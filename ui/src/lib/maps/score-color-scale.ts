@@ -83,6 +83,84 @@ export const LOT_NEUTRAL_FALLBACK = "#ffffff";
 export const DEFAULT_LINE_TOKEN = "--st-semantic-action-primary";
 export const DEFAULT_LINE_FALLBACK = "#2563eb";
 
+export type SignauxLotCategory =
+  | "direct"
+  | "inherited"
+  | "priority"
+  | "fourPlus"
+  | "tod"
+  | "neutral";
+
+export interface SignauxLotClassificationInput {
+  signalProjection?: string | null;
+  priorite?: boolean | null;
+  multifamilial4plus?: boolean | null;
+  tod?: boolean | null;
+}
+
+interface SignauxLotCategorySpec {
+  category: SignauxLotCategory;
+  token: string;
+  fallback: string;
+  label: string;
+}
+
+const SIGNAUX_LOT_CATEGORY_SPECS: readonly SignauxLotCategorySpec[] = [
+  { category: "direct", token: SIGNAL_DIRECT_TOKEN, fallback: SIGNAL_DIRECT_FALLBACK, label: "Cité par un signal" },
+  { category: "inherited", token: SIGNAL_INHERITED_TOKEN, fallback: SIGNAL_INHERITED_FALLBACK, label: "Zone citée par un signal" },
+  { category: "priority", token: PRIORITY_LINE_TOKEN, fallback: PRIORITY_LINE_FALLBACK, label: "Priorité (4+ ∧ TOD)" },
+  { category: "fourPlus", token: LOT_4PLUS_TOD_TOKEN, fallback: LOT_4PLUS_TOD_FALLBACK, label: "Multifamilial 4+" },
+  { category: "tod", token: LOT_TOD_TOKEN, fallback: LOT_TOD_FALLBACK, label: "Périmètre TOD" },
+  { category: "neutral", token: LOT_NEUTRAL_TOKEN, fallback: LOT_NEUTRAL_FALLBACK, label: "Sans indicateur" },
+];
+
+/** Pure classification matching the first winning MapLibre paint branch. */
+export function classifySignauxLot(
+  lot: SignauxLotClassificationInput,
+): SignauxLotCategory {
+  if (lot.signalProjection === "direct") return "direct";
+  if (lot.signalProjection === "inherited") return "inherited";
+  if (lot.priorite === true || (lot.multifamilial4plus === true && lot.tod === true)) {
+    return "priority";
+  }
+  if (lot.multifamilial4plus === true) return "fourPlus";
+  if (lot.tod === true) return "tod";
+  return "neutral";
+}
+
+export interface SignauxLotLegendEntry extends LegendEntry {
+  category: SignauxLotCategory;
+  count: number;
+}
+
+/** Builds present-only legend entries while counting every lot exactly once. */
+export function buildSignauxLotLegend(
+  lots: ReadonlyArray<SignauxLotClassificationInput>,
+  el?: Element | null,
+): SignauxLotLegendEntry[] {
+  const counts = new Map<SignauxLotCategory, number>();
+  for (const lot of lots) {
+    const category = classifySignauxLot(lot);
+    counts.set(category, (counts.get(category) ?? 0) + 1);
+  }
+  return SIGNAUX_LOT_CATEGORY_SPECS.flatMap((spec) => {
+    const count = counts.get(spec.category) ?? 0;
+    return count > 0
+      ? [{
+          category: spec.category,
+          count,
+          color: resolveMapColor(spec.token, spec.fallback, el),
+          label: spec.label,
+        }]
+      : [];
+  });
+}
+
+function signauxLotCategoryColor(category: SignauxLotCategory, el?: Element | null): string {
+  const spec = SIGNAUX_LOT_CATEGORY_SPECS.find((candidate) => candidate.category === category)!;
+  return resolveMapColor(spec.token, spec.fallback, el);
+}
+
 /**
  * Résout la valeur calculée d'un token CSS DS depuis un élément monté.
  * Retourne `fallback` si le DOM/document n'est pas disponible ou si le token
@@ -154,16 +232,16 @@ export function signauxLotFillColorExpression(el?: Element | null): StyleExpress
   return [
     "case",
     ["==", ["get", "signalProjection"], "direct"],
-    resolveMapColor(SIGNAL_DIRECT_TOKEN, SIGNAL_DIRECT_FALLBACK, el),
+    signauxLotCategoryColor("direct", el),
     ["==", ["get", "signalProjection"], "inherited"],
-    resolveMapColor(SIGNAL_INHERITED_TOKEN, SIGNAL_INHERITED_FALLBACK, el),
+    signauxLotCategoryColor("inherited", el),
     ["any", isTrue("priorite"), ["all", isTrue("multifamilial4plus"), isTrue("tod")]],
-    resolveMapColor(PRIORITY_LINE_TOKEN, PRIORITY_LINE_FALLBACK, el),
+    signauxLotCategoryColor("priority", el),
     isTrue("multifamilial4plus"),
-    resolveMapColor(LOT_4PLUS_TOD_TOKEN, LOT_4PLUS_TOD_FALLBACK, el),
+    signauxLotCategoryColor("fourPlus", el),
     isTrue("tod"),
-    resolveMapColor(LOT_TOD_TOKEN, LOT_TOD_FALLBACK, el),
-    resolveMapColor(LOT_NEUTRAL_TOKEN, LOT_NEUTRAL_FALLBACK, el),
+    signauxLotCategoryColor("tod", el),
+    signauxLotCategoryColor("neutral", el),
   ];
 }
 
