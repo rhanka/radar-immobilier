@@ -1,5 +1,5 @@
 # Public Traefik Ingress for the radar sentropic app, exposed through the
-# cluster-wide Traefik + shared SCW LoadBalancer + cert-manager delivered by
+# cluster-wide Traefik + shared legacy object store LoadBalancer + cert-manager delivered by
 # the poc-k8s platform stack. Mirrors sentropic deploy/k8s/60-ingress.yaml:
 #   - single host -> the `radar-ui` Service; nginx baked into the UI fans out
 #     /api -> radar-api:3000 (50-ui.yaml), so no separate api subdomain;
