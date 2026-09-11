@@ -1,7 +1,7 @@
 name: Build & push images
 
 # Builds the production api + ui images on GitHub-hosted runners and pushes them
-# to the Scaleway registry, so the local box (which hosts the k8s demo + agents)
+# to GHCR, so the local box (which hosts the k8s demo + agents)
 # no longer has to carry the heavy `docker build`. This is the CI counterpart of
 # the Makefile `build-images` / `push-images` targets (deploy/k8s/README.md step 2:
 # "CI does this on the live path").
@@ -85,9 +85,9 @@ name: Build & push images
 # To roll back or deploy by hand, the same commands still work with a full
 # kubeconfig:
 #   kubectl -n radar-immobilier apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
-#   kubectl -n radar-immobilier set image deploy/radar-api       api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
-#   kubectl -n radar-immobilier set image deploy/radar-ui        ui=rg.fr-par.scw.cloud/radar-immobilier/radar-ui:<sha>
-#   kubectl -n radar-immobilier set image deploy/radar-immo-mcp  mcp=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
+#   kubectl -n radar-immobilier set image deploy/radar-api       api=ghcr.io/rhanka/radar-api:<sha>
+#   kubectl -n radar-immobilier set image deploy/radar-ui        ui=ghcr.io/rhanka/radar-ui:<sha>
+#   kubectl -n radar-immobilier set image deploy/radar-immo-mcp  mcp=ghcr.io/rhanka/radar-api:<sha>
 #   kubectl -n radar-immobilier rollout status deploy/radar-api deploy/radar-ui deploy/radar-immo-mcp
 
 on:
@@ -111,8 +111,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REGISTRY: rg.fr-par.scw.cloud
-  IMAGE_PREFIX: rg.fr-par.scw.cloud/radar-immobilier
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/rhanka
 
 jobs:
   build-push:
@@ -140,7 +140,7 @@ jobs:
           # Grounding image (citations) — PUBLISH-ONLY (plan 4.4.3): the in-cluster
           # Job pulls the host-staged candidate, hash-verifies it, and publishes to
           # the preprod MinIO. No LLM / no mesh access / no pdftotext (all host-side).
-          # Built + pushed to SCW like radar-api for digest-pin.
+          # Built + pushed to GHCR like radar-api for digest-pin.
           - service: grounding
             image: radar-grounding
             dockerfile: deploy/grounding/Dockerfile
@@ -155,28 +155,6 @@ jobs:
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Scaleway container registry convention: docker login with username
-      # `nologin` and the SCW *secret key* as the password (same secret the
-      # `scw registry login` CLI uses). Registry host is rg.fr-par.scw.cloud;
-      # the project namespace (/radar-immobilier) is part of the image path.
-      - name: Login to Scaleway registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: nologin
-          password: ${{ secrets.SCW_SECRET_KEY }}
-
-      # Mirror to GHCR alongside Scaleway (OVH-readiness C1): publishes the
-      # same images to ghcr.io/rhanka/<image> so they exist on a registry
-      # reachable from the future OVH cluster. This does NOT switch any
-      # manifest's `image:` field or the deploy job's target registry — that
-      # cutover is a separate, later PR once the GHCR images are confirmed
-      # and the package visibility is set to public. The mirror itself is a
-      # SEPARATE, non-fatal step below ("Mirror to GHCR") that copies the
-      # already-pushed Scaleway image without rebuilding — it never shares
-      # the main build-push-action call, so a GHCR failure (package not yet
-      # created, visibility, auth) can never break the Scaleway push the
-      # deploy job depends on.
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -231,32 +209,6 @@ jobs:
             GIT_SHA=${{ steps.vars.outputs.sha }}
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,scope=${{ matrix.service }},mode=max
-
-      # Best-effort GHCR mirror (OVH-readiness C1): copies the Scaleway image
-      # just pushed above to ghcr.io/rhanka/<image> via `docker buildx
-      # imagetools create` — a manifest copy, no rebuild. `continue-on-error:
-      # true` makes this step fully non-fatal: GHCR packages don't exist yet
-      # (first push creates them, default-private) and visibility isn't
-      # confirmed, so any failure here (auth, package creation, visibility)
-      # must never fail the job, the Scaleway push above, or the deploy job
-      # below. Each tag is mirrored independently so one failing tag doesn't
-      # skip the rest.
-      - name: Mirror to GHCR (best-effort)
-        continue-on-error: true
-        env:
-          SHA: ${{ steps.vars.outputs.sha }}
-        run: |
-          set -u
-          mirror() {
-            local src="$1" dst="$2"
-            docker buildx imagetools create --tag "$dst" "$src" \
-              || echo "::warning title=GHCR mirror failed::${dst} (source ${src})"
-          }
-          mirror "${IMAGE_PREFIX}/${{ matrix.image }}:${SHA}"    "ghcr.io/rhanka/${{ matrix.image }}:${SHA}"
-          mirror "${IMAGE_PREFIX}/${{ matrix.image }}:latest"    "ghcr.io/rhanka/${{ matrix.image }}:latest"
-          if [ -n "${{ inputs.tag }}" ]; then
-            mirror "${IMAGE_PREFIX}/${{ matrix.image }}:${{ inputs.tag }}" "ghcr.io/rhanka/${{ matrix.image }}:${{ inputs.tag }}"
-          fi
 
       - name: Summary
         run: |
@@ -799,7 +751,7 @@ jobs:
             echo "namespace: ${NAMESPACE}"
             echo "nameSuffix: -${SHA}"
             echo "images:"
-            echo "  - name: rg.fr-par.scw.cloud/radar-immobilier/radar-api"
+            echo "  - name: ghcr.io/rhanka/radar-api"
             echo "    newName: ${IMAGE_PREFIX}/radar-api"
             echo "    newTag: \"${SHA}\""
           } > "$tmp/kustomization.yaml"
@@ -1022,7 +974,7 @@ jobs:
           curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
           sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
           cd deploy/k8s/refresh-diag
-          kustomize edit set image rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:${SHA}
+          kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api:${SHA}
           kubectl -n "$NAMESPACE" delete job radar-refresh-diag --ignore-not-found
           kustomize build . | kubectl -n "$NAMESPACE" apply -f -
           echo "diag Job applied (radar-api:${SHA}); polling for completion…"
@@ -1058,7 +1010,7 @@ jobs:
           curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
           sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
           cd deploy/k8s/refresh-cronjobs
-          kustomize edit set image rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:${SHA}
+          kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api:${SHA}
           kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n "$NAMESPACE" apply -f -
           echo "refresh CronJobs deployed to ${NAMESPACE} (radar-api:${SHA}, suspend:false):"
           kubectl -n "$NAMESPACE" get cronjob radar-refresh-scrape radar-refresh-projection -o wide || true
@@ -1169,6 +1121,7 @@ jobs:
     permissions:
       contents: read
       deployments: write
+      packages: write
     concurrency:
       # Never cancel an in-flight prod promote — queue instead. This is
       # load-bearing now that the promotion runs backup+migrate before set-image:
@@ -1245,16 +1198,16 @@ jobs:
           fi
           chmod 600 "$HOME/.kube/config"
 
-      - name: Login to Scaleway registry
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: nologin
-          password: ${{ secrets.SCW_SECRET_KEY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # DIGEST RESOLUTION (§2.3, revue #4) — build-once: resolve the IMMUTABLE
       # sha256 digests of the images already built on main for this commit's
-      # <sha7> tag. Missing digest = the <sha7> tag aged out of SCW-CR (retention)
+      # <sha7> tag. Missing digest = the <sha7> tag aged out of GHCR (retention)
       # or was never built → fall back to build-at-tag below. Both api AND ui.
       - name: Resolve image digests (api + ui)
         id: digests
@@ -1266,7 +1219,7 @@ jobs:
           echo "api=${api:-<none>}  ui=${ui:-<none>}"
           if [ -z "$api" ] || [ -z "$ui" ]; then
             echo "resolved=false" >> "$GITHUB_OUTPUT"
-            echo "::warning title=Digest missing — will build-at-tag::radar-api/ui:${SHA} not resolvable in SCW-CR (aged-out or never built)."
+            echo "::warning title=Digest missing — will build-at-tag::radar-api/ui:${SHA} not resolvable in GHCR (aged-out or never built)."
           else
             echo "resolved=true" >> "$GITHUB_OUTPUT"
             echo "api=${api}" >> "$GITHUB_OUTPUT"
@@ -1276,7 +1229,7 @@ jobs:
       # FALLBACK build-at-tag (GO-cond §4/§5) — ONLY when the digest aged out.
       # Rebuilds api/ui FROM THE TAGGED COMMIT (this checkout) and pushes
       # radar-<svc>:<sha7>, then re-resolves. Removes the hard dependency on
-      # SCW-CR retention. Deterministic input: same source + same GIT_SHA.
+      # GHCR retention. Deterministic input: same source + same GIT_SHA.
       - name: Fallback — build at tag (only if digest aged out)
         if: steps.digests.outputs.resolved != 'true'
         id: buildtag
@@ -1412,7 +1365,7 @@ jobs:
             echo "namespace: ${NAMESPACE}"
             echo "nameSuffix: -${SHA}"
             echo "images:"
-            echo "  - name: rg.fr-par.scw.cloud/radar-immobilier/radar-api"
+            echo "  - name: ghcr.io/rhanka/radar-api"
             echo "    newName: ${IMAGE_PREFIX}/radar-api"
             echo "    digest: \"${DIG_API}\""
           } > "$tmp/kustomization.yaml"

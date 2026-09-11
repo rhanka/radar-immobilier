@@ -1,6 +1,6 @@
 # radar API (Hono) Deployment + Service. Brought in from draft PR #8
 # (deploy/k8s/api.yaml) and extended for the sentropic-app model:
-#   - runs under the radar-app ServiceAccount (SCW registry pull);
+#   - runs under the radar-app ServiceAccount;
 #   - object storage points at the in-cluster MinIO (25-minio.yaml);
 #   - the SENTROPIC_* / OAUTH_* / AUTH_* env wires human auth to the shared
 #     sentropic IdP (OIDC, see 80-auth.yaml + README "Auth delegation").
@@ -130,7 +130,7 @@ spec:
           # k8s-apply-mcp, annulant le `set image` du CD (pod bloqué pré-#326,
           # /livez 401 ; diag poc-k8s 2026-07-03). Avec :latest + Always, l'apply
           # + rollout restart tire toujours la dernière image publiée par le CD.
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          image: ghcr.io/rhanka/radar-api:latest
           imagePullPolicy: Always
           ports:
             - name: http
