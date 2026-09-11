@@ -1,12 +1,11 @@
 # radar-immobilier deployed as a *sentropic app* (tenant) on the shared
-# Scaleway poc-k8s cluster (cluster-operator repo: github.com/rhanka/poc-k8s).
+# OVH MKS cluster (cluster-operator repo: github.com/rhanka/poc-k8s).
 #
 # "Sentropic app" model — mirrors the sentropic tenant layout
 # (~/src/sentropic/deploy/k8s/{10-rbac,30-api,40-ui,60-ingress}.yaml):
 #   - one tenant Namespace per app, default-deny NetworkPolicy + ResourceQuota
 #     owned by the cluster operator;
-#   - a namespace-scoped ServiceAccount with an imagePullSecret for the SCW
-#     Container Registry;
+#   - a namespace-scoped ServiceAccount for application workloads;
 #   - api + ui + postgres workloads behind a public Traefik Ingress with
 #     cert-manager TLS;
 #   - human auth DELEGATED to the shared sentropic IdP at auth.sent-tech.ca
@@ -39,4 +38,3 @@ metadata:
     pod-security.kubernetes.io/warn-version: latest
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/audit-version: latest
-

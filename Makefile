@@ -242,7 +242,7 @@ db-status: ## Check DB readiness
 	  pg_isready -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 # ─────────────────────────────────────────────────────────────────────
-# Object storage (MinIO local, Scaleway in prod)
+# Object storage (local emulator; managed service in production)
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: s3-init
@@ -271,7 +271,7 @@ s3-ls: ## List keys under PREFIX=<prefix>
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: worker-live
-worker-live: ## Live-scrape config-only PV cities → SCW (CITIES="a b", LIMIT=n)
+worker-live: ## Live-scrape config-only PV cities → object store (CITIES="a b", LIMIT=n)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm -T \
 	  -e LIVE_SCRAPE_LIMIT=$(LIMIT) api \
 	  npx tsx src/scripts/worker-live.ts $(CITIES)

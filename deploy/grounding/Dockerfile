@@ -7,7 +7,7 @@
 # only the publish runtimes.
 #
 # radar-api:latest still can't do this (it lacks python3/s5cmd/jq), hence a
-# dedicated image, built + pushed to the SCW registry like radar-api.
+# dedicated image, built + pushed to GHCR like radar-api.
 #
 # Measured deps of tools/grounding/publish-citation-grounding.sh: s5cmd (pull +
 # publish), jq, python3 (candidate JSON). hash-verify = sha256sum (coreutils, in
@@ -42,4 +42,3 @@ USER grounding
 
 # No default ENTRYPOINT/CMD — the grounding-citation Job (41-…, extraction #588,
 # publish-only) sets the command (publish-citation-grounding.sh with a city).
-
