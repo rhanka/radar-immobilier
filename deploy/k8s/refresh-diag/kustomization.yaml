@@ -5,7 +5,7 @@
 #
 #   cd deploy/k8s/refresh-diag
 #   kustomize edit set image \
-#     rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
+#     ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api:<sha>
 #   kustomize build . | kubectl -n radar-immobilier-preprod apply -f -   # ONLY the diag Job
 #
 # (This overlay's resource is a SIBLING file, so no LoadRestrictionsNone is
@@ -18,5 +18,5 @@ resources:
   - diag-refresh-job.yaml
 
 images:
-  - name: rg.fr-par.scw.cloud/radar-immobilier/radar-api
+  - name: ghcr.io/rhanka/radar-api
     newTag: PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
