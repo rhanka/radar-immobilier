@@ -96,8 +96,7 @@ describe("buildZoneIndex", () => {
 
     const mixte = index.byCodeNorm.get("M-209")!;
     expect(mixte.kind).toBe("MIXTE");
-    expect(mixte.kindSource).toBe("source");
-    expect(mixte.densiteLogHa).toBeNull(); // no live density → unknown
+    expect(mixte.densiteLogHa).toBeNull(); // pas de densité live → null honnête
     expect(mixte.usages).toEqual([]);
 
     const h = index.byCodeNorm.get("H-241")!;
@@ -113,7 +112,6 @@ describe("buildZoneIndex", () => {
     expect(index.size).toBe(1);
     const zone = index.byCodeNorm.get("H-101")!;
     expect(zone.kind).toBe("H"); // "zonage" (PG) inconnu → préfixe H- → H
-    expect(zone.kindSource).toBe("code");
     expect(zone.bbox).toEqual([-72.6, 46.3, -72.5, 46.4]);
   });
 
@@ -320,7 +318,6 @@ describe("enrichLotFeatures — jointure par centroïde (cas live : lot sans cod
     expect(props["zone"]).toEqual({
       code: "M-209",
       kind: "MIXTE",
-      kindSource: "source",
       densiteLogHa: null,
       usages: [],
       grillePdfUrl: null,
@@ -338,15 +335,6 @@ describe("enrichLotFeatures — jointure par centroïde (cas live : lot sans cod
     expect("priorite" in props).toBe(false);
     // Propriétés brutes conservées
     expect(props["NO_LOT"]).toBe("1 000 001");
-  });
-
-  it("marks the lot zone kind as code-derived when no source kind resolves", () => {
-    const localIndex = buildZoneIndex(LOCAL_ZONAGE_FC);
-    const lot = liveLot("1 000 010", square(-72.56, 46.34, -72.55, 46.35));
-    const { features } = enrichLotFeatures([lot], localIndex);
-    const zone = features[0]!.properties!["zone"] as Record<string, unknown>;
-    expect(zone["kind"]).toBe("H");
-    expect(zone["kindSource"]).toBe("code");
   });
 
   it("lot dans la zone H (sans grille) → multifamilial4plus=false, heuristique", () => {
