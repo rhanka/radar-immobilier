@@ -1,7 +1,7 @@
 # refresh-cronjobs — Kustomize overlay that deploys the two refresh CronJobs to
 # PREPROD (radar-immobilier-preprod), pinned to the release image and
-# UN-SUSPENDED. §6 is PREPROD-ONLY (owner directive: the refresh runs on
-# preprod.immo.sent-tech.ca; no prod tag, no promote-prod path).
+# UN-SUSPENDED. Production uses the separate refresh-cronjobs-prod twin,
+# independently gated in the promote-prod path.
 #
 # It transforms the base ../34-refresh-cronjob.yaml (ns radar-immobilier,
 # suspend:true — the prod-dormant default) into the preprod-active instance:
