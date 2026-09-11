@@ -13,21 +13,23 @@ les listes ci-dessous regroupent les numéros par fichier.
 
 Résultat : **885 lignes**, classées sans double compte :
 
-- **A — 414** : résidus purs supprimés ou reformulés;
-- **B — 170** : ressources toujours nécessaires, remplacées seulement quand
-  la cible a été vérifiée, sinon laissées en TODO;
+- **A — 412** : résidus purs supprimés ou reformulés;
+- **B — 172** : ressources toujours nécessaires, remplacées seulement quand
+  la cible a été vérifiée, sinon laissées en TODO (ou conservées sur décision
+  owner : transport e-mail SCW TEM, voir B3);
 - **C — 301** : historique, émulation locale ou service encore opéré par k8s,
   laissé intact.
 
 Les fichiers binaires signalés par le balayage sont listés à la fin en C sans
 numéro de ligne et ne sont pas inclus dans les 885 lignes textuelles.
 
-## A — résidus supprimés ou neutralisés (414)
+## A — résidus supprimés ou neutralisés (412)
 
-Actions : suppression des manifests et scripts morts; retrait du login, miroir,
-secrets et transport HTTP de l’ancien fournisseur; suppression des fausses
-instructions courantes; terminologie fournisseur-neutre dans le code, les
-contrats et les documents actifs.
+Actions : suppression des manifests et scripts morts; retrait du login, miroir
+et secret de pull de l’ancien registre (le transport e-mail SCW TEM est
+CONSERVÉ, voir B3); suppression des fausses instructions courantes;
+terminologie fournisseur-neutre dans le code, les contrats et les documents
+actifs.
 
 Fichiers supprimés :
 
@@ -85,7 +87,6 @@ Occurrences au commit de référence :
 - `deploy/k8s/33b-scrape-cities-job.yaml:83,87`
 - `deploy/k8s/34-refresh-cronjob.yaml:4,9,13,113,117,217`
 - `deploy/k8s/37-graphify34-apply-job.yaml:102`
-- `deploy/k8s/40-maildev.yaml:4,7`
 - `deploy/k8s/41-grounding-citation-job.yaml:7,31,37,58,97,99`
 - `deploy/k8s/50-ui.yaml:89`
 - `deploy/k8s/60-ingress.yaml:2`
@@ -140,7 +141,7 @@ Occurrences au commit de référence :
 - `ui/e2e-qa/pdf-overlay.harness.spec.ts:17`
 - `ui/src/lib/signals/graph-signal-detail-client.test.ts:66`
 
-## B — ressources nécessaires (170)
+## B — ressources nécessaires (172)
 
 ### B1 — registre et images (43)
 
@@ -197,12 +198,21 @@ ou reçue de k8s/i-infra. Chaque point d’usage porte maintenant un TODO explic
 - `deploy/k8s/40-export-gt-designation-events-job.yaml:87,143,145,147`
 - `deploy/k8s/41-grounding-citation-job.yaml:101,103,105,107,109`
 
-### B3 — e-mail transactionnel (91)
+### B3 — e-mail transactionnel (93)
 
-Le transport HTTP retiré ne peut plus être une cible. Son code, sa configuration
-et son secret ont été supprimés; le mode de repli existant consigne toujours le
-lien d’invitation. Aucun nouveau fournisseur n’a été inventé : le fournisseur et
-ses paramètres restent à choisir et à fournir hors dépôt.
+**TEM SCW CONSERVÉ (décision owner 2026-09-11)** — proposition de fournisseur
+de remplacement en cours (i-infra) ; retrait différé.
+
+Le transport HTTP Scaleway Transactional Email (schéma `SCW_TEM_*`,
+`resolveTemConfig`/`TemConfig` dans `config.ts`, client `mailer.ts` et ses
+tests, câblage `app.ts`/`index.ts`, ConfigMap + `secretKeyRef
+SCW_TEM_SECRET_KEY` de `30-api.yaml`, Secret `radar-tem-credentials` de
+`secrets.example.yaml`, commentaire de `40-maildev.yaml`) est restauré à
+l’identique de `831cad2` par le commit de revert de cette branche. Le mode de
+repli qui consigne le lien d’invitation reste celui de `main`. Aucun nouveau
+fournisseur n’a été inventé : le choix et ses paramètres viendront de la
+proposition i-infra, hors dépôt, et le retrait du transport SCW n’interviendra
+qu’après validation owner de cette proposition.
 
 - `api/src/app.ts:52`
 - `api/src/config.ts:201,203,205,207,208,209,210,211,212,394,395,411,414,415,416,417,422,423,425,426`
@@ -210,6 +220,7 @@ ses paramètres restent à choisir et à fournir hors dépôt.
 - `api/src/services/auth/mailer.test.ts:9,10,19,21,22,23,24,25,26,30,31,41,42,49,82`
 - `api/src/services/auth/mailer.ts:3,4,6,8,12,13,14,15,16,17,21,23,25,44,48,49,50,52,53,54,73,99,102,106,133,147`
 - `deploy/k8s/30-api.yaml:38,39,40,41,42,43,44,45,47,49,50,51,52,53,54,166,169,170,172,173`
+- `deploy/k8s/40-maildev.yaml:4,7`
 - `deploy/k8s/secrets.example.yaml:77,79,80,81,92,93`
 
 ### Valeurs B manquantes à obtenir de k8s/i-infra
@@ -221,7 +232,9 @@ ses paramètres restent à choisir et à fournir hors dépôt.
 - noms des Secrets et mapping des clés access/secret;
 - image vérifiée de `radar-obscura`;
 - image vérifiée du service geo cité par le contrat;
-- fournisseur d’e-mail transactionnel et paramètres non secrets associés.
+- proposition i-infra d’un fournisseur d’e-mail transactionnel de remplacement
+  (paramètres non secrets associés) ; tant qu’elle n’est pas validée par
+  l’owner, SCW TEM reste en place (B3).
 
 ## C — occurrences conservées (301)
 
@@ -343,3 +356,19 @@ cluster. La règle `allow-api-to-minio` reste en C tant que l’API servie par
 - `docs/spec/input/walkthrough/Capture d’écran du 2026-06-09 18-26-20.png`
 - `docs/spec/input/walkthrough/Capture d’écran du 2026-06-09 18-49-09.png`
 - `docs/spec/reports/study-2026-08/report.pdf`
+
+## Séquencement — décom MinIO
+
+Les références `radar-minio` restantes sont conservées volontairement : MinIO
+OVH est load-bearing en préprod et en prod. Compte au commit de revert :
+21 lignes dans les fichiers suivis hors `.remote/` (`rg radar-minio`, unité =
+ligne textuelle ; le brief conducteur du 2026-09-11 en cite 27, écart de
+méthode de comptage, sans effet sur la règle ci-dessous).
+
+Décom gatée dans cet ordre : bucket OVH provisionné → objets migrés → clients
+repointés. Ne pas pruner avant. Le retrait de `deploy/k8s/25-minio.yaml` est la
+DERNIÈRE étape.
+
+État de cette branche : `deploy/k8s/25-minio.yaml` est actuellement supprimé en
+A (demande du brief initial). Cette suppression est à réconcilier avec le
+séquencement ci-dessus avant toute levée du hold de merge (PR #670, draft).
