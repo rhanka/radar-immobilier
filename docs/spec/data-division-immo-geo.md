@@ -120,7 +120,7 @@ Légende : **R** = Responsible (exécute) · **A** = Accountable (owner/décide)
   reste **immo** (mapper).
 - **Pour les flux nouvellement délégués (rôle, adresses, OCR plans)** : à aligner — soit `geo`
   les expose aussi en collections OGC géoréférencées (préférable, cohérent), soit en fichiers
-  normalisés + provenance dans un espace SCW **distinct** des `raw/` PV immo (pas de collision de clés).
+  normalisés + provenance dans un espace object store **distinct** des `raw/` PV immo (pas de collision de clés).
 - **Registre municipalités** : `geo` devient source de vérité (slug/mrc/lat/lon/pop/distance) ;
   `immo` conserve un **overlay** `priorityRank`/`excluded`/`deprioritized` (vue stratégique métier)
   joint au registre geo par `slug`.
@@ -172,7 +172,7 @@ l'anti-bot chez geo.
 6. **Infra de scraping dur (Obscura)** : `geo` confirme qu'il **ne reprend PAS** l'anti-bot/SPA/403
    (reste immo), et qu'il ne consomme pas Obscura pour ses propres scrapers ? (Sinon, aligner pour
    éviter deux implémentations.)
-7. **Buckets/espaces SCW** : les couches nouvellement déléguées (rôle/adresses/OCR) sont publiées
+7. **Buckets/espaces object store** : les couches nouvellement déléguées (rôle/adresses/OCR) sont publiées
    dans un espace **distinct** des `raw/` PV immo (pas de collision de clés) ?
 8. **Calendrier** : `geo` a-t-il la capacité pour absorber rôle/adresses/inventaire/OCR à un
    horizon utile ? Sinon **repli** : `immo` héberge temporairement (les adapters existent déjà),
@@ -228,7 +228,7 @@ SUR LE CHANTIER #190 (villes M-Z dures) :
 INTERFACE :
   - GeoJSON normalisé + provenance via API OGC (déjà en place). Clé NO_LOT verbatim + no_lot_norm.
   - Pour rôle/adresses/OCR : soit collections OGC géoréférencées (préférable), soit fichiers
-    normalisés dans un espace SCW DISTINCT de nos raw/ PV (pas de collision de clés).
+    normalisés dans un espace object store DISTINCT de nos raw/ PV (pas de collision de clés).
   - PMTiles = plus tard, OK.
 
 QUESTIONS OUVERTES (on a besoin de ton OK/contre-proposition) :
@@ -238,7 +238,7 @@ QUESTIONS OUVERTES (on a besoin de ton OK/contre-proposition) :
   Q4. Tu packages ton atelier OCR/géoréf PDF en lib/service consommable (plans ET PV scannés) ?
   Q5. Contraintes géo (CPTAQ/BDZI/humides) : dans ton périmètre ? calendrier ?
   Q6. Tu confirmes que tu NE reprends PAS l'anti-bot/SPA/403 (reste immo) ?
-  Q7. Espace SCW distinct pour tes nouvelles couches (pas de collision avec nos raw/ PV) ?
+  Q7. Espace object store distinct pour tes nouvelles couches (pas de collision avec nos raw/ PV) ?
   Q8. Calendrier : capacité d'absorber rôle/adresses/inventaire/OCR à un horizon utile ?
       Sinon repli : on héberge temporairement (les adapters existent déjà), tu absorbes plus tard.
 
