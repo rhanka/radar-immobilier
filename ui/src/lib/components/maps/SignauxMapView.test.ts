@@ -13,7 +13,7 @@
  * Le toggle lots est lu depuis `window.location.search` à l'init du composant.
  */
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { render, cleanup, waitFor, screen, fireEvent } from "@testing-library/svelte";
+import { render, cleanup, waitFor, screen, fireEvent, within } from "@testing-library/svelte";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -210,6 +210,48 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     expect(vi.mocked(loadSignauxZones)).toHaveBeenCalled();
   });
 
+  it("should hide the Lots legend when the displayed collection is empty", async () => {
+    setSearch("");
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    await waitFor(() => expect(vi.mocked(fetchAllLots)).toHaveBeenCalled());
+    expect(screen.queryByTestId("map-legend-lots")).toBeNull();
+  });
+
+  it("should show only winning lot categories present in displayedLots", async () => {
+    vi.mocked(fetchAllLots).mockResolvedValueOnce({
+      ok: true,
+      citySlug: CITY_SLUG,
+      source: "donnees-quebec",
+      collectionId: `qc-lots-${CITY_SLUG}`,
+      numberMatched: 2,
+      numberReturned: 2,
+      featureCollection: {
+        type: "FeatureCollection",
+        features: [
+          { type: "Feature", geometry: null, properties: { noLot: "1", priorite: true } },
+          { type: "Feature", geometry: null, properties: { noLot: "2", tod: true } },
+        ],
+      },
+    });
+    setSearch("");
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    const legend = await screen.findByTestId("map-legend-lots");
+    const queries = within(legend);
+    expect(queries.getByText("Priorité (4+ ∧ TOD)")).toBeTruthy();
+    expect(queries.getByText("Périmètre TOD")).toBeTruthy();
+    expect(queries.queryByText("Multifamilial 4+")).toBeNull();
+    expect(queries.queryByText("Sans indicateur")).toBeNull();
+    expect(queries.queryByText("Zone citée par un signal")).toBeNull();
+
+    for (const label of ["N° de zone", "N° de lot"]) {
+      const checkboxLabel = screen.getByLabelText(label).closest("label");
+      expect(checkboxLabel?.classList.contains("text-xs")).toBe(true);
+      expect(checkboxLabel?.classList.contains("text-slate-600")).toBe(true);
+    }
+  });
+
   it("?layers=zones (alias) : fetchAllLots N'EST PAS appelé", async () => {
     setSearch("?layers=zones");
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
@@ -255,6 +297,19 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
       screen.getByTestId("legend-cptaq-toggle").querySelector(".line-through"),
     ).toBeNull();
     localStorage.clear();
+  });
+
+  it("should render a single agricultural entry when the CPTAQ toggle is shown", async () => {
+    const response = fixtureZones(CITY_SLUG);
+    response.featureCollection.features[0]!.properties.kind = "agricole";
+    vi.mocked(loadSignauxZones).mockResolvedValueOnce({ tier: "collection", response });
+    setSearch("");
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    const legend = await screen.findByTestId("map-legend-zonage");
+    expect(within(legend).getByText("Agricole (CPTAQ)")).toBeTruthy();
+    expect(within(legend).queryByText("Agricole", { exact: true })).toBeNull();
+    expect(within(legend).queryByText("Affectation (source)")).toBeNull();
   });
 
   it("(deux modes) préférence 'satellite' persistée : le mode défaut reste 'plan', le deep-link ville charge zones + lots (harness inchangé)", async () => {

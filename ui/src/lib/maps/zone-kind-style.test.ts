@@ -1,10 +1,9 @@
 /**
  * Tests de zone-kind-style — teinte des aplats de zone par kind (tokens DS).
  *
- * Directive owner : la famille est résolue à partir des SEULES données source
- * (affectation / champ kind), JAMAIS dérivée du token du code de zone. Un code
- * seul (kind=null) ne produit donc PAS de famille : « H-12 » reste le code réel
- * de la zone (son identité), pas une famille « H » inventée.
+ * Reference data: Salaberry-de-Valleyfield zones have a real code while kind
+ * and affectation can be absent. Styling resolves a family without changing
+ * the zone identity carried by that code.
  */
 import { describe, it, expect } from "vitest";
 import {
@@ -19,18 +18,17 @@ import {
 import type { GeoZoneFeatureCollection } from "./geo-zones-client.js";
 
 describe("canonicalZoneKind", () => {
-  it("ne dérive PLUS la famille du code seul (directive owner) — code sans kind/affectation → null", () => {
-    // « H-12 » reste le code réel de la zone (identité), jamais réduit à « H ».
-    expect(canonicalZoneKind(null, "A-118")).toBeNull();
-    expect(canonicalZoneKind(null, "H-354")).toBeNull();
-    expect(canonicalZoneKind(null, "C-186")).toBeNull();
-    expect(canonicalZoneKind(null, "I-31")).toBeNull();
-    expect(canonicalZoneKind(null, "P-411")).toBeNull();
-    expect(canonicalZoneKind(null, "U-4")).toBeNull();
-    expect(canonicalZoneKind(null, "REC-11")).toBeNull();
-    expect(canonicalZoneKind(null, "CONS-2")).toBeNull();
-    expect(canonicalZoneKind(null, "Cons-5")).toBeNull();
-    expect(canonicalZoneKind(null, "i-93")).toBeNull();
+  it("should resolve the family from a zone code when kind and affectation are absent", () => {
+    expect(canonicalZoneKind(null, "A-118")).toBe("A");
+    expect(canonicalZoneKind(null, "H-354")).toBe("H");
+    expect(canonicalZoneKind(null, "C-186")).toBe("C");
+    expect(canonicalZoneKind(null, "I-31")).toBe("I");
+    expect(canonicalZoneKind(null, "P-411")).toBe("P");
+    expect(canonicalZoneKind(null, "U-4")).toBe("U");
+    expect(canonicalZoneKind(null, "REC-11")).toBe("REC");
+    expect(canonicalZoneKind(null, "CONS-2")).toBe("CONS");
+    expect(canonicalZoneKind(null, "Cons-5")).toBe("CONS");
+    expect(canonicalZoneKind(null, "i-93")).toBe("I");
   });
 
   it("résout depuis le libellé kind quand présent (variantes FR)", () => {
@@ -59,6 +57,10 @@ describe("canonicalZoneKind", () => {
   it("l'affectation PRIME sur le kind et le code (libellé le plus fiable)", () => {
     expect(canonicalZoneKind("residential", "H-1", "Conservation")).toBe("CONS");
     expect(canonicalZoneKind(null, "C-186", "Agricole")).toBe("A");
+  });
+
+  it("should prefer kind over the zone code", () => {
+    expect(canonicalZoneKind("commerce", "H-1")).toBe("C");
   });
 
   it("résout chaque libellé d'affectation servi par geo vers une catégorie (mesure 2026-07)", () => {
@@ -186,11 +188,11 @@ describe("canonicalZoneKind", () => {
     expect(canonicalZoneKind("forestry", null)).toBe("A");
   });
 
-  it("un code de zone seul (même à préfixe secteur) ne dérive plus de famille → null", () => {
-    expect(canonicalZoneKind(null, "CO-939")).toBeNull();
-    expect(canonicalZoneKind(null, "CV-RF-2")).toBeNull();
-    expect(canonicalZoneKind(null, "ST-TO-1")).toBeNull();
-    expect(canonicalZoneKind(null, "VA-P-3")).toBeNull();
+  it("should resolve sector-prefixed zone codes", () => {
+    expect(canonicalZoneKind(null, "CO-939")).toBe("CONS");
+    expect(canonicalZoneKind(null, "CV-RF-2")).toBe("H");
+    expect(canonicalZoneKind(null, "ST-TO-1")).toBe("REC");
+    expect(canonicalZoneKind(null, "VA-P-3")).toBe("P");
   });
 });
 
@@ -202,12 +204,10 @@ describe("zoneKindStyle / zoneKindColor", () => {
     expect(ZONE_KIND_NEUTRAL.token.startsWith("--st-semantic-")).toBe(true);
   });
 
-  it("retourne le fallback sent-tech hors DOM (H jaune, C rouge, A vert) — depuis le kind source", () => {
-    expect(zoneKindColor("habitation", null, null)).toBe("#EDC948");
-    expect(zoneKindColor("commerce", null, null)).toBe("#E15759");
-    expect(zoneKindColor("agricole", null, null)).toBe("#59A14F");
-    // Code seul (kind/affectation absents) → neutre : plus de dérivation par code.
-    expect(zoneKindColor(null, "H-354", null)).toBe(ZONE_KIND_NEUTRAL.fallback);
+  it("should return token fallbacks for code-only zones outside the DOM", () => {
+    expect(zoneKindColor(null, "H-354", null)).toBe("#EDC948");
+    expect(zoneKindColor(null, "C-186", null)).toBe("#E15759");
+    expect(zoneKindColor(null, "A-118", null)).toBe("#59A14F");
     expect(zoneKindColor(null, "fallback:x", null)).toBe(ZONE_KIND_NEUTRAL.fallback);
   });
 
@@ -255,12 +255,12 @@ describe("decorateZonesWithKindColor", () => {
     };
   }
 
-  it("décore chaque feature d'un kindColor résolu par le kind source (code seul → neutre)", () => {
+  it("should decorate code-only features with their zoning family color", () => {
     const decorated = decorateZonesWithKindColor(
       zonesFC([
-        { code: "H-1", kind: "habitation" },
-        { code: "C-2", kind: "commerce" },
-        { code: "4052" }, // ni kind ni affectation source → neutre
+        { code: "H-1" },
+        { code: "C-2" },
+        { code: "4052" },
       ]),
       new Set(),
       null,
@@ -304,15 +304,15 @@ describe("decorateZonesWithKindColor", () => {
 });
 
 describe("zoneKindLegend", () => {
-  it("liste uniquement les familles SOURCE présentes, dédupliquées (aucune entrée neutre)", () => {
+  it("should list families present through kind or code without a neutral entry", () => {
     const zones = [
       { kind: "agricole", code: "A-118" },
-      { kind: "habitation", code: "H-354" },
-      { kind: "habitation", code: "H-159" },
-      { kind: "commerce", code: "C-186" },
+      { kind: null, code: "H-354" },
+      { kind: null, code: "H-159" },
+      { kind: null, code: "C-186" },
       { kind: "Conservation", code: "CONS-2" },
       { kind: "Récréation", code: "REC-11" },
-      { kind: null, code: "4052" }, // code seul, kind absent → PAS d'entrée
+      { kind: null, code: "4052" },
     ];
     const legend = zoneKindLegend(zones, null);
     const labels = legend.map((entry) => entry.label);

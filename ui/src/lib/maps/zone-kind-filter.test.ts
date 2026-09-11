@@ -30,9 +30,9 @@ function filterOf(...ids: ZoneKindGroupId[]): ZoneKindFilter {
 
 const ZONES = [
   { kind: "Habitation", code: "H-431" },
-  { kind: null, code: "H-102" }, // code seul, kind absent → UNRESOLVED (plus de dérivation)
+  { kind: null, code: "H-102" },
   { kind: "Commerce", code: "C-186" },
-  { kind: null, code: "I-93" }, // code seul, kind absent → UNRESOLVED
+  { kind: null, code: "I-93" },
   { kind: "Conservation", code: "CONS-1" },
   { kind: "Récréation", code: "REC-2" },
   { kind: null, code: "XYZ-9" }, // kind absent → UNRESOLVED
@@ -40,7 +40,7 @@ const ZONES = [
 
 // ── Groupes dérivés de la légende ─────────────────────────────────────────────
 
-describe("ZONE_KIND_GROUPS — dérivés de zone-kind-style, pas dupliqués", () => {
+describe("ZONE_KIND_GROUPS — issus de zone-kind-style, pas dupliqués", () => {
   it("reprend les libellés de la légende zonage tels quels", () => {
     const byId = new Map(ZONE_KIND_GROUPS.map((g) => [g.id, g.label]));
     expect(byId.get("H")).toBe(ZONE_KIND_STYLES.H.label);
@@ -61,9 +61,9 @@ describe("ZONE_KIND_GROUPS — dérivés de zone-kind-style, pas dupliqués", ()
     expect(zoneKindGroupId("", null)).toBe("UNRESOLVED");
   });
 
-  it("kind absent (code seul) → UNRESOLVED : plus de dérivation par le code (directive owner)", () => {
-    expect(zoneKindGroupId(null, "H-102")).toBe("UNRESOLVED");
-    expect(zoneKindGroupId(null, "I-93")).toBe("UNRESOLVED");
+  it("should group code-only zones by their zoning family", () => {
+    expect(zoneKindGroupId(null, "H-102")).toBe("H");
+    expect(zoneKindGroupId(null, "I-93")).toBe("I");
   });
 });
 
@@ -80,8 +80,7 @@ describe("zoneMatchesKindFilter — additif, vide = toutes", () => {
   it("un groupe sélectionné : seules ses zones matchent", () => {
     const f = filterOf("H");
     expect(zoneMatchesKindFilter("Habitation", "H-431", f)).toBe(true);
-    // Code seul (kind absent) → UNRESOLVED, ne matche PAS le filtre H.
-    expect(zoneMatchesKindFilter(null, "H-102", f)).toBe(false);
+    expect(zoneMatchesKindFilter(null, "H-102", f)).toBe(true);
     expect(zoneMatchesKindFilter("Commerce", "C-186", f)).toBe(false);
   });
 
@@ -104,18 +103,18 @@ describe("zoneMatchesKindFilter — additif, vide = toutes", () => {
 describe("compteurs N/M et par groupe", () => {
   it("countZoneKindMatches : N matchées sur l'ensemble fourni", () => {
     expect(countZoneKindMatches(ZONES, DEFAULT_ZONE_KIND_FILTER)).toBe(ZONES.length);
-    expect(countZoneKindMatches(ZONES, filterOf("H"))).toBe(1);
-    expect(countZoneKindMatches(ZONES, filterOf("H", "CONS_REC"))).toBe(3);
+    expect(countZoneKindMatches(ZONES, filterOf("H"))).toBe(2);
+    expect(countZoneKindMatches(ZONES, filterOf("H", "CONS_REC"))).toBe(4);
     expect(countZoneKindMatches(ZONES, filterOf("A"))).toBe(0);
   });
 
   it("zoneKindGroupCounts : seuls les groupes présents, avec leur compte", () => {
     const counts = zoneKindGroupCounts(ZONES);
-    expect(counts.get("H")).toBe(1);
+    expect(counts.get("H")).toBe(2);
     expect(counts.get("C")).toBe(1);
-    expect(counts.has("I")).toBe(false); // I-93 = code seul → UNRESOLVED (plus de dérivation)
+    expect(counts.get("I")).toBe(1);
     expect(counts.get("CONS_REC")).toBe(2);
-    expect(counts.get("UNRESOLVED")).toBe(3); // H-102 + I-93 + XYZ-9
+    expect(counts.get("UNRESOLVED")).toBe(1);
     expect(counts.has("A")).toBe(false); // groupe absent → pas de chip
   });
 });
