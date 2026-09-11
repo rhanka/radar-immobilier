@@ -88,7 +88,7 @@ this file and only add tooling glue on top of it.
 - Backwards-compatibility hacks (renamed `_var` placeholders, `// removed` comments, re-exports for unused types) are forbidden. Delete and move on.
 
 ## Storage Policy
-- Raw documents (HTML, PDF, transcripts, captures) → **Object Storage** (Scaleway S3-compatible bucket `radar-immobilier-raw`, MinIO locally).
+- Raw documents (HTML, PDF, transcripts, captures) → **S3-compatible Object Storage** (managed service in production, local emulator for development).
 - Structured metadata & scored entities → **Postgres**.
 - Fields not yet stabilized → `jsonb` columns validated by versioned Zod schemas in `packages/radar-domain/src/schemas/`.
 - No SQL migration to widen / refactor a `jsonb` field unless a stable pattern emerges through `BR-06` data investigation.

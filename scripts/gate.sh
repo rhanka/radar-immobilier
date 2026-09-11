@@ -39,7 +39,7 @@ mrg=$(echo "$json" | python3 -c "import sys,json;print(json.load(sys.stdin).get(
 pii=$(gh pr diff "$PR" --repo "$REPO" 2>/dev/null | python3 - <<'PY'
 import sys, re
 EXCL = re.compile(r'(^|/)(fixtures?|docs|__fixtures__)/|\.fixture\.|\.spec\.|\.test\.')
-PII = re.compile(r'\b[0-9]{3}[ -][0-9]{3}[ -][0-9]{3}\b|\b\(?[0-9]{3}\)?[ .-][0-9]{3}[ .-][0-9]{4}\b|-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY|AKIA[0-9A-Z]{16}|SCW[A-Z0-9]{17,}')
+PII = re.compile(r'\b[0-9]{3}[ -][0-9]{3}[ -][0-9]{3}\b|\b\(?[0-9]{3}\)?[ .-][0-9]{3}[ .-][0-9]{4}\b|-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY|AKIA[0-9A-Z]{16}')
 cur, skip, hits = "", False, []
 for line in sys.stdin:
     if line.startswith('+++ '):

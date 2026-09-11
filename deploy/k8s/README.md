@@ -1,8 +1,8 @@
 # radar-immobilier on Kubernetes — deployed as a *sentropic app*
 
 This directory holds the **tenant-owned** manifests that deploy
-`radar-immobilier` on the shared Scaleway **poc-k8s** cluster *as a sentropic
-app*: a tenant/workspace under the sentropic platform, with **human auth
+`radar-immobilier` on the shared OVH MKS cluster managed by **poc-k8s** *as a
+sentropic app*: a tenant/workspace under the sentropic platform, with **human auth
 delegated to the shared sentropic Identity Provider** and the **code managed in
 a named sentropic workspace**.
 
@@ -37,7 +37,6 @@ and extended with the sentropic-app integration.
 | `00-namespace.yaml` | tenant Namespace + workspace/part-of labels (operator owns the live copy + RQ/LimitRange/NetPol) |
 | `10-rbac.yaml` | `radar-app` ServiceAccount + legacy SCW pull secret retained for `radar-obscura` |
 | `20-postgres-postgis.yaml` | Postgres 16 + PostGIS StatefulSet + headless Service + 5Gi PVC |
-| `25-minio.yaml` | in-cluster MinIO (S3) StatefulSet + Service for raw-document storage |
 | `30-api.yaml` | radar API (Hono) Deployment + Service + non-secret ConfigMap (incl. OIDC RP env) |
 | `35-obscura.yaml` | headless-browser CDP service for scraping |
 | `40-maildev.yaml` | SMTP sink (POC) |

@@ -57,11 +57,11 @@ CLAUDE.md / AGENTS.md / GEMINI.md   # per-agent pointers to rules/MASTER.md
 
 ## Stack at a glance
 
-- **API** : Hono on Node 24, Drizzle on Postgres 16 (PostGIS), S3-compatible object storage (Scaleway in prod, MinIO locally), `@sentropic/llm-mesh` for multi-provider LLM access, `@sentropic/chat-core` for orchestration, `graphifyy` for the knowledge graph linking documents.
+- **API** : Hono on Node 24, Drizzle on Postgres 16 (PostGIS), S3-compatible managed object storage in production (local emulator for development), `@sentropic/llm-mesh` for multi-provider LLM access, `@sentropic/chat-core` for orchestration, `graphifyy` for the knowledge graph linking documents.
 - **UI** : Svelte 5 + Vite + Tailwind, design system `@sentropic/design-system-{svelte,themes,tokens}`, chat panel from `@sentropic/chat-ui`, map via MapLibre (BR-10).
 - **Scraping** : `playwright` connected to an `obscura` (Rust headless) sidecar with anti-detect.
 - **Auth** : passkey (WebAuthn) + magic-link, replicated from sentropic (BR-09).
-- **Deployment** : SPA on GitHub Pages, server on the K8s POC cluster (Scaleway Kapsule), bucket S3 on the `PoCs` Scaleway project. Domain `immo.sent-tech.ca`.
+- **Deployment** : SPA on GitHub Pages, server on OVH MKS. Domain `immo.sent-tech.ca`; managed object-storage coordinates are supplied out of band.
 - **Container registry** : public `ghcr.io/rhanka/radar-{api,ui,grounding}` packages; no pull secret is required for api, ui, MCP, or grounding.
 
 See `docs/spec/SPEC_EVOL_SCAFFOLDING.md` for the full design and version pins.
