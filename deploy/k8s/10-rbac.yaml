@@ -1,11 +1,11 @@
-# Namespace-scoped ServiceAccount used by every radar Pod. Mirrors sentropic's
-# deploy/k8s/10-rbac.yaml (ServiceAccount `sentropic-app`).
+# Namespace-scoped ServiceAccount used by every radar Pod, carrying the
+# imagePullSecret for the SCW Container Registry. Mirrors sentropic's
+# deploy/k8s/10-rbac.yaml (ServiceAccount `sentropic-app` +
+# imagePullSecrets: [sentropic-registry]).
 #
-# No imagePullSecrets: every radar image (radar-api / radar-ui / radar-grounding
-# / radar-obscura) is a PUBLIC ghcr.io/rhanka package. The legacy SCW
-# `radar-registry-pull` dockerconfigjson Secret (kept only for radar-obscura
-# after the GHCR cutover, #671) is retired now that radar-obscura is built +
-# pushed to GHCR too (build-push-images.yml matrix `obscura`).
+# The `radar-registry-pull` dockerconfigjson Secret is created out-of-band by
+# the operator (see deploy/k8s/secrets.example.yaml + README); it is NOT
+# committed with real credentials.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -15,5 +15,7 @@ metadata:
     app.kubernetes.io/name: radar-immobilier
     app.kubernetes.io/part-of: sentropic
     app.kubernetes.io/component: app
+imagePullSecrets:
+  - name: radar-registry-pull
 automountServiceAccountToken: false
 
