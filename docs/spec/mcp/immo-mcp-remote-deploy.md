@@ -162,7 +162,7 @@ hypothesis needs one of these BEFORE the Deployment can actually start:
      in the runtime stage.
 - **(B)** — a dedicated `packages/immo-mcp/Dockerfile` + a new `immo-mcp`
   matrix row in `build-push-images.yml`, image tag
-  `ghcr.io/rhanka/immo-mcp:latest`. Decouples the MCP
+  `<future-ghcr-immo-mcp-image>`. Decouples the MCP
   server's release/rollback from the main api image (arguably cleaner given
   it's a distinct OAuth-facing attack surface) at the cost of a new
   Dockerfile + CI row + a one-line `image:` swap in
