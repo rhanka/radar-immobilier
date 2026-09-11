@@ -53,7 +53,7 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
   - [x] Run the requested tracked-file inventory and verify the live OVH cluster evidence.
   - [x] Confirm GHCR package visibility and the successful build for `831cad2`.
 - [x] **Lot 1 — Remove dead infrastructure paths**
-  - [x] Delete provider-only workflows, mount helpers, one-shot manifests, and repository-owned MinIO manifests/policies.
+  - [x] Delete provider-only workflows, mount helpers, one-shot manifests, and retired MinIO manifests/policies while preserving the live cluster MinIO network path.
   - [x] Remove the retired transactional-email transport while preserving invitation-link log mode.
 - [x] **Lot 2 — Replace verified image registry references**
   - [x] Make GHCR the build/push source of truth.
@@ -66,6 +66,6 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
 - [ ] **Lot 4 — Verification and delivery**
   - [x] Run the repository-wide residue sweep and review every remaining match.
   - [ ] Run `make typecheck`, `make lint`, `make test ENV=test-eradicate-scw`, and `make k8s-validate` (offline k8s validation passed; Compose checks are blocked locally by exhausted Docker address pools and move to CI).
-  - [ ] Run harness scope/branch verification and independent review.
-  - [ ] Push `chore/eradicate-scw-refs` and open a PR to `main`.
+  - [x] Run harness scope/branch verification and attempt independent consensus review (one safety leg completed late and was reconciled; the correctness leg returned no result, so no consensus verdict is claimed).
+  - [x] Push `chore/eradicate-scw-refs` and open PR #670 to `main`.
   - [ ] Verify CI green; preserve the branch after merge.
