@@ -382,9 +382,19 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
   });
 
   it("shows Agricole without CPTAQ and no absence notice when the collection is absent", async () => {
+    type CptaqResponse = Awaited<ReturnType<typeof fetchCptaqConstraints>>;
+    let resolveCptaq!: (value: CptaqResponse) => void;
+    vi.mocked(fetchCptaqConstraints).mockImplementationOnce(
+      () => new Promise<CptaqResponse>((resolve) => { resolveCptaq = resolve; }),
+    );
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
     await fireEvent.click(await screen.findByTestId("legend-cptaq-toggle"));
-    await waitFor(() => expect(vi.mocked(fetchCptaqConstraints)).toHaveBeenCalled());
+    expect(await screen.findByText("Chargement de la couche Agricole (CPTAQ)…")).toBeTruthy();
+
+    resolveCptaq(cptaqResponse(false));
+    await waitFor(() =>
+      expect(screen.queryByText("Chargement de la couche Agricole (CPTAQ)…")).toBeNull(),
+    );
 
     const legend = screen.getByTestId("map-legend-zonage");
     expect(within(legend).getByText("Agricole", { exact: true })).toBeTruthy();
