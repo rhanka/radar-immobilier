@@ -47,7 +47,7 @@ spec:
                 capabilities:
                   drop:
                     - ALL
-              image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+              image: ghcr.io/rhanka/radar-api:latest
               imagePullPolicy: Always
               workingDir: /workspace/api
               command: ["node", "dist/services/geo/run-populate-geo.js"]
