@@ -66,6 +66,6 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
 - [ ] **Lot 4 — Verification and delivery**
   - [x] Run the repository-wide residue sweep and review every remaining match.
   - [ ] Run `make typecheck`, `make lint`, `make test ENV=test-eradicate-scw`, and `make k8s-validate` (offline k8s validation passed; Compose checks are blocked locally by exhausted Docker address pools and move to CI).
-  - [x] Run harness scope/branch verification and attempt independent consensus review (one safety leg completed late and was reconciled; the correctness leg returned no result, so no consensus verdict is claimed).
+  - [x] Run harness scope/branch verification and attempt independent consensus review (two safety legs completed late and were reconciled; no correctness leg returned a result, so no consensus verdict is claimed).
   - [x] Push `chore/eradicate-scw-refs` and open PR #670 to `main`.
   - [ ] Verify CI green; preserve the branch after merge.
