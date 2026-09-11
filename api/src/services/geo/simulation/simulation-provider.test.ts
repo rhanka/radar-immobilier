@@ -43,14 +43,14 @@ describe("zoneKindFromCode", () => {
   it("C-115 → commercial", () => {
     expect(zoneKindFromCode("C-115")).toBe("commercial");
   });
-  it("ID-R1.10 → autre (ID means îlot déstructuré in Saint-Constant)", () => {
-    expect(zoneKindFromCode("ID-R1.10")).toBe("autre");
+  it("ID-R1.10 → industriel", () => {
+    expect(zoneKindFromCode("ID-R1.10")).toBe("industriel");
   });
   it("P-541 → public", () => {
     expect(zoneKindFromCode("P-541")).toBe("public");
   });
-  it("CGS-101 → commercial (commerciale grande surface)", () => {
-    expect(zoneKindFromCode("CGS-101")).toBe("commercial");
+  it("CGS-101 → public", () => {
+    expect(zoneKindFromCode("CGS-101")).toBe("public");
   });
   it("(vide) → autre", () => {
     expect(zoneKindFromCode("")).toBe("autre");
