@@ -80,11 +80,13 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
             - name: S3_SECRET_KEY
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
-            # SCRAPE_S3 EXPLICITE vers Scaleway (bucket scrape = radar-immobilier-docs-pocs,
+            # SCRAPE_S3 EXPLICITE vers retired provider (bucket scrape = legacy object bucket,
             # même que raw/proces-verbaux-<city>/cas/). Le secret radar-scrape-s3-credentials
             # est ABSENT sur OVH → le worker retombait sur l'endpoint MinIO in-cluster
             # (radar-immobilier-docs.radar-minio, virtual-hosted) → ENOTFOUND (échec 2026-08-03).
-            # Creds depuis radar-s3-credentials (le secret Scaleway qui marche pour emit/apply).
+            # Creds depuis radar-s3-credentials (le secret retired provider qui marche pour emit/apply).
+            # TODO(k8s): replace this endpoint/bucket/region tuple and credentials
+            # with verified OVH Object Storage values before running this Job.
             - name: SCRAPE_S3_ENDPOINT
               value: "https://s3.fr-par.scw.cloud"
             - name: SCRAPE_S3_BUCKET

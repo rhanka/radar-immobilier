@@ -134,6 +134,8 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            # TODO(k8s): replace this endpoint/bucket/region tuple and credentials
+            # with verified OVH Object Storage values before running this Job.
             - name: GRAPH_S3_ENDPOINT
               value: "https://s3.fr-par.scw.cloud"
             - name: GRAPH_S3_BUCKET
