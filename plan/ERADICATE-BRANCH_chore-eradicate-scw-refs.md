@@ -66,6 +66,6 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
 - [x] **Lot 4 — Verification and delivery**
   - [x] Run the repository-wide residue sweep and review every remaining match.
   - [x] Run the full validation gates (local offline k8s validation passed; GitHub CI passed Compose validation, k8s validation, typecheck, lint, build, UI smoke, and unit/integration tests after the shared local Docker address pools blocked container startup).
-  - [x] Run harness scope/branch verification and independent consensus review (Opus correctness + Sonnet safety); reconcile all findings to GO.
+  - [x] Run harness scope/branch verification and two independent Opus-correctness/Sonnet-safety review pairs; reconcile all findings to GO.
   - [x] Push `chore/eradicate-scw-refs` and open PR #670 to `main`.
   - [x] Verify CI green; preserve the branch after merge.

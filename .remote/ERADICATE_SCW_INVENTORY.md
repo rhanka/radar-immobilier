@@ -13,16 +13,16 @@ les listes ci-dessous regroupent les numéros par fichier.
 
 Résultat : **885 lignes**, classées sans double compte :
 
-- **A — 424** : résidus purs supprimés ou reformulés;
+- **A — 414** : résidus purs supprimés ou reformulés;
 - **B — 170** : ressources toujours nécessaires, remplacées seulement quand
   la cible a été vérifiée, sinon laissées en TODO;
-- **C — 291** : historique, émulation locale ou service encore opéré par k8s,
+- **C — 301** : historique, émulation locale ou service encore opéré par k8s,
   laissé intact.
 
 Les fichiers binaires signalés par le balayage sont listés à la fin en C sans
 numéro de ligne et ne sont pas inclus dans les 885 lignes textuelles.
 
-## A — résidus supprimés ou neutralisés (424)
+## A — résidus supprimés ou neutralisés (414)
 
 Actions : suppression des manifests et scripts morts; retrait du login, miroir,
 secrets et transport HTTP de l’ancien fournisseur; suppression des fausses
@@ -89,7 +89,6 @@ Occurrences au commit de référence :
 - `deploy/k8s/41-grounding-citation-job.yaml:7,31,37,58,97,99`
 - `deploy/k8s/50-ui.yaml:89`
 - `deploy/k8s/60-ingress.yaml:2`
-- `deploy/k8s/70-networkpolicy.yaml:98,126,129,130,131,133,134,138,143,148`
 - `deploy/k8s/71-networkpolicy-graph-projection-minio-preprod.yaml:1,4,5,7,8,9,12,19,20,24,29,31,35`
 - `deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml:1,4,5,14,18,23,28,33`
 - `deploy/k8s/README.md:4,16,40,200`
@@ -224,7 +223,7 @@ ses paramètres restent à choisir et à fournir hors dépôt.
 - image vérifiée du service geo cité par le contrat;
 - fournisseur d’e-mail transactionnel et paramètres non secrets associés.
 
-## C — occurrences conservées (291)
+## C — occurrences conservées (301)
 
 ### C1 — historique append-only ou rapports datés (141)
 
@@ -259,11 +258,16 @@ plans archivés ne sont pas des instructions d’exploitation courantes.
 - `plan/done/02-BRANCH_feat-api-skeleton-hono-postgres-s3.md:4,30,41,42,47,48,62,66,97,106,109,113`
 - `plan/done/06V-BRANCH_feat-vertical-slice-valleyfield.md:20`
 
-### C2 — émulation locale, tests et MinIO encore opéré par k8s (150)
+### C2 — émulation locale, tests et MinIO encore opéré par k8s (160)
 
 Ces occurrences sont soit nécessaires au développement/test isolé, soit liées
 au service encore présent dans le cluster et explicitement hors périmètre de
 cette branche. Elles ne constituent pas une valeur de remplacement OVH.
+
+Le manifeste applicatif `25-minio.yaml` est supprimé en A comme le demande
+explicitement le brief. Cette suppression dans le dépôt ne mute aucun objet du
+cluster. La règle `allow-api-to-minio` reste en C tant que l’API servie par
+`831cad2` utilise le service vivant géré par k8s.
 
 - `.claude/skills/ingest-test/SKILL.md:29,32`
 - `.env.example:11,14,15,20`
@@ -306,6 +310,7 @@ cette branche. Elles ne constituent pas une valeur de remplacement OVH.
 - `deploy/k8s/33b-scrape-cities-job.yaml:85,86`
 - `deploy/k8s/34-refresh-cronjob.yaml:115,116,220`
 - `deploy/k8s/41-grounding-citation-job.yaml:9,17,19,28,29,59,87,110,111,113`
+- `deploy/k8s/70-networkpolicy.yaml:98,126,129,130,131,133,134,138,143,148`
 - `deploy/k8s/41-grounding-worklist-configmap.yaml:12`
 - `deploy/k8s/grounding-preprod/projection-job.preprod.yaml:4,12,13,64,66`
 - `deploy/k8s/refresh-cronjobs/kustomization.yaml:56,58,61,80,89,159`
