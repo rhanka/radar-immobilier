@@ -42,9 +42,9 @@ status below covers every one of the 49 tokens present in the production table;
 when the abbreviated audit provides no token-level citation, the status is
 conservatively `PARTIEL`.
 
-## Token-level status and implemented action
+## Token-level status and UI action
 
-| Token | Audit status | Evidence | Implemented action |
+| Token | Audit status | Evidence | UI action |
 |---|---|---|---|
 | `H` | FONDÉ+source | CORE; Delson 901 | keep `H` |
 | `HA` | PARTIEL | measured MT/SH table | keep `H` |
@@ -68,7 +68,7 @@ conservatively `PARTIEL`.
 | `MXTV` | FONDÉ+source | CORE | keep `MIXTE` |
 | `MXT` | FONDÉ+source | CORE | keep `MIXTE` |
 | `MF` | PARTIEL | measured MT table | keep `MIXTE` |
-| `CU` | PARTIEL | Quebec web summary; regulation text not verified | keep `MIXTE` |
+| `CU` | PARTIEL | measured MT table; `CV-`/`VA-` sector suffixes | keep `MIXTE` |
 | `C` | FONDÉ+source | CORE; SH | keep `C` |
 | `CM` | PARTIEL | measured MT/SH table | keep `C` |
 | `CA` | PARTIEL | measured MT table | keep `C` |
@@ -104,43 +104,49 @@ conservatively `PARTIEL`.
 - `CONS` and `REC` now have distinct design-system tokens, fallback colours and
   labels. `REC` is labelled `Récréation / tourisme`, so `TO` and `RE` are not
   presented as conservation.
-- The API prefix table removes `ID` from industrial and maps `CGS` to commercial.
-- Missing CPTAQ collections no longer produce a notice. The legend says
-  `Agricole`; `(CPTAQ)` appears only after a real collection is returned.
+- The radar-api prefix table is unchanged in this branch. Its known `ID` and
+  `CGS` errors remain outside this UI correction and are assigned to GEO.
+- CPTAQ availability is probed at city selection with `limit=1`, independently
+  from layer activation. A missing collection leaves `Agricole` as a normal,
+  non-interactive family; an available collection exposes the stable
+  `Agricole (CPTAQ)` toggle before activation.
 - Zone/lot number controls target the actual design-system label span and match
   legend rows at `0.75rem` and `rgb(71 85 105)` (`text-slate-600`).
 - A lone neutral lot category is hidden, while the `Lots` heading and zone-number
   control remain. Neutral stays visible whenever another lot category exists.
 
-## Second mechanism in the API
+## Unchanged radar-api mechanism
 
-`lot-zone-enrichment.ts` has a separate two-step resolver: a recognized source
-`zone.kind` wins; otherwise `zoneKindFromCode()` applies the API prefix table.
-The emitted `zone.kindSource` is now `source` or `code`, and tests verify both
-paths. This is machine-readable provenance, not new visible UI wording.
+`lot-zone-enrichment.ts` retains its separate two-step resolver: a recognized
+source `zone.kind` wins; otherwise `zoneKindFromCode()` applies the radar-api
+prefix table. No file under `api/` is changed by this branch. At this branch
+head, that table still resolves `(I|ID)-` as industrial and `(P|CGS)-` as
+public, and `zone.kindSource` is not emitted anywhere under `api/src`.
 
-The code-derived kind still reaches `zoneAllows4Plus()` in the existing API
-enrichment path. Removing that influence changes the numeric lot-scoring
-contract and is outside this branch; the residual path is now explicitly
-traceable rather than indistinguishable from source data.
+The current browser path consumes geo-api collections directly, bypassing this
+radar-api overlay. Its `ID` and `CGS` deductions are therefore known but are not
+corrected here. The GEO work owns both the correction and deprecation path:
+publish source-backed `zone_family`, migrate consumers to it, then retire the
+legacy radar-api code-prefix fallback. Numeric lot scoring remains outside this
+branch.
 
 ## Residual limits and target state
 
 - Retained `PARTIEL` and MT-only tokens can still be wrong outside their measured
   municipalities. An unknown or removed token must remain unresolved/neutral.
 - The UI `kind` field can originate upstream and does not yet carry a per-city
-  regulatory citation. `kindSource` currently covers the API lot enrichment
-  object, not every zone collection.
-- The target is city-scoped mappings with regulation/article metadata, and
-  source `affectation` available as tier 1. Code-token inference remains tier 3.
+  regulatory citation. No `kindSource` field currently closes that provenance
+  gap in radar-api.
+- The target is GEO-published `zone_family` with city-scoped regulation/article
+  metadata and source `affectation` available as tier 1. Code-token inference
+  remains tier 3 until that migration is complete.
 
 ## Effect verification
 
 - `lot-potential-visual.test.ts`: corrected and rejected token effects.
 - `zone-kind-style.test.ts` and `zone-kind-filter.test.ts`: precedence,
-  `CO-939`, distinct conservation/recreation colours, labels and filters.
-- `simulation-provider.test.ts`: API `ID` and `CGS` corrections.
-- `lot-zone-enrichment.test.ts`: `kindSource` source/code propagation.
-- `SignauxMapView.test.ts`: missing/present CPTAQ labels and notice, the actual
-  DS label node plus its exact inherited style variables, and both neutral-lot
-  legend cases.
+  `CO-939`, distinct family tokens/fallback colours, labels and filters.
+- `SignauxMapView.test.ts`: selection-time CPTAQ probing, non-interactive
+  agriculture when absent, stable toggle labels, the actual DS label node and
+  the published `Checkbox.svelte` variable-consumption contract, plus both
+  neutral-lot legend cases.
