@@ -37,7 +37,7 @@ Le script **échoue en code 2** si les 5 ancres ne matchent pas — la fidélit�
 ## Source (pointeur versionné)
 
 - Dump prod-PG `graph_nodes` (projection exacte de `listCitiesWithSignalNodes`, export OVH read-only job 39).
-- S3 : `s3://radar-immobilier-docs-pocs/scratch/postbrossard-7263-20260803/graph_nodes.ndjson`
+- S3 : `s3://<verified-ovh-bucket>/scratch/postbrossard-7263-20260803/graph_nodes.ndjson`
 - Export OVH **2026-08-06** · **7298 nœuds** · sha256 `d9cb3cc6b9700caa1ba711d7fa204597e2db8be6b4002a764a7f386a43e57699`
 
 ## Invocation
