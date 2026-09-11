@@ -24,6 +24,7 @@ on:
           - mapper
           - snapshot
           - projection
+          - scrape
           - graphify34-apply
           - graphify34-emit-candidates
           - scrape
@@ -126,6 +127,9 @@ jobs:
               echo "file=deploy/k8s/40-export-gt-designation-events-job.yaml" >> "$GITHUB_OUTPUT"
               echo "configmap=deploy/k8s/38-graphify34-set167-configmap.yaml" >> "$GITHUB_OUTPUT"
               echo "name=radar-export-gt-designation-events" >> "$GITHUB_OUTPUT" ;;
+            scrape)
+              echo "file=deploy/k8s/33-scrape-job.yaml" >> "$GITHUB_OUTPUT"
+              echo "name=radar-scrape" >> "$GITHUB_OUTPUT" ;;
             *)
               echo "job inconnu"; exit 1 ;;
           esac
