@@ -23,8 +23,7 @@ import {
 } from "./zone-kind-style.js";
 
 /**
- * Groupe de filtre = entrée de légende. CONS et REC partagent teinte ET
- * libellé (« Conservation / récréation ») → un seul groupe `CONS_REC`.
+ * Filter groups mirror legend entries, including distinct CONS and REC groups.
  * `UNRESOLVED` = zones au kind source irrésolu : SANS chip (aucun libellé de
  * catégorie), gardé seulement comme cible interne du groupement/estompage.
  */
@@ -35,7 +34,8 @@ export type ZoneKindGroupId =
   | "I"
   | "P"
   | "A"
-  | "CONS_REC"
+  | "CONS"
+  | "REC"
   | "U"
   | "UNRESOLVED";
 
@@ -53,7 +53,8 @@ export const ZONE_KIND_GROUPS: ReadonlyArray<ZoneKindGroup> = [
   { id: "I", label: ZONE_KIND_STYLES.I.label },
   { id: "P", label: ZONE_KIND_STYLES.P.label },
   { id: "A", label: ZONE_KIND_STYLES.A.label },
-  { id: "CONS_REC", label: ZONE_KIND_STYLES.CONS.label },
+  { id: "CONS", label: ZONE_KIND_STYLES.CONS.label },
+  { id: "REC", label: ZONE_KIND_STYLES.REC.label },
   { id: "U", label: ZONE_KIND_STYLES.U.label },
   // Pas de groupe « Type non déterminé » : une zone sans famille source n'a pas
   // de chip (directive owner) — le vrai code de zone reste son identité.
@@ -79,7 +80,6 @@ export function zoneKindGroupId(
 ): ZoneKindGroupId {
   const canonical: StyledZoneKind | null = canonicalZoneKind(kind, code, affectation);
   if (canonical === null) return "UNRESOLVED";
-  if (canonical === "CONS" || canonical === "REC") return "CONS_REC";
   return canonical;
 }
 

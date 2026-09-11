@@ -15,6 +15,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, cleanup, waitFor, screen, fireEvent, within } from "@testing-library/svelte";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
@@ -109,6 +110,7 @@ vi.mock("$lib/maps/lots-client.js", async (importOriginal) => {
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchAllLots } from "$lib/maps/lots-client.js";
 import { loadSignauxZones } from "$lib/maps/signaux-zones-loader.js";
+import { fetchCptaqConstraints } from "$lib/maps/cptaq-client.js";
 
 /** Une zone réelle avec géométrie — le drill zones est alimenté. */
 function fixtureZones(citySlug: string): GeoZonesResponse {
@@ -164,6 +166,21 @@ function cityRoute(): GeoRoute {
   };
 }
 
+function cptaqResponse(present: boolean) {
+  return {
+    ok: present,
+    citySlug: CITY_SLUG,
+    source: present ? ("geo-ogc" as const) : ("none" as const),
+    absent: present ? undefined : true,
+    featureCollection: {
+      type: "FeatureCollection" as const,
+      features: present
+        ? [{ type: "Feature" as const, geometry: null, properties: {} }]
+        : [],
+    },
+  };
+}
+
 /** Positionne `window.location.search` (lu à l'init du composant). */
 function setSearch(search: string): void {
   window.history.replaceState({}, "", `/geo/city/${CITY_SLUG}${search}`);
@@ -172,11 +189,14 @@ function setSearch(search: string): void {
 afterEach(() => {
   cleanup();
   setSearch("");
+  localStorage.clear();
 });
 
 beforeEach(() => {
   vi.mocked(fetchAllLots).mockClear();
   vi.mocked(loadSignauxZones).mockClear();
+  vi.mocked(fetchCptaqConstraints).mockReset();
+  vi.mocked(fetchCptaqConstraints).mockResolvedValue(cptaqResponse(false));
 });
 
 describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
@@ -245,11 +265,69 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     expect(queries.queryByText("Sans indicateur")).toBeNull();
     expect(queries.queryByText("Zone citée par un signal")).toBeNull();
 
+    const referenceItem = queries.getByText("Priorité (4+ ∧ TOD)").closest("li")!;
+    expect(referenceItem.classList.contains("text-xs")).toBe(true);
+    expect(referenceItem.classList.contains("text-slate-600")).toBe(true);
     for (const label of ["N° de zone", "N° de lot"]) {
-      const checkboxLabel = screen.getByLabelText(label).closest("label");
-      expect(checkboxLabel?.classList.contains("text-xs")).toBe(true);
-      expect(checkboxLabel?.classList.contains("text-slate-600")).toBe(true);
+      const checkboxRoot = screen.getByLabelText(label).closest("label")!;
+      const visibleLabel = checkboxRoot.querySelector<HTMLElement>(".st-choice__label")!;
+      const styleHost = checkboxRoot.closest<HTMLElement>(".legend-number-toggle")!;
+      expect(visibleLabel.tagName).toBe("SPAN");
+      expect(visibleLabel.textContent).toBe(label);
+      expect(styleHost.contains(visibleLabel)).toBe(true);
+      expect(
+        styleHost.style.getPropertyValue("--st-component-selection-choiceLabelFontSize"),
+      ).toBe("0.75rem");
+      expect(
+        styleHost.style.getPropertyValue("--st-component-selection-choiceLabelColor"),
+      ).toBe("rgb(71 85 105)");
     }
+  });
+
+  it("hides only the neutral lot entry when every displayed lot is neutral", async () => {
+    vi.mocked(fetchAllLots).mockResolvedValueOnce({
+      ok: true,
+      citySlug: CITY_SLUG,
+      source: "donnees-quebec",
+      collectionId: `qc-lots-${CITY_SLUG}`,
+      numberMatched: 1,
+      numberReturned: 1,
+      featureCollection: {
+        type: "FeatureCollection",
+        features: [
+          { type: "Feature", geometry: null, properties: { noLot: "neutral-1" } },
+        ],
+      },
+    });
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    const legend = await screen.findByTestId("map-legend-lots");
+    expect(within(legend).getByText("Lots")).toBeTruthy();
+    expect(within(legend).queryByText("Sans indicateur")).toBeNull();
+    expect(within(legend).getByLabelText("N° de lot")).toBeTruthy();
+  });
+
+  it("keeps the neutral lot entry when another category is present", async () => {
+    vi.mocked(fetchAllLots).mockResolvedValueOnce({
+      ok: true,
+      citySlug: CITY_SLUG,
+      source: "donnees-quebec",
+      collectionId: `qc-lots-${CITY_SLUG}`,
+      numberMatched: 2,
+      numberReturned: 2,
+      featureCollection: {
+        type: "FeatureCollection",
+        features: [
+          { type: "Feature", geometry: null, properties: { noLot: "priority-1", priorite: true } },
+          { type: "Feature", geometry: null, properties: { noLot: "neutral-1" } },
+        ],
+      },
+    });
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    const legend = await screen.findByTestId("map-legend-lots");
+    expect(within(legend).getByText("Priorité (4+ ∧ TOD)")).toBeTruthy();
+    expect(within(legend).getByText("Sans indicateur")).toBeTruthy();
   });
 
   it("?layers=zones (alias) : fetchAllLots N'EST PAS appelé", async () => {
@@ -267,47 +345,81 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
   // les fetchs zones + lots exactement comme en plan ; le mode transmis au socle
   // reste 'satellite'. (Les assertions de PAINT par mode sont couvertes par le
   // socle — GeoCityMapBase.basemap-mode.test.ts — et l'e2e recette.)
-  // §7 R2 — refonte légende CPTAQ : encadré autonome retiré, « Agricole (CPTAQ) »
-  // devient un TOGGLE de couche sous AFFECTATION (rayé quand désactivé), qui persiste.
-  it("(§7) « Agricole (CPTAQ) » = toggle sous AFFECTATION (encadré autonome retiré), rayé puis persisté", async () => {
+  // §7 R2 — CPTAQ is probed at city selection. When available, its row is a
+  // persistent toggle under zoning; when absent, agriculture stays static.
+  it("probes CPTAQ before activation and keeps its label stable after toggling", async () => {
     setSearch("");
-    localStorage.clear();
+    vi.mocked(fetchCptaqConstraints).mockResolvedValue(cptaqResponse(true));
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
 
-    // Le toggle apparaît sous AFFECTATION une fois la ville sélectionnée.
     const toggle = await screen.findByTestId("legend-cptaq-toggle");
     expect(toggle.tagName).toBe("BUTTON");
     expect(toggle.textContent).toContain("Agricole (CPTAQ)");
+    expect(fetchCptaqConstraints).toHaveBeenCalledTimes(1);
+    expect(fetchCptaqConstraints).toHaveBeenCalledWith(
+      CITY_SLUG,
+      expect.objectContaining({ limit: 1, signal: expect.any(AbortSignal) }),
+    );
     // L'encadré autonome + sa case à cocher ont disparu.
     expect(screen.queryByTestId("map-legend-cptaq")).toBeNull();
-    // Désactivé par défaut → aria-pressed false + libellé RAYÉ (line-through seul).
+    // Désactivé par défaut → aria-pressed false + libellé rayé.
     expect(toggle.getAttribute("aria-pressed")).toBe("false");
     expect(toggle.querySelector(".line-through")).not.toBeNull();
 
-    // Clic → activé + persisté ; la rayure disparaît.
+    // Clic → chargement complet, activation et persistance.
     await fireEvent.click(toggle);
     await waitFor(() =>
-      expect(
-        screen.getByTestId("legend-cptaq-toggle").getAttribute("aria-pressed"),
-      ).toBe("true"),
+      expect(screen.getByTestId("legend-cptaq-toggle").getAttribute("aria-pressed")).toBe("true"),
     );
-    // Persistance CPTAQ = "1"/"0" (readLabelPref/persistLabelPref, inchangé).
-    expect(localStorage.getItem("signaux-cptaq-enabled")).toBe("1");
+    expect(fetchCptaqConstraints).toHaveBeenLastCalledWith(
+      CITY_SLUG,
+      expect.objectContaining({ limit: 2000 }),
+    );
+    expect(screen.getByTestId("legend-cptaq-toggle").textContent).toContain("Agricole (CPTAQ)");
     expect(
       screen.getByTestId("legend-cptaq-toggle").querySelector(".line-through"),
     ).toBeNull();
-    localStorage.clear();
+
+    await fireEvent.click(screen.getByTestId("legend-cptaq-toggle"));
+    expect(screen.getByTestId("legend-cptaq-toggle").getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByTestId("legend-cptaq-toggle").textContent).toContain("Agricole (CPTAQ)");
+    expect(screen.getByTestId("legend-cptaq-toggle").querySelector(".line-through")).not.toBeNull();
+    expect(localStorage.getItem("signaux-cptaq-enabled")).toBe("0");
+  });
+
+  it("shows unavailable CPTAQ as normal agriculture without a strike-through", async () => {
+    const response = fixtureZones(CITY_SLUG);
+    response.featureCollection.features[0]!.properties.kind = "agricole";
+    vi.mocked(loadSignauxZones).mockResolvedValueOnce({ tier: "collection", response });
+    vi.mocked(fetchCptaqConstraints).mockResolvedValueOnce(cptaqResponse(false));
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    await waitFor(() =>
+      expect(fetchCptaqConstraints).toHaveBeenCalledWith(
+        CITY_SLUG,
+        expect.objectContaining({ limit: 1 }),
+      ),
+    );
+    const legend = await screen.findByTestId("map-legend-zonage");
+    const agriculturalRow = await within(legend).findByText("Agricole", { exact: true });
+    expect(agriculturalRow.closest("button")).toBeNull();
+    expect(agriculturalRow.classList.contains("line-through")).toBe(false);
+    expect(screen.queryByTestId("legend-cptaq-toggle")).toBeNull();
+    expect(within(legend).queryByText("Agricole (CPTAQ)")).toBeNull();
   });
 
   it("should render a single agricultural entry when the CPTAQ toggle is shown", async () => {
     const response = fixtureZones(CITY_SLUG);
     response.featureCollection.features[0]!.properties.kind = "agricole";
     vi.mocked(loadSignauxZones).mockResolvedValueOnce({ tier: "collection", response });
+    vi.mocked(fetchCptaqConstraints).mockResolvedValueOnce(cptaqResponse(true));
     setSearch("");
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
 
     const legend = await screen.findByTestId("map-legend-zonage");
-    expect(within(legend).getByText("Agricole (CPTAQ)")).toBeTruthy();
+    await waitFor(() =>
+      expect(within(legend).getByText("Agricole (CPTAQ)")).toBeTruthy(),
+    );
     expect(within(legend).queryByText("Agricole", { exact: true })).toBeNull();
     expect(within(legend).queryByText("Affectation (source)")).toBeNull();
   });
@@ -383,5 +495,24 @@ describe("SignauxMapView — déclencheur chat (câblage source, store #564)", (
     expect(source).toContain("isChatEnabled()");
     // Le bouton (IconButton chat) est rendu SOUS condition du flag.
     expect(source).toMatch(/\{#if chatEnabled\}[\s\S]*?data-testid="chat-toggle"[\s\S]*?\{\/if\}/);
+  });
+});
+
+describe("SignauxMapView — design-system Checkbox contract", () => {
+  const designSystemEntry = createRequire(import.meta.url).resolve(
+    "@sentropic/design-system-svelte",
+  );
+  const checkboxSource = readFileSync(
+    resolve(dirname(designSystemEntry), "Checkbox.svelte"),
+    "utf8",
+  );
+
+  it("consumes the inherited choice label font-size and color variables", () => {
+    expect(checkboxSource).toContain(
+      "var(--st-component-selection-choiceLabelFontSize",
+    );
+    expect(checkboxSource).toContain(
+      "var(--st-component-selection-choiceLabelColor",
+    );
   });
 });

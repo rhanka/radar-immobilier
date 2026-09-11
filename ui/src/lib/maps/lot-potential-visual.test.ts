@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { resolveLotPotentialScore } from "./lot-potential-visual.js";
+import {
+  kindFromZoneCode,
+  resolveLotPotentialScore,
+} from "./lot-potential-visual.js";
 
 describe("resolveLotPotentialScore", () => {
   it("uses an API score first", () => {
@@ -49,4 +52,19 @@ describe("resolveLotPotentialScore", () => {
       source: "none",
     });
   });
+});
+
+describe("kindFromZoneCode", () => {
+  it("keeps sourced code fallback mappings used by the map", () => {
+    expect(kindFromZoneCode("CO-939")).toBe("CONS");
+    expect(kindFromZoneCode("CGS-101")).toBe("C");
+    expect(kindFromZoneCode("RC-12")).toBe("MIXTE");
+  });
+
+  it.each(["ID-R1.10", "VILL-2", "TV-8", "R-4", "RF-2", "RB-1", "RV-3", "PU-9", "FO-7"])(
+    "does not assign a global family to unsupported or conflicting code %s",
+    (code) => {
+      expect(kindFromZoneCode(code)).toBeNull();
+    },
+  );
 });
