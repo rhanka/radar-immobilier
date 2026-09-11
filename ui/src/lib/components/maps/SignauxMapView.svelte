@@ -292,7 +292,6 @@
   let cptaqEnabled = false;
   let cptaqLoading = false;
   let cptaqError: string | null = null;
-  let cptaqAbsent = false;
   let cptaqAvailable = false;
 
   // ── §5 R2 point 2 — état ouvert du chat (déclencheur carré de la rangée) ─────
@@ -362,8 +361,9 @@
   // (AbortController) — elle ne peint jamais la mauvaise ville.
   const detailGuard = new RequestGuard();
   const geoGuard = new RequestGuard();
-  // Garde dédiée CPTAQ : supersède ses propres requêtes (toggle/ville) sans
-  // toucher aux baux zones/lots (couche indépendante).
+  // Gardes dédiées CPTAQ : la sonde de disponibilité reste indépendante du
+  // chargement complet piloté par le toggle.
+  const cptaqAvailabilityGuard = new RequestGuard();
   const cptaqGuard = new RequestGuard();
   let activeDocument: SignalDocRef | null = null;
   // m7 / m8 — source documentaire générique ouverte dans le viewer partagé
@@ -443,9 +443,28 @@
     cptaqEnabled = value;
     persistLabelPref(CPTAQ_LS_KEY, value);
     if (value) {
-      if (selectedCity) void loadCptaq(selectedCity.municipality.slug);
+      if (selectedCity && cptaqAvailable) void loadCptaq(selectedCity.municipality.slug);
     } else {
       clearCptaq();
+    }
+  }
+
+  /** Probe collection availability without enabling or loading the overlay. */
+  async function probeCptaqAvailability(citySlug: string): Promise<void> {
+    const lease = cptaqAvailabilityGuard.lease();
+    cptaqAvailable = false;
+    try {
+      const res = await fetchCptaqConstraints(citySlug, {
+        limit: 1,
+        signal: lease.signal,
+      });
+      if (!lease.isCurrent()) return;
+      cptaqAvailable = !res.absent;
+      if (cptaqAvailable && cptaqEnabled) void loadCptaq(citySlug);
+    } catch (err) {
+      if (!lease.isCurrent() || isAbortError(err)) return;
+      console.warn("CPTAQ availability probe failed:", err);
+      cptaqAvailable = false;
     }
   }
 
@@ -458,8 +477,6 @@
     const lease = cptaqGuard.lease();
     cptaqLoading = true;
     cptaqError = null;
-    cptaqAbsent = false;
-    cptaqAvailable = false;
     let fc: CptaqFeatureCollection = EMPTY_CPTAQ;
     try {
       const res = await fetchCptaqConstraints(citySlug, {
@@ -468,7 +485,7 @@
       });
       if (!lease.isCurrent()) return;
       if (res.absent) {
-        cptaqAbsent = true;
+        cptaqAvailable = false;
       } else {
         cptaqAvailable = true;
         fc = res.featureCollection;
@@ -476,7 +493,6 @@
     } catch (err) {
       if (!lease.isCurrent() || isAbortError(err)) return;
       console.warn("CPTAQ load failed:", err);
-      cptaqAvailable = false;
       cptaqError = "Zone agricole protégée indisponible.";
     } finally {
       if (lease.isCurrent()) {
@@ -490,16 +506,24 @@
     cptaqGuard.cancel();
     cptaqLoading = false;
     cptaqError = null;
-    cptaqAbsent = false;
     mapApi?.setCptaqData(EMPTY_CPTAQ);
     // §7 R2 — disable : retire l'emphase hover/focus (aucune requête au hover d'une
     // entrée rayée ; l'aplat CPTAQ revient au repos, isolé à `cptaq-fill`).
     mapApi?.setCptaqLegendEmphasis(false);
   }
 
+  /** Reset all city-scoped CPTAQ state while preserving the user preference. */
+  function resetCptaq(): void {
+    cptaqAvailabilityGuard.cancel();
+    clearCptaq();
+    cptaqAvailable = false;
+  }
+
   /** « Réessayer » de l'overlay CPTAQ (recharge la seule couche agricole). */
   function retryCptaq(): void {
-    if (cptaqEnabled && selectedCity) void loadCptaq(selectedCity.municipality.slug);
+    if (cptaqEnabled && cptaqAvailable && selectedCity) {
+      void loadCptaq(selectedCity.municipality.slug);
+    }
   }
 
   // ── Cache multi-villes : nœuds par ville ──────────────────────────────────
@@ -1150,25 +1174,22 @@
     null,
   );
 
-  /**
-   * The agricultural row is the CPTAQ toggle. Its suffix reflects confirmed
-   * collection availability, and the row is appended when zoning data contains
-   * no agricultural family. Other zoning-family rows remain static.
-   */
+  /** Agriculture becomes a toggle only after CPTAQ availability is confirmed. */
   function buildAffectationLegend(
     entries: { color: string; label: string }[],
     hasCptaq: boolean,
   ): { color: string; label: string; isCptaq: boolean }[] {
-    const agriculturalLabel = hasCptaq
-      ? CPTAQ_LEGEND_LABEL
-      : AGRICOLE_FAMILY_LABEL;
     const mapped = entries.map((entry) =>
       entry.label === AGRICOLE_FAMILY_LABEL
-        ? { color: cptaqLegendColor, label: agriculturalLabel, isCptaq: true }
+        ? {
+            color: cptaqLegendColor,
+            label: hasCptaq ? CPTAQ_LEGEND_LABEL : AGRICOLE_FAMILY_LABEL,
+            isCptaq: hasCptaq,
+          }
         : { color: entry.color, label: entry.label, isCptaq: false },
     );
-    if (!mapped.some((entry) => entry.isCptaq)) {
-      mapped.push({ color: cptaqLegendColor, label: agriculturalLabel, isCptaq: true });
+    if (hasCptaq && !mapped.some((entry) => entry.isCptaq)) {
+      mapped.push({ color: cptaqLegendColor, label: CPTAQ_LEGEND_LABEL, isCptaq: true });
     }
     return mapped;
   }
@@ -1360,7 +1381,9 @@
     }
     // Deep-link / ré-init : la carte devient prête APRÈS selectCity → (re)charge
     // CPTAQ si activé (re-pose la couche agricole sur la carte neuve).
-    if (cptaqEnabled && selectedCity) void loadCptaq(selectedCity.municipality.slug);
+    if (cptaqEnabled && cptaqAvailable && selectedCity) {
+      void loadCptaq(selectedCity.municipality.slug);
+    }
   }
 
   // ── Ville sélectionnée ─────────────────────────────────────────────────────
@@ -1393,8 +1416,8 @@
         },
       });
     }
+    resetCptaq();
     selectedCity = entry;
-    cptaqAvailable = false;
     detailNodes = [];
     detailLegacyProjection = null;
     geoNotices = [];
@@ -1419,11 +1442,11 @@
     flyToCity(entry);
     villeZoomed = true; // C1 — caméra cadrée sur la ville (état zoomé)
 
-    // Les 3 couches partent EN PARALLÈLE, chacune avec son propre waiter et sa
-    // propre garde anti-course : détail (panneau droit) + zones + lots.
+    // Les ressources partent EN PARALLÈLE avec leurs gardes anti-course :
+    // détail, zones/lots et sonde légère de disponibilité CPTAQ.
     void loadDetailForCity(entry.municipality.slug);
     void loadGeoForCity(entry.municipality.slug);
-    if (cptaqEnabled) void loadCptaq(entry.municipality.slug);
+    void probeCptaqAvailability(entry.municipality.slug);
   }
 
   /**
@@ -1481,7 +1504,7 @@
     // en retard ne repeindra la carte après « Fermer ».
     detailGuard.cancel();
     geoGuard.cancel();
-    cptaqGuard.cancel();
+    resetCptaq();
     selectedCity = null;
     pendingRouteZoneKey = null;
     detailNodes = [];
@@ -1499,15 +1522,8 @@
     activeEvidence = null;
     activeSource = null;
     hoveredEvidenceSignalId = null;
-    // CPTAQ : retour Province → couche vidée (état préservé : cptaqEnabled reste ;
-    // la prochaine ville rechargera si activé). Jamais de disparition muette.
-    cptaqLoading = false;
-    cptaqError = null;
-    cptaqAbsent = false;
-    cptaqAvailable = false;
-    mapApi?.setCptaqData(EMPTY_CPTAQ);
-    // §7 R2 — retour Province : retire toute emphase CPTAQ résiduelle.
-    mapApi?.setCptaqLegendEmphasis(false);
+    // cptaqEnabled reste préservé ; la prochaine ville sera sondée puis chargée
+    // automatiquement si la préférence est active et la collection disponible.
     selectionState = createSelectionBucketState();
     // Contrat « lot suivant » : retour Province → plus de lot caméra de
     // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
@@ -2552,7 +2568,7 @@
                 />
               </div>
             {/if}
-            <!-- The agricultural row doubles as the conditional CPTAQ toggle. -->
+            <!-- Agriculture is interactive only when the CPTAQ probe succeeds. -->
             <ul class="grid grid-cols-2 gap-x-3 gap-y-1">
               {#each affectationLegendEntries as item (item.label)}
                 {#if item.isCptaq}
@@ -2630,9 +2646,8 @@
             </div>
           </div>
         {/if}
-        <!-- §7 R2 — l'encadré autonome CPTAQ (`map-legend-cptaq`) + sa case à cocher
-             ont été RETIRÉS : « Agricole (CPTAQ) » vit désormais comme toggle de
-             couche SOUS AFFECTATION (ZONAGE), rayé quand désactivé. -->
+        <!-- Une couche CPTAQ disponible vit comme toggle sous Zonage ; sans
+             collection, Agricole reste une famille non interactive. -->
       {/if}
     </svelte:fragment>
 
