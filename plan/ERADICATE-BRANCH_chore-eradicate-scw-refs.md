@@ -63,9 +63,9 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
   - [x] Reword active documentation that presents retired infrastructure as current.
   - [x] Record A/B/C baseline locations, actions, evidence, and missing OVH values.
   - [x] Preserve immutable history and ambiguous functional local-test references as classified entries.
-- [ ] **Lot 4 — Verification and delivery**
+- [x] **Lot 4 — Verification and delivery**
   - [x] Run the repository-wide residue sweep and review every remaining match.
-  - [ ] Run `make typecheck`, `make lint`, `make test ENV=test-eradicate-scw`, and `make k8s-validate` (offline k8s validation passed; Compose checks are blocked locally by exhausted Docker address pools and move to CI).
+  - [x] Run the full validation gates (local offline k8s validation passed; GitHub CI passed Compose validation, k8s validation, typecheck, lint, build, UI smoke, and unit/integration tests after the shared local Docker address pools blocked container startup).
   - [x] Run harness scope/branch verification and independent consensus review (Opus correctness + Sonnet safety); reconcile all findings to GO.
   - [x] Push `chore/eradicate-scw-refs` and open PR #670 to `main`.
-  - [ ] Verify CI green; preserve the branch after merge.
+  - [x] Verify CI green; preserve the branch after merge.
