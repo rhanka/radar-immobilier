@@ -17,6 +17,7 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
   - `.remote/ERADICATE_SCW_INVENTORY.md`
+  - `.remote/ERADICATE_REVIEW*.md`
   - `.github/workflows/**`
   - `.env.example`, `.gitignore`, `README.md`, `Makefile`
   - `api/**`, `deploy/**`, `docker-compose*.yml`
@@ -54,17 +55,17 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
 - [x] **Lot 1 — Remove dead infrastructure paths**
   - [x] Delete provider-only workflows, mount helpers, one-shot manifests, and repository-owned MinIO manifests/policies.
   - [x] Remove the retired transactional-email transport while preserving invitation-link log mode.
-- [ ] **Lot 2 — Replace verified image registry references**
-  - [ ] Make GHCR the build/push source of truth.
-  - [ ] Rewrite deploy image references to the verified public GHCR packages.
-  - [ ] Run scoped workflow and manifest validation.
-- [ ] **Lot 3 — Inventory and current documentation**
-  - [ ] Reword active documentation that presents retired infrastructure as current.
-  - [ ] Record A/B/C baseline locations, actions, evidence, and missing OVH values.
-  - [ ] Preserve immutable history and ambiguous functional local-test references as classified entries.
+- [x] **Lot 2 — Replace verified image registry references**
+  - [x] Make GHCR the build/push source of truth.
+  - [x] Rewrite deploy image references to the verified public GHCR packages.
+  - [x] Run scoped workflow and manifest validation.
+- [x] **Lot 3 — Inventory and current documentation**
+  - [x] Reword active documentation that presents retired infrastructure as current.
+  - [x] Record A/B/C baseline locations, actions, evidence, and missing OVH values.
+  - [x] Preserve immutable history and ambiguous functional local-test references as classified entries.
 - [ ] **Lot 4 — Verification and delivery**
-  - [ ] Run the repository-wide residue sweep and review every remaining match.
-  - [ ] Run `make typecheck`, `make lint`, `make test ENV=test-eradicate-scw`, and `make k8s-validate`.
+  - [x] Run the repository-wide residue sweep and review every remaining match.
+  - [ ] Run `make typecheck`, `make lint`, `make test ENV=test-eradicate-scw`, and `make k8s-validate` (offline k8s validation passed; Compose checks are blocked locally by exhausted Docker address pools and move to CI).
   - [ ] Run harness scope/branch verification and independent review.
   - [ ] Push `chore/eradicate-scw-refs` and open a PR to `main`.
   - [ ] Verify CI green; preserve the branch after merge.
