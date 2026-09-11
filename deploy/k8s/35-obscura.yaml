@@ -39,6 +39,8 @@ spec:
             capabilities:
               drop:
                 - ALL
+          # TODO(k8s): replace with the verified OVH/GHCR obscura image. No
+          # ghcr.io/rhanka/radar-obscura package exists as of 2026-09-11.
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-obscura:latest
           imagePullPolicy: IfNotPresent
           ports:
