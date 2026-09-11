@@ -31,6 +31,7 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
   - `plan/NN-BRANCH_*.md` and `plan/done/**`
 - **Conditional Paths**:
   - Production storage endpoint, region, bucket, credentials, and mail provider require verified values from k8s/infra.
+  - MinIO decommissioning is gated: OVH bucket provisioned → objects migrated → clients repointed; the remaining `radar-minio` references are kept on purpose and `25-minio.yaml` removal is the LAST step (see inventory "Séquencement — décom MinIO"). This PR stays DRAFT (merge hold) until that sequencing is reconciled.
 - **Exceptions**:
   - `ERADICATE-EX1`: `Makefile`, Compose files, workflows, and `rules/**` are explicitly in the owner-mandated residue sweep. Impact is limited to removing obsolete provider wiring; rollback is a revert of the affected commit.
 
@@ -54,7 +55,7 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
   - [x] Confirm GHCR package visibility and the successful build for `831cad2`.
 - [x] **Lot 1 — Remove dead infrastructure paths**
   - [x] Delete provider-only workflows, mount helpers, one-shot manifests, and retired MinIO manifests/policies while preserving the live cluster MinIO network path.
-  - [x] Remove the retired transactional-email transport while preserving invitation-link log mode.
+  - [x] Transactional-email transport: RETAINED (owner decision 2026-09-11). The initial removal was reverted to the `831cad2` state (SCW TEM schema, resolver, mailer + tests, ConfigMap/secretKeyRef, example Secret); invitation-link log mode is unchanged from main. Removal deferred until i-infra proposes a replacement provider and the owner validates it.
 - [x] **Lot 2 — Replace verified image registry references**
   - [x] Make GHCR the build/push source of truth.
   - [x] Rewrite deploy image references to the verified public GHCR packages.
