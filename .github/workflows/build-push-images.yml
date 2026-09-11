@@ -12,10 +12,11 @@ name: Build & push images
 #
 # Auth uses the `KUBE_CONFIG_DATA` gh secret (same pattern as rhanka/surch
 # ci-k8s.yml): a kubeconfig (base64 OR raw) for a NAMESPACE-SCOPED ServiceAccount
-# `radar-ci-deployer` that can only get/list/patch/update Deployments (+ read
-# pods/replicasets for `rollout status`) inside the `radar-immobilier` namespace —
-# it cannot read Secrets or touch any other namespace. There is no GitOps
-# controller (Argo/Flux) on this cluster, so `kubectl set image` is not reverted.
+# `radar-ci-deployer` that can get/list/patch/update Deployments, read
+# pods/replicasets for `rollout status`, and manage `batch/cronjobs` for the gated
+# production refresh inside `radar-immobilier` — it cannot read Secrets or touch
+# any other namespace. There is no GitOps controller (Argo/Flux) on this cluster,
+# so `kubectl set image` is not reverted.
 #
 # The deploy job also rolls `radar-immo-mcp` (the remote MCP server) to the same
 # radar-api sha — it runs the SAME radar-api image, so without this it drifted on
@@ -1011,9 +1012,10 @@ jobs:
       # §6 DEPLOY REFRESH CRONJOBS (preprod) — deploy + un-suspend the two refresh
       # CronJobs in radar-immobilier-preprod, pinned to this release's :<sha>
       # (reused, no 2nd resolution), via the refresh-cronjobs overlay
-      # (namespace->preprod + suspend:false). §6 is PREPROD-ONLY (owner directive;
-      # no prod path). Gated by REFRESH_CRONJOB_PREPROD_ENABLED — armed by the owner
-      # AFTER the diag PASS. Needs batch/cronjobs on the preprod deployer
+      # (namespace->preprod + suspend:false). Production uses its own twin overlay
+      # and independent gate in promote-prod. Gated by
+      # REFRESH_CRONJOB_PREPROD_ENABLED — armed by the owner AFTER the diag PASS.
+      # Needs batch/cronjobs on the preprod deployer
       # (deploy/k8s/11-…rbac.yaml, owner-applied). Once live, the CronJobs run
       # nightly (03:17 scrape / 04:30 projection) → refresh on preprod.immo.
       - name: Deploy refresh CronJobs (preprod)
@@ -1445,6 +1447,22 @@ jobs:
             kubectl -n "$NAMESPACE" set image deploy/radar-immo-mcp mcp="${IMAGE_PREFIX}/radar-api@${DIG_API}"
           fi
 
+      - name: Deploy refresh CronJobs (prod)
+        if: ${{ vars.REFRESH_CRONJOB_PROD_ENABLED == 'true' }}
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+        run: |
+          set -euo pipefail
+          kver=5.4.3
+          tmp="$(mktemp -d)"
+          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
+          sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
+          cd deploy/k8s/refresh-cronjobs-prod
+          kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api:${SHA}
+          kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n radar-immobilier apply -f -
+          echo "refresh CronJobs deployed to radar-immobilier (radar-api:${SHA}, suspend:false):"
+          kubectl -n radar-immobilier get cronjob radar-refresh-scrape radar-refresh-projection -o wide || true
+
       - name: Wait for rollouts
         run: |
           set -eu
@@ -1492,10 +1510,6 @@ jobs:
             sleep 10
           done
 
-      # NB §6 refresh is PREPROD-ONLY (owner directive) — there is deliberately NO
-      # prod CronJob-pin step here. The refresh CronJobs are deployed + un-suspended
-      # in radar-immobilier-preprod by the deploy-preprod "Deploy refresh CronJobs
-      # (preprod)" step; prod (this promote path) never carries them.
       - name: Deployment status — success
         if: success() && steps.deployment.outputs.id != ''
         uses: actions/github-script@v7
