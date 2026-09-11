@@ -45,9 +45,8 @@ export const ZONE_KIND_STYLES: Record<Exclude<ZoneKind, "AUTRE">, ZoneKindStyle>
   I: { token: "--st-semantic-data-category7", fallback: "#B07AA1", label: "Industriel" },
   P: { token: "--st-semantic-data-category1", fallback: "#4E79A7", label: "Public / institutionnel" },
   A: { token: "--st-semantic-data-category5", fallback: "#59A14F", label: "Agricole" },
-  // CONS et REC partagent teinte ET libellé : une seule entrée de légende.
-  CONS: { token: "--st-semantic-data-category4", fallback: "#76B7B2", label: "Conservation / récréation" },
-  REC: { token: "--st-semantic-data-category4", fallback: "#76B7B2", label: "Conservation / récréation" },
+  CONS: { token: "--st-semantic-data-category4", fallback: "#76B7B2", label: "Conservation" },
+  REC: { token: "--st-semantic-data-category8", fallback: "#FF9DA7", label: "Récréation / tourisme" },
   U: { token: "--st-semantic-data-category8", fallback: "#FF9DA7", label: "Utilité publique" },
 };
 
