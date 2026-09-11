@@ -13,7 +13,7 @@
 # the CI run only (release-ephemeral pin, no commit-back):
 #   cd deploy/k8s/refresh-cronjobs
 #   kustomize edit set image \
-#     rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
+#     ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api:<sha>
 #   kustomize build --load-restrictor LoadRestrictionsNone . | kubectl apply -f -
 #
 # NB command: `kubectl apply -k` can NOT be used — the base CronJob lives one dir
@@ -38,7 +38,7 @@ resources:
   - ../34-refresh-cronjob.yaml
 
 images:
-  - name: rg.fr-par.scw.cloud/radar-immobilier/radar-api
+  - name: ghcr.io/rhanka/radar-api
     newTag: PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
 
 patches:
