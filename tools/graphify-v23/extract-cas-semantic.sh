@@ -20,9 +20,10 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
   fi
   primary="$WORK_DIR/corpus/$(basename "$primary_key")"
   semantic_input="$primary"
+  pdf_read=false
   if [ "${primary##*.}" = "pdf" ]; then
     semantic_input="$WORK_DIR/parsed/$CITY/$sha.txt"
-    [ -s "$semantic_input" ] || { echo "[semantic] $CITY: pdf_text_unavailable_$sha" >&2; exit 1; }
+    [ -s "$semantic_input" ] || pdf_read=true
   fi
   wrapper="$WORK_DIR/findings/$sha.wrapper.json"
   success=false
@@ -31,14 +32,24 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
     [ "$current" -lt 500 ] || { echo "[semantic] $CITY: llm_budget_exhausted_before_501" >&2; exit 1; }
     printf '%s\n' "$((current + 1))" > "${LLM_COUNTER}.tmp"
     mv "${LLM_COUNTER}.tmp" "$LLM_COUNTER"
+    claude_args=(-p --bare --model claude-sonnet-4-6 --autocompact 1m
+      --no-session-persistence --disable-slash-commands --permission-mode dontAsk
+      --output-format json --json-schema "$schema")
+    if [ "$pdf_read" = "true" ]; then
+      claude_args+=(--allowedTools Read --disallowedTools Bash Edit Write Glob Grep WebFetch WebSearch Agent Task)
+    else
+      claude_args+=(--disallowedTools Bash Edit Write Read Glob Grep WebFetch WebSearch Agent Task)
+    fi
     if {
       cat "$EXTRACTION_PROMPT"
-      printf '\nMunicipality: %s\nCAS SHA-256: %s\nCAS key: %s\n\nDOCUMENT:\n' "$CITY" "$sha" "$primary_key"
-      cat "$semantic_input"
-    } | timeout 240 claude -p --model claude-sonnet-4-6 --autocompact 1m \
-        --no-session-persistence --disable-slash-commands --permission-mode dontAsk \
-        --disallowedTools Bash Edit Write Read Glob Grep WebFetch WebSearch Agent Task \
-        --output-format json --json-schema "$schema" > "$wrapper" 2>> "$LOG"; then
+      printf '\nMunicipality: %s\nCAS SHA-256: %s\nCAS key: %s\n\n' "$CITY" "$sha" "$primary_key"
+      if [ "$pdf_read" = "true" ]; then
+        printf 'DOCUMENT: Use exactly one Read call on this local PDF, then return the structured result: %s\n' "$primary"
+      else
+        printf 'DOCUMENT:\n'
+        cat "$semantic_input"
+      fi
+    } | timeout 240 claude "${claude_args[@]}" > "$wrapper" 2>> "$LOG"; then
       finding_tmp="${finding}.tmp"
       if jq -e '.structured_output' "$wrapper" > "$finding_tmp" 2>/dev/null || \
          jq -er '.result | fromjson' "$wrapper" > "$finding_tmp" 2>/dev/null; then

@@ -33,10 +33,10 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
       echo "[download] $CITY: pdf_text_conversion_failed_$sha" >&2
       exit 1
     }
-    grep -q '[[:alnum:]]' "$parsed_pdf" || {
-      echo "[download] $CITY: pdf_text_unavailable_$sha" >&2
-      exit 1
-    }
+    if ! grep -q '[[:alnum:]]' "$parsed_pdf"; then
+      rm -f "$parsed_pdf"
+      echo "[download] $CITY: local PDF text unavailable; semantic PDF read required for $sha" >> "$LOG"
+    fi
   fi
   verified=$((verified + 1))
 done < "$CITY_MANIFEST"
