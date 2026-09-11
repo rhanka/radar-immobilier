@@ -49,6 +49,7 @@ Ingest the immutable 139-document CAS batch for 40 municipalities, merge fresh s
 - [ ] **Lot 1 — Immutable CAS batch**
   - [x] Build and validate the exact CAS manifest.
   - [x] Download selected representations and verify every SHA-256.
+  - [x] Materialize readable PDF text locally before profile detection.
 - [ ] **Lot 2 — Semantic extraction and baseline merge**
   - [x] Count and cap structured semantic extraction attempts.
   - [x] Convert grounded findings and merge with the v2.3 baseline extraction.

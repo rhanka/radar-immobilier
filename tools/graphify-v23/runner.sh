@@ -256,7 +256,8 @@ process_city() {
     if ! bash "$WORKER_SH" "$city" "$baseline" "$city_work" "$ROOT" "$source_id" \
       "$CAS_MANIFEST" "$LLM_COUNTER" "$EXCLUSIONS" > "$city_work/worker.stdout.log" 2>&1; then
       local worker_reason
-      worker_reason=$(tail -1 "$city_work/worker.stdout.log" 2>/dev/null | grep -oE '[a-z_]+$' || echo "worker_failed")
+      worker_reason=$(tail -1 "$city_work/worker.stdout.log" 2>/dev/null | awk -F': ' '{print $NF}')
+      [ -n "$worker_reason" ] || worker_reason="worker_failed"
       local ts; ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
       local oldS oldE
       oldS=$(jq '[.nodes[]? | select(.type=="Signal")] | length' "$baseline" 2>/dev/null || echo 0)
