@@ -38,3 +38,7 @@ The independent report's snapshot verdict remains preserved in its leg file; its
 - Finding 5 is accepted as a provider-neutral local/test default; the running production manifest retains its explicit value.
 
 The two reviewers agree that the inventory is complete, no OVH coordinates were invented, and the remaining provider-specific values are explicit B/C exceptions. With the deployment-safety findings closed, the reconciled consensus is GO.
+
+## Post-review classification refinement
+
+A second independent pair confirmed the 885-line baseline and prompted one classification correction: the ten baseline lines for the preserved live-cluster `allow-api-to-minio` policy moved from A to C. The final partition is A=414, B=170, C=301. The explicit A deletion of the repository's StatefulSet/Service/PVC remains unchanged; no live cluster object was mutated.
