@@ -79,7 +79,7 @@ echo "--- DISPATCH ---"
 # Lire le TSV (skip header), extraire city + chercher baseline
 declare -a CITIES=()
 
-# Sources de baselines : d'abord le répertoire local, sinon SCW à la volée
+# Sources de baselines : d'abord le répertoire local, sinon object store à la volée
 get_baseline() {
   local city="$1"
   local local_bl="$BASELINE_DIR/${city}.json"
@@ -87,7 +87,7 @@ get_baseline() {
     echo "$local_bl"
     return 0
   fi
-  # Télécharger depuis SCW si absent localement
+  # Télécharger depuis object store si absent localement
   local remote_bl="$RUN_DIR/baselines/${city}.json"
   mkdir -p "$RUN_DIR/baselines"
   if s5cmd --endpoint-url "$SCRAPE_S3_ENDPOINT" cat "s3://$SCRAPE_S3_BUCKET/graph/${city}/latest.json" > "$remote_bl" 2>/dev/null; then
