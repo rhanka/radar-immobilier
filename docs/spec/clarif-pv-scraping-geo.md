@@ -23,7 +23,7 @@
    scraping), **pas** le projet `@sentropic/geo` (#56). C'est l'origine probable de la confusion.
 3. **PR #190 → ROUVRIR comme chantier ré-extraction, pas merger en l'état, ne pas laisser
    mourir.** Son contenu PV (manifeste 38 villes M-Z dures + 30 configs vérifiées HTTP 200 +
-   stratégies SPA/Modellium/Googlebot + 4 raw déjà sur SCW) est **un gisement réel et absent de
+   stratégies SPA/Modellium/Googlebot + 4 raw déjà sur object store) est **un gisement réel et absent de
    `main`** ; mais la branche est très divergée (52 commits de retard, beaucoup de bruit non-PV).
    → en extraire le PV-only sur une branche fraîche issue de `main`.
 
@@ -49,7 +49,7 @@ WORKER LIVE → RECUEIL (raw → S3 CAS) → EXPLOITATION (parse pdftotext) → 
 | **Registry d'adapters** | `api/src/services/pipeline/adapter-registry.ts` | Mappe les kinds gérés par le pipeline immo : **PV**, avis-publics, rôle d'évaluation MAMH, adresses-Québec. **Aucune entrée geo / zonage / cadastre.** |
 | **Voie HTTP à la demande** | `api/src/routes/sources.ts`, `api/src/routes/ciblage.ts` | POST → RECUEIL ; plan CIBLAGE pilote RECUEIL→EXPLOITATION par ville×source. |
 | **Stockage raw (clé CAS)** | `packages/radar-sources/src/RawDocument.ts` | `rawStorageKey()` → `raw/<source>/cas/<sha256>.<ext>` (ex. `raw/proces-verbaux-<ville>/cas/…`) + sidecar `.meta.json`. |
-| **Boundary S3** | `api/src/storage/s3-object-store.ts`, `api/src/config.ts` | `S3ObjectStore` (AWS SDK v3). Local : `radar-immobilier-raw` (MinIO). **Prod PV bruts** : store `SCRAPE_S3_*` → bucket SCW `radar-immobilier-docs` (`radar-immobilier-docs-pocs` en POC), endpoint `s3.fr-par.scw.cloud`. |
+| **Boundary S3** | `api/src/storage/s3-object-store.ts`, `api/src/config.ts` | `S3ObjectStore` (AWS SDK v3). Local : `radar-immobilier-raw` (MinIO). **Prod PV bruts** : store `SCRAPE_S3_*` → bucket object store `radar-immobilier-docs` (`<verified-ovh-bucket>` en POC), endpoint `<verified-ovh-endpoint>`. |
 | **graphify** (raw → graphe) | `tools/graphify-v23/` (`runner.sh`, `worker.sh`, `gate.sh`) + skill `graphify` externe | **Outil bash SÉPARÉ** (pas du code applicatif). `gate.sh` publie `s3://$BUCKET/graph/<CITY>/latest.json` (backup history avant écrasement atomique). Contrat normatif : `radar/ontology/graphify-output-contract.md` (v2.3). |
 | **Lecture API du graphe** | `api/src/services/graph/graph-store.ts`, `api/src/routes/graph.ts`, `graph-signals.ts` | Lit `graph/<city>/latest.json`, dérive signaux/étapes/zonage. |
 
@@ -98,7 +98,7 @@ les **couches géo** (polygones zones/lots) que le mapper immo joint au texte de
   - **30 villes câblées config-only** dans `ALL_PV_CITIES` (`proces-verbaux-generic.ts`, +226 l.)
     avec `pvIndexUrl` vérifiés HTTP 200 (anti-invention).
   - **Smoke test** `proces-verbaux-mz-hard.test.ts` (+69 l.).
-  - **RECUEIL live validé end-to-end** : raw scrapés sur SCW pour **mont-joli, metabetchouan,
+  - **RECUEIL live validé end-to-end** : raw scrapés sur object store pour **mont-joli, metabetchouan,
     oka, rapide-danseur** (`raw/proces-verbaux-<ville>/cas/`).
   - **Stratégies dures vérifiées** : SPA Marieville (Playwright/rendu navigateur) ; back-door
     Modellium vplus (sitemap `api/<slug>/sitemap/xml` + PDF S3 `vplus-documents`) ; bypass WAF
@@ -122,13 +122,13 @@ les **couches géo** (polygones zones/lots) que le mapper immo joint au texte de
 
 - **PAS (a) superseded par geo** : `geo` ne reprend pas les PV (§2) → le contenu PV de #190 reste
   pertinent et nécessaire.
-- **(b) gisement réel** : le manifeste + les 30 configs vérifiées + les 4 raw SCW + les stratégies
+- **(b) gisement réel** : le manifeste + les 30 configs vérifiées + les 4 raw object store + les stratégies
   dures sont du **travail d'investigation coûteux et non reproduit sur `main`**. À récupérer.
 - **(c) à refondre dans la forme** : ne **pas** merger la branche telle quelle (divergence + bruit).
   Extraire **uniquement les 4 fichiers PV** (`pv-cities-hard.json`, le delta `proces-verbaux-generic.ts`
-  des 30 configs, le smoke test, et le pointeur vers les raw SCW) sur une **branche fraîche issue de
+  des 30 configs, le smoke test, et le pointeur vers les raw object store) sur une **branche fraîche issue de
   `main`**, re-vérifier les URLs HTTP 200 (certaines datent du 2026-06-14), puis enchaîner le
-  **graphify manquant** des raw déjà sur SCW.
+  **graphify manquant** des raw déjà sur object store.
 
 ### 3.4 Reco #190
 
@@ -139,7 +139,7 @@ les **couches géo** (polygones zones/lots) que le mapper immo joint au texte de
 >    `ALL_PV_CITIES` + `proces-verbaux-mz-hard.test.ts`. Ignorer tout le reste du diff (déjà sur
 >    `main` ou hors sujet).
 > 3. Re-vérifier les `pvIndexUrl` HTTP 200 (anti-invention ; les marquages datent du 14/06).
-> 4. **graphify** les 4 raw déjà sur SCW (mont-joli, metabetchouan, oka, rapide-danseur) →
+> 4. **graphify** les 4 raw déjà sur object store (mont-joli, metabetchouan, oka, rapide-danseur) →
 >    `graph/<ville>/latest.json` (contrat v2.3), puis étendre aux villes `config-ready`.
 > 5. Traiter les stratégies dures en lots séparés (SPA via obscura, Modellium back-door, Googlebot)
 >    et **acter les 7 irréductibles** (notés + passés).
@@ -176,7 +176,7 @@ rattacher.
 4. **Calendrier `geo`** : `geo` a-t-il la capacité/le calendrier pour livrer les couches zones/lots
    à temps pour le chantier ré-extraction PV ? (Sinon le repli du cadrage s'applique : `immo` héberge
    temporairement, `geo` absorbe plus tard — mais cela **ne concerne que la géo**, pas les PV.)
-5. **Buckets SCW partagés** : confirmer que `radar-immobilier-docs` / `…-docs-pocs` (raw PV +
+5. **Buckets de stockage objet partagés** : confirmer les buckets OVH (raw PV +
    graphes) restent **owned par immo**, et que `geo` publie ses couches dans un **espace distinct**
    (pas de collision de clés `raw/` ↔ couches géo).
 6. **Rendu headless / obscura** : le sidecar obscura (rendu SPA, bypass 403) est-il un service
@@ -190,13 +190,13 @@ rattacher.
 - **Architecture PV actuelle (qui possède)** : `immo` possède **tout** le pipeline PV — adapter +
   parser dans `packages/radar-sources/src/sources/proces-verbaux-{generic,parser}.ts` ; RECUEIL /
   orchestration / exploitation dans `api/src/services/sources/` ; graphify = tool bash séparé
-  `tools/graphify-v23/` ; raw + graphes sur SCW `radar-immobilier-docs`. `geo` n'y figure pas.
+  `tools/graphify-v23/` ; raw + graphes sur object store `radar-immobilier-docs`. `geo` n'y figure pas.
 - **`geo` reprend-il les PV ?** → **NON.** 6 preuves convergentes (cadrage, réorientation, plan
   scraping, mapper, brainstorm, h2a). `geo` reprend la **géo générique** (zones/lots/contraintes),
   pas les PV. Le « geo » des messages h2a = le **registre de villes**, d'où le malentendu.
 - **Sort de #190** → **ROUVRIR comme chantier ré-extraction** (gisement réel hors-`main`),
   **ne pas merger la branche** (divergée + bruit non-PV), **ne pas laisser mourir** : porter le
-  PV-only sur une branche fraîche, re-vérifier les URLs, graphifier les 4 raw SCW, traiter les
+  PV-only sur une branche fraîche, re-vérifier les URLs, graphifier les 4 raw object store, traiter les
   stratégies dures par lots, acter les 7 irréductibles.
 - **Points à confirmer avec `geo`** : voir §5 (6 points ; le principal : confirmer noir sur blanc
   que `geo` n'absorbe pas la collecte PV).
