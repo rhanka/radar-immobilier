@@ -35,7 +35,7 @@
   /**
    * Base de calcul du sélecteur de millésime = TOUTES les zones de la ville
    * (jamais la couche déjà filtrée par millésime). Le sélecteur se masque
-   * lui-même tant qu'il n'y a pas ≥ 2 millésimes servis (dégradé honnête).
+   * lui-même tant qu'il n'y a pas ≥ 2 millésimes servis.
    */
   export let millesimeZones: ReadonlyArray<{ reglementMillesime?: string | null }> = [];
   export let millesimeFilter: ZoneMillesimeFilter = null;
@@ -61,7 +61,7 @@
 
 <div class="fh" data-testid="signaux-zone-filter-header">
   <div class="fh-head">
-    <span class="fh-name">Filtrer par affectation (source)</span>
+    <span class="fh-name">Filtrer par type</span>
     <span class="fh-count" data-testid="signaux-zone-filter-count">
       <strong>{matchedCount.toLocaleString("fr-CA")}</strong>/{zones.length.toLocaleString("fr-CA")}
     </span>
@@ -85,7 +85,7 @@
   />
 
   <!-- Types de zone additifs (vide = tous) — catégories de la légende zonage -->
-  <div class="fh-chips" role="group" aria-label="Filtre par affectation (source) (additif)">
+  <div class="fh-chips" role="group" aria-label="Filtre par type de zone (additif)">
     {#each visibleGroups as group (group.id)}
       {@const isActive = filter.has(group.id)}
       <button

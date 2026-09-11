@@ -172,20 +172,13 @@
   } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
   import {
+    buildSignauxLotLegend,
     lotLineColorExpression,
     signauxLotFillColorExpression,
     resolveToken,
     resolveMapColor,
     LOT_NEUTRAL_TOKEN,
     LOT_NEUTRAL_FALLBACK,
-    LOT_TOD_TOKEN,
-    LOT_TOD_FALLBACK,
-    LOT_4PLUS_TOD_TOKEN,
-    LOT_4PLUS_TOD_FALLBACK,
-    PRIORITY_LINE_TOKEN,
-    PRIORITY_LINE_FALLBACK,
-    SIGNAL_DIRECT_TOKEN,
-    SIGNAL_DIRECT_FALLBACK,
   } from "$lib/maps/score-color-scale.js";
   import {
     isDefaultEvalFilter,
@@ -1119,13 +1112,10 @@
   }
 
   // ── Légende (couleurs résolues des tokens DS ; fallbacks sent-tech hors DOM) ─
-  const lotLegendEntries = [
-    { color: resolveToken(SIGNAL_DIRECT_TOKEN, SIGNAL_DIRECT_FALLBACK, null), label: "Cité par un signal" },
-    { color: resolveToken(PRIORITY_LINE_TOKEN, PRIORITY_LINE_FALLBACK, null), label: "Priorité (4+ ∧ TOD)" },
-    { color: resolveToken(LOT_4PLUS_TOD_TOKEN, LOT_4PLUS_TOD_FALLBACK, null), label: "Multifamilial 4+" },
-    { color: resolveToken(LOT_TOD_TOKEN, LOT_TOD_FALLBACK, null), label: "Périmètre TOD" },
-    { color: resolveToken(LOT_NEUTRAL_TOKEN, LOT_NEUTRAL_FALLBACK, null), label: "Sans indicateur" },
-  ];
+  $: lotLegendEntries = buildSignauxLotLegend(
+    displayedLots.features.map((lot) => lot.properties),
+    null,
+  );
   /** Kinds réellement présents dans les zones de la ville active (hors fallback contour). */
   $: zoneLegendEntries = selectedCity
     ? zoneKindLegend(
@@ -1177,7 +1167,7 @@
   /**
    * Base du sélecteur de millésime de la légende = TOUTES les zones servies
    * (jamais filtrées) : le sélecteur se masque lui-même tant qu'il n'y a pas
-   * ≥ 2 millésimes (dégradé honnête, jamais mono-option).
+   * ≥ 2 millésimes (jamais mono-option).
    */
   $: zoneMillesimeLegendInput = (
     zonesResponse?.featureCollection.features ?? []
@@ -1398,7 +1388,7 @@
     // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
     cameraLot = null;
     // Millésime exclusif : un choix d'une ville précédente n'a aucun sens sur la
-    // nouvelle couche → retour à « tous » (dégradé honnête, jamais tout estompé).
+    // nouvelle couche → retour à « tous » pour éviter de tout estomper.
     zoneMillesimeFilter = DEFAULT_ZONE_MILLESIME_FILTER;
     const cityKey = makeKey("municipality", entry.municipality.slug);
     selectionState = createSelectionBucketState({
@@ -1438,7 +1428,7 @@
       });
       if (!lease.isCurrent()) return; // réponse périmée → on ignore
       if (!res.ok && res.nodes.length === 0) {
-        // 404 — ville sans signaux graphify (état vide honnête, pas une erreur)
+        // 404 — ville sans signaux graphify (état vide explicite, pas une erreur)
         detailNodes = [];
         detailLegacyProjection = null;
         detailError = null;
@@ -2234,7 +2224,7 @@
     zonesResponse = null;
     lotsResponse = null;
     updateGeoLayers();
-    // Notices accumulées par couche (affichage honnête « fallback / vide »).
+    // Notices accumulées par couche (affichage explicite « fallback / vide »).
     const notices: string[] = [];
     const publishNotices = () => {
       if (lease.isCurrent()) geoNotices = [...notices];
@@ -2259,7 +2249,7 @@
             notices.push("Zones dérivées des lots : géométrie officielle non configurée.");
           }
         } else if (!loaded.response) {
-          // Endpoint ET collection non configurés → état vide honnête.
+          // Endpoint ET collection non configurés → état vide explicite.
           zonesResponse = emptyUnconfiguredZones(citySlug);
         } else {
           const entry = allEntries.find((item) => item.municipality.slug === citySlug);
@@ -2538,7 +2528,7 @@
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Zonage</p>
             {#if zoneLegendEntries.length > 0}
               <!-- m6 — sélecteur de millésime (exclusif), masqué tant qu'un seul
-                   millésime est servi pour la ville (dégradé honnête). -->
+                   millésime est servi pour la ville. -->
               <div class="mb-2">
                 <ZoneMillesimeSelect
                   zones={zoneMillesimeLegendInput}
@@ -2547,11 +2537,8 @@
                 />
               </div>
             {/if}
-            <!-- Familles = attribut d'affectation SOURCE (directive owner), jamais
-                 l'identité de la zone (le vrai code reste sur l'aplat). §7 R2 — la
-                 ligne « Agricole » devient « Agricole (CPTAQ) » et sert de TOGGLE de
-                 couche (rayée quand désactivée, emphase de `cptaq-fill` au hover). -->
-            <p class="mb-1 text-[0.65rem] uppercase tracking-wide text-slate-400">Affectation (source)</p>
+            <!-- §7 R2 — la ligne « Agricole (CPTAQ) » remplace la famille
+                 « Agricole » et sert de toggle de couche. -->
             <ul class="grid grid-cols-2 gap-x-3 gap-y-1">
               {#each affectationLegendEntries as item (item.label)}
                 {#if item.isCptaq}
@@ -2591,6 +2578,7 @@
               <!-- Case DS indépendante : affiche/masque le n° de zone sur les aplats. -->
               <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-zone-labels-toggle">
                 <Checkbox
+                  class="text-xs text-slate-600 [&_.st-choice__label]:!text-xs [&_.st-choice__label]:!text-slate-600"
                   label="N° de zone"
                   checked={showZoneLabels}
                   onchange={(event) => setShowZoneLabels(event.currentTarget.checked)}
@@ -2599,28 +2587,31 @@
             {/if}
           </div>
         {/if}
-        <div
-          class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
-          data-testid="map-legend-lots"
-        >
-          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Lots</p>
-          <ul class="space-y-1">
-            {#each lotLegendEntries as item (item.label)}
-              <li class="flex items-center gap-2 text-xs text-slate-600">
-                <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
-                {item.label}
-              </li>
-            {/each}
-          </ul>
-          <!-- Case DS indépendante : affiche/masque le n° de lot sur les aplats. -->
-          <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-lot-labels-toggle">
-            <Checkbox
-              label="N° de lot"
-              checked={showLotLabels}
-              onchange={(event) => setShowLotLabels(event.currentTarget.checked)}
-            />
+        {#if displayedLots.features.length > 0}
+          <div
+            class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+            data-testid="map-legend-lots"
+          >
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Lots</p>
+            <ul class="space-y-1">
+              {#each lotLegendEntries as item (item.category)}
+                <li class="flex items-center gap-2 text-xs text-slate-600">
+                  <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                  {item.label}
+                </li>
+              {/each}
+            </ul>
+            <!-- Case DS indépendante : affiche/masque le n° de lot sur les aplats. -->
+            <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-lot-labels-toggle">
+              <Checkbox
+                class="text-xs text-slate-600 [&_.st-choice__label]:!text-xs [&_.st-choice__label]:!text-slate-600"
+                label="N° de lot"
+                checked={showLotLabels}
+                onchange={(event) => setShowLotLabels(event.currentTarget.checked)}
+              />
+            </div>
           </div>
-        </div>
+        {/if}
         <!-- §7 R2 — l'encadré autonome CPTAQ (`map-legend-cptaq`) + sa case à cocher
              ont été RETIRÉS : « Agricole (CPTAQ) » vit désormais comme toggle de
              couche SOUS AFFECTATION (ZONAGE), rayé quand désactivé. -->
