@@ -144,6 +144,17 @@ jobs:
           - service: grounding
             image: radar-grounding
             dockerfile: deploy/grounding/Dockerfile
+          # Obscura headless-browser sidecar (deploy/k8s/35-obscura.yaml) — the
+          # LAST image still pulled from the decommissioned SCW registry. The
+          # obscura/Dockerfile only wraps the upstream h4ckf0r0day/obscura
+          # release binary (no COPY from the build context), so the root context
+          # + ignored GIT_SHA build-arg are harmless (same as radar-ui). Built +
+          # pushed to public GHCR like the others so the Deployment can pull
+          # without the legacy `radar-registry-pull` secret. Not rolled by the
+          # deploy jobs (replicas 0 / :latest, IfNotPresent) — build-only here.
+          - service: obscura
+            image: radar-obscura
+            dockerfile: obscura/Dockerfile
     steps:
       - name: Checkout
         uses: actions/checkout@v4
