@@ -48,7 +48,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          image: ghcr.io/rhanka/radar-api:latest
           imagePullPolicy: Always
           workingDir: /workspace/api
           # __SCRAPE_CITIES__ = space-separated slugs, sed-substituted by run-job.
