@@ -55,8 +55,9 @@ metadata:
     app.kubernetes.io/part-of: sentropic
     app.kubernetes.io/component: app
     app.kubernetes.io/env: preprod
-imagePullSecrets:
-  - name: radar-registry-pull
+# No imagePullSecrets: all radar images are public ghcr.io/rhanka packages
+# (radar-obscura included since build-push-images.yml matrix `obscura`); the
+# legacy SCW `radar-registry-pull` Secret is retired — see 10-rbac.yaml.
 automountServiceAccountToken: false
 ---
 apiVersion: rbac.authorization.k8s.io/v1

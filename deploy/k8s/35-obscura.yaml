@@ -1,6 +1,12 @@
 # Obscura headless-browser (CDP) service for radar scraping (BR-07).
 # Brought in from draft PR #8 (deploy/k8s/obscura.yaml), aligned to the
 # sentropic tenant conventions (radar-app ServiceAccount, part-of label).
+#
+# Image: built from obscura/Dockerfile (wrapper around the upstream
+# h4ckf0r0day/obscura release binary) and pushed to PUBLIC GHCR by
+# .github/workflows/build-push-images.yml (matrix `obscura`), like
+# radar-api / radar-ui / radar-grounding. No pull secret needed — the legacy
+# SCW registry (rg.fr-par.scw.cloud) is decommissioned.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,7 +45,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-obscura:latest
+          image: ghcr.io/rhanka/radar-obscura:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: cdp
