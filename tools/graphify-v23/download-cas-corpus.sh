@@ -9,7 +9,7 @@ WORK_DIR="${3:?work directory required}"
 LOG="$WORK_DIR/worker.log"
 CITY_MANIFEST="$WORK_DIR/cas-manifest.tsv"
 
-mkdir -p "$WORK_DIR/corpus"
+mkdir -p "$WORK_DIR/corpus" "$WORK_DIR/parsed/$CITY"
 awk -F '\t' -v city="$CITY" 'NR == 1 || $2 == city' "$MANIFEST" > "$CITY_MANIFEST"
 expected=$(awk 'END {print NR-1}' "$CITY_MANIFEST")
 verified=0
@@ -27,6 +27,17 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
   fi
   actual_sha=$(sha256sum "$primary" | awk '{print $1}')
   [ "$actual_sha" = "$sha" ] || { echo "[download] $CITY: cas_integrity_failed_$sha" >&2; exit 1; }
+  if [ "${primary##*.}" = "pdf" ]; then
+    parsed_pdf="$WORK_DIR/parsed/$CITY/$sha.txt"
+    pdftotext -layout "$primary" "$parsed_pdf" 2>> "$LOG" || {
+      echo "[download] $CITY: pdf_text_conversion_failed_$sha" >&2
+      exit 1
+    }
+    grep -q '[[:alnum:]]' "$parsed_pdf" || {
+      echo "[download] $CITY: pdf_text_unavailable_$sha" >&2
+      exit 1
+    }
+  fi
   verified=$((verified + 1))
 done < "$CITY_MANIFEST"
 

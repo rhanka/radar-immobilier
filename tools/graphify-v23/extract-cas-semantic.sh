@@ -21,8 +21,8 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
   primary="$WORK_DIR/corpus/$(basename "$primary_key")"
   semantic_input="$primary"
   if [ "${primary##*.}" = "pdf" ]; then
-    semantic_input=$(find "$WORK_DIR/.graphify/converted/pdf" -type f -name "${sha}_*.md" -print -quit 2>/dev/null || true)
-    [ -n "$semantic_input" ] || { echo "[semantic] $CITY: pdf_text_unavailable_$sha" >&2; exit 1; }
+    semantic_input="$WORK_DIR/parsed/$CITY/$sha.txt"
+    [ -s "$semantic_input" ] || { echo "[semantic] $CITY: pdf_text_unavailable_$sha" >&2; exit 1; }
   fi
   wrapper="$WORK_DIR/findings/$sha.wrapper.json"
   success=false
