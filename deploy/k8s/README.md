@@ -1,8 +1,8 @@
 # radar-immobilier on Kubernetes — deployed as a *sentropic app*
 
 This directory holds the **tenant-owned** manifests that deploy
-`radar-immobilier` on the shared Scaleway **poc-k8s** cluster *as a sentropic
-app*: a tenant/workspace under the sentropic platform, with **human auth
+`radar-immobilier` on the shared OVH MKS cluster managed by **poc-k8s** *as a
+sentropic app*: a tenant/workspace under the sentropic platform, with **human auth
 delegated to the shared sentropic Identity Provider** and the **code managed in
 a named sentropic workspace**.
 

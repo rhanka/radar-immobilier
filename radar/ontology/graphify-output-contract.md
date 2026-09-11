@@ -3,7 +3,7 @@
 > **Statut : NORMATIF.**  
 > Tout graphe produit par graphify (re-graphify ou nouvelle ville) DOIT se conformer
 > à ce contrat. Toute variante listée en section [INTERDIT](#interdit--variantes-bannies)
-> est invalide et doit être corrigée avant ingestion dans le pipeline SCW→PG.
+> est invalide et doit être corrigée avant ingestion dans le pipeline object store→PG.
 >
 > **v2.1** (2026-06-14) : ajout des champs `etape` + `etape_date` sur Signal et
 > DesignationEvent pour l'axe ANTICIPATION du scoring. Voir §8.

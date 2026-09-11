@@ -92,11 +92,11 @@ EXPLOITATION      API immo /api/signals, /api/ontology/:city → UI Svelte
 
 ### 1.2 Les buckets S3 (le « contrat de données » de fait)
 
-| Logique | Var env (cascade) | Bucket prod SCW | Préfixes |
+| Logique | Var env (cascade) | Bucket prod object store | Préfixes |
 | --- | --- | --- | --- |
 | Raw / API | `S3_*` | `radar-immobilier-raw` | `ontology/`, divers |
 | Scrape | `SCRAPE_S3_*` → `S3_*` | `radar-immobilier-docs` | `raw/<city>/pv/cas/<sha>`, `parsed/…`, `runs/<source>/<runId>/manifest.jsonl` |
-| Graph | `GRAPH_S3_*` → `SCRAPE_S3_*` | `radar-immobilier-docs-pocs` | `graph/<city>/latest.json` |
+| Graph | `GRAPH_S3_*` → `SCRAPE_S3_*` | `<verified-ovh-bucket>` | `graph/<city>/latest.json` |
 
 > **Insight clé** : la frontière collecte ↔ exploitation **existe déjà** et c'est
 > **S3**. `graph/<city>/latest.json` + `ontology/<city>/project-state.json` sont
@@ -145,7 +145,7 @@ EXPLOITATION      API immo /api/signals, /api/ontology/:city → UI Svelte
 │  ┌─ Déterministe (cron/jobs, AUCUN LLM) ─┐   ┌─ Agentique (LLM, piloté chat) ─┐│
 │  │ • scrape (recueil CAS)                │   │ • graphify (replay par prompt) ││
 │  │ • parse + exploit                     │   │   via RemoteTrigger/@sentropic/ ││
-│  │ • projection SCW→PG                    │   │   flow, agents bg, llm-mesh     ││
+│  │ • projection object store→PG                    │   │   flow, agents bg, llm-mesh     ││
 │  │ • manifeste d'état (désiré−présent)    │──▶│ • file de travail graphify      ││
 │  └───────────────────────────────────────┘   └────────────────────────────────┘│
 │                              │  écrit                                          │
@@ -171,7 +171,7 @@ EXPLOITATION      API immo /api/signals, /api/ontology/:city → UI Svelte
 | Option | Frontière | Pour | Contre | Reco |
 | --- | --- | --- | --- | --- |
 | **F1 — S3 seul** | data écrit `graph/`+`ontology/` ; immo lit S3 directement (déjà le cas pour `project-state.json`) | Zéro nouveau composant ; immo a déjà le code lecteur S3 | immo lit du JSON brut (pas de requêtes relationnelles riches) | **Transition** |
-| **F2 — PG projeté (propriété data)** | data projette SCW→PG ; immo lit PG en **read-only** | Requêtes riches (scoring JSONB), déjà spécifié (`upsertGraph`) | Qui owne la migration PG ? Couplage schéma | **Cible** |
+| **F2 — PG projeté (propriété data)** | data projette object store→PG ; immo lit PG en **read-only** | Requêtes riches (scoring JSONB), déjà spécifié (`upsertGraph`) | Qui owne la migration PG ? Couplage schéma | **Cible** |
 | **F3 — API "data" interne** | data expose une API ; immo l'appelle | Découplage net | Sur-ingénierie ; latence ; YAGNI en V1 | ❌ |
 
 > **Recommandation frontière** : **F1 maintenant → F2 à terme**. Le contrat S3 (`graph/`
@@ -448,7 +448,7 @@ toute seule, anti-sature, reprend après crash, projette quand vert.*
 
 ## 8. Références
 
-- `SPEC_PERSISTENCE_S3_FIRST.md` §3 (réconciliation `désiré−présent`) ; Phase 2 (SCW
+- `SPEC_PERSISTENCE_S3_FIRST.md` §3 (réconciliation `désiré−présent`) ; Phase 2 (object store
   Serverless Jobs + Cron quotidien, partition par hash slug, 40→1000 villes)
 - `SPEC_EVOL_PROCESS_E2E.md` §5/§7 (flow/h2a cibles ; cron vs agent ; voies a/b/c)
 - `SPEC_EVOL_H2A_CHAT.md`, `UAT_EV2_EV7_ESCALATIONS.md` (h2a/flow différés, V1 stub)

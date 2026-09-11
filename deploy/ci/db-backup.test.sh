@@ -65,7 +65,7 @@ run_case() {
   (
     export PATH="${CASE_DIR}/bin:${PATH}" CALLS_DIR="$CASE_DIR"
     export BACKUP_ENV=preprod BACKUP_TAG=abc1234 NAMESPACE=radar-immobilier-preprod
-    export BACKUP_S3_BUCKET=radar-db-backups BACKUP_S3_ENDPOINT=https://s3.fr-par.scw.cloud
+    export BACKUP_S3_BUCKET=radar-db-backups BACKUP_S3_ENDPOINT=https://objects.example.invalid
     export AWS_ACCESS_KEY_ID=fake-key AWS_SECRET_ACCESS_KEY=fake-secret
     export BACKUP_POLL_INTERVAL=1
     eval "${EXTRA:-}"

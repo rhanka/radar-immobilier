@@ -139,6 +139,8 @@ spec:
               value: "--max-old-space-size=400 --dns-result-order=ipv4first"
             - name: GT_S3_PREFIX
               value: "gt/designation-events-167-v2-20260803"
+            # TODO(k8s): replace this endpoint/bucket/region tuple and credentials
+            # with verified OVH Object Storage values before running this Job.
             - name: GRAPH_S3_ENDPOINT
               value: "https://s3.fr-par.scw.cloud"
             - name: GRAPH_S3_BUCKET

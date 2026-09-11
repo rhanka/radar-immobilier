@@ -93,9 +93,9 @@ spec:
 ---
 # ADDITIVE: let one-shot graph projection jobs reach Postgres on :5432.
 #
-# Projection jobs (31/32/32b) run with `component: graph-projection`, not
+# Projection jobs (31/32) run with `component: graph-projection`, not
 # `component: api`. The operator baseline `allow-api-to-runtime-dependencies`
-# only allows api -> postgres, so graph projection pods can list SCW objects but
+# only allows api -> postgres, so graph projection pods can list objects but
 # then hang on the first DB upsert. Keep this tenant-owned exception narrowly
 # scoped to graph-projection -> postgres:5432.
 apiVersion: networking.k8s.io/v1
@@ -123,15 +123,12 @@ spec:
         - protocol: TCP
           port: 5432
 ---
-# ADDITIVE: let the api pod reach MinIO on :9000 (object storage).
+# ADDITIVE: let the api pod reach the live cluster MinIO service on :9000.
 #
-# The api's /health probe (and every RECUEIL object PUT/GET) calls the S3 API on
-# `radar-minio:9000`. The operator baseline `allow-api-to-runtime-dependencies`
-# opens api -> {postgres:5432, obscura:9222, maildev:1025/1080} but OMITS MinIO;
-# under default-deny, api -> minio:9000 is DROPPED, so the S3 SDK HANGS (silent —
-# no error) and /health never returns -> readiness/liveness fail -> CrashLoop.
-# This purely-additive policy opens api -> minio:9000 so object-store access (and
-# therefore /health) works. (Mirror of the operator baseline, scoped to MinIO.)
+# This rule belongs to the cluster MinIO path explicitly kept out of scope by
+# the decommissioning brief. Keep it unchanged until k8s migrates S3_ENDPOINT
+# and retires the cluster service; pruning it earlier would break API health and
+# RECUEIL object access under the namespace default-deny policy.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

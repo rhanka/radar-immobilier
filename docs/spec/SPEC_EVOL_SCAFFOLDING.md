@@ -204,7 +204,7 @@ Signal réglementaire → Ancrage foncier → Contraintes → Marché → Contex
 
 On sépare **3 couches de stockage** pour éviter les migrations lourdes inutiles tant que la réalité des données n'est pas comprise :
 
-1. **Objet brut → Scaleway Object Storage (S3)**
+1. **Objet brut → OVH Object Storage (S3)**
    Tous les documents bruts collectés (HTML, PDF, transcripts vidéo, JSON d'API, captures) sont stockés tels quels dans un bucket S3 dédié. Postgres ne stocke **jamais** le contenu brut.
 
 2. **Métadonnées & entités structurées → Postgres**
@@ -213,13 +213,12 @@ On sépare **3 couches de stockage** pour éviter les migrations lourdes inutile
 3. **Champs encore mal définis → colonnes `jsonb` Postgres**
    Tant que la cardinalité et la structure d'un champ n'est pas figée par la confrontation au réel (zonage extrait, géométrie, attributs propriétaire, etc.), on stocke en `jsonb` validé par un Zod schema versionné. Migration vers colonnes typées **uniquement** quand un pattern stable émerge.
 
-### 7.2 Bucket S3 (Scaleway Object Storage)
+### 7.2 Bucket S3 (managed Object Storage)
 
-- Projet : `PoCs` (ID `09ac728a-e3b9-4a5b-9749-664b0f147c70`).
-- Bucket : `radar-immobilier-raw` (région `fr-par`).
+- Projet, bucket et région : `TODO(k8s)` — valeurs OVH à confirmer.
 - Préfixage : `raw/<source>/<YYYY>/<MM>/<DD>/<sha256>.<ext>`.
 - Access : IAM application credentials (scope bucket-only) injectées dans l'API K8s via Secret.
-- Création via `scw object bucket create` en BR-04.
+- Création out-of-band par l'opérateur k8s en BR-04.
 
 ### 7.3 Schéma Postgres minimal initial (BR-02)
 
@@ -316,14 +315,14 @@ WatcherJob.run() (cron-like)
 - **Domaine cible (transitoire avant transfert)** : `immo.sent-tech.ca` (réutilisation du wildcard `*.sent-tech.ca` actif sur le cluster POC).
 - CORS autorisé pour l'URL GitHub Pages (la SPA) et `immo.sent-tech.ca`.
 
-### 9.3 Stockage objet (Scaleway Object Storage)
-- Bucket : `radar-immobilier-raw`, projet `PoCs` (`09ac728a-e3b9-4a5b-9749-664b0f147c70`), région `fr-par`.
-- Création via `scw object bucket create name=radar-immobilier-raw region=fr-par project-id=09ac728a-...` (cible BR-04).
+### 9.3 Stockage objet (managed Object Storage)
+- Endpoint, bucket, projet et région : `TODO(k8s)` — valeurs OVH à confirmer.
+- Création out-of-band par l'opérateur k8s (cible BR-04).
 - IAM application credentials dédiées, scope bucket-only, secret K8s `radar-s3-credentials`.
 
 ### 9.4 Local
 - `make dev ENV=dev` → docker-compose lance api + postgres (PostGIS) + obscura + maildev + ui-dev.
-- En local, soit MinIO (S3 compatible) en docker-compose, soit accès direct au bucket Scaleway via credentials dev. **Choix** : MinIO en local (isolation), bucket Scaleway en `demo`/`prod`.
+- En local, soit MinIO (S3 compatible) en docker-compose, soit accès direct au bucket managed object storage via credentials dev. **Choix** : MinIO en local (isolation), bucket managed object storage en `demo`/`prod`.
 - `make test ENV=test` → tests unitaires.
 - `make test-e2e ENV=e2e` → Playwright e2e.
 
@@ -363,8 +362,7 @@ BR-03  feat/ui-skeleton-svelte-ds
 BR-04  feat/k8s-tenant-radar-and-infra
        - ../poc-k8s/tenants/radar-immobilier/{00-namespace,api,
          postgres-postgis,obscura,maildev,ingress}.yaml
-       - Création bucket S3 Scaleway `radar-immobilier-raw`
-         (`scw object bucket create ...`)
+       - Création du bucket S3 géré par l'opérateur k8s
        - Secrets : DB creds, S3 creds, LLM API keys
        - DNS / Ingress sur immo.sent-tech.ca
        - make deploy-k8s ENV=poc
@@ -469,7 +467,7 @@ Le scaffolding est **terminé** quand :
 | Volume Postgres K8s POC saturé (pool 40 GB partagé) | Quota strict sur le tenant (1-2 Gi suffisent démo) | Quota explicite dans `00-namespace.yaml`. |
 | Sources municipales rate-limitent / bloquent Obscura | Backoff + anti-detect intégré ; éviter parallélisme agressif | Respecter robots.txt, fenêtres horaires raisonnables. |
 | Multi-agent rules dérivent vers Claude-only | Auditer périodiquement les fichiers `rules/` pour terminologie | Skill `scope-check` étendu. |
-| S3 credentials Scaleway exposés (par ex. dans logs / commits) | Secret K8s + rotation possible | Scope IAM bucket-only ; pas de credentials en clair dans le repo ; audit des commits avant push. |
+| S3 credentials managed object storage exposés (par ex. dans logs / commits) | Secret K8s + rotation possible | Scope IAM bucket-only ; pas de credentials en clair dans le repo ; audit des commits avant push. |
 | Schéma jsonb dérive en chaos (champs ad-hoc partout) | Discipline Zod : tout `jsonb` validé in/out via un schema versionné dans `radar-domain/schemas/` | Skill `scope-check` vérifie la présence du schema Zod. |
 | Domaine `immo.sent-tech.ca` non disponible / wildcard cert manquant | Ingress radar peut atterrir sur sous-domaine alternatif | Vérifier en début BR-04 ; cert-manager déjà en place sur cluster POC. |
 | Carte interactive : tuiles externes (OSM/IGN) sujettes à rate-limit | Cache local + provider tiles auto-hébergé si volume | Démo : OSM standard suffisant. |

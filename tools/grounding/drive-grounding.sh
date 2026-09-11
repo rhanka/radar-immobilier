@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # drive-grounding.sh — pilote séquentiel/faible-concurrence du grounding verbatim.
 # Lit une worklist (1 ville/ligne), ground + gate + publish ville par ville.
-# N_LANES bas (défaut 2) pour protéger la box. Résumable : skip villes déjà citées sur SCW.
+# N_LANES bas (défaut 2) pour protéger la box. Résumable : skip villes déjà citées sur object store.
 #
 # Usage: drive-grounding.sh <worklist> <run_dir> [n_lanes]
 #
 # Le gate utilisé est le wrapper grounding (gate-grounding.sh) : il applique le
 # check 7bis (citation verbatim obligatoire) AVANT de déléguer au gate canonique
-# tools/graphify-v23/gate.sh pour la publication atomique SCW.
+# tools/graphify-v23/gate.sh pour la publication atomique object store.
 set -uo pipefail
 
 WORKLIST="${1:?worklist requis}"
@@ -22,7 +22,7 @@ GATE="$SCRIPT_DIR/gate-grounding.sh"
 # ── 2-bucket split (préprod-safe, IN-CLUSTER) ─────────────────────────────────
 # Modèle d'exécution = IN-CLUSTER : PAS de `.env` host (extraction de secrets host refusée). Les
 # variables viennent de 2 secretRef montés en env dans le pod :
-#   READ_*    ← secretRef `radar-s3-credentials`      (SCW -pocs, RO : raw PVs + .meta.json sidecars)
+#   READ_*    ← secretRef `radar-s3-credentials`      (source object-store bucket, RO: raw PVs + .meta.json sidecars)
 #   PUBLISH_* ← secretRef `radar-graph-s3-credentials` (OVH préprod : graph/<city>/latest.json)
 # READ est STRICTEMENT RO (worker seulement) ; 0 write vers READ_BUCKET ni vers le prod-graph.
 # Le `.env` host n'est sourcé QUE s'il existe (dev/local) — jamais requis in-cluster.
@@ -88,7 +88,7 @@ process_city(){
   local city="$1" lane="$2"
   local W="$RUN_DIR/workers/$city"; mkdir -p "$W"
   if already_cited "$city"; then
-    log "[$lane/$city] SKIP déjà cité sur SCW"; return 0
+    log "[$lane/$city] SKIP déjà cité sur object store"; return 0
   fi
   if ! s5cmd --endpoint-url "$S3_URL" cat "s3://$BUCKET/graph/$city/latest.json" > "$W/candidate.v23.json" 2>/dev/null || [ ! -s "$W/candidate.v23.json" ]; then
     log "[$lane/$city] BLOCKED candidate_missing"; return 1

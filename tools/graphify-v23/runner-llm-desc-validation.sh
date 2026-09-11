@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # runner-llm-desc-validation.sh — lot de VALIDATION étape (b) v2.3
 # Enrichit les descriptions manquantes via Sonnet 4.6 pour les 12 villes cibles,
-# passe le gate central, publie sur SCW.
+# passe le gate central, publie sur object store.
 #
 # Usage: runner-llm-desc-validation.sh [--dry-run] [--run-dir <path>] [--root <path>]
 #
@@ -67,8 +67,8 @@ echo "Started    : $TIMESTAMP"
 echo "Cibles     : ${#CITIES[@]}"
 echo ""
 
-# ── Preflight SCW ─────────────────────────────────────────────────────────────
-echo "--- PREFLIGHT SCW ---"
+# ── Preflight object store ─────────────────────────────────────────────────────────────
+echo "--- PREFLIGHT object store ---"
 
 # shellcheck source=/dev/null
 source "$ROOT/.env" 2>/dev/null || true
@@ -80,25 +80,25 @@ S3_URL="${SCRAPE_S3_ENDPOINT:-}"
 BUCKET="${SCRAPE_S3_BUCKET:-}"
 
 if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$S3_URL" ] || [ -z "$BUCKET" ]; then
-  echo "PREFLIGHT KO: credentials SCW manquants (.env)" >&2
+  echo "PREFLIGHT KO: credentials object store manquants (.env)" >&2
   exit 1
 fi
 
 if ! s5cmd --endpoint-url "$S3_URL" ls "s3://$BUCKET/graph/" >/tmp/runner-llm-preflight.log 2>&1; then
-  echo "PREFLIGHT KO: SCW inaccessible en lecture — voir /tmp/runner-llm-preflight.log" >&2
+  echo "PREFLIGHT KO: object store inaccessible en lecture — voir /tmp/runner-llm-preflight.log" >&2
   exit 1
 fi
 
 probe_key="s3://$BUCKET/_preflight-llm-runner-$(date +%s).txt"
 echo "probe" > /tmp/runner-llm-probe.txt
 if ! s5cmd --endpoint-url "$S3_URL" cp /tmp/runner-llm-probe.txt "$probe_key" >/tmp/runner-llm-preflight-write.log 2>&1; then
-  echo "PREFLIGHT KO: SCW inaccessible en écriture — voir /tmp/runner-llm-preflight-write.log" >&2
+  echo "PREFLIGHT KO: object store inaccessible en écriture — voir /tmp/runner-llm-preflight-write.log" >&2
   exit 1
 fi
 s5cmd --endpoint-url "$S3_URL" rm "$probe_key" >/dev/null 2>&1 || true
 rm -f /tmp/runner-llm-probe.txt
 
-echo "  [OK] SCW credentials + R/W"
+echo "  [OK] object store credentials + R/W"
 echo ""
 
 # ── Traitement séquentiel des 12 villes ───────────────────────────────────────
@@ -129,10 +129,10 @@ for city in "${CITIES[@]}"; do
     continue
   fi
 
-  # Récupérer la baseline depuis SCW
+  # Récupérer la baseline depuis object store
   baseline="$city_work/baseline.json"
   if ! s5cmd --endpoint-url "$S3_URL" cat "s3://$BUCKET/graph/$city/latest.json" > "$baseline" 2>"$city_work/baseline.log"; then
-    echo "  [BLOCKED] $city: baseline SCW introuvable"
+    echo "  [BLOCKED] $city: baseline object store introuvable"
     ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     jq -cn \
       --arg city "$city" --arg ts "$ts" \

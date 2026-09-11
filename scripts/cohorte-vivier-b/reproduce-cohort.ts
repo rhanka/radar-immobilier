@@ -20,7 +20,7 @@
  *
  * SOURCE (pointeur versionné) :
  *   dump prod-PG graph_nodes (projection exacte de listCitiesWithSignalNodes, export OVH read-only)
- *   S3 : s3://radar-immobilier-docs-pocs/scratch/postbrossard-7263-20260803/graph_nodes.ndjson
+ *   Source : export local contrôlé via DUMP=<path/graph_nodes.ndjson>
  *   export OVH 2026-08-06 · 7298 nœuds · sha256 d9cb3cc6b9700caa1ba711d7fa204597e2db8be6b4002a764a7f386a43e57699
  *
  * INVOCATION :

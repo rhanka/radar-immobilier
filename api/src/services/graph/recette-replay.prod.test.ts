@@ -11,7 +11,7 @@ import { projectionRowFromGraphNode } from "./bprime-recette.fixture.js";
 /**
  * HARNAIS DE REJEU RECETTE — rejoue la classification vivier/B′ sur les nœuds
  * RÉELS de production (snapshots graphify `graph/<slug>/latest.json` tirés de
- * SCW, la source de vérité documentée), via le VRAI chemin serveur
+ * object store, la source de vérité documentée), via le VRAI chemin serveur
  * (`projectionRowFromGraphNode` → `aggregateGraphSignalProjectionRows`).
  *
  * Ce n'est PAS un test unitaire de gate : il est SKIPPÉ sauf si
@@ -44,10 +44,10 @@ const LOT_SET = LOT_SLUGS.length ? new Set(LOT_SLUGS) : null;
 // NDJSON, pour alimenter le MÊME outillage snapshot/diff que le dump prod PG.
 const PROJECTION_OUT = process.env.RECETTE_PROJECTION_OUT ?? "";
 
-const RUN_SCW = Boolean(GRAPHS_DIR && existsSync(GRAPHS_DIR));
+const RUN_OBJECT_STORE = Boolean(GRAPHS_DIR && existsSync(GRAPHS_DIR));
 
 describe("recette replay — prod graph snapshots", () => {
-  (RUN_SCW ? it : it.skip)(
+  (RUN_OBJECT_STORE ? it : it.skip)(
     "rejoue vivier/B′ sur les nœuds réels et vérifie le contrôle 6777/720",
     () => {
       const slugs = readdirSync(GRAPHS_DIR).filter((name) => {

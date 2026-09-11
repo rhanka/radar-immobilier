@@ -127,7 +127,7 @@ Sources municipales / géo → Acquisition & scraping (Obscura) → OCR / graphi
 | **radar-ui** | nginx servant un build **Vite + Svelte 5** (SPA) | 8080 | tag figé `main-…` (écrasé par le CD) | proxifie `/api/*` → radar-api |
 | **radar-immo-mcp** | Hono, MCP Streamable HTTP | 8848 | **même image `radar-api`** (`node packages/immo-mcp/dist/server-http.js`) | 256Mi ; hors kustomization |
 | radar-postgres (PostGIS) | Postgres | 5432 | — | projection géospatiale |
-| radar-minio | MinIO S3 | 9000 | — | dev/cluster ; prod = SCW S3 |
+| object-storage emulator | S3-compatible local service | 9000 | — | development/test only; production coordinates are operator-owned |
 | radar-obscura | Rust headless (CDP anti-bot) | 9222 | `radar-obscura:latest` | **replicas 0** (FinOps) |
 | radar-maildev | maildev | 1025/1080 | — | **replicas 0** (FinOps) |
 
@@ -199,7 +199,7 @@ côté client OAuth** (claude.ai / le RP `radar-api`), **pas** dans le pod MCP (
 
 ### 2.5 Kubernetes & CD (`deploy/k8s/**`, `.github/workflows/`)
 
-`kustomization.yaml` inclut : `00-namespace`, `10-rbac`, `20-postgres-postgis`, `25-minio`,
+`kustomization.yaml` inclut : `00-namespace`, `10-rbac`, `20-postgres-postgis`,
 `30-api`, `34-refresh-cronjob`, `35-obscura`, `40-maildev`, `50-ui`, `60-ingress`, `70-networkpolicy`,
 `80-auth`. **Le MCP (`40-immo-mcp-http-deploy.yaml`, `41-immo-mcp-ingress.yaml`) est délibérément
 HORS kustomization** — appliqué seulement par le workflow manuel.
@@ -214,7 +214,7 @@ HORS kustomization** — appliqué seulement par le workflow manuel.
 - **Ingress** : host `immo.sent-tech.ca`, `/` → radar-ui:8080 ; `/mcp` → radar-immo-mcp:8848 (hors
   kustomization). NetworkPolicy default-deny.
 - **CD** : `build-push-images.yml` — sur push `main`, build+push api & ui vers
-  `rg.fr-par.scw.cloud/radar-immobilier`, puis `kubectl set image deploy/radar-api|radar-ui :<sha>`
+  `ghcr.io/rhanka`, puis `kubectl set image deploy/radar-api|radar-ui :<sha>`
   + `rollout status` (SA `radar-ci-deployer`, secret `KUBE_CONFIG_DATA`, **pas de GitOps**).
   `k8s-apply-mcp.yaml` — **manuel** (`workflow_dispatch`) : seul chemin qui déploie le MCP
   (apply 30/40/41/70 + rollout restart + smoke PRM).
@@ -224,12 +224,12 @@ HORS kustomization** — appliqué seulement par le workflow manuel.
 
 ### 2.6 Persistance S3-first (`SPEC_PERSISTENCE_S3_FIRST.md`, validé)
 
-Principe : **SCW S3 = source de vérité immuable ; Postgres = index/cache reconstructible ; git =
+Principe : **Object Storage S3 = source de vérité immuable ; Postgres = index/cache reconstructible ; git =
 code + config, jamais de donnée scrapée**. Layout CAS sha256 :
 `raw/parsed/graph/runs/state/registry/fixtures`, `latest.json` = pointeurs, manifestes de run = axe
 transaction-time (bitemporel). `radar db rebuild` from-S3 testé en CI. Loi 25 : `raw/` privé jamais
 servi, filtrage PII au parsing, aucun nom de personne physique en nœud graphify. **Cible de scaling**
-1000+ villes : SCW Serverless Jobs + Cron (voir §6, dette « scale sans OOM »).
+1000+ villes : Kubernetes Jobs + CronJobs sur OVH MKS (voir §6, dette « scale sans OOM »).
 
 ---
 
@@ -309,7 +309,7 @@ les vraies citations.
 
 **Pipeline réutilisable** `tools/grounding/` : `nodes-by-sha` → `pdftotext -layout` → `extract-citations.sh`
 (Sonnet 4.6, `found:false` si introuvable, zéro invention) → `build-grounded-graph.py` (injecte
-`refs[]`, purge synthetic, bump `ontology_version→2.3`) → `gate.sh` → publish atomique SCW.
+`refs[]`, purge synthetic, bump `ontology_version→2.3`) → `gate.sh` → publish atomique object store.
 
 **État réel :**
 - Pilote **Mont-Tremblant** : **COMPLET** (13/13 nœuds cités, projection PG passe de **0→13** sur
@@ -614,7 +614,7 @@ critique) est une **hypothèse business explicitement HORS V1** (V1 = mono-opér
 |---|---|---|---|
 | **D1** | **Grounding cleansing** — 100 % de signaux à citation vérifiable (focus 56/70, 14 à re-grounder/purger ; province ~55 %) | pilote Mont-Tremblant complet, reste à généraliser | pipeline `tools/grounding/` ; items `MX8DY0`/`PP7X37`/`8T8PZ9` ; préco #1 |
 | **D2** | **Mapper PG pull** — le rapprochement lit le PG (~7 villes pullées), plafonné par le PG pas par geo (déjà 29/30 en live) | jobs `populate-geo` prêts | puller les 29/30 focus en PG |
-| **D3** | **Scale sans OOM** (≈ le « P5-P9 optim mémoire » du brief) | crashloop radar-api **corrigé** (étude B : `/livez` découplé, heap cap 512, pg timeout, image `:latest`, 768Mi) ; scale 1106 non fait | charte WP5 « 1106 villes sans OOM » via S3-first + SCW Serverless Jobs |
+| **D3** | **Scale sans OOM** (≈ le « P5-P9 optim mémoire » du brief) | crashloop radar-api **corrigé** (étude B : `/livez` découplé, heap cap 512, pg timeout, image `:latest`, 768Mi) ; scale 1106 non fait | charte WP5 « 1106 villes sans OOM » via S3-first + Kubernetes Jobs |
 | **D4** | **Coûts (R6)** — coût siège/démo vs coût complet industrialisé 1104 | **structure + placeholders posés, chiffres en attente** | h2a → agent-stats (tokens immo), poc-k8s (infra), geo (coût geo/geo-quebec) |
 | **D5** | **geo — TOD** (PMAD/CMM) | [en attente], filtre UI câblé | incrément demandé au fournisseur geo (4 villes réf.) |
 | **D6** | **geo — normes/grilles** exposées API (déclencheur « 4+ fondé grille ») | pilote Salaberry 97,9 % ; alignement 4 villes en cours | reglements-urbanisme-parser + exposition API geo |

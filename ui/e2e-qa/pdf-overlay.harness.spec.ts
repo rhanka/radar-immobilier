@@ -14,7 +14,7 @@ import { expect, test } from "@playwright/test";
  * renvoie bien le binaire, la preuve se rend.
  *
  * Le blocage prod résiduel (« fallback Mont-Tremblant / St-Frédéric ») n'était
- * PAS une donnée absente : les PV existent sur SCW radar-immobilier-docs-pocs
+ * PAS une donnée absente : les PV existent dans le stockage objet géré
  * (raw/proces-verbaux-<ville>/cas/<sha>.pdf) et la route /api/documents/raw les
  * sert en 200 application/pdf. La cause : les nœuds graphify portent aussi un
  * sourceUrl PUBLIC (PDF de la ville) que l'overlay préférait pour le RENDU →

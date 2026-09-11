@@ -7,7 +7,7 @@ name: Build & push images
 # "CI does this on the live path").
 #
 # Deploy (CD) is wired below in the `deploy` job, but ONLY on pushes to `main`
-# (never on PRs / feature branches). It rolls the live Scaleway Kapsule cluster
+# (never on PRs / feature branches). It rolls the live OVH MKS cluster
 # with `kubectl set image` against the same short-sha tag the build just pushed.
 #
 # Auth uses the `KUBE_CONFIG_DATA` gh secret (same pattern as rhanka/surch
@@ -41,9 +41,9 @@ name: Build & push images
 # just-pinned sha back to `:latest`; applying it BEFORE means the following
 # set-image step is always the last word on which image tag actually runs.
 #
-# PRE-FLIGHT / TARGET CLUSTER (2026-07-28): the live tenant moved from Scaleway
-# Kapsule to OVH MKS (BHS5). The Scaleway node pool that hosted it HAS BEEN
-# DELETED, so there is no rollback target left there. The `deploy` job now runs
+# PRE-FLIGHT / TARGET CLUSTER (2026-07-28): the live tenant moved from the
+# retired provider to OVH MKS (BHS5). The former node pool HAS BEEN DELETED, so
+# there is no rollback target left there. The `deploy` job now runs
 # a BLOCKING pre-flight before the first mutating kubectl: it extracts the
 # apiserver HOST from the kubeconfig (`kubectl config view` without --raw, which
 # redacts credentials) and refuses to deploy unless it equals the expected host.

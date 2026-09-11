@@ -122,7 +122,7 @@ yet in `kustomization.yaml`'s `resources:` list (see §3).
 
 ## 2. Prérequis image — le gap trouvé
 
-`api/Dockerfile` builds `rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest`
+`api/Dockerfile` builds `ghcr.io/rhanka/radar-api:latest`
 (also tagged `:latest`, confirmed in `.github/workflows/build-push-images.yml`
 line ~91) from **only** `{radar-domain, radar-scoring, radar-sources, api}` —
 it never touches `packages/immo-mcp`. Its `esbuild` step's `entryPoints` are
@@ -162,7 +162,7 @@ hypothesis needs one of these BEFORE the Deployment can actually start:
      in the runtime stage.
 - **(B)** — a dedicated `packages/immo-mcp/Dockerfile` + a new `immo-mcp`
   matrix row in `build-push-images.yml`, image tag
-  `rg.fr-par.scw.cloud/radar-immobilier/immo-mcp:latest`. Decouples the MCP
+  `<future-ghcr-immo-mcp-image>`. Decouples the MCP
   server's release/rollback from the main api image (arguably cleaner given
   it's a distinct OAuth-facing attack surface) at the cost of a new
   Dockerfile + CI row + a one-line `image:` swap in

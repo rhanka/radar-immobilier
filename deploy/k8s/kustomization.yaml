@@ -4,7 +4,7 @@
 # values); real Secrets are created out-of-band (SealedSecrets or
 # `make k8s-create-secrets`). The `00-namespace.yaml` is included so the bundle
 # renders/validates standalone and can be applied to a throwaway/kind cluster
-# for review; on the live poc-k8s cluster the operator owns the Namespace +
+# for review; on the live OVH cluster the operator owns the Namespace +
 # ResourceQuota + baseline NetworkPolicy, and its copy wins.
 #
 # `40-immo-mcp-http-deploy.yaml` / `41-immo-mcp-ingress.yaml` (remote MCP HTTP

@@ -1,16 +1,16 @@
 # refresh-cronjob.yaml — RAFRAÎCHISSEMENT PÉRIODIQUE du pipeline DÉTERMINISTE.
 #
 # Deux CronJobs distincts, deux cadences (cf. brainstorm §4.1 « 3 régimes »
-# et SPEC_PERSISTENCE_S3_FIRST §6 « SCW Serverless Jobs + Cron quotidien ») :
+# et SPEC_PERSISTENCE_S3_FIRST §6 « Kubernetes Jobs + CronJobs ») :
 #
 #   A. radar-refresh-scrape  (QUOTIDIEN, 03:17 UTC)
 #      scrape + parse + exploit déterministe des ~528 villes config-only → raw/ parsed/
 #      (sur 563 configs ALL_PV_CITIES − 35 fixtures ; couverture data actuelle ~1007)
-#      ontology/ sur SCW. AUCUN LLM. HEAD-skip CAS → ne capte que le NOUVEAU.
+#      ontology/ sur le stockage objet source. AUCUN LLM. HEAD-skip CAS → ne capte que le NOUVEAU.
 #      C'est le moteur du « refresh des nouveaux PV tout seul » de la Vague A.
 #
 #   B. radar-refresh-projection  (QUOTIDIEN, 04:30 UTC, APRÈS le scrape)
-#      projette graph/<ville>/latest.json (SCW) → PG. Idempotent (upsert ON
+#      projette graph/<ville>/latest.json (stockage objet source) → PG. Idempotent (upsert ON
 #      CONFLICT). Rattrape en PG tout graphe re-graphifié hors-bande depuis la
 #      veille. NE migre PAS (schéma supposé à jour ; reset DB → passer d'abord
 #      par 31-graph-projection-job.yaml une fois).
@@ -110,11 +110,13 @@ spec:
                   valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
                 - name: S3_SECRET_KEY
                   valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
-                # SCRAPE_S3 EXPLICITE vers Scaleway (bucket scrape = radar-immobilier-docs-pocs,
+                # SCRAPE_S3 EXPLICITE vers le stockage source non migré (bucket scrape = bucket source,
                 # même que raw/proces-verbaux-<city>/cas/). Le secret radar-scrape-s3-credentials
                 # est ABSENT sur OVH → le worker retombait sur l'endpoint MinIO in-cluster
                 # (radar-immobilier-docs.radar-minio, virtual-hosted) → ENOTFOUND (échec 2026-08-03).
-                # Creds depuis radar-s3-credentials (le secret Scaleway qui marche pour emit/apply).
+                # Identifiants depuis radar-s3-credentials (secret source utilisé par emit/apply).
+                # TODO(k8s): replace this endpoint/bucket/region tuple and credentials
+                # with verified OVH Object Storage values before enabling this CronJob.
                 - name: SCRAPE_S3_ENDPOINT
                   value: "https://s3.fr-par.scw.cloud"
                 - name: SCRAPE_S3_BUCKET
@@ -214,12 +216,14 @@ spec:
                 - name: S3_SECRET_KEY
                   valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
                 # ── Store de graphes EXPLICITE (GRAPH_S3_*) ───────────────────
-                # Garantit le bon bucket SCW (radar-immobilier-docs-pocs)
+                # Garantit le bon bucket du stockage objet source
                 # INDÉPENDAMMENT du secret radar-scrape-s3-credentials, absent en
                 # prod (sa disparition faisait tomber resolveGraphS3Config sur
                 # S3_ENDPOINT=radar-minio + bucket "radar-immobilier-docs" →
                 # ENOTFOUND, projection gelée). GRAPH_S3_* a priorité sur
                 # SCRAPE_S3_*/S3_* dans resolveGraphS3Config (config.ts).
+                # TODO(k8s): replace this endpoint/bucket/region tuple and credentials
+                # with verified OVH Object Storage values before enabling this CronJob.
                 - name: GRAPH_S3_ENDPOINT
                   value: "https://s3.fr-par.scw.cloud"
                 - name: GRAPH_S3_BUCKET

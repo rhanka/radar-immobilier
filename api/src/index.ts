@@ -17,7 +17,7 @@ const logger = createLogger(config.LOG_LEVEL);
 const dbHandle = createDb(config);
 const objectStore = createObjectStore(config);
 
-// Dedicated scraping-document store (SCW `radar-immobilier-docs` in production;
+// Dedicated scraping-document store (object store `radar-immobilier-docs` in production;
 // falls back to MinIO locally when SCRAPE_S3_* env vars are not set).
 const scrapeObjectStore = getScrapeObjectStore(config);
 
@@ -76,8 +76,8 @@ void objectStore
   .ensureBucket()
   .catch((e) => logger.warn({ err: String(e) }, "ensureBucket failed"));
 
-// Ensure the scraping-document bucket exists (creates it on MinIO locally;
-// on SCW the bucket is pre-created and this becomes a no-op HeadBucket).
+// Ensure the scraping-document bucket exists. Managed production buckets are
+// pre-created, so this normally becomes a no-op HeadBucket there.
 void scrapeObjectStore
   .ensureBucket()
   .catch((e) =>
