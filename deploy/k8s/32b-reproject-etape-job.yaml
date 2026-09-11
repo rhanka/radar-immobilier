@@ -75,7 +75,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:etape-1781485930
+          image: ghcr.io/rhanka/radar-api:etape-1781485930
           imagePullPolicy: Always
           workingDir: /workspace/api
           command: ["node", "dist/scripts/project-graph-from-s3.js"]

@@ -74,7 +74,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          image: ghcr.io/rhanka/radar-api:latest
           imagePullPolicy: Always
           workingDir: /workspace/api
           command: ["node", "dist/db/scripts/backfill-0004-tracking.js"]
@@ -101,7 +101,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          image: ghcr.io/rhanka/radar-api:latest
           imagePullPolicy: Always
           # migrate.js lit `migrationsFolder: "drizzle"` relatif au CWD → /workspace/api
           # où l'image copie api/drizzle/*.sql + meta/_journal.json.
@@ -135,7 +135,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          image: ghcr.io/rhanka/radar-api:latest
           imagePullPolicy: Always
           workingDir: /workspace/api
           command: ["node", "dist/scripts/project-graph-from-s3.js"]

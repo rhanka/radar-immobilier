@@ -83,7 +83,7 @@ spec:
               # immutable digest as the deployed release). This base tag is a
               # bootstrap default only — the CronJobs must be applied via the
               # refresh-cronjobs overlay, never with :latest live (§6).
-              image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+              image: ghcr.io/rhanka/radar-api:latest
               imagePullPolicy: IfNotPresent
               workingDir: /workspace/api
               command: ["node", "dist/scripts/worker-live.js"]
@@ -193,7 +193,7 @@ spec:
               # immutable digest as the deployed release). This base tag is a
               # bootstrap default only — the CronJobs must be applied via the
               # refresh-cronjobs overlay, never with :latest live (§6).
-              image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+              image: ghcr.io/rhanka/radar-api:latest
               imagePullPolicy: IfNotPresent
               workingDir: /workspace/api
               command: ["node", "dist/scripts/project-graph-from-s3.js"]
