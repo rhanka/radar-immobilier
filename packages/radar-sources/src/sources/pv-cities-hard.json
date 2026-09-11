@@ -10,7 +10,7 @@
       "pvIndexUrl": "https://batiscan.ca/proces-verbaux",
       "pdf_count": 20,
       "status": "graphified",
-      "scw_key": "graph/batiscan/latest.json"
+      "graph_key": "graph/batiscan/latest.json"
     },
     "boileau": {
       "strategy": "vplus",
@@ -19,7 +19,7 @@
       "pvIndexUrl": "https://boileau.ca/proces-verbaux",
       "pdf_count": 164,
       "status": "graphified",
-      "scw_key": "graph/boileau/latest.json"
+      "graph_key": "graph/boileau/latest.json"
     },
     "bowman": {
       "strategy": "vplus",
@@ -28,7 +28,7 @@
       "pvIndexUrl": "https://bowman.ca/les-proces-verbaux",
       "pdf_count": 13,
       "status": "graphified",
-      "scw_key": "graph/bowman/latest.json"
+      "graph_key": "graph/bowman/latest.json"
     },
     "chibougamau": {
       "strategy": "vplus",
@@ -38,7 +38,7 @@
       "pdf_count": 270,
       "status": "graphified",
       "notes": "270 PVs, 2016 nodes, 2664 edges",
-      "scw_key": "graph/chibougamau/latest.json"
+      "graph_key": "graph/chibougamau/latest.json"
     },
     "dunham": {
       "strategy": "vplus",
@@ -47,7 +47,7 @@
       "pvIndexUrl": "https://ville.dunham.qc.ca/seances-du-conseil-municipal",
       "pdf_count": 132,
       "status": "graphified",
-      "scw_key": "graph/dunham/latest.json"
+      "graph_key": "graph/dunham/latest.json"
     },
     "grenville": {
       "strategy": "vplus",
@@ -56,7 +56,7 @@
       "pvIndexUrl": "https://grenville.ca/seances-du-conseil",
       "pdf_count": 12,
       "status": "graphified",
-      "scw_key": "graph/grenville/latest.json"
+      "graph_key": "graph/grenville/latest.json"
     },
     "lac-saint-paul": {
       "strategy": "vplus",
@@ -65,8 +65,8 @@
       "pvIndexUrl": "https://lac-saint-paul.ca/proces-verbaux",
       "pdf_count": 82,
       "status": "graphified",
-      "scw_key": "graph/lac-saint-paul/latest.json",
-      "notes": "3 PDFs 2024 déjà en SCW, 2 403 (fichiers anciens supprimés)"
+      "graph_key": "graph/lac-saint-paul/latest.json",
+      "notes": "3 PDFs 2024 déjà dans le stockage objet, 2 403 (fichiers anciens supprimés)"
     },
     "laurierville": {
       "strategy": "vplus",
@@ -76,7 +76,7 @@
       "pdf_count": 227,
       "status": "graphified",
       "notes": "227 PVs, 1575 nodes, 2324 edges",
-      "scw_key": "graph/laurierville/latest.json"
+      "graph_key": "graph/laurierville/latest.json"
     },
     "lorrainville": {
       "strategy": "vplus",
@@ -85,7 +85,7 @@
       "pvIndexUrl": "https://lorrainville.ca/proces-verbaux",
       "pdf_count": 60,
       "status": "graphified",
-      "scw_key": "graph/lorrainville/latest.json",
+      "graph_key": "graph/lorrainville/latest.json",
       "notes": "60 PDFs scannés/image → 62 noeuds seulement (OCR non disponible)"
     },
     "lyster": {
@@ -96,7 +96,7 @@
       "pdf_count": 251,
       "status": "graphified",
       "notes": "251 PVs, 1924 nodes, 3155 edges",
-      "scw_key": "graph/lyster/latest.json"
+      "graph_key": "graph/lyster/latest.json"
     },
     "baie-des-sables": {
       "strategy": "vplus",
@@ -106,7 +106,7 @@
       "pdf_count": 215,
       "status": "graphified",
       "notes": "215 PVs, 1610 nodes, 2658 edges",
-      "scw_key": "graph/baie-des-sables/latest.json"
+      "graph_key": "graph/baie-des-sables/latest.json"
     },
     "beaupre": {
       "strategy": "vplus",
@@ -115,7 +115,7 @@
       "pvIndexUrl": "https://villedebeaupre.com/conseil-municipal/seance-du-conseil",
       "pdf_count": 114,
       "status": "graphified",
-      "scw_key": "graph/beaupre/latest.json"
+      "graph_key": "graph/beaupre/latest.json"
     },
     "grand-remous": {
       "strategy": "vplus",
@@ -125,7 +125,7 @@
       "pdf_count": 323,
       "status": "graphified",
       "notes": "323 PVs, 2073 nodes, 3337 edges",
-      "scw_key": "graph/grand-remous/latest.json"
+      "graph_key": "graph/grand-remous/latest.json"
     }
   },
   "other_scraped": {
@@ -136,7 +136,7 @@
       "pvArchiveUrl": "https://www.lac-frontiere.ca/web/proces-verbaux-archive/",
       "pdf_count": 85,
       "status": "graphified",
-      "scw_key": "graph/lac-frontiere/latest.json",
+      "graph_key": "graph/lac-frontiere/latest.json",
       "notes": "WordPress Download Manager (wpdmdl=N redirect). 658 nodes, 902 edges."
     },
     "clarendon": {
@@ -144,12 +144,12 @@
       "pvIndexUrl": "https://clarendon.ca/municipality/council-meetings/",
       "pdf_count": 56,
       "status": "graphified",
-      "scw_key": "graph/clarendon/latest.json",
+      "graph_key": "graph/clarendon/latest.json",
       "notes": "42 Minutes PDFs depuis pages événements + 14 depuis zip 2023-frn. Bilingue EN/FR. 603 nodes, 872 edges."
     }
   },
   "configured_not_scraped": {
-    "_description": "Villes déjà dans ALL_PV_CITIES mais pas encore scrapées (raw/ absent de SCW). Ces villes sont confirmées irréductibles pour l'instant.",
+    "_description": "Villes déjà dans ALL_PV_CITIES mais pas encore scrapées (raw/ absent du stockage objet). Ces villes sont confirmées irréductibles pour l'instant.",
     "brossard": {
       "pvIndexUrl": "https://brossard.ca/assemblees-du-conseil-municipal/",
       "status": "irreductible",

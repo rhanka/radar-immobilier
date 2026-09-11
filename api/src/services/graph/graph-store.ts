@@ -51,7 +51,7 @@ export const graphifyNodeSchema = z.object({
    */
   label: z.string().optional().default(""),
   /**
-   * graphify v1 (old) emits `file_type`; graphify v2 (SCW) emits `type`.
+   * graphify v1 (old) emits `file_type`; graphify v2 (object store) emits `type`.
    * Both are accepted and mapped to the DB `type` column.
    */
   file_type: z.string().optional(),
@@ -99,7 +99,7 @@ export const graphifyLinkSchema = z.preprocess(
     source: z.string(),
     target: z.string(),
     /**
-     * graphify v1 (old) emits `relation`; graphify v2 (SCW) emits `type` on
+     * graphify v1 (old) emits `relation`; graphify v2 (object store) emits `type` on
      * edges. We coerce both: `relation` takes priority when present (v1),
      * otherwise `type` is used (v2). At least one of the two is required.
      * Some v2 variants use `rel` which is normalised to `relation` in the
@@ -323,7 +323,7 @@ export interface SourceMaterializationResult {
  * it (locator≥1 AND page AND evidence≥1) — a locator-only ref is rejected and the
  * node stays a phantom that the viewer never renders (the owner bug).
  *
- * Source mapping (measured on the docs-pocs baseline, extraction):
+ * Source mapping (measured on the legacy extraction baseline):
  *  - a DesignationEvent's source lives on ITS OWN edges — `derived_from`
  *    (event→bylaw) or `supports` (source→event), refs[0] = {docSha, page:1};
  *    evidence = the event's own `label`.

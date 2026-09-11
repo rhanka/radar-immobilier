@@ -696,11 +696,11 @@ describe("graphifyGraphSchema", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// graphify v2 (SCW) format tests — `type` instead of `file_type`, `type` on
+// graphify v2 (object store) format tests — `type` instead of `file_type`, `type` on
 // edges, `status`/`description`/`refs` on nodes.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Fixture: real-world shape from graph/drummondville/latest.json (SCW). */
+/** Fixture: real-world shape from graph/drummondville/latest.json (object store). */
 const FIXTURE_GRAPH_V2 = {
   ville: "drummondville",
   generatedAt: "2026-06-12",

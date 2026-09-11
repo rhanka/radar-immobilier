@@ -93,7 +93,7 @@ describe("GET /api/documents/raw", () => {
     const app = documentsRoute({ store });
 
     const res = await app.request(
-      `/api/documents/raw?rawRef=${encodeURIComponent(`/tmp/scw-docs/${record.storageKey}`)}`,
+      `/api/documents/raw?rawRef=${encodeURIComponent(`/tmp/object-docs/${record.storageKey}`)}`,
     );
 
     expect(res.status).toBe(200);

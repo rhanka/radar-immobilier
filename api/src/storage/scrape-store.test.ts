@@ -10,7 +10,7 @@
  *  5. Without a scrapeStore, the executor falls back to the main objectStore for
  *     raw docs (MinIO local default — unchanged behaviour).
  *
- * No real S3 / SCW network calls are made. All stores are in-memory mocks.
+ * No real S3 / object store network calls are made. All stores are in-memory mocks.
  */
 
 import { describe, expect, it } from "vitest";
@@ -132,7 +132,7 @@ describe("resolveScrapeS3Config — fallback to S3_* when SCRAPE_S3_* absent", (
   it("falls back to all S3_* values when no SCRAPE_S3_* are set", () => {
     const config = loadConfig({
       S3_ENDPOINT: "http://minio:9000",
-      S3_REGION: "fr-par",
+      S3_REGION: "us-east-1",
       S3_BUCKET: "radar-immobilier-raw",
       S3_ACCESS_KEY: "minioadmin",
       S3_SECRET_KEY: "minioadmin",
@@ -141,7 +141,7 @@ describe("resolveScrapeS3Config — fallback to S3_* when SCRAPE_S3_* absent", (
     const scrape = resolveScrapeS3Config(config);
 
     expect(scrape.endpoint).toBe("http://minio:9000");
-    expect(scrape.region).toBe("fr-par");
+    expect(scrape.region).toBe("us-east-1");
     // bucket defaults to radar-immobilier-docs regardless of S3_BUCKET
     expect(scrape.bucket).toBe("radar-immobilier-docs");
     expect(scrape.accessKey).toBe("minioadmin");
@@ -149,48 +149,48 @@ describe("resolveScrapeS3Config — fallback to S3_* when SCRAPE_S3_* absent", (
     expect(scrape.forcePathStyle).toBe(true);
   });
 
-  it("uses SCRAPE_S3_* overrides when all are present (SCW prod scenario)", () => {
+  it("uses SCRAPE_S3_* overrides when all are present (object store prod scenario)", () => {
     const config = loadConfig({
       S3_ENDPOINT: "http://minio:9000",
-      S3_REGION: "fr-par",
+      S3_REGION: "us-east-1",
       S3_BUCKET: "radar-immobilier-raw",
       S3_ACCESS_KEY: "minioadmin",
       S3_SECRET_KEY: "minioadmin",
       S3_FORCE_PATH_STYLE: "true",
-      SCRAPE_S3_ENDPOINT: "https://s3.fr-par.scw.cloud",
-      SCRAPE_S3_REGION: "fr-par",
+      SCRAPE_S3_ENDPOINT: "https://objects.example.invalid",
+      SCRAPE_S3_REGION: "us-east-1",
       SCRAPE_S3_BUCKET: "radar-immobilier-docs",
-      SCRAPE_S3_ACCESS_KEY: "scw-access-key-placeholder",
-      SCRAPE_S3_SECRET_KEY: "scw-secret-key-placeholder",
+      SCRAPE_S3_ACCESS_KEY: "test-access-key",
+      SCRAPE_S3_SECRET_KEY: "test-secret-key",
       SCRAPE_S3_FORCE_PATH_STYLE: "false",
     });
     const scrape = resolveScrapeS3Config(config);
 
-    expect(scrape.endpoint).toBe("https://s3.fr-par.scw.cloud");
-    expect(scrape.region).toBe("fr-par");
+    expect(scrape.endpoint).toBe("https://objects.example.invalid");
+    expect(scrape.region).toBe("us-east-1");
     expect(scrape.bucket).toBe("radar-immobilier-docs");
-    expect(scrape.accessKey).toBe("scw-access-key-placeholder");
-    expect(scrape.secretKey).toBe("scw-secret-key-placeholder");
+    expect(scrape.accessKey).toBe("test-access-key");
+    expect(scrape.secretKey).toBe("test-secret-key");
     expect(scrape.forcePathStyle).toBe(false);
   });
 
   it("resolves partial overrides (endpoint + bucket only)", () => {
     const config = loadConfig({
       S3_ENDPOINT: "http://minio:9000",
-      S3_REGION: "fr-par",
+      S3_REGION: "us-east-1",
       S3_BUCKET: "radar-immobilier-raw",
       S3_ACCESS_KEY: "minioadmin",
       S3_SECRET_KEY: "minioadmin",
-      SCRAPE_S3_ENDPOINT: "https://s3.fr-par.scw.cloud",
+      SCRAPE_S3_ENDPOINT: "https://objects.example.invalid",
       SCRAPE_S3_BUCKET: "radar-immobilier-docs",
     });
     const scrape = resolveScrapeS3Config(config);
 
     // Overridden:
-    expect(scrape.endpoint).toBe("https://s3.fr-par.scw.cloud");
+    expect(scrape.endpoint).toBe("https://objects.example.invalid");
     expect(scrape.bucket).toBe("radar-immobilier-docs");
     // Fallen back:
-    expect(scrape.region).toBe("fr-par");
+    expect(scrape.region).toBe("us-east-1");
     expect(scrape.accessKey).toBe("minioadmin");
     expect(scrape.secretKey).toBe("minioadmin");
   });

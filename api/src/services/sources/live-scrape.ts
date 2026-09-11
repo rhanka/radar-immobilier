@@ -1,6 +1,6 @@
 /**
  * WORKER LIVE — orchestration entry point that SCRAPES the config-only PV cities
- * live and writes their raw documents to the scraping object store (Scaleway in
+ * live and writes their raw documents to the scraping object store (managed object storage in
  * production, MinIO locally). Spec: docs/spec/SPEC_PERSISTENCE_S3_FIRST.md §3.
  *
  * For each `PvCityEntry.config` in `ALL_PV_CITIES` (or a requested subset) it

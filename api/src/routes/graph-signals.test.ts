@@ -485,7 +485,7 @@ describe("GET /api/graph-signals/:city", () => {
   });
 
   it("keeps a raw document link when metadata is missing but the raw key is resolvable", async () => {
-    const legacyRawRef = "/tmp/scw-docs/raw/proces-verbaux-testville/cas/abc123.pdf";
+    const legacyRawRef = "/tmp/object-docs/raw/proces-verbaux-testville/cas/abc123.pdf";
     const node = makeNode("sig-005", "drummondville", "Signal", {
       refs: [
         {

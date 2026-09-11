@@ -1,7 +1,7 @@
 /**
  * live-scrape.test.ts — WORKER LIVE (SPEC_PERSISTENCE_S3_FIRST §3): the
  * orchestration entry point that scrapes the **config-only** PV cities live and
- * writes them to the scraping object store (SCW in prod, MinIO locally).
+ * writes them to the scraping object store (object store in prod, MinIO locally).
  *
  * `runLiveScrape(citySlugs?, { store, fetch, limit })`:
  *   - for each PvCityEntry config (or the requested subset) it instantiates the
