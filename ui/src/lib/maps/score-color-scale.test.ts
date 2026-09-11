@@ -13,6 +13,33 @@ import {
   ZONE_LABEL_MINZOOM,
 } from "./score-color-scale.js";
 
+function evaluateMapExpression(
+  expression: unknown,
+  properties: Record<string, unknown>,
+): unknown {
+  if (!Array.isArray(expression)) return expression;
+  const [operator, ...args] = expression;
+  if (operator === "get") return properties[String(args[0])];
+  if (operator === "==") {
+    return evaluateMapExpression(args[0], properties) === evaluateMapExpression(args[1], properties);
+  }
+  if (operator === "any") {
+    return args.some((arg) => evaluateMapExpression(arg, properties) === true);
+  }
+  if (operator === "all") {
+    return args.every((arg) => evaluateMapExpression(arg, properties) === true);
+  }
+  if (operator === "case") {
+    for (let index = 0; index < args.length - 1; index += 2) {
+      if (evaluateMapExpression(args[index], properties) === true) {
+        return evaluateMapExpression(args[index + 1], properties);
+      }
+    }
+    return evaluateMapExpression(args[args.length - 1], properties);
+  }
+  throw new Error(`Unsupported test expression operator: ${String(operator)}`);
+}
+
 // The score ramp MUST derive from DS tokens, never invented palettes.
 // Échelle : 0–10 (scorer canonique PR #165, lot-potential.ts).
 describe("score-color-scale — DS-token-driven ramp", () => {
@@ -104,6 +131,27 @@ describe("score-color-scale — DS-token-driven ramp", () => {
       { category: "neutral", count: 1, label: "Sans indicateur" },
     ]);
     expect(buildSignauxLotLegend([], null)).toEqual([]);
+  });
+
+  it("should keep the lot classifier in parity with the MapLibre color expression", () => {
+    const expression = signauxLotFillColorExpression(null);
+    const projections = [undefined, "none", "direct", "inherited"] as const;
+    const flags = [undefined, false, true] as const;
+
+    for (const signalProjection of projections) {
+      for (const priorite of flags) {
+        for (const multifamilial4plus of flags) {
+          for (const tod of flags) {
+            const properties = { signalProjection, priorite, multifamilial4plus, tod };
+            const [legendEntry] = buildSignauxLotLegend([properties], null);
+            expect(
+              evaluateMapExpression(expression, properties),
+              JSON.stringify(properties),
+            ).toBe(legendEntry.color);
+          }
+        }
+      }
+    }
   });
 
   it("opacity expression boosts priorité lots", () => {
