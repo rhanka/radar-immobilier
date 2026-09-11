@@ -40,7 +40,7 @@ const ZONES = [
 
 // ── Groupes dérivés de la légende ─────────────────────────────────────────────
 
-describe("ZONE_KIND_GROUPS — dérivés de zone-kind-style, pas dupliqués", () => {
+describe("ZONE_KIND_GROUPS — issus de zone-kind-style, pas dupliqués", () => {
   it("reprend les libellés de la légende zonage tels quels", () => {
     const byId = new Map(ZONE_KIND_GROUPS.map((g) => [g.id, g.label]));
     expect(byId.get("H")).toBe(ZONE_KIND_STYLES.H.label);
