@@ -123,6 +123,37 @@ spec:
         - protocol: TCP
           port: 5432
 ---
+# ADDITIVE: let the api pod reach the live cluster MinIO service on :9000.
+#
+# This rule belongs to the cluster MinIO path explicitly kept out of scope by
+# the decommissioning brief. Keep it unchanged until k8s migrates S3_ENDPOINT
+# and retires the cluster service; pruning it earlier would break API health and
+# RECUEIL object access under the namespace default-deny policy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-to-minio
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: minio
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: minio
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: api
+      ports:
+        - protocol: TCP
+          port: 9000
+---
 # ADDITIVE: let public Traefik traffic reach the immo MCP HTTP server
 # (40-immo-mcp-http-deploy.yaml + 41-immo-mcp-ingress.yaml).
 #
