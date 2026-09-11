@@ -62,6 +62,7 @@ CLAUDE.md / AGENTS.md / GEMINI.md   # per-agent pointers to rules/MASTER.md
 - **Scraping** : `playwright` connected to an `obscura` (Rust headless) sidecar with anti-detect.
 - **Auth** : passkey (WebAuthn) + magic-link, replicated from sentropic (BR-09).
 - **Deployment** : SPA on GitHub Pages, server on the K8s POC cluster (Scaleway Kapsule), bucket S3 on the `PoCs` Scaleway project. Domain `immo.sent-tech.ca`.
+- **Container registry** : public `ghcr.io/rhanka/radar-{api,ui,grounding}` packages; no pull secret is required for api, ui, MCP, or grounding.
 
 See `docs/spec/SPEC_EVOL_SCAFFOLDING.md` for the full design and version pins.
 

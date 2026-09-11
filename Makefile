@@ -31,7 +31,7 @@ export API_PROXY_TARGET ?= http://api:3000
 export API_VERSION ?= dev
 export UI_VERSION  ?= dev
 export E2E_VERSION ?= dev
-export REGISTRY ?= rg.fr-par.scw.cloud/radar-immobilier
+export REGISTRY ?= ghcr.io/rhanka
 export API_IMAGE ?= $(REGISTRY)/radar-api
 export UI_IMAGE ?= $(REGISTRY)/radar-ui
 
@@ -325,8 +325,8 @@ build-ui-image: ## Build the production ui image from ui/Dockerfile
 build-images: build-api-image build-ui-image ## Build production api + ui images
 
 .PHONY: registry-login
-registry-login: ## Login docker to the Scaleway registry using the scw CLI profile
-	scw registry login
+registry-login: ## Login docker to GHCR using the active GitHub CLI session
+	gh auth token | docker login ghcr.io -u "$$(gh api user --jq .login)" --password-stdin
 
 .PHONY: push-api-image
 push-api-image: ## Push API image (API_VERSION=<tag>, also updates latest)

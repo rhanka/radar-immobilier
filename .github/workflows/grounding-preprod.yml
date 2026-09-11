@@ -30,7 +30,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  IMAGE_PREFIX: rg.fr-par.scw.cloud/radar-immobilier
+  IMAGE_PREFIX: ghcr.io/rhanka
   NAMESPACE: radar-immobilier-preprod
 
 jobs:

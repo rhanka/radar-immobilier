@@ -41,7 +41,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:main-8909943-pdfgeo
+          image: ghcr.io/rhanka/radar-api:main-8909943-pdfgeo
           imagePullPolicy: Always
           workingDir: /workspace/api
           command: ["node", "dist/db/migrate.js"]
