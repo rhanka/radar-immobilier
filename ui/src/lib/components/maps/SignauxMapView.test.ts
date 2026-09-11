@@ -15,6 +15,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, cleanup, waitFor, screen, fireEvent, within } from "@testing-library/svelte";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
@@ -344,64 +345,67 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
   // les fetchs zones + lots exactement comme en plan ; le mode transmis au socle
   // reste 'satellite'. (Les assertions de PAINT par mode sont couvertes par le
   // socle — GeoCityMapBase.basemap-mode.test.ts — et l'e2e recette.)
-  // §7 R2 — refonte légende CPTAQ : encadré autonome retiré, « Agricole (CPTAQ) »
-  // devient un TOGGLE de couche sous AFFECTATION (rayé quand désactivé), qui persiste.
-  it("(§7) « Agricole (CPTAQ) » = toggle sous AFFECTATION (encadré autonome retiré), rayé puis persisté", async () => {
+  // §7 R2 — CPTAQ is probed at city selection. When available, its row is a
+  // persistent toggle under zoning; when absent, agriculture stays static.
+  it("probes CPTAQ before activation and keeps its label stable after toggling", async () => {
     setSearch("");
-    vi.mocked(fetchCptaqConstraints).mockResolvedValueOnce(cptaqResponse(true));
+    vi.mocked(fetchCptaqConstraints).mockResolvedValue(cptaqResponse(true));
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
 
-    // Availability has not been established before the layer is requested.
     const toggle = await screen.findByTestId("legend-cptaq-toggle");
     expect(toggle.tagName).toBe("BUTTON");
-    expect(toggle.textContent).toContain("Agricole");
-    expect(toggle.textContent).not.toContain("(CPTAQ)");
+    expect(toggle.textContent).toContain("Agricole (CPTAQ)");
+    expect(fetchCptaqConstraints).toHaveBeenCalledTimes(1);
+    expect(fetchCptaqConstraints).toHaveBeenCalledWith(
+      CITY_SLUG,
+      expect.objectContaining({ limit: 1, signal: expect.any(AbortSignal) }),
+    );
     // L'encadré autonome + sa case à cocher ont disparu.
     expect(screen.queryByTestId("map-legend-cptaq")).toBeNull();
-    // Désactivé par défaut → aria-pressed false + libellé RAYÉ (line-through seul).
+    // Désactivé par défaut → aria-pressed false + libellé rayé.
     expect(toggle.getAttribute("aria-pressed")).toBe("false");
     expect(toggle.querySelector(".line-through")).not.toBeNull();
 
-    // Clic → activé + persisté ; la rayure disparaît.
+    // Clic → chargement complet, activation et persistance.
     await fireEvent.click(toggle);
     await waitFor(() =>
-      expect(
-        screen.getByTestId("legend-cptaq-toggle").getAttribute("aria-pressed"),
-      ).toBe("true"),
+      expect(screen.getByTestId("legend-cptaq-toggle").getAttribute("aria-pressed")).toBe("true"),
     );
-    await waitFor(() =>
-      expect(screen.getByTestId("legend-cptaq-toggle").textContent).toContain(
-        "Agricole (CPTAQ)",
-      ),
+    expect(fetchCptaqConstraints).toHaveBeenLastCalledWith(
+      CITY_SLUG,
+      expect.objectContaining({ limit: 2000 }),
     );
-    // Persistance CPTAQ = "1"/"0" (readLabelPref/persistLabelPref, inchangé).
-    expect(localStorage.getItem("signaux-cptaq-enabled")).toBe("1");
+    expect(screen.getByTestId("legend-cptaq-toggle").textContent).toContain("Agricole (CPTAQ)");
     expect(
       screen.getByTestId("legend-cptaq-toggle").querySelector(".line-through"),
     ).toBeNull();
+
+    await fireEvent.click(screen.getByTestId("legend-cptaq-toggle"));
+    expect(screen.getByTestId("legend-cptaq-toggle").getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByTestId("legend-cptaq-toggle").textContent).toContain("Agricole (CPTAQ)");
+    expect(screen.getByTestId("legend-cptaq-toggle").querySelector(".line-through")).not.toBeNull();
+    expect(localStorage.getItem("signaux-cptaq-enabled")).toBe("0");
   });
 
-  it("shows Agricole without CPTAQ and no absence notice when the collection is absent", async () => {
-    type CptaqResponse = Awaited<ReturnType<typeof fetchCptaqConstraints>>;
-    let resolveCptaq!: (value: CptaqResponse) => void;
-    vi.mocked(fetchCptaqConstraints).mockImplementationOnce(
-      () => new Promise<CptaqResponse>((resolve) => { resolveCptaq = resolve; }),
-    );
+  it("shows unavailable CPTAQ as normal agriculture without a strike-through", async () => {
+    const response = fixtureZones(CITY_SLUG);
+    response.featureCollection.features[0]!.properties.kind = "agricole";
+    vi.mocked(loadSignauxZones).mockResolvedValueOnce({ tier: "collection", response });
+    vi.mocked(fetchCptaqConstraints).mockResolvedValueOnce(cptaqResponse(false));
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
-    await fireEvent.click(await screen.findByTestId("legend-cptaq-toggle"));
-    expect(await screen.findByText("Chargement de la couche Agricole (CPTAQ)…")).toBeTruthy();
 
-    resolveCptaq(cptaqResponse(false));
     await waitFor(() =>
-      expect(screen.queryByText("Chargement de la couche Agricole (CPTAQ)…")).toBeNull(),
+      expect(fetchCptaqConstraints).toHaveBeenCalledWith(
+        CITY_SLUG,
+        expect.objectContaining({ limit: 1 }),
+      ),
     );
-
-    const legend = screen.getByTestId("map-legend-zonage");
-    expect(within(legend).getByText("Agricole", { exact: true })).toBeTruthy();
+    const legend = await screen.findByTestId("map-legend-zonage");
+    const agriculturalRow = await within(legend).findByText("Agricole", { exact: true });
+    expect(agriculturalRow.closest("button")).toBeNull();
+    expect(agriculturalRow.classList.contains("line-through")).toBe(false);
+    expect(screen.queryByTestId("legend-cptaq-toggle")).toBeNull();
     expect(within(legend).queryByText("Agricole (CPTAQ)")).toBeNull();
-    expect(
-      screen.queryByText("Couche Agricole (CPTAQ) non disponible pour cette ville."),
-    ).toBeNull();
   });
 
   it("should render a single agricultural entry when the CPTAQ toggle is shown", async () => {
@@ -412,7 +416,6 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     setSearch("");
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
 
-    await fireEvent.click(await screen.findByTestId("legend-cptaq-toggle"));
     const legend = await screen.findByTestId("map-legend-zonage");
     await waitFor(() =>
       expect(within(legend).getByText("Agricole (CPTAQ)")).toBeTruthy(),
@@ -492,5 +495,24 @@ describe("SignauxMapView — déclencheur chat (câblage source, store #564)", (
     expect(source).toContain("isChatEnabled()");
     // Le bouton (IconButton chat) est rendu SOUS condition du flag.
     expect(source).toMatch(/\{#if chatEnabled\}[\s\S]*?data-testid="chat-toggle"[\s\S]*?\{\/if\}/);
+  });
+});
+
+describe("SignauxMapView — design-system Checkbox contract", () => {
+  const designSystemEntry = createRequire(import.meta.url).resolve(
+    "@sentropic/design-system-svelte",
+  );
+  const checkboxSource = readFileSync(
+    resolve(dirname(designSystemEntry), "Checkbox.svelte"),
+    "utf8",
+  );
+
+  it("consumes the inherited choice label font-size and color variables", () => {
+    expect(checkboxSource).toContain(
+      "var(--st-component-selection-choiceLabelFontSize",
+    );
+    expect(checkboxSource).toContain(
+      "var(--st-component-selection-choiceLabelColor",
+    );
   });
 });
