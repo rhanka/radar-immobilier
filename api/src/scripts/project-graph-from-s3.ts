@@ -1,7 +1,7 @@
 /**
- * project-graph-from-s3 — projette les graphes graphify SCW dans Postgres.
+ * project-graph-from-s3 — projette les graphes graphify object store dans Postgres.
  *
- * Lit `graph/<ville>/latest.json` depuis le bucket SCW (GRAPH_S3_* / SCRAPE_S3_*)
+ * Lit `graph/<ville>/latest.json` depuis le bucket object store (GRAPH_S3_* / SCRAPE_S3_*)
  * et appelle `upsertGraphAtomic(db, citySlug, graphJson)` pour chaque fichier qui
  * contient un champ `nodes` valide.
  *
@@ -21,7 +21,7 @@
  *   GRAPH_S3_REGION, GRAPH_S3_FORCE_PATH_STYLE
  *   (chacun se rabat sur SCRAPE_S3_* puis S3_*)
  *
- * Format SCW attendu (graphify v2) :
+ * Format object store attendu (graphify v2) :
  *   { nodes: [{ id, type, label, status?, description?, refs? }],
  *     edges: [{ source, target, type|relation, refs? }] }
  * ou le format graphify v1 classique :

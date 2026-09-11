@@ -44,7 +44,7 @@ export interface RunCiblagePlanInput {
   /**
    * Optional dedicated store for raw scraped documents (RECUEIL output).
    * When provided, raw bytes are written to / read from this store (e.g. the
-   * SCW `radar-immobilier-docs` bucket in production); the main `objectStore`
+   * object store `radar-immobilier-docs` bucket in production); the main `objectStore`
    * is still used for project-state, ciblage plans, and jobs. When absent,
    * `objectStore` handles everything (local-dev / MinIO default).
    */
