@@ -128,12 +128,13 @@ if [ "$TARGET_LAYOUT" = "cas" ]; then
   CAS_MANIFEST_SHA=$(sha256sum "$CAS_MANIFEST" | awk '{print $1}')
   planned_docs=$(awk 'END {print NR-1}' "$CAS_MANIFEST")
   planned_max_calls=$((planned_docs * 2))
-  if [ "$planned_max_calls" -gt 500 ]; then
-    echo "REFUS LLM: worst-case $planned_max_calls calls exceeds cap 500." >&2
+  [ -f "$LLM_COUNTER" ] || printf '0\n' > "$LLM_COUNTER"
+  calls_before_run=$(cat "$LLM_COUNTER")
+  if [ "$((calls_before_run + planned_max_calls))" -gt 500 ]; then
+    echo "REFUS LLM: reserved attempts would exceed cap 500." >&2
     exit 1
   fi
-  [ -f "$LLM_COUNTER" ] || printf '0\n' > "$LLM_COUNTER"
-  echo "CAS manifest: $planned_docs documents (max $planned_max_calls LLM attempts)"
+  echo "CAS manifest: $planned_docs documents ($planned_max_calls attempts reserved before chunking)"
 fi
 
 # ── 2. Charger les cibles ─────────────────────────────────────────────────────
