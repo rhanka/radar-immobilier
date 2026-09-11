@@ -109,6 +109,7 @@ vi.mock("$lib/maps/lots-client.js", async (importOriginal) => {
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchAllLots } from "$lib/maps/lots-client.js";
 import { loadSignauxZones } from "$lib/maps/signaux-zones-loader.js";
+import { fetchCptaqConstraints } from "$lib/maps/cptaq-client.js";
 
 /** Une zone réelle avec géométrie — le drill zones est alimenté. */
 function fixtureZones(citySlug: string): GeoZonesResponse {
@@ -164,6 +165,21 @@ function cityRoute(): GeoRoute {
   };
 }
 
+function cptaqResponse(present: boolean) {
+  return {
+    ok: present,
+    citySlug: CITY_SLUG,
+    source: present ? ("geo-ogc" as const) : ("none" as const),
+    absent: present ? undefined : true,
+    featureCollection: {
+      type: "FeatureCollection" as const,
+      features: present
+        ? [{ type: "Feature" as const, geometry: null, properties: {} }]
+        : [],
+    },
+  };
+}
+
 /** Positionne `window.location.search` (lu à l'init du composant). */
 function setSearch(search: string): void {
   window.history.replaceState({}, "", `/geo/city/${CITY_SLUG}${search}`);
@@ -172,11 +188,14 @@ function setSearch(search: string): void {
 afterEach(() => {
   cleanup();
   setSearch("");
+  localStorage.clear();
 });
 
 beforeEach(() => {
   vi.mocked(fetchAllLots).mockClear();
   vi.mocked(loadSignauxZones).mockClear();
+  vi.mocked(fetchCptaqConstraints).mockReset();
+  vi.mocked(fetchCptaqConstraints).mockResolvedValue(cptaqResponse(false));
 });
 
 describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
@@ -245,11 +264,69 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     expect(queries.queryByText("Sans indicateur")).toBeNull();
     expect(queries.queryByText("Zone citée par un signal")).toBeNull();
 
+    const referenceItem = queries.getByText("Priorité (4+ ∧ TOD)").closest("li")!;
+    expect(referenceItem.classList.contains("text-xs")).toBe(true);
+    expect(referenceItem.classList.contains("text-slate-600")).toBe(true);
     for (const label of ["N° de zone", "N° de lot"]) {
-      const checkboxLabel = screen.getByLabelText(label).closest("label");
-      expect(checkboxLabel?.classList.contains("text-xs")).toBe(true);
-      expect(checkboxLabel?.classList.contains("text-slate-600")).toBe(true);
+      const checkboxRoot = screen.getByLabelText(label).closest("label")!;
+      const visibleLabel = checkboxRoot.querySelector<HTMLElement>(".st-choice__label")!;
+      const styleHost = checkboxRoot.closest<HTMLElement>(".legend-number-toggle")!;
+      expect(visibleLabel.tagName).toBe("SPAN");
+      expect(visibleLabel.textContent).toBe(label);
+      expect(styleHost.contains(visibleLabel)).toBe(true);
+      expect(
+        styleHost.style.getPropertyValue("--st-component-selection-choiceLabelFontSize"),
+      ).toBe("0.75rem");
+      expect(
+        styleHost.style.getPropertyValue("--st-component-selection-choiceLabelColor"),
+      ).toBe("rgb(71 85 105)");
     }
+  });
+
+  it("hides only the neutral lot entry when every displayed lot is neutral", async () => {
+    vi.mocked(fetchAllLots).mockResolvedValueOnce({
+      ok: true,
+      citySlug: CITY_SLUG,
+      source: "donnees-quebec",
+      collectionId: `qc-lots-${CITY_SLUG}`,
+      numberMatched: 1,
+      numberReturned: 1,
+      featureCollection: {
+        type: "FeatureCollection",
+        features: [
+          { type: "Feature", geometry: null, properties: { noLot: "neutral-1" } },
+        ],
+      },
+    });
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    const legend = await screen.findByTestId("map-legend-lots");
+    expect(within(legend).getByText("Lots")).toBeTruthy();
+    expect(within(legend).queryByText("Sans indicateur")).toBeNull();
+    expect(within(legend).getByLabelText("N° de lot")).toBeTruthy();
+  });
+
+  it("keeps the neutral lot entry when another category is present", async () => {
+    vi.mocked(fetchAllLots).mockResolvedValueOnce({
+      ok: true,
+      citySlug: CITY_SLUG,
+      source: "donnees-quebec",
+      collectionId: `qc-lots-${CITY_SLUG}`,
+      numberMatched: 2,
+      numberReturned: 2,
+      featureCollection: {
+        type: "FeatureCollection",
+        features: [
+          { type: "Feature", geometry: null, properties: { noLot: "priority-1", priorite: true } },
+          { type: "Feature", geometry: null, properties: { noLot: "neutral-1" } },
+        ],
+      },
+    });
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    const legend = await screen.findByTestId("map-legend-lots");
+    expect(within(legend).getByText("Priorité (4+ ∧ TOD)")).toBeTruthy();
+    expect(within(legend).getByText("Sans indicateur")).toBeTruthy();
   });
 
   it("?layers=zones (alias) : fetchAllLots N'EST PAS appelé", async () => {
@@ -271,13 +348,14 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
   // devient un TOGGLE de couche sous AFFECTATION (rayé quand désactivé), qui persiste.
   it("(§7) « Agricole (CPTAQ) » = toggle sous AFFECTATION (encadré autonome retiré), rayé puis persisté", async () => {
     setSearch("");
-    localStorage.clear();
+    vi.mocked(fetchCptaqConstraints).mockResolvedValueOnce(cptaqResponse(true));
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
 
-    // Le toggle apparaît sous AFFECTATION une fois la ville sélectionnée.
+    // Availability has not been established before the layer is requested.
     const toggle = await screen.findByTestId("legend-cptaq-toggle");
     expect(toggle.tagName).toBe("BUTTON");
-    expect(toggle.textContent).toContain("Agricole (CPTAQ)");
+    expect(toggle.textContent).toContain("Agricole");
+    expect(toggle.textContent).not.toContain("(CPTAQ)");
     // L'encadré autonome + sa case à cocher ont disparu.
     expect(screen.queryByTestId("map-legend-cptaq")).toBeNull();
     // Désactivé par défaut → aria-pressed false + libellé RAYÉ (line-through seul).
@@ -291,23 +369,44 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
         screen.getByTestId("legend-cptaq-toggle").getAttribute("aria-pressed"),
       ).toBe("true"),
     );
+    await waitFor(() =>
+      expect(screen.getByTestId("legend-cptaq-toggle").textContent).toContain(
+        "Agricole (CPTAQ)",
+      ),
+    );
     // Persistance CPTAQ = "1"/"0" (readLabelPref/persistLabelPref, inchangé).
     expect(localStorage.getItem("signaux-cptaq-enabled")).toBe("1");
     expect(
       screen.getByTestId("legend-cptaq-toggle").querySelector(".line-through"),
     ).toBeNull();
-    localStorage.clear();
+  });
+
+  it("shows Agricole without CPTAQ and no absence notice when the collection is absent", async () => {
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+    await fireEvent.click(await screen.findByTestId("legend-cptaq-toggle"));
+    await waitFor(() => expect(vi.mocked(fetchCptaqConstraints)).toHaveBeenCalled());
+
+    const legend = screen.getByTestId("map-legend-zonage");
+    expect(within(legend).getByText("Agricole", { exact: true })).toBeTruthy();
+    expect(within(legend).queryByText("Agricole (CPTAQ)")).toBeNull();
+    expect(
+      screen.queryByText("Couche Agricole (CPTAQ) non disponible pour cette ville."),
+    ).toBeNull();
   });
 
   it("should render a single agricultural entry when the CPTAQ toggle is shown", async () => {
     const response = fixtureZones(CITY_SLUG);
     response.featureCollection.features[0]!.properties.kind = "agricole";
     vi.mocked(loadSignauxZones).mockResolvedValueOnce({ tier: "collection", response });
+    vi.mocked(fetchCptaqConstraints).mockResolvedValueOnce(cptaqResponse(true));
     setSearch("");
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
 
+    await fireEvent.click(await screen.findByTestId("legend-cptaq-toggle"));
     const legend = await screen.findByTestId("map-legend-zonage");
-    expect(within(legend).getByText("Agricole (CPTAQ)")).toBeTruthy();
+    await waitFor(() =>
+      expect(within(legend).getByText("Agricole (CPTAQ)")).toBeTruthy(),
+    );
     expect(within(legend).queryByText("Agricole", { exact: true })).toBeNull();
     expect(within(legend).queryByText("Affectation (source)")).toBeNull();
   });
