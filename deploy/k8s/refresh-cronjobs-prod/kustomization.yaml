@@ -1,0 +1,33 @@
+# refresh-cronjobs-prod — deploys the two production refresh CronJobs, pins
+# them to the promoted release image, and un-suspends them. This is the
+# production twin of refresh-cronjobs; it deliberately carries no MinIO patch.
+#
+# The schedules are inherited unchanged from 34-refresh-cronjob.yaml: scrape at
+# 03:17 UTC, then projection at 04:30 UTC. Keep both outside the release window:
+# neither refresh workload may overlap the release backup.
+#
+# TODO(#670): remove the inherited SCW endpoint, bucket, and credential
+# references only as part of the tracked SCW S3 eradication.
+#
+# Applied only by the gated promote-prod "Deploy refresh CronJobs (prod)" step.
+# The fail-loud image placeholder must be replaced by `kustomize edit set image`
+# before rendering or applying this overlay.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: radar-immobilier
+
+resources:
+  - ../34-refresh-cronjob.yaml
+
+images:
+  - name: ghcr.io/rhanka/radar-api
+    newTag: PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
+
+patches:
+  - target:
+      kind: CronJob
+    patch: |
+      - op: replace
+        path: /spec/suspend
+        value: false
