@@ -816,6 +816,20 @@ jobs:
             api="${IMAGE_PREFIX}/radar-api:${SHA}"
           kubectl -n "$NAMESPACE" set image deploy/radar-ui \
             ui="${IMAGE_PREFIX}/radar-ui:${SHA}"
+          # Parité immo-mcp (préprod) : le connecteur MCP embarque la même image
+          # radar-api ; sans ce set-image il restait sur son ancien registre/tag
+          # (constat k8s 2026-09-11 : rg.fr-par.scw.cloud/…:a132d4a pendant que
+          # api/ui étaient sur ghcr.io/…:1a1d218). Guardé : absent ⇒ skip. Le
+          # Deployment est patché seulement (pas d'apply de 40-immo-mcp ici, cf.
+          # NOTE ci-dessus : namespace hardcodé prod + Role préprod sans CM/SVC).
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" set image deploy/radar-immo-mcp \
+              mcp="${IMAGE_PREFIX}/radar-api:${SHA}"
+            kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=180s \
+              || echo "::warning::radar-immo-mcp rollout not complete within 180s (optional connector, deploy continues)"
+          else
+            echo "radar-immo-mcp Deployment absent in ${NAMESPACE} — skipping immo-mcp parity set-image"
+          fi
 
       - name: Wait for rollouts
         id: wait
