@@ -144,6 +144,9 @@ jobs:
           - service: grounding
             image: radar-grounding
             dockerfile: deploy/grounding/Dockerfile
+          # No `obscura` entry on purpose: deploy/k8s/35-obscura.yaml runs the
+          # upstream PUBLIC Docker Hub image (docker.io/h4ckf0r0day/obscura,
+          # tag + digest pinned) — nothing to build, no GHCR package.
     steps:
       - name: Checkout
         uses: actions/checkout@v4
