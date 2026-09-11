@@ -1,7 +1,7 @@
 # radar API (Hono) Deployment + Service. Brought in from draft PR #8
 # (deploy/k8s/api.yaml) and extended for the sentropic-app model:
 #   - runs under the radar-app ServiceAccount;
-#   - object storage points at the in-cluster MinIO (25-minio.yaml);
+#   - object-storage coordinates remain operator-owned pending the OVH handoff;
 #   - the SENTROPIC_* / OAUTH_* / AUTH_* env wires human auth to the shared
 #     sentropic IdP (OIDC, see 80-auth.yaml + README "Auth delegation").
 #     The api is the OIDC *relying party*: it runs the authorization-code +

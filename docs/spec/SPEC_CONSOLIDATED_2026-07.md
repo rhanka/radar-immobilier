@@ -199,7 +199,7 @@ côté client OAuth** (claude.ai / le RP `radar-api`), **pas** dans le pod MCP (
 
 ### 2.5 Kubernetes & CD (`deploy/k8s/**`, `.github/workflows/`)
 
-`kustomization.yaml` inclut : `00-namespace`, `10-rbac`, `20-postgres-postgis`, `25-minio`,
+`kustomization.yaml` inclut : `00-namespace`, `10-rbac`, `20-postgres-postgis`,
 `30-api`, `34-refresh-cronjob`, `35-obscura`, `40-maildev`, `50-ui`, `60-ingress`, `70-networkpolicy`,
 `80-auth`. **Le MCP (`40-immo-mcp-http-deploy.yaml`, `41-immo-mcp-ingress.yaml`) est délibérément
 HORS kustomization** — appliqué seulement par le workflow manuel.
