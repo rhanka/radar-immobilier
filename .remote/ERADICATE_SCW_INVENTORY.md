@@ -4,6 +4,14 @@
 
 Référence immuable : `831cad2459b6a59fde790145af5c6cf9bb3f6b72`.
 
+Recalage 2026-09-11 : branche rebasée sur `main` `a4a2c00` (PR #671 « cutover
+registry SCW→GHCR » mergée). Les hunks registre (`IMAGE_PREFIX`/`REGISTRY`,
+`image:` `radar-{api,ui}` des manifests, `Makefile REGISTRY`, README registre)
+sont livrés par #671 et ne font plus partie de la PR #670, dont le périmètre
+restant est : stockage S3 SCW (TODO k8s), références/docs/règles/specs
+neutralisées, inventaire et plan. Chaque ligne ci-dessous est portée par #670
+sauf étiquette contraire (« livrée par #671 » ou « CONSERVÉE sur `main` »).
+
 Le balayage a porté sur tous les fichiers suivis avec les motifs demandés :
 `scw`, `scaleway`, `rg.fr-par.scw.cloud`, `s3.fr-par.scw.cloud`, `fr-par`,
 `kapsule`, `radar-minio`, `minio`, `MINIO_`,
@@ -13,10 +21,15 @@ les listes ci-dessous regroupent les numéros par fichier.
 
 Résultat : **885 lignes**, classées sans double compte :
 
-- **A — 366** : résidus purs supprimés ou reformulés;
+- **A — 366** : résidus purs supprimés ou reformulés — **339 portées par
+  #670** (275 reformulées + 64 supprimées avec leurs 4 fichiers), **25 livrées
+  par #671** (mergé `a4a2c00` : login, miroir et commentaires de l'ancien
+  registre), **2 CONSERVÉES sur `main`** (pull secret `radar-registry-pull`
+  requis par `radar-obscura`, voir B1);
 - **B — 172** : ressources toujours nécessaires, remplacées seulement quand
   la cible a été vérifiée, sinon laissées en TODO (ou conservées sur décision
-  owner : transport e-mail SCW TEM, voir B3);
+  owner : transport e-mail SCW TEM, voir B3) — dont **B1 registre et images :
+  39 livrées par #671**, 1 conservée (`radar-obscura`), 3 docs portées par #670;
 - **C — 347** : historique, émulation locale ou service encore opéré par k8s,
   laissé intact (dont les manifests MinIO `25-minio.yaml` + netpols 71/72,
   conservés jusqu'à la dernière étape de décom, voir « Séquencement — décom
@@ -27,12 +40,19 @@ numéro de ligne et ne sont pas inclus dans les 885 lignes textuelles.
 
 ## A — résidus supprimés ou neutralisés (366)
 
-Actions : suppression des manifests et scripts morts; retrait du login, miroir
-et secret de pull de l’ancien registre (le transport e-mail SCW TEM est
-CONSERVÉ, voir B3; les manifests MinIO `25-minio.yaml` + netpols 71/72 sont
-CONSERVÉS, voir « Séquencement — décom MinIO »); suppression des fausses
-instructions courantes; terminologie fournisseur-neutre dans le code, les
-contrats et les documents actifs.
+Actions : suppression des manifests et scripts morts; retrait du login et du
+miroir de l’ancien registre (livré par #671, mergé `a4a2c00`) — le secret de
+pull `radar-registry-pull` (`10-rbac.yaml`, `secrets.example.yaml`) est
+CONSERVÉ sur `main` tant que `radar-obscura` tire depuis l’ancien registre
+(cutover obscura = branche `feat/obscura-ghcr`, hors #670); le transport e-mail
+SCW TEM est CONSERVÉ, voir B3; les manifests MinIO `25-minio.yaml` + netpols
+71/72 sont CONSERVÉS, voir « Séquencement — décom MinIO »; suppression des
+fausses instructions courantes; terminologie fournisseur-neutre dans le code,
+les contrats et les documents actifs.
+
+Décompte A : 339 lignes portées par #670 (275 reformulées + 64 dans les 4
+fichiers supprimés), 25 livrées par #671, 2 conservées sur `main` — étiquetées
+ci-dessous.
 
 Fichiers supprimés :
 
@@ -44,10 +64,10 @@ Fichiers supprimés :
 Occurrences au commit de référence :
 
 - `.env.example:10,12,17,21,22,26,27,28`
-- `.github/workflows/build-push-images.yml:4,10,44,45,143,158,159,160,162,167,169,176,178,235,241,1248,1253,1257,1269,1279`
+- `.github/workflows/build-push-images.yml:10,44,45` (commentaires cluster) ; `:4,143,158,159,160,162,167,169,176,178,235,241,1248,1253,1257,1269,1279` livrées par #671
 - `.github/workflows/grounding-publish-prod.yml:1,3,4,9,10,14,16,18,19,21,23,24,25,26,55,56,57,58,59,63,98,100,101,104,105,106,129,130,149,152,153,156,157`
 - `.gitignore:44,64,65`
-- `Makefile:245,274,328,329`
+- `Makefile:245,274` ; `:328,329` (`registry-login`) livrées par #671
 - `README.md:60,64`
 - `api/Dockerfile:55`
 - `api/src/config.ts:27,31,38,41,42,49,60,61,64,233,251,252`
@@ -77,23 +97,23 @@ Occurrences au commit de référence :
 - `deploy/ci/db-backup.test.sh:68`
 - `deploy/grounding/Dockerfile:10`
 - `deploy/k8s/00-namespace.yaml:2,8`
-- `deploy/k8s/10-rbac.yaml:2`
-- `deploy/k8s/30-api.yaml:3,4,31`
+- `deploy/k8s/10-rbac.yaml:2` — CONSERVÉE sur `main` (`imagePullSecrets: radar-registry-pull`, requis par `radar-obscura`)
+- `deploy/k8s/30-api.yaml:4,31` ; `:3` livrée par #671
 - `deploy/k8s/31-graph-projection-job.yaml:1,14,23,129,158`
 - `deploy/k8s/32-graph-projection-only-job.yaml:5,83,84`
-- `deploy/k8s/32b-reproject-etape-job.yaml:1,4,5,8,9,11,15,17,23,31,78,95,96,99,101,103`
+- `deploy/k8s/32b-reproject-etape-job.yaml:1,4,5,8,9,11,15,17,23,31,78,95,96,99,101,103` (fichier supprimé par #670 ; `:78` avait été repointée par #671 avant suppression)
 - `deploy/k8s/33-scrape-job.yaml:1,89,93`
 - `deploy/k8s/33b-scrape-cities-job.yaml:83,87`
 - `deploy/k8s/34-refresh-cronjob.yaml:4,9,13,113,117,217`
 - `deploy/k8s/37-graphify34-apply-job.yaml:102`
 - `deploy/k8s/41-grounding-citation-job.yaml:7,31,37,58,97,99`
-- `deploy/k8s/50-ui.yaml:89`
+- `deploy/k8s/50-ui.yaml:89` livrée par #671
 - `deploy/k8s/60-ingress.yaml:2`
-- `deploy/k8s/README.md:4,16,200`
-- `deploy/k8s/grounding-preprod/kustomization.yaml:11`
+- `deploy/k8s/README.md:4` ; `:16,200` livrées par #671
+- `deploy/k8s/grounding-preprod/kustomization.yaml:11` livrée par #671
 - `deploy/k8s/refresh-cronjobs/kustomization.yaml:55,87,88`
 - `deploy/k8s/refresh-diag/diag-refresh-job.yaml:78,91`
-- `deploy/k8s/secrets.example.yaml:27,54,56,64,65,66,75,111`
+- `deploy/k8s/secrets.example.yaml:27,54,56,64,65,66,75` ; `:111` CONSERVÉE sur `main` (Secret `radar-registry-pull`, requis par `radar-obscura`)
 - `docker-compose.yml:92`
 - `docs/spec/SPEC_CONSOLIDATED_2026-07.md:130,202,227,232,312,617`
 - `docs/spec/SPEC_EVOL_SCAFFOLDING.md:207,216,219,222,319,320,321,326,366,367,472`
@@ -139,13 +159,19 @@ Occurrences au commit de référence :
 
 ## B — ressources nécessaires (172)
 
-### B1 — registre et images (43)
+### B1 — registre et images (43 : 39 livrées par #671, 1 conservée, 3 docs #670)
 
-Les chemins `radar-api`, `radar-ui` et `radar-grounding` ont été remplacés par
-`ghcr.io/rhanka/*` après vérification des paquets publics et du tag `831cad2`.
-L’image `radar-obscura` n’existe pas dans GHCR et reste inchangée avec un TODO.
-Le contrat geo porte maintenant un placeholder explicite en attendant son image
-vérifiée. Le chemin hypothétique d’une image MCP dédiée a été retiré en A.
+Le cutover registre est **livré par #671 (mergé `a4a2c00`)** : `REGISTRY` /
+`IMAGE_PREFIX` des workflows, `REGISTRY` du Makefile et toutes les lignes
+`image:` `radar-api` / `radar-ui` / `radar-grounding` des manifests pointent
+sur `ghcr.io/rhanka/*` sur `main`. La PR #670 ne porte plus aucun de ces hunks.
+L’image `radar-obscura` n’existe pas dans GHCR : elle reste inchangée sur
+`main` (avec le pull secret `radar-registry-pull`) et son cutover est porté par
+la branche `feat/obscura-ghcr`, hors #670. Le contrat geo porte un placeholder
+explicite en attendant son image vérifiée (#670). Le chemin hypothétique d’une
+image MCP dédiée a été retiré en A.
+
+Livrées par #671 (mergé `a4a2c00`) — 39 :
 
 - `.github/workflows/build-push-images.yml:88,89,90,114,115,802,1025,1061,1415`
 - `.github/workflows/grounding-preprod.yml:33`
@@ -158,7 +184,6 @@ vérifiée. Le chemin hypothétique d’une image MCP dédiée a été retiré e
 - `deploy/k8s/34-refresh-cronjob.yaml:86,196`
 - `deploy/k8s/35-consistency-snapshot-cronjob.yaml:64`
 - `deploy/k8s/35-consistency-snapshot-job.yaml:52`
-- `deploy/k8s/35-obscura.yaml:42`
 - `deploy/k8s/35-run-geo-mapper-job.yaml:53`
 - `deploy/k8s/35a-populate-geo-job.yaml:47`
 - `deploy/k8s/35b-populate-geo-cronjob.yaml:50`
@@ -173,6 +198,13 @@ vérifiée. Le chemin hypothétique d’une image MCP dédiée a été retiré e
 - `deploy/k8s/refresh-cronjobs/kustomization.yaml:16,41`
 - `deploy/k8s/refresh-diag/diag-refresh-job.yaml:58`
 - `deploy/k8s/refresh-diag/kustomization.yaml:8,21`
+
+Conservée sur `main` (cutover obscura = `feat/obscura-ghcr`) — 1 :
+
+- `deploy/k8s/35-obscura.yaml:42`
+
+Portées par #670 (documentation du registre livré) — 3 :
+
 - `docs/spec/SPEC_CONSOLIDATED_2026-07.md:217`
 - `docs/spec/geo-contracts/contrat-jointure-immo-zones-lots.md:215`
 - `docs/spec/mcp/immo-mcp-remote-deploy.md:125`
@@ -226,7 +258,8 @@ qu’après validation owner de cette proposition.
 - région OVH;
 - mode `forcePathStyle`;
 - noms des Secrets et mapping des clés access/secret;
-- image vérifiée de `radar-obscura`;
+- image vérifiée de `radar-obscura` (cutover porté par `feat/obscura-ghcr`,
+  hors #670 ; d’ici là le pull secret `radar-registry-pull` reste sur `main`);
 - image vérifiée du service geo cité par le contrat;
 - proposition i-infra d’un fournisseur d’e-mail transactionnel de remplacement
   (paramètres non secrets associés) ; tant qu’elle n’est pas validée par
