@@ -102,72 +102,63 @@ function readZoneObject(value: unknown): { kind: ZoneKind; densiteLogHa: number 
 }
 
 /**
- * Codes courts de famille de zonage → kind canonique. Couvre les préfixes
- * réglementaires QC historiques (H-, C-, I-, CONS-…) ET la taxonomie servie
- * par geo, MESURÉE sur les collections `qc-zonage-*` (2026-07 : Mont-Tremblant
- * + échantillon de 80 collections) : CO/CR/CF/CFA conservation, VP/VF/V/TV
- * villégiature (résidentiel saisonnier), TO/RE/REC récréotouristique, AG/AF/FO
- * agro-forestier, EX extraction, IN industriel, PU public, HA/RA/RB/RC/RV
- * résidentiel, suffixes des codes à secteur CV-/VA- (RF/RMF/RFM/RTF
- * résidentiel, CA/CCM commercial, MF/MXT/CU mixte, IND industriel).
- * Aucune entrée inventée.
+ * Last-resort code-token mapping measured on Mont-Tremblant and South Shore
+ * municipal data. Quebec municipalities define their own zoning codes; this is
+ * not a province-wide standard. Source status and residual collisions are
+ * recorded in SPEC_DEDUCTION_ZONAGE_CODE_FAMILLE.md.
  */
 const ZONE_CODE_TOKEN_KINDS: Record<string, ZoneKind> = {
-  // Habitation (résidentiel + villégiature)
+  // Delson 901 / South Shore: H. Mont-Tremblant (2008)-102: HA, RA, RM,
+  // RFM, RMF, RTF, V, VP and VF. Conflicting R/RF and source-gap RB/RV removed.
   H: "H",
   HA: "H",
-  R: "H",
   RA: "H",
-  RB: "H",
-  RC: "H",
   RM: "H",
-  RV: "H",
-  RF: "H",
   RFM: "H",
   RMF: "H",
   RTF: "H",
   V: "H",
   VP: "H",
   VF: "H",
-  TV: "H",
-  VILL: "H",
-  // Mixte
+  // Mont-Tremblant (2008)-102 and South Shore tables. RC is explicitly
+  // residential + commercial; TV is omitted because "touristic resort" is
+  // not evidence of habitation.
   M: "MIXTE",
   MS: "MIXTE",
   MXTV: "MIXTE",
   MXT: "MIXTE",
   MF: "MIXTE",
   CU: "MIXTE",
-  // Commercial
+  RC: "MIXTE",
+  // Candiac 5000 / Saint-Constant 1528-17 / Delson 901; CGS means
+  // "commerciale grande surface" in Saint-Constant, not public use.
   C: "C",
   CM: "C",
   CA: "C",
   CCM: "C",
-  // Industriel (extraction incluse : carrières/sablières)
+  CGS: "C",
+  // Mont-Tremblant (2008)-102 and South Shore tables. Saint-Constant ID
+  // (îlot déstructuré) is omitted because it is not an industrial family.
   I: "I",
-  ID: "I",
   IN: "I",
   IND: "I",
   EX: "I",
-  // Utilité publique
+  // Multi-municipality municipal tables audited by Fable 5.1.
   U: "U",
-  // Public / institutionnel
   P: "P",
-  PU: "P",
-  CGS: "P",
-  // Agricole / agro-forestier
+  // Mont-Tremblant (2008)-102. FO is omitted because the audit found no source.
   A: "A",
   AG: "A",
   AF: "A",
-  FO: "A",
-  // Conservation (corridors fauniques et conservation forestière inclus)
+  // CO: Candiac 5000 art. 15, Saint-Constant 1528-17 art. 17,
+  // Mont-Tremblant (2008)-102 and Delson 901. CR/CF/CFA: Mont-Tremblant only.
   CONS: "CONS",
   CONSERVATION: "CONS",
   CO: "CONS",
   CR: "CONS",
   CF: "CONS",
   CFA: "CONS",
-  // Récréation / touristique
+  // Municipal tables audited by Fable 5.1; TO remains a partial fallback.
   REC: "REC",
   RE: "REC",
   TO: "REC",
