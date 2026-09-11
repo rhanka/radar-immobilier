@@ -122,7 +122,7 @@ yet in `kustomization.yaml`'s `resources:` list (see §3).
 
 ## 2. Prérequis image — le gap trouvé
 
-`api/Dockerfile` builds `rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest`
+`api/Dockerfile` builds `ghcr.io/rhanka/radar-api:latest`
 (also tagged `:latest`, confirmed in `.github/workflows/build-push-images.yml`
 line ~91) from **only** `{radar-domain, radar-scoring, radar-sources, api}` —
 it never touches `packages/immo-mcp`. Its `esbuild` step's `entryPoints` are
