@@ -14,10 +14,6 @@ schema=$(jq -c . "$FINDINGS_SCHEMA")
 
 while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
   [ "$source_id" = "source_id" ] && continue
-  finding="$WORK_DIR/findings/$sha.1.json"
-  if [ -s "$finding" ] && jq -e '.findings | type == "array"' "$finding" >/dev/null 2>&1; then
-    continue
-  fi
   primary="$WORK_DIR/corpus/$(basename "$primary_key")"
   semantic_input="$primary"
   pdf_read=false
@@ -25,43 +21,65 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
     semantic_input="$WORK_DIR/parsed/$CITY/$sha.txt"
     [ -s "$semantic_input" ] || pdf_read=true
   fi
-  wrapper="$WORK_DIR/findings/$sha.wrapper.json"
-  success=false
-  for attempt in 1 2; do
+
+  semantic_inputs=("$semantic_input")
+  if [ "$pdf_read" = "false" ] && [ "$(wc -c < "$semantic_input")" -gt 200000 ]; then
+    chunk_dir="$WORK_DIR/parsed/$CITY/chunks"
+    mkdir -p "$chunk_dir"
+    split -C 120000 -d -a 3 --additional-suffix=.txt \
+      "$semantic_input" "$chunk_dir/$sha."
+    mapfile -t semantic_inputs < <(find "$chunk_dir" -maxdepth 1 -type f \
+      -name "$sha.*.txt" -print | sort)
+  fi
+
+  chunk_total="${#semantic_inputs[@]}"
+  chunk_index=0
+  for semantic_input in "${semantic_inputs[@]}"; do
+    chunk_index=$((chunk_index + 1))
+    finding="$WORK_DIR/findings/$sha.$chunk_index.json"
+    if [ -s "$finding" ] && jq -e '.findings | type == "array"' "$finding" >/dev/null 2>&1; then
+      continue
+    fi
+    wrapper="$WORK_DIR/findings/$sha.$chunk_index.wrapper.json"
+    success=false
     current=$(cat "$LLM_COUNTER")
-    [ "$current" -lt 500 ] || { echo "[semantic] $CITY: llm_budget_exhausted_before_501" >&2; exit 1; }
-    printf '%s\n' "$((current + 1))" > "${LLM_COUNTER}.tmp"
-    mv "${LLM_COUNTER}.tmp" "$LLM_COUNTER"
-    claude_args=(-p --bare --model claude-sonnet-4-6 --autocompact 1m
-      --no-session-persistence --disable-slash-commands --permission-mode dontAsk
-      --output-format json --json-schema "$schema")
-    if [ "$pdf_read" = "true" ]; then
-      claude_args+=(--allowedTools Read --disallowedTools Bash Edit Write Glob Grep WebFetch WebSearch Agent Task)
-    else
-      claude_args+=(--disallowedTools Bash Edit Write Read Glob Grep WebFetch WebSearch Agent Task)
-    fi
-    if {
-      cat "$EXTRACTION_PROMPT"
-      printf '\nMunicipality: %s\nCAS SHA-256: %s\nCAS key: %s\n\n' "$CITY" "$sha" "$primary_key"
+    [ "$((current + 2))" -le 500 ] || { echo "[semantic] $CITY: llm_budget_reservation_exceeds_500" >&2; exit 1; }
+    for attempt in 1 2; do
+      current=$(cat "$LLM_COUNTER")
+      printf '%s\n' "$((current + 1))" > "${LLM_COUNTER}.tmp"
+      mv "${LLM_COUNTER}.tmp" "$LLM_COUNTER"
+      claude_args=(-p --bare --model claude-sonnet-4-6 --autocompact 1m
+        --no-session-persistence --disable-slash-commands --permission-mode dontAsk
+        --output-format json --json-schema "$schema")
       if [ "$pdf_read" = "true" ]; then
-        printf 'DOCUMENT: Use exactly one Read call on this local PDF, then return the structured result: %s\n' "$primary"
+        claude_args+=(--allowedTools Read --disallowedTools Bash Edit Write Glob Grep WebFetch WebSearch Agent Task)
       else
-        printf 'DOCUMENT:\n'
-        cat "$semantic_input"
+        claude_args+=(--disallowedTools Bash Edit Write Read Glob Grep WebFetch WebSearch Agent Task)
       fi
-    } | timeout 240 claude "${claude_args[@]}" > "$wrapper" 2>> "$LOG"; then
-      finding_tmp="${finding}.tmp"
-      if jq -e '.structured_output' "$wrapper" > "$finding_tmp" 2>/dev/null || \
-         jq -er '.result | fromjson' "$wrapper" > "$finding_tmp" 2>/dev/null; then
-        if jq -e '.findings | type == "array"' "$finding_tmp" >/dev/null 2>&1; then
-          mv "$finding_tmp" "$finding"
-          success=true
-          break
+      if {
+        cat "$EXTRACTION_PROMPT"
+        printf '\nMunicipality: %s\nCAS SHA-256: %s\nCAS key: %s\nChunk: %s/%s\n\n' \
+          "$CITY" "$sha" "$primary_key" "$chunk_index" "$chunk_total"
+        if [ "$pdf_read" = "true" ]; then
+          printf 'DOCUMENT: Use exactly one Read call on this local PDF, then return the structured result: %s\n' "$primary"
+        else
+          printf 'DOCUMENT CHUNK: Extract only evidence visible in this chunk; do not infer omitted context.\n'
+          cat "$semantic_input"
         fi
+      } | timeout 240 claude "${claude_args[@]}" > "$wrapper" 2>> "$LOG"; then
+        finding_tmp="${finding}.tmp"
+        if jq -e '.structured_output' "$wrapper" > "$finding_tmp" 2>/dev/null || \
+           jq -er '.result | fromjson' "$wrapper" > "$finding_tmp" 2>/dev/null; then
+          if jq -e '.findings | type == "array"' "$finding_tmp" >/dev/null 2>&1; then
+            mv "$finding_tmp" "$finding"
+            success=true
+            break
+          fi
+        fi
+        rm -f "$finding_tmp"
       fi
-      rm -f "$finding_tmp"
-    fi
-    echo "[semantic] $CITY: retry $sha after attempt $attempt" >> "$LOG"
+      echo "[semantic] $CITY: retry $sha chunk $chunk_index after attempt $attempt" >> "$LOG"
+    done
+    [ "$success" = "true" ] || { echo "[semantic] $CITY: semantic_extraction_failed_${sha}_chunk_$chunk_index" >&2; exit 1; }
   done
-  [ "$success" = "true" ] || { echo "[semantic] $CITY: semantic_extraction_failed_$sha" >&2; exit 1; }
 done < "$CITY_MANIFEST"
