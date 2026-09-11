@@ -16,7 +16,7 @@
 #                 DST_S3_ENDPOINT DST_S3_BUCKET DST_AWS_ACCESS_KEY_ID DST_AWS_SECRET_ACCESS_KEY
 # Env (optional): AWS_REGION (default us-east-1) ; REQUIRE_SIDECAR=1 (fail if no .sha256 sidecar)
 #   DST_PREFIX (default graph) — DST key prefix. 1-store migration: preprod publishes to `graph-preprod`
-#     within the SAME docs-pocs bucket (isolation by PREFIX, the safety boundary). PERMIT-LIST fail-closed
+#     within the SAME configured bucket bucket (isolation by PREFIX, the safety boundary). PERMIT-LIST fail-closed
 #     (graph|graph-preprod|parsed) — never raw/ (READ-only source PVs) nor any other prefix.
 set -euo pipefail
 CITY="${1:?city requis}"
@@ -57,7 +57,7 @@ src_obj="s3://$SRC_S3_BUCKET/$SRC_PREFIX/$CITY/latest.json"
 dst_obj="s3://$DST_S3_BUCKET/$DST_KEY"
 # SRC != DST : refuse le SELF-OVERWRITE (même endpoint + MÊME objet lu==écrit). 1-store : même bucket +
 # préfixe DIFFÉRENT (candidats/ -> graph-preprod/) = LÉGITIME ; seul l'objet identique est refusé (≠ l'ancien
-# garde bucket-égalité, qui bloquait à tort le publish intra-docs-pocs du modèle 1-store).
+# garde bucket-égalité, qui bloquait à tort le publish intra-configured bucket du modèle 1-store).
 if [ "$SRC_S3_ENDPOINT|$src_obj" = "$DST_S3_ENDPOINT|$dst_obj" ]; then
   echo "publish-verify: FAIL-CLOSED — SRC==DST self-overwrite ($dst_obj) refusé." >&2; exit 2
 fi
