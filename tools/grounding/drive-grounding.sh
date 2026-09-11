@@ -22,7 +22,7 @@ GATE="$SCRIPT_DIR/gate-grounding.sh"
 # ── 2-bucket split (préprod-safe, IN-CLUSTER) ─────────────────────────────────
 # Modèle d'exécution = IN-CLUSTER : PAS de `.env` host (extraction de secrets host refusée). Les
 # variables viennent de 2 secretRef montés en env dans le pod :
-#   READ_*    ← secretRef `radar-s3-credentials`      (object store  legacy bucket, RO : raw PVs + .meta.json sidecars)
+#   READ_*    ← secretRef `radar-s3-credentials`      (source object-store bucket, RO: raw PVs + .meta.json sidecars)
 #   PUBLISH_* ← secretRef `radar-graph-s3-credentials` (OVH préprod : graph/<city>/latest.json)
 # READ est STRICTEMENT RO (worker seulement) ; 0 write vers READ_BUCKET ni vers le prod-graph.
 # Le `.env` host n'est sourcé QUE s'il existe (dev/local) — jamais requis in-cluster.

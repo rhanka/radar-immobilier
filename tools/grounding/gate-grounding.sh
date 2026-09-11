@@ -126,7 +126,7 @@ if [ -n "${CHECK_ONLY:-}" ]; then
 fi
 
 # ── 2-bucket (préprod-safe) : le PUBLISH doit viser le PUBLISH bucket (OVH préprod-graph), JAMAIS le
-#    READ bucket (object store  legacy bucket / prod). Le gate canonique publie vers SCRAPE_S3_BUCKET/ENDPOINT avec AWS_*.
+#    READ bucket (source object-store bucket / prod). Le gate canonique publie vers SCRAPE_S3_BUCKET/ENDPOINT avec AWS_*.
 #    On surcharge ces variables ICI (wrapper grounding) avec les valeurs PUBLISH → gate.sh partagé
 #    INCHANGÉ. Fallback SCRAPE_S3_*/AWS_* = mode single-bucket (dev/legacy) : comportement identique. ──
 export SCRAPE_S3_BUCKET="${PUBLISH_S3_BUCKET:-${SCRAPE_S3_BUCKET:-}}"

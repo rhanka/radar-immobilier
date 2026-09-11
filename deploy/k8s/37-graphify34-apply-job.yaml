@@ -99,7 +99,7 @@ spec:
             - name: S3_SECRET_KEY
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
             # Graph store EXPLICIT (GRAPH_S3_* wins in resolveGraphS3Config) —
-            # guarantees bucket legacy object bucket regardless of the
+            # guarantees the source bucket regardless of the
             # optional scrape secret. Same wiring as 34-refresh-cronjob.yaml.
             # TODO(k8s): replace this endpoint/bucket/region tuple and credentials
             # with verified OVH Object Storage values before running this Job.

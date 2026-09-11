@@ -29,7 +29,7 @@ ROOT="${5:?root_dir requis}"
 # 0 repli vers claude / OpenAI / provider-natif-codex (le hook n'appelle AUCUN autre provider). Pin luna explicite.
 CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-luna}"
 # 2-bucket split (préprod-safe) : le worker LIT UNIQUEMENT (raw PVs + .meta.json sidecars) depuis le
-# READ bucket (object store  legacy bucket, RO). Il ne publie JAMAIS. Fallback SCRAPE_S3_* = mode single-bucket (dev/legacy).
+# READ bucket (source object-store bucket, RO). Il ne publie JAMAIS. Fallback SCRAPE_S3_* = mode single-bucket (dev/legacy).
 BUCKET="${READ_S3_BUCKET:-${SCRAPE_S3_BUCKET:-}}"
 S3_URL="${READ_S3_ENDPOINT:-${SCRAPE_S3_ENDPOINT:-}}"
 # Creds READ pour les s5cmd du worker (lecture seule ; jamais de publish). Defense-in-depth : en mode

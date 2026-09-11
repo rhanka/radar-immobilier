@@ -109,7 +109,8 @@ export class S3ObjectStore implements ObjectStore {
    * rejects the write if another writer moved the object in between.
    *
    * LIMIT, declared: conditional writes on PUT are honoured by AWS S3 and by
-   * MinIO, but managed object storage's Object Storage support is not verified here. The
+   * MinIO, but support has not been verified for every managed S3-compatible
+   * provider. The
    * caller therefore ALSO performs a HEAD re-check immediately before this
    * call (`canonical-graph-writer.ts`). That pair narrows the race to the few
    * milliseconds between HEAD and PUT when the header is ignored; it does not

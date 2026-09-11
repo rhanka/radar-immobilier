@@ -1,4 +1,4 @@
-# graph-projection-job.yaml — projette les graphes graphify legacy object store dans Postgres.
+# graph-projection-job.yaml — projette les graphes graphify du stockage objet source dans Postgres.
 #
 # Trois étapes dans le même Job (initContainers exécutés dans l'ordre, puis le
 # conteneur principal) :
@@ -11,7 +11,7 @@
 #   2. db-migrate       : applique les migrations Drizzle (idempotent, CREATE IF NOT
 #                         EXISTS). workingDir /workspace/api car migrate.js lit
 #                         `migrationsFolder: "drizzle"` RELATIF au CWD.
-#   3. project-graph    : lit graph/<ville>/latest.json depuis legacy object store (GRAPH_S3_* →
+#   3. project-graph    : lit graph/<ville>/latest.json depuis le stockage objet source (GRAPH_S3_* →
 #                         SCRAPE_S3_*) et appelle upsertGraph pour chaque ville.
 #
 # Les trois conteneurs partagent l'IMAGE radar-api unique : depuis le fix esbuild
@@ -20,7 +20,7 @@
 # api/dist/scripts/project-graph-from-s3.js. (Avant le fix, ce dernier était
 # ABSENT → MODULE_NOT_FOUND : c'était la douleur D1 « projection PG cassée ».)
 #
-# Usage one-shot (reprojection des ~1000 graphes v2.1 legacy object store→PG) :
+# Usage one-shot (reprojection des ~1000 graphes v2.1 stockage objet source → PG) :
 #   kubectl apply -f deploy/k8s/31-graph-projection-job.yaml -n radar-immobilier
 #   kubectl wait job/radar-graph-projection --for=condition=complete -n radar-immobilier --timeout=900s
 #   kubectl logs -l job-name=radar-graph-projection -n radar-immobilier
@@ -126,7 +126,7 @@ spec:
           resources:
             requests: { cpu: 50m, memory: 96Mi }
             limits: { cpu: 150m, memory: 256Mi }
-      # ── Étape 3 : projection legacy object store → PG ────────────────────────────────────
+      # ── Étape 3 : projection stockage objet source → PG ──────────────────────────────────
       containers:
         - name: project-graph
           securityContext:
@@ -155,7 +155,7 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
             - name: S3_SECRET_KEY
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
-            # Creds legacy object store pour le bucket legacy object bucket (SCRAPE_S3_*).
+            # Identifiants du stockage objet source pour le bucket source (SCRAPE_S3_*).
             # Le script project-graph-from-s3.ts lit GRAPH_S3_* puis se rabat
             # sur SCRAPE_S3_* : aucune variable GRAPH_S3_* supplémentaire n'est
             # nécessaire si les SCRAPE_S3_* pointent déjà sur le bon bucket.

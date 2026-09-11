@@ -52,7 +52,7 @@ patches:
         value: false
 
   # CITATIONS/BUCKET ALIGNMENT (i-infra) — the projection CronJob's base 34
-  # hardcodes GRAPH_S3 on the legacy object bucket. In PREPROD
+  # hardcodes GRAPH_S3 on the source object-store bucket. In PREPROD
   # the graph store is the IN-CLUSTER MinIO `radar-minio:9000` /
   # `radar-immobilier-docs-preprod` — the SAME store the app reads and the
   # grounding publishes to. Override GRAPH_S3 to that MinIO so
@@ -84,8 +84,8 @@ patches:
                         value: "true"
 
   # SCRAPE bucket/path-style alignment (i-infra) — base 34 ship SCRAPE_S3_ENDPOINT/
-  # BUCKET en `valueFrom: secretKeyRef` (héritage legacy object store) + SCRAPE_S3_FORCE_PATH_STYLE
-  # =false (legacy object store → virtual-host → ENOTFOUND sur MinIO). En PREPROD le store est le
+  # BUCKET en `valueFrom: secretKeyRef` (configuration S3 historique) + SCRAPE_S3_FORCE_PATH_STYLE
+  # =false (virtual-hosted S3 → ENOTFOUND sur MinIO). En PREPROD le store est le
   # MinIO in-cluster `radar-minio:9000` / `radar-immobilier-docs-preprod`
   # (path-style), le MÊME que l'app + la projection. On aligne SCRAPE_S3 dessus
   # pour que le scrape écrive raw/ dans le bucket préprod unique.
