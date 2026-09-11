@@ -48,7 +48,7 @@ Ingest the immutable 139-document CAS batch for 40 municipalities, merge fresh s
   - [x] Freeze scope, safety constraints, and test environment.
 - [ ] **Lot 1 — Immutable CAS batch**
   - [x] Build and validate the exact CAS manifest.
-  - [ ] Download selected representations and verify every SHA-256.
+  - [x] Download selected representations and verify every SHA-256.
 - [ ] **Lot 2 — Semantic extraction and baseline merge**
   - [x] Count and cap structured semantic extraction attempts.
   - [x] Convert grounded findings and merge with the v2.3 baseline extraction.
