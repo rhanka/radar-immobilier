@@ -47,7 +47,7 @@ Ingest the immutable 139-document CAS batch for 40 municipalities, merge fresh s
   - [x] Create the isolated repository-local worktree from `origin/main`.
   - [x] Freeze scope, safety constraints, and test environment.
 - [ ] **Lot 1 — Immutable CAS batch**
-  - [ ] Build and validate the exact CAS manifest.
+  - [x] Build and validate the exact CAS manifest.
   - [ ] Download selected representations and verify every SHA-256.
 - [ ] **Lot 2 — Semantic extraction and baseline merge**
   - [ ] Count and cap structured semantic extraction attempts.
