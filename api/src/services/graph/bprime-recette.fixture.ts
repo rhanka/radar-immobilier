@@ -9,8 +9,8 @@ import { COATICOOK_LEGACY_GRAPH_NODES } from "./coaticook-legacy.fixture.js";
  * Contrat : docs/reports/recette/RECETTE_VIVIER_BPRIME_STEVE30.md.
  *
  * ANTI-INVENTION (correctif de la revue NO-GO) : plus AUCUNE fixture fabriquée.
- * L'accès S3/SCW aux projections `graph/<slug>/latest.json` N'EST PAS configuré
- * dans ce worktree (ni rclone `scw:` ni credentials s5cmd) → on NE fabrique
+ * L'accès au stockage objet des projections `graph/<slug>/latest.json` N'EST PAS configuré
+ * dans ce worktree (ni montage distant ni credentials s5cmd) → on NE fabrique
  * RIEN. Les seules villes prouvables HORS-LIGNE sont celles dont les nœuds de
  * graphe RÉELS sont déjà committés :
  *
@@ -182,7 +182,7 @@ export interface OfflineGap {
   reason: string;
 }
 
-const NO_NODE = "Aucun nœud de graphe committé (S3/SCW non accessible dans ce worktree). Preuve = QA prod.";
+const NO_NODE = "Aucun nœud de graphe committé (stockage objet non accessible dans ce worktree). Preuve = QA prod.";
 
 export const BPRIME_RECETTE_OFFLINE_GAPS: readonly OfflineGap[] = [
   {
