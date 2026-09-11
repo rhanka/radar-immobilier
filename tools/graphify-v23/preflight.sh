@@ -7,13 +7,15 @@ set -euo pipefail
 ROOT="${1:?root_dir requis}"
 DRY_RUN="${2:-}"
 
-GRAPHIFY_CLI="$ROOT/node_modules/.bin/graphify"
+GRAPHIFY_CLI="${GRAPHIFY_CLI:-$ROOT/node_modules/.bin/graphify}"
 ONTOLOGY_PROFILE="$ROOT/radar/ontology/ontology-profile.yaml"
-RERUN_TARGETS="$ROOT/tmp/graphify-v23-headless-20260618T131516/rerun-targets-final.tsv"
+RERUN_TARGETS="${GRAPHIFY_TARGETS:-$ROOT/tmp/graphify-v23-headless-20260618T131516/rerun-targets-final.tsv}"
 BASELINE_DIR="$ROOT/tmp/graphify-v23-rerun-sessions-20260618T173454/parts/lane-01-baselines"
-REFS_DIR="$ROOT/tmp/graphify-v23-cli-20260618-1155/worker/agent-04/test-aguanish/references"
-GRAPHIFY_TO_EXTRACTION="/tmp/graphify_to_extraction_v23.js"
-EXTRACTION_TO_GRAPH="/tmp/extraction_to_v23_graph.js"
+REFS_DIR="${GRAPHIFY_REFS_DIR:-$ROOT/tmp/graphify-v23-cli-20260618-1155/worker/agent-04/test-aguanish/references}"
+GRAPHIFY_TO_EXTRACTION="$ROOT/tools/graphify-v23/graphify_to_extraction_v23.js"
+EXTRACTION_TO_GRAPH="$ROOT/tools/graphify-v23/extraction_to_v23_graph.js"
+PREFLIGHT_WORK="${GRAPHIFY_PREFLIGHT_WORK:-$ROOT/tmp/graphify-v23-preflight}"
+mkdir -p "$PREFLIGHT_WORK"
 
 ok=0
 fail=0
@@ -35,7 +37,9 @@ echo "Root: $ROOT"
 echo ""
 
 # ── 1. SCW credentials ────────────────────────────────────────────────────────
-source "$ROOT/.env" 2>/dev/null || true
+if [ -f "$ROOT/.env" ]; then
+  source "$ROOT/.env"
+fi
 export AWS_ACCESS_KEY_ID="${SCRAPE_S3_ACCESS_KEY:-}"
 export AWS_SECRET_ACCESS_KEY="${SCRAPE_S3_SECRET_KEY:-}"
 export AWS_REGION="${SCRAPE_S3_REGION:-}"
@@ -56,23 +60,27 @@ else
 fi
 
 # ── 3. SCW read ───────────────────────────────────────────────────────────────
-if s5cmd --endpoint-url "$S3_URL" ls "s3://$BUCKET/graph/" >/tmp/preflight-read.log 2>&1; then
-  graph_count=$(wc -l < /tmp/preflight-read.log 2>/dev/null || echo 0)
+if s5cmd --endpoint-url "$S3_URL" ls "s3://$BUCKET/graph/" >"$PREFLIGHT_WORK/read.log" 2>&1; then
+  graph_count=$(wc -l < "$PREFLIGHT_WORK/read.log" 2>/dev/null || echo 0)
   check "SCW read (graph/)" "OK ($graph_count entrées)"
 else
-  check "SCW read (graph/)" "FAILED (voir /tmp/preflight-read.log)"
+  check "SCW read (graph/)" "FAILED (voir $PREFLIGHT_WORK/read.log)"
 fi
 
 # ── 4. SCW write ──────────────────────────────────────────────────────────────
-probe_key="s3://$BUCKET/_preflight-runner-probe-$(date +%s).txt"
-echo "preflight" > /tmp/preflight-probe.txt
-if s5cmd --endpoint-url "$S3_URL" cp /tmp/preflight-probe.txt "$probe_key" >/tmp/preflight-write.log 2>&1; then
-  s5cmd --endpoint-url "$S3_URL" rm "$probe_key" >/dev/null 2>&1 || true
-  check "SCW write" "OK"
+if [ "$DRY_RUN" = "--dry-run" ]; then
+  check "SCW write" "OK (skipped in read-only dry-run)"
 else
-  check "SCW write" "FAILED (voir /tmp/preflight-write.log)"
+  probe_key="s3://$BUCKET/_preflight-runner-probe-$(date +%s).txt"
+  echo "preflight" > "$PREFLIGHT_WORK/probe.txt"
+  if s5cmd --endpoint-url "$S3_URL" cp "$PREFLIGHT_WORK/probe.txt" "$probe_key" >"$PREFLIGHT_WORK/write.log" 2>&1; then
+    s5cmd --endpoint-url "$S3_URL" rm "$probe_key" >/dev/null 2>&1 || true
+    check "SCW write" "OK"
+  else
+    check "SCW write" "FAILED (voir $PREFLIGHT_WORK/write.log)"
+  fi
+  rm -f "$PREFLIGHT_WORK/probe.txt"
 fi
-rm -f /tmp/preflight-probe.txt
 
 # ── 5. Graphify CLI ───────────────────────────────────────────────────────────
 if [ -x "$GRAPHIFY_CLI" ]; then
@@ -106,6 +114,15 @@ fi
 if [ -f "$RERUN_TARGETS" ]; then
   target_count=$(tail -n +2 "$RERUN_TARGETS" | wc -l)
   check "rerun-targets-final.tsv" "OK ($target_count cibles)"
+  if IFS=$'\t' read -r h1 h2 h3 _rest < "$RERUN_TARGETS" && \
+     [ "$h1" = "source_id" ] && [ "$h2" = "city_slug" ] && [ "$h3" = "new_docs" ]; then
+    first_source=$(awk -F '\t' 'NR == 2 {print $1}' "$RERUN_TARGETS")
+    if s5cmd --endpoint-url "$S3_URL" ls "s3://$BUCKET/raw/$first_source/cas/*" >/dev/null 2>&1; then
+      check "CAS source layout" "OK"
+    else
+      check "CAS source layout" "MISSING (raw/$first_source/cas/)"
+    fi
+  fi
 else
   check "rerun-targets-final.tsv" "MISSING ($RERUN_TARGETS)"
 fi
@@ -115,7 +132,12 @@ if [ -d "$BASELINE_DIR" ]; then
   baseline_count=$(ls "$BASELINE_DIR"/*.json 2>/dev/null | wc -l || echo 0)
   check "baselines directory" "OK ($baseline_count fichiers)"
 else
-  check "baselines directory" "MISSING ($BASELINE_DIR)"
+  first_city=$(awk -F '\t' 'NR == 2 {print $2}' "$RERUN_TARGETS" 2>/dev/null || true)
+  if [ -n "$first_city" ] && s5cmd --endpoint-url "$S3_URL" ls "s3://$BUCKET/graph/$first_city/latest.json" >/dev/null 2>&1; then
+    check "baselines directory" "OK (S3 fallback verified)"
+  else
+    check "baselines directory" "MISSING ($BASELINE_DIR) and S3 fallback unavailable"
+  fi
 fi
 
 # ── 10. Références CSV ───────────────────────────────────────────────────────
@@ -127,13 +149,20 @@ for csv in municipalities.csv cadastre.csv adresses_qc.csv; do
   fi
 done
 
-# ── 11. Dry-run publish sur 1 ville déjà publiée ─────────────────────────────
+# ── 11. Publish-path probe (never writes during dry-run) ──────────────────────
 # Utiliser abercorn (v2.2 connue, non dans rerun-targets si elle est done)
 DRY_CITY="abercorn"
-DRY_WORK="/tmp/preflight-drydryrun-$DRY_CITY"
-mkdir -p "$DRY_WORK"
+DRY_WORK="$PREFLIGHT_WORK/publish-$DRY_CITY"
 
-if s5cmd --endpoint-url "$S3_URL" cat "s3://$BUCKET/graph/$DRY_CITY/latest.json" > "$DRY_WORK/latest.old.json" 2>/tmp/preflight-drydl.log; then
+if [ "$DRY_RUN" = "--dry-run" ]; then
+  check "publish path" "OK (skipped in read-only dry-run)"
+else
+  mkdir -p "$DRY_WORK"
+fi
+
+if [ "$DRY_RUN" = "--dry-run" ]; then
+  :
+elif s5cmd --endpoint-url "$S3_URL" cat "s3://$BUCKET/graph/$DRY_CITY/latest.json" > "$DRY_WORK/latest.old.json" 2>"$PREFLIGHT_WORK/publish-download.log"; then
   # Simuler un graphe v2.3 minimal valide depuis la baseline
   existing_signals=$(jq '[.nodes[]? | select(.type=="Signal")] | length' "$DRY_WORK/latest.old.json" 2>/dev/null || echo 0)
   # Créer un candidat de test qui prétend être v2.3 (sans LLM — juste la forme)
@@ -147,11 +176,11 @@ if s5cmd --endpoint-url "$S3_URL" cat "s3://$BUCKET/graph/$DRY_CITY/latest.json"
 
   # Dry-run: upload vers parsed/ uniquement (pas graph/)
   parsed_probe="s3://$BUCKET/parsed/$DRY_CITY/graphify-v2.3/_preflight-dry-$(date +%s).json"
-  if s5cmd --endpoint-url "$S3_URL" cp "$DRY_WORK/latest.v23.json" "$parsed_probe" >/tmp/preflight-publish-dry.log 2>&1; then
+  if s5cmd --endpoint-url "$S3_URL" cp "$DRY_WORK/latest.v23.json" "$parsed_probe" >"$PREFLIGHT_WORK/publish.log" 2>&1; then
     s5cmd --endpoint-url "$S3_URL" rm "$parsed_probe" >/dev/null 2>&1 || true
     check "dry-run publish chemin parsed/" "OK (upload+cleanup réussi pour $DRY_CITY)"
   else
-    check "dry-run publish chemin parsed/" "FAILED (voir /tmp/preflight-publish-dry.log)"
+    check "dry-run publish chemin parsed/" "FAILED (voir $PREFLIGHT_WORK/publish.log)"
   fi
 else
   check "dry-run publish chemin parsed/" "SKIPPED (impossible de lire $DRY_CITY depuis SCW)"
