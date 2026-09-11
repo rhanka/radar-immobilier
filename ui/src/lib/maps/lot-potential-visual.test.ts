@@ -32,10 +32,9 @@ describe("resolveLotPotentialScore", () => {
     });
   });
 
-  it("a bare zone code (no source kind) is unavailable — no token derivation (owner directive)", () => {
-    // Le potentiel de zone n'est plus dérivé du token du code (« MxtV-4 ») :
-    // sans `kind` source, le score de zone est unknown → état explicite
-    // unavailable (jamais une densité fabriquée à partir du code).
+  it("keeps a bare zone code out of the numeric lot score", () => {
+    // Zone styling may classify this code, but scoring still requires its own
+    // supported inputs and must not create density from the code.
     expect(resolveLotPotentialScore({ zoneCode: "MxtV-4" })).toMatchObject({
       score: 0,
       status: "unavailable",

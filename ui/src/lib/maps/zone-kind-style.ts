@@ -6,15 +6,15 @@
  *
  * Parité concurrente (vue Signaux) : les zones ne sont plus des contours gris
  * uniformes mais des aplats doux distincts par famille, sous les lots colorés
- * par flags. La famille est résolue à partir des SEULES données source
- * (directive owner — aucune famille hallucinée) :
+ * par flags. La famille est résolue dans cet ordre :
  *   1. libellé `affectation` de la source quand présent — le plus fiable
  *      (« Conservation », « CV - Résidentielle de faible densité »…) ;
  *   2. sinon `kind` de la source : libellé (« habitation », « mixed-use »…),
  *      lettre canonique, ou code court de la taxonomie geo (« CO », « Rv »,
  *      « Af/b »… — `kindFromZoneCode` sur le champ `kind` SOURCE) ;
- *   3. sinon teinte neutre SANS libellé de catégorie — le token du CODE de zone
- *      n'est JAMAIS dérivé en famille (« H-12 » reste le code réel, pas « H »).
+ *   3. sinon code réel de la zone (« H-12 », « CO-939 »).
+ * Le code reste l'identité affichée de la zone ; la famille pilote uniquement
+ * sa couleur, sa légende et son filtre.
  */
 
 import { kindFromZoneCode, type ZoneKind } from "./lot-potential-visual.js";
@@ -132,21 +132,18 @@ function kindFromLabel(label: string | null | undefined): StyledZoneKind | null 
 }
 
 /**
- * Résout le kind canonique d'une zone à partir des SEULES données source
- * (directive owner — aucune famille hallucinée) :
+ * Résout le kind canonique d'une zone :
  *   1. libellé `affectation` (« Conservation » → CONS, « CV - Résidentielle
  *      de faible densité » → H…) ;
  *   2. `kind` source : lettre canonique (« H »), libellé (« habitation »,
  *      « mixed-use »), ou code court de la taxonomie geo (« CO », « Rv »,
- *      « Af/b » — `kindFromZoneCode` sur le champ `kind` SOURCE).
- * Le token du CODE de zone n'est JAMAIS dérivé en famille : « H-12 » reste le
- * code réel (identité de la zone), pas une famille « H » inventée. `_code` est
- * conservé pour la signature des appelants mais n'entre plus dans la résolution.
- * null si irrésolu ⇒ aplat neutre SANS libellé de catégorie (aucune invention).
+ *      « Af/b » — `kindFromZoneCode` sur le champ `kind`) ;
+ *   3. code de zone (« H-431 » → H, « CO-939 » → CONS).
+ * Le code reste inchangé comme identité. null si aucune famille ne correspond.
  */
 export function canonicalZoneKind(
   kind: string | null | undefined,
-  _code: string | null | undefined,
+  code: string | null | undefined,
   affectation?: string | null,
 ): StyledZoneKind | null {
   const fromAffectation = kindFromLabel(affectation);
@@ -159,7 +156,8 @@ export function canonicalZoneKind(
     const fromKindCode = kindFromZoneCode(kind);
     if (fromKindCode !== null && fromKindCode !== "AUTRE") return fromKindCode;
   }
-  return null;
+  const fromCode = code ? kindFromZoneCode(code) : null;
+  return fromCode !== null && fromCode !== "AUTRE" ? fromCode : null;
 }
 
 /** Style (token/fallback/label) d'une zone — neutre si kind irrésolu. */
