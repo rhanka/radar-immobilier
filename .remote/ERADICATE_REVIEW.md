@@ -1,5 +1,6 @@
 ---
-status: incomplete
+status: completed
+verdict: go
 review-author:
   host: codex
   model: gpt-5.6-sol
@@ -7,15 +8,16 @@ review-author:
 target-ref: 831cad2459b6a59fde790145af5c6cf9bb3f6b72..1e5b2dc739eb9de6fcb9e158ff586a6e25257ccb
 legs:
   - path: .remote/ERADICATE_REVIEW_CORRECTNESS.md
-    status: failed
+    status: completed
   - path: .remote/ERADICATE_REVIEW_SAFETY.md
     status: completed
-observed-failure: The correctness leg exited without output or a result contract; the safety leg completed after the initial timeout.
 ---
 
 # Consensus review
 
-No consensus verdict is recorded because the correctness leg did not return.
+## Verdict: GO after reconciliation
+
+Both independent legs completed after their initial launcher timeouts. The correctness leg returned GO with one conditional GHCR-permission finding; the safety leg returned NO-GO on public-package proof and the live-cluster network policy. All actionable findings were either fixed before the reports arrived or resolved in follow-up commits.
 
 ## Reconciliation of the completed safety leg
 
@@ -27,3 +29,12 @@ No consensus verdict is recorded because the correctness leg did not return.
 - F6 accepted as category A: the deleted workflow only targeted the retired object store.
 
 The independent report's snapshot verdict remains preserved in its leg file; its blocking and high findings are resolved in the branch.
+
+## Reconciliation of the completed correctness leg
+
+- Findings 1 and 2 are closed by `e7b6ed0`: `promote-prod` has `packages: write`, which includes package read access for the job token.
+- Finding 3 remains category B with a `TODO(k8s)` because no replacement `radar-obscura` image was verified.
+- Finding 4 is covered by the category B TODOs and by `ef0c433`, which preserves the live-cluster NetworkPolicy while leaving the cluster-managed service itself untouched.
+- Finding 5 is accepted as a provider-neutral local/test default; the running production manifest retains its explicit value.
+
+The two reviewers agree that the inventory is complete, no OVH coordinates were invented, and the remaining provider-specific values are explicit B/C exceptions. With the deployment-safety findings closed, the reconciled consensus is GO.
