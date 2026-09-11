@@ -2,27 +2,27 @@
 
 **Statut** : validé (consensus pairs Opus + Fable 5 ; Codex annulé) — prêt pour plan d'implémentation
 **Date** : 2026-06-10
-**Origine** : l'utilisateur a constaté que les résultats de scraping étaient committés en `*.fixture.ts` dans git et que rien n'était durable sur SCW S3 — inacceptable à 1000 villes. Méthode : consensus multi-pairs.
+**Origine** : l'utilisateur a constaté que les résultats de scraping étaient committés en `*.fixture.ts` dans git et que rien n'était durable sur Object Storage — inacceptable à 1000 villes. Méthode : consensus multi-pairs.
 
 ---
 
 ## 0. Principe directeur
 
-> **SCW S3 est la SOURCE DE VÉRITÉ (immuable). Postgres est un INDEX/CACHE reconstructible.**
+> **Object Storage S3 est la SOURCE DE VÉRITÉ (immuable). Postgres est un INDEX/CACHE reconstructible.**
 > `DROP DATABASE` doit être réparable par `rebuild-from-s3`, sans aucune perte. **Git ne contient que du code et de la config — jamais de donnée scrappée.**
 
-Cette inversion source-de-vérité résout directement le « on va pas reperdre ça ailleurs que sur scw » : un crash du poste (on en a eu 5) ne perd plus rien — raw/parsed/graph sont déjà sur SCW.
+Cette inversion source-de-vérité répond au besoin de durabilité hors du poste : un crash du poste (on en a eu 5) ne perd plus rien — raw/parsed/graph sont déjà sur le stockage objet.
 
 État actuel = anti-pattern à corriger :
 - résultats de scraping = ~57 `*.fixture.ts` dans git (2,9 Mo, croissance linéaire/ville) ;
 - parsing/graphify = seedé dans un Postgres éphémère (perdu au crash) ;
-- SCW S3 (`radar-immobilier-docs-pocs`) = **vide** (le code `ObjectStore`/`rawObjectKey` existe mais **personne n'appelle `put()`**).
+- Object Storage S3 (`<verified-ovh-bucket>`) = **vide** (le code `ObjectStore`/`rawObjectKey` existe mais **personne n'appelle `put()`**).
 
 ---
 
 ## 1. Layout S3 (schéma de clés)
 
-Bucket prod **dédié** (≠ `-pocs`), région `fr-par`. Règle : tout sous `raw/ parsed/ graph/ runs/` est **write-once** ; la mutabilité ne vit que derrière des pointeurs `latest.json` et sous `state/`.
+Bucket prod **dédié**, région `<verified-ovh-region>`. Règle : tout sous `raw/ parsed/ graph/ runs/` est **write-once** ; la mutabilité ne vit que derrière des pointeurs `latest.json` et sous `state/`.
 
 **Adressage par contenu (CAS, sha256)** → dédup + idempotence gratuites.
 
@@ -108,15 +108,15 @@ Tables = **projections** : `documents` (meta+manifests), `mentions`/`signals` (p
    manifests > lastAppliedKey → upsert documents/mentions/signals | graph latest.json modifiés → upsert graph_nodes/edges | avance projection_meta
 ```
 
-**Scheduler = boucle de réconciliation** : `travail = désiré − présent` (diff de manifestes) — **pas de file de messages à opérer**. Chaque étape = fonction `(entrées CAS, version code) → clé déterministe` ; crash = relance + HEAD-skip. Un crash pendant graphify ne perd plus rien (raw/parsed déjà sur SCW).
+**Scheduler = boucle de réconciliation** : `travail = désiré − présent` (diff de manifestes) — **pas de file de messages à opérer**. Chaque étape = fonction `(entrées CAS, version code) → clé déterministe` ; crash = relance + HEAD-skip. Un crash pendant graphify ne perd plus rien (raw/parsed déjà sur object store).
 
 ---
 
 ## 6. Exécution des 1000 jobs (sans OOM)
 
 - **Phase 1 (immédiat)** : runner local unique, `p-limit` 4–8 fetches concurrents, **politeness par domaine** (1 req/s/domaine, user-agent honnête), zéro Postgres embarqué. 1000 index + N PDFs = dizaines de minutes, ~100 Mo. **L'OOM disparaît par construction** : on ne boote plus aucune stack par ville (l'OOM venait des stacks docker/Postgres parallèles, pas du scraping).
-- **Phase 2** : **SCW Serverless Jobs + Cron** (fr-par, même région que le bucket → pas d'egress, IAM scopé). Le worker phase 1 (sans état, S3-only) se containerise tel quel ; 1 job = batch ~50 villes (partition stable par hash slug), concurrence 4–8 jobs, cron quotidien ; graphify/LLM en jobs séparés (déclenchés sur inputset modifié).
-- **Pas de file managée en v1** : la réconciliation sur S3 (manifests + state shardé) *est* la file. SCW Queues/NATS seulement si latence < 1 h devient un besoin.
+- **Phase 2** : **Kubernetes Jobs + CronJobs sur OVH MKS**. Le worker phase 1 (sans état, S3-only) se containerise tel quel ; 1 job = batch ~50 villes (partition stable par hash slug), concurrence 4–8 jobs, cron quotidien ; graphify/LLM en jobs séparés (déclenchés sur inputset modifié).
+- **Pas de file managée en v1** : la réconciliation sur S3 (manifests + state shardé) *est* la file. object store Queues/NATS seulement si latence < 1 h devient un besoin.
 
 ---
 
@@ -126,7 +126,7 @@ Tables = **projections** : `documents` (meta+manifests), `mentions`/`signals` (p
 2. **BUG course `scrape-status/store.ts`** : `STORE_KEY="scrape-status/index.json"` + `readAll → upsert → put` sur **UN objet global** → **perte de mises à jour garantie** à 1000 villes concurrentes. → **sharder `state/{city}/{kind}.json`** (un écrivain/clé) ; l'agrégat devient une projection.
 3. **Loi 25** : les PV bruts **contiennent des noms** (dérogations nominatives, période de questions citoyenne). Documents publics, mais : bucket `raw/` **privé, jamais servi tel quel** ; **filtrage PII au parsing** ; **schéma Zod de `extract.json` interdit tout champ « nom »** ; **jamais de personne physique comme nœud graphify**. Documenter finalité + rétention.
 4. **Graphify non déterministe + coûteux** : sans clé `inputsetHash`, chaque re-run réécrit/re-paye → le cache CAS + pointeur `latest.json` (last-writer-wins, les deux versions restent) contiennent le coût.
-5. **Bucket prod ≠ `-pocs`** : créer le bucket prod avec **IAM scopé** : clé write-only préfixe `raw/+runs/+state/` (scrapers), clé read-only (projecteur).
+5. **Bucket prod dédié** : créer le bucket prod avec **IAM scopé** : clé write-only préfixe `raw/+runs/+state/` (scrapers), clé read-only (projecteur).
 6. **« Reconstructible » non testé = mensonge** : `rebuild-from-s3` **doit** être un test CI (MinIO + mini-corpus).
 7. **Dérive des sites municipaux** : ~quelques %/mois cassent (refonte CMS) → lignes `error` des manifests + `state` alimentent un dashboard de santé ; budget d'entretien permanent assumé.
 
@@ -135,11 +135,11 @@ Tables = **projections** : `documents` (meta+manifests), `mentions`/`signals` (p
 ## 8. Plan d'exécution (ordre)
 
 1. **Geler l'anti-pattern** : plus aucune nouvelle `*.fixture.ts` de ville. Corriger bug #1 (`rawObjectKey` → CAS) + bug #2 (sharder `scrape-status`). *(petits, débloquent tout)*
-2. **Brancher le worker scrape sur S3** (port `Storage`, le bucket est vide : gap le plus rentable) + manifestes de run. Re-scraper les ~40 villes des fixtures vers SCW.
+2. **Brancher le worker scrape sur S3** (port `Storage`, le bucket est vide : gap le plus rentable) + manifestes de run. Re-scraper les ~40 villes des fixtures vers object store.
 3. **Persister `parsed/` et `graph/` sur S3** avant toute écriture DB ; pointeurs `latest.json` ; le seed Postgres devient le **projecteur**.
 4. **`radar db rebuild` + test CI** (MinIO) — preuve que Postgres n'est plus la source de vérité.
 5. **Réduire les fixtures git au golden set** (par famille) + script de promotion.
-6. **Containeriser le worker → SCW Serverless Jobs + Cron** — passage 40 → 1000 villes sans toucher au poste.
+6. **Containeriser le worker → Kubernetes Jobs + CronJobs** — passage 40 → 1000 villes sans toucher au poste.
 
 Points 1–4 = durabilité à périmètre constant ; 5–6 = passage à l'échelle. **Aucune nouvelle brique d'infra** (pas de file, pas de lakehouse) — discipline de clés S3 + inversion source-de-vérité.
 

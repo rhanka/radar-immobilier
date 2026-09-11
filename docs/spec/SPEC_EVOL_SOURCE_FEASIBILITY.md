@@ -127,7 +127,7 @@ Manual/partner-dependent for Phase 1:
 ## 7. Remaining Open Questions
 
 - Confirm the exact MAMH XML dictionary/XSD path for role d'evaluation fields.
-- Confirm Scaleway/production storage costs for large PDF/GIS retention once
+- Confirm managed object storage/production storage costs for large PDF/GIS retention once
   ingestion cadence is known.
 - Confirm whether a JLR or registry access agreement is commercially realistic
   for the proposal phase.

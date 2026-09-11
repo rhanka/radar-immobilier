@@ -27,7 +27,7 @@ Mettre en place dès maintenant la structure du projet `radar-immobilier` (code,
 
 ### 3.1 Stack applicative
 - **SPA Svelte** (frontend) — déploiement sur **GitHub Pages**.
-- **Server TypeScript / Node** (backend) — hébergé sur le **cluster K8s POC** (`../poc-k8s` → Scaleway Kapsule, cluster `poc`).
+- **Server TypeScript / Node** (backend) — hébergé sur le **cluster K8s POC** (`../poc-k8s` → OVH MKS, cluster `poc`).
 
 ### 3.2 Réutilisation maximale `@sentropic/*`
 À consommer comme dépendances npm (ou monorepo workspace si pertinent) :
@@ -57,7 +57,7 @@ Mettre en place dès maintenant la structure du projet `radar-immobilier` (code,
 ### 3.6 Déploiement
 - **Frontend SPA Svelte** → GitHub Pages (`gh.pages`).
 - **Server TS Node** → K8s POC via `../poc-k8s/tenants/radar-immobilier/` (à créer en suivant le contrat `contracts/README.md` : Namespace + ResourceQuota + LimitRange + NetworkPolicy + ServiceAccount).
-- Cible Scaleway `fr-par-2`, pool `default` partagé (ressources limitées : 4 GB / 3 vCPU à la base, burst possible).
+- Cible OVH MKS (BHS5) ; capacité et pools gérés par l'opérateur k8s.
 
 ## 4. Organisation des specs
 

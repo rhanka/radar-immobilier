@@ -180,7 +180,7 @@ pas d'Iceberg fiable). D est éliminé pour le mapper. E ne résout aucun des pr
 ## 5. Le point dur — jointure mapper signal↔lot/zone en zero-copy
 
 C'est **le** problème de design. Le rendu (PMTiles) est résolu de façon évidente ; la jointure ne l'est
-pas, car les **signaux vivent en PG/SCW** (graphify) tandis que la **géo vit sur S3** (geo).
+pas, car les **signaux vivent en PG/object store** (graphify) tandis que la **géo vit sur S3** (geo).
 
 ### 5.1 Pourquoi la jointure est dure
 

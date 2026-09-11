@@ -23,13 +23,13 @@ SELECT count(*) FROM (
 
 **714 villes** ont au moins un signal détecté ; **295 villes** (29,2 %) ont un graphe v2.3 mais zéro Signal ni DesignationEvent.
 
-Toutes les 295 villes ont un `graph/latest.json` sur SCW (`radar-immobilier-docs-pocs`), confirmant que le pipeline graphify a bien tourné.
+Toutes les 295 villes ont un `graph/latest.json` sur object store (`<verified-ovh-bucket>`), confirmant que le pipeline graphify a bien tourné.
 
 ---
 
 ## 2. Méthode d'audit
 
-### 2.1 Catégorisation par contenu graphe SCW
+### 2.1 Catégorisation par contenu graphe object store
 
 Lecture de `graph/{city}/latest.json` pour chacune des 295 villes :
 
@@ -255,8 +255,8 @@ Les signaux génériques issus d'anciens runs pour ces deux villes ne doivent pa
 ## 8. Données sources
 
 - Base PostgreSQL : `radar-immobilier` namespace k8s (KUBECONFIG=~/.kube/poc.yaml)
-- Bucket S3 : `radar-immobilier-docs-pocs` (Scaleway fr-par)
-- Graphes SCW : `graph/{city}/latest.json` (1 118 villes avec latest.json)
+- Bucket S3 : `<verified-ovh-bucket>` (managed object storage <verified-ovh-region>)
+- Graphes object store : `graph/{city}/latest.json` (1 118 villes avec latest.json)
 - PDFs bruts : `raw/proces-verbaux-{city}/cas/{sha}.pdf`
 - Anciens runs graphify : `parsed/{city}/graphify/*/graph.json`
 - Extraction texte : `pdftotext` (poppler 24.02.0)

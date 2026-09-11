@@ -35,7 +35,7 @@ suffit pour le gate.**
   `sourceUrl` via les `.meta.json` sidecar — mais SEULEMENT s'ils existent.
 
 ### Récupérabilité des PV
-- Bucket SCW `radar-immobilier-docs-pocs`, CAS `raw/<source>/cas/<sha256>.<ext>`.
+- Bucket object store `<verified-ovh-bucket>`, CAS `raw/<source>/cas/<sha256>.<ext>`.
 - mont-tremblant : 2 PV (3 p. + 15 p.), **avec** `.meta.json` (sourceUrl présent).
 - rimouski : 5 PV, **sans** `.meta.json` (sourceUrl à reconstituer ; rawRef
   dérivable du pattern CAS).
@@ -53,7 +53,7 @@ suffit pour le gate.**
    `refs:[{docSha,sourceUrl,rawRef,page,excerpt,citation}]` (top-level → `props.refs`
    lu par l'API) + scalaires `properties.{sourceUrl,rawRef,citation,page}` ;
    purge les refs d'arête `generated://`/`synthetic` ; bump `ontology_version`→`2.3`.
-5. `gate.sh` → publish atomique SCW (backup `history/` automatique).
+5. `gate.sh` → publish atomique object store (backup `history/` automatique).
 
 ## 3. Résultat pilote — Mont-Tremblant (vérifié)
 

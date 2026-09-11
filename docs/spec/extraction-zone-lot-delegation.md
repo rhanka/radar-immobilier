@@ -216,16 +216,16 @@ jq '
 # → rapport informatif (pas de seuil bloquant — la couverture dépend du texte)
 ```
 
-Gates 1, 2, 3 sont **bloquants** (must be true avant upload SCW).
+Gates 1, 2, 3 sont **bloquants** (must be true avant upload object store).
 Gate 4 est informatif — reporter les chiffres dans le rapport de lot.
 
-**Upload SCW obligatoire** après chaque lot validé :
+**Upload object store obligatoire** après chaque lot validé :
 
 ```bash
-# Upload du graphe vers SCW (bucket radar-immobilier)
+# Upload du graphe vers object store (bucket radar-immobilier)
 aws s3 cp graph/<slug>/latest.json \
   s3://radar-immobilier/graph/<slug>/latest.json \
-  --endpoint-url $SCW_ENDPOINT
+  --endpoint-url $object store_ENDPOINT
 ```
 
 **NE PAS projeter PG.** Le conducteur orchestrera la projection après validation
