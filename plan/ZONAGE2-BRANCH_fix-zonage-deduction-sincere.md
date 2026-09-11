@@ -43,22 +43,22 @@ Correct unsupported zoning-family deductions, distinguish code-derived API data 
 - [x] **Lot 0 — Baseline and evidence**
   - [x] Confirm branch and exact `origin/main` base.
   - [x] Read the Fable source report and relevant project rules.
-  - [ ] Trace both UI and API deduction paths and the rendered Checkbox DOM/CSS path.
+  - [x] Trace both UI and API deduction paths and the rendered Checkbox DOM/CSS path.
 
-- [ ] **Lot 1 — Correct deduction and provenance**
-  - [ ] Correct unsupported UI/API token mappings and add negative regressions.
-  - [ ] Split conservation and recreation styles and verify rendered legend labels/colors.
-  - [ ] Add `kindSource: "code"` only for API code fallback and verify source/code cases.
-  - [ ] Commit as `fix(vues)`.
+- [x] **Lot 1 — Correct deduction and provenance**
+  - [x] Correct unsupported UI/API token mappings and add negative regressions.
+  - [x] Split conservation and recreation styles and verify rendered legend labels/colors.
+  - [x] Add `kindSource: "code"` only for API code fallback and verify source/code cases.
+  - [x] Commit as `fix(vues)`.
 
-- [ ] **Lot 2 — Correct Signaux map legends**
-  - [ ] Remove the CPTAQ-absence notice while retaining actionable states.
-  - [ ] Make the agricultural label conditional on actual CPTAQ presence.
-  - [ ] Fix number-toggle typography on the real DS label node and verify computed style.
-  - [ ] Hide neutral-only lot entries while retaining the lot-number toggle.
-  - [ ] Commit as `fix(vues)` or `feat(vues)` by behavior.
+- [x] **Lot 2 — Correct Signaux map legends**
+  - [x] Remove the CPTAQ-absence notice while retaining actionable states.
+  - [x] Make the agricultural label conditional on actual CPTAQ presence.
+  - [x] Fix number-toggle typography on the real DS label node and verify the DS style contract.
+  - [x] Hide neutral-only lot entries while retaining the lot-number toggle.
+  - [x] Commit as `fix(vues)` or `feat(vues)` by behavior.
 
-- [ ] **Lot 3 — Finalize specification and verification**
-  - [ ] Write the sourced status table, corrections, residual limits, precedence target, and API mechanism.
-  - [ ] Run focused UI/API tests, map suites, `svelte-check`, and branch scope verification.
-  - [ ] Commit as `docs(spec)` and produce the untracked `.sol-build-report-v2.md`.
+- [x] **Lot 3 — Finalize specification and verification**
+  - [x] Write the sourced status table, corrections, residual limits, precedence target, and API mechanism.
+  - [x] Run focused UI/API tests, map suites, `svelte-check`, and branch scope verification.
+  - [x] Commit as `docs(spec)` and produce the untracked `.sol-build-report-v2.md`.
