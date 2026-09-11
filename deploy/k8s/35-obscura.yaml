@@ -2,11 +2,37 @@
 # Brought in from draft PR #8 (deploy/k8s/obscura.yaml), aligned to the
 # sentropic tenant conventions (radar-app ServiceAccount, part-of label).
 #
-# Image: built from obscura/Dockerfile (wrapper around the upstream
-# h4ckf0r0day/obscura release binary) and pushed to PUBLIC GHCR by
-# .github/workflows/build-push-images.yml (matrix `obscura`), like
-# radar-api / radar-ui / radar-grounding. No pull secret needed — the legacy
-# SCW registry (rg.fr-par.scw.cloud) is decommissioned.
+# Image provenance — UPSTREAM PUBLIC Docker Hub image, pinned by tag AND digest
+# (immutable reference, no mutable tag, no build step, no registry credential):
+#   docker.io/h4ckf0r0day/obscura:0.1.5
+#     @sha256:9b4f1c083421f8b83e36700118cd582143e14e6e033820f162ea3c6056350cd9
+#   = linux/amd64 image manifest of tag 0.1.5 (OCI index
+#     sha256:4efef8abf66beff6f994e562b6994875de3dd057cf5054ae0ae06ecb25df5b87,
+#     pushed 2026-05-14). Upstream Dockerfile at git tag v0.1.5:
+#     gcr.io/distroless/cc-debian12, ENTRYPOINT ["/obscura"],
+#     CMD ["serve","--port","9222","--host","0.0.0.0"], EXPOSE 9222,
+#     no USER (config User "0"), Env SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt.
+#
+# Why no in-house wrapper image any more: the former
+# rg.fr-par.scw.cloud/radar-immobilier/radar-obscura (obscura/Dockerfile) only
+# re-packaged the SAME upstream v0.1.5 release tarball; the SCW registry is
+# being decommissioned and publishing a replacement to GHCR would have required
+# a manual "make the package public" act (new GHCR packages are private by
+# default), which the owner ruled out. Same version as the wrapper's pin
+# (v0.1.5) → no behaviour change for the api (OBSCURA_CDP_URL, 30-api.yaml).
+#
+# Runtime adaptations (verified locally: `docker run --user 1001:1001
+# --cap-drop ALL --security-opt no-new-privileges --entrypoint /obscura <image>
+# serve --host 0.0.0.0 --port 9222` → GET /json/version = 200 within 1 s):
+#   - command/args are EXPLICIT: the binary lives at /obscura (NOT on PATH), so
+#     `command: ["/obscura"]` — a bare `obscura` would fail to exec.
+#   - the image runs as root by default (User "0"): runAsNonRoot + numeric
+#     runAsUser/runAsGroup 1001 (pod level, repeated on the container) override
+#     it; uid 1001 has no /etc/passwd entry in the distroless rootfs, which is
+#     fine for a numeric runAsUser.
+#   - distroless = no shell, no curl → readiness stays an httpGet probe
+#     (kubelet-side); never use an exec probe here.
+# Dormant (replicas: 0) — FinOps; scale up on demand.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -40,13 +66,23 @@ spec:
       containers:
         - name: obscura
           securityContext:
+            # The upstream image has no USER instruction (root by default):
+            # force the non-root uid/gid here too, so the guarantee does not
+            # depend on the pod-level block alone.
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
               drop:
                 - ALL
-          image: ghcr.io/rhanka/radar-obscura:latest
+          image: docker.io/h4ckf0r0day/obscura:0.1.5@sha256:9b4f1c083421f8b83e36700118cd582143e14e6e033820f162ea3c6056350cd9
           imagePullPolicy: IfNotPresent
+          # Explicit entrypoint + args (see header): same flags the upstream
+          # image's CMD uses, spelled out so the manifest is self-describing.
+          command: ["/obscura"]
+          args: ["serve", "--host", "0.0.0.0", "--port", "9222"]
           ports:
             - name: cdp
               containerPort: 9222

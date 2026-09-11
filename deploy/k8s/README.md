@@ -25,7 +25,7 @@ and extended with the sentropic-app integration.
 | Aspect | How radar does it | Source mirrored |
 | --- | --- | --- |
 | **Tenant / workspace** | dedicated `radar-immobilier` Namespace; every resource carries `app.kubernetes.io/part-of: sentropic` and `sentropic.dev/workspace: radar-immobilier` | sentropic per-tenant namespace + `app.kubernetes.io/*` labels (`10-rbac.yaml`, `30-api.yaml`) |
-| **Registry pull** | public `ghcr.io/rhanka/radar-{api,ui,grounding,obscura}` packages need no pull secret; the shared `radar-app` ServiceAccount carries no `imagePullSecrets` (legacy SCW `radar-registry-pull` retired) | `10-rbac.yaml` |
+| **Registry pull** | public `ghcr.io/rhanka/radar-{api,ui,grounding}` packages need no pull secret; `radar-obscura` runs the **upstream public Docker Hub image** `docker.io/h4ckf0r0day/obscura` (tag + digest pinned — no GHCR package, no pull secret either); the shared `radar-app` ServiceAccount still carries the legacy SCW `radar-registry-pull` secret only while the live prod/preprod Deployments run SCW-tagged images — its retirement is a separate PR after the GHCR promotion | `10-rbac.yaml` |
 | **Auth** | OIDC **relying party** to the shared sentropic IdP (`auth.sent-tech.ca`) | sentropic `35-auth-idp.yaml`, `60-ingress.yaml`, and the RP recipe `apps/auth-idp/RP_SESSION_GLUE.md` |
 | **Public ingress / TLS** | Traefik Ingress on `immo.sent-tech.ca`, cert-manager `letsencrypt-prod` (DNS-01) | sentropic `60-ingress.yaml` |
 | **UI delivery** | nginx-served Svelte SPA that proxies `/api` → api (same-origin) | sentropic `40-ui.yaml` (nginx fans out `/api`) |
@@ -35,18 +35,18 @@ and extended with the sentropic-app integration.
 | File | Purpose |
 | --- | --- |
 | `00-namespace.yaml` | tenant Namespace + workspace/part-of labels (operator owns the live copy + RQ/LimitRange/NetPol) |
-| `10-rbac.yaml` | `radar-app` ServiceAccount (no pull secret — all images are public GHCR) |
+| `10-rbac.yaml` | `radar-app` ServiceAccount + legacy SCW pull secret (transitional: no manifest in this directory needs it any more — api/ui/grounding are public GHCR, obscura is the public upstream Docker Hub image — it stays until the live prod/preprod Deployments are promoted to GHCR images; retired in a follow-up PR) |
 | `20-postgres-postgis.yaml` | Postgres 16 + PostGIS StatefulSet + headless Service + 5Gi PVC |
 | `25-minio.yaml` | in-cluster MinIO (S3) StatefulSet + Service for raw-document storage |
 | `30-api.yaml` | radar API (Hono) Deployment + Service + non-secret ConfigMap (incl. OIDC RP env) |
-| `35-obscura.yaml` | headless-browser CDP service for scraping (`ghcr.io/rhanka/radar-obscura`, built from `obscura/Dockerfile` by CI) |
+| `35-obscura.yaml` | headless-browser CDP service for scraping — upstream public `docker.io/h4ckf0r0day/obscura:0.1.5@sha256:…` (nothing built in-house, no registry credential), dormant `replicas: 0` |
 | `40-maildev.yaml` | SMTP sink (POC) |
 | `50-ui.yaml` | Svelte SPA via nginx + `/api` proxy (ConfigMap holds the nginx conf) |
 | `60-ingress.yaml` | public Traefik Ingress for `immo.sent-tech.ca` + cert-manager TLS |
 | `70-networkpolicy.yaml` | tenant-side additive NetworkPolicy: Traefik → `radar-ui`:8080 (see "Ingress reaches the UI pod, not the api") |
 | `80-auth.yaml` | declarative record of the sentropic OIDC delegation (`radar-sentropic-auth` ConfigMap) |
 | `kustomization.yaml` | bundles the resources; stamps the `sentropic` part-of + workspace labels |
-| `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret |
+| `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / legacy SCW registry pull (transitional, see `10-rbac.yaml`) |
 
 ## Auth delegation — radar as an OIDC relying party
 
@@ -197,9 +197,11 @@ trigger, not the agent's:
 #    sentropic tenant convention — see ~/src/sentropic/deploy/k8s/README.md).
 kubectl -n radar-immobilier apply -f <private-secrets.yaml>
 
-# 2. Build + push api / ui / grounding / obscura to public GHCR (CI does this on
-#    the live path via .github/workflows/build-push-images.yml; api/ui build
-#    targets also live in the Makefile). No registry pull secret is needed.
+# 2. Build + push api / ui / grounding to public GHCR (CI does this on the live
+#    path via .github/workflows/build-push-images.yml; api/ui build targets also
+#    live in the Makefile). `radar-obscura` is NOT built: 35-obscura.yaml runs
+#    the upstream public Docker Hub image (tag + digest pinned) — no registry
+#    credential is needed for it.
 
 # 3. Validate, then apply — explicit opt-in:
 KUBECONFIG=<path> make deploy-k8s K8S_DEPLOY_CONFIRM=1 ENV=poc
