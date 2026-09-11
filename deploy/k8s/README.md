@@ -13,7 +13,7 @@ a named sentropic workspace**.
 
 The pattern mirrors the **sentropic** tenant layout
 (`~/src/sentropic/deploy/k8s/`): one Namespace per app, a namespace-scoped
-ServiceAccount with an SCW registry pull secret, api + ui + datastore workloads
+ServiceAccount, api + ui + datastore workloads
 behind a public Traefik Ingress with cert-manager TLS, and OIDC auth delegation
 to `auth.sent-tech.ca`. The base radar workloads were brought in from draft
 **PR #8** (`feat/k8s-tenant-radar-and-infra`,
@@ -25,7 +25,7 @@ and extended with the sentropic-app integration.
 | Aspect | How radar does it | Source mirrored |
 | --- | --- | --- |
 | **Tenant / workspace** | dedicated `radar-immobilier` Namespace; every resource carries `app.kubernetes.io/part-of: sentropic` and `sentropic.dev/workspace: radar-immobilier` | sentropic per-tenant namespace + `app.kubernetes.io/*` labels (`10-rbac.yaml`, `30-api.yaml`) |
-| **Registry pull** | `radar-app` ServiceAccount with `imagePullSecrets: [radar-registry-pull]` | sentropic `sentropic-app` SA + `sentropic-registry` (`10-rbac.yaml`) |
+| **Registry pull** | public `ghcr.io/rhanka/radar-{api,ui,grounding}` packages need no pull secret; the shared `radar-app` ServiceAccount keeps `radar-registry-pull` only for `radar-obscura` on SCW | `10-rbac.yaml` |
 | **Auth** | OIDC **relying party** to the shared sentropic IdP (`auth.sent-tech.ca`) | sentropic `35-auth-idp.yaml`, `60-ingress.yaml`, and the RP recipe `apps/auth-idp/RP_SESSION_GLUE.md` |
 | **Public ingress / TLS** | Traefik Ingress on `immo.sent-tech.ca`, cert-manager `letsencrypt-prod` (DNS-01) | sentropic `60-ingress.yaml` |
 | **UI delivery** | nginx-served Svelte SPA that proxies `/api` → api (same-origin) | sentropic `40-ui.yaml` (nginx fans out `/api`) |
@@ -35,7 +35,7 @@ and extended with the sentropic-app integration.
 | File | Purpose |
 | --- | --- |
 | `00-namespace.yaml` | tenant Namespace + workspace/part-of labels (operator owns the live copy + RQ/LimitRange/NetPol) |
-| `10-rbac.yaml` | `radar-app` ServiceAccount + registry pull secret reference |
+| `10-rbac.yaml` | `radar-app` ServiceAccount + legacy SCW pull secret retained for `radar-obscura` |
 | `20-postgres-postgis.yaml` | Postgres 16 + PostGIS StatefulSet + headless Service + 5Gi PVC |
 | `25-minio.yaml` | in-cluster MinIO (S3) StatefulSet + Service for raw-document storage |
 | `30-api.yaml` | radar API (Hono) Deployment + Service + non-secret ConfigMap (incl. OIDC RP env) |
@@ -46,7 +46,7 @@ and extended with the sentropic-app integration.
 | `70-networkpolicy.yaml` | tenant-side additive NetworkPolicy: Traefik → `radar-ui`:8080 (see "Ingress reaches the UI pod, not the api") |
 | `80-auth.yaml` | declarative record of the sentropic OIDC delegation (`radar-sentropic-auth` ConfigMap) |
 | `kustomization.yaml` | bundles the resources; stamps the `sentropic` part-of + workspace labels |
-| `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / registry pull |
+| `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / legacy `radar-obscura` registry pull |
 
 ## Auth delegation — radar as an OIDC relying party
 
@@ -197,8 +197,9 @@ trigger, not the agent's:
 #    sentropic tenant convention — see ~/src/sentropic/deploy/k8s/README.md).
 kubectl -n radar-immobilier apply -f <private-secrets.yaml>
 
-# 2. Build + push the api / obscura / ui images to the SCW registry (CI does
-#    this on the live path; image build targets live in the Makefile).
+# 2. Build + push api / ui / grounding to public GHCR (CI does this on the live
+#    path; image build targets live in the Makefile). `radar-obscura` remains on
+#    SCW and continues to use the existing `radar-registry-pull` secret.
 
 # 3. Validate, then apply — explicit opt-in:
 KUBECONFIG=<path> make deploy-k8s K8S_DEPLOY_CONFIRM=1 ENV=poc
