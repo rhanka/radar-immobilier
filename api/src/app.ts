@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import type { AuthConfig, TemConfig } from "./config.js";
+import type { AuthConfig } from "./config.js";
 import {
   authRoute,
   protect,
@@ -49,8 +49,6 @@ export type AppDeps = HealthDeps &
     auth?: AuthConfig;
     /** Test seams for the OIDC routes (mock fetch / JWKS / discovery). */
     authOptions?: AuthRouteOptions;
-    /** Config Scaleway TEM optionnelle pour les emails d'invitation. */
-    tem?: TemConfig;
     /**
      * Seams de la couverture sources (source-coverage) : fetch injectable
      * (tests OFFLINE — jamais de réseau en unit), base OGC geo et TTL du cache
@@ -82,20 +80,7 @@ export function createApp(deps: AppDeps): Hono {
         adminRoute({
           db: deps.db,
           sessionSecret: deps.auth.sessionSecret,
-          ...(deps.tem?.enabled
-            ? {
-                mailer: {
-                  temApiBaseUrl: deps.tem.apiBaseUrl,
-                  temRegion: deps.tem.region,
-                  temProjectId: deps.tem.projectId,
-                  temFromEmail: deps.tem.fromEmail,
-                  temFromName: deps.tem.fromName,
-                  temSecretKey: deps.tem.secretKey,
-                  appBaseUrl: deps.auth.appBaseUrl,
-                },
-                appBaseUrl: deps.auth.appBaseUrl,
-              }
-            : { appBaseUrl: deps.auth.appBaseUrl }),
+          appBaseUrl: deps.auth.appBaseUrl,
         }),
       );
     }
