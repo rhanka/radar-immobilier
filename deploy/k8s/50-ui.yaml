@@ -86,10 +86,10 @@ spec:
               drop:
                 - ALL
           # radar-ui image (ui/Dockerfile): SPA bundle + nginx baked in, built
-          # and pushed by CI to the SCW registry. This is the image that
+          # and pushed by CI to public GHCR. This is the image that
           # actually serves the static SPA (the previous stock-nginx image had
           # an empty html root and served a blank page).
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-ui:main-8909943-pdfgeo
+          image: ghcr.io/rhanka/radar-ui:main-8909943-pdfgeo
           imagePullPolicy: Always
           ports:
             - name: http
