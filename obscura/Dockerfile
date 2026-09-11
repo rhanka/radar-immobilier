@@ -1,7 +1,17 @@
+# LEGACY wrapper image — kept for local debugging builds only; NOT built by CI
+# and NOT used by production nor by the compose dev stack any more.
+#
+# Production (deploy/k8s/35-obscura.yaml) and docker-compose.yml both run the
+# upstream PUBLIC Docker Hub image docker.io/h4ckf0r0day/obscura:0.1.5 (pinned
+# by digest): same v0.1.5 release as the tarball below, distroless/cc,
+# ENTRYPOINT /obscura, no shell. This Dockerfile re-packages that release into
+# a Debian-slim image with a shell and a non-root user (uid 1001) — handy when
+# you need to `docker exec … sh` into the container; candidate for removal in a
+# follow-up PR. Build by hand: `docker build -t radar-obscura obscura/`.
+#
 # Wrapper image around the upstream Obscura headless-browser binary
-# (https://github.com/h4ckf0r0day/obscura). Upstream publishes only
-# raw tarballs, so we package the Linux x86_64 binary into a small
-# Debian-slim image and expose its Chrome DevTools Protocol port.
+# (https://github.com/h4ckf0r0day/obscura): packages the Linux x86_64 release
+# binary into a small Debian-slim image and exposes its CDP port.
 
 FROM debian:bookworm-slim AS fetcher
 
