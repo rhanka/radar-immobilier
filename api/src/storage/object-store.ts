@@ -60,7 +60,7 @@ export interface ObjectReader {
 }
 
 /**
- * Storage boundary for raw source documents. Backed by S3 (Scaleway) in
+ * Storage boundary for raw source documents. Backed by S3 (managed object storage) in
  * prod and MinIO locally. Adapters live behind this interface so the rest
  * of the code never talks to a concrete SDK.
  */

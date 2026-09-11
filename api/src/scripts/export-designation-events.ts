@@ -51,7 +51,7 @@ function s3() {
   return {
     endpoint: e.GRAPH_S3_ENDPOINT ?? e.SCRAPE_S3_ENDPOINT ?? e.S3_ENDPOINT,
     bucket: e.GRAPH_S3_BUCKET ?? e.SCRAPE_S3_BUCKET ?? e.S3_BUCKET,
-    region: e.GRAPH_S3_REGION ?? e.SCRAPE_S3_REGION ?? e.S3_REGION ?? "fr-par",
+    region: e.GRAPH_S3_REGION ?? e.SCRAPE_S3_REGION ?? e.S3_REGION ?? "us-east-1",
     accessKeyId: e.GRAPH_S3_ACCESS_KEY ?? e.SCRAPE_S3_ACCESS_KEY ?? e.S3_ACCESS_KEY,
     secretAccessKey: e.GRAPH_S3_SECRET_KEY ?? e.SCRAPE_S3_SECRET_KEY ?? e.S3_SECRET_KEY,
   };
