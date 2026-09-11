@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { createApp } from "./app.js";
-import { loadConfig, resolveAuthConfig } from "./config.js";
+import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
 import { loadGeoKeyIndex } from "./services/sources/document-resolver.js";
@@ -47,7 +47,15 @@ logger.info(
     : "OIDC relying-party disabled (open mode — no login)",
 );
 
-logger.info("Invitation links will be logged until a replacement mail provider is configured");
+// Resolve optional Scaleway TEM config for invitation emails. SMTP egress is
+// blocked at the platform level (BR-37b), so mail goes through the TEM HTTP API.
+const tem = resolveTemConfig(config);
+logger.info(
+  { temEnabled: tem.enabled, temRegion: tem.enabled ? tem.region : undefined },
+  tem.enabled
+    ? "Scaleway TEM mailer enabled (invitation emails will be sent via HTTP API)"
+    : "Scaleway TEM mailer disabled (invitation links will be logged to stdout)",
+);
 
 const app = createApp({
   checkDb: makeDbProbe(dbHandle),
@@ -60,6 +68,7 @@ const app = createApp({
   ontologyWriteToken: config.RADAR_ONTOLOGY_WRITE_TOKEN,
   db: dbHandle.db,
   auth,
+  tem,
 });
 
 // Ensure the raw-metadata bucket exists before serving RECUEIL collect requests.
