@@ -54,7 +54,7 @@ Ingest the immutable 139-document CAS batch for 40 municipalities, merge fresh s
   - [x] Convert grounded findings and merge with the v2.3 baseline extraction.
   - [x] Resolve the two ungrounded baseline nodes by declared exclusion.
 - [ ] **Lot 3 — Runner and gates**
-  - [ ] Carry the immutable contract through runner, worker, gate, and metrics.
+  - [x] Carry the immutable contract through runner, worker, gate, and metrics.
   - [ ] Keep dry-run preflight and gate strictly read-only.
 - [ ] **Lot 4 — Qualification and delivery**
   - [ ] Run targeted static checks and the complete 40-city dry-run.
