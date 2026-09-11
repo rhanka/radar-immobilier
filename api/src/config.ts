@@ -72,6 +72,13 @@ const envSchema = z.object({
     .enum(["true", "false"])
     .optional()
     .transform((v) => (v === undefined ? undefined : v === "true")),
+  /**
+   * Object-key prefix for the graph store. Default `graph/` = the ungrounded
+   * BASELINE (standard/refresh/prod projection — UNCHANGED). The PREPROD
+   * projection sets `graph-preprod/` to read preprod-grounded graphs isolated by
+   * prefix within the SAME store (1-store migration). See resolveGraphPrefix.
+   */
+  GRAPH_S3_PREFIX: z.string().optional(),
 
   /**
    * immo→geo document repoint (zero-copy PV cutover) — see
@@ -263,6 +270,17 @@ export function resolveGraphS3Config(config: AppConfig): ScrapeS3Config {
     forcePathStyle:
       config.GRAPH_S3_FORCE_PATH_STYLE ?? scrape.forcePathStyle,
   };
+}
+
+/**
+ * The graph store's object-key prefix — `graph/` (baseline, default) or a
+ * configured value such as `graph-preprod/` (preprod-grounded, isolated by prefix
+ * in the SAME store). Normalized to exactly one trailing slash so callers can
+ * concatenate `${prefix}${city}/latest.json`.
+ */
+export function resolveGraphPrefix(config: AppConfig): string {
+  const raw = (config.GRAPH_S3_PREFIX ?? "graph/").trim().replace(/\/+$/, "");
+  return raw.length > 0 ? `${raw}/` : "graph/";
 }
 
 /** Effective config for the read-only geo document store (same shape as S3). */

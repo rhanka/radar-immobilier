@@ -28,7 +28,7 @@
  *   { nodes: [{ id, label, file_type? }], links: [{ source, target, relation }] }
  */
 
-import { loadConfig, resolveGraphS3Config } from "../config.js";
+import { loadConfig, resolveGraphS3Config, resolveGraphPrefix } from "../config.js";
 import { createLogger } from "../logger.js";
 import { createDb } from "../db/client.js";
 import {
@@ -58,18 +58,23 @@ async function main(): Promise<void> {
 
   const { db, pool } = createDb(config);
 
+  // Préfixe de clés du store graphe : `graph/` (baseline, défaut) ou
+  // `graph-preprod/` (préprod grounded, isolé par préfixe dans le MÊME store).
+  const graphPrefix = resolveGraphPrefix(config);
+  logger.info({ graphPrefix }, "project-graph-from-s3: préfixe graphe");
+
   // Slugs explicites en arguments, ou toutes les villes disponibles.
   const argSlugs = process.argv.slice(2);
 
   let keys: string[];
   if (argSlugs.length > 0) {
     // Mode sélectif : construire les clés depuis les slugs fournis.
-    keys = argSlugs.map((slug) => `graph/${slug}/latest.json`);
+    keys = argSlugs.map((slug) => `${graphPrefix}${slug}/latest.json`);
     logger.info({ slugs: argSlugs }, "project-graph-from-s3: mode sélectif");
   } else {
-    // Mode complet : lister tout le préfixe graph/.
-    logger.info("project-graph-from-s3: mode complet — listage graph/*");
-    keys = (await store.list?.("graph/")) ?? [];
+    // Mode complet : lister tout le préfixe configuré.
+    logger.info({ graphPrefix }, "project-graph-from-s3: mode complet — listage du préfixe");
+    keys = (await store.list?.(graphPrefix)) ?? [];
     // Ne garder que les latest.json (pas les snapshots historiques éventuels).
     keys = keys.filter((k) => k.endsWith("/latest.json"));
     logger.info({ total: keys.length }, "project-graph-from-s3: clés trouvées");
@@ -84,9 +89,10 @@ async function main(): Promise<void> {
   const abortedCities: string[] = [];
 
   for (const key of keys) {
-    // Extraire le citySlug depuis la clé : graph/<citySlug>/latest.json
-    const parts = key.split("/");
-    const citySlug = parts[1] ?? key;
+    // Extraire le citySlug RELATIF au préfixe configuré :
+    // <graphPrefix><citySlug>/latest.json → 1er segment après le préfixe.
+    const rest = key.startsWith(graphPrefix) ? key.slice(graphPrefix.length) : key;
+    const citySlug = rest.split("/")[0] || key;
 
     let raw: Uint8Array;
     try {
