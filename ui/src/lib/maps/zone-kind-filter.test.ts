@@ -2,8 +2,8 @@
  * Tests du filtre par TYPE de zone (zone-kind-filter) — en-tête de
  * l'accordéon ZONES du drawer droit.
  *
- * Vérifie : groupes dérivés de la légende (labels non dupliqués, CONS+REC
- * fusionnés), matching additif (vide = tout), compteurs N/M et par groupe,
+ * Vérifie : groupes dérivés de la légende (CONS et REC distincts), matching
+ * additif (vide = tout), compteurs N/M et par groupe,
  * peinture pilotée (matchée accentuée / hors-filtre estompée / filtre
  * inactif → null, la hiérarchie existante s'applique).
  */
@@ -45,15 +45,16 @@ describe("ZONE_KIND_GROUPS — issus de zone-kind-style, pas dupliqués", () => 
     const byId = new Map(ZONE_KIND_GROUPS.map((g) => [g.id, g.label]));
     expect(byId.get("H")).toBe(ZONE_KIND_STYLES.H.label);
     expect(byId.get("C")).toBe(ZONE_KIND_STYLES.C.label);
-    expect(byId.get("CONS_REC")).toBe(ZONE_KIND_STYLES.CONS.label);
+    expect(byId.get("CONS")).toBe(ZONE_KIND_STYLES.CONS.label);
+    expect(byId.get("REC")).toBe(ZONE_KIND_STYLES.REC.label);
     // Directive owner : pas de groupe « Type non déterminé » (aucune chip pour
     // une zone sans famille source).
     expect(byId.has("UNRESOLVED")).toBe(false);
   });
 
-  it("CONS et REC partagent le même groupe (même entrée de légende)", () => {
-    expect(zoneKindGroupId("Conservation", "CONS-1")).toBe("CONS_REC");
-    expect(zoneKindGroupId("Récréation", "REC-2")).toBe("CONS_REC");
+  it("keeps conservation and recreation in separate groups", () => {
+    expect(zoneKindGroupId("Conservation", "CONS-1")).toBe("CONS");
+    expect(zoneKindGroupId("Récréation", "REC-2")).toBe("REC");
   });
 
   it("kind irrésolu → UNRESOLVED (aucune invention)", () => {
@@ -104,7 +105,7 @@ describe("compteurs N/M et par groupe", () => {
   it("countZoneKindMatches : N matchées sur l'ensemble fourni", () => {
     expect(countZoneKindMatches(ZONES, DEFAULT_ZONE_KIND_FILTER)).toBe(ZONES.length);
     expect(countZoneKindMatches(ZONES, filterOf("H"))).toBe(2);
-    expect(countZoneKindMatches(ZONES, filterOf("H", "CONS_REC"))).toBe(4);
+    expect(countZoneKindMatches(ZONES, filterOf("H", "CONS"))).toBe(3);
     expect(countZoneKindMatches(ZONES, filterOf("A"))).toBe(0);
   });
 
@@ -113,7 +114,8 @@ describe("compteurs N/M et par groupe", () => {
     expect(counts.get("H")).toBe(2);
     expect(counts.get("C")).toBe(1);
     expect(counts.get("I")).toBe(1);
-    expect(counts.get("CONS_REC")).toBe(2);
+    expect(counts.get("CONS")).toBe(1);
+    expect(counts.get("REC")).toBe(1);
     expect(counts.get("UNRESOLVED")).toBe(1);
     expect(counts.has("A")).toBe(false); // groupe absent → pas de chip
   });

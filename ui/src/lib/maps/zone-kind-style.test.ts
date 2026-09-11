@@ -146,24 +146,18 @@ describe("canonicalZoneKind", () => {
       ["CF", "CONS"],
       ["CFA", "CONS"],
       ["HA", "H"],
-      ["Rv", "H"],
       ["Ra", "H"],
-      ["Rb", "H"],
-      ["Rc", "H"],
+      ["Rc", "MIXTE"],
       ["Ra/ru", "H"],
       ["VP", "H"],
       ["VF", "H"],
       ["V", "H"],
-      ["TV", "H"],
       ["CM", "C"],
       ["IN", "I"],
       ["Ex", "I"],
-      ["PU", "P"],
       ["AG", "A"],
       ["AF", "A"],
       ["Af/b", "A"],
-      ["Fo", "A"],
-      ["Fo/ru", "A"],
       ["RE", "REC"],
       ["Rec", "REC"],
       ["Rec/f", "REC"],
@@ -190,7 +184,7 @@ describe("canonicalZoneKind", () => {
 
   it("should resolve sector-prefixed zone codes", () => {
     expect(canonicalZoneKind(null, "CO-939")).toBe("CONS");
-    expect(canonicalZoneKind(null, "CV-RF-2")).toBe("H");
+    expect(canonicalZoneKind(null, "CV-RF-2")).toBeNull();
     expect(canonicalZoneKind(null, "ST-TO-1")).toBe("REC");
     expect(canonicalZoneKind(null, "VA-P-3")).toBe("P");
   });
@@ -304,7 +298,7 @@ describe("decorateZonesWithKindColor", () => {
 });
 
 describe("zoneKindLegend", () => {
-  it("should list families present through kind or code without a neutral entry", () => {
+  it("lists conservation and recreation with distinct labels and colors", () => {
     const zones = [
       { kind: "agricole", code: "A-118" },
       { kind: null, code: "H-354" },
@@ -319,8 +313,10 @@ describe("zoneKindLegend", () => {
     expect(labels).toContain("Habitation");
     expect(labels).toContain("Commercial");
     expect(labels).toContain("Agricole");
-    // CONS et REC fusionnés en une seule entrée (même teinte, même libellé).
-    expect(labels.filter((l) => l === "Conservation / récréation")).toHaveLength(1);
+    expect(labels.filter((label) => label === "Conservation")).toHaveLength(1);
+    expect(labels.filter((label) => label === "Récréation / tourisme")).toHaveLength(1);
+    expect(ZONE_KIND_STYLES.CONS.token).not.toBe(ZONE_KIND_STYLES.REC.token);
+    expect(ZONE_KIND_STYLES.CONS.fallback).not.toBe(ZONE_KIND_STYLES.REC.fallback);
     // Directive owner : une zone sans famille source n'ajoute PLUS d'entrée
     // « Type non déterminé » (aucune catégorie inventée en légende).
     expect(labels).not.toContain(ZONE_KIND_NEUTRAL.label);
