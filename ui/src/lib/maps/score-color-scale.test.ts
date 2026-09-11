@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   SCORE_STOPS,
+  buildSignauxLotLegend,
+  classifySignauxLot,
   lotFillColorExpression,
   signauxLotFillColorExpression,
   lotFillOpacityExpression,
@@ -67,6 +69,41 @@ describe("score-color-scale — DS-token-driven ramp", () => {
     expect(expr[10]).toBe("#2563eb");
     // 6. neutre → BLANC (C2, token surface-default), PAS la rampe score.
     expect(expr[expr.length - 1]).toBe("#ffffff");
+  });
+
+  it("should classify each lot once and build a dynamic legend in paint order", () => {
+    const lots = [
+      { signalProjection: "direct", priorite: true, multifamilial4plus: true, tod: true },
+      { signalProjection: "inherited", priorite: true },
+      { priorite: true },
+      { multifamilial4plus: true, tod: true },
+      { multifamilial4plus: true },
+      { tod: true },
+      {},
+    ];
+
+    expect(lots.map(classifySignauxLot)).toEqual([
+      "direct",
+      "inherited",
+      "priority",
+      "priority",
+      "fourPlus",
+      "tod",
+      "neutral",
+    ]);
+    expect(buildSignauxLotLegend(lots, null).map(({ category, count, label }) => ({
+      category,
+      count,
+      label,
+    }))).toEqual([
+      { category: "direct", count: 1, label: "Cité par un signal" },
+      { category: "inherited", count: 1, label: "Zone citée par un signal" },
+      { category: "priority", count: 2, label: "Priorité (4+ ∧ TOD)" },
+      { category: "fourPlus", count: 1, label: "Multifamilial 4+" },
+      { category: "tod", count: 1, label: "Périmètre TOD" },
+      { category: "neutral", count: 1, label: "Sans indicateur" },
+    ]);
+    expect(buildSignauxLotLegend([], null)).toEqual([]);
   });
 
   it("opacity expression boosts priorité lots", () => {
