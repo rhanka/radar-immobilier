@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""dump-parity.py — parité de deux dumps de projection graph_nodes (ex. SCW vs OVH).
+"""dump-parity.py — parité de deux dumps de projection graph_nodes (ex. legacy store vs OVH).
 
 Usage : dump-parity.py <A.ndjson> <B.ndjson>
 

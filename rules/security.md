@@ -9,8 +9,8 @@ tags: [security]
 ## Secrets
 
 - Never commit `.env`, credentials, tokens, or private keys. `.gitignore` blocks the common cases; `git diff --cached` is checked by the `pre-commit` hook (BR-00 may stub it).
-- Production secrets live in K8s `Secret` resources (Scaleway tenant), populated out-of-band.
-- LLM API keys, Scaleway IAM keys, DB credentials: separate `Secret` per concern.
+- Production secrets live in K8s `Secret` resources, populated out-of-band.
+- LLM API keys, object-storage access keys and DB credentials: separate `Secret` per concern.
 - For dev: `.env.example` documents the required keys; `.env` is per-developer and never tracked.
 
 ## Sandboxing
