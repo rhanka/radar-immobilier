@@ -28,6 +28,12 @@ newSignals=0
 newEvents=0
 nodes_count=0
 edges_count=0
+freshSignals=0
+freshEvents=0
+documentsExpected=0
+documentsVerified=0
+excludedSignals=0
+excludedEvents=0
 
 emit_status() {
   local finished_at
@@ -41,13 +47,19 @@ emit_status() {
     --argjson newEvents "$newEvents" \
     --argjson nodes "$nodes_count" \
     --argjson edges "$edges_count" \
+    --argjson freshSignals "$freshSignals" \
+    --argjson freshEvents "$freshEvents" \
+    --argjson documentsExpected "$documentsExpected" \
+    --argjson documentsVerified "$documentsVerified" \
+    --argjson excludedSignals "$excludedSignals" \
+    --argjson excludedEvents "$excludedEvents" \
     --arg reason "$reason" \
     --arg lane "$LANE_ID" \
     --arg startedAt "$started_at" \
     --arg finishedAt "$finished_at" \
     --argjson validatedExtraction "$validatedExtraction" \
     --argjson published "$published" \
-    '{city:$city,status:$status,lane:$lane,oldSignals:$oldSignals,oldEvents:$oldEvents,newSignals:$newSignals,newEvents:$newEvents,nodes:$nodes,edges:$edges,validatedExtraction:$validatedExtraction,published:$published,reason:$reason,startedAt:$startedAt,finishedAt:$finishedAt}' \
+    '{city:$city,status:$status,lane:$lane,oldSignals:$oldSignals,oldEvents:$oldEvents,newSignals:$newSignals,newEvents:$newEvents,freshSignals:$freshSignals,freshEvents:$freshEvents,documentsExpected:$documentsExpected,documentsVerified:$documentsVerified,excludedSignals:$excludedSignals,excludedEvents:$excludedEvents,nodes:$nodes,edges:$edges,validatedExtraction:$validatedExtraction,published:$published,reason:$reason,startedAt:$startedAt,finishedAt:$finishedAt}' \
     >> "$STATUS_FILE"
   printf '\n' >> "$STATUS_FILE"
 }
@@ -68,6 +80,14 @@ fi
 # ── 1. Comptages baseline ─────────────────────────────────────────────────────
 oldSignals=$(jq '[.nodes[]? | select(.type=="Signal")] | length' "$BASELINE" 2>/dev/null || echo 0)
 oldEvents=$(jq '[.nodes[]? | select(.type=="DesignationEvent")] | length' "$BASELINE" 2>/dev/null || echo 0)
+if [ -f "${GRAPHIFY_EXCLUSIONS:-}" ]; then
+  excludedSignals=$(awk -F '\t' -v city="$CITY" '$1 == city && $3 == "Signal" {count++} END {print count+0}' "$GRAPHIFY_EXCLUSIONS")
+  excludedEvents=$(awk -F '\t' -v city="$CITY" '$1 == city && $3 == "DesignationEvent" {count++} END {print count+0}' "$GRAPHIFY_EXCLUSIONS")
+fi
+if [ -f "${CAS_METRICS:-}" ]; then
+  documentsExpected=$(jq -r '.documentsExpected // 0' "$CAS_METRICS")
+  documentsVerified=$(jq -r '.documentsVerified // 0' "$CAS_METRICS")
+fi
 
 # ── 2. Shape header ───────────────────────────────────────────────────────────
 if ! jq -e --arg city "$CITY" \
@@ -104,10 +124,22 @@ newSignals=$(jq '[.nodes[]? | select(.type=="Signal")] | length' "$CANDIDATE" 2>
 newEvents=$(jq '[.nodes[]? | select(.type=="DesignationEvent")] | length' "$CANDIDATE" 2>/dev/null || echo 0)
 nodes_count=$(jq '.nodes|length' "$CANDIDATE" 2>/dev/null || echo 0)
 edges_count=$(jq '.edges|length' "$CANDIDATE" 2>/dev/null || echo 0)
+if [ -n "${CAS_MANIFEST_SHA:-}" ]; then
+  freshSignals=$(jq --arg batch "$CAS_MANIFEST_SHA" '[.nodes[]? | select(.type=="Signal" and .properties.ingestion_manifest_sha==$batch)] | length' "$CANDIDATE")
+  freshEvents=$(jq --arg batch "$CAS_MANIFEST_SHA" '[.nodes[]? | select(.type=="DesignationEvent" and .properties.ingestion_manifest_sha==$batch)] | length' "$CANDIDATE")
+fi
 
 # ── 5. Préservation signaux 2.1/2.2 ──────────────────────────────────────────
-if [ "$newSignals" -lt "$oldSignals" ] || [ "$newEvents" -lt "$oldEvents" ]; then
-  reason="signal_or_event_regression_${oldSignals}+${oldEvents}->${newSignals}+${newEvents}"
+minimumSignals=$((oldSignals - excludedSignals))
+minimumEvents=$((oldEvents - excludedEvents))
+if [ "$newSignals" -lt "$minimumSignals" ] || [ "$newEvents" -lt "$minimumEvents" ]; then
+  reason="signal_or_event_regression_${oldSignals}+${oldEvents}_minus_${excludedSignals}+${excludedEvents}->${newSignals}+${newEvents}"
+  emit_status
+  exit 1
+fi
+
+if [ "$documentsExpected" -ne "$documentsVerified" ]; then
+  reason="cas_documents_unverified_${documentsVerified}_of_${documentsExpected}"
   emit_status
   exit 1
 fi

@@ -52,7 +52,7 @@ Ingest the immutable 139-document CAS batch for 40 municipalities, merge fresh s
 - [ ] **Lot 2 — Semantic extraction and baseline merge**
   - [x] Count and cap structured semantic extraction attempts.
   - [x] Convert grounded findings and merge with the v2.3 baseline extraction.
-  - [ ] Resolve the two ungrounded baseline nodes by declared exclusion.
+  - [x] Resolve the two ungrounded baseline nodes by declared exclusion.
 - [ ] **Lot 3 — Runner and gates**
   - [ ] Carry the immutable contract through runner, worker, gate, and metrics.
   - [ ] Keep dry-run preflight and gate strictly read-only.
