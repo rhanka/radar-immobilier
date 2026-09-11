@@ -50,7 +50,7 @@ Ingest the immutable 139-document CAS batch for 40 municipalities, merge fresh s
   - [x] Build and validate the exact CAS manifest.
   - [ ] Download selected representations and verify every SHA-256.
 - [ ] **Lot 2 — Semantic extraction and baseline merge**
-  - [ ] Count and cap structured semantic extraction attempts.
+  - [x] Count and cap structured semantic extraction attempts.
   - [ ] Convert grounded findings and merge with the v2.3 baseline extraction.
   - [ ] Resolve the two ungrounded baseline nodes by declared exclusion.
 - [ ] **Lot 3 — Runner and gates**
