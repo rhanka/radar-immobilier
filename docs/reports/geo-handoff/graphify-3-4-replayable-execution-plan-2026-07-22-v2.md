@@ -134,9 +134,11 @@ properties.proof = {
 source is provenance/coverage; zone is a sourced assignment only; gaps records
 what is missing. There is no old, new, before, after, delta, threshold, grid
 bound, score, or calculated effect. A missing zone remains null. The 3.4
-materializer emits or retains effet_densifiant: "inconnu" only. This is a
-hard gate because api/src/services/graph/vivier-v2.ts on the branch can
-otherwise consume an existing effect value for classification.
+materializer leaves effet_densifiant absent when missing (equivalent to
+"inconnu" via the Vivier default) and does not emit a placeholder, because a
+present placeholder would block the guarded Geo writer. This is a hard gate
+because api/src/services/graph/vivier-v2.ts on the branch can otherwise consume
+an existing effect value for classification.
 
 HEAD has no immo-feature-proof/v1 or properties.proof producer. The future
 cross-team modules are:
