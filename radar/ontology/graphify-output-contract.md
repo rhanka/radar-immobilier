@@ -27,10 +27,12 @@ not replace the ontology line. Every output of this pass MUST retain
 |---|---|---|
 | `3.4` | **`2.3`** | existing `graph_nodes`, complete city snapshot |
 
-Pass 3.4 adds only compatible properties (`etape`, `instrument`,
-`effet_densifiant: "inconnu"`) and a companion manifest; it is not an ontology
-contract migration. `effet_densifiant` remains a placeholder until Geo's
-separate artifact is available.
+Pass 3.4 adds only compatible properties (`etape`, `instrument`) and a companion
+manifest; it is not an ontology contract migration. `effet_densifiant` is left
+**ABSENT** — Phase A does **not** write an `"inconnu"` placeholder: the Vivier
+already treats an absent value as `inconnu`, and writing an explicit placeholder
+would block the later computed value. It stays absent until Geo's separate
+artifact provides a real `effet_densifiant`.
 
 ---
 
