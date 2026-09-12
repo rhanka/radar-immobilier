@@ -54,6 +54,7 @@ Ingest the immutable 139-document CAS batch for 40 municipalities, merge fresh s
   - [x] Chunk oversized semantic inputs and reserve their retry budget before calls.
   - [x] Version chunk caches and deduplicate repeated evidence across chunks.
   - [x] Bound inputs above 400 kB to 30 kB chunks and preserve resume-safe call reservations.
+  - [x] Bound factual extraction reasoning with an explicit low-effort model setting.
 - [ ] **Lot 2 — Semantic extraction and baseline merge**
   - [x] Count and cap structured semantic extraction attempts.
   - [x] Convert grounded findings and merge with the v2.3 baseline extraction.
