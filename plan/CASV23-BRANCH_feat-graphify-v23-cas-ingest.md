@@ -53,6 +53,7 @@ Ingest the immutable 139-document CAS batch for 40 municipalities, merge fresh s
   - [x] Restrict scanned-PDF fallback to one local semantic `Read` invocation.
   - [x] Chunk oversized semantic inputs and reserve their retry budget before calls.
   - [x] Version chunk caches and deduplicate repeated evidence across chunks.
+  - [x] Reduce chunk size for inputs above 400 kB and preserve resume-safe call reservations.
 - [ ] **Lot 2 — Semantic extraction and baseline merge**
   - [x] Count and cap structured semantic extraction attempts.
   - [x] Convert grounded findings and merge with the v2.3 baseline extraction.

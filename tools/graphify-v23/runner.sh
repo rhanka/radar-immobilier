@@ -130,11 +130,12 @@ if [ "$TARGET_LAYOUT" = "cas" ]; then
   planned_max_calls=$((planned_docs * 2))
   [ -f "$LLM_COUNTER" ] || printf '0\n' > "$LLM_COUNTER"
   calls_before_run=$(cat "$LLM_COUNTER")
-  if [ "$((calls_before_run + planned_max_calls))" -gt 500 ]; then
+  cached_findings=$(find "$RUN_DIR/workers" -path '*/findings/*.json' ! -name '*.wrapper.json' -type f -print -quit 2>/dev/null || true)
+  if [ -z "$cached_findings" ] && [ "$((calls_before_run + planned_max_calls))" -gt 500 ]; then
     echo "REFUS LLM: reserved attempts would exceed cap 500." >&2
     exit 1
   fi
-  echo "CAS manifest: $planned_docs documents ($planned_max_calls attempts reserved before chunking)"
+  echo "CAS manifest: $planned_docs documents (per-input retry budget reserved before calls)"
 fi
 
 # ── 2. Charger les cibles ─────────────────────────────────────────────────────
