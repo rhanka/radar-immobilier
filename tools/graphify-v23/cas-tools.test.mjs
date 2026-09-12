@@ -2,7 +2,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -10,7 +9,9 @@ import { fileURLToPath } from 'node:url';
 const toolsDir = path.dirname(fileURLToPath(import.meta.url));
 
 test('CAS conversion grounds an empty document and exclusions remove incident edges', () => {
-  const work = fs.mkdtempSync(path.join(os.tmpdir(), 'graphify-cas-test-'));
+  const testTmp = path.resolve(toolsDir, '../../tmp');
+  fs.mkdirSync(testTmp, { recursive: true });
+  const work = fs.mkdtempSync(path.join(testTmp, 'graphify-cas-test-'));
   try {
     const sha = 'a'.repeat(64);
     const manifest = path.join(work, 'manifest.tsv');
@@ -36,6 +37,26 @@ test('CAS conversion grounds an empty document and exclusions remove incident ed
     assert.equal(converted.nodes[0].citations[0].source_file,
       `raw/proces-verbaux-test-ville/cas/${sha}.txt`);
     assert.equal(converted.nodes[0].citations[0].page, 1);
+
+    const repeated = { findings: [{
+      label: 'Modification de zonage',
+      description: 'Le règlement de zonage est modifié.',
+      kind: 'modification_zonage',
+      category: 'zonage',
+      etape: 'adoption',
+      date: '',
+      citation: 'modifiant le règlement de zonage',
+      page: 1,
+    }] };
+    fs.writeFileSync(path.join(findings, `${sha}.1.json`), JSON.stringify(repeated));
+    fs.writeFileSync(path.join(findings, `${sha}.2.json`), JSON.stringify(repeated));
+    execFileSync(process.execPath, [
+      path.join(toolsDir, 'cas_findings_to_extraction_v23.js'),
+      'test-ville', manifest, corpus, findings, 'batch-sha', extraction,
+    ]);
+    const deduplicated = JSON.parse(fs.readFileSync(extraction, 'utf8'));
+    assert.equal(deduplicated.nodes.filter((node) => node.node_type === 'Signal').length, 1);
+    assert.equal(deduplicated.nodes.filter((node) => node.node_type === 'DesignationEvent').length, 1);
 
     const graph = path.join(work, 'graph.json');
     const exclusions = path.join(work, 'exclusions.tsv');

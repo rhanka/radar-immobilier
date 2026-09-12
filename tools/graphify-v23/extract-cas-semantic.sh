@@ -37,7 +37,15 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
   for semantic_input in "${semantic_inputs[@]}"; do
     chunk_index=$((chunk_index + 1))
     finding="$WORK_DIR/findings/$sha.$chunk_index.json"
+    cache_valid=false
     if [ -s "$finding" ] && jq -e '.findings | type == "array"' "$finding" >/dev/null 2>&1; then
+      if [ "$chunk_total" -eq 1 ] || jq -e --argjson index "$chunk_index" --argjson total "$chunk_total" \
+        '._casChunkingVersion == 1 and .chunkIndex == $index and .chunkTotal == $total' \
+        "$finding" >/dev/null 2>&1; then
+        cache_valid=true
+      fi
+    fi
+    if [ "$cache_valid" = "true" ]; then
       continue
     fi
     wrapper="$WORK_DIR/findings/$sha.$chunk_index.wrapper.json"
@@ -69,9 +77,14 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
       } | timeout 240 claude "${claude_args[@]}" > "$wrapper" 2>> "$LOG"; then
         finding_tmp="${finding}.tmp"
         if jq -e '.structured_output' "$wrapper" > "$finding_tmp" 2>/dev/null || \
-           jq -er '.result | fromjson' "$wrapper" > "$finding_tmp" 2>/dev/null; then
+          jq -er '.result | fromjson' "$wrapper" > "$finding_tmp" 2>/dev/null; then
           if jq -e '.findings | type == "array"' "$finding_tmp" >/dev/null 2>&1; then
-            mv "$finding_tmp" "$finding"
+            annotated="${finding_tmp}.annotated"
+            jq --argjson index "$chunk_index" --argjson total "$chunk_total" \
+              '. + {_casChunkingVersion:1,chunkIndex:$index,chunkTotal:$total}' \
+              "$finding_tmp" > "$annotated"
+            mv "$annotated" "$finding"
+            rm -f "$finding_tmp"
             success=true
             break
           fi

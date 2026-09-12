@@ -42,10 +42,14 @@ for (const [, , sha, primaryKey, sidecarKey] of rows) {
 
   const findingPattern = new RegExp(`^${sha}\\.\\d+\\.json$`, 'u');
   const findingFiles = fs.readdirSync(findingsDir).filter((name) => findingPattern.test(name)).sort();
+  const seenFindings = new Set();
   let findingIndex = 0;
   for (const findingFile of findingFiles) {
     const payload = JSON.parse(fs.readFileSync(path.join(findingsDir, findingFile), 'utf8'));
     for (const finding of payload.findings || []) {
+      const signature = `${finding.kind}\u0000${finding.citation}`;
+      if (seenFindings.has(signature)) continue;
+      seenFindings.add(signature);
       findingIndex += 1;
       const suffix = `${sha.slice(0, 16)}-${findingIndex}`;
       const eventId = `event-${city}-cas-${suffix}`;
