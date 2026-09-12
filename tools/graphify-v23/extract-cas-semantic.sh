@@ -23,10 +23,17 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
   fi
 
   semantic_inputs=("$semantic_input")
-  if [ "$pdf_read" = "false" ] && [ "$(wc -c < "$semantic_input")" -gt 200000 ]; then
+  semantic_bytes=0
+  if [ "$pdf_read" = "false" ]; then
+    semantic_bytes=$(wc -c < "$semantic_input")
+  fi
+  if [ "$pdf_read" = "false" ] && [ "$semantic_bytes" -gt 200000 ]; then
     chunk_dir="$WORK_DIR/parsed/$CITY/chunks"
     mkdir -p "$chunk_dir"
-    split -C 120000 -d -a 3 --additional-suffix=.txt \
+    find "$chunk_dir" -maxdepth 1 -type f -name "$sha.*.txt" -delete
+    chunk_bytes=120000
+    [ "$semantic_bytes" -le 400000 ] || chunk_bytes=60000
+    split -C "$chunk_bytes" -d -a 3 --additional-suffix=.txt \
       "$semantic_input" "$chunk_dir/$sha."
     mapfile -t semantic_inputs < <(find "$chunk_dir" -maxdepth 1 -type f \
       -name "$sha.*.txt" -print | sort)
