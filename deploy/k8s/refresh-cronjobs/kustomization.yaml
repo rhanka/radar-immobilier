@@ -91,7 +91,7 @@ patches:
                             name: radar-graph-s3-credentials
                             key: GRAPH_S3_SECRET_KEY
                       - name: GRAPH_S3_FORCE_PATH_STYLE
-                        value: "true"
+                        value: "false"
 
   # SCRAPE bucket/path-style alignment (i-infra) — base 34 ship SCRAPE_S3_ENDPOINT/
   # BUCKET en `valueFrom: secretKeyRef` (héritage SCW) + SCRAPE_S3_FORCE_PATH_STYLE
