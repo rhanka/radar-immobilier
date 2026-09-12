@@ -63,7 +63,7 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
       current=$(cat "$LLM_COUNTER")
       printf '%s\n' "$((current + 1))" > "${LLM_COUNTER}.tmp"
       mv "${LLM_COUNTER}.tmp" "$LLM_COUNTER"
-      claude_args=(-p --bare --model claude-sonnet-4-6 --autocompact 1m
+      claude_args=(-p --bare --model claude-sonnet-4-6 --effort low --autocompact 1m
         --no-session-persistence --disable-slash-commands --permission-mode dontAsk
         --output-format json --json-schema "$schema")
       if [ "$pdf_read" = "true" ]; then
