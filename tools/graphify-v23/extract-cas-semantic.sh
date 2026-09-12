@@ -32,7 +32,7 @@ while IFS=$'\t' read -r source_id city sha primary_key sidecar_key; do
     mkdir -p "$chunk_dir"
     find "$chunk_dir" -maxdepth 1 -type f -name "$sha.*.txt" -delete
     chunk_bytes=120000
-    [ "$semantic_bytes" -le 400000 ] || chunk_bytes=60000
+    [ "$semantic_bytes" -le 400000 ] || chunk_bytes=30000
     split -C "$chunk_bytes" -d -a 3 --additional-suffix=.txt \
       "$semantic_input" "$chunk_dir/$sha."
     mapfile -t semantic_inputs < <(find "$chunk_dir" -maxdepth 1 -type f \
