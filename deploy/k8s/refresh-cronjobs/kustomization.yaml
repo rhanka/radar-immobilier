@@ -52,14 +52,12 @@ patches:
         value: false
 
   # CITATIONS/BUCKET ALIGNMENT (i-infra) — the projection CronJob's base 34
-  # hardcodes GRAPH_S3 on the SCW bucket `radar-immobilier-docs-pocs`. In PREPROD
-  # the graph store is the IN-CLUSTER MinIO `radar-minio:9000` /
-  # `radar-immobilier-docs-preprod` — the SAME store the app reads and the
-  # grounding publishes to. Override GRAPH_S3 to that MinIO so
-  # projection-read == app-store == grounding-publish (else citations break: the
-  # projection would read a different bucket). Creds stay radar-s3-credentials
-  # (= the MinIO creds); MinIO needs path-style. (i-infra co-vals endpoint/bucket/
-  # path-style.)
+  # hardcodes GRAPH_S3 on the SCW bucket `radar-immobilier-docs-pocs`. En PRÉPROD
+  # le graph store est désormais OVH `radar-immobilier-graph-preprod`
+  # (s3.bhs.io.cloud.ovh.net, région bhs, virtual-host) — migration MinIO→OVH du
+  # 2026-09-12 (144 187 objets mirrorés, src⊆dst vérifié). Les creds viennent du
+  # secret `radar-graph-s3-credentials`, déjà OVH. Le MinIO in-cluster reste en
+  # service jusqu'à sa décommission (#670-B), mais plus aucun CronJob ne le lit.
   - target:
       kind: CronJob
       name: radar-refresh-projection
@@ -77,16 +75,28 @@ patches:
                   - name: project-graph
                     env:
                       - name: GRAPH_S3_ENDPOINT
-                        value: http://radar-minio:9000
+                        value: https://s3.bhs.io.cloud.ovh.net
                       - name: GRAPH_S3_BUCKET
-                        value: radar-immobilier-docs-preprod
+                        value: radar-immobilier-graph-preprod
+                      - name: GRAPH_S3_REGION
+                        value: bhs
+                      - name: GRAPH_S3_ACCESS_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: radar-graph-s3-credentials
+                            key: GRAPH_S3_ACCESS_KEY
+                      - name: GRAPH_S3_SECRET_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: radar-graph-s3-credentials
+                            key: GRAPH_S3_SECRET_KEY
                       - name: GRAPH_S3_FORCE_PATH_STYLE
                         value: "true"
 
   # SCRAPE bucket/path-style alignment (i-infra) — base 34 ship SCRAPE_S3_ENDPOINT/
   # BUCKET en `valueFrom: secretKeyRef` (héritage SCW) + SCRAPE_S3_FORCE_PATH_STYLE
   # =false (SCW → virtual-host → ENOTFOUND sur MinIO). En PREPROD le store est le
-  # MinIO in-cluster `radar-minio:9000` / `radar-immobilier-docs-preprod`
+  # store OVH `radar-immobilier-graph-preprod` (virtual-host, path-style false)
   # (path-style), le MÊME que l'app + la projection. On aligne SCRAPE_S3 dessus
   # pour que le scrape écrive raw/ dans le bucket préprod unique.
   #
@@ -156,13 +166,26 @@ patches:
                       - name: NODE_OPTIONS
                         value: "--max-old-space-size=2560 --dns-result-order=ipv4first"
                       - name: SCRAPE_S3_ENDPOINT
-                        value: "http://radar-minio:9000"
+                        value: "https://s3.bhs.io.cloud.ovh.net"
                         valueFrom: null
                       - name: SCRAPE_S3_BUCKET
-                        value: "radar-immobilier-docs-preprod"
+                        value: "radar-immobilier-graph-preprod"
+                        valueFrom: null
+                      - name: SCRAPE_S3_REGION
+                        value: "bhs"
                         valueFrom: null
                       - name: SCRAPE_S3_FORCE_PATH_STYLE
-                        value: "true"
+                        value: "false"
+                      - name: SCRAPE_S3_ACCESS_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: radar-graph-s3-credentials
+                            key: GRAPH_S3_ACCESS_KEY
+                      - name: SCRAPE_S3_SECRET_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: radar-graph-s3-credentials
+                            key: GRAPH_S3_SECRET_KEY
                     resources:
                       requests:
                         cpu: 100m
