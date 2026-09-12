@@ -1,0 +1,217 @@
+<!doctype html><html><head><meta charset="utf-8"><base href="file:///home/antoinefa/src/radar-immobilier/.lanes/conductor/docs/reports/"><title>Rapport du mois — livraison — août–septembre 2026</title><style>
+@page { size: A4; margin: 16mm 14mm 18mm 14mm; }
+* { box-sizing: border-box; }
+body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; line-height: 1.42; font-size: 10.5px; }
+h1 { font-size: 28px; line-height: 1.12; color: #0b1728; margin: 0 0 12px; padding-bottom: 10px; border-bottom: 3px solid #2563eb; }
+h2 { font-size: 18px; color: #10203a; margin: 26px 0 10px; padding-top: 6px; border-top: 1px solid #d8dee9; break-after: avoid; }
+h3 { font-size: 13.5px; color: #1d3557; margin: 18px 0 8px; break-after: avoid; }
+h4 { font-size: 12px; margin: 14px 0 6px; break-after: avoid; }
+p { margin: 6px 0; }
+ul, ol { margin-top: 5px; padding-left: 20px; }
+li { margin: 2px 0; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0 14px; font-size: 9px; break-inside: avoid; }
+th, td { border: 1px solid #cbd5e1; padding: 4px 5px; vertical-align: top; }
+th { background: #eef4ff; color: #10203a; font-weight: 700; }
+blockquote { border-left: 4px solid #93c5fd; background: #f8fbff; margin: 10px 0; padding: 8px 10px; color: #334155; }
+code { font-family: "SFMono-Regular", Consolas, monospace; background: #f1f5f9; padding: 1px 3px; border-radius: 3px; font-size: 0.9em; }
+pre { background: #0f172a; color: #e2e8f0; padding: 10px; border-radius: 6px; overflow: hidden; font-size: 8.5px; }
+img { display: block; max-width: 100%; max-height: 132mm; margin: 8px auto 16px; border: 1px solid #d7dde8; border-radius: 8px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12); break-inside: avoid; }
+hr { border: 0; border-top: 1px solid #d8dee9; margin: 18px 0; }
+strong { color: #0f172a; }
+a { color: #1d4ed8; text-decoration: none; }
+.cover-note { font-size: 10px; color: #64748b; margin-bottom: 18px; }
+table { break-inside: auto; } tr { break-inside: avoid; } thead { display: table-header-group; } td code { overflow-wrap: anywhere; } a { overflow-wrap: anywhere; }</style></head><body><h1>Rapport de livraison — 12 août → 10 septembre 2026</h1>
+<p><strong>Périmètre</strong> : plateforme Radar immobilier (immo) + socle géographique (geo).
+<strong>Méthode</strong> : tous les chiffres de ce rapport sont mesurés sur la fenêtre Montréal <code>2026-08-12T00:00:00-04:00</code> → <code>2026-09-10T23:59:59-04:00</code> : historique premier parent et tags de <code>origin/main</code>, PR mergées, journal Track local et état d&#39;exploitation relevé le 11 septembre. Les captures d&#39;écran proviennent de l&#39;application en préproduction (même code que la production, SHA <code>831cad2</code> = v1.2.5, vérifié avant chaque prise), prises le 11 septembre 2026 par session authentifiée.</p>
+<hr>
+<h2>1. Synthèse exécutive</h2>
+<p>Le mois livre un saut de produit visible : <strong>recherche directe de lots et de zones</strong>, <strong>viewer PDF multipage avec recherche</strong>, <strong>satellite 2D</strong>, <strong>légende de zonage restaurée avec déductions bornées</strong>, cycle de vie des règlements, provenance renforcée et premières notes collaboratives. La chaîne Geo progresse en parallèle sur les règlements, le CPTAQ, le moteur cartographique et plusieurs jointures municipales.</p>
+<p>La mesure Git donne <strong>132 PR immo mergées</strong> et <strong>9 releases</strong>, de <strong>v1.0.0 à v1.2.5</strong>. Côté geo, <strong>174 PR sont mergées</strong> et <strong>5 versions</strong> sont publiées, de <strong>v0.5.1 à v0.6.1</strong>. Le 11 septembre, les points publics <code>/build.json</code> et <code>/health</code> servent le SHA <strong>831cad2</strong>, soit <strong>v1.2.5</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Volet</th>
+<th>Livré</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>immo</strong></td>
+<td><strong>132 PR mergées</strong> ; recherche lots/zones, preuve PV→règlement, PDF multipage, satellite 2D, légende de zonage et déduction auditée, CPTAQ conditionnel, provenance réglementaire, notes lots/signaux</td>
+</tr>
+<tr>
+<td><strong>geo</strong></td>
+<td><strong>174 PR mergées</strong> ; contrat et service des règlements, chaîne CPTAQ, moteur de carte et sessions de tuiles, résolution PV/zonage et nouvelles jointures municipales</td>
+</tr>
+<tr>
+<td><strong>prod</strong></td>
+<td><strong>9 releases immo</strong> ; production observée sur <strong>v1.2.5</strong> ; refresh automatique présent en préproduction, pas encore armé en production</td>
+</tr>
+<tr>
+<td><strong>suivi</strong></td>
+<td>Journal Track local arrêté au 5 septembre : <strong>119 événements</strong> dans la fenêtre, <strong>48 items créés</strong>, <strong>12 décisions</strong> et <strong>2 transitions distinctes vers done</strong> ; Git demeure la mesure de livraison après cette coupe</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. Livraisons immo</h2>
+<p>Les livraisons principales sont regroupées ci-dessous. « En prod » signifie que le changement est contenu dans <strong>v1.2.5</strong>, version observée le 11 septembre ; cela ne remplace pas une recette ville par ville.</p>
+<table>
+<thead>
+<tr>
+<th>Chantier</th>
+<th>PR principales</th>
+<th>État prod (11 sept.)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Zonage — couleurs, légende et numéros</strong> : restauration des couleurs de familles ; affichage distinct du numéro de zone et du numéro de lot ; priorité aux valeurs de source, puis repli alphabétique audité ; les valeurs non résolues restent non résolues</td>
+<td>#632 (v1.2.0), #666 (v1.2.4), #667 (v1.2.5)</td>
+<td>En prod, v1.2.0 puis v1.2.4–v1.2.5</td>
+</tr>
+<tr>
+<td><strong>Carte — satellite 2D</strong> : intégration du moteur Geo, stabilisation des changements de style, autorisation du domaine de tuiles en production et retour au fond Plan par défaut</td>
+<td>#640, #643, #645–#649, #652–#654, #664, #665</td>
+<td>En prod, v1.2.2–v1.2.3 ; 3D désactivée</td>
+</tr>
+<tr>
+<td><strong>Recherche et chaîne de preuve</strong> : recherche séparée dans lots et zones ; distinction entre PV source et règlement ; corrections du rattachement de preuve</td>
+<td>#511, #520, #523, #526, #527, #530</td>
+<td>En prod, v1.1.1–v1.2.0</td>
+</tr>
+<tr>
+<td><strong>Viewer PDF</strong> : défilement continu entre pages et recherche plein texte dans tout le document, avec navigation entre occurrences</td>
+<td>#539, #541</td>
+<td>En prod, v1.2.0 ; dépend de la couche texte du PDF</td>
+</tr>
+<tr>
+<td><strong>Règlements et provenance</strong> : cycle avis/projet/adoption, statut dérivé à l&#39;ingestion, rattachement aux objets Geo, exposition MCP et garde-fous de citation</td>
+<td>#532, #540, #542, #556, #560, #568–#571, #588, #603, #606, #615, #616</td>
+<td>En prod, v1.2.0</td>
+</tr>
+<tr>
+<td><strong>Contraintes CPTAQ</strong> : contrôle de couche et passage par le proxy OGC de production lorsque la collection municipale existe</td>
+<td>#591, #614</td>
+<td>En prod, v1.2.0 ; disponibilité variable selon la ville</td>
+</tr>
+<tr>
+<td><strong>Notes lots/signaux</strong> : migration additive, édition, suppression logique, interface et mise à jour SSE</td>
+<td>#576, #581, #584</td>
+<td>En prod, v1.2.0 ; périmètre mono-client, pas la collaboration complète</td>
+</tr>
+<tr>
+<td><strong>Liste des municipalités</strong> : suppression du plafond qui masquait Saint-Stanislas-de-Kostka hors recherche</td>
+<td>#512</td>
+<td>En prod, v1.1.1</td>
+</tr>
+</tbody></table>
+<h3>Le zonage redevient lisible et traçable</h3>
+<p>Les PR <strong>#666/#667</strong> rétablissent la lecture couleur sans confondre trois notions : le numéro municipal de zone, le type déclaré par la source et la famille d&#39;usage utilisée pour la couleur. La déduction suit une précédence bornée — <code>affectation</code>, puis <code>kind</code>, puis code alphabétique audité — et ne transforme pas ce dernier repli en norme québécoise universelle.</p>
+<p><img src="assets/2026-09/signaux-zonage-couleurs.png" alt="Signaux et couleurs de zonage"></p>
+<p><em>Les signaux restent visibles dans leur contexte de zone ; les familles distinguées par la légende proviennent du contrat livré, pas d&#39;une correspondance libre ajoutée au rapport.</em></p>
+<p><img src="assets/2026-09/legende-zonage-sincere.png" alt="Légende de zonage — familles en clair, numéros de zone et de lot"></p>
+<p><em>La fiche sépare le numéro de zone, le numéro de lot et la famille d&#39;affichage. Les codes sans correspondance auditée ne sont pas forcés.</em></p>
+<p>Le relevé Track du 4 septembre quantifie le terrain : <code>zone_code</code> est servi pour <strong>868 municipalités</strong> sur <strong>871 collections</strong> examinées, dont <strong>727</strong> avec provenance de source citée et <strong>144</strong> avec un vrai numéro de zone mais une provenance encore incomplète. <code>usage_dominant</code> est dérivé pour <strong>710 municipalités</strong>. Les écarts de géométrie restent concentrés sur <strong>195 + 43 municipalités</strong> selon les deux catégories consignées dans la décision ; ils ne sont pas masqués par la légende.</p>
+<h3>Le fond satellite 2D complète le plan</h3>
+<p>La série <strong>#640, #643, #645–#649, #652–#654</strong> raccorde le moteur cartographique Geo à l&#39;application. <strong>#664</strong> autorise les tuiles en production et <strong>#665</strong> conserve Plan comme mode initial, afin que le satellite soit un choix explicite. La vue 3D reste désactivée dans la version servie.</p>
+<p><img src="assets/2026-09/satellite-2d.png" alt="Fond satellite 2D"></p>
+<h3>Retrouver un objet puis ouvrir sa preuve</h3>
+<p>La recherche lots/zones est livrée par <strong>#520/#523</strong>, puis consolidée par <strong>#527/#530</strong>. La preuve distingue désormais le PV ayant produit le signal du règlement applicable (<strong>#511/#526</strong>). Dans le document, <strong>#539/#541</strong> ajoutent le défilement multipage et la recherche avec occurrences précédente/suivante ; les PDF constitués uniquement d&#39;images restent hors de cette preuve faute d&#39;OCR.</p>
+<p><img src="assets/2026-09/recherche-lot-zone.png" alt="Recherche d'un lot ou d'une zone"></p>
+<p><img src="assets/2026-09/viewer-pdf.png" alt="Viewer PDF multipage et recherche"></p>
+<p>Les correctifs de provenance <strong>#568/#569/#588/#603/#606/#616</strong> ferment plusieurs chemins où une citation pouvait être affichée sans référence exploitable. Ils renforcent la chaîne de preuve ; ils ne démontrent pas que chaque municipalité publie des documents de qualité identique.</p>
+<hr>
+<h2>3. Livraisons geo</h2>
+<p>Geo totalise <strong>174 PR mergées</strong> sur le premier parent et cinq versions dans la période : <strong>v0.5.1, v0.5.2, v0.5.3, v0.6.0 et v0.6.1</strong>.</p>
+<p><strong>Principales voies livrées sur la période</strong> :</p>
+<ul>
+<li><strong>Règlements</strong> : mesure de couverture des URL, contrat de cycle de vie, KPI sur l&#39;univers de <strong>1 106 municipalités</strong>, émission des événements de zonage, état de décision et exposition MCP/service (#277, #278, #282, #283, #286, #294, #295, #325, #343).</li>
+<li><strong>Contraintes CPTAQ</strong> : normalisation, métadonnées de service, collections et garde-fous de publication (#280, #302, #303, #306, #307, #310–#312). À la coupe Track du 5 septembre, quatre municipalités servent effectivement cette couche — <strong>Coaticook, Saint-Stanislas-de-Kostka, Sutton et Warden</strong> — sous forme de MultiPolygons. BDZI et GRHQ sont raccordés mais pas encore servis.</li>
+<li><strong>Moteur cartographique</strong> : interfaces initiales, package 0.5.1, création des sessions de tuiles, service et adaptateurs jusqu&#39;à 0.6.1, puis activation de l&#39;overlay de production et RBAC (#206–#223, #297, #301, #330, #331, #333, #334, #337, #339, #341, #354, #368, #369).</li>
+<li><strong>Résolution PV et zonage</strong> : audit, remédiations et résolution CAS des événements pour mieux relier les documents aux municipalités et aux objets réglementaires (#255, #256, #258, #261–#264, #267, #272–#275).</li>
+<li><strong>Jointures municipales</strong> : travaux ciblés pour <strong>Amherst, Beaupré et Boischatel</strong>, avec leurs correctifs associés (#194, #196, #199, #201).</li>
+</ul>
+<p>Ces apports alimentent les parcours immo visibles au §2. Ils ne justifient pas d&#39;extrapoler une couverture provinciale aux couches encore servies sur un nombre limité de municipalités.</p>
+<hr>
+<h2>4. Déploiements et exploitation</h2>
+<table>
+<thead>
+<tr>
+<th>Élément</th>
+<th>Mesure (période)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Releases immo</td>
+<td><strong>9 tags</strong> : v1.0.0 (19 août), v1.1.0 (22 août), v1.1.1 (23 août), v1.2.0 (9 septembre), puis v1.2.1 à v1.2.5 (10 septembre)</td>
+</tr>
+<tr>
+<td>Production</td>
+<td><code>/build.json</code> et <code>/health</code> observés le 11 septembre sur <strong>831cad2 = v1.2.5</strong></td>
+</tr>
+<tr>
+<td>Préproduction</td>
+<td>Séparation préprod/prod, sauvegarde pré-release, rollback applicatif et migrations dans le pipeline (#518, #572, #575, #656, #659). Les CronJobs scrape/projection sont actifs et leur dernier succès observé date du 11 septembre. La finalisation de la migration <strong>SCW→OVH</strong> reste rattachée à ce chantier préprod : registry→GHCR, transfert vers les buckets OVH et décommissionnement de MinIO</td>
+</tr>
+<tr>
+<td>Fraîcheur production</td>
+<td>Aucun CronJob de refresh n&#39;est présent dans le namespace de production OVH au relevé : l&#39;actualisation automatique de production n&#39;est pas encore armée. Données servies en production au relevé du 11 septembre (requêtes bornées en lecture seule) : nœuds Signal, Zone, Lot et Bylaw créés au plus tard le <strong>6 août 2026</strong> ; nœuds réglementaires (<code>source</code>, <code>designationevent</code>) jusqu&#39;au 10 septembre ; dates de documents source au plus tard le <strong>16 juin 2026</strong>. Un premier refresh de production (scrape + détection des signaux, Job <code>radar-scrape</code>) a été déclenché le 11 septembre à 18:27Z via le workflow self-service <code>run-job</code> (option <code>scrape</code>, PR #669) ; son résultat est en cours de mesure</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>5. Action items de la dernière réunion — pointage</h2>
+<p>Le journal ne contient pas un procès-verbal unique et exhaustif. Le tableau reprend les directives owner explicitement datées du <strong>4 septembre</strong>, sans compléter les blancs par supposition.</p>
+<p>Légende : ✓ fait (preuve) · ◐ partiel/en cours · ☐ à faire</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>État</th>
+<th>Preuve / commentaire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Distinguer les vrais numéros de zone de la famille colorée et privilégier la lecture habitation</td>
+<td>✓</td>
+<td>Affichage corrigé et repli audité dans #632/#666/#667, servi en v1.2.5. La provenance municipale reste incomplète pour une partie des 144 jeux portant un vrai numéro.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Activer les deux choix de fond utiles : satellite et plan</td>
+<td>✓</td>
+<td>Satellite autorisé en production par #664 ; Plan remis par défaut par #665. La livraison est 2D, sans activation implicite de la 3D. Directive non retrouvée sous cette forme dans le journal Track au 4 septembre (source-gap) : la livraison est établie par Git, les items satellite tracés datent du 5 septembre (GO#2).</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Ne pas faire du CPTAQ l&#39;unique réponse environnementale ; avancer aussi les couches inondation et autres contraintes</td>
+<td>◐</td>
+<td>CPTAQ est servi pour quatre municipalités à la coupe ; BDZI et GRHQ sont raccordés côté Geo mais pas servis. Extension et recette bout en bout à poursuivre.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Rendre la publication des citations autonome, sans action manuelle de l&#39;owner</td>
+<td>✓</td>
+<td>Le journal consigne le 4 septembre la création d&#39;une identité IAM dédiée, de sa politique, de sa clé et de la variable de publication. Aucune valeur secrète n&#39;est reproduite ici.</td>
+</tr>
+</tbody></table>
+<p><strong>Bilan : 3 faits, 1 partiel.</strong> Le reste porte sur l&#39;extension mesurée des contraintes environnementales, pas sur la reprise des parcours déjà livrés.</p>
+<hr>
+<h2>6. Prochaines étapes</h2>
+<p><strong>Attendu de Steve</strong> :</p>
+<ul>
+<li><strong>Valider les parcours de démonstration</strong> : recherche lot/zone, lecture de la famille et du vrai numéro de zone, bascule Plan/Satellite, ouverture du PV et recherche dans le PDF.</li>
+<li><strong>Qualifier les familles d&#39;usage</strong> : signaler les cas municipaux où le code affiché ou la couleur ne correspond pas au sens attendu, afin d&#39;étendre uniquement les correspondances vérifiables.</li>
+<li><strong>Prioriser les couches environnementales</strong> : ordonner inondation, hydrographie et autres contraintes après le pilote CPTAQ, à partir des villes de démonstration.</li>
+</ul>
+<p><strong>De notre côté</strong> :</p>
+<ul>
+<li><strong>Armer le refresh production</strong> : promouvoir le circuit scrape→projection avec métriques de couverture, critères d&#39;arrêt et preuve de fraîcheur ; un succès de CronJob ne remplacera pas la mesure des données servies.</li>
+<li><strong>Étendre les contraintes Geo</strong> : faire passer BDZI/GRHQ du raccordement au service, puis élargir la couverture CPTAQ au-delà des quatre municipalités mesurées.</li>
+<li><strong>Achever la provenance du zonage</strong> : réduire les villes sans géométrie ou sans source citée et conserver l&#39;état non résolu lorsqu&#39;aucune correspondance municipale n&#39;est démontrée.</li>
+<li><strong>Recetter la chaîne de release</strong> : joindre aux pipelines les preuves de restauration, de rollback de schéma et d&#39;approbation de promotion.</li>
+<li><strong>Finaliser le chantier préprod OVH</strong> : basculer le registry vers GHCR, transférer les objets requis dans les buckets OVH et retirer MinIO après validation.</li>
+<li><strong>Réconcilier Track avec Git</strong> : rattacher aux items les PR, versions et preuves visuelles livrées après la dernière coupe locale du 5 septembre.</li>
+</ul>
+<hr>
+<p><em>Rapport généré le 11 septembre 2026. Sources : historique premier parent et tags de <code>origin/main</code> pour <code>rhanka/radar-immobilier</code> et geo, références de PR mergées, journal Track local (<code>.track/events.jsonl</code>, dernière entrée le 5 septembre), points publics <code>/build.json</code> et <code>/health</code>, inventaire Kubernetes borné du 11 septembre, requêtes bornées en lecture seule sur la base de production (<code>radar-immobilier-freshness.txt</code>, <code>radar-immobilier-source-dates.txt</code>) et captures <code>docs/reports/assets/2026-09/</code>.</em></p>
+</body></html>
