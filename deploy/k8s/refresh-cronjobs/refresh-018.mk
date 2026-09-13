@@ -313,7 +313,8 @@ observe-scheduled-prod: live-ready-prod
 	    sleep 5; \
 	  done; \
 	  $(KP) get "job/$$job" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,IMAGE:.spec.template.spec.containers[0].image,START:.status.startTime,END:.status.completionTime; \
-	  $(KP) logs "job/$$job" --all-containers=true; \
+	  $(KP) logs "job/$$job" --all-containers=true \
+	    | awk '/refresh-pv: (starting|model call (completed|failed)|completed)/'; \
 	  test "$$terminal" = complete \
 	    || { echo "production scheduled Job did not complete successfully" >&2; exit 1; }
 
@@ -324,7 +325,8 @@ status-prod: guard-prod
 
 logs-prod: guard-prod
 	@test -n "$(JOB_NAME)" || { echo "JOB_NAME is required" >&2; exit 1; }
-	@$(KP) logs "job/$(JOB_NAME)" --all-containers=true
+	@$(KP) logs "job/$(JOB_NAME)" --all-containers=true \
+	  | awk '/refresh-pv: (starting|model call (completed|failed)|completed)/'
 
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
