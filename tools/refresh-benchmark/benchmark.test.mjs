@@ -56,4 +56,5 @@ test("the live runner binds the wall timeout to the actual fetch", async () => {
   assert.match(runner, /AbortSignal\.any\(\[init\.signal, controller\.signal\]\)/);
   assert.match(runner, /fetch\(url, \{ \.\.\.init, signal \}\)/);
   assert.match(runner, /transportTimeoutMs: 480_000/);
+  assert.match(runner, /JSON\.stringify\(JSON\.parse\(generated\.text\)\)/);
 });
