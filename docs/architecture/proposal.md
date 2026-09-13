@@ -2,9 +2,10 @@
 
 [FACT] This is the current T1 design from the September 13 refresh handoff, not
 the former Option A and not an observed deployment. It keeps the existing
-preproduction MinIO API roles until T2. Graphify 0.18.0 is published; Immo's
-mesh 0.19 host composition, operated keyring, durable lock and scheduled
-acceptance remain pending implementation.
+preproduction MinIO API roles until T2. Graphify 0.18.0 is published. At the
+15:39 UTC progress capture, Immo had pinned the refresh dependencies in
+`d0595d9f`, passed typecheck and started scoped tests; consumer completion,
+operated keyring, durable lock and scheduled acceptance remain open.
 
 ```mermaid
 flowchart LR

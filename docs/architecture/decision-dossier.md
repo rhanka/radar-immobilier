@@ -28,19 +28,25 @@ is verified.
 
 ## 2. Existing state and evidence boundary
 
-[FACT] The September 13 current-state snapshot verifies preproduction at
+[FACT] The September 13 current-state snapshot verifies preproduction storage at
 12:33–12:37 UTC: API `PP-RAW` / `PP-DOCS` remain physical MinIO roles;
 scrape/projection use the same existing OVH `PP-GRAPH`; PG remains `PP-DB`.
 Mapped PDF evidence reads `GEO-S3/raw/pv-index/cas/`. Production application
 access is observed, but private Immo DB/object/refresh bindings are **UNVERIFIED**.
+
+[FACT] A dedicated Immo read at 15:38 UTC confirmed one ready preprod API, UI
+and MCP replica plus the existing scrape/projection CronJobs. It did not observe
+the proposed Graphify 0.18 refresh, PVC/storage class or production internals.
 
 [FACT] `immo.sent-tech.ca`, `preprod.immo.sent-tech.ca`, `auth.sent-tech.ca` and
 `preprod.auth.sent-tech.ca` are the observed access/SSO surfaces. The existing
 platform observation has three b3-8 nodes. Its instantaneous ~9,454 Mi exceeds
 one node's 5,907.82 Mi allocatable; MinIO accounts for only ~347 Mi.
 
-[FACT] Graphify 0.18.0 is published. That closes a producer dependency, not the
-Immo consumer, scheduled refresh or typed Signal/PDF acceptance. Every target
+[FACT] Graphify 0.18.0 is published. By 15:39 UTC Immo had committed the refresh
+dependency pins at `d0595d9f`, passed typecheck and started scoped tests. That is
+observed implementation progress, not consumer completion, a scheduled refresh
+or typed Signal/PDF acceptance. Every target
 production role may be named as a contract, but its physical binding remains
 TBD rather than inferred from source defaults or the old SCW cluster.
 
@@ -52,8 +58,8 @@ fresh candidate **before** canonical publication → guarded full-graph write �
 atomic PG projection → typed Signal plus exact PDF. [Detailed T1 flow](proposal.md).
 
 [FACT] Immo owns every step; Geo owns geographic inputs. T1 keeps the existing
-API MinIO roles until T2. Graphify 0.18.0 is published, while mesh 0.19 host
-planning, keyring operation and consumer integration remain pending.
+API MinIO roles until T2. Consumer implementation is underway; operated keyring,
+durable lock and end-to-end qualification remain pending.
 
 [JUDGMENT] Acceptance requires the actual installed contract, durable credentials,
 one lock shared by scheduled/manual execution, failure/resume and a CronJob-created

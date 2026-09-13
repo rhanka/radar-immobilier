@@ -135,6 +135,7 @@
   - [x] Update D5 replay, attribution and local-preview documentation.
   - [x] Publish a current report-through-September-13 companion and supersede the older window without rewriting its sources.
   - [x] Regenerate the current/dated portable HTML and evidence manifest with D5 hashes.
+  - [x] Capture the 15:38 UTC preproduction/T1 progress without upgrading it to runtime acceptance.
   - [x] Pass static, build, browser, clipboard, scope and diff gates; record limitations without deployment claims.
     - [x] Adapt fail-closed mapping/provenance assertions for all eight D5 graphs.
     - [x] Adapt browser and real-clipboard gates to the final-target entry and fixed-instruction export.

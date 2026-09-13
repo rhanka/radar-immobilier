@@ -6,6 +6,7 @@ import { sceneFor } from './scenes.js';
 import { routeAvoidsNodes } from '/kit/src/architecture-routing.js';
 import { presentation } from './presentation-fr.js';
 const { graphs, docs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
+const currentReport = await readFile('../../reports/architecture-monthly/report-through-2026-09-13.md', 'utf8');
 
 test('complete native scenes preserve exact identities and route around absolute leaf bounds', () => {
   assert.deepEqual(graphs.map(graph => graph.id), ['asis-1', 'asis-2', 'asis-3', 'asis-4', 'target-1', 'target-2', 'target-3', 'detail-1']);
@@ -60,7 +61,9 @@ test('D5 leads with complete sequential architecture and keeps fixed billing ins
   assert.equal(presentation.length, 8);
   assert.match(presentation[0], /architecture finale complète.*un seul b3-8/si);
   assert.match(presentation[1], /Existant.*T1.*T2.*T3/s);
+  assert.match(presentation[1], /15:38 UTC/);
   assert.match(presentation[2], /candidat frais.*3\.4.*publication.*projection PG.*Signal typé.*PDF exact/s);
+  assert.match(presentation[2], /d0595d9f.*typecheck.*en cours/s);
   assert.match(presentation[3], /PP-RAW-OVH.*PP-DOCS-OVH.*préprod avant prod/s);
   assert.match(presentation[4], /9 454 Mi.*5 907,82 Mi.*347 Mi/s);
   assert.match(presentation[7], /ANNEXE FACTURATION · EN DERNIER/);
@@ -70,7 +73,9 @@ test('D5 leads with complete sequential architecture and keeps fixed billing ins
   assert.equal(docs['decision-dossier'].match(/^## /gm).length, 8);
   assert.match(docs['decision-dossier'], /Revision \*\*D5/);
   assert.match(docs['decision-dossier'], /option` is `null`: no method was selected/);
+  assert.match(docs['decision-dossier'], /15:38 UTC.*d0595d9f/s);
   assert.match(docs.transitions, /inside the requested period/);
+  assert.match(currentReport, /Architecture capture cutoff:.*2026-09-13T15:38:00Z/);
   assert.equal((docs['transitions-target'].match(/```mermaid/g) ?? []).length, 3);
 });
 
