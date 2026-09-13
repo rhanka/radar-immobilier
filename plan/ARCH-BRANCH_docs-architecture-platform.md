@@ -34,7 +34,7 @@
 
 ## Plan / Todo (lot-based)
 - [x] **Lot 0 — Read rules, inventory sources and establish scope.**
-- [ ] **Lot 1 — Architecture diagrams and evidence register.**
+- [x] **Lot 1 — Architecture diagrams and evidence register.**
 - [ ] **Lot 2 — Render with h2a Focus and open the local HTML page.**
 - [ ] **Lot 3 — Verify Mermaid rendering, links and documentation diff.**
 
