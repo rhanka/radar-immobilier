@@ -82,6 +82,9 @@ for rel in "${PUBLIC_IMAGE_FILES[@]}"; do
   grep -Eiq 'radar-registry-pull|rg\.fr-par\.scw\.cloud' "$ROOT/$rel" &&
     fail "$rel retains a legacy SCW registry reference"
 done
+grep -Eiq 'refresh-diag|REFRESH_DIAG_ENABLED|radar-refresh-diag' \
+  "$ROOT/.github/workflows/build-push-images.yml" &&
+  fail '.github/workflows/build-push-images.yml retains the legacy refresh diagnostic'
 
 for rel in scripts/mount-scw.sh scripts/umount-scw.sh; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"

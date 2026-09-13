@@ -11,7 +11,8 @@ run_ok() { bash "$CHECK" "$1" >/dev/null 2>&1 && ok "$2" || bad "$2"; }
 run_bad() { bash "$CHECK" "$1" >/dev/null 2>&1 && bad "$2" || ok "$2"; }
 
 FILES=(
-  .env.example deploy/k8s/30-api.yaml deploy/k8s/refresh-diag/diag-refresh-job.yaml
+  .env.example .github/workflows/build-push-images.yml
+  deploy/k8s/30-api.yaml deploy/k8s/refresh-diag/diag-refresh-job.yaml
   deploy/k8s/kustomization.yaml deploy/k8s/70-networkpolicy.yaml
   deploy/k8s/31-graph-projection-job.yaml deploy/k8s/32-graph-projection-only-job.yaml
   deploy/k8s/33-scrape-job.yaml deploy/k8s/33b-scrape-cities-job.yaml
@@ -65,6 +66,9 @@ run_bad "$CASE_ROOT" 'preserves the new radar-refresh-pv CronJob'; rm -rf "$CASE
 
 fixture; sed -i '/automountServiceAccountToken/i\imagePullSecrets: [{ name: radar-registry-pull }]' "$CASE_ROOT/deploy/k8s/10-rbac.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored SCW image pull secret'; rm -rf "$CASE_ROOT"
+
+fixture; echo 'REFRESH_DIAG_ENABLED' >>"$CASE_ROOT/.github/workflows/build-push-images.yml"
+run_bad "$CASE_ROOT" 'rejects a restored MinIO refresh diagnostic'; rm -rf "$CASE_ROOT"
 
 fixture; rm -f "$CASE_ROOT/deploy/k8s/32b-reproject-etape-job.yaml"
 run_bad "$CASE_ROOT" 'keeps every gated client explicit'; rm -rf "$CASE_ROOT"

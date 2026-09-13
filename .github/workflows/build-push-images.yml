@@ -569,12 +569,7 @@ jobs:
     name: Deploy to preprod cluster
     needs: build-push
     runs-on: ubuntu-latest
-    # 45min: the §6 "Refresh diag Job" step polls up to 1800s (30min) and the
-    # rollouts take ~6min + the post-deploy proofs ~3min — the old 10min timeout
-    # cancelled the JOB before the diag poll could finish (measured on #586/#592,
-    # ~10min15s each). Must exceed the diag poll deadline + the rollout/proof time.
-    # (A future scaled diag — full city set vs the delson smoke — may need both
-    # the poll deadline AND this timeout raised further; i-infra co-vals.)
+    # Rollouts and public-path proofs retain bounded deployment headroom.
     timeout-minutes: 45
     # Only roll preprod on pushes to main. PRs / feature-branch dispatches build
     # & push images but never deploy.
@@ -971,42 +966,6 @@ jobs:
               exit 1
             fi
             sleep 10
-          done
-
-      # §6 REFRESH DIAG (preprod) — one-shot Job proving the PINNED image
-      # refreshes WITHOUT OOM against preprod, BEFORE the suspended prod CronJobs
-      # are ever touched. REUSES the preprod release identity (:<sha> — no 2nd
-      # resolution) + batch/jobs (§1a #572, 0 new RBAC). DISARMED by default
-      # (REFRESH_DIAG_ENABLED — an owner/operator flip); the Job's city args are
-      # scaled for the OOM measurement and i-infra co-vals the diag output
-      # (default is a bounded 1-city smoke). prod suspend:true
-      # is untouched. No pods/log grant → failure surfaces via the poll, not logs.
-      - name: Refresh diag Job (preprod, image-pin validation)
-        if: ${{ vars.REFRESH_DIAG_ENABLED == 'true' }}
-        env:
-          SHA: ${{ steps.vars.outputs.sha }}
-        run: |
-          set -euo pipefail
-          kver=5.4.3
-          tmp="$(mktemp -d)"
-          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
-          sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
-          cd deploy/k8s/refresh-diag
-          kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api:${SHA}
-          kubectl -n "$NAMESPACE" delete job radar-refresh-diag --ignore-not-found
-          kustomize build . | kubectl -n "$NAMESPACE" apply -f -
-          echo "diag Job applied (radar-api:${SHA}); polling for completion…"
-          deadline=$(( $(date +%s) + 1800 ))
-          while :; do
-            s="$(kubectl -n "$NAMESPACE" get job radar-refresh-diag -o jsonpath='{.status.succeeded}' 2>/dev/null || true)"
-            f="$(kubectl -n "$NAMESPACE" get job radar-refresh-diag -o jsonpath='{.status.failed}' 2>/dev/null || true)"
-            if [ "${s:-0}" = "1" ]; then echo "diag OK — pinned image refresh completed in ${NAMESPACE}"; exit 0; fi
-            if [ "${f:-0}" != "" ] && [ "${f:-0}" -ge 1 ] 2>/dev/null; then
-              echo "::error title=Refresh diag FAILED::radar-refresh-diag failed in ${NAMESPACE} (pinned radar-api:${SHA}) — check OOM/boot. Prod CronJobs untouched (suspend:true)."
-              exit 1
-            fi
-            if [ "$(date +%s)" -ge "$deadline" ]; then echo "::error title=Refresh diag timeout::radar-refresh-diag did not complete in 1800s."; exit 1; fi
-            sleep 15
           done
 
       # §6 DEPLOY REFRESH CRONJOBS (preprod) — deploy + un-suspend the two refresh
