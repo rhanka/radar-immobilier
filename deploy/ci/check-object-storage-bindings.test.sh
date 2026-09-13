@@ -24,7 +24,7 @@ FILES=(
   deploy/k8s/10-rbac.yaml deploy/k8s/11-ci-deployer-preprod-rbac.yaml
   deploy/k8s/object-storage-docs-prod/copy-job.yaml
   deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml deploy/k8s/secrets.example.yaml
-  .github/workflows/grounding-preprod.yml .github/workflows/grounding-publish-prod.yml
+  .github/workflows/grounding-preprod.yml
   .github/workflows/run-job.yaml
 )
 fixture() {
