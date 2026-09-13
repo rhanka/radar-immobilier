@@ -7,8 +7,8 @@ execution; it is not a request to vote again on those three objectives.
 
 ## Reference and update contract
 
-- Canonical current-state source: `docs/architecture.md`; the three proposed
-  platform states are in `docs/architecture/transitions-target.md` and the
+- Before-state source: `docs/architecture.md`; the effective transition snapshot
+  plus the two after targets are in `docs/architecture/transitions-target.md` and the
   detailed T1 causal boundary is in `docs/architecture/proposal.md`.
 - Committed renderer: `docs/architecture/focus/`, including the Mermaid parser,
   SVG renderer, native nested SvelteFlow, service/repository map and tests.
@@ -27,8 +27,8 @@ execution; it is not a request to vote again on those three objectives.
 
 | Transition | Existing work retained | Remaining acceptance | Current status |
 | --- | --- | --- | --- |
-| T1 — autonomous PV → Signal cron | Immo CAS #678; Fable BLOCK at `ac3a7150`; fixes `537b9e0c` + `3d9ed43c`; scoped 34/34 + integration 4/4 + typecheck | Complete Fable re-review; benchmark historical/manual and v1/v2/v3 on the same five PDFs with non-simulated runs; then provider Signal and K8s schedule acceptance | **BLOCKED** pending re-review and acceptance; model unselected, Cloud Code not enrolled, no benchmark scores |
-| T2 — remove MinIO and remaining SCW dependencies | Live `PP-RAW`; empty `PP-DOCS`; useful `PP-DOCS-LEGACY`; remediation `ee84ae29` / `f2ac3825` / `c30467ca` / `cef6d7ed` | Finish checkpoint mechanism `aaf0cbf7` / `91242223`; copy + integrity + recovery; fence/repoint/test; retain legacy until complete parity/recovery; close SCW except TEM | **MIGRATE+RETAIN** decided; checkpoint work under construction, not accepted; no object copy |
+| T1 — autonomous PV → Signal cron | Graphify 0.18.0 integrated; Luna high selected; K8s validation launched | Re-run with an actual PDF; prove provider completion, typed Signal + exact PDF, idempotent replay and unattended schedule | **IN VALIDATION**: first K8s run failed before the LLM because the supplied object was `.html`, not PDF; no T1 acceptance yet |
+| T2 — remove MinIO and remaining SCW dependencies | `PP-RAW-OVH` parity + API rebind verified; DOCS bucket/Secret provisioned; inventories show PP 144,193/28.34 GB vs canonical PR 59,017/12,534,514,457 B; guarded copy tooling through `be362561` | Diff manifests; use exact PR 59,017 keys+hashes as canonical set; selectively copy to OVH prod/preprod; prove equality/recovery; then remove all MinIO; TEM excluded | **PARTIAL / IN PROGRESS**: RAW complete; DOCS copy/parity/rebind not complete; production migration outcome unknown |
 | T3 — one OVH b3-8 | Three b3-8; service plan; 16 PVC/15 Cinder RWO inventory | Finish T2; rightsize; reconcile required affinity/PVC constraints; prove controlled two-node operation; only then test one-node preprod before production | **NO-GO today**: requests and required anti-affinity do not fit one node |
 
 [FACT] Graphify producer confirms **0.18.0 published**, tag `v0.18.0`, merge
@@ -38,11 +38,11 @@ contract tests passed on the producer side. H2A envelope
 dependency, not the Immo consumer acceptance. Earlier open-PR references are dated
 history, not current release status.
 
-[FACT] Fable returned **BLOCK** at Immo `ac3a7150`. Corrective commits `537b9e0c`
-and `3d9ed43c` now pass scoped 34/34, integration 4/4 and typecheck, while Fable
-re-review is in progress. Graphify remains exactly 0.18.0 and fail-closes correctly;
-`immo-pv-extraction-v3` remains an internal contract name. No provider Signal or
-Kubernetes acceptance exists, and T1 remains blocked rather than accepted.
+[FACT] Graphify remains exactly 0.18.0 and `immo-pv-extraction-v3` remains an
+internal contract name. Luna high is the selected model. A first Kubernetes run
+was executed, but the selected object was `.html` while the contract requires a
+PDF; execution therefore failed **before the LLM was called**. This proves the
+workload reached input validation, not provider completion or T1 acceptance.
 
 [FACT · owner correction] Keep llm-mesh 0.19.0. A rare nested `UND_ERR_SOCKET`
 fails the Job closed; durable state is resumed at the next cycle. No corruption or
@@ -50,9 +50,9 @@ in-process retry is claimed. The 0.19.1 need is judged probably false and not pr
 cross-repository implementation is unauthorized, PR #585 is closed and its branches
 are removed. Diagnosis is deferred to `s-conductor`, with no implementation request.
 
-[FACT · gate] Before real extraction, compare the historical/manual baseline with
-v1, v2 and v3 on the same five PDFs. Runs must be non-simulated and traceable.
-The model is not selected, Cloud Code is not enrolled and no score is available.
+[FACT · gate] The next run must use a valid PDF and prove provider completion,
+typed Signal + exact PDF, idempotent replay and unattended scheduling. The Luna
+high selection does not waive any of those acceptance gates.
 
 [JUDGMENT] The shortest continuation is the engaged in-pod library integration,
 not a new mesh network service, another CLI orchestration layer or completion of
@@ -66,13 +66,18 @@ remains cross-repository work throughout these transitions. Retain **SCW TEM**
 until its replacement is validated. Do not delete shared MatchID SCW resources
 or historical audit evidence as part of Immo/Geo cleanup.
 
-[FACT] The live API uses MinIO `PP-RAW`; its derived `PP-DOCS` bucket is empty.
-The distinct `PP-DOCS-LEGACY` bucket has baseline 1/2,821,583 B, graph 4/639,226 B,
-ontology 530/34,257,805 B, parsed ≥4,884/≥272,554,144 B, raw unknown and runs ≥445.
-Remediation now reaches `ee84ae29`, `f2ac3825`, `c30467ca` and `cef6d7ed`.
-The checkpoint mechanism at `aaf0cbf7` / `91242223` remains under construction.
-**MIGRATE+RETAIN** applies until complete parity and recovery. No object copy has
-started, and TEM remains retained.
+[FACT] Preproduction RAW has completed parity and the API is rebound to
+`PP-RAW-OVH`; the old identity is fenced/recovery-only. DOCS inventories show
+preprod MinIO at 144,193 objects / 28.34 GB and production SCW `docs-pocs` at
+59,017 / 12,534,514,457 B. The OVH bucket and Secret are provisioned; guarded copy
+tooling is committed on `chore/scw-final-sweep` through `be362561`.
+
+[FACT · owner decision] The current production source is the exact initial
+canonical reference. Both OVH prod and preprod must converge to the same 59,017
+keys and hashes. The preprod surplus is non-canonical and must not be migrated.
+Sequence: manifest diff → canonical set → selective copy → exact parity → recovery
+proof → recoverable removal of all MinIO. Copy/parity/rebind are not complete;
+the launched production migration has no reported outcome. TEM remains retained.
 
 [FACT] The current platform audit measured three b3-8 nodes. One node exposes
 1,840m CPU / 5,907.82 Mi allocatable; workload requests total 4,095m / 8,442 Mi,
@@ -83,20 +88,19 @@ prove a controlled two-node state before attempting one-node preprod acceptance.
 
 ## Requested report period and billing-last direction
 
-[FACT · owner] The requested period starts at the **real preceding invoice/report
-boundary**, still unverified, and ends September 13 inclusive, America/Toronto
-(`2026-09-14T00:00:00-04:00` exclusive). Record the actual evidence capture cutoff
-separately because the current September 13 day is incomplete. T1/T2/T3 work on
-September 13 is inside the requested period and must be classified observed versus
-planned, not moved to a post-period section.
+[FACT] The last cost report merged on `origin/main` ends August 9. The joined
+window is therefore **August 10 through September 13 inclusive**, America/Toronto:
+`2026-08-10T00:00:00-04:00` to `2026-09-14T00:00:00-04:00`, 35 days / 840 hours.
+This is a repository-report boundary; no claim is made about an external invoice
+that is absent from the repository.
 
-[FACT · owner] Billing comes last. The infrastructure basis is one b3-8 BHS5
-projection at the observed `0.082 CAD/h`; period hours and projected amount are
-unknown until the start is verified. `720 h / 59.04 CAD` is an old 30-day
-illustration only, never the current-period amount.
+[FACT · owner] Billing comes last. The infrastructure basis is exactly one b3-8
+BHS5 projection at `0.082 CAD/h`: `840 × 0.082 = 68.88 CAD`. The observed two-
+and three-node cluster costs are platform pass-through/internal costs and are not
+billable in this projection.
 
-[FACT · owner] Count LLM tokens later with the **same unit tariffs as the previous
-month's actual invoice**. First identify that invoice and its tariffs. Do not open
-a DIRECT/USAGE/CAPACITY allocation choice, infer D4's null option or parse tokens
-in this docs build. Earlier reports and Wave examples remain evidence, not proof
-of the latest invoice boundary or price.
+[FACT · owner] LLM allocation retains the preceding report method and unit basis:
+two Claude seats and one ChatGPT Pro seat at 200 USD/month each, measured seven-
+day provider capacity, USD→CAD 1.37 and LLM margin ×1.15. The dated token audit
+records actual window totals and deduplication; it is an allocation calculation,
+not a provider invoice line.
