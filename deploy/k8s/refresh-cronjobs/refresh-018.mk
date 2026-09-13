@@ -283,7 +283,7 @@ live-ready-prod: storage-ready-prod runtime-ready-prod
 .PHONY: observe-scheduled-prod
 observe-scheduled-prod: live-ready-prod
 	@test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }
-	@old_schedule="$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.schedule}')"; \
+	@set -o pipefail; old_schedule="$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.schedule}')"; \
 	  before="$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.status.lastScheduleTime}')"; \
 	  restore() { $(KP) patch cronjob radar-refresh-pv --type=merge \
 	    -p "{\"spec\":{\"schedule\":\"$$old_schedule\"}}" >/dev/null; }; \
@@ -313,8 +313,10 @@ observe-scheduled-prod: live-ready-prod
 	    sleep 5; \
 	  done; \
 	  $(KP) get "job/$$job" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,IMAGE:.spec.template.spec.containers[0].image,START:.status.startTime,END:.status.completionTime; \
-	  $(KP) logs "job/$$job" --all-containers=true \
-	    | awk '/refresh-pv: (starting|model call (completed|failed)|completed)/'; \
+	  evidence="$$( $(KP) logs "job/$$job" --all-containers=true \
+	    | awk '/refresh-pv: (starting|model call (completed|failed)|completed)/' )"; \
+	  test -n "$$evidence" || { echo "production refresh emitted no safe receipt evidence" >&2; exit 1; }; \
+	  printf '%s\n' "$$evidence"; \
 	  test "$$terminal" = complete \
 	    || { echo "production scheduled Job did not complete successfully" >&2; exit 1; }
 
@@ -325,8 +327,10 @@ status-prod: guard-prod
 
 logs-prod: guard-prod
 	@test -n "$(JOB_NAME)" || { echo "JOB_NAME is required" >&2; exit 1; }
-	@$(KP) logs "job/$(JOB_NAME)" --all-containers=true \
-	  | awk '/refresh-pv: (starting|model call (completed|failed)|completed)/'
+	@set -o pipefail; evidence="$$( $(KP) logs "job/$(JOB_NAME)" --all-containers=true \
+	  | awk '/refresh-pv: (starting|model call (completed|failed)|completed)/' )"; \
+	  test -n "$$evidence" || { echo "production refresh emitted no safe receipt evidence" >&2; exit 1; }; \
+	  printf '%s\n' "$$evidence"
 
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
