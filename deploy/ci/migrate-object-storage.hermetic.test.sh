@@ -271,6 +271,9 @@ if [ "$(cat "$TEST_TMP/store/destination/dst/objects/raw/conflict.txt")" = forei
 reset_store
 TEST_NAME='delta refuses to run without fence evidence'
 expect_bad run_tool delta "$TEST_TMP/reports/no-fence"
+TEST_NAME='delta names absent fence evidence in its summary'
+if jq -e '.missingProof | index("delta fence record is absent")' \
+  "$TEST_TMP/reports/no-fence/summary.json" >/dev/null; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 
 reset_store
 put_fixture source src raw/a.txt alpha; put_fixture source src graph/a.json graph

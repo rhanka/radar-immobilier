@@ -73,8 +73,6 @@ $RECONCILE_OWNED && [ -n "$LEDGER" ] || ! $RECONCILE_OWNED || \
   die '--reconcile-owned requires --ledger'
 $RECONCILE_OWNED && [ -n "$FENCE_RECORD" ] || ! $RECONCILE_OWNED || \
   die '--reconcile-owned requires --fence-record'
-[ "$OPERATION" != delta ] || [ -n "$FENCE_RECORD" ] || \
-  die 'delta requires --fence-record'
 
 validate_endpoint() {
   [[ "$2" =~ ^https?://[^/@?#]+$ ]] || die "$1 must be an http(s) origin without credentials"
@@ -648,6 +646,7 @@ reconcile_owned_objects() {
       $object.versionId == $result.putVersionId and
       $object.versionId != $result.priorVersionId and $object.sha256 != $result.priorHash) |
     {schemaVersion:1,migrationId:$first[0].migrationId,key:$result.key,
+     expectedManifestDigest:$first[0].expectedManifestDigest,
      originalLedgerDigest:$ledgerDigest,fenceEvidenceDigest:$fenceDigest,fenceValidated:false,
      prior:{versionId:$result.priorVersionId,sha256:$result.priorHash},
      new:{versionId:$object.versionId,sha256:$object.sha256},object:$object}' \
@@ -688,6 +687,9 @@ prove_recoverable_priors() {
 }
 
 FENCE_EVIDENCE_DIGEST=null
+if [ "$OPERATION" = delta ] && [ -z "$FENCE_RECORD" ]; then
+  add_missing_proof 'delta fence record is absent'
+fi
 if [ -n "$FENCE_RECORD" ]; then
   if [ -r "$FENCE_RECORD" ] && [ -s "$FENCE_RECORD" ]; then
     FENCE_EVIDENCE_DIGEST="$(sha256sum "$FENCE_RECORD" | awk '{print $1}')"
