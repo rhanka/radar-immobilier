@@ -117,13 +117,13 @@
   - [x] Extend the Docker-only portable build and browser gate to the dated monthly rendering and hash manifest.
   - [x] Embed the dated Mermaid/SvelteFlow rendering into the monthly companion; retain post-period separation.
   - [x] Pin the dated rendering, architecture inputs and read-only monthly evidence in a reproducible SHA-256 manifest.
-- [ ] **Lot 12 — D5 owner correction: architecture-first Focus dossier.**
+- [x] **Lot 12 — D5 owner correction: architecture-first Focus dossier.**
   - [x] Add committed full-platform T1, T2 and T3 Mermaid states with stable resource identities and explicit stage cards.
     - [x] T1 full-platform source.
     - [x] T2 full-platform source.
     - [x] T3 full-platform source.
   - [x] Replace Option A with the actual T1 refresh sequence and preserve its acceptance boundaries.
-  - [ ] Render every transition as complete native nested SvelteFlow and sanitized Mermaid; open on the final target (mapping wired; UI default pending).
+  - [x] Render every transition as complete native nested SvelteFlow and sanitized Mermaid; open on the final target.
   - [x] Replace the allocation referendum with fixed invoice-tariff instructions, unresolved period evidence and D4 provenance.
   - [x] Make target architecture and sequential transitions the primary Focus reading path; keep billing last.
     - [x] Open on the complete target and place the Existant → T1 → T2 → T3 path before prose.
@@ -134,7 +134,7 @@
   - [x] Align the transition register and architecture overview with D5 timing, published Graphify and graph coverage.
   - [x] Update D5 replay, attribution and local-preview documentation.
   - [x] Publish a current report-through-September-13 companion and supersede the older window without rewriting its sources.
-  - [ ] Regenerate the current/dated portable HTML and evidence manifest with D5 hashes (D5 generator ready; build pending).
-  - [ ] Pass static, build, browser, clipboard, scope and diff gates; record limitations without deployment claims.
+  - [x] Regenerate the current/dated portable HTML and evidence manifest with D5 hashes.
+  - [x] Pass static, build, browser, clipboard, scope and diff gates; record limitations without deployment claims.
     - [x] Adapt fail-closed mapping/provenance assertions for all eight D5 graphs.
     - [x] Adapt browser and real-clipboard gates to the final-target entry and fixed-instruction export.
