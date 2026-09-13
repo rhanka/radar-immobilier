@@ -120,7 +120,7 @@
 - [ ] **Lot 12 — D5 owner correction: architecture-first Focus dossier.**
   - [ ] Add committed full-platform T1, T2 and T3 Mermaid states with stable resource identities and explicit stage cards.
     - [x] T1 full-platform source.
-    - [ ] T2 full-platform source.
+    - [x] T2 full-platform source.
     - [ ] T3 full-platform source.
   - [ ] Replace Option A with the actual T1 refresh sequence and preserve its acceptance boundaries.
   - [ ] Render every transition as complete native nested SvelteFlow and sanitized Mermaid; open on the final target.
