@@ -14,6 +14,7 @@ T1_COMMIT := f9b311da536bda2e1442d154a05599c35b482518
 T1_COMMIT_V3 := 8f10ba1690a67e223851a467508f06e59d2ec668
 KEYRING_SOURCE := /home/antoinefa/.sentropic/llm-mesh-keyring
 BASELINE_GOLD := $(MAIN_ROOT)/.lanes/conductor/tmp/bench-llm/bench/v2/gold.json
+PREFLIGHT_FILE ?= preflight-before.json
 
 .PHONY: test test-v3 test-score-v3 score-v3 runtime-text freeze-v3 prepare-prompts-v3 run-v3 preflight-v3 run-v3-sol-normal quota inspect-validation
 
@@ -115,7 +116,7 @@ preflight-v3:
 	  --mount type=bind,source=$(V3_RESULTS),target=/results \
 	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
-	  -e BENCHMARK_PREFLIGHT_OUTPUT=/results/preflight-before.json \
+	  -e BENCHMARK_PREFLIGHT_OUTPUT=/results/$(PREFLIGHT_FILE) \
 	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_MODEL=gpt-5.6-sol \
 	  -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec node tools/refresh-benchmark/codex-preflight.mjs'

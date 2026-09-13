@@ -17,12 +17,13 @@ test("matches only exact frozen anchor, stage, page and PDF identity", () => {
     excerpt: "Le conseil adopte le Règlement 26-956-2 tel que soumis" };
   const output = { nodes: [{ id: "event", node_type: "DesignationEvent", etape: "adoption",
     citations: [citation] }, { id: "signal", node_type: "Signal", etape: "adoption",
-    citations: [citation] }], edges: [{ source: "event", target: "signal", relation: "generates" }], evidence: [] };
+    citations: [citation] }], edges: [{ source: "event", target: "signal", relation: "raises_signal" }], evidence: [] };
   const gold = [{ id: "W001", stage: "adoption", page: 3,
     anchor: "adopte le Règlement 26-956-2" }];
-  assert.deepEqual(scoreValid(output, document, gold), { oracleUnits: 1, candidateGroups: 1,
-    matchedIds: ["W001"], tp: 1, fp: 0, fn: 0, precision: 1, recall: 1, f1: 1,
-    partialOracle: false, unmatchedGroups: 0, duplicateMatches: 0 });
-  assert.equal(scoreValid(output, document, [{ ...gold[0], page: 2 }]).tp, 0);
-  assert.equal(scoreValid(output, document, [{ ...gold[0], stage: "projet_reglement" }]).tp, 0);
+  assert.deepEqual(scoreValid(output, document, gold), { oracleUnits: 1, typedNodes: 2,
+    matchedTypedNodes: 2, unmatchedTypedNodes: 0, nodePrecision: 1, matchedIds: ["W001"],
+    missedIds: [], oracleRecall: 1, partialOracle: false, raisesSignalRelations: 1 });
+  assert.equal(scoreValid(output, document, [{ ...gold[0], page: 2 }]).matchedIds.length, 0);
+  assert.equal(scoreValid(output, document,
+    [{ ...gold[0], stage: "projet_reglement" }]).matchedIds.length, 0);
 });
