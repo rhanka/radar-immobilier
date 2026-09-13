@@ -25,4 +25,5 @@ configMapGenerator:
       - prove-docs-conditional-writes.sh=../../ci/prove-docs-conditional-writes.sh
       - build-docs-expected-manifest.sh=../../ci/build-docs-expected-manifest.sh
       - copy-canonical-docs.sh=../../ci/copy-canonical-docs.sh
+      - copy-canonical-docs.mjs=../../ci/copy-canonical-docs.mjs
       - copy-canonical-docs-progress.sh=../../ci/copy-canonical-docs-progress.sh
