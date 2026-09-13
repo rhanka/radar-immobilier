@@ -89,6 +89,7 @@
     - [x] Document the bounded operator contract and explicit non-acceptance limits.
 - [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
   - [x] Record the bounded live MinIO inventory and classify `radar-immobilier-docs-preprod` as migrate-and-retain, without claiming completeness or parity.
+  - [x] Reconcile resumable-inventory design findings F1-F10 before implementation.
   - [ ] Conditional after independent review: build the resumable whole-bucket `StartAfter` inventory design without weakening copy gates.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
 - [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
