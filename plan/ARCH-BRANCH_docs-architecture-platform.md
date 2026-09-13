@@ -55,7 +55,7 @@
   - [x] Confirm the resource check rejects baseline 73762926 and passes the corrected document.
   - [ ] Reconcile independent findings against main and runtime; do not promote declared legacy Jobs to active paths.
 - [ ] **Lot 6 — Owner feedback: effective storage and eradication status.**
-  - [ ] Re-fetch main, check migration PRs and re-audit whitelisted live preprod bindings.
+  - [x] Re-fetch main, check migration PRs and re-audit whitelisted live preprod bindings; #670 remains draft, MinIO still configured for API.
   - [ ] Obtain OVH production read-only evidence; never substitute the legacy SCW cluster.
   - [ ] Exclude unobserved legacy paths from operational diagrams and regenerate Focus.
 
