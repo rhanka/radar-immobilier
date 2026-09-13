@@ -46,7 +46,7 @@ spec:
               set +e
               mkdir -p "$report"
               CANONICAL_MANIFEST=/evidence/prod-canonical-manifest.jsonl \
-                CANONICAL_DIGEST="$CANONICAL_DIGEST" REPORT_DIR="$report" CONCURRENCY=32 \
+                CANONICAL_DIGEST="$CANONICAL_DIGEST" REPORT_DIR="$report" CONCURRENCY=128 \
                 CONDITIONAL_WRITE_PROOF=/evidence/docs-conditional-write-proof.json \
                 SOURCE_ENDPOINT=https://s3.fr-par.scw.cloud SOURCE_REGION=fr-par \
                 SOURCE_BUCKET=radar-immobilier-docs-pocs \
