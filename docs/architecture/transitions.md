@@ -7,8 +7,9 @@ execution; it is not a request to vote again on those three objectives.
 
 ## Reference and update contract
 
-- Canonical current-state source: `docs/architecture.md`; the proposed refresh
-  boundary is in `docs/architecture/proposal.md` until verified in deployment.
+- Canonical current-state source: `docs/architecture.md`; the three proposed
+  platform states are in `docs/architecture/transitions-target.md` and the
+  detailed T1 causal boundary is in `docs/architecture/proposal.md`.
 - Committed renderer: `docs/architecture/focus/`, including the Mermaid parser,
   SVG renderer, native nested SvelteFlow, service/repository map and tests.
   Reference commits: `b1aef3b2`, `df0ac28e`, `63f32086`, `8d3da5b6`, `ef0b24c2`.
@@ -55,23 +56,22 @@ Immo prod certification and is not a peak. MinIO preprod retirement frees about
 347 Mi in its later sample, not the full 904 Mi namespace. T3 must use the existing
 service-by-service plan; do not assume deleting MinIO alone makes a drain safe.
 
-## Monthly reporting and billing direction
+## Requested report period and billing-last direction
 
-[FACT] Report window: **2026-08-12 00:00 through 2026-09-10 23:59:59,
-America/Toronto**. September 13 transitions belong in an explicitly post-period
-update, not in the month's delivered totals.
+[FACT · owner] The requested period starts at the **real preceding invoice/report
+boundary**, still unverified, and ends September 13 inclusive, America/Toronto
+(`2026-09-14T00:00:00-04:00` exclusive). Record the actual evidence capture cutoff
+separately because the current September 13 day is incomplete. T1/T2/T3 work on
+September 13 is inside the requested period and must be classified observed versus
+planned, not moved to a post-period section.
 
-[FACT] Owner fixes the billable infrastructure basis to **one node projected**.
-The three-node configuration was an error. Actual provider expense remains an
-internal incurred-cost line; extra node capacity is not passed through to the
-client. Do not divide the historical total by three without checking node-hours,
-rates and separately billed non-node items. Keep the prior preprod allocation
-decision and SCW TEM exception; neither is being re-asked.
+[FACT · owner] Billing comes last. The infrastructure basis is one b3-8 BHS5
+projection at the observed `0.082 CAD/h`; period hours and projected amount are
+unknown until the start is verified. `720 h / 59.04 CAD` is an old 30-day
+illustration only, never the current-period amount.
 
-[JUDGMENT] Re-audit tokens before issuing the bill: exact local-time window,
-per-message/call deduplication across resumed/copied sessions, input/cache/output
-breakdown, model/provider scope and like-for-like prior window. Separate observed
-usage, real subscription/API expense, allocation method, margin and billable sum.
-The current historical-peak normalization is an allocation assumption, not a
-supplier bill. Present each alternative only after its explicit question and
-numerical consequence; no default selection or invented lower consumption.
+[FACT · owner] Count LLM tokens later with the **same unit tariffs as the previous
+month's actual invoice**. First identify that invoice and its tariffs. Do not open
+a DIRECT/USAGE/CAPACITY allocation choice, infer D4's null option or parse tokens
+in this docs build. Earlier reports and Wave examples remain evidence, not proof
+of the latest invoice boundary or price.
