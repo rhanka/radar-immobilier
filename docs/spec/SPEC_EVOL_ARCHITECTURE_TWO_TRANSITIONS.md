@@ -148,12 +148,16 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  B_CITY["Municipal PV sources"] -.-> B_COLLECT["Immo collect / parse"]
-  B_COLLECT -.-> B_CORPUS[("OVH PV corpus / durable checkpoints")]
-  B_ADMIN["Admin workstation · enrollment / configuration only"] -.-> B_IDENTITY["Workload enrollment / durable keyring"]
+  B_CITY["Municipal PV sources"]
+  B_CORPUS[("OVH PV corpus / durable checkpoints")]
+  subgraph B_WORKSTATION["Administrator workstation · not an extraction worker"]
+    B_OPERATOR["Operator · enrollment / configuration only"]
+  end
+  B_OPERATOR -.-> B_IDENTITY["Workload enrollment / durable keyring"]
   subgraph B_CLOUD["OVH · production Immo"]
     subgraph B_REFRESH["New refresh workload · PRODUCTION DORMANT until promotion"]
       B_CRON["radar-refresh-pv · gated CronJob"] -.-> B_DRIVER["Causal refresh run"]
+      B_COLLECT["Immo collect / parse"]
       B_DRIVER -.-> B_EXTRACT["Graphify 0.18.0 + llm-mesh · in-process libraries"]
       B_EXTRACT -.-> B_VALIDATE["Typed Signal / exact PDF validation"]
       B_PROJECT["Atomic projection · same causal run"]
@@ -161,6 +165,8 @@ flowchart LR
     B_PROJECT -.-> B_DB[("PostgreSQL graph")]
     B_DB --> B_API["radar-api"] --> B_UI["radar-ui"]
   end
+  B_CITY -.-> B_COLLECT
+  B_COLLECT -.-> B_CORPUS
   B_DRIVER -.-> B_COLLECT
   B_CORPUS -.-> B_EXTRACT
   B_IDENTITY -.-> B_EXTRACT
@@ -171,3 +177,96 @@ flowchart LR
 ```
 
 [FACT/JUDGMENT: S9] Mandatory separate annotation: `Preproduction accepted: real Luna high Waterloo Signal/PDF, immutable release replay, controller-created Job at 22:21Z. Production promotion remains pending; dashed refresh paths describe the integrated dormant implementation.` The annotation is not a preprod resource subgraph. Existing API/UI/DB serving is distinct from the dormant new writer. A successful replay without additional model calls proves idempotence, not a new benchmark result. Administrator enrollment is not a per-cycle extraction dependency.
+
+## D6 — M1: benchmark-backed extraction-model decision
+
+[FACT: OWNER] M1 is a separate decision below the two architecture pairs. The owner requests three options: effective Sonnet, Luna low and Gemini 3.8 at its lowest supported effort. No model is selected by this design. The existing Luna high acceptance run is evidence of that trial, not evidence for Luna low or a three-model ranking [S9,S11].
+
+### M1.1 Decision asked
+
+Which of `sonnet-effective`, `luna-low`, or `gemini38-lowest` should be ratified for production PV extraction after the matched M1 benchmark and independent judging? Scope: the extraction model and its exact qualified runtime configuration, not production promotion, storage retirement or invoicing.
+
+### M1.2 Context and unknowns
+
+[FACT] Existing historical CLI/CAS campaigns and the September 13 Sol-medium v3 diagnostic use different configurations and have disclosed quality/protocol limitations [S11]. [UNKNOWN] Matched outputs, native identities/efforts, attributable usage, judge verdicts and the winner for these three requested options are not available in this design. Keep each missing cell visibly `not measured` or `not qualified`, never zero or green. Model aliases are display labels until enrollment/preflight records the exact effective provider/model/effort.
+
+### M1.3 Stakes
+
+[JUDGMENT] Extraction quality changes user-visible regulatory findings and evidence. Subscription compatibility, latency, quotas and repeatability matter alongside semantic coverage; ease of reusing the already observed Luna trial is an agent convenience, not proof of owner value. The production write/promotion gate remains independent of M1 ratification.
+
+### M1.4 Options
+
+| ID | Requested option | Strongest case for evaluation | Strongest limitation | Cost / reversibility | What would make it win |
+| --- | --- | --- | --- | --- | --- |
+| `sonnet-effective` | Sonnet, exact effective identity/effort recorded | Closest reference to the operator's existing semantic process | Historical outputs cannot establish quality on the newly frozen common contract | Usage unmeasured; configuration reversible, published findings require audit | Best qualified quality/latency/usage tradeoff on the same oracle |
+| `luna-low` | Luna, explicit native low effort | Tests whether a lower-effort configuration meets the extraction contract | The successful high-effort trial is not a low-effort result | Usage unmeasured; same rollback boundary | Best qualified quality/latency/usage tradeoff on the same oracle |
+| `gemini38-lowest` | Gemini 3.8, lowest natively supported effort | Tests a separate provider/configuration against the same requirements | Enrollment and faithful effective effort must be attested first | Usage unmeasured; same rollback boundary | Best qualified quality/latency/usage tradeoff on the same oracle |
+
+Unsupported low effort or missing model enrollment yields `not qualified`; never silently substitute another effort, provider or model. Keep all three rows visible even when one cannot run. No invented preflight call, zero-call proof or API-paid fallback counts as a completed candidate.
+
+### M1.5 Recommendation and anti-bias requirements
+
+[JUDGMENT] Recommendation is `defer model ratification` until comparable evidence exists. Strongest counterargument: waiting delays an already workable trial path; this does not establish that trial's superiority. The recommendation is overturned by a qualified frozen benchmark with complete independent judgment and owner ratification, not by one successful extraction. Pre-mortem: six months later the choice failed because differences in prompt, effort, source selection or transport limits were hidden behind model labels. Disclose presenter convenience separately from owner interests: reliable findings, understandable evidence, accountable usage and an auditable reversible choice.
+
+### M1.6 Reversibility and cost
+
+[JUDGMENT] Changing the configured model is reversible; provider usage already consumed is not recoverable, and changing future configuration does not retract previously published findings. Freeze inputs/oracle/prompt/schema/tool versions, effective budgets and retry policy before matched calls. Record wall time, per-attempt failures and attributable usage; a shared-account quota delta is not per-model cost. This design authorizes no calls, tariff changes or report-cost recalculation.
+
+### M1.7 Required results, judges and owner criteria
+
+| Required panel content | Evidence / acceptance rule | Initial state |
+| --- | --- | --- |
+| Three candidate rows | Same public PDFs/oracle, source hashes, prompt/schema/runtime freeze; exact effective route/effort and actual wire budgets | Pending M1 |
+| Outcome and quality | Attempt state, typed findings, source/page/excerpt grounding, stage/outcome accuracy, unsupported claims and coverage; preserve refusals and agenda modality | Not measured |
+| Runtime/usage | Successful and failed attempts, latency, replay behavior, attributable tokens/usage; unavailable values remain null | Not measured |
+| Independent judges | Two separately frozen qualified judge identities/efforts; blinded candidate identities; own verdict/evidence before reconciliation | Pending; no verdict invented |
+| Disagreements | Both original judge assessments plus reconciliation; no silent averaging of regulatory or evidence disagreements | Pending |
+| Owner choice | Named option or explicit deferral plus optional comment; no default selection or silent adoption from a trial | Unratified |
+
+The intended independent judge roles are Sol xhigh and Fable 5 xhigh, subject to faithful qualification before judging; inability to obtain either stays visible and does not silently change the judging panel [S11]. Existing unrelated design reviews are not benchmark judge verdicts. Show historical diagnostics separately from M1, with their incompatible contracts and dates.
+
+### M1.8 Comment and JSON capture
+
+Present the question, context, option table, measured results and judge findings before choice controls. While evidence or the two design reviews are incomplete, mark the dossier `Incomplete` and permit commentary/explicit deferral without advertising a justified model winner. The UI captures a user-selected option or deferral and free text; it exports the same structured record through the existing comment/JSON clipboard pattern. It does not deploy, send a message, mutate Track or claim signed comprehension. Conductor recording is a separate authorized step.
+
+Illustrative initial payload (a schema example, not a recorded decision):
+
+```json
+{
+  "schemaVersion": 1,
+  "decisionId": "M1",
+  "status": "awaiting-benchmark",
+  "selectedOption": null,
+  "comment": "",
+  "options": ["sonnet-effective", "luna-low", "gemini38-lowest"],
+  "benchmarkRef": null,
+  "sourceFreezeHash": null,
+  "candidateResults": [],
+  "judgeAssessments": [],
+  "reconciliationRef": null,
+  "recordedAt": null,
+  "decisionActor": null
+}
+```
+
+Actual `candidateResults` retain option ID, requested/effective provider/model/effort, attempt state, input/output references, metrics and missing-data reasons. Judge entries retain exact identity/effort, frozen rubric, independent verdict references and candidate blinding. Validate selected option membership and legal states (`awaiting-benchmark`, `deferred`, `ratified`); a ratified export requires evidence references and an explicit owner choice. Free text is escaped safely in HTML/PDF and round-trips literal newlines in JSON. Never infer `decisionActor` from the relay agent or mark an exported browser choice as cryptographically signed.
+
+## Source register and freshness handoff
+
+Sources below are immutable commit/path/line anchors. References to runtime receipts are versioned operator observations, not fresh live checks performed for this design. The implementation must preserve their timestamps and evidence class; a newer acceptance may update September state only with a new cited receipt and regenerated source hashes.
+
+| Ref | Repository / revision / anchor | What it establishes and limits |
+| --- | --- | --- |
+| S1 | Immo `4d5cb8f7`, `docs/architecture.md:3`; `docs/reports/architecture-monthly/report-through-2026-09-13.md:27` | D8 before is September preprod and after mixes future transitions; protected report billing is later in the same report |
+| S2 | Immo `26caa4d9`, `docs/reports/couts-2026-07-13_2026-08-09.md:40`; `.github/workflows/build-push-images.yml:44`; poc-k8s `0f382f12`, `docs/migrations/ovh-rapport-2026-07-26.md:146` | OVH migration already occurred; two nodes and namespace usage observed by August 9; platform report is historical, not freshly fetched main |
+| S3 | Immo `26caa4d9`, `deploy/k8s/30-api.yaml:29`, `25-minio.yaml:30`, `34-refresh-cronjob.yaml:159`, `.github/workflows/build-push-images.yml:109,153,212` | API DB/MinIO declaration; SCW graph binding; SCW image source and non-fatal GHCR mirror; not successful mirror receipts |
+| S4 | Geo `49573c0f`, `deploy/k8s/geo-api-deployment.yaml:36,45`; Immo `26caa4d9`, cost report `:60`; poc-k8s `a2ff303f`, `docs/migrations/scw-immo-geo-closure-2026-09-13.md:36` | Geo API SCW image declaration; OVH bucket already billed; later platform report dates S3 Geo cutover to July 29 |
+| S5 | Immo `9d004b0f`, `docs/architecture/evidence/scw-final-sweep-prod-live-receipt-2026-09-13.json:3,33,41,53,67,72`; `docs/architecture/scw-final-sweep.md:12`; `plan/SCWF-BRANCH_chore-scw-final-sweep.md:112` | September 13 23:39Z API rollout, OVH graph/scrape, MinIO absence, TEM retained; final full parity and dependency sweep still open |
+| S6 | Immo `4d5cb8f7`, `docs/architecture/storage-audit.md:15`; Geo `5a262a9b`, `docs/ops/scw-eradication/evidence/runtime-after-20260913.json:2`, `decommission-after-20260913.json:1` | Immo GHCR merged; Geo GHCR runtime at 15:47Z and provider retirement at 15:49Z; do not extrapolate Geo certification to Immo |
+| S7 | poc-k8s `a2ff303f`, `docs/migrations/scw-immo-geo-closure-2026-09-13.md:80`; Immo `4d5cb8f7`, `docs/architecture/transitions.md:85` | Three-node platform observation and one-node capacity gate; not a one-node rollout |
+| S8 | Immo `26caa4d9`, `api/src/scripts/worker-live.ts:4`, `deploy/k8s/34-refresh-cronjob.yaml:17,43,111`, `api/src/scripts/project-graph-from-s3.ts:2`, `radar/ontology/graphify-output-contract.md:1`, `docs/study/industrialisation-refresh-suivi.md:60` | Manual Graphify method, suspended schedules, repaired atomic projection, v2.3 ontology / 3.4 enrichment; no exact-day end-to-end receipt |
+| S9 | Immo `4d5cb8f7`, `docs/reviews/refresh-018/acceptance.md:5,18,24,35,37` | Exact Graphify 0.18 release, Luna high trial, preprod scheduled replay and explicit production dormancy |
+| S10 | Immo `26caa4d9`, `deploy/k8s/60-ingress.yaml:35`, `50-ui.yaml:56,76`, `80-auth.yaml:11`, `api/src/routes/graph-signals.ts:4`; Immo `4d5cb8f7`, `docs/architecture.md:47` | User URL, UI/API/Geo routes, OIDC and graph-node serving; later public URL/SSO observations |
+| S11 | Immo `4d5cb8f7`, `docs/reviews/refresh-018/extraction-baseline-audit.md:9,82,90`; local benchmark `b98aa6cf`, `docs/reviews/refresh-benchmark/v3/report.md:3,12,66,73` | Historical campaigns are not August baseline or matched M1 ranking; Sol-medium diagnostic has fairness limits; judge plan is not completed judging |
+
+[UNKNOWN] No fresh August 9 per-pod environment/image inventory, successful GHCR mirror inventory, exact-day manual extraction receipts or matched three-option M1 verdict exists among these inspected sources. [JUDGMENT] These gaps limit claims; they do not authorize replacing August with a later preproduction snapshot.
