@@ -127,22 +127,25 @@ describe("refresh mesh", () => {
 
   it("should propagate the run signal through validated generation", async () => {
     const seen: AbortSignal[] = [];
+    const efforts: unknown[] = [];
     const fake: GraphifyMesh = {
       listProviders: () => [],
       listModels: () => [],
-      async generate(request) { seen.push(request.signal!); return response; },
+      async generate(request) { seen.push(request.signal!); efforts.push(request.reasoning?.effort); return response; },
       async generateValidated(request, validate) {
         seen.push(request.signal!);
+        efforts.push(request.reasoning?.effort);
         await validate(response);
         return response;
       },
       async stream() { throw new Error("not used"); },
     };
     const controller = new AbortController();
-    const bound = bindRefreshAbortSignal(fake, controller.signal);
+    const bound = bindRefreshAbortSignal(fake, controller.signal, { effort: "high" });
     await bound.generate({ messages: [] });
     await bound.generateValidated({ messages: [] }, () => undefined);
     expect(seen).toEqual([controller.signal, controller.signal]);
+    expect(efforts).toEqual(["high", "high"]);
   });
 
   it("should forward schema and token cap through all installed mesh copies", async () => {
