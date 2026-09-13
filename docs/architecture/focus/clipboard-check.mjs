@@ -17,7 +17,16 @@ try {
     if (r.exceptionDetails) throw Error(JSON.stringify(r.exceptionDetails));
     return r.result.value;
   };
-  await evaluate(`new Promise((resolve, reject) => { const end = Date.now() + 2000; const check = () => document.querySelector('.steps button') ? resolve(true) : Date.now() > end ? reject(Error('Dossier missing')) : requestAnimationFrame(check); check(); })`);
+  const waitUntil = async (expression, failure) => {
+    const until = Date.now() + 3000;
+    do {
+      try { if (await evaluate(expression)) return; }
+      catch (error) { if (error?.code !== -32000) throw error; }
+      await new Promise(resolve => setTimeout(resolve, 50));
+    } while (Date.now() < until);
+    throw Error(failure);
+  };
+  await waitUntil(`Boolean(document.querySelector('.steps button'))`, 'Dossier missing');
   console.log(await evaluate(`(async () => {
     const settle = () => new Promise(resolve => setTimeout(resolve, 120));
     const previousClipboard = await navigator.clipboard.readText();
