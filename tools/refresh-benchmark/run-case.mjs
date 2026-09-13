@@ -18,6 +18,12 @@ const variants = {
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const caseDocument = required("BENCHMARK_DOCUMENT");
 const variantName = required("BENCHMARK_VARIANT");
+const attemptNumber = Number(process.env.BENCHMARK_ATTEMPT ?? "1");
+const retryReason = process.env.BENCHMARK_RETRY_REASON ?? null;
+if (!Number.isInteger(attemptNumber) || attemptNumber < 1 || attemptNumber > 2) {
+  throw new Error("BENCHMARK_ATTEMPT must be 1 or 2");
+}
+if (attemptNumber === 2 && !retryReason) throw new Error("Attempt 2 requires BENCHMARK_RETRY_REASON");
 const variant = variants[variantName];
 if (!variant) throw new Error(`Unsupported live variant: ${variantName}`);
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
@@ -35,9 +41,11 @@ if (frozen.t1Commit !== t1Commit) throw new Error("T1 prompt commit differs from
 const expected = frozen.documents.find(({ id }) => id === document.id);
 if (!expected) throw new Error("Document is absent from the frozen prompt contract");
 const caseId = `${document.id}--${variantName}`;
-const receiptPath = resolve(outputDir, `${caseId}.receipt.json`);
-const outputPath = resolve(outputDir, `${caseId}.output.json`);
+const attemptSuffix = attemptNumber === 1 ? "" : `.attempt-${attemptNumber}`;
+const receiptPath = resolve(outputDir, `${caseId}${attemptSuffix}.receipt.json`);
+const outputPath = resolve(outputDir, `${caseId}${attemptSuffix}.output.json`);
 await mkdir(outputDir, { recursive: true });
+if (attemptNumber === 2) await access(resolve(outputDir, `${caseId}.receipt.json`));
 for (const path of [receiptPath, outputPath]) await access(path).then(
   () => { throw new Error(`Refusing quality rerun over ${path}`); }, () => undefined);
 
@@ -142,7 +150,7 @@ const receipt = { schemaVersion: 1, caseId, status, t1Commit, profileModuleSha25
     completedAt: new Date(completed).toISOString(), totalMs: completed - started,
     queueMs: wire && generationStarted ? Date.parse(wire.fetchStartedAt) - generationStarted : null,
     runMs: wire ? completed - Date.parse(wire.fetchStartedAt) : null }, attempts: 1,
-  extractionAccepted: Boolean(extraction), error };
+  extractionAccepted: Boolean(extraction), attemptNumber, retryReason, error };
 await writeFile(receiptPath, JSON.stringify(receipt), "utf8");
 console.log(JSON.stringify(receipt));
 if (status !== "completed") process.exitCode = 1;

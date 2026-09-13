@@ -70,7 +70,8 @@ run-case: runtime-text
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=$(T1_ROOT) \
 	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT) -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
 	  -e BENCHMARK_OUTPUT_DIR=/results -e BENCHMARK_DOCUMENT=$(DOC) \
-	  -e BENCHMARK_VARIANT=$(VARIANT) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
+	  -e BENCHMARK_VARIANT=$(VARIANT) -e BENCHMARK_ATTEMPT=$(or $(ATTEMPT),1) \
+	  -e BENCHMARK_RETRY_REASON='$(RETRY_REASON)' -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
 	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/run-case.mjs'
 
 quota:
