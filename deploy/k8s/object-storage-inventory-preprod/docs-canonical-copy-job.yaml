@@ -30,7 +30,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: copy
-          image: amazon/aws-cli:2.34.53@sha256:cf53765c0de54ad3a8ea21818f1c4c845a8cf7ca87831c078a00fef244031493
+          image: ghcr.io/rhanka/radar-api@sha256:4d062b88cd983aa1eef288475cded34f735084e1771a7639cbf8392df0277010
           imagePullPolicy: IfNotPresent
           command: ["/bin/bash", "-ceu", "--"]
           args:
@@ -44,12 +44,13 @@ spec:
                 echo 'ERROR: canonical manifest import timed out' >&2; exit 2; }
               report="/evidence/reports/${MIGRATION_RUN_ID}"
               set +e
+              mkdir -p "$report"
               CANONICAL_MANIFEST=/evidence/prod-canonical-manifest.jsonl \
-                CANONICAL_DIGEST="$CANONICAL_DIGEST" REPORT_DIR="$report" \
+                CANONICAL_DIGEST="$CANONICAL_DIGEST" REPORT_DIR="$report" CONCURRENCY=32 \
                 CONDITIONAL_WRITE_PROOF=/evidence/docs-conditional-write-proof.json \
                 SOURCE_ENDPOINT=https://s3.fr-par.scw.cloud SOURCE_REGION=fr-par \
                 SOURCE_BUCKET=radar-immobilier-docs-pocs \
-                /bin/bash /tool/copy-canonical-docs.sh
+                node /tool/copy-canonical-docs.mjs
               status=$?
               set -e
               marker="/evidence/export-ready/${MIGRATION_RUN_ID}"

@@ -3,6 +3,7 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 subject="$root/deploy/ci/copy-canonical-docs.sh"
+node_subject="$root/deploy/ci/copy-canonical-docs.mjs"
 test_tmp="$(mktemp -d /tmp/canonical-docs-test.XXXXXX)"
 trap 'rm -rf "$test_tmp"' EXIT
 mkdir -p "$test_tmp/bin" "$test_tmp/report"
@@ -37,4 +38,8 @@ grep -F -- "--if-none-match '*'" "$subject" >/dev/null
 grep -F -- '--argjson size "$size"' "$subject" >/dev/null
 ! grep -Eq 'delete-object|delete-bucket|rm-object' "$subject"
 grep -F '"$batch" -eq 32' "$subject" >/dev/null
+grep -F 'IfNoneMatch: "*"' "$node_subject" >/dev/null
+grep -F 'concurrency > 32' "$node_subject" >/dev/null
+grep -F 'destination-conflict' "$node_subject" >/dev/null
+! grep -Eq 'DeleteObject|DeleteBucket' "$node_subject"
 echo 'canonical docs copy hermetic test: PASS'
