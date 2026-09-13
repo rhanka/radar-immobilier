@@ -42,9 +42,9 @@
 - [x] **Lot 2 — Focus contract and regression coverage.**
   - [x] Update owner-facing presentation, summary and response JSON facts.
   - [x] Keep only `asis-1` and `target-3`; verify complete icons, repo provenance and nested subflows.
-- [ ] **Lot 3 — Monthly artifacts and evidence.**
-  - [ ] Update the monthly Markdown and regenerate portable HTML, report HTML/PDF and evidence hashes.
-  - [ ] Pass Focus tests, browser/clipboard checks and PDF report gates.
+- [x] **Lot 3 — Monthly artifacts and evidence.**
+  - [x] Update the monthly Markdown and regenerate portable HTML, report HTML/PDF and evidence hashes.
+  - [x] Pass Focus tests, browser/clipboard checks and PDF report gates.
 - [ ] **Lot 4 — Review and handoff.**
   - [ ] Verify scope and atomic commit limits.
   - [ ] Push the branch and open a PR; report exact commits and gates.
