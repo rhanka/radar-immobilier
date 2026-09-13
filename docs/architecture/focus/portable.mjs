@@ -63,7 +63,7 @@ const evidence = {
   claims: { deployment: 'preproduction T2 accepted; production T2 in progress; complete AFTER is not deployed', invoice: 'none',
     decisionOptions: 'three explicit open questions; local drafts only; fixed owner decisions unchanged', llmRatification: 'open-non-blocking' },
   sourceFiles,
-  replay: 'make -f docs/architecture/focus/Makefile tokens test build browser clipboard ENV=test-architecture',
+  replay: 'make -f docs/architecture/focus/Makefile tokens test build browser clipboard report-check ENV=test-architecture',
 };
 await writeFile(`${monthlyDir}/evidence-manifest-2026-09-13.json`, `${JSON.stringify(evidence, null, 2)}\n`);
 console.log(`Portable D8 Focus: ${Buffer.byteLength(html)} bytes; ${sha256(html)}`);

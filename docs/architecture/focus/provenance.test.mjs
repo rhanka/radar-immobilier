@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { provenanceFor } from './service-provenance.js';
 import { serviceIcons } from './service-icons.js';
 const { graphs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
+const transitionTargets = await readFile('../transitions-target.md', 'utf8');
 
 test('every component and nested box has an explicit repo role, evidence and service icon', () => {
   const identities = new Map();
@@ -30,4 +31,14 @@ test('platform, SSO, Immo, Geo, external and unassigned roles are not conflated'
   assert.match(provenanceFor('target-3', 'PR_RAW_OVH').role, /binding TBD/);
   assert.deepEqual(provenanceFor('target-3', 'GEO_JOIN').repos, ['geo']);
   assert.equal(provenanceFor('asis-1', 'PP_RAW').service, 'S3 compatible · MinIO');
+});
+
+test('accepted preproduction DOCS provenance matches the D8 transition receipt', () => {
+  const provenance = provenanceFor('target-3', 'PP_DOCS_OVH');
+  const renderedProvenance = `${provenance.role} ${provenance.evidence}`;
+  for (const fact of ['59,017', '12,534,514,457', '52646a7b…0425', 'failed 0']) {
+    assert.ok(transitionTargets.includes(fact), `transition receipt missing ${fact}`);
+    assert.ok(renderedProvenance.includes(fact), `provenance missing ${fact}`);
+  }
+  assert.doesNotMatch(renderedProvenance, /inventory in progress/i);
 });
