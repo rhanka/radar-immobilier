@@ -442,6 +442,7 @@ object-storage-docs-preprod-validate: ## Render support and validate the DOCS bu
 	@bash -n deploy/ci/prove-docs-conditional-writes.sh \
 	  deploy/ci/build-docs-expected-manifest.sh deploy/ci/copy-canonical-docs.sh \
 	  deploy/ci/copy-canonical-docs.hermetic.test.sh deploy/ci/copy-canonical-docs-progress.sh
+	@node --check deploy/ci/copy-canonical-docs.mjs
 	@bash deploy/ci/copy-canonical-docs.hermetic.test.sh
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
