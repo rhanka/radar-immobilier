@@ -1,5 +1,5 @@
 export const fixedInstructions = {
-  architectureOrder: ['before', 'effective-transition-2026-09-13', 'after-T2', 'after-T3-one-b3-8'],
+  architectureOrder: ['before', 'after-T3-one-b3-8'],
   rolloutOrder: ['preproduction', 'production'],
   retainScwTemUntilValidatedReplacement: true,
   transitionEvidence: {
@@ -33,21 +33,56 @@ export const fixedInstructions = {
       excluded: 'observed two/three-node platform pass-through/internal costs' },
     llm: { method: 'same subscription-capacity allocation and unit basis as preceding report',
       immoFacturableCad: 139.33773242975033, geoFacturableCad: 111.87770524666708,
-      totalFacturableCad: 251.21543767641742, evidence: 'token-audit-2026-08-10_2026-09-13.json' },
+      totalFacturableCad: 251.21543767641742, evidence: 'token-audit-2026-08-10_2026-09-13.json',
+      ratificationStatus: 'open-non-blocking' },
     indicativeTotalCad: 320.0954376764174,
   },
 };
 
-export function responsePack(manifest, note, remarks, capturedAt) {
-  return { schema: 'immo-focus-owner-instructions/v4', dossier: 'immo-before-transition-after-and-reporting', revision: 'D6',
+export const questions = [
+  { key: 'preprod-address', criticality: 'non-blocking',
+    question: 'Quelle adresse doit devenir le point d’entrée propriétaire de la préproduction ?',
+    context: 'Les preuves confirment preprod.immo.sent-tech.ca; preprod.sent-tech.ca reste une intention non tranchée.',
+    options: [
+      { key: 'KEEP_VERIFIED', title: 'Conserver l’adresse vérifiée', detail: 'Garder preprod.immo.sent-tech.ca comme entrée canonique.' },
+      { key: 'ALIAS_PORTAL', title: 'Créer un alias ou portail', detail: 'Faire de preprod.sent-tech.ca une entrée distincte, après conception et vérification.' },
+      { key: 'DEFER', title: 'Différer', detail: 'Ne changer aucune adresse tant que le besoin propriétaire n’est pas précisé.' },
+    ] },
+  { key: 'automation-scope', criticality: 'architecture',
+    question: 'Le périmètre futur d’automatisation doit-il rester limité à Immo ou inclure les extractions Geo assistées ?',
+    context: 'Cette question ne rouvre pas la propriété ratifiée du pipeline PV Immo.',
+    options: [
+      { key: 'IMMO_ONLY', title: 'Automatisation Immo seulement', detail: 'Le worker couvre Graphify/grounding Immo; Geo garde ses traitements séparés.' },
+      { key: 'IMMO_AND_GEO', title: 'Étendre aux extractions Geo', detail: 'Concevoir un périmètre coordonné pour règlements et grilles, sans transférer la propriété du pipeline PV.' },
+      { key: 'DEFER', title: 'Différer', detail: 'Attendre les preuves T1/T2 avant de définir cette extension.' },
+    ] },
+  { key: 'llm-billing', criticality: 'non-critical',
+    question: 'Quel statut donner à l’allocation LLM auditée de 251,215438 CAD ?',
+    context: 'Sans réponse, elle reste une allocation indicative non ratifiée et ne bloque pas l’architecture.',
+    options: [
+      { key: 'KEEP_INDICATIVE', title: 'Laisser indicative', detail: 'Conserver le calcul comme information non facturée et non bloquante.' },
+      { key: 'RATIFY_METHOD', title: 'Ratifier la méthode', detail: 'Accepter la méthode d’allocation, sous réserve de l’identité de facture externe.' },
+      { key: 'RECONCILE_FIRST', title: 'Rapprocher avant décision', detail: 'Comparer aux factures fournisseur avant toute ratification.' },
+    ] },
+];
+
+export function responsePack(manifest, selections = {}, comments = {}, remarks = '', capturedAt = null) {
+  const responses = questions.map(question => {
+    const selection = selections[question.key] ?? null;
+    if (selection !== null && !question.options.some(option => option.key === selection)) throw Error(`Unknown option ${selection} for ${question.key}`);
+    return { key: question.key, question: question.question, criticality: question.criticality,
+      selection, decisionStatus: selection === null ? (question.criticality === 'non-critical' ? 'open-non-blocking' : 'open') : 'owner-draft-not-ratified',
+      comment: comments[question.key] ?? '', options: question.options };
+  });
+  return { schema: 'immo-focus-owner-response/v5', dossier: 'immo-before-after-and-reporting', revision: 'D7',
     dossierHash: manifest.dossierHash, artifactInputHash: manifest.artifactInputHash, capturedAt,
-    buildOnly: true, status: 'effective-transition-recorded; acceptance-gates-open',
-    authority: 'facts and fixed instructions captured; no deployment, invoice or Track decision emitted',
-    option: null, optionInterpretation: 'No genuine balanced decision is open; no option is presented.',
+    buildOnly: true, status: 'draft-not-ratified',
+    authority: 'open answers captured as a local draft; fixed owner decisions remain unchanged; no deployment, invoice or Track decision emitted',
+    responses,
     fixedInstructions, unresolvedEvidence: [
       'T1 valid-PDF provider completion, typed Signal/exact PDF, replay and schedule acceptance',
       'T2 DOCS copy, parity/recovery and rebind',
       'production object audit/migration outcome', 'T3 capacity and placement acceptance',
       'external invoice identity, if it differs from the merged repository report boundary',
-    ], note, remarks };
+    ], remarks };
 }
