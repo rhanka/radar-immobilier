@@ -315,6 +315,9 @@ retry_get_version() {
 build_manifest() {
   local side="$1" listing="$2" output="$3" bucket item key size class index=0
   local head tags body getout sha scratch="$WORK_DIR/$side-manifest.unsorted.jsonl"
+  if $CHECKPOINT_REQUESTED && [ "${CHECKPOINT_BUILDING_PAGE:-false}" != true ]; then
+    build_manifest_checkpoint "$side" "$output"; return
+  fi
   bucket="$(bucket_for "$side")"; : >"$scratch"
   while IFS= read -r item; do
     index=$((index + 1)); key="$(jq -r '.key' <<<"$item")"
@@ -413,7 +416,9 @@ if $CHECKPOINT_REQUESTED; then
   CHECKPOINT_RUN_STARTED_EPOCH="$(date +%s)"
   if $RESUME; then
     checkpoint_load_index source "$WORK_DIR/source-checkpoint-preflight.jsonl"
+    checkpoint_validate_bodies source
     checkpoint_load_index destination "$WORK_DIR/destination-checkpoint-preflight.jsonl"
+    checkpoint_validate_bodies destination
   fi
 fi
 SOURCE_LISTING="$WORK_DIR/source-listing.jsonl"
