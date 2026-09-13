@@ -99,13 +99,13 @@ copy and cutover must preserve this single-writer contract.
 | Manifests | Storage behavior | Disposition |
 | --- | --- | --- |
 | `31-graph-projection-job.yaml` | Inherits configured object store/optional scrape credentials | Rebind explicitly per environment |
-| `32-projection-only-job.yaml`, `33-scrape-job.yaml`, `33b-scrape-cities-job.yaml` | Direct SCW docs-pocs | Remove literal and obsolete duplicate route |
+| `32-graph-projection-only-job.yaml`, `33-scrape-job.yaml`, `33b-scrape-cities-job.yaml` | Direct SCW docs-pocs | Remove literal and obsolete duplicate route |
 | `32b-reproject-etape-job.yaml` | Direct SCW, old image, manual legacy | Retire |
-| `34-refresh-cronjobs.yaml` | Two suspended base CronJobs with direct SCW; overlays may unsuspend | Make base provider-neutral; require per-env OVH binding |
-| `35-consistency-snapshot{,-cronjob}.yaml`, `35-run-geo-mapper-job.yaml` | PostgreSQL only; CronJob is suspended | Retain; not an object-store dependency |
+| `34-refresh-cronjob.yaml` | Two suspended base CronJobs with direct SCW; overlays may unsuspend | Make base provider-neutral; require per-env OVH binding |
+| `35-consistency-snapshot-job.yaml`, `35-consistency-snapshot-cronjob.yaml`, `35-run-geo-mapper-job.yaml` | PostgreSQL only; CronJob is suspended | Retain; not an object-store dependency |
 | `35a-populate-geo-job.yaml`, `35b-populate-geo-cronjob.yaml` | PostgreSQL/Geo HTTP; scheduled definition not bundled | Retain; prove absence/presence in runtime inventory |
 | `36-db-migrate-job.yaml` | PostgreSQL work but inherits unused S3 secret/config | Remove unnecessary S3 privilege during remediation |
-| `37-graphify-apply-job.yaml`, `38-emit-candidates-job.yaml`, `39-export-graph-nodes-job.yaml`, `40-export-ground-truth-job.yaml` | Direct SCW docs-pocs | Rebind or retire with stale run-job options |
+| `37-graphify34-apply-job.yaml`, `38-graphify34-emit-candidates-job.yaml`, `39-export-graph-nodes-job.yaml`, `40-export-gt-designation-events-job.yaml` | Direct SCW docs-pocs | Rebind or retire with stale run-job options |
 | `41-grounding-citation-job.yaml` | SCW source to MinIO destination | Retire after T1 replacement and parity proof |
 | preprod projection and refresh diagnostic Jobs | Direct MinIO destinations | Rebind before MinIO decommission |
 
@@ -132,13 +132,13 @@ two-host consensus claim.
 | Concern | Exact source surface | Required outcome |
 | --- | --- | --- |
 | Deployed API stores | `deploy/k8s/30-api.yaml`; `deploy/overlays/preprod/kustomization.yaml` | Production bindings explicit in base/prod path; preprod overrides `PP_RAW` and `PP_DOCS`; neither points to MinIO or SCW |
-| Refresh stores | `deploy/k8s/34-refresh-cronjobs.yaml`; `deploy/k8s/refresh-cronjobs/{kustomization.yaml,patch-refresh-s3.yaml}`; `deploy/k8s/refresh-cronjobs-prod/kustomization.yaml` | Provider-neutral base; explicit OVH bucket/region/path-style values in both overlays before either is unsuspended |
+| Refresh stores | `deploy/k8s/34-refresh-cronjob.yaml`; `deploy/k8s/refresh-cronjobs/kustomization.yaml`; `deploy/k8s/refresh-cronjobs-prod/kustomization.yaml` | Provider-neutral base; explicit OVH bucket/region/path-style values in both overlays before either is unsuspended |
 | Diagnostic writer | `deploy/k8s/refresh-diag/diag-refresh-job.yaml`; `.github/workflows/build-push-images.yml` | Diagnostic uses the same environment-specific OVH contract, without an independent MinIO default |
 | Legacy grounding | `.github/workflows/grounding-{preprod,publish-prod}.yml`; `deploy/k8s/41-grounding-citation-job.yaml`; `deploy/k8s/grounding-preprod/**`; `deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml` | Retire once T1 publishes canonical graph/evidence and source/destination parity is recorded |
-| Manual Jobs | `.github/workflows/run-job.yaml`; `deploy/k8s/{31,32,32b,33,33b,34,37,38,39,40}-*.yaml` | Remove obsolete Jobs/routes; remaining clients inherit only an explicit environment OVH binding; eliminate duplicate scrape route |
+| Manual Jobs | `.github/workflows/run-job.yaml`; `deploy/k8s/31-graph-projection-job.yaml`; `32-graph-projection-only-job.yaml`; `32b-reproject-etape-job.yaml`; `33-scrape-job.yaml`; `33b-scrape-cities-job.yaml`; `37-graphify34-apply-job.yaml`; `38-graphify34-emit-candidates-job.yaml`; `39-export-graph-nodes-job.yaml`; `40-export-gt-designation-events-job.yaml` | Remove obsolete Jobs/routes; remaining clients inherit only an explicit environment OVH binding; eliminate duplicate scrape route |
 | MinIO workload | `deploy/k8s/{25-minio,70-networkpolicy,71-networkpolicy-graph-projection-minio-preprod}.yaml`; `deploy/k8s/kustomization.yaml` | Remove cluster MinIO service, StatefulSet, PVC declaration, and policies only after consumer and recovery gates pass |
 | Secrets/least privilege | `deploy/k8s/{30-api,36-db-migrate,secrets.example}.yaml`; active workflow secret references | Provider-neutral names, no unused S3 access on DB migration, no deployed SCW object credential consumer; TEM secret remains |
-| Registry residue | `deploy/k8s/10-rbac.yaml`; `deploy/k8s/11-ci-deployer-preprod-rbac.yaml`; `deploy/k8s/secrets.example.yaml`; deployment README | Remove `radar-registry-pull` only after both live namespaces prove GHCR/public images and no pull dependency |
+| Registry residue | `deploy/k8s/10-rbac.yaml`; `deploy/k8s/11-ci-deployer-preprod-rbac.yaml`; `deploy/k8s/secrets.example.yaml`; `deploy/k8s/README.md` | Remove `radar-registry-pull` only after both live namespaces prove GHCR/public images and no pull dependency |
 | Manual mount | `scripts/mount-scw.sh`; `scripts/umount-scw.sh` | Delete executable legacy object mounts |
 | Recovery | `.github/workflows/rollback.yml`; `deploy/ci/rollback-release.sh`; DB backup/restore runbook or implementation selected by design | Preserve image rollback and add an evidenced object/DB recovery path; local `make db-restore` alone is insufficient |
 | Active defaults/schema | `.env.example`; `api/src/config.ts`; `packages/radar-sources/src/sources/pv-cities-hard.json` plus its consumers/tests | Separate local MinIO defaults from deployed guidance; neutralize provider-shaped active names without weakening URL-deny tests |
