@@ -13,7 +13,6 @@ API_IMAGE := ghcr.io/rhanka/radar-api
 APPROVED_IMAGE := ghcr.io/rhanka/radar-api@sha256:d4a46b5615a7510fd5bf3384f65dea8b881cb75ae3226a3dc3751a7f9271119e
 OVH_S3_ENDPOINT := https://s3.bhs.io.cloud.ovh.net
 OVH_DOCS_BUCKET := radar-immobilier-docs
-OVH_RAW_BUCKET := radar-immobilier-raw
 
 .PHONY: guard-preprod
 guard-preprod:
@@ -58,7 +57,7 @@ inspect-prod: guard-prod
 	@$(KP) get configmap radar-api --ignore-not-found \
 	  -o custom-columns=NAME:.metadata.name,GRAPH_ENDPOINT:.data.GRAPH_S3_ENDPOINT,GRAPH_REGION:.data.GRAPH_S3_REGION,GRAPH_BUCKET:.data.GRAPH_S3_BUCKET,SCRAPE_ENDPOINT:.data.SCRAPE_S3_ENDPOINT,SCRAPE_REGION:.data.SCRAPE_S3_REGION,SCRAPE_BUCKET:.data.SCRAPE_S3_BUCKET
 	@if [ "$$($(KP) auth can-i get secrets)" = yes ]; then \
-	  $(KP) get secret radar-raw-s3-credentials radar-graph-s3-credentials radar-scrape-s3-credentials radar-refresh-keyring-bootstrap radar-refresh-runtime --ignore-not-found -o name; \
+	  $(KP) get secret radar-docs-s3-credentials radar-graph-s3-credentials radar-scrape-s3-credentials radar-refresh-keyring-bootstrap radar-refresh-runtime --ignore-not-found -o name; \
 	else echo 'secret inventory: unavailable to this identity'; fi
 	@if [ "$$($(KP) auth can-i get persistentvolumeclaims)" = yes ]; then \
 	  $(KP) get pvc radar-refresh-keyring --ignore-not-found \
@@ -147,6 +146,10 @@ verify-render-prod:
 	  grep -q 'name: radar-refresh-keyring-bootstrap' "$$tmp"; \
 	  grep -q 'claimName: radar-refresh-keyring' "$$tmp"; \
 	  test "$$(grep -c "image: $(APPROVED_IMAGE)" "$$tmp")" -eq 4; \
+	  pv="$$(awk 'BEGIN { RS="---" } /kind: CronJob/ && /name: radar-refresh-pv/ { print }' "$$tmp")"; \
+	  test "$$(printf %s "$$pv" | grep -c 'name: radar-scrape-s3-credentials')" -eq 2; \
+	  test "$$(printf %s "$$pv" | grep -c 'name: radar-api')" -ge 4 \
+	    || { echo "radar-refresh-pv lacks complete provider-neutral DOCS bindings" >&2; exit 1; }; \
 	  awk '\
 	    /^kind: CronJob$$/ { kind="CronJob" } \
 	    kind == "CronJob" && /^  name: radar-refresh-/ { name=$$2 } \
@@ -173,12 +176,12 @@ storage-ready-prod: guard-prod verify-render-prod
 	      || { echo "missing required key $$1/$$2" >&2; exit 1; }; \
 	  }; \
 	  for item in \
-	    radar-raw-s3-credentials/RAW_S3_ENDPOINT \
-	    radar-raw-s3-credentials/RAW_S3_REGION \
-	    radar-raw-s3-credentials/RAW_S3_BUCKET \
-	    radar-raw-s3-credentials/RAW_S3_FORCE_PATH_STYLE \
-	    radar-raw-s3-credentials/RAW_S3_ACCESS_KEY \
-	    radar-raw-s3-credentials/RAW_S3_SECRET_KEY \
+	    radar-docs-s3-credentials/DOCS_S3_ENDPOINT \
+	    radar-docs-s3-credentials/DOCS_S3_REGION \
+	    radar-docs-s3-credentials/DOCS_S3_BUCKET \
+	    radar-docs-s3-credentials/DOCS_S3_FORCE_PATH_STYLE \
+	    radar-docs-s3-credentials/DOCS_S3_ACCESS_KEY \
+	    radar-docs-s3-credentials/DOCS_S3_SECRET_KEY \
 	    radar-graph-s3-credentials/GRAPH_S3_ACCESS_KEY \
 	    radar-graph-s3-credentials/GRAPH_S3_SECRET_KEY \
 	    radar-scrape-s3-credentials/SCRAPE_S3_ACCESS_KEY \
@@ -187,13 +190,24 @@ storage-ready-prod: guard-prod verify-render-prod
 	  done; \
 	  expected_endpoint="$$(printf %s '$(OVH_S3_ENDPOINT)' | base64 | tr -d '\n')"; \
 	  expected_region="$$(printf %s bhs | base64 | tr -d '\n')"; \
-	  expected_bucket="$$(printf %s '$(OVH_RAW_BUCKET)' | base64 | tr -d '\n')"; \
+	  expected_bucket="$$(printf %s '$(OVH_DOCS_BUCKET)' | base64 | tr -d '\n')"; \
 	  expected_style="$$(printf %s false | base64 | tr -d '\n')"; \
-	  test "$$( $(KP) get secret radar-raw-s3-credentials -o jsonpath='{.data.RAW_S3_ENDPOINT}' )" = "$$expected_endpoint"; \
-	  test "$$( $(KP) get secret radar-raw-s3-credentials -o jsonpath='{.data.RAW_S3_REGION}' )" = "$$expected_region"; \
-	  test "$$( $(KP) get secret radar-raw-s3-credentials -o jsonpath='{.data.RAW_S3_BUCKET}' )" = "$$expected_bucket"; \
-	  test "$$( $(KP) get secret radar-raw-s3-credentials -o jsonpath='{.data.RAW_S3_FORCE_PATH_STYLE}' )" = "$$expected_style" \
-	    || { echo "live RAW binding is not the approved OVH RAW store" >&2; exit 1; }; \
+	  test "$$( $(KP) get secret radar-docs-s3-credentials -o jsonpath='{.data.DOCS_S3_ENDPOINT}' )" = "$$expected_endpoint"; \
+	  test "$$( $(KP) get secret radar-docs-s3-credentials -o jsonpath='{.data.DOCS_S3_REGION}' )" = "$$expected_region"; \
+	  test "$$( $(KP) get secret radar-docs-s3-credentials -o jsonpath='{.data.DOCS_S3_BUCKET}' )" = "$$expected_bucket"; \
+	  test "$$( $(KP) get secret radar-docs-s3-credentials -o jsonpath='{.data.DOCS_S3_FORCE_PATH_STYLE}' )" = "$$expected_style" \
+	    || { echo "live API binding is not the approved OVH DOCS store" >&2; exit 1; }; \
+	  refs="$$( $(KP) get deployment radar-api -o jsonpath='{range .spec.template.spec.containers[?(@.name=="api")].env[*]}{.name}={.valueFrom.secretKeyRef.name}/{.valueFrom.secretKeyRef.key}{"\n"}{end}' )"; \
+	  for ref in \
+	    S3_ENDPOINT=radar-docs-s3-credentials/DOCS_S3_ENDPOINT \
+	    S3_REGION=radar-docs-s3-credentials/DOCS_S3_REGION \
+	    S3_BUCKET=radar-docs-s3-credentials/DOCS_S3_BUCKET \
+	    S3_FORCE_PATH_STYLE=radar-docs-s3-credentials/DOCS_S3_FORCE_PATH_STYLE \
+	    S3_ACCESS_KEY=radar-docs-s3-credentials/DOCS_S3_ACCESS_KEY \
+	    S3_SECRET_KEY=radar-docs-s3-credentials/DOCS_S3_SECRET_KEY; do \
+	      printf '%s\n' "$$refs" | grep -Fxq "$$ref" \
+	        || { echo "live API lacks required canonical DOCS binding $$ref" >&2; exit 1; }; \
+	  done; \
 	  test -z "$$( $(KP) get statefulset radar-minio --ignore-not-found -o name )"; \
 	  test -z "$$( $(KP) get service radar-minio --ignore-not-found -o name )"; \
 	  test -z "$$( $(KP) get pvc minio-data-radar-minio-0 --ignore-not-found -o name )" \
