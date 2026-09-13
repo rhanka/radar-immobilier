@@ -2,9 +2,54 @@
 
 Date: 2026-09-13
 Audit baseline: `097036783006226afea53a6b49383bf70890774f` (`origin/main`)
-Scope: evidence and remediation map only; no storage, cluster, secret, or workload mutation.
+Live transition receipt: [`evidence/scw-final-sweep-prod-live-receipt-2026-09-13.json`](evidence/scw-final-sweep-prod-live-receipt-2026-09-13.json)
+Scope: historical baseline plus non-secret transition reconciliation. The
+freshness pass was read-only; it did not mutate storage, cluster resources,
+Secrets, or workloads.
 
-## Conclusion
+## Current transition state
+
+The storage cutover actions recorded by the branch plan have occurred. A fresh
+read-only production observation at `2026-09-13T23:36:25Z` reached the OVH MKS
+API server in namespace `radar-immobilier`. The API Deployment was rolled out
+and all six `S3_*` entries use `radar-docs-s3-credentials` key references with
+no literal value. GRAPH and SCRAPE ConfigMap coordinates point to OVH BHS bucket
+`radar-immobilier-docs`; their dedicated Secret objects exist. Scaleway TEM is
+the explicit retained exception.
+
+The completed production copy Job
+`radar-object-storage-copy-docs-prod-b92vl` reported 59,017 processed objects,
+12,534,514,457 bytes, zero failures and canonical manifest SHA-256
+`52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425`.
+The observation also found no production `radar-minio` StatefulSet, Service,
+data PVC, or ingress NetworkPolicy; the 1 Gi evidence checkpoint PVC remains
+Bound. These are accepted facts about the performed transition, not a rollback
+of the historical baseline below.
+
+Final parity acceptance is nevertheless reopened. That completed Job proved
+destination bodies, SHA-256 values, sizes and the exact key/size set, but its
+version did not compare destination Content-Type/Encoding/Cache-Control/
+Disposition, user metadata or tags, and its summary did not record the later
+final-source rescan fields. A fresh read-only full scan with the strengthened
+checker must pass before `exactParity` is accepted again. The repository
+`object-storage-docs-prod-final-status` target also stopped at the quota check:
+the production `ci-deployer` may not `get resourcequotas`. All preceding
+absence/checkpoint checks passed, but the target as a whole is not claimed
+green. The linked receipt records both limitations without object keys or
+Secret values.
+
+The branch plan records the earlier preproduction transition separately. This
+freshness pass did not re-observe preproduction and therefore makes no newer
+runtime claim for that namespace.
+
+## Historical audit baseline
+
+Everything from this heading through the original blocker/handoff section is
+the immutable pre-cutover assessment at commit `09703678`. Statements such as
+“armed”, “unproved”, “no copy”, and listed legacy paths describe that baseline,
+not the current repository or the live transition summarized above.
+
+## Historical baseline conclusion
 
 Immo is not ready to claim SCW eradication. The production grounding publisher is
 armed and still writes to SCW. Preproduction has three physical storage planes:
@@ -17,7 +62,7 @@ Local MinIO is not a removal target. Historical evidence and defensive tests
 that reject unsafe object URLs also remain. This audit targets effective
 preproduction and production clients and executable deployment paths.
 
-## Evidence and freshness
+## Historical baseline evidence and freshness
 
 - Source, workflow, environment-variable names, secret names, GitHub run
   metadata, and PR state were inspected from the audit baseline. No secret
@@ -47,7 +92,7 @@ preproduction and production clients and executable deployment paths.
   runs. It does not prove production state. Re-run the final checks with a
   read-only Immo principal before either cutover is accepted.
 
-## Classification vocabulary
+## Historical classification vocabulary
 
 | Class | Meaning |
 | --- | --- |
@@ -58,7 +103,7 @@ preproduction and production clients and executable deployment paths.
 | TEM | Explicitly retained Scaleway Transactional Email dependency. |
 | Shared | Geo or MatchID resource requiring the owning repository or reconciled scope. |
 
-## Physical clients and data
+## Historical baseline physical clients and data
 
 | Client | Preproduction evidence | Production evidence | Class/action |
 | --- | --- | --- | --- |
@@ -76,7 +121,7 @@ owns `graph/<city>/latest.json`, history, candidates, and exports. Canonical
 graph writes are guarded by pre-image archival and expected-ETag conditions;
 copy and cutover must preserve this single-writer contract.
 
-## Executable workflows and manifests
+## Historical baseline executable workflows and manifests
 
 | Path/group | Finding | Class |
 | --- | --- | --- |
@@ -94,7 +139,7 @@ copy and cutover must preserve this single-writer contract.
 | `.env.example`, `docker-compose*.yml`, Makefile MinIO defaults | Developer/test MinIO; `.env.example` no longer prescribes a deployed provider | Local-only |
 | `scripts/mount-scw.sh`, `scripts/umount-scw.sh` | Executables removed in the first source slice; historical references retained | Retired from active source |
 
-## Jobs and CronJobs
+## Historical baseline Jobs and CronJobs
 
 | Manifests | Storage behavior | Disposition |
 | --- | --- | --- |
@@ -109,7 +154,7 @@ copy and cutover must preserve this single-writer contract.
 | `41-grounding-citation-job.yaml` | SCW source to MinIO destination | Retire after T1 replacement and parity proof |
 | preprod projection and refresh diagnostic Jobs | Direct MinIO destinations | Rebind before MinIO decommission |
 
-## Retained references
+## Historical baseline retained references
 
 - Keep local integration fixtures and compose MinIO services.
 - Keep provenance/UI tests that reject MinIO, private, or presigned storage URLs.
@@ -122,7 +167,7 @@ copy and cutover must preserve this single-writer contract.
   blockers to a global claim, not Immo mutation authority.
 - Shared MatchID registry scopes remain under reconciliation with `poc-k8s`.
 
-## First source slice checkpoint and remaining clients
+## Historical baseline first source slice checkpoint and remaining clients
 
 This branch has prepared provider-neutral bindings for the released manual Jobs,
 removed unused migration credentials, and retired the two uncalled mount scripts.
@@ -148,7 +193,7 @@ Remaining executable clients, in risk order:
 7. The MinIO StatefulSet, Service, PVC and network policies remain intentionally.
    Their deletion requires copy/parity, paired DB/object recovery, and zero consumers.
 
-## Minimal remediation file map
+## Historical baseline remediation file map
 
 This is the implementation boundary for the later design/build chain. Astra
 must settle delete-versus-rebind choices, Gemini 3.8 High reviews that design,
@@ -243,7 +288,7 @@ text-search success alone is insufficient.
    separately approved and recorded. A missing object due to RBAC is not proof
    that it is absent.
 
-## Current blockers and handoff
+## Historical baseline blockers and handoff
 
 - Fresh preproduction and production runtime proof requires an OVH read-only
   principal with access to the two Immo namespaces.
