@@ -20,6 +20,12 @@ OBJECT_STORAGE_DOCS_PROD_DIR := deploy/k8s/object-storage-docs-prod
 OBJECT_STORAGE_DOCS_PROD_NAMESPACE := radar-immobilier
 OBJECT_STORAGE_DOCS_PROD_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 
+.PHONY: object-storage-docs-prod-context
+object-storage-docs-prod-context: ## Read the non-secret PROD context coordinates
+	@server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
+	  namespace="$$( $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )"; \
+	  jq -n --arg server "$$server" --arg namespace "$$namespace" '{server:$$server,namespace:$$namespace}'
+
 .PHONY: object-storage-docs-prod-validate
 object-storage-docs-prod-validate: ## Validate the PROD DOCS support and inventory Job offline
 	@bash -n deploy/ci/migrate-object-storage.sh deploy/ci/object-storage-checkpoint.sh
@@ -166,7 +172,8 @@ object-storage-docs-prod-bind: ## Bind future PROD DOCS workers after exact cano
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
 	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
 	    "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]; \
-	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )" = "$$namespace" ]; \
+	  context_namespace="$$( $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )"; \
+	  [ -z "$$context_namespace" ] || [ "$$context_namespace" = "$$namespace" ]; \
 	  pod="$$( $(KUBECTL) -n "$$namespace" get pods \
 	    -l "job-name=$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
 	  summary="$$( $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
