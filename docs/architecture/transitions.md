@@ -28,7 +28,7 @@ execution; it is not a request to vote again on those three objectives.
 | Transition | Existing work retained | Remaining acceptance | Current status |
 | --- | --- | --- | --- |
 | T1 — autonomous PV → Signal cron | Immo CAS #678; Fable BLOCK at `ac3a7150`; fixes `537b9e0c` + `3d9ed43c`; scoped 34/34 + integration 4/4 + typecheck | Complete Fable re-review; benchmark historical/manual and v1/v2/v3 on the same five PDFs with non-simulated runs; then provider Signal and K8s schedule acceptance | **BLOCKED** pending re-review and acceptance; model unselected, Cloud Code not enrolled, no benchmark scores |
-| T2 — remove MinIO and remaining SCW dependencies | #677 OVH refresh bindings; live API `PP-RAW`; empty `PP-DOCS`; useful `PP-DOCS-LEGACY`; #671/#672 GHCR work | Complete the `25ec9e04` fail-before-write suite and conditional-write capability; copy + integrity + recovery; fence/repoint/test; retain legacy until complete parity/recovery; close SCW except TEM | **MIGRATE+RETAIN** decided; remediation underway, not accepted; no copy, cutover or deletion |
+| T2 — remove MinIO and remaining SCW dependencies | Live `PP-RAW`; empty `PP-DOCS`; useful `PP-DOCS-LEGACY`; remediation `ee84ae29` / `f2ac3825` / `c30467ca` / `cef6d7ed` | Finish checkpoint mechanism `aaf0cbf7` / `91242223`; copy + integrity + recovery; fence/repoint/test; retain legacy until complete parity/recovery; close SCW except TEM | **MIGRATE+RETAIN** decided; checkpoint work under construction, not accepted; no object copy |
 | T3 — one OVH b3-8 | Three b3-8; service plan; 16 PVC/15 Cinder RWO inventory | Finish T2; rightsize; reconcile required affinity/PVC constraints; prove controlled two-node operation; only then test one-node preprod before production | **NO-GO today**: requests and required anti-affinity do not fit one node |
 
 [FACT] Graphify producer confirms **0.18.0 published**, tag `v0.18.0`, merge
@@ -63,10 +63,10 @@ or historical audit evidence as part of Immo/Geo cleanup.
 [FACT] The live API uses MinIO `PP-RAW`; its derived `PP-DOCS` bucket is empty.
 The distinct `PP-DOCS-LEGACY` bucket has baseline 1/2,821,583 B, graph 4/639,226 B,
 ontology 530/34,257,805 B, parsed ≥4,884/≥272,554,144 B, raw unknown and runs ≥445.
-Fable's postbuild review keeps fail-before-write and conditional-write capability
-remediation blocking. Commit `25ec9e04` starts fail-before-write; its suite and the
-conditional-write capability remain in progress. **MIGRATE+RETAIN** applies until
-complete parity and recovery; no copy, cutover or deletion has started, and TEM remains retained.
+Remediation now reaches `ee84ae29`, `f2ac3825`, `c30467ca` and `cef6d7ed`.
+The checkpoint mechanism at `aaf0cbf7` / `91242223` remains under construction.
+**MIGRATE+RETAIN** applies until complete parity and recovery. No object copy has
+started, and TEM remains retained.
 
 [FACT] The current platform audit measured three b3-8 nodes. One node exposes
 1,840m CPU / 5,907.82 Mi allocatable; workload requests total 4,095m / 8,442 Mi,
