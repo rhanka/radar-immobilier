@@ -16,6 +16,7 @@
 - [x] Forbidden: root `Makefile`, `docker-compose*.yml`, `rules/**`, entrypoints, `.track/**`, other plans, application/infra/workflow edits during the audit phase.
 - [x] SCWF-EX1: extend this audit branch to the exact implementation paths in `docs/reviews/scw-final/build-design.md`, after independent review reconciliation; impact is branch-local manifests/scripts/tests, rollback by reverting the relevant atomic commits, no runtime changes by builders.
 - [x] SCWF-EX2: authorize only the MinIO cutover design now; after conductor release, the exact second-slice paths are those frozen in `docs/reviews/scw-final/minio-cutover-design.md`, with refresh-overlay scope conditional on avoiding duplicate T1 work; rollback is per atomic source commit, never a live reverse-copy.
+- [x] SCWF-EX3: release the bounded tool/checker/test paths plus one quality-gate step in `.github/workflows/ci.yml` per `minio-cutover-reconciliation.md`; CI currently does not run the checker, impact is offline validation only, rollback is the individual source commit; runtime manifests remain gated.
 - [x] Conditional: legacy grounding retirement requires T1 canonical writer acceptance; resource/data deletion requires parity, recovery and zero-consumer proof. These do not block independent T2 code preparation.
 
 ## Feedback Loop
@@ -49,7 +50,7 @@
 - [x] Lot 3g2a: dispatch the owner-authorized independent Fable review of first-slice commit `332af1e8` and second-slice design `671380f4`; no consensus or acceptance claim until its readable findings are reconciled.
 - [x] Lot 3h1: freeze the implementation-ready RAW/DOCS/GRAPH client matrix, migration-tool contract, and second-slice paths.
 - [x] Lot 3h1a: preserve independent Fable cutover findings B1-B5 separately; conflict convergence, multi-source identity and declared exclusions require reconciliation before tool release.
-- [ ] Lot 3h2: conductor reconciles the design, obtains independent review, and explicitly releases source edits.
+- [x] Lot 3h2: conductor reconciles independent findings A1-A3/B1-B5 and releases only the tool, tests and CI gate; runtime bindings remain gated separately.
 - [ ] Lot 3h3: build and hermetically test the dry-run-default, non-destructive migration/proof tool.
 - [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
