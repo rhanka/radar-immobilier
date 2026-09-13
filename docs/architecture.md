@@ -167,3 +167,115 @@ OVH S3 endpoint: `https://s3.bhs.io.cloud.ovh.net`. An S3 bucket is external to 
 | Geo prod → preprod sync | Controlled on-demand window | Mirror `normalized/`, stamp coherence, refresh serving index, verify collections | DECLARED Job; not an independent always-on refresh cron |
 
 Schedules are independent timers, not a dependency-aware workflow. In particular 04:17 Toronto is **not** before 04:30 UTC. A last-scheduled timestamp is not proof of successful processing or fresh downstream signals.
+
+## 4. Geo: sources, acquisition, joins and serving
+
+Geo owns reusable geographic acquisition and products. Immo also has its own PV acquisition and graph pipeline: the two PV paths overlap in source material, but they are not evidence of a fully unified pipeline. Geo PV records must not be equated with Immo Signal nodes.
+
+```mermaid
+flowchart TB
+  subgraph sources["External authoritative sources"]
+    pv["Municipal PV / notices<br/>PDF, HTML, municipal portals"]
+    zones["Zoning polygons<br/>ArcGIS / AGOL, WFS, CKAN, municipal GIS"]
+    rules["Regulations / zoning grids<br/>Municipal PDFs, annexes, tables"]
+    lots["Cadastral parcels / assessment data<br/>Québec MRNF and municipal sources"]
+    env["Environment<br/>BDZI floods · GRHQ hydrography · CPTAQ agriculture"]
+  end
+  subgraph processing["Geo processing · source-specific runners / bounded Jobs"]
+    capture["Capture on cluster<br/>Raw bytes + URL + retrieved_at + SHA-256"]
+    raw[("OVH S3 · sentropic-geo<br/>Raw capture, manifests, worklists, registries")]
+    normalize["Parse / normalize / validate provenance<br/>Geometries, PV, regulations, norms"]
+    join["Spatial join: parcel ∩ zoning polygons<br/>Area-majority / centroid fallback / multi-zone status"]
+    fold["Semantic joins<br/>Canonical zone code → regulation / norms<br/>Parcel + zone + norms → enriched lot"]
+    constraints["Normalize / intersect constraints<br/>Evidence and explicit missing-data status"]
+    output[("OVH S3 · normalized/<br/>Zones, lots, PV, regulations, constraints<br/>GeoJSON / Parquet + provenance")]
+    capture --> raw
+    raw --> normalize
+    normalize --> join
+    join --> fold
+    normalize --> fold
+    normalize --> constraints
+    normalize --> output
+    fold --> output
+    constraints --> output
+  end
+  pv --> capture
+  zones --> capture
+  rules --> capture
+  lots --> capture
+  env --> capture
+  local["Workstation-assisted extraction where required<br/>OCR / vision / LLM for document tables<br/>Reads captured corpus; not local source capture"]
+  raw --> local
+  local -->|"Validated extraction products"| normalize
+  output --> api["geo namespace · geo-api<br/>S3 StoreProvider · OGC / collections / items"]
+  output --> sync["Controlled preprod sync<br/>coherence_id + count + set_hash<br/>Refresh index and verify through API"]
+  sync --> mirror[("OVH S3 · sentropic-geo-preprod<br/>normalized/")]
+  mirror --> p_api["geo-preprod namespace · geo-api"]
+  api --> immo["Immo production<br/>Live OGC reads + reference resolution"]
+  p_api --> p_immo["Immo preproduction<br/>Live OGC reads + reference resolution"]
+  api --> site["geo.sent-tech.ca<br/>Static catalogue · GitHub Pages"]
+```
+
+The diagram describes implemented source families and processing responsibilities; it is **not** a claim that every family has complete coverage, an active scheduler or a fully automatic extractor. The serving contract is file/object based: `GEO_DATA_URI=s3://…/normalized` selects `StoreProvider`. A running `geo/postgis` StatefulSet was observed, but no current API-to-PostGIS dependency is demonstrated by that configuration. Do not substitute a database-backed OGC architecture for the observed S3 serving path.
+
+The lot/zone join (`packages/geo/src/zonage/lotZoneJoin.ts`) uses spatial intersections and records `area-majority`, `centroid-fallback` or `unassigned`, with multiple-zone information. Norms use canonicalized zone codes. The persisted intermediate `normalized/qc-lot-zonage/<city>.parquet` joins the zoning-norms registry and feeds served `qc-lots` products. Regulation references are folded into zoning products; Immo then resolves its own Signal/DesignationEvent references to zones and lots. An unresolved reference remains explicit, not a fabricated join.
+
+Environmental source adapters exist for BDZI, GRHQ and CPTAQ. Data presence and coverage must be assessed separately from the existence of an adapter; an empty response alone does not establish the absence of a flood, watercourse or protected agricultural area. The S9 contract requires source and missing-data status. On-demand extraction runners and operator-assisted document interpretation are shown separately from deployed serving.
+
+## 5. Supporting components and operational boundaries
+
+| Component | Role | Current qualification |
+| --- | --- | --- |
+| `radar-immo-mcp` | OAuth-protected remote MCP access to Immo tools, through `/mcp` | Deployment LIVE in preprod; an additional user/agent entry point |
+| Obscura | Browser automation for sources needing a browser | DECLARED and configured in Immo; no Obscura Deployment in the inspected preprod inventory |
+| MinIO | In-cluster object store backed by PVC | LIVE in preprod; still the API-configured store despite refresh migration to OVH |
+| Mail delivery | Invitations/enrolment via Scaleway TEM HTTP API | DECLARED; Maildev is a development/optional scaffold, not evidence of production email delivery |
+| Maps / satellite | Geo basemap endpoint and browser-side map/tile requests; MapLibre rendering | Google basemap config exists in Geo overlays; current key activation is not established by the code flag alone |
+| Chat / LLM access | User-facing assistant capability, distinct from scheduled document processing | Does not demonstrate autonomous graphify or grounding inside Kubernetes |
+| CI + image registry | Build versioned `radar-api`, `radar-ui`, Geo images in GHCR; deploy preprod; gated promotion to prod | DECLARED; a source commit and a live image need not be the same version |
+| Backups, PVCs, restore | Preserve business state and restore/copy environments | PostgreSQL and MinIO have persistence distinct from external S3; copy/sync is not a release or a new scrape |
+| DNS / TLS / tenant isolation | Cloudflare DNS, Traefik, cert-manager, namespace-specific RBAC and network policy | Platform responsibility in `poc-k8s`; shared physical cluster, separate logical tenants |
+
+```mermaid
+flowchart LR
+  operator["Operator / approved release"] --> ci["GitHub Actions<br/>build once → GHCR images"]
+  ci --> pp["Preprod deployment<br/>Immo + Geo application images"]
+  pp --> acceptance["Validation of this version"]
+  acceptance --> promote["Gated production promotion<br/>backup → deploy → verify"]
+  promote --> prod["Production deployment"]
+  prod -.->|"Controlled data copy, separate operation"| refresh["DB snapshot / restore<br/>Geo normalized S3 sync"]
+  refresh -.-> pp
+  corpus["New municipal documents"] --> scrape["Data acquisition"]
+  scrape --> local["Workstation LLM stage today"]
+  local --> projection["Validated graph publication → projection"]
+  projection --> appdata["Application data / visible signals"]
+```
+
+The planned evolution moves LLM graph processing to an operated worker/queue with durable progress, quota control, provenance and retries. It is shown here as **PLANNED**, not an existing Kubernetes LLM deployment. Code promotion, data refresh and production-to-preprod copying are three different operations.
+
+## 6. Questions for the architecture walkthrough
+
+1. **Address:** should `preprod.sent-tech.ca` become an alias/portal, or was it shorthand for the observed `preprod.immo.sent-tech.ca`? This document retains the verified URLs until clarified.
+2. **Storage transition:** should the next implementation align grounding publication and API document reads with OVH graph-preprod? Current evidence shows three preprod store roles that are not yet consolidated. This document records the state; it does not authorize or perform a migration.
+3. **Automation scope:** should the future worker own only Immo graphify/grounding, or also Geo's remaining assisted regulation/grid extraction? Both dependencies are relevant, but no new architecture decision is assumed here.
+
+## 7. Evidence and reproducibility
+
+| Repository | Reference inspected | How it was used |
+| --- | --- | --- |
+| `radar-immobilier` | `097036783006226afea53a6b49383bf70890774f` (`origin/main`, 2026-09-11 commit with Sep-12 migration notes) | Current deploy/workflow/source baseline; this document is on an isolated branch from it |
+| `geo` | `f68d8ddf` (`origin/main`, 2026-09-12) | Current serving overlays, S3 target, joins and acquisition code; local root HEAD was older |
+| `poc-k8s` | `03acdfd` (local HEAD, 2026-09-05) | OVH runbook, shared platform and tenant ownership; its local remote-tracking ref was older |
+| `i-cond` | Local `.lanes/conductor/docs/PLAN_PIPELINE_DONNEES_PREPROD.md`, dated 2026-09-03 | Operational context, workstation requirement and publish-only boundary; historical status superseded where live evidence exists |
+
+Primary Immo references: [refresh study](study/industrialisation-refresh-suivi.md), [four-stage pipeline study](spec/brainstorm-industrialisation-refresh-data.md), [worker](../api/src/scripts/worker-live.ts), [graph projection](../api/src/scripts/project-graph-from-s3.ts), [grounding tools](../tools/grounding/README.md), [publish-only Job](../deploy/k8s/41-grounding-citation-job.yaml), [OVH preprod refresh overlay](../deploy/k8s/refresh-cronjobs/kustomization.yaml), [prod refresh overlay](../deploy/k8s/refresh-cronjobs-prod/kustomization.yaml), [nginx preprod](../deploy/overlays/preprod/nginx/default.conf), [release workflow](../.github/workflows/build-push-images.yml), [Geo mapper](../api/src/services/geo/run-geo-mapper.ts).
+
+Primary Geo references, pinned to the inspected revision: [serving overlays](https://github.com/rhanka/geo/tree/f68d8ddf/deploy/k8s/overlays), [S3 target](https://github.com/rhanka/geo/blob/f68d8ddf/acquisition/config/s3-target.json), [provider selection](https://github.com/rhanka/geo/blob/f68d8ddf/packages/geo/src/api/providers/make-provider.ts), [lot/zone joins](https://github.com/rhanka/geo/blob/f68d8ddf/packages/geo/src/zonage/lotZoneJoin.ts), [norms join diagnostic](https://github.com/rhanka/geo/blob/f68d8ddf/acquisition/src/_immo-lots-norms-join-probe.ts), [environment contract](https://github.com/rhanka/geo/blob/f68d8ddf/docs/spec/SPEC_GEO_ENV_CONSTRAINTS_S9.md), [capture campaign](https://github.com/rhanka/geo/blob/f68d8ddf/deploy/k8s/pv-probable-backlog-cronjob.yaml), [preprod sync contract](https://github.com/rhanka/geo/blob/f68d8ddf/deploy/k8s/preprod/README.md).
+
+Platform references: `poc-k8s/docs/runbooks/ovh-operations.md`, `platform/overlays/ovh/20-traefik.yaml`, `tenants/{radar-immobilier,geo,sentropic-preprod}/README.md`, and `docs/migrations/ovh-canada-migration-plan.md`. These were read locally at the revision above; the initial Scaleway README and early tenant descriptions are not authoritative for today's provider or Immo UI routing.
+
+Read-only live checks: Immo login redirects in both environments; OIDC discovery from both issuers; Geo preprod `/conformance`; `geo` deployments/StatefulSets/CronJobs/ingress and whitelisted API environment variables; `radar-immobilier-preprod` workloads/CronJobs/Jobs and whitelisted ConfigMap fields. No Secret values, database contents or private documents were read. Live production Immo and SSO namespace inventories were not accessible with the initial Geo-scoped credential; they are not represented as freshly verified deployment inventories.
+
+At inspection, Immo preprod API/UI/MCP images were tagged `8e18f01`; Geo production API used digest `sha256:73332b22315a85991ebaefde7cabc3fce8760ab3d06d0ea5ee22acf3ff9b7220`. These identify observed workloads, not the source revision of every diagram component.
+
+The local HTML companion is generated from this Markdown with the **FocusSnapshot render core shipped in h2a**, then enhanced with Mermaid rendering. It is an architecture orientation document, not a Track approval or a live decision form.
