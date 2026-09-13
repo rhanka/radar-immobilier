@@ -164,8 +164,9 @@ is rejected and that an update with a stale `If-Match` ETag is rejected:
 }
 ```
 
-The tool validates the schema, expiry, exact destination tuple and identity
-fingerprint before any destination write. It records the proof digest and
+The tool validates the schema, exact destination tuple, identity fingerprint,
+and a validity window of at most 48 hours before any destination write. It
+records the proof digest and
 `providerEnforcementValidated:false`: custody and validation of the probe
 transcript remain conductor responsibilities. Missing, expired or mismatched
 evidence is a `missingProof` and prevents every PUT.

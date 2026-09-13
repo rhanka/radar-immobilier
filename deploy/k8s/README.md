@@ -234,6 +234,7 @@ deploy/ci/migrate-object-storage.sh <inventory|copy|verify|delta>
   [--exclude-prefix PREFIX/ ...] [--expected-manifest FILE]
   [--execute-copy] [--fence-record FILE]
   [--reconcile-owned --ledger FILE]
+  [--conditional-write-proof FILE]
   [--concurrency N] [--retries N] [--max-failures N]
   [--max-object-bytes N]
 ```
@@ -245,6 +246,10 @@ streamed SHA-256, content headers, user metadata, tags, diagnostic ETag, and
 VersionId. ETags are never treated as content hashes. Defaults are concurrency
 4, three attempts per operation, 20 object failures, and a 5 GB per-object
 temporary-file ceiling; the bounded overrides are recorded in `summary.json`.
+Every executed copy also requires a capability proof, no older and valid for no
+more than 48 hours, bound to the exact destination and migration identity. The
+operator must validate and retain its external probe transcript; tool receipts
+keep `providerEnforcementValidated:false`.
 
 DOCS `copy`, `verify`, and `delta` require `--expected-manifest`. The versioned
 JSON document has top-level `sources[]` and `objects[]`; every object holds the
