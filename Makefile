@@ -600,7 +600,7 @@ object-storage-docs-preprod-progress: ## Aggregate DOCS checkpoint pages without
 	@set -euo pipefail; pod="$$( $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pods \
 	  -l "job-name=$(OBJECT_STORAGE_INVENTORY_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
 	  [ -n "$$pod" ] || { echo "[object-storage-docs] Job Pod is absent"; exit 1; }; \
-	  $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) exec "$$pod" -- /bin/bash -ceu 'shopt -s nullglob; for phase in provisional fenced; do for side in source destination; do files=(/evidence/docs-checkpoint/$$phase/$$side/index-receipt-*.json); if [ "$${#files[@]}" -gt 0 ]; then jq -s --arg phase "$$phase" --arg side "$$side" '\''{phase:$$phase,side:$$side,pages:length,objects:(map(.objects)|add//0),bytes:(map(.bytes)|add//0)}'\'' "$${files[@]}"; fi; done; done'
+	  $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) exec "$$pod" -- /bin/bash -ceu 'shopt -s nullglob; for phase in provisional fenced; do for side in source destination; do files=(/evidence/docs-checkpoint-v2/$$phase/$$side/index-receipt-*.json); if [ "$${#files[@]}" -gt 0 ]; then jq -s --arg phase "$$phase" --arg side "$$side" '\''{phase:$$phase,side:$$side,pages:length,objects:(map(.objects)|add//0),bytes:(map(.bytes)|add//0)}'\'' "$${files[@]}"; fi; done; done'
 
 .PHONY: object-storage-inventory-preprod-fetch
 object-storage-inventory-preprod-fetch: ## Fetch receipts without printing them (requires JOB and EVIDENCE_DIR)
@@ -620,7 +620,7 @@ object-storage-inventory-preprod-fetch: ## Fetch receipts without printing them 
 	  mkdir -p "$$destination"; \
 	  while IFS= read -r remote; do \
 	    relative="$${remote#/evidence/}"; \
-	    case "$$relative" in raw-checkpoint/*|docs-checkpoint/*|docs-companion-empty/*|docs-conditional-write-proof.json|docs-expected-manifest.json|reports/*|export-ready/*) ;; \
+	    case "$$relative" in raw-checkpoint/*|docs-checkpoint/*|docs-checkpoint-v2/*|docs-companion-empty/*|docs-conditional-write-proof.json|docs-expected-manifest.json|reports/*|export-ready/*) ;; \
 	      *) echo "[object-storage-inventory] refused unexpected evidence path"; exit 1 ;; \
 	    esac; \
 	    mkdir -p "$$destination/$$(dirname "$$relative")"; \
