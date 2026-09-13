@@ -170,7 +170,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
       candidateHash: baselineHash, stateKey: prior.key };
   }
   if (prior) {
-    const resumed = enrichGraphify34Snapshot(baseline, options.citySlug).snapshot;
+    const resumed = baseline as Graphify34Snapshot;
     if (canonicalHash(resumed) !== baselineHash) throw new Error("Published refresh state no longer matches canonical bytes");
     return { ...await publishSnapshot(options, prior, resumed, read.anchor, now), inputHash: corpus.inputHash };
   }
