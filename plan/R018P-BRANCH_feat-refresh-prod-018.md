@@ -35,7 +35,7 @@
 - [ ] **Lot 0 — Production audit and fail-closed contract**
   - [x] Read project rules and create the isolated worktree.
   - [x] Add a read-only inventory for live production CronJobs, S3 binding names, MinIO absence, keyring PVC, runtime/bootstrap Secret presence, and storage Jobs without reading Secret values.
-  - [x] Define one active causal CronJob, two suspended legacy CronJobs, the keyring PVC, dedicated OVH DOCS credentials, and no storage fallback in the production overlay.
+  - [x] Define one active causal CronJob, two suspended legacy CronJobs, and the keyring PVC without overriding the T2-owned provider-neutral storage bindings.
   - [x] Add an exact-image render gate that rejects every SCW, MinIO, generic credential, duplicate schedule, or missing keyring reference.
 - [ ] **Lot 1 — Make-only production controls**
   - [x] Add namespace/API-server guards, read-only inspection, server dry-run, seed, apply, scheduled observation, status, logs, and rollback targets.
