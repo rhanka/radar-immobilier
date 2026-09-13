@@ -44,6 +44,8 @@ K8S_NAMESPACE        ?= radar-immobilier
 OBJECT_STORAGE_INVENTORY_DIR := deploy/k8s/object-storage-inventory-preprod
 OBJECT_STORAGE_INVENTORY_NAMESPACE := radar-immobilier-preprod
 OBJECT_STORAGE_RAW_REBIND_PATCH := $(OBJECT_STORAGE_INVENTORY_DIR)/raw-api-rebind-patch.yaml
+OBJECT_STORAGE_DOCS_BUCKET_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-bucket-job.yaml
+OBJECT_STORAGE_DOCS_INVENTORY_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-inventory-job.yaml
 # Set to 1 only when a real KUBECONFIG is present to additionally run a
 # server-side dry-run. Offline render works with no cluster.
 K8S_VALIDATE_WITH_CLUSTER ?= 0
@@ -425,6 +427,60 @@ object-storage-inventory-preprod-start: ## Apply support and create one RAW read
 	  $(KUBECTL) apply -f "$$render" >/dev/null; \
 	  $(KUBECTL) create -f $(OBJECT_STORAGE_INVENTORY_DIR)/job.yaml -o name
 
+.PHONY: object-storage-docs-preprod-validate
+object-storage-docs-preprod-validate: ## Render support and validate the DOCS bucket/inventory Jobs offline
+	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[object-storage-docs] kubectl not found"; exit 1; }
+	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
+	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
+	@$(KUBECTL) create --dry-run=client --validate=false \
+	  -f $(OBJECT_STORAGE_DOCS_BUCKET_JOB) -o name >/dev/null
+	@$(KUBECTL) create --dry-run=client --validate=false \
+	  -f $(OBJECT_STORAGE_DOCS_INVENTORY_JOB) -o name >/dev/null
+
+.PHONY: object-storage-docs-preprod-provision
+object-storage-docs-preprod-provision: ## Create the concern-specific Secret and exact BHS DOCS bucket
+	@if [ "$(OBJECT_STORAGE_DOCS_PROVISION_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ]; then \
+	  echo "[object-storage-docs] refused: require KUBECONFIG, OBJECT_STORAGE_DOCS_PROVISION_CONFIRM=1, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@$(MAKE) object-storage-docs-preprod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  $(KUBECTL) -n "$$namespace" get secret radar-raw-s3-credentials -o json | \
+	    jq -e 'select(.metadata.name == "radar-raw-s3-credentials") | \
+	      select(all(.data.RAW_S3_ACCESS_KEY,.data.RAW_S3_SECRET_KEY; type == "string" and length > 0)) | \
+	      {apiVersion:"v1",kind:"Secret",metadata:{name:"radar-docs-s3-credentials",namespace:"radar-immobilier-preprod"},type:"Opaque",data:{ \
+	        DOCS_S3_ACCESS_KEY:.data.RAW_S3_ACCESS_KEY, \
+	        DOCS_S3_SECRET_KEY:.data.RAW_S3_SECRET_KEY, \
+	        DOCS_S3_ENDPOINT:("https://s3.bhs.io.cloud.ovh.net"|@base64), \
+	        DOCS_S3_REGION:("bhs"|@base64), \
+	        DOCS_S3_BUCKET:("radar-immobilier-docs-preprod"|@base64), \
+	        DOCS_S3_FORCE_PATH_STYLE:("false"|@base64)}}' | \
+	    $(KUBECTL) apply -f - >/dev/null; \
+	  job_ref="$$( $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_BUCKET_JOB) -o name )"; \
+	  $(KUBECTL) -n "$$namespace" wait --for=condition=complete "$$job_ref" --timeout=180s >/dev/null; \
+	  echo "[object-storage-docs] provision verified by $$job_ref"
+
+.PHONY: object-storage-docs-preprod-start
+object-storage-docs-preprod-start: ## Apply support and create one resumable full-prefix DOCS inventory Job
+	@if [ "$(OBJECT_STORAGE_DOCS_INVENTORY_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ]; then \
+	  echo "[object-storage-docs] refused: require KUBECONFIG, OBJECT_STORAGE_DOCS_INVENTORY_CONFIRM=1, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@$(MAKE) object-storage-docs-preprod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  $(KUBECTL) -n "$$namespace" get secret radar-docs-s3-credentials -o json | \
+	    jq -e '. as $$secret | \
+	      ["DOCS_S3_ACCESS_KEY","DOCS_S3_SECRET_KEY","DOCS_S3_ENDPOINT","DOCS_S3_REGION","DOCS_S3_BUCKET","DOCS_S3_FORCE_PATH_STYLE"] \
+	      as $$required | ($$secret.data | keys | sort) == ($$required | sort) and \
+	      all($$required[] as $$key; ($$secret.data[$$key] | type == "string" and length > 0))' >/dev/null; \
+	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
+	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
+	    $(OBJECT_STORAGE_INVENTORY_DIR) >"$$render"; \
+	  $(KUBECTL) apply -f "$$render" >/dev/null; \
+	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_INVENTORY_JOB) -o name
+
 .PHONY: object-storage-raw-preprod-rebind
 object-storage-raw-preprod-rebind: ## Roll radar-api RAW bindings to OVH without changing the shared ConfigMap
 	@if [ "$(OBJECT_STORAGE_REBIND_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
@@ -506,7 +562,7 @@ object-storage-inventory-preprod-fetch: ## Fetch receipts without printing them 
 	  mkdir -p "$$destination"; \
 	  while IFS= read -r remote; do \
 	    relative="$${remote#/evidence/}"; \
-	    case "$$relative" in raw-checkpoint/*|reports/*|export-ready/*) ;; \
+	    case "$$relative" in raw-checkpoint/*|docs-checkpoint/*|docs-companion-empty/*|reports/*|export-ready/*) ;; \
 	      *) echo "[object-storage-inventory] refused unexpected evidence path"; exit 1 ;; \
 	    esac; \
 	    mkdir -p "$$destination/$$(dirname "$$relative")"; \
