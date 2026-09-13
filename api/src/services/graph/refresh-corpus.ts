@@ -55,7 +55,7 @@ function parseManifest(bytes: Uint8Array): ManifestEntry[] {
     const [sourceId, citySlug, sha256, representationKey, sidecarKey] = fields as [string, string, string, string, string];
     if (!SHA256.test(sha256)) throw new Error(`Invalid SHA-256 at manifest row ${index + 2}`);
     const prefix = `raw/${sourceId}/cas/${sha256}`;
-    if (!new RegExp(`^${prefix}\\.(pdf|html|txt)$`).test(representationKey)) {
+    if (!["pdf", "html", "txt"].some((extension) => representationKey === `${prefix}.${extension}`)) {
       throw new Error(`Invalid CAS representation path at manifest row ${index + 2}`);
     }
     if (sidecarKey !== "source-gap" && sidecarKey !== `${representationKey}.meta.json`) {
@@ -111,4 +111,35 @@ function chunkDocument(doc: Omit<RefreshCorpusDocument, "chunks">): RefreshCorpu
     pages: [...new Set(chunk.pages)],
     text: chunk.parts.join("\n\n"),
   }));
+}
+
+export async function materializeRefreshCorpus(options: MaterializeRefreshCorpusOptions): Promise<RefreshCorpus> {
+  const selected = parseManifest(await options.reader.get(options.manifestKey))
+    .filter((entry) => entry.citySlug === options.citySlug)
+    .sort((a, b) => a.representationKey.localeCompare(b.representationKey));
+  if (selected.length === 0) throw new Error(`No manifest inputs selected for ${options.citySlug}`);
+  const documents: RefreshCorpusDocument[] = [];
+  for (const entry of selected) {
+    if (!entry.representationKey.endsWith(".pdf") || entry.sidecarKey === "source-gap") {
+      throw new Error(`Exact-PDF refresh requires a PDF and sidecar: ${entry.representationKey}`);
+    }
+    const bytes = await options.reader.get(entry.representationKey);
+    const digest = createHash("sha256").update(bytes).digest("hex");
+    if (digest !== entry.sha256) throw new Error(`Checksum mismatch for ${entry.representationKey}`);
+    const sidecar = JSON.parse(new TextDecoder().decode(await options.reader.get(entry.sidecarKey))) as { sourceUrl?: unknown };
+    if (typeof sidecar.sourceUrl !== "string" || !URL.canParse(sidecar.sourceUrl)) {
+      throw new Error(`Missing public source URL for ${entry.representationKey}`);
+    }
+    const text = await options.extractPdf(bytes, sidecar.sourceUrl);
+    const pageTexts = text.split("\f");
+    if (pageTexts.at(-1) === "") pageTexts.pop();
+    if (!pageTexts.some((page) => page.trim())) throw new Error(`Unsupported scanned PDF ${entry.representationKey}`);
+    const base = { sourceId: entry.sourceId, citySlug: entry.citySlug, sha256: entry.sha256,
+      originalKey: entry.representationKey, sourceUrl: sidecar.sourceUrl,
+      pages: pageTexts.map((page, index) => ({ page: index + 1, text: page })) };
+    documents.push({ ...base, chunks: chunkDocument(base) });
+  }
+  const inputHash = createHash("sha256").update(selected.map((entry) =>
+    `${entry.sourceId}\t${entry.citySlug}\t${entry.sha256}\t${entry.representationKey}`).join("\n")).digest("hex");
+  return { inputHash, documents, chunks: documents.flatMap((document) => document.chunks) };
 }
