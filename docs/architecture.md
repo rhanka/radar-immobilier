@@ -6,6 +6,12 @@ Evidence labels: **LIVE** = observed during this inspection; **DECLARED** = repo
 
 **Reading the diagrams:** bracketed IDs identify the **same resource in every view**. `PP-` = preproduction, `PR-` = production; `GEO-S3` is a shared corpus. Diagram 1 locates resources, diagram 2 zooms into **preprod Immo** using those exact IDs, and diagram 3 follows Geo products. READ arrows point from consumer to store, not in the direction of byte transfer. Dashed edges are conditional/unverified. Unobserved legacy publication templates are listed in §3, **not drawn as active workloads**. Production storage is explicitly unknown until an OVH inventory is available.
 
+The [local SvelteFlow dossier](architecture/README.md) adds service pictograms and
+an explicit **repo + responsibility** label inside every component and nested box.
+[Attribution evidence](architecture/service-provenance.md) separates application
+code/manifests, platform provisioning, S3 client bindings and external services;
+neither an icon nor a repo label is a new claim of runtime activation.
+
 **Storage migration is partial, not complete** ([dated audit and migration PRs](architecture/storage-audit.md)):
 
 | Effective path | Preproduction | Production |
