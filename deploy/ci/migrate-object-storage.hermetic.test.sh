@@ -157,6 +157,9 @@ exec "$REAL_SYNC" "$@"
 SYNC
 chmod +x "$TEST_TMP/bin/sync"
 
+printf '#!/usr/bin/env bash\nexit 97\n' >"$TEST_TMP/bin/cmp"
+chmod +x "$TEST_TMP/bin/cmp"
+
 PASS=0 FAIL=0
 ok() { PASS=$((PASS + 1)); echo "ok: $1"; }
 bad() { FAIL=$((FAIL + 1)); echo "FAIL: $1" >&2; }

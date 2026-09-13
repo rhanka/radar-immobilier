@@ -450,8 +450,16 @@ object-storage-inventory-preprod-fetch: ## Fetch receipts without printing them 
 	    -o jsonpath='{.status.containerStatuses[0].ready}' )"; \
 	  [ "$$ready" = true ] || { echo "[object-storage-inventory] evidence is not ready"; exit 1; }; \
 	  mkdir -p "$$destination"; \
-	  $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) cp \
-	    "$$pod:/evidence/." "$$destination" >/dev/null; \
+	  while IFS= read -r remote; do \
+	    relative="$${remote#/evidence/}"; \
+	    case "$$relative" in raw-checkpoint/*|reports/*|export-ready/*) ;; \
+	      *) echo "[object-storage-inventory] refused unexpected evidence path"; exit 1 ;; \
+	    esac; \
+	    mkdir -p "$$destination/$$(dirname "$$relative")"; \
+	    $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) exec "$$pod" -- \
+	      cat "$$remote" >"$$destination/$$relative"; \
+	  done < <($(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) exec "$$pod" -- \
+	    find /evidence -type f -print); \
 	  cd "$$destination"; \
 	  find . -type f ! -name SHA256SUMS -print0 | LC_ALL=C sort -z | \
 	    xargs -0 -r sha256sum >SHA256SUMS; \
