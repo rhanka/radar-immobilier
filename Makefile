@@ -653,7 +653,7 @@ object-storage-minio-preprod-remove: ## Irreversibly remove exact preprod MinIO 
 	  [ -n "$$pod" ] || { echo '[object-storage-minio] parity evidence Pod is absent'; exit 1; }; \
 	  uid="$$( $(KUBECTL) -n "$$namespace" get "pod/$$pod" -o jsonpath='{.metadata.uid}' )"; \
 	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- cat "/evidence/reports/$$uid/summary.json" >"$$work/parity.json"; \
-	  jq -e --arg digest "$$expected_digest" '.complete == true and .exactParity == true and .expected == 59017 and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .sourceVerifiedObjects == 59017 and .sourceVerifiedBytes == 12534514457 and .sourceManifestDigest == $$digest and .sourceExact == true' \
+	  jq -e --arg digest "$$expected_digest" -f deploy/ci/docs-parity-receipt.jq \
 	    "$$work/parity.json" >/dev/null; \
 	  parity_digest="$$(sha256sum "$$work/parity.json" | awk '{print $$1}')"; \
 	  [[ "$$parity_digest" =~ ^[0-9a-f]{64}$$ ]] || { echo '[object-storage-minio] parity receipt is invalid'; exit 1; }; \
