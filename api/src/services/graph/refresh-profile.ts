@@ -30,6 +30,7 @@ export interface LoadRefreshProfileContextOptions {
   readonly root: string;
   readonly configPath?: string;
   readonly profilePath?: string;
+  readonly unregisteredOnly?: boolean;
 }
 export interface ExtractRefreshProfileOptions {
   readonly textClient: TextJsonGenerationClient;
@@ -42,6 +43,12 @@ export interface RefreshProfileChunk {
   readonly extraction: Extraction;
 }
 export function loadRefreshProfileContext(options: LoadRefreshProfileContextOptions): RefreshProfileContext {
+  if (options.unregisteredOnly) {
+    if (!options.profilePath) throw new Error("Unregistered-only refresh requires an explicit profile path");
+    const profile = loadOntologyProfile(options.profilePath);
+    const registries: Record<string, RegistryRecord[]> = {};
+    return { profile, registries, registryExtraction: registryRecordsToExtraction(registries, profile) };
+  }
   const configPath = options.configPath ?? discoverProjectConfig(options.root).path;
   if (!configPath) throw new Error(`No Graphify project config found under ${resolve(options.root)}`);
   const projectConfig = loadProjectConfig(configPath);
@@ -95,6 +102,13 @@ function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: R
   try { parsed = JSON.parse(text); } catch { throw new Error(`Invalid JSON for chunk ${chunk.id}`); }
   const baseErrors = validateExtraction(parsed);
   if (baseErrors.length > 0) throw new Error(`Invalid Graphify extraction for chunk ${chunk.id}: ${baseErrors.join("; ")}`);
+  for (const node of (parsed as Extraction).nodes) {
+    const registryId = Object.entries(context.profile.registries)
+      .find(([, spec]) => spec.node_type === node.node_type)?.[0];
+    if (registryId && !(registryId in context.registries)) {
+      throw new Error(`Registry-backed ${node.node_type} requires loaded registry ${registryId}`);
+    }
+  }
   const profileResult = validateProfileExtraction(parsed, {
     profile: context.profile, registryExtraction: context.registryExtraction,
   });

@@ -12,7 +12,7 @@ import {
 import { beforeAll, describe, expect, it } from "vitest";
 
 import type { RefreshCorpusChunk } from "./refresh-corpus.js";
-import { extractRefreshProfile, type RefreshProfileContext } from "./refresh-profile.js";
+import { extractRefreshProfile, loadRefreshProfileContext, type RefreshProfileContext } from "./refresh-profile.js";
 
 const oraclePath = new URL("../../../tests/fixtures/refresh-018/oracle.json", import.meta.url);
 const profilePath = fileURLToPath(new URL("../../../../radar/ontology/ontology-profile.yaml", import.meta.url));
@@ -67,6 +67,16 @@ function client(responses: Array<{ text: string; status?: "completed" | "instruc
 }
 
 describe("refresh profile extraction", () => {
+  it("should load an unregistered PV profile and refuse registry-backed output", async () => {
+    const pvContext = loadRefreshProfileContext({ root: "/unused", profilePath, unregisteredOnly: true });
+    expect(pvContext.registries).toEqual({});
+    const invalid = extraction();
+    invalid.nodes[0]!.node_type = "Municipality";
+    await expect(extractRefreshProfile([chunk()], {
+      context: pvContext, textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("requires loaded registry municipalities");
+  });
+
   it("should return every validated extraction in chunk order with typed PDF evidence", async () => {
     const seen: TextJsonGenerationInput[] = [];
     const second = chunk(`${"b".repeat(64)}.1`, "[PDF PAGE 4]\nNo relevant regulatory fact.");
