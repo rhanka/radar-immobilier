@@ -106,6 +106,10 @@ object-storage-docs-prod-proof: ## Prove conditional OVH writes for the canonica
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
 	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
 	    "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]; \
+	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
+	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
+	    $(OBJECT_STORAGE_DOCS_PROD_DIR) >"$$render"; \
+	  $(KUBECTL) apply -f "$$render" >/dev/null; \
 	  job_ref="$$( $(KUBECTL) create \
 	    -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/conditional-proof-job.yaml -o name )"; \
 	  $(KUBECTL) -n "$$namespace" wait --for=condition=complete "$$job_ref" \
@@ -118,9 +122,14 @@ object-storage-docs-prod-copy: ## Start the exact canonical copy to OVH PROD
 	  echo '[object-storage-docs-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
 	fi
 	@$(MAKE) object-storage-docs-prod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
-	@[ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
-	  "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]
-	@$(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml -o name
+	@set -euo pipefail; \
+	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
+	    "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]; \
+	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
+	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
+	    $(OBJECT_STORAGE_DOCS_PROD_DIR) >"$$render"; \
+	  $(KUBECTL) apply -f "$$render" >/dev/null; \
+	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml -o name
 
 .PHONY: object-storage-docs-prod-copy-progress
 object-storage-docs-prod-copy-progress: ## Read copy/parity progress without printing keys
