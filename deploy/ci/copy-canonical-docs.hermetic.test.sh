@@ -42,6 +42,9 @@ grep -F 'IfNoneMatch: "*"' "$node_subject" >/dev/null
 grep -F 'concurrency > 128' "$node_subject" >/dev/null
 grep -F 'maxSockets: concurrency' "$node_subject" >/dev/null
 grep -F 'destination-conflict' "$node_subject" >/dev/null
+grep -F 'failed("conditional-put", error, item)' "$node_subject" >/dev/null || \
+  grep -F 'stage = "conditional-put"' "$node_subject" >/dev/null
+grep -F 'httpStatus: error?.$metadata?.httpStatusCode ?? null' "$node_subject" >/dev/null
 grep -F 'diff.extra.length === 1 && allowSingleProofPrune' "$node_subject" >/dev/null
 grep -F 'new DeleteObjectCommand' "$node_subject" >/dev/null
 grep -F 'IfMatch: extra.etag' "$node_subject" >/dev/null
