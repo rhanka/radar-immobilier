@@ -71,62 +71,42 @@ clients, rehearse recovery and retain the old store read-only until deletion gat
 private bindings are still TBD/UNVERIFIED. Retire MinIO only at zero consumers.
 The final Immo sweep covers images, old digests, Jobs, manual/CI/backup/bootstrap and executable/secret references. TEM remains the sole exception.
 
-## 5. Execution basis and counter-case
+## 5. T3 — one existing b3-8
 
-[FACT · owner] Proceed with T1, then T2, then T3. [JUDGMENT] Reuse the canonical
-writer, projection/3.4 and i-cond's library boundary; do not create another publisher
-or network mesh service. Acceptance, not the dossier UI, gates cutover. The release
-dependency is closed; an installed package alone does not qualify the refresh.
+[FACT] The current observation is three b3-8 nodes and ~9,454 Mi instantaneous
+memory against 5,907.82 Mi allocatable on one node. MinIO accounts for only ~347
+Mi and its removal is insufficient to make a one-node drain safe.
 
-[JUDGMENT] **Strongest argument against A:** it could create a disposable second
-orchestrator, duplicate credential handling, and postpone the only robust writer
-boundary. B can be cheaper overall if the DAG integration is already close to ready.
-**Implementation stop condition:** the continuation would violate single-writer
-or recovery guarantees. Resolve that concrete defect; do not silently change the
-owner-fixed order or reopen the entire architecture choice.
+[JUDGMENT] T3 consolidates both Immo and Geo tenants on one **existing** b3-8 only
+after a complete shared peak including Immo production and the new refresh. It
+must settle realistic requests, hibernation/wake choices, anti-affinity, PDBs,
+PVC placement/attachment, batch overlap, health probes and recovery on one failure
+domain. No second per-tenant node is part of the target or billing projection.
 
-[JUDGMENT] **Pre-mortem:** six months later Jobs are green but new PVs still do not
-reach served Signals, PDFs point at a different corpus, and an ephemeral keyring
-lost refreshed tokens. Root cause: accepting infrastructure success instead of a
-document-to-UI proof, and deleting old stores before all writers/readers were mapped.
+[JUDGMENT] The counter-case is explicit: the workload may not fit safely. Until
+measurement and controlled drain evidence exist, the target remains proposed and
+no capacity reduction is claimed.
 
-[JUDGMENT] **Presenter interest:** A is easiest for me to bound and validate in a
-small branch; that convenience is not evidence of lowest total cost. **Owner
-interest:** reliable fresh findings with evidence, reduced storage dependencies,
-controlled recovery and no unnecessary Graphify rework. Reviewer findings must be
-shown individually in [review records](decision-reviews.md); absence is not consensus.
+## 6. Gates, promotion and recovery
 
-## 6. Reversibility and cost
+[JUDGMENT] **T1 gates:** installed-package compatibility → consumer/integration
+tests → real preprod Signal/PDF and idempotent resume → unattended scheduled run
+after pod and credential refresh. **T2 gates:** complete client/IAM/object inventory
+→ new destination controls → full and final-delta parity → fence → repoint → real
+client tests → scheduled observation → isolated recovery → zero consumers → later
+deletion. **T3 gates:** full peak/requests/placement proof → controlled preprod
+drain/health → separately authorized production consolidation.
 
-[JUDGMENT] Gate sequence: **G0** inventory/contract/owner criteria for **every
-affected consumer, including production if a resource is shared** → **G1** isolated
-one-document extraction/candidate test (no PG) → **G1b** durable credential owner,
-exclusive refresh writer, persistence and refresh/restart/recovery tests → **G2**
-preprod publish/project/3.4/API/PDF end-to-end and retry tests → **G3** preprod
-object parity, client repoint and write fencing → **G4** preprod restore rehearsal
-+ retention window → **G5** removal of **verified preprod-exclusive** MinIO/resources
-only after no consumers remain → **G6** separately authorized production
-inventory/backup/promotion, repeating G1b–G5 there before any production deletion.
-Shared-resource deletion requires all consumers' inventory and acceptance first.
-No dual writers during the handoff. Backups are rollback artifacts, not live fallbacks.
+[JUDGMENT] Every stage is preprod first and production second. Shared resources
+require all consumers' acceptance. Suspended/manual paths are still executable and
+must be inventoried. Backups are rollback artifacts, not live fallbacks; no dual
+writer is permitted during handoff.
 
-[JUDGMENT] G0/G3/G5 also cover **SCW storage and image dependencies**: inventory
-executable endpoints, image coordinates and every reader/writer; validate OVH
-object parity and replacement image provenance/pulls (including rollback images);
-then remove obsolete active templates/configuration. Historical audit evidence is
-not rewritten. **TEM stays excluded**; MinIO removal alone does not close SCW retirement.
-
-[JUDGMENT] Before cutover, revert code/config. After writes, stop writers, restore
-the captured graph/DB checkpoint and reconcile objects before routing clients back.
-The proposed recovery point fences relevant writers and records the canonical graph
-hash, SQL checkpoint/version, exact evidence-object set and run input hash together.
-Intervening writes must be either prevented or journaled/replayed within the agreed
-RPO; do not assume a cross-S3/SQL transaction or silently discard newer API writes.
-G4 must verify that this recovered version serves its Signals and their exact PDFs.
-Do not reactivate two stores. Permanent deletion is not instantly reversible.
-Time/cost are **not estimated** until volume, credential route, maintenance window
-and restore throughput are measured. Required owner criteria: acceptable downtime,
-recovery point/time and retention; none is silently assumed.
+[JUDGMENT] After writes, stop and fence writers, restore an app-consistent set of
+canonical graph hash, SQL checkpoint/version, evidence objects and run input hash,
+then prove the recovered Signals and exact PDFs. Prevent or journal/replay intervening
+writes within the accepted RPO. Do not assume a cross-S3/SQL transaction or discard
+newer writes. RPO/RTO, retention, volume and restore throughput remain unresolved.
 
 ## 7. Attendus
 
