@@ -227,3 +227,75 @@ classify_key() {
     printf unclassified
   fi
 }
+
+FAILURE_COUNT=0
+: >"$REPORT_DIR/failures.jsonl"
+record_failure() {
+  local side="$1" key="$2" operation="$3"
+  FAILURE_COUNT=$((FAILURE_COUNT + 1))
+  jq -cn --arg side "$side" --arg key "$key" --arg operation "$operation" \
+    '{side:$side,key:$key,operation:$operation}' >>"$REPORT_DIR/failures.jsonl"
+}
+failure_cap_reached() { [ "$FAILURE_COUNT" -ge "$MAX_FAILURES" ]; }
+
+retry_get_object() {
+  local output="$1" body="$2" side="$3" bucket="$4" key="$5" attempt=1
+  while [ "$attempt" -le "$RETRIES" ]; do
+    rm -f "$body"
+    if aws_side "$side" get-object --bucket "$bucket" --key "$key" "$body" \
+      >"$output" 2>"$WORK_DIR/aws-error"; then return 0; fi
+    attempt=$((attempt + 1))
+  done
+  rm -f "$body"
+  return 1
+}
+
+build_manifest() {
+  local side="$1" listing="$2" output="$3" bucket item key size class index=0
+  local head tags body getout sha scratch="$WORK_DIR/$side-manifest.unsorted.jsonl"
+  bucket="$(bucket_for "$side")"; : >"$scratch"
+  while IFS= read -r item; do
+    index=$((index + 1)); key="$(jq -r '.key' <<<"$item")"
+    size="$(jq -r '.size' <<<"$item")"; class="$(classify_key "$key")"
+    if [ "$size" -gt "$MAX_OBJECT_BYTES" ]; then
+      record_failure "$side" "$key" max-object-bytes
+      failure_cap_reached && break
+      continue
+    fi
+    head="$WORK_DIR/$side-head-$index.json"; tags="$WORK_DIR/$side-tags-$index.json"
+    body="$WORK_DIR/$side-body-$index"; getout="$WORK_DIR/$side-get-$index.json"
+    if ! retry_json "$head" "$side" head-object --bucket "$bucket" --key "$key"; then
+      record_failure "$side" "$key" head-object
+      failure_cap_reached && break
+      continue
+    fi
+    if ! retry_get_object "$getout" "$body" "$side" "$bucket" "$key"; then
+      record_failure "$side" "$key" get-object
+      failure_cap_reached && break
+      continue
+    fi
+    if ! retry_json "$tags" "$side" get-object-tagging --bucket "$bucket" --key "$key"; then
+      record_failure "$side" "$key" get-object-tagging
+      rm -f "$body"; failure_cap_reached && break
+      continue
+    fi
+    if [ "$(jq -r '.ContentLength' "$head")" != "$size" ]; then
+      record_failure "$side" "$key" unstable-size
+      rm -f "$body"; failure_cap_reached && break
+      continue
+    fi
+    sha="$(sha256sum "$body" | awk '{print $1}')"; rm -f "$body"
+    jq -cn --argjson listed "$item" --slurpfile head "$head" --slurpfile tags "$tags" \
+      --arg sha "$sha" --arg classification "$class" '
+      {key:$listed.key,size:$head[0].ContentLength,sha256:$sha,
+       contentType:($head[0].ContentType // null),
+       contentEncoding:($head[0].ContentEncoding // null),
+       cacheControl:($head[0].CacheControl // null),
+       contentDisposition:($head[0].ContentDisposition // null),
+       metadata:($head[0].Metadata // {}),tags:(($tags[0].TagSet // []) | sort_by(.Key)),
+       etag:($listed.etag // ""),versionId:($head[0].VersionId // null),
+       classification:$classification}' >>"$scratch" || return 1
+  done <"$listing"
+  jq -cs 'sort_by(.key)[]' "$scratch" >"$output" || return 1
+  ! failure_cap_reached
+}

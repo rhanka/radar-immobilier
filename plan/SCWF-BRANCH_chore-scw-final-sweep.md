@@ -54,6 +54,9 @@
 - [ ] Lot 3h3: build and hermetically test the dry-run-default, non-destructive migration/proof tool.
   - [x] Freeze the fail-closed CLI, coordinate, credential, prefix and resource-limit guards.
   - [ ] Inventory every page/body and emit complete classified manifests.
+    - [x] Isolate path-style clients and exhaust paginated bucket listings with bounded retries.
+    - [x] Stream each body hash and capture preserved headers, metadata, tags and diagnostic ETags.
+    - [ ] Wire classified receipts and failure evidence into the operation result.
   - [ ] Compare single-source or approved-union parity and proof inputs.
   - [ ] Copy missing objects and reconcile only exact migration-owned versions.
   - [ ] Enforce hermetic failure paths, binding checks and the CI gate.
