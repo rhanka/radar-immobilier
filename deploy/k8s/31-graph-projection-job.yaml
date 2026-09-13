@@ -1,4 +1,4 @@
-# graph-projection-job.yaml — projette les graphes graphify SCW dans Postgres.
+# graph-projection-job.yaml — projects graphify graphs from object storage into Postgres.
 #
 # Trois étapes dans le même Job (initContainers exécutés dans l'ordre, puis le
 # conteneur principal) :
@@ -11,8 +11,8 @@
 #   2. db-migrate       : applique les migrations Drizzle (idempotent, CREATE IF NOT
 #                         EXISTS). workingDir /workspace/api car migrate.js lit
 #                         `migrationsFolder: "drizzle"` RELATIF au CWD.
-#   3. project-graph    : lit graph/<ville>/latest.json depuis SCW (GRAPH_S3_* →
-#                         SCRAPE_S3_*) et appelle upsertGraph pour chaque ville.
+#   3. project-graph    : reads graph/<city>/latest.json from the explicitly
+#                         bound GRAPH_S3_* store and upserts each city.
 #
 # Les trois conteneurs partagent l'IMAGE radar-api unique : depuis le fix esbuild
 # multi-entryPoints (api/Dockerfile), l'image embarque api/dist/index.js ET
@@ -20,7 +20,7 @@
 # api/dist/scripts/project-graph-from-s3.js. (Avant le fix, ce dernier était
 # ABSENT → MODULE_NOT_FOUND : c'était la douleur D1 « projection PG cassée ».)
 #
-# Usage one-shot (reprojection des ~1000 graphes v2.1 SCW→PG) :
+# Usage one-shot (reprojection des ~1000 graphes v2.1 objet → PG) :
 #   kubectl apply -f deploy/k8s/31-graph-projection-job.yaml -n radar-immobilier
 #   kubectl wait job/radar-graph-projection --for=condition=complete -n radar-immobilier --timeout=900s
 #   kubectl logs -l job-name=radar-graph-projection -n radar-immobilier
@@ -32,12 +32,12 @@
 # Variante SANS migrate (DB déjà à jour) : 32-graph-projection-only-job.yaml.
 # CronJob de rafraîchissement périodique : 34-projection-cronjob.yaml.
 #
-# Budget mémoire tenant SERRÉ : api+ui+pg+minio laissent ~256Mi/150m CPU libres.
+# Budget mémoire tenant SERRÉ : les workloads permanents laissent ~256Mi/150m CPU libres.
 # requests 96Mi/50m, limits 256Mi/150m, NODE_OPTIONS=--max-old-space-size=200
 # (heap V8 plafonné sous la limite conteneur pour éviter l'OOM-kill).
 #
-# Nota : les secrets S3 sont partagés avec le Deployment radar-api via le
-# même Secret radar-s3-credentials / radar-scrape-s3-credentials.
+# GRAPH_S3 coordinates and credentials are required references. Missing keys
+# fail before the container starts rather than selecting an inherited store.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -122,7 +122,7 @@ spec:
           resources:
             requests: { cpu: 50m, memory: 96Mi }
             limits: { cpu: 150m, memory: 256Mi }
-      # ── Étape 3 : projection SCW → PG ────────────────────────────────────
+      # ── Étape 3 : projection stockage objet → PG ─────────────────────────
       containers:
         - name: project-graph
           securityContext:
@@ -147,26 +147,18 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
-            - name: S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
-            - name: S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
-            # Creds SCW pour le bucket radar-immobilier-docs-pocs (SCRAPE_S3_*).
-            # Le script project-graph-from-s3.ts lit GRAPH_S3_* puis se rabat
-            # sur SCRAPE_S3_* : aucune variable GRAPH_S3_* supplémentaire n'est
-            # nécessaire si les SCRAPE_S3_* pointent déjà sur le bon bucket.
-            - name: SCRAPE_S3_ENDPOINT
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ENDPOINT, optional: true } }
-            - name: SCRAPE_S3_BUCKET
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_BUCKET, optional: true } }
-            - name: SCRAPE_S3_REGION
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_REGION, optional: true } }
-            - name: SCRAPE_S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY, optional: true } }
-            - name: SCRAPE_S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY, optional: true } }
-            - name: SCRAPE_S3_FORCE_PATH_STYLE
-              value: "false"
+            - name: GRAPH_S3_ENDPOINT
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_ENDPOINT } }
+            - name: GRAPH_S3_BUCKET
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_BUCKET } }
+            - name: GRAPH_S3_REGION
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_REGION } }
+            - name: GRAPH_S3_FORCE_PATH_STYLE
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_FORCE_PATH_STYLE } }
+            - name: GRAPH_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_ACCESS_KEY } }
+            - name: GRAPH_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_SECRET_KEY } }
           resources:
             requests: { cpu: 50m, memory: 96Mi }
             limits: { cpu: 150m, memory: 256Mi }
