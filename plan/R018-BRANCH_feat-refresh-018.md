@@ -12,12 +12,16 @@
 
 ## Branch Scope Boundaries (MANDATORY)
 - [x] Allowed: `plan/R018-BRANCH_feat-refresh-018.md`, `docs/spec/SPEC_EVOL_REFRESH_018.md`, `docs/reviews/refresh-018/**`.
-- [x] Design phase only: no application, dependency, deployment or workflow edits until the conductor releases the reviewed build scope.
+- [x] R018-EX1 — owner-requested build released after Fable GO_WITH_CHANGES; exact C01–C14 paths below. Impact: isolated application/dependency/tests only; rollback: revert branch commits; no deployed state changes.
+- [x] Allowed C01–C14: `api/package.json`, `package-lock.json`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state,run}.ts`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state}.test.ts`; `api/tests/fixtures/refresh-018/oracle.json`; `api/tests/integration/refresh-018.spec.ts`; `api/src/scripts/refresh-pv.ts`. Braces enumerate exact filenames, not open globs.
 - [x] Forbidden: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent entrypoints, `.track/**`, other branch plans, other repositories.
-- [x] Conditional: app/dependency/Kubernetes paths require a file-level build scope in this plan; infra operations require conductor coordination.
+- [x] Conditional: C15–C25 remain unreleased until slice tests/reconciliation; Kubernetes operations remain conductor-only. Existing canonical writer, graph store and enrichment are read-only reuse unless a precise amendment is recorded.
 
 ## Feedback Loop
 - [x] Owner routing: Astra design, Gemini 3.8 High pre-build review via h2a run agy, Sol xhigh build, Gemini 3.8 High post-build review. This is the requested review circuit, not a claim of the skill's two-host consensus.
+- [x] September 13 owner amendment: keep independent review; Fable 5 may replace unavailable Gemini. Delegate development to Sol immediately after reconciliation; the owner did not waive review.
+- [x] Fable F1–F4 accepted: public prep composition instead of unexported runConfiguredDataprep; cross-instance mesh probe; published schema-forwarding probe; explicit projection abort/refusal propagation. No new architecture or producer wait.
+- [x] Native Sol developer `/root/t1_build` replaces failed h2a developer launch (missing runtime package); Fable review remains a distinct Claude-hosted leg. Do not stage reviewer files from the build worker.
 - [x] Report to `codex:radar-immobilier:98cef8dfc274`, loop `loop:immo-transitions-2026-09-13`; do not mark the overall loop done.
 
 ## Orchestration Mode (AI-selected)
@@ -30,8 +34,8 @@
 - [x] Lot 0: identify exact existing consumer/runner/canonical writer/projection/3.4 contracts and reusable CAS work; evidence and decisions in `docs/spec/SPEC_EVOL_REFRESH_018.md`.
 - [x] Lot 1: deliver numbered continuation decisions, proposed exact build paths/commit caps and acceptance gates in `docs/spec/SPEC_EVOL_REFRESH_018.md` and `docs/reviews/refresh-018/build-handoff.md`; static design only.
 - [x] Lot 1 gate: report first design handoff through h2a for independent Gemini review; package, typed Signal/PDF and scheduled-run acceptance remain unexecuted.
-- [ ] Scope release: conductor reconciles Gemini findings and releases the exact C01–C25 paths from `docs/reviews/refresh-018/build-handoff.md`; no build permission is implied by this proposal.
-- [ ] Lot 2: Gemini independent design review and conductor reconciliation.
+- [x] Scope release: conductor reconciled Fable findings and released exact C01–C14 with the corrections in `docs/reviews/refresh-018/build-handoff.md`; no further owner vote required for this code scope.
+- [x] Lot 2: Fable independent design review GO_WITH_CHANGES and conductor reconciliation; evidence `docs/reviews/refresh-018/fable-design.md` at target ca7d9acf. One reviewer, no two-peer consensus claim.
 - [ ] Lot 3: Sol builds the released scope with isolated tests and atomic commits.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.

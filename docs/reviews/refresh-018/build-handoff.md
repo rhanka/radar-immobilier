@@ -1,6 +1,8 @@
 # Refresh 0.18 — Gemini review / Sol build packet
 
-Design: `docs/spec/SPEC_EVOL_REFRESH_018.md`. Worktree `tmp/refresh-018`, branch `feat/refresh-018`. This is a proposed file-level release; current authorization remains documentation only. No delegate pushes, merges, deploys, mutates clusters or writes `.track`.
+Design: `docs/spec/SPEC_EVOL_REFRESH_018.md`. Worktree `tmp/refresh-018`, branch `feat/refresh-018`. C01–C14 are RELEASED to Sol after owner-authorized Fable review GO_WITH_CHANGES and conductor reconciliation. C15–C25 remain conditional. No delegate pushes, merges, deploys, mutates clusters or writes `.track`.
+
+Reviewed corrections are mandatory: C01 checks schema forwarding in the installed npm artifact; C03 proves alias/nested-mesh runtime interop, abort and classified failure; C06 composes public profile/config/registry/preparation exports instead of unexported `runConfiguredDataprep`; C12 checks AbortSignal before/after projection and treats `upsertGraphAtomic` returning `{aborted:true}` as failure. No producer release wait is needed. See `fable-design.md`, findings F1–F4. Activation credentials/PVC gates do not block C01–C14 code or mocked tests.
 
 ## First executable slice
 
