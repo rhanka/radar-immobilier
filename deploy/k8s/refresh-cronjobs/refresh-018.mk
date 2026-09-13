@@ -85,7 +85,7 @@ render-preprod:
 	@[[ "$(IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
 	  || { echo "IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
 	@test -n "$(RENDER_OUT)" || { echo "RENDER_OUT is required" >&2; exit 1; }
-	@umask 077; kubectl kustomize --load-restrictor LoadRestrictionsNone "$(OVERLAY)" \
+	@set -o pipefail; umask 077; kubectl kustomize --load-restrictor LoadRestrictionsNone "$(OVERLAY)" \
 	  | sed "s#$(PLACEHOLDER)#$(IMAGE_REF)#g" > "$(RENDER_OUT)"
 	@! grep -q 'PINNED-BY-CI\|radar-api:latest' "$(RENDER_OUT)"
 
@@ -94,7 +94,7 @@ render-prod:
 	@[[ "$(IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
 	  || { echo "IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
 	@test -n "$(RENDER_OUT)" || { echo "RENDER_OUT is required" >&2; exit 1; }
-	@umask 077; kubectl kustomize --load-restrictor LoadRestrictionsNone "$(PROD_OVERLAY)" \
+	@set -o pipefail; umask 077; kubectl kustomize --load-restrictor LoadRestrictionsNone "$(PROD_OVERLAY)" \
 	  | sed "s#$(PLACEHOLDER)#$(IMAGE_REF)#g" > "$(RENDER_OUT)"
 	@! grep -q 'PINNED-BY-CI\|radar-api:latest' "$(RENDER_OUT)"
 
@@ -146,7 +146,8 @@ observe-scheduled-preprod: guard-preprod
 	  done; \
 	  test -n "$$current" -a "$$current" != "$$before" \
 	    || { echo "CronJob controller did not schedule within 120 seconds" >&2; exit 1; }; \
-	  restore; trap - EXIT; \
+	  if ! restore; then echo "Failed to restore the daily schedule" >&2; exit 1; fi; \
+	  trap - EXIT; \
 	  job="$$($(K) get jobs \
 	    -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.ownerReferences[0].name}{"\t"}{.metadata.creationTimestamp}{"\n"}{end}' \
 	    | awk '$$2 == "radar-refresh-pv" { print }' | sort -k3 | tail -1 | cut -f1)"; \
