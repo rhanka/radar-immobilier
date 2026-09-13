@@ -102,7 +102,7 @@ flowchart TB
   provider["LLM provider<br/>Inference may be remote; orchestration is local"]
   corpus[("Corpus store<br/>raw/ + metadata, parsed/, runs/, ontology/")]
   candidate[("Staged candidates<br/>candidats/CITY/latest.json + SHA-256")]
-  graph[("Canonical graph store<br/>graph/CITY/latest.json + history/")]
+  graphstore[("Canonical graph store<br/>graph/CITY/latest.json + history/")]
   geosvc["Geo OGC API<br/>Zones / lots / regulations / constraints"]
   websites --> scrape
   scrape --> corpus
@@ -111,11 +111,11 @@ flowchart TB
   parse --> corpus
   corpus --> llm
   llm <-->|"Model calls"| provider
-  gate -->|"Direct validated graph publication path"| graph
+  gate -->|"Direct validated graph publication path"| graphstore
   gate -->|"Grounding candidate path"| candidate
   candidate --> pub
-  pub -.->|"Destination alignment still required; see below"| graph
-  graph --> project
+  pub -.->|"Destination alignment still required; see below"| graphstore
+  graphstore --> project
   project --> pg
   geosvc --> geoimport
   geoimport --> pg
