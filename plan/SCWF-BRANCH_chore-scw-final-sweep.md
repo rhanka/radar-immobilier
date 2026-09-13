@@ -46,6 +46,7 @@
 - [x] Lot 3f2: guard retained local-development, diagnostic, and TEM bindings.
 - [x] Lot 3g1: record the first-slice checkpoint and explicit remaining-client list.
 - [ ] Lot 3g2: run final offline gates and complete independent post-build review.
+- [x] Lot 3g2a: dispatch the owner-authorized independent Fable review of first-slice commit `332af1e8` and second-slice design `671380f4`; no consensus or acceptance claim until its readable findings are reconciled.
 - [x] Lot 3h1: freeze the implementation-ready RAW/DOCS/GRAPH client matrix, migration-tool contract, and second-slice paths.
 - [ ] Lot 3h2: conductor reconciles the design, obtains independent review, and explicitly releases source edits.
 - [ ] Lot 3h3: build and hermetically test the dry-run-default, non-destructive migration/proof tool.
