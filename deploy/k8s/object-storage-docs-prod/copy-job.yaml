@@ -42,7 +42,7 @@ spec:
               summary=/evidence/docs-prod-canonical/summary.json
               proof=/evidence/docs-prod-conditional-write-proof.json
               test -s "$canonical" && test -s "$summary" && test -s "$proof"
-              digest=$(jq -er '.manifestSha256' "$summary")
+              digest=$(node -e 'const fs=require("node:fs");process.stdout.write(JSON.parse(fs.readFileSync(process.argv[1],"utf8")).manifestSha256)' "$summary")
               report="/evidence/reports/${MIGRATION_RUN_ID}"
               mkdir -p "$report"
               set +e
@@ -55,7 +55,7 @@ spec:
               set -e
               marker="/evidence/export-ready/${MIGRATION_RUN_ID}"
               mkdir -p "$(dirname "$marker")"
-              jq -n --argjson status "$status" '{status:$status}' >"$marker.tmp"
+              STATUS="$status" MARKER="$marker.tmp" node -e 'require("node:fs").writeFileSync(process.env.MARKER,JSON.stringify({status:Number(process.env.STATUS)})+"\n",{mode:0o600})'
               sync -f "$marker.tmp" && mv "$marker.tmp" "$marker"
               sleep 300
               exit "$status"

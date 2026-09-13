@@ -34,6 +34,8 @@ object-storage-docs-prod-validate: ## Validate the PROD DOCS support and invento
 	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/conditional-proof-job.yaml -o name >/dev/null
 	@$(KUBECTL) create --dry-run=client --validate=false \
 	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml -o name >/dev/null
+	@! grep -Eq '(^|[[:space:]])jq([[:space:]]|$$)' \
+	  $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml
 
 .PHONY: object-storage-docs-prod-fast-start
 object-storage-docs-prod-fast-start: ## Start the low-memory canonical PROD inventory
@@ -138,6 +140,11 @@ object-storage-docs-prod-copy-progress: ## Read copy/parity progress without pri
 	    -l "job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
 	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
 	    'report=/evidence/reports/$${MIGRATION_RUN_ID}; if [ -s "$$report/summary.json" ]; then cat "$$report/summary.json"; elif [ -s "$$report/progress.json" ]; then cat "$$report/progress.json"; else echo '\''{"processed":0,"logicalBytes":0}'\''; fi'
+
+.PHONY: object-storage-docs-prod-logs
+object-storage-docs-prod-logs: ## Read one PROD object-storage Job log
+	@$(KUBECTL) -n $(OBJECT_STORAGE_DOCS_PROD_NAMESPACE) \
+	  logs job/$(OBJECT_STORAGE_DOCS_PROD_JOB) --all-containers=true
 
 .PHONY: object-storage-docs-prod-expand-pvc-quota
 object-storage-docs-prod-expand-pvc-quota: ## Guardedly expand only the PROD PVC count quota from 2 to 3
