@@ -87,5 +87,9 @@ test('transition states preserve physical IDs and final-target exclusions', () =
   for (const id of ['PP_RAW_OVH', 'PP_DOCS_OVH', 'PR_RAW_OVH', 'PR_DOCS_OVH', 'TEM', 'PV_SRC', 'ZONES_SRC', 'REGULATIONS_SRC', 'LOTS_SRC', 'ENV_SRC']) assert.ok(t3.nodes.some(node => node.id === id));
   for (const removed of ['PP_RAW', 'PP_DOCS', 'SCW_RESIDUE']) assert.ok(!t3.nodes.some(node => node.id === removed));
   assert.ok(!t3.groups.some(group => group.id === 'ppminio'));
+  for (const graph of [t1, t2, t3]) for (const source of ['PP_API', 'PR_API']) {
+    const email = graph.edges.find(edge => edge.source === source && edge.target === 'TEM');
+    assert.ok(email?.dashed, `${graph.id}/${source}: retained TEM relation must remain qualified`);
+  }
   for (const [source, target] of [['candidate', 'post'], ['post', 'publish'], ['publish', 'project'], ['project', 'served']]) assert.ok(detail.edges.some(edge => edge.source === source && edge.target === target));
 });

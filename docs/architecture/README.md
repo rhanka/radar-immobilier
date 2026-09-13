@@ -33,7 +33,7 @@ The same build emits the dated monthly companion HTML and D5 evidence manifest u
 - Select `PP-DB`, `PP-GRAPH`, etc. to zoom to it and cross-link to the same identity
   in another diagram. External relationships retain original source/target IDs.
 - Mermaid source is **rendered visually**, both beneath the SvelteFlow and in
-  embedded source documents; exact code remains available. Five strict, sanitized
+  embedded source documents; exact code remains available. Eight strict, sanitized
   SVGs are generated locally and embedded offline, with exact node/group/edge text
   checks. Mermaid's global `htmlLabels:false` retains SVG text under sanitization.
 - Every component and nested box has a blue service pictogram, a service name and
