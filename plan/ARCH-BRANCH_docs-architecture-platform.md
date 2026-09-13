@@ -25,6 +25,7 @@
 - [x] Use current remote immo/geo references and newer poc-k8s local HEAD; record provenance.
 - [x] Distinguish live reads, declared configuration and future work.
 - [x] Record the live OVH refresh / committed MinIO grounding destination mismatch.
+- [x] Use the installed h2a FocusSnapshot renderer; document preview has no Track writes.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single documentation branch; no delegated implementation.
