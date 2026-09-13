@@ -6,6 +6,7 @@ NAMESPACE := radar-immobilier-preprod
 EXPECTED_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 K := kubectl --kubeconfig "$(KUBECONFIG)" -n $(NAMESPACE)
 PLACEHOLDER := ghcr.io/rhanka/radar-api:PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
+API_IMAGE := ghcr.io/rhanka/radar-api
 
 .PHONY: guard-preprod
 guard-preprod:
@@ -31,9 +32,26 @@ inspect-preprod: guard-preprod
 keyring-summary:
 	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
-	@docker run --rm -v "$(KEYRING_SOURCE_DIR):/source:ro" \
+	@docker run --rm --user 0:0 -v "$(KEYRING_SOURCE_DIR):/source:ro" \
 	  -v "$(OVERLAY)/keyring-summary.mjs:/workspace/keyring-summary.mjs:ro" "$(LOCAL_IMAGE)" \
 	  /bin/sh -ceu 'mkdir /keyring; cp -a /source/. /keyring/; node /workspace/keyring-summary.mjs'
+
+.PHONY: push-immutable
+push-immutable:
+	@test "$(ENV)" = "preprod" || { echo "ENV=preprod is required" >&2; exit 1; }
+	@[[ "$(PUSH_TAG)" =~ ^r018-[0-9a-f]{8}$$ ]] \
+	  || { echo "PUSH_TAG must be the isolated r018 commit tag" >&2; exit 1; }
+	@docker image inspect "radar-immobilier-api:$(PUSH_TAG)" >/dev/null
+	@docker tag "radar-immobilier-api:$(PUSH_TAG)" "$(API_IMAGE):$(PUSH_TAG)"
+	@docker push "$(API_IMAGE):$(PUSH_TAG)"
+
+.PHONY: image-digest
+image-digest:
+	@test "$(ENV)" = "preprod" || { echo "ENV=preprod is required" >&2; exit 1; }
+	@[[ "$(PUSH_TAG)" =~ ^r018-[0-9a-f]{8}$$ ]] \
+	  || { echo "PUSH_TAG must be the isolated r018 commit tag" >&2; exit 1; }
+	@docker image inspect "$(API_IMAGE):$(PUSH_TAG)" \
+	  --format '{{range .RepoDigests}}{{println .}}{{end}}' | grep '^$(API_IMAGE)@sha256:'
 
 .PHONY: render-preprod
 render-preprod:
