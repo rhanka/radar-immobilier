@@ -186,10 +186,7 @@ object-storage-docs-prod-bind: ## Bind future PROD DOCS workers after exact cano
 	    <<<"$$quota" >/dev/null; \
 	  source="$$( $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials -o json )"; \
 	  jq -e -f deploy/ci/validate-docs-secret.jq <<<"$$source" >/dev/null; \
-	  jq -e '(.data.DOCS_S3_ENDPOINT | @base64d) == "https://s3.bhs.io.cloud.ovh.net" and \
-	    (.data.DOCS_S3_REGION | @base64d) == "bhs" and \
-	    (.data.DOCS_S3_BUCKET | @base64d) == "radar-immobilier-docs" and \
-	    (.data.DOCS_S3_FORCE_PATH_STYLE | @base64d) == "false"' <<<"$$source" >/dev/null; \
+	  jq -e '(.data.DOCS_S3_ENDPOINT | @base64d) == "https://s3.bhs.io.cloud.ovh.net" and (.data.DOCS_S3_REGION | @base64d) == "bhs" and (.data.DOCS_S3_BUCKET | @base64d) == "radar-immobilier-docs" and (.data.DOCS_S3_FORCE_PATH_STYLE | @base64d) == "false"' <<<"$$source" >/dev/null; \
 	  if [ "$$(jq -r '.status.used.secrets' <<<"$$quota")" = 13 ]; then \
 	    ! $(KUBECTL) -n "$$namespace" get secret/radar-graph-s3-credentials >/dev/null 2>&1; \
 	    ! $(KUBECTL) -n "$$namespace" get secret/radar-scrape-s3-credentials >/dev/null 2>&1; \
@@ -200,15 +197,10 @@ object-storage-docs-prod-bind: ## Bind future PROD DOCS workers after exact cano
 	    -p '{"data":{"GRAPH_S3_ENDPOINT":"https://s3.bhs.io.cloud.ovh.net","GRAPH_S3_REGION":"bhs","GRAPH_S3_BUCKET":"radar-immobilier-docs","GRAPH_S3_FORCE_PATH_STYLE":"false","SCRAPE_S3_ENDPOINT":"https://s3.bhs.io.cloud.ovh.net","SCRAPE_S3_REGION":"bhs","SCRAPE_S3_BUCKET":"radar-immobilier-docs","SCRAPE_S3_FORCE_PATH_STYLE":"false"}}' >/dev/null; \
 	  runtime="$$( $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials \
 	    secret/radar-graph-s3-credentials secret/radar-scrape-s3-credentials -o json )"; \
-	  jq -e 'INDEX(.items[];.metadata.name) as $$s | ($$s["radar-docs-s3-credentials"].data) as $$d | \
-	    ($$s["radar-graph-s3-credentials"].data == {GRAPH_S3_ACCESS_KEY:$$d.DOCS_S3_ACCESS_KEY,GRAPH_S3_SECRET_KEY:$$d.DOCS_S3_SECRET_KEY}) and \
-	    ($$s["radar-scrape-s3-credentials"].data == {SCRAPE_S3_ACCESS_KEY:$$d.DOCS_S3_ACCESS_KEY,SCRAPE_S3_SECRET_KEY:$$d.DOCS_S3_SECRET_KEY})' \
+	  jq -e 'INDEX(.items[];.metadata.name) as $$s | ($$s["radar-docs-s3-credentials"].data) as $$d | ($$s["radar-graph-s3-credentials"].data == {GRAPH_S3_ACCESS_KEY:$$d.DOCS_S3_ACCESS_KEY,GRAPH_S3_SECRET_KEY:$$d.DOCS_S3_SECRET_KEY}) and ($$s["radar-scrape-s3-credentials"].data == {SCRAPE_S3_ACCESS_KEY:$$d.DOCS_S3_ACCESS_KEY,SCRAPE_S3_SECRET_KEY:$$d.DOCS_S3_SECRET_KEY})' \
 	    <<<"$$runtime" >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get configmap/radar-api -o json | jq -e \
-	    '.data.GRAPH_S3_ENDPOINT == "https://s3.bhs.io.cloud.ovh.net" and .data.GRAPH_S3_REGION == "bhs" and \
-	     .data.GRAPH_S3_BUCKET == "radar-immobilier-docs" and .data.GRAPH_S3_FORCE_PATH_STYLE == "false" and \
-	     .data.SCRAPE_S3_ENDPOINT == "https://s3.bhs.io.cloud.ovh.net" and .data.SCRAPE_S3_REGION == "bhs" and \
-	     .data.SCRAPE_S3_BUCKET == "radar-immobilier-docs" and .data.SCRAPE_S3_FORCE_PATH_STYLE == "false"' >/dev/null; \
+	    '.data.GRAPH_S3_ENDPOINT == "https://s3.bhs.io.cloud.ovh.net" and .data.GRAPH_S3_REGION == "bhs" and .data.GRAPH_S3_BUCKET == "radar-immobilier-docs" and .data.GRAPH_S3_FORCE_PATH_STYLE == "false" and .data.SCRAPE_S3_ENDPOINT == "https://s3.bhs.io.cloud.ovh.net" and .data.SCRAPE_S3_REGION == "bhs" and .data.SCRAPE_S3_BUCKET == "radar-immobilier-docs" and .data.SCRAPE_S3_FORCE_PATH_STYLE == "false"' >/dev/null; \
 	  for _ in $$(seq 1 30); do \
 	    used="$$( $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o jsonpath='{.status.used.secrets}' )"; \
 	    [ "$$used" = 15 ] && break; sleep 1; \
