@@ -95,5 +95,5 @@
   - [x] Regression reproduced: infrastructure showed 8 native nodes instead of all 29 leaves and boxes; replace collapsed representation with complete recursive layout.
   - [x] Render every node/edge simultaneously with native nested parentId boxes; navigation only changes the viewport.
   - [x] Add strict, sanitized Mermaid prerendering with source hashes and node/group parity; embed the visual and exact code offline.
-  - [ ] Add DS Tile/Radio options, comment, local persistence and copyable JSON response pack.
+  - [x] Add the same DS Tile/Radio choice pattern as the Sentropic dossier, with comments, local drafts and copy/download JSON containing all options and provenance.
   - [ ] Verify simultaneous completeness, nested bounds, Mermaid rendering and A/B/C comment/export behavior.
