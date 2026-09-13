@@ -1,6 +1,7 @@
 <script>
   import { Button, Badge, Flex } from '@sentropic/design-system-svelte';
   import Flow from './Flow.svelte';
+  import Mermaid from './Mermaid.svelte';
   let { graphs } = $props();
   let graphId = $state('asis-1'), scope = $state(null), selected = $state(null), expanded = $state(false);
   let graph = $derived(graphs.find(g => g.id === graphId));
@@ -59,5 +60,5 @@
   </div>
   <p class="caption">Tous les sous-flows sont emboîtés et affichés dans le même schéma. Cliquer sur une boîte zoome dessus sans masquer les autres composants ni leurs liens.
     {graph.nodes.length} composants · {graph.edges.length} relations · {graph.groups.length} sous-flows. Flèches READ : consommateur → store.</p>
-  <details><summary>Source Mermaid exacte · mapping intégral</summary><pre>{graph.source}</pre></details>
+  {#key graph.id}<Mermaid {graph} />{/key}
 </section>
