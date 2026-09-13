@@ -156,3 +156,76 @@ list_objects_checkpoint() {
     fi
   done
 }
+
+checkpoint_validate_body_shard() {
+  local side="$1" sequence="$2" phase dir base page body receipt page_hash body_hash
+  local count bytes coordinate identity
+  phase="$(checkpoint_phase)"; dir="$CHECKPOINT_DIR/$phase/$side"
+  printf -v base '%06d' "$sequence"
+  page="$dir/index-page-$base.jsonl"; body="$dir/body-manifest-$base.jsonl"
+  receipt="$dir/body-receipt-$base.json"
+  if [ -e "$body" ] && [ ! -e "$receipt" ]; then rm -f "$body"; fi
+  if [ ! -e "$receipt" ]; then CHECKPOINT_BODY_PRESENT=false; return 0; fi
+  [ -r "$body" ] || die "checkpoint body shard $sequence is missing"
+  jq -es --slurpfile page "$page" '
+    [.[].key] == [$page[].key] and ([.[].key] | length) == ([.[].key] | unique | length)
+  ' "$body" >/dev/null || die "checkpoint body shard $sequence has a different key set"
+  page_hash="$(sha256sum "$page" | awk '{print $1}')"
+  body_hash="$(sha256sum "$body" | awk '{print $1}')"
+  count="$(jq -s length "$body")"; bytes="$(jq -s 'map(.size) | add // 0' "$body")"
+  coordinate="$(jq -c ".$side | del(.identityFingerprint)" "$CHECKPOINT_DIR/config.json")"
+  identity="$(jq -r ".$side.identityFingerprint" "$CHECKPOINT_DIR/config.json")"
+  jq -e --arg side "$side" --argjson sequence "$sequence" \
+    --arg pageHash "$page_hash" --arg bodyHash "$body_hash" --argjson count "$count" \
+    --argjson bytes "$bytes" --argjson coordinate "$coordinate" --arg identity "$identity" \
+    --arg config "$(jq -r '.configDigest' "$CHECKPOINT_DIR/config.json")" \
+    --arg fence "$FENCE_EVIDENCE_DIGEST" '
+    .schemaVersion == 1 and .side == $side and .sequence == $sequence and
+    .coordinate == $coordinate and .identityFingerprint == $identity and
+    .configDigest == $config and .indexPageSha256 == $pageHash and
+    .bodyManifestSha256 == $bodyHash and .objects == $count and .bytes == $bytes and
+    .failures == 0 and
+    .fenceEvidenceDigest == (if $fence=="null" then null else $fence end)' \
+    "$receipt" >/dev/null || die "checkpoint body receipt $sequence is invalid"
+  CHECKPOINT_BODY_PRESENT=true
+}
+
+checkpoint_validate_bodies() {
+  local side="$1" sequence=1 missing=false phase dir page
+  phase="$(checkpoint_phase)"; dir="$CHECKPOINT_DIR/$phase/$side"
+  while :; do
+    printf -v page '%s/index-page-%06d.jsonl' "$dir" "$sequence"
+    [ -e "$page" ] || break
+    checkpoint_validate_body_shard "$side" "$sequence"
+    if $CHECKPOINT_BODY_PRESENT; then
+      $missing && die 'checkpoint body shards are non-contiguous'
+    else
+      missing=true
+    fi
+    sequence=$((sequence + 1))
+  done
+}
+
+checkpoint_commit_body() {
+  local side="$1" sequence="$2" tmp_body="$3" phase dir base page body receipt tmp_receipt
+  local page_hash body_hash count bytes coordinate identity
+  phase="$(checkpoint_phase)"; dir="$CHECKPOINT_DIR/$phase/$side"
+  printf -v base '%06d' "$sequence"; page="$dir/index-page-$base.jsonl"
+  body="$dir/body-manifest-$base.jsonl"; receipt="$dir/body-receipt-$base.json"
+  tmp_receipt="$receipt.tmp"; page_hash="$(sha256sum "$page" | awk '{print $1}')"
+  body_hash="$(sha256sum "$tmp_body" | awk '{print $1}')"
+  count="$(jq -s length "$tmp_body")"; bytes="$(jq -s 'map(.size) | add // 0' "$tmp_body")"
+  coordinate="$(jq -c ".$side | del(.identityFingerprint)" "$CHECKPOINT_DIR/config.json")"
+  identity="$(jq -r ".$side.identityFingerprint" "$CHECKPOINT_DIR/config.json")"
+  jq -n --arg side "$side" --argjson sequence "$sequence" \
+    --argjson coordinate "$coordinate" --arg identity "$identity" \
+    --arg pageHash "$page_hash" --arg bodyHash "$body_hash" --argjson count "$count" \
+    --argjson bytes "$bytes" --arg config "$(jq -r '.configDigest' "$CHECKPOINT_DIR/config.json")" \
+    --arg fence "$FENCE_EVIDENCE_DIGEST" '
+    {schemaVersion:1,side:$side,coordinate:$coordinate,identityFingerprint:$identity,
+     sequence:$sequence,indexPageSha256:$pageHash,bodyManifestSha256:$bodyHash,
+     objects:$count,bytes:$bytes,failures:0,configDigest:$config,
+     fenceEvidenceDigest:(if $fence=="null" then null else $fence end),
+     observedAt:(now|todateiso8601)}' >"$tmp_receipt"
+  sync -f "$tmp_body" "$tmp_receipt" && mv "$tmp_body" "$body" && mv "$tmp_receipt" "$receipt"
+}
