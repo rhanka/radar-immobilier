@@ -1,12 +1,13 @@
 # refresh-cronjobs — Kustomize overlay that deploys the two refresh CronJobs to
 # PREPROD (radar-immobilier-preprod), pinned to the release image and
-# UN-SUSPENDED. Production uses the separate refresh-cronjobs-prod twin,
+# with only the causal PV-to-Signal refresh UN-SUSPENDED. Production uses the
+# separate refresh-cronjobs-prod twin,
 # independently gated in the promote-prod path.
 #
 # It transforms the base ../34-refresh-cronjob.yaml (ns radar-immobilier,
 # suspend:true — the prod-dormant default) into the preprod-active instance:
 #   - namespace -> radar-immobilier-preprod
-#   - suspend   -> false (the CronJobs RUN)
+#   - suspend   -> false only for radar-refresh-pv
 #   - image     -> pinned by CI to the deploy-preprod release :<sha> (no :latest)
 #
 # Applied ONLY by the deploy-preprod "Deploy refresh CronJobs (preprod)" step, in
@@ -36,20 +37,48 @@ namespace: radar-immobilier-preprod
 
 resources:
   - ../34-refresh-cronjob.yaml
+  - ../34-refresh-keyring-pvc.yaml
 
 images:
   - name: ghcr.io/rhanka/radar-api
     newTag: PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
 
 patches:
-  # §6 preprod is ACTIVE: un-suspend BOTH CronJobs (base 34 ships suspend:true,
-  # the prod-dormant default). `target: kind=CronJob` matches both.
+  # The old scrape/direct-PG and independent projection schedules remain
+  # suspended. One causally ordered acquisition -> Graphify -> publish -> PG
+  # workload is the only active preprod refresh.
   - target:
       kind: CronJob
+      name: radar-refresh-pv
     patch: |
       - op: replace
         path: /spec/suspend
         value: false
+
+  - target:
+      kind: CronJob
+      name: radar-refresh-pv
+    patch: |
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: radar-refresh-pv
+      spec:
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: refresh-pv
+                    env:
+                      - { name: SCRAPE_S3_ENDPOINT, value: "https://s3.bhs.io.cloud.ovh.net" }
+                      - { name: SCRAPE_S3_BUCKET, value: "radar-immobilier-graph-preprod" }
+                      - { name: SCRAPE_S3_REGION, value: "bhs" }
+                      - { name: SCRAPE_S3_FORCE_PATH_STYLE, value: "false" }
+                      - name: SCRAPE_S3_ACCESS_KEY
+                        valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_ACCESS_KEY } }
+                      - name: SCRAPE_S3_SECRET_KEY
+                        valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_SECRET_KEY } }
 
   # CITATIONS/BUCKET ALIGNMENT (i-infra) — the projection CronJob's base 34
   # hardcodes GRAPH_S3 on the SCW bucket `radar-immobilier-docs-pocs`. En PRÉPROD
