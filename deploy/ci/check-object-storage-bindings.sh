@@ -12,11 +12,15 @@ GRAPH_FILES=(
 )
 SCRAPE_FILES=(deploy/k8s/33-scrape-job.yaml deploy/k8s/33b-scrape-cities-job.yaml)
 FILES=("${GRAPH_FILES[@]}" "${SCRAPE_FILES[@]}" deploy/k8s/36-db-migrate-job.yaml)
+PUBLIC_IMAGE_FILES=(
+  deploy/k8s/10-rbac.yaml
+  deploy/k8s/11-ci-deployer-preprod-rbac.yaml
+  deploy/k8s/object-storage-docs-prod/copy-job.yaml
+  deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml
+  deploy/k8s/secrets.example.yaml
+)
 PENDING_CLIENTS=(
   deploy/k8s/32b-reproject-etape-job.yaml
-  deploy/k8s/refresh-diag/diag-refresh-job.yaml
-  .github/workflows/grounding-preprod.yml
-  .github/workflows/grounding-publish-prod.yml
   .github/workflows/run-job.yaml
 )
 FAIL=0
@@ -71,6 +75,33 @@ grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|radar-s
   "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" && fail 'deploy/k8s/34-refresh-cronjob.yaml retains a legacy storage binding'
 grep -Fq 'name: radar-refresh-pv' "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" ||
   fail 'deploy/k8s/34-refresh-cronjob.yaml lost radar-refresh-pv'
+for rel in "${PUBLIC_IMAGE_FILES[@]}"; do
+  grep -Eiq 'radar-registry-pull|rg\.fr-par\.scw\.cloud' "$ROOT/$rel" &&
+    fail "$rel retains a legacy SCW registry reference"
+done
+grep -Eiq 'refresh-diag|REFRESH_DIAG_ENABLED|radar-refresh-diag' \
+  "$ROOT/.github/workflows/build-push-images.yml" &&
+  fail '.github/workflows/build-push-images.yml retains the legacy refresh diagnostic'
+grep -Eiq 'radar-grounding|deploy/grounding' "$ROOT/.github/workflows/build-push-images.yml" &&
+  fail '.github/workflows/build-push-images.yml still builds the retired grounding image'
+[ ! -e "$ROOT/.github/workflows/grounding-preprod.yml" ] ||
+  fail '.github/workflows/grounding-preprod.yml must be retired'
+[ ! -e "$ROOT/.github/workflows/grounding-publish-prod.yml" ] ||
+  fail '.github/workflows/grounding-publish-prod.yml must be retired'
+[ ! -e "$ROOT/deploy/k8s/41-grounding-citation-job.yaml" ] ||
+  fail 'deploy/k8s/41-grounding-citation-job.yaml must be retired'
+for rel in deploy/k8s/grounding-preprod/kustomization.yaml deploy/k8s/grounding-preprod/projection-job.preprod.yaml; do
+  [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
+done
+for rel in deploy/k8s/71-networkpolicy-graph-projection-minio-preprod.yaml \
+  deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml deploy/grounding/Dockerfile; do
+  [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
+done
+[ ! -e "$ROOT/deploy/k8s/41-grounding-worklist-configmap.yaml" ] ||
+  fail 'deploy/k8s/41-grounding-worklist-configmap.yaml must be retired'
+for rel in deploy/k8s/refresh-diag/diag-refresh-job.yaml deploy/k8s/refresh-diag/kustomization.yaml; do
+  [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
+done
 
 for rel in scripts/mount-scw.sh scripts/umount-scw.sh; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
@@ -91,7 +122,6 @@ for expected in \
   'S3_SECRET_KEY=minioadmin'; do
   grep -Fqx "$expected" "$ROOT/.env.example" || fail ".env.example local setting changed: $expected"
 done
-grep -Fq 'value: "http://radar-minio:9000"' "$ROOT/deploy/k8s/refresh-diag/diag-refresh-job.yaml" || fail 'refresh diagnostic binding changed'
 grep -Fq 'SCW_TEM_API_BASE_URL: "https://api.scaleway.com"' "$ROOT/deploy/k8s/30-api.yaml" || fail 'TEM configuration changed'
 grep -Fq 'name: radar-tem-credentials' "$ROOT/deploy/k8s/30-api.yaml" || fail 'TEM Secret reference changed'
 

@@ -30,6 +30,9 @@ jobs:
       - name: Validate K8s manifests (radar as a sentropic app, offline render)
         run: make k8s-validate ENV=ci
 
+      - name: Validate refresh overlays (preprod and prod)
+        run: make -f deploy/k8s/refresh-cronjobs/refresh-018.mk verify-renders ENV=ci
+
       - name: Validate object-storage contracts (offline)
         run: bash deploy/ci/check-object-storage-bindings.test.sh
 

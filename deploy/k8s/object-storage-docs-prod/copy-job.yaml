@@ -28,8 +28,6 @@ spec:
         fsGroup: 1001
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
-      imagePullSecrets:
-        - name: radar-registry-pull
       containers:
         - name: copy
           image: ghcr.io/rhanka/radar-api@sha256:4d062b88cd983aa1eef288475cded34f735084e1771a7639cbf8392df0277010
@@ -43,6 +41,10 @@ spec:
               proof=/evidence/docs-prod-conditional-write-proof.json
               test -s "$canonical" && test -s "$summary" && test -s "$proof"
               digest=$(node -e 'const fs=require("node:fs");process.stdout.write(JSON.parse(fs.readFileSync(process.argv[1],"utf8")).manifestSha256)' "$summary")
+              [ "$digest" = "52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425" ] || {
+                echo "ERROR: canonical PROD manifest digest changed" >&2
+                exit 2
+              }
               report="/evidence/reports/${MIGRATION_RUN_ID}"
               mkdir -p "$report"
               set +e
