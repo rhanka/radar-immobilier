@@ -23,6 +23,7 @@
 - [x] September 13 owner amendment: keep independent review; Fable 5 may replace unavailable Gemini. Delegate development to Sol immediately after reconciliation; the owner did not waive review.
 - [x] Fable F1–F4 accepted: public prep composition instead of unexported runConfiguredDataprep; cross-instance mesh probe; published schema-forwarding probe; explicit projection abort/refusal propagation. No new architecture or producer wait.
 - [x] Native Sol developer `/root/t1_build` replaces failed h2a developer launch (missing runtime package); Fable review remains a distinct Claude-hosted leg. Do not stage reviewer files from the build worker.
+- [x] Disjoint secondary Sol owns C06–C07 profile source/test/oracle only, with no Git, plan or shared-service operations; `/root/t1_build` retains integration and index ownership.
 - [x] Report to `codex:radar-immobilier:98cef8dfc274`, loop `loop:immo-transitions-2026-09-13`; do not mark the overall loop done.
 
 ## Orchestration Mode (AI-selected)
@@ -44,6 +45,7 @@
 - [x] C02: compose the public owner-scoped Graphify mesh with explicit refresh adapters, model and run abort signal.
 - [x] C03: prove schema/token forwarding, three-copy mesh interop, owner isolation, classified failure, abort propagation and log silence.
 - [x] C04a: define strict immutable-manifest, original-page and bounded UTF-8 corpus chunk contracts.
+- [x] C04b: materialize selected PDF bytes and metadata with checksum, page-text and input-hash validation.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
