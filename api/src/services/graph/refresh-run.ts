@@ -44,6 +44,11 @@ export interface RefreshPdfSelection {
 const MANIFEST_HEADER = "source_id\tcity_slug\tsha\trepresentation_key\tsidecar_key";
 const SHA256 = /^[0-9a-f]{64}$/;
 
+/** Default two-second source pacing with the project-required ±300 ms jitter. */
+export function refreshSourceDelayMs(random = Math.random): number {
+  return 1_700 + Math.floor(random() * 601);
+}
+
 /** Convert one successful existing RECUEIL result into C04's immutable PDF selection. */
 export async function acquireRefreshPdfManifest(
   options: AcquireRefreshPdfOptions,
@@ -55,7 +60,7 @@ export async function acquireRefreshPdfManifest(
     acceptRef: (ref) => ref.contentType?.toLowerCase().startsWith("application/pdf") === true
       || /\.pdf(?:[?#]|$)/i.test(ref.url),
     beforeFetch: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2_000));
+      await new Promise((resolve) => setTimeout(resolve, refreshSourceDelayMs()));
     },
     ...(options.signal !== undefined ? { signal: options.signal } : {}),
     ...(options.limit !== undefined ? { limit: options.limit } : {}),
