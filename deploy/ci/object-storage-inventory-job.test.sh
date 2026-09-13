@@ -80,10 +80,17 @@ if grep -Fq 'if [ -s /fence/fence.txt ]' "$JOB" &&
   grep -Fq 'name: radar-object-storage-inventory-fence' "$JOB" &&
   grep -Fq 'optional: true' "$JOB"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 
-TEST_NAME='fence target scales only the proven RAW writer and records zero'
-if grep -Fq 'scale deployment/radar-api --replicas=0' "$ROOT/Makefile" &&
-  grep -Fq 'writer=deployment/radar-api' "$ROOT/Makefile" &&
-  ! grep -A35 '^object-storage-raw-preprod-fence:' "$ROOT/Makefile" | grep -Eq 'cronjob|statefulset'; then
+TEST_NAME='rolling rebind maps all six RAW settings to the dedicated Secret'
+if [ "$(grep -c 'name: radar-raw-s3-credentials' "$SUPPORT/raw-api-rebind-patch.yaml")" = 6 ] &&
+  [ "$(grep -c 'key: RAW_S3_' "$SUPPORT/raw-api-rebind-patch.yaml")" = 6 ] &&
+  ! grep -Fq 'value:' "$SUPPORT/raw-api-rebind-patch.yaml"; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+TEST_NAME='fence follows a settled rolling rebind without scaling workloads'
+if grep -Fq 'patch deployment/radar-api --type=strategic' "$ROOT/Makefile" &&
+  grep -Fq 'minioRawWriters=0' "$ROOT/Makefile" &&
+  ! grep -A80 '^object-storage-raw-preprod-rebind:' "$ROOT/Makefile" | grep -Eq 'scale|cronjob|statefulset'; then
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
 

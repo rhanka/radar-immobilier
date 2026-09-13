@@ -87,11 +87,15 @@ Fetch writes `SHA256SUMS` locally. The checkpoint and reports contain object
 keys, so retain them under operator custody. This path is RAW-only; DOCS remains
 fail-closed until its exact OVH destination and identity are approved.
 
-After provisional parity is independently validated, fence the only proven RAW
-writer and start the same Job again. The new attempt sees the non-empty mounted
-fence record and builds the distinct fenced chain:
+After provisional parity is independently validated, roll only the API's six
+RAW settings to the dedicated OVH Secret without changing the shared ConfigMap.
+Once the old Pod is gone, record that no remaining writer targets MinIO RAW and
+start the same Job again. The new attempt sees the non-empty mounted fence
+record and builds the distinct fenced chain:
 
 ```text
+KUBECONFIG=<preprod-kubeconfig> make object-storage-raw-preprod-rebind \
+  OBJECT_STORAGE_REBIND_CONFIRM=1 ENV=preprod
 KUBECONFIG=<preprod-kubeconfig> make object-storage-raw-preprod-fence \
   OBJECT_STORAGE_FENCE_CONFIRM=1 ENV=preprod
 KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-start \
