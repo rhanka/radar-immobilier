@@ -62,6 +62,8 @@
   - [x] Separate main-only templates in the register; record runtime success timestamps and Geo CAS prefix/environment boundaries.
 - [ ] **Lot 7 — Prepare the owner-requested implementation continuation.**
   - [x] Request existing i-cond, i-infra and Graphify conductor handoffs through h2a; no overlapping implementation dispatched.
+  - [x] Read September 11 continuation briefs; correct the lowercase-feed/served-Signal boundary and document 3.4 post-projection processing.
+  - [x] Record owner confirmation: retain SCW TEM until its replacement is validated.
   - [ ] Establish the exact current plan, upgrade contract, scope and deployment gates before opening implementation work.
 
 ## Merge / Close

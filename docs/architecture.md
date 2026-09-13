@@ -57,7 +57,7 @@ flowchart TB
       PP_API -->|"SQL read/write"| PP_DB
       PP_API -->|"READ/WRITE API store"| PP_RAW
       PP_API -->|"Legacy document READ"| PP_DOCS
-      PP_SCRAPE -->|"Direct additive WRITE"| PP_DB
+      PP_SCRAPE -->|"WRITE lowercase nodes<br/>NOT served by graph-signals"| PP_DB
       PP_PROJECT -->|"Atomic WRITE"| PP_DB
       PP_UI -->|"/api/geo/collections*"| PP_GEO
       PP_API -->|"READ OGC"| PP_GEO
@@ -138,13 +138,13 @@ flowchart TB
   GEO_S3[("[GEO-S3] sentropic-geo<br/>OVH S3 · raw corpus + normalized/ products")]
   websites -->|"1 · discover / fetch / CAS"| PP_SCRAPE
   PP_SCRAPE -->|"WRITE raw/ parsed/ ontology/ runs/"| PP_GRAPH
-  PP_SCRAPE -->|"Direct additive WRITE · upsertGraph"| PP_DB
+  PP_SCRAPE -->|"WRITE lowercase nodes · upsertGraph<br/>NOT served by graph-signals"| PP_DB
   WS_IMMO -.->|"Run-selected corpus READ / validated graph WRITE"| PP_GRAPH
   WS_IMMO <-->|"Model calls; evidence / schema gates"| provider
   PP_PROJECT -->|"READ graph/"| PP_GRAPH
   PP_PROJECT -->|"Atomic WRITE · upsertGraphAtomic"| PP_DB
-  PP_API -->|"SQL read/write · signals / evidence"| PP_DB
-  PP_UI -->|"/api/* · signals and PDF viewer"| PP_API
+  PP_API -->|"READ Signal / DesignationEvent<br/>Classify vivier B on request"| PP_DB
+  PP_UI -->|"/api/* · display filters / PDF viewer"| PP_API
   PP_API -->|"READ/WRITE API store"| PP_RAW
   PP_API -->|"Legacy document READ"| PP_DOCS
   PP_API -->|"READ raw/pv-index/cas/<br/>Mapped PVs · no Immo fallback"| GEO_S3
@@ -163,7 +163,9 @@ flowchart TB
 | 3. Graphify/ground | `tools/graphify-v23/`, `tools/grounding/`, ontology contracts | Versioned graph with Signal/DesignationEvent nodes, stage/date, source/page/citation; staged candidates for publish-only path | Workstation agent/CLI, with provider access; not a nightly in-cluster LLM service |
 | 4. Project | `project-graph-from-s3.ts` and `upsertGraphAtomic` | Canonical graph → PostgreSQL, with per-city replacement and non-regression gates | Projection Job / CronJob; does not execute stages 1–3 |
 
-**Two current PG paths, not one serial chain:** deterministic exploitation can already populate graph nodes without the workstation LLM. At the follow-up live inspection on 2026-09-13, `radar-refresh-scrape` had `LIVE_SCRAPE_EXPLOIT=1` and a `POSTGRES_PASSWORD` Secret reference (reference only inspected, not its value). This confirms direct-feed wiring, not the success of every run. The dedicated projection separately reads the canonical S3 graph. The workstation remains required for the LLM-derived extraction/citation path, not for every deterministic signal.
+**Two PG paths, but only one feeds served Signals:** deterministic exploitation writes **lowercase types** (`nodeType → toLowerCase`). The signal routes select the exact capitalized types **`Signal` / `DesignationEvent`**. The direct scrape feed therefore **does not produce visible Signals by itself**. Live `LIVE_SCRAPE_EXPLOIT=1` and a DB Secret reference establish wiring, not a successful run or a bridge between these type contracts. Canonical projection and the workstation extraction/grounding path remain essential; a nightly scrape followed by projection does not prove fresh visible signals.
+
+**Implemented post-projection processing, not an observed active CronJob:** Immo's **Graphify 3.4 Phase A** first reads PG for **EMIT PASS-1** (candidate/control outputs), then **APPLY PASS-2 recalculates from PG**, archives/publishes the canonical S3 graph through the guarded writer and atomically reprojections PG. APPLY does **not** read EMIT's candidate files; neither step performs new PV extraction or LLM inference. These on-demand tools exist on main, but no such Job was present in this preprod inventory. The API then computes vivier B dynamically; the UI applies display/date filters. There is no separate B database and no service filter requiring `graphify_pass=3.4`. Historical cohort counts are not today's runtime counts.
 
 **As-is versus the documented refactoring target** ([consolidated design, September 5](https://github.com/rhanka/radar-immobilier/blob/6296396fed804cf9a3d4a6e031c452af57313357/docs/design/PIPELINE_FULLAUTO_CLUSTER_MESH.md), §§3/5/8/10):
 
@@ -184,7 +186,7 @@ Grounding is an enrichment of stage 3, not a replacement for graph generation. I
 
 **PDF delivery is another path:** `PP-API` has live `GEO_DOCUMENTS_REPOINT=1` and `GEO_DOCUMENTS_S3_BUCKET=sentropic-geo`. The primary rewrite maps Immo `raw/proces-verbaux-<city>/cas/<sha>.<ext>` to Geo **`raw/pv-index/cas/<sha>.<ext>`**; an optional frozen URL index can add a candidate. `/api/documents/raw` reads **only `GEO-S3`** for mapped candidates, with no Immo fallback on miss. Non-mapped references retain `PP-DOCS` then `PP-RAW`. This shares captured documents, not ownership of Immo's detection/graphification/SQL projection. `PP-GEO-S3/normalized/` serves geographic features, not these PDFs.
 
-A fresh PV can enter `PP-GRAPH/raw/` and the deterministic PG feed without a new canonical graph or a PDF resolvable through the separate Geo document reader. A successful projection can re-read an unchanged canonical graph. These are distinct freshness, graph-publication and evidence-serving boundaries, not proof that any individual document is missing.
+A fresh PV can enter `PP-GRAPH/raw/` and the lowercase PG feed **without any fresh served Signal**, new canonical graph or PDF resolvable through the separate Geo document reader. A successful projection can re-read an unchanged canonical graph. These are distinct freshness, graph-publication and evidence-serving boundaries, not proof that any individual document is missing.
 
 ## 3. Storage and scheduled processing
 
@@ -203,7 +205,7 @@ A fresh PV can enter `PP-GRAPH/raw/` and the deterministic PG feed without a new
 
 OVH S3 endpoint: `https://s3.bhs.io.cloud.ovh.net`. An S3 bucket is external to Kubernetes; the MinIO service is in-cluster and backed by a PVC. These are separate failure and persistence boundaries.
 
-**Production counterpart, not a second copy of diagram 2:** `PR-DB` replaces `PP-DB`; production refresh manifests name `LEGACY-POC` for canonical projection, while the scrape target remains unresolved without the secret-backed configuration. The production grounding workflow runs on GitHub Actions and publishes `candidats/ → graph/` **within `LEGACY-POC`**, not through preprod Job 41/MinIO. Production OGC is `GEO-API → GEO-S3`. Live production API-store overrides and PDF-reader activation remain unverified. This is why diagram 2 is explicitly preprod rather than falsely symmetric.
+**Production declarations, not a live counterpart of diagram 2:** main names `PR-DB` and SCW `LEGACY-POC` for canonical projection; the scrape target is secret-backed. The old grounding workflow declares GitHub Actions publication `candidats/ → graph/` within that SCW bucket. Those declarations do not establish current execution. Only Geo's `GEO-API → GEO-S3` serving was inventoried live; production Immo overrides remain unknown.
 
 **Main-only references, excluded from operational diagrams:** the following are templates, not verified production or preprod execution. The preceding production description is a manifest contract only.
 
@@ -317,10 +319,12 @@ flowchart LR
   scrape --> local["Workstation LLM stage today"]
   local --> projection["Validated graph publication → projection"]
   projection --> appdata["Application data / visible signals"]
-  scrape -->|"Current direct deterministic PG feed"| appdata
+  scrape -->|"Direct deterministic PG feed"| interim["Lowercase graph nodes<br/>NOT served as Signal / DesignationEvent"]
 ```
 
 The September full-auto design selects `@sentropic/s3-dag` reconciliation with durable progress, quota control, provenance and retries; it also requires the E4 merge / E5 sole-writer transition described in §2. LLM execution moves off the workstation in that **PLANNED** architecture; no deployed LLM gateway or completed cutover is asserted here. The older June workspace-data/queue proposal is historical context, not the current target. Code promotion, data refresh and production-to-preprod copying are three different operations.
+
+**Newer continuation evidence:** i-cond's September 11 `.remote/REFRESH_E2E_CONCEPTION.md` proposes a checkpointed sequential runner covering extraction, grounding, publication, projection and 3.4 EMIT/APPLY; initially hybrid, then cluster mesh. It explicitly describes a **design, not implemented or accepted runtime**. This newer proposal and the ongoing Graphify upgrade must be reconciled before choosing the implementation plan; the September 5 E1–E5 document alone is insufficient. The owner requests continuation and preprod-first retirement, but retains **SCW TEM until its replacement is validated** (reconfirmed September 13).
 
 ## 6. Questions for the architecture walkthrough
 
@@ -336,6 +340,7 @@ The September full-auto design selects `@sentropic/s3-dag` reconciliation with d
 | `geo` | `f68d8ddf` (`origin/main`, 2026-09-12) | Current serving overlays, S3 target, joins and acquisition code; local root HEAD was older |
 | `poc-k8s` | `03acdfd` (local HEAD, 2026-09-05); freshly fetched main remains `346e49b8` (July 4) | OVH runbooks are newer local work, **not main**; live endpoint evidence takes precedence over the older main's SCW platform description |
 | `i-cond` | Local `.lanes/conductor/docs/PLAN_PIPELINE_DONNEES_PREPROD.md`, dated 2026-09-03 | Operational context, workstation requirement and publish-only boundary; historical status superseded where live evidence exists |
+| `i-cond` latest refresh study | Local `.remote/PIPELINE_PV_SIGNAUX_E2E.md` and `.remote/REFRESH_E2E_CONCEPTION.md`, September 11 | Case-sensitive served-node boundary and 3.4 EMIT/APPLY checked against current main; older storage/repoint claims superseded by this live audit; conception is not implementation |
 | Immo full-auto design | `6296396fed804cf9a3d4a6e031c452af57313357` (`origin/design/fullauto-pipeline-consolidated`, September 5) | Follow-up ownership/transition audit: E1–E5, geographic seam, interim feed and future sole writer; design, not deployed state |
 | Immo Graphify CAS work | `73172214a369ebfba0aab530dadde873341baa4a` (`feat/graphify-v23-cas-ingest`, September 11) | Follow-up branch inspection against its pre-change parent `8e18f01b`; changes remain in Immo tools and plan; qualification not inferred |
 

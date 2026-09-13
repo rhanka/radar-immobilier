@@ -25,6 +25,7 @@ separate gated change. They describe MinIO as still load-bearing in both
 environments on September 11; this is historical operational evidence, **not**
 a fresh production runtime observation. SCW transactional email was retained by
 owner decision, pending an approved replacement.
+The owner explicitly reconfirmed that exception on September 13 during this audit.
 
 The #677 overlay comment claiming the refresh bucket is also the application's
 bucket contradicts the live API ConfigMap below. The executable patch only
@@ -52,6 +53,9 @@ request success, object coverage, or a running process's refreshed environment.
 CronJob `lastSuccessfulTime` is controller status, not proof of fresh signals.
 The projection timestamp does not establish the cause of its more recent lack
 of recorded success; no remediation is part of this architecture task.
+Current main also confirms that the direct scrape feed writes lowercase node
+types while the Signal routes select exact `Signal`/`DesignationEvent` types.
+Scrape success alone is therefore not a fresh served-signal acceptance criterion.
 
 ## Production: explicit evidence gap
 
