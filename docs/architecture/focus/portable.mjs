@@ -32,7 +32,7 @@ const sourceFiles = await Promise.all([
 const evidence = {
   schema: 'immo-architecture-monthly-evidence/v2', revision: 'D5',
   requestedPeriod: { timezone: 'America/Toronto', start: null, startDefinition: 'real preceding invoice/report boundary', startVerified: false, endExclusive: '2026-09-14T00:00:00-04:00' },
-  captureCutoffs: { architectureLiveCheck: '2026-09-13T12:37:00Z', unifiedDeliveryTokenBilling: null, status: 'September 13 incomplete; unified cutoff not frozen' },
+  captureCutoffs: { architectureLiveCheck: '2026-09-13T15:38:00Z', unifiedDeliveryTokenBilling: null, status: 'September 13 incomplete; unified cutoff not frozen' },
   ownerCorrection: { capturedAt: '2026-09-13T15:10:18.423Z', sourceRevision: 'D4', dossierHash: 'b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451', artifactInputHash: '92b87297fbc8ed0f2670fa4fd07e1dde6d061d04533d3695275c1f386b3b032e', option: null, interpretation: 'no allocation vote; D5 fixed instructions' },
   snapshotAt: '2026-09-13', transitionRelation: 'inside-requested-period; observed-versus-planned', monetaryEvidence: 'incomplete',
   deploymentClaim: 'none; T1, T2 and T3 are explicitly proposed/not deployed',

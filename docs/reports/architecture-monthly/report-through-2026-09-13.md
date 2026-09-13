@@ -8,7 +8,7 @@ signature, deployment record or replacement for preserved source reports.
 - Timezone: America/Toronto.
 - Requested start: the real preceding invoice/report boundary, **unverified**.
 - Requested end: September 13 inclusive (`2026-09-14T00:00:00-04:00` exclusive).
-- Architecture capture cutoff: last cited live check `2026-09-13T12:37:00Z`.
+- Architecture capture cutoff: last cited live check `2026-09-13T15:38:00Z`.
 - Unified delivery/token/billing cutoff: **not frozen or verified**; September 13
   is incomplete in the available evidence.
 - Owner correction captured `2026-09-13T15:10:18.423Z`; this is provenance of
@@ -35,7 +35,7 @@ states](../../architecture/transitions-target.md), [T1 causal detail](../../arch
 | State | Observed in available September 13 evidence | Planned / not deployed |
 | --- | --- | --- |
 | Existant | Preprod API uses MinIO `PP-RAW`/`PP-DOCS`; refresh uses same OVH `PP-GRAPH`; same `PP-DB`; Geo PDF corpus is separate. Prod access observed; private bindings unavailable. | None inferred from production source defaults. |
-| T1 | Graphify 0.18.0 published; refresh design and CAS work available. | In-pod host mesh 0.19 integration, durable keyring/lock, full fresh candidate→3.4→guarded graph→atomic PG path, typed Signal/PDF and scheduled acceptance. |
+| T1 | Graphify 0.18.0 published; dependency commit `d0595d9f`, typecheck PASS and scoped tests underway by 15:39 UTC. | Finish the in-pod consumer, durable keyring/lock, full fresh candidate→3.4→guarded graph→atomic PG path, typed Signal/PDF and scheduled acceptance. |
 | T2 | Preprod refresh graph binding is already OVH; API MinIO and executable SCW residue remain evidenced. | New `PP-RAW-OVH`/`PP-DOCS-OVH` roles, reader/writer parity, fencing, recovery, zero-consumer retirement, separately inventoried prod, final SCW sweep; TEM retained. |
 | T3 | Three b3-8 nodes; ~9,454 Mi instantaneous memory; 5,907.82 Mi allocatable per node; MinIO ~347 Mi. | One existing b3-8 for Immo+Geo only after full peak/requests/affinity/PDB/PVC/drain acceptance. |
 

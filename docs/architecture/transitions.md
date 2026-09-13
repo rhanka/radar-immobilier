@@ -27,7 +27,7 @@ execution; it is not a request to vote again on those three objectives.
 
 | Transition | Existing work retained | Remaining acceptance | Current status |
 | --- | --- | --- | --- |
-| T1 — autonomous PV → Signal cron | Immo CAS #678; four-stage pipeline; canonical writer; projection; 3.4 EMIT/APPLY; i-cond's in-pod Graphify study; existing scrape/projection CronJobs | Install exact Graphify 0.18.0; finish consumer/runner wiring; one-document proof then selected corpus; guarded publish → PG → typed Signal and PDF; retry/idempotence; durable unattended identity; run the CronJob's Job template, then observe scheduled execution | Release ready; Immo integration and live end-to-end proof still pending |
+| T1 — autonomous PV → Signal cron | Immo CAS #678; four-stage pipeline; canonical writer; projection; 3.4 EMIT/APPLY; i-cond's in-pod Graphify study; existing scrape/projection CronJobs | Finish consumer/runner wiring; one-document proof then selected corpus; guarded publish → PG → typed Signal and PDF; retry/idempotence; durable unattended identity; run the CronJob's Job template, then observe scheduled execution | Implementation underway: dependency commit `d0595d9f`, typecheck PASS, scoped tests underway at 15:39 UTC; no runtime acceptance or deployment |
 | T2 — remove MinIO and remaining SCW dependencies | #677 OVH refresh bindings, #671/#672 GHCR migrations; #670 retirement branch; existing role map PP-RAW/PP-DOCS/PP-GRAPH/GEO-S3 | Inventory all readers/writers and objects; provision exact OVH bindings; copy + integrity + final-write reconciliation; repoint and test; stop MinIO after no clients remain; close executable SCW references in images, Jobs, CI and backups; purge source PVC only after recovery acceptance | MinIO still effective in the dated preprod snapshot; production inventory and cross-repo residue closure required |
 | T3 — one OVH b3-8 | poc-k8s `cluster-rightsizing-plan.md`, `rightsizing-status-2026-09-13.md`, `b3-8-service-plan.md` | Include Immo prod and the new refresh Job in full capacity budget; verify PDB/affinity/PVC placement, batch and wake peaks; preserve data and active services; controlled consolidation then pool min=max=desired=1 | Owner-fixed target; not yet a demonstrated safe placement |
 
@@ -37,6 +37,12 @@ contract tests passed on the producer side. H2A envelope
 `env:graphify-018-final:1789306808055`, 13:40 UTC. This closes the publication
 dependency, not the Immo consumer acceptance. Earlier open-PR references are dated
 history, not current release status.
+
+[FACT] H2A progress envelope `env:d5-live-progress-20260913T1539` reports Immo
+dependency commit `d0595d9f`, typecheck PASS and scoped tests underway. The paired
+15:38 UTC read-only readiness note confirms existing preprod workloads and CronJobs,
+not the new refresh. Neither item proves a Graphify 0.18 run, Signal/PDF acceptance,
+durable credentials, scheduled execution or deployment.
 
 [JUDGMENT] The shortest continuation is the engaged in-pod library integration,
 not a new mesh network service, another CLI orchestration layer or completion of

@@ -20,7 +20,7 @@ flowchart TB
     T1_KEEP["KEPT<br/>PP-DB, PP-GRAPH, API/UI/MCP, Geo evidence and MinIO API roles"]
     T1_REMOVE["REMOVED<br/>Routine workstation LLM and parallel legacy canonical publishers"]
     T1_GATES["GATES<br/>Installed contract + durable identity/lock + preprod E2E THEN production"]
-    T1_EVIDENCE["EVIDENCE<br/>Graphify 0.18.0 published; Immo implementation/schedule acceptance open"]
+    T1_EVIDENCE["EVIDENCE<br/>Graphify 0.18.0 published; Immo dependency commit d0595d9f<br/>typecheck PASS; scoped tests underway; runtime acceptance open"]
   end
   user["User / browser"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
