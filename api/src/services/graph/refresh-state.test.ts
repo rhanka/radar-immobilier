@@ -4,6 +4,7 @@ import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
 import {
   completeRefreshChunk,
   openRefreshState,
+  readCompletedRefreshChunk,
   reserveRefreshChunk,
   writeRefreshCandidate,
   writeRefreshStageReceipt,
@@ -50,12 +51,24 @@ describe("refresh durable state", () => {
     let handle = await openRefreshState(store, identity(), 6);
     const reserved = await reserveRefreshChunk(store, handle, "chunk.1", 2);
     expect(reserved.shouldCall).toBe(true);
-    handle = await completeRefreshChunk(store, reserved, "chunk.1", "sha256:" + "e".repeat(64));
+    handle = await completeRefreshChunk(store, reserved, "chunk.1", { nodes: [{ id: "signal-1" }] });
 
     const resumed = await openRefreshState(store, identity(), 6);
     const skipped = await reserveRefreshChunk(store, resumed, "chunk.1", 2);
     expect(skipped.shouldCall).toBe(false);
     expect(skipped.state.reservedCalls).toBe(2);
+    expect(await readCompletedRefreshChunk(store, skipped, "chunk.1"))
+      .toEqual({ nodes: [{ id: "signal-1" }] });
+  });
+
+  it("should reject a changed completed chunk artifact", async () => {
+    const store = new MemoryStore();
+    const reserved = await reserveRefreshChunk(store, await openRefreshState(store, identity(), 2), "chunk.1", 2);
+    const completed = await completeRefreshChunk(store, reserved, "chunk.1", { nodes: [] });
+    store.objects.set(completed.state.completedChunks["chunk.1"]!.key,
+      new TextEncoder().encode('{"nodes":[{"id":"changed"}]}'));
+    await expect(readCompletedRefreshChunk(store, completed, "chunk.1"))
+      .rejects.toThrow("hash mismatch");
   });
 
   it("should count interrupted maximum-attempt reservations conservatively", async () => {
