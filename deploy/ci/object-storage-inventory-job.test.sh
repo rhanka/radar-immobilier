@@ -62,6 +62,11 @@ if grep -Fq 'automountServiceAccountToken: false' "$JOB" &&
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
 
+TEST_NAME='opens a bounded ready-marked evidence collection window'
+if grep -Fq 'marker="/evidence/export-ready/${MIGRATION_RUN_ID}"' "$JOB" &&
+  grep -Fq 'test -f /evidence/export-ready/${MIGRATION_RUN_ID}' "$JOB" &&
+  grep -Fq 'sleep 300' "$JOB"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
 TEST_NAME='limits MinIO ingress to the dedicated inventory selector'
 if grep -Fq 'name: allow-object-storage-inventory-to-minio' "$RENDER" &&
   grep -Fq 'app.kubernetes.io/component: object-storage-inventory' "$RENDER" &&
