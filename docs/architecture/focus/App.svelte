@@ -9,7 +9,7 @@
   import Choices from './Choices.svelte';
   import mermaid from './.generated/mermaid.json';
   import data from './.generated/data.json';
-  const titles = ['Avant', 'Transition effective', 'T1 · prochain gate', 'Après T2 · objets OVH', 'Après T3 · un b3-8', 'Gates & retour arrière', 'Preuves & limites', 'Annexe facturation'];
+  const titles = ['Architecture AVANT', 'Architecture APRÈS', 'Delta factuel', 'Gates & retour arrière', 'Décisions ratifiées', 'Questions ouvertes', 'Preuves & limites', 'Annexe facturation'];
   let step = $state(0), note = $state(''), saved = $state(false), storageError = $state(false), source = $state(null);
   const key = `immo-focus-decision:${data.manifest.artifactInputHash}:draft`;
   const renderer = new marked.Renderer();
@@ -41,11 +41,11 @@
       <header class="masthead">
         <Flex justify="between" align="center" wrap gap={2}>
           <span class="eyebrow">h2a Focus · dossier de décision · Immo / Geo / Kubernetes</span>
-          <Badge tone="warning">AVANT · TRANSITION EFFECTIVE · APRÈS CIBLE</Badge>
+          <Badge tone="warning">ARCHITECTURE AVANT · ARCHITECTURE APRÈS</Badge>
         </Flex>
         <h1>Des nouveaux PV<br>aux signaux visibles.</h1>
-        <p class="lede">Comparer Avant → Transition effective au 13 septembre → Après T2 → Après cible. Les gates séparent strictement les faits, le travail en cours et la projection.</p>
-        <div class="truth-strip"><span><strong>Avant</strong> API raw MinIO + LLM poste</span><span><strong>Effectif</strong> RAW OVH; T1 pré-LLM; DOCS inventaire</span><span><strong>Après T2</strong> DOCS/prod seulement après preuves</span><span><strong>Après T3</strong> un b3-8; pas commencé</span></div>
+        <p class="lede">Comparer les deux seules architectures de référence : la capture AVANT et la cible APRÈS. L’état effectif et les gates restent du contexte textuel, jamais un troisième graphe principal.</p>
+        <div class="truth-strip"><span><strong>AVANT</strong> MinIO + poste LLM + plateforme trois nœuds</span><span><strong>APRÈS</strong> objets OVH + refresh autonome + un b3-8 après acceptation</span></div>
       </header>
       <Explorer graphs={data.graphs} />
       <nav class="steps" aria-label="Sections du dossier">
@@ -53,9 +53,9 @@
       </nav>
       <ProgressBar value={step + 1} max={8} label={`Section ${step + 1} sur 8`} size="sm" />
       <section class="decision-content">
-        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D6 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
+        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D7 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
         <!-- The French reading surface links to the complete repository dossier. -->
-        {#if step === 7}<Choices manifest={data.manifest} remarks={note} />{:else}<div class="prose" onclick={link} role="presentation">{@html html(presentation[step])}</div>{/if}
+        {#if step === 5}<Choices manifest={data.manifest} remarks={note} />{:else}<div class="prose" onclick={link} role="presentation">{@html html(presentation[step])}</div>{/if}
         <Button variant="ghost" size="sm" onclick={() => source = 'decision-dossier'}>Dossier source complet · références et qualification des faits</Button>
         {#if step === 6}<Button variant="secondary" onclick={() => source = 'decision-reviews'}>Lire les avis réels des reviewers</Button>{/if}
       </section>
