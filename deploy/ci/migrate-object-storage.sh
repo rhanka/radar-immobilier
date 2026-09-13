@@ -411,6 +411,81 @@ if [ "$EXPECTED_MANIFEST_DIGEST" != null ]; then
     add_missing_proof 'current source disagrees with the approved union'
 fi
 
+copy_one() {
+  local item="$1" result="$2" index="$3" key body getout putout sha
+  local content_type content_encoding cache_control disposition metadata tagging
+  local args
+  key="$(jq -r '.key' <<<"$item")"; body="$WORK_DIR/copy-body-$index"
+  getout="$WORK_DIR/copy-get-$index.json"; putout="$WORK_DIR/copy-put-$index.json"
+  if ! retry_get_object "$getout" "$body" source "$SOURCE_BUCKET" "$key"; then
+    jq -cn --arg key "$key" '{status:"failed",key:$key,operation:"get-object"}' >"$result"
+    return 1
+  fi
+  sha="$(sha256sum "$body" | awk '{print $1}')"
+  if [ "$sha" != "$(jq -r '.sha256' <<<"$item")" ]; then
+    rm -f "$body"
+    jq -cn --arg key "$key" '{status:"failed",key:$key,operation:"source-changed"}' >"$result"
+    return 1
+  fi
+  args=(put-object --bucket "$DESTINATION_BUCKET" --key "$key" --body "$body" --if-none-match '*')
+  content_type="$(jq -r '.contentType // empty' <<<"$item")"
+  content_encoding="$(jq -r '.contentEncoding // empty' <<<"$item")"
+  cache_control="$(jq -r '.cacheControl // empty' <<<"$item")"
+  disposition="$(jq -r '.contentDisposition // empty' <<<"$item")"
+  metadata="$(jq -c '.metadata' <<<"$item")"
+  tagging="$(jq -r '[.tags[]? | ((.Key|@uri) + "=" + (.Value|@uri))] | join("&")' <<<"$item")"
+  [ -z "$content_type" ] || args+=(--content-type "$content_type")
+  [ -z "$content_encoding" ] || args+=(--content-encoding "$content_encoding")
+  [ -z "$cache_control" ] || args+=(--cache-control "$cache_control")
+  [ -z "$disposition" ] || args+=(--content-disposition "$disposition")
+  [ "$metadata" = '{}' ] || args+=(--metadata "$metadata")
+  [ -z "$tagging" ] || args+=(--tagging "$tagging")
+  if ! retry_json "$putout" destination "${args[@]}"; then
+    rm -f "$body"
+    jq -cn --arg key "$key" '{status:"failed",key:$key,operation:"conditional-put"}' >"$result"
+    return 1
+  fi
+  rm -f "$body"
+  jq -cn --arg key "$key" --arg versionId "$(jq -r '.VersionId // empty' "$putout")" \
+    '{status:"copied",key:$key,putVersionId:(if $versionId == "" then null else $versionId end)}' \
+    >"$result"
+}
+
+copy_missing_objects() {
+  local tasks="$WORK_DIR/copy-tasks.jsonl" index=0 item result failed
+  local -a pids=() results=()
+  mkdir -p "$WORK_DIR/copy-results"
+  jq -c --slurpfile source "$REPORT_DIR/source-included-manifest.jsonl" '
+    .missing[] as $key | ($source | map(select(.key == $key)) | first) |
+    select(. != null)' "$PARITY" >"$tasks"
+  while IFS= read -r item; do
+    index=$((index + 1)); result="$WORK_DIR/copy-results/$index.json"
+    copy_one "$item" "$result" "$index" & pids+=("$!"); results+=("$result")
+    if [ "${#pids[@]}" -ge "$CONCURRENCY" ]; then
+      for pid in "${pids[@]}"; do wait "$pid" || true; done
+      failed=false
+      for result in "${results[@]}"; do
+        if [ "$(jq -r '.status' "$result")" = failed ]; then
+          record_failure destination "$(jq -r '.key' "$result")" "$(jq -r '.operation' "$result")"
+          failed=true
+        fi
+      done
+      pids=(); results=()
+      failure_cap_reached && break
+      $failed && [ "$FAILURE_COUNT" -ge "$MAX_FAILURES" ] && break
+    fi
+  done <"$tasks"
+  for pid in "${pids[@]}"; do wait "$pid" || true; done
+  for result in "${results[@]}"; do
+    if [ "$(jq -r '.status' "$result")" = failed ]; then
+      record_failure destination "$(jq -r '.key' "$result")" "$(jq -r '.operation' "$result")"
+    fi
+  done
+  jq -cs 'map(select(.status == "copied")) | sort_by(.key)[]' \
+    "$WORK_DIR"/copy-results/*.json >"$REPORT_DIR/copy-results.jsonl" 2>/dev/null ||
+    : >"$REPORT_DIR/copy-results.jsonl"
+}
+
 PARITY="$REPORT_DIR/parity.json"
 jq -n --slurpfile expected "$TARGET_MANIFEST" --slurpfile actual "$DESTINATION_MANIFEST" '
   def core: del(.etag,.versionId,.classification,.sources);
