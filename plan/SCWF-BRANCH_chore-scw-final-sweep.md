@@ -35,6 +35,11 @@
 - [ ] Lot 3: Astra design and Gemini review, then Sol implementation and Gemini post-build review.
 - [x] Lot 3a: conductor defines the bounded parallel implementation and cutover dependencies in `docs/reviews/scw-final/build-design.md`.
 - [x] Lot 3b: Fable GO_WITH_CHANGES reconciled (F1 required complete bindings; F2 defer armed refresh-diag; F3/F4 remaining-client visibility); amended first slice released to Sol.
+- [x] Lot 3c: remove unused object-storage credentials from PostgreSQL migration containers.
+- [ ] Lot 3d: require complete graph and scrape bindings in manual Jobs.
+- [ ] Lot 3e: retire uncalled SCW mount executables and correct deployment guidance.
+- [ ] Lot 3f: add and pass scoped offline storage-binding regression checks.
+- [ ] Lot 3g: record remaining clients, run final offline gates, and complete independent post-build review.
 - [ ] Lot 4: after T1, conductor verifies copy/parity/fencing/recovery and preprod then production cutovers.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
 
