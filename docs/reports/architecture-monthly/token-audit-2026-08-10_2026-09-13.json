@@ -1,0 +1,96 @@
+{
+  "schema": "immo-geo-token-allocation-audit/v1",
+  "generatedAt": "2026-09-13T21:09:35.483Z",
+  "period": {
+    "timezone": "America/Toronto",
+    "startInclusive": "2026-08-10T00:00:00-04:00",
+    "endExclusive": "2026-09-14T00:00:00-04:00",
+    "days": 35
+  },
+  "method": {
+    "dedupClaude": "(file,message.id), componentwise max on inconsistent duplicates",
+    "dedupCodex": "(sessionId,timestamp,usage) exact signature",
+    "dailyBucketing": "America/Toronto fixed UTC-04 for this DST window",
+    "capacity": "provider global seven-day peak; historical audited peak retained when larger",
+    "tariffs": {
+      "claudeSeats": 2,
+      "codexSeats": 1,
+      "seatUsdPerMonth": 200,
+      "usdCad": 1.37,
+      "llmMargin": 1.15
+    }
+  },
+  "capacity": {
+    "claude": {
+      "tokens": 15138897392,
+      "start": "2026-08-30",
+      "end": "2026-09-05"
+    },
+    "codex": {
+      "tokens": 32217805325,
+      "start": "2026-05-04",
+      "end": "2026-05-10"
+    }
+  },
+  "currentWindowPeaks": {
+    "claude": {
+      "tokens": 15138897392,
+      "start": "2026-08-30",
+      "end": "2026-09-05"
+    },
+    "codex": {
+      "tokens": 3832110404,
+      "start": "2026-08-10",
+      "end": "2026-08-16"
+    }
+  },
+  "products": {
+    "immo": {
+      "tokens": {
+        "claude": 14009998961,
+        "codex": 1426882082
+      },
+      "prorataUsd": 88.44032524896879,
+      "prorataCad": 121.16324559108725,
+      "facturableCad": 139.33773242975033
+    },
+    "geo": {
+      "tokens": {
+        "claude": 11194704885,
+        "codex": 1376664354
+      },
+      "prorataUsd": 71.01092049931265,
+      "prorataCad": 97.28496108405834,
+      "facturableCad": 111.87770524666708
+    }
+  },
+  "totals": {
+    "tokens": {
+      "claude": 25204703846,
+      "codex": 2803546436
+    },
+    "facturableCad": 251.21543767641742
+  },
+  "scan": {
+    "claude": {
+      "files": 375,
+      "bytes": 3513040154,
+      "lines": 1497639,
+      "records": 208146,
+      "uniqueMessages": 84338,
+      "duplicates": 123808,
+      "inconsistent": 20,
+      "malformed": 4
+    },
+    "codex": {
+      "sessions": 1249,
+      "turns": 94062,
+      "duplicates": 75
+    }
+  },
+  "caveats": [
+    "Allocation from local session logs; not a provider invoice line.",
+    "Historical provider capacity comes from the September 11 deduplicated audit; this run replaces it only if the refreshed-window peak is higher.",
+    "Only immo and geo are billable products; platform usage is excluded from product numerators."
+  ]
+}
