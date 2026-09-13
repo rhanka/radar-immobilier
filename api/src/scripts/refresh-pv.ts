@@ -8,7 +8,9 @@ import { EncryptedFileKeyring } from "@sentropic/llm-mesh-refresh/node";
 import { loadConfig } from "../config.js";
 import { createDb } from "../db/client.js";
 import { createLogger } from "../logger.js";
-import { createRefreshMesh, type RefreshProvider } from "../services/graph/refresh-mesh.js";
+import {
+  createRefreshMesh, refreshErrorDiagnostic, type RefreshProvider,
+} from "../services/graph/refresh-mesh.js";
 import { loadRefreshProfileContext } from "../services/graph/refresh-profile.js";
 import { runPvRefresh, type RefreshAcquire } from "../services/graph/refresh-run.js";
 import { canonicalHash } from "../services/graph/replay/canonical-json.js";
@@ -35,21 +37,6 @@ function provider(): RefreshProvider {
   const value = required("REFRESH_PROVIDER");
   if (value !== "openai" && value !== "gemini") throw new Error("REFRESH_PROVIDER must be openai or gemini");
   return value;
-}
-
-function safeErrorDiagnostic(error: unknown): Record<string, string | number | undefined> {
-  const record = error && typeof error === "object" ? error as Record<string, unknown> : {};
-  const cause = record["cause"] && typeof record["cause"] === "object"
-    ? record["cause"] as Record<string, unknown> : {};
-  const token = (value: unknown) => typeof value === "string" && /^[A-Za-z0-9_.:-]{1,120}$/.test(value)
-    ? value : undefined;
-  const status = (value: unknown) => typeof value === "number" && Number.isInteger(value) ? value : undefined;
-  const internalFrame = error instanceof Error ? error.stack?.split("\n").slice(1)
-    .map((line) => line.trim()).find((line) => /^at [A-Za-z0-9_.<>]+ \(?node:internal\//.test(line)) : undefined;
-  return { errorName: token(record["name"]), errorCode: token(record["code"]),
-    statusCode: status(record["statusCode"] ?? record["status"]), requestId: token(record["requestId"]),
-    causeName: token(cause["name"]), causeCode: token(cause["code"]),
-    causeStatusCode: status(cause["statusCode"] ?? cause["status"]), stackOrigin: internalFrame };
 }
 
 async function seedSavedInput(store: S3ObjectStore, city: string): Promise<RefreshAcquire | undefined> {
@@ -114,7 +101,7 @@ async function main(): Promise<void> {
         return result;
       } catch (error) {
         logger.warn({ ...receipt, latencyMs: Date.now() - startedAt, status: "failed",
-          aborted: controller.signal.aborted, ...safeErrorDiagnostic(error) }, "refresh-pv: model call failed");
+          aborted: controller.signal.aborted, ...refreshErrorDiagnostic(error) }, "refresh-pv: model call failed");
         throw error;
       }
     } };

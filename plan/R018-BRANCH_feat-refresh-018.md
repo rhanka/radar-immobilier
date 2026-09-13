@@ -75,6 +75,7 @@
 - [x] C14c: identify the exact live schema and prompt by digest in the redacted model-call receipt.
 - [x] C14d: distinguish completed generation from failure instead of treating cleanup as a provider response.
 - [x] C14e: retain only allow-listed name/code/status/request and internal stack-origin diagnostics for model failures.
+- [x] C14f: compose the run AbortSignal into the public Codex transport fetch and prove streamed cancellation with redacted diagnostics.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
