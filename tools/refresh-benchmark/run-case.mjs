@@ -95,7 +95,8 @@ const observedFetch = async (url, init) => {
   const fetchStarted = Date.now();
   const bodyText = String(init?.body ?? "");
   const body = JSON.parse(bodyText);
-  const response = await fetch(url, init);
+  const signal = init?.signal ? AbortSignal.any([init.signal, controller.signal]) : controller.signal;
+  const response = await fetch(url, { ...init, signal });
   wire = { fetchStartedAt: new Date(fetchStarted).toISOString(), httpStatus: response.status,
     requestBodySha256: sha256(bodyText), model: body.model, reasoning: body.reasoning,
     maxOutputTokens: body.max_output_tokens, inputBytes: Buffer.byteLength(bodyText),
@@ -143,7 +144,7 @@ if (generated?.text) await writeFile(outputPath, generated.text, "utf8");
 const receipt = { schemaVersion: 1, caseId, status, t1Commit, profileModuleSha256,
   documentId: document.id, input: { pdfSha256: document.sha256, textSha256: document.textSha256 },
   requested: { providerId: "openai", modelId: variant.model, effort: variant.effort,
-    maxOutputTokens: frozen.maxOutputTokens }, accountPseudonym, wire,
+    maxOutputTokens: frozen.maxOutputTokens, transportTimeoutMs: 480_000 }, accountPseudonym, wire,
   actual: generated ? { responseId: generated.id, providerId: generated.providerId,
     modelId: generated.modelId, finishReason: generated.finishReason, usage: generated.usage } : null,
   hashes: inputHashes, timing: { startedAt: new Date(started).toISOString(),
