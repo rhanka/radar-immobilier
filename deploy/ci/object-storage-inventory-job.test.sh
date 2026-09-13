@@ -87,6 +87,14 @@ if [ "$(grep -c 'name: radar-raw-s3-credentials' "$SUPPORT/raw-api-rebind-patch.
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
 
+TEST_NAME='live binding verifier accepts the exact six-key mapping'
+if jq -n '["ACCESS_KEY","BUCKET","ENDPOINT","FORCE_PATH_STYLE","REGION","SECRET_KEY"] |
+    {spec:{template:{spec:{containers:[{name:"api",env:map({name:("S3_" + .),
+      valueFrom:{secretKeyRef:{name:"radar-raw-s3-credentials",key:("RAW_S3_" + .)}}})}]}}}}' |
+  jq -e -f "$ROOT/deploy/ci/raw-api-ovh-binding.jq" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
 TEST_NAME='fence follows a settled rolling rebind without scaling workloads'
 if grep -Fq 'patch deployment/radar-api --type=strategic' "$ROOT/Makefile" &&
   grep -Fq 'minioRawWriters=0' "$ROOT/Makefile" &&

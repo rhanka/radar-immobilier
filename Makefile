@@ -440,12 +440,14 @@ object-storage-raw-preprod-rebind: ## Roll radar-api RAW bindings to OVH without
 	  for ((attempt=1; attempt<=60; attempt++)); do \
 	    pods="$$( $(KUBECTL) -n "$$namespace" get pods \
 	      -l 'app.kubernetes.io/name=radar-immobilier,app.kubernetes.io/component=api' -o json )"; \
-	    if jq -e '.items | length == 1 and all(.[]; .metadata.deletionTimestamp == null and \
-	      any(.status.conditions[]?; .type == "Ready" and .status == "True"))' \
+	    if jq -e '.items | length == 1 and all(.[]; .metadata.deletionTimestamp == null and any(.status.conditions[]?; .type == "Ready" and .status == "True"))' \
 	      <<<"$$pods" >/dev/null; then settled=true; break; fi; \
 	    sleep 2; \
 	  done; \
 	  $$settled || { echo "[object-storage-rebind] old API Pod did not terminate"; exit 1; }; \
+	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | \
+	    jq -e -f deploy/ci/raw-api-ovh-binding.jq >/dev/null || \
+	    { echo "[object-storage-rebind] dedicated RAW references are unproved"; exit 1; }; \
 	  echo "[object-storage-rebind] radar-api rolled to dedicated RAW references"
 
 .PHONY: object-storage-raw-preprod-fence
@@ -457,23 +459,11 @@ object-storage-raw-preprod-fence: ## Record that the rolled API leaves no MinIO 
 	fi
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
 	  deployment="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json )"; \
-	  jq -e '(.spec.template.spec.containers[] | select(.name == "api") | \
-	    [.env[] | select(.name == "S3_ENDPOINT" or .name == "S3_REGION" or \
-	      .name == "S3_BUCKET" or .name == "S3_FORCE_PATH_STYLE" or \
-	      .name == "S3_ACCESS_KEY" or .name == "S3_SECRET_KEY") | \
-	      {name,secret:.valueFrom.secretKeyRef.name,key:.valueFrom.secretKeyRef.key}] | \
-	    sort_by(.name)) == \
-	    [{name:"S3_ACCESS_KEY",secret:"radar-raw-s3-credentials",key:"RAW_S3_ACCESS_KEY"}, \
-	     {name:"S3_BUCKET",secret:"radar-raw-s3-credentials",key:"RAW_S3_BUCKET"}, \
-	     {name:"S3_ENDPOINT",secret:"radar-raw-s3-credentials",key:"RAW_S3_ENDPOINT"}, \
-	     {name:"S3_FORCE_PATH_STYLE",secret:"radar-raw-s3-credentials",key:"RAW_S3_FORCE_PATH_STYLE"}, \
-	     {name:"S3_REGION",secret:"radar-raw-s3-credentials",key:"RAW_S3_REGION"}, \
-	     {name:"S3_SECRET_KEY",secret:"radar-raw-s3-credentials",key:"RAW_S3_SECRET_KEY"}]' \
-	    <<<"$$deployment" >/dev/null || { echo "[object-storage-fence] RAW rebind is unproved"; exit 1; }; \
+	  jq -e -f deploy/ci/raw-api-ovh-binding.jq <<<"$$deployment" >/dev/null || \
+	    { echo "[object-storage-fence] RAW rebind is unproved"; exit 1; }; \
 	  pods="$$( $(KUBECTL) -n "$$namespace" get pods \
 	    -l 'app.kubernetes.io/name=radar-immobilier,app.kubernetes.io/component=api' -o json )"; \
-	  jq -e '.items | length == 1 and all(.[]; .metadata.deletionTimestamp == null and \
-	    any(.status.conditions[]?; .type == "Ready" and .status == "True"))' \
+	  jq -e '.items | length == 1 and all(.[]; .metadata.deletionTimestamp == null and any(.status.conditions[]?; .type == "Ready" and .status == "True"))' \
 	    <<<"$$pods" >/dev/null || { echo "[object-storage-fence] API rollout is unsettled"; exit 1; }; \
 	  pod_uid="$$(jq -r '.items[0].metadata.uid' <<<"$$pods")"; \
 	  generation="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
