@@ -80,6 +80,8 @@ spec:
           env:
             - name: MIGRATION_RUN_ID
               valueFrom: { fieldRef: { fieldPath: metadata.uid } }
+            - name: MIGRATION_PROCESS_CONCURRENCY
+              value: "12"
             - name: MIGRATION_SOURCE_ACCESS_KEY_ID
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
             - name: MIGRATION_SOURCE_SECRET_ACCESS_KEY

@@ -129,6 +129,8 @@ validate_scalar --destination-bucket "$DESTINATION_BUCKET"
 validate_path_style --source-path-style "$SOURCE_PATH_STYLE"
 validate_path_style --destination-path-style "$DESTINATION_PATH_STYLE"
 validate_limit --concurrency "$CONCURRENCY" 32; validate_limit --retries "$RETRIES" 10
+PROCESS_CONCURRENCY="${MIGRATION_PROCESS_CONCURRENCY:-$CONCURRENCY}"
+validate_limit MIGRATION_PROCESS_CONCURRENCY "$PROCESS_CONCURRENCY" "$CONCURRENCY"
 validate_limit --max-failures "$MAX_FAILURES" 100
 validate_limit --max-object-bytes "$MAX_OBJECT_BYTES" 5000000000
 validate_limit --page-size "$PAGE_SIZE" 1000
@@ -386,7 +388,7 @@ consume_manifest_batch() {
 }
 
 build_manifest() {
-  local side="$1" listing="$2" output="$3" bucket item index=0 parallelism="$CONCURRENCY"
+  local side="$1" listing="$2" output="$3" bucket item index=0 parallelism="$PROCESS_CONCURRENCY"
   local scratch="$WORK_DIR/$side-manifest.unsorted.jsonl" result
   local -a pids=() results=()
   if $CHECKPOINT_REQUESTED && [ "${CHECKPOINT_BUILDING_PAGE:-false}" != true ]; then
@@ -935,6 +937,7 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
   --arg conditionalDigest "$CONDITIONAL_WRITE_PROOF_DIGEST" \
   --argjson conditionalAccepted "$CONDITIONAL_WRITE_PROOF_ACCEPTED" \
   --argjson concurrency "$CONCURRENCY" --argjson retries "$RETRIES" \
+  --argjson processConcurrency "$PROCESS_CONCURRENCY" \
   --argjson maxFailures "$MAX_FAILURES" --argjson maxObjectBytes "$MAX_OBJECT_BYTES" \
   --argjson resumeRequired "$CHECKPOINT_RESUME_REQUIRED" \
   --argjson checkpointEnabled "$CHECKPOINT_REQUESTED" \
@@ -960,7 +963,8 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
    conditionalWriteCapability:{required:$executeCopy,proofAccepted:$conditionalAccepted,
      proofDigest:(if $conditionalDigest == "null" then null else $conditionalDigest end),
      providerEnforcementValidated:false},
-   limits:{concurrency:$concurrency,retries:$retries,maxFailures:$maxFailures,
+   limits:{concurrency:$concurrency,processConcurrency:$processConcurrency,
+     retries:$retries,maxFailures:$maxFailures,
      maxObjectBytes:$maxObjectBytes},
    counts:{source:$sourceCount,destination:$destinationCount,missing:($parity.missing|length),
      extra:($parity.extra|length),conflicting:($parity.conflicting|length),
