@@ -18,11 +18,12 @@ const kitNode = await readFile('/kit/src/ArchitectureNode.svelte', 'utf8');
 const kitRouter = await readFile('/kit/src/architecture-routing.js', 'utf8');
 const presentation = await readFile('presentation-fr.js', 'utf8');
 const choices = await readFile('choices.js', 'utf8');
+const rendererSources = Object.fromEntries(await Promise.all(['ServiceNode.svelte', 'ServiceIcon.svelte', 'service-icons.js', 'Subflow.svelte', 'scenes.js', 'style.css', 'render-mermaid.mjs', 'mermaid-labels.mjs'].map(async name => [name, await readFile(name, 'utf8')])));
 const manifest = { schema: 'immo-focus-mermaid-map/v1', architectureHash: sha256(architecture),
   proposalHash: sha256(proposal), dossierHash: sha256(docs['decision-dossier']),
   reference: 'Sentropic decision-kit / September 7, 2026',
-  nativeFocusNodeHash: sha256(kitNode), nativeFocusRouterHash: sha256(kitRouter),
-  presentationHash: sha256(presentation), choicesHash: sha256(choices), artifactInputHash: sha256(JSON.stringify({ docs, graphs, presentation, choices })),
+  referenceFocusNodeHash: sha256(kitNode), nativeFocusRouterHash: sha256(kitRouter), serviceRendererHash: sha256(JSON.stringify(rendererSources)),
+  presentationHash: sha256(presentation), choicesHash: sha256(choices), artifactInputHash: sha256(JSON.stringify({ docs, graphs, presentation, choices, rendererSources })),
   mapping: 'Every node and exact edge is rendered simultaneously; subgraphs are native nested parentId boxes. Navigation changes only the viewport.',
   geometry: 'Node bounds and route/node clearance checked; edge/label/arrow crossings are NOT certified zero-overlap.',
   graphs: graphs.map(g => ({ id: g.id, nodes: g.nodes.length, edges: g.edges.length, subflows: g.groups.length })) };

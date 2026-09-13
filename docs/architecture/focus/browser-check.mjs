@@ -33,6 +33,15 @@ console.log(await evaluate(`(async () => {
     choose('Vue architecture', view); await settle();
     const scopes = [...document.querySelector('select[aria-label="Zoomer sur un sous-flow"]').options].map(o => o.value);
     const expected = { 'asis-1': [25, 4, 34], 'asis-2': [14, 3, 14], 'asis-3': [20, 4, 24], 'asis-4': [13, 0, 12], 'target-1': [15, 2, 19] }[view];
+    const source = window.expectedGraphs.find(g => g.id === view);
+    for (const item of [...source.nodes, ...source.groups]) {
+      const box = document.querySelector('.svelte-flow__node[data-id="' + item.id + '"]');
+      if (box.querySelector('.repo-label')?.textContent !== item.provenance.repoLabel || box.querySelector('[data-service-icon]')?.dataset.serviceIcon !== item.provenance.icon) throw Error('Missing icon/repository: ' + view + '/' + item.id);
+      const card = box.querySelector('.service-node'), header = box.querySelector('.subflow-box header');
+      if (card && (card.scrollHeight > card.clientHeight + 1 || card.scrollWidth > card.clientWidth + 1)) throw Error('Component text overflow: ' + view + '/' + item.id);
+      if (header && (header.scrollHeight > header.clientHeight + 1 || header.scrollWidth > header.clientWidth + 1)) throw Error('Subflow header overflow: ' + view + '/' + item.id);
+      if (card && card.querySelector('.node-description').textContent.replace(/\\s+/g, '') !== item.label.replace(/\\s+/g, '')) throw Error('Lost SvelteFlow source text: ' + item.id);
+    }
     for (const scope of scopes) {
       choose('Zoomer sur un sous-flow', scope); await settle();
       const actual = ['.svelte-flow__node-architecture', '.svelte-flow__node-subflow', '.svelte-flow__edge'].map(selector => document.querySelectorAll(selector).length);
@@ -49,6 +58,7 @@ console.log(await evaluate(`(async () => {
   }
   choose('Vue architecture', 'asis-1'); await settle(); choose('Retrouver un composant', 'PP_DB'); await settle();
   if (!document.querySelector('.inspector').textContent.includes('PP-DB')) throw Error('DB inspector missing');
+  if (!document.querySelector('.inspector').textContent.includes('repo: radar-immobilier')) throw Error('DB provenance missing');
   [...document.querySelectorAll('.cross-link')].find(b => b.textContent.includes('PV →')).click(); await settle();
   if (document.querySelector('.flow').dataset.graph !== 'asis-2' || !document.querySelector('.inspector').textContent.includes('PP-DB')) throw Error('Shared DB cross-view navigation failed');
   choose('Vue architecture', 'asis-1'); await settle();
@@ -109,6 +119,18 @@ console.log(await evaluate(`(async () => {
 await writeFile('/out/flow-preview.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
 await evaluate('window.scrollTo(0, 0)');
 await writeFile('/out/dossier-preview.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
+for (const [label, value, file] of [['Retrouver un composant', 'PP_DB', 'service-preview.png'], ['Zoomer sur un sous-flow', 'ppminio', 'stores-preview.png']]) {
+  await evaluate(`(async () => {
+    document.querySelector('.inspector .close')?.click();
+    const select = document.querySelector('select[aria-label="' + ${JSON.stringify(label)} + '"]');
+    select.value = ${JSON.stringify(value)}; select.dispatchEvent(new Event('change', { bubbles: true }));
+    document.querySelector('.graph-layout').scrollIntoView({ behavior: 'instant', block: 'center' });
+    await new Promise(resolve => setTimeout(resolve, 300));
+  })()`);
+  await writeFile('/out/' + file, Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
+}
+await evaluate(`document.querySelector('.mermaid-panel').open = true; document.querySelector('.mermaid-panel').scrollIntoView({ behavior: 'instant' }); true`);
+await writeFile('/out/mermaid-preview.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
 await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
 const mobile = await evaluate('({ width: innerWidth, content: document.documentElement.scrollWidth })');
 if (mobile.content > mobile.width) throw Error(`Mobile overflow ${JSON.stringify(mobile)}`);
@@ -117,4 +139,4 @@ await call('Page.navigate', { url: 'file:///home/antoinefa/src/radar-immobilier/
 await evaluate(`new Promise((resolve, reject) => { const until = Date.now() + 2000; const check = () => document.querySelector('.svelte-flow__node') ? resolve(true) : Date.now() > until ? reject(Error('Offline native flow missing')) : requestAnimationFrame(check); check(); })`);
 if (errors.length || external.length) throw Error(JSON.stringify({ errors, external }));
 console.log(JSON.stringify({ mobile, offline: true, externalRequests: external.length, runtimeErrors: errors.length }));
-clearTimeout(timeout); ws.close();
+clearTimeout(timeout); ws.close(); await fetch(`${base}/json/close/${page.id}`);
