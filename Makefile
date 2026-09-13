@@ -448,6 +448,11 @@ object-storage-docs-preprod-validate: ## Render support and validate the DOCS bu
 	  deploy/ci/build-docs-expected-manifest.sh deploy/ci/copy-canonical-docs.sh \
 	  deploy/ci/copy-canonical-docs.hermetic.test.sh deploy/ci/copy-canonical-docs-progress.sh
 	@node --check deploy/ci/copy-canonical-docs.mjs
+	@set -o pipefail; $(MAKE) --no-print-directory -n object-storage-minio-preprod-remove \
+	  OBJECT_STORAGE_MINIO_REMOVE_CONFIRM=DESTROY_NONCANONICAL_PREPROD_MINIO \
+	  OBJECT_STORAGE_DOCS_PARITY_JOB=radar-object-storage-copy-canonical-docs-hermetic \
+	  OBJECT_STORAGE_DOCS_CANONICAL_DIGEST=52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425 \
+	  KUBECONFIG=/nonsecret/hermetic.kubeconfig ENV=preprod | bash -n
 	@bash deploy/ci/copy-canonical-docs.hermetic.test.sh
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
@@ -681,7 +686,7 @@ object-storage-minio-preprod-remove: ## Irreversibly remove exact preprod MinIO 
 	    networkpolicy/allow-object-storage-inventory-to-minio networkpolicy/allow-scrape-to-minio \
 	    networkpolicy/allow-snapshot-dump-to-minio --ignore-not-found -o name )"; [ -z "$$remaining" ]; \
 	  removed="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
-	  jq -n --slurpfile before "$$work/before.json" --arg removedAt "$$removed" --arg beforeDigest "$$before_digest" --arg parityDigest "$$parity_digest" '\''$$before[0] + {removed:true,removedAt:$$removedAt,beforeDigest:$$beforeDigest,parityReceiptDigest:$$parityDigest,nonRecoverablePvcData:true}'\'' >"$$work/after.json"; \
+	  jq -n --slurpfile before "$$work/before.json" --arg removedAt "$$removed" --arg beforeDigest "$$before_digest" --arg parityDigest "$$parity_digest" '$$before[0] + {removed:true,removedAt:$$removedAt,beforeDigest:$$beforeDigest,parityReceiptDigest:$$parityDigest,nonRecoverablePvcData:true}' >"$$work/after.json"; \
 	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-minio-removal \
 	    --from-file=receipt.json="$$work/after.json" --dry-run=client -o yaml | $(KUBECTL) apply -f - >/dev/null; \
 	  echo "[object-storage-minio] removed StatefulSet/radar-minio Service/radar-minio PVC/minio-data-radar-minio-0 and six ingress policies; receipt=$$(sha256sum "$$work/after.json" | awk '{print $$1}')"
