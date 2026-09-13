@@ -50,7 +50,7 @@ scoped 34/34, integration 4/4 and typecheck; Fable re-review is still in progres
 The internal PDF contract remains `immo-pv-extraction-v3`, not a Graphify release.
 Retain llm-mesh 0.19.0. On rare nested `UND_ERR_SOCKET`, Graphify fails closed,
 the Job fails and the next cycle resumes from durable state; no corruption or
-in-process retry is claimed. The 0.19.1 need is not established or prioritized.
+in-process retry is claimed. The 0.19.1 need is judged probably false and not prioritized.
 Cross-repository implementation is unauthorized; PR #585 is closed and its branches
 are removed. Diagnosis is deferred to `s-conductor` without an implementation request.
 T1 remains **BLOCKED** pending re-review and the remaining acceptance gates. No
