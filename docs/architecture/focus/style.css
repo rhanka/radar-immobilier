@@ -11,7 +11,7 @@ h1 { font-size: clamp(2.4rem, 4.5vw, 4.6rem); line-height: 1.04; letter-spacing:
 h2 { font-size: 1.7rem; letter-spacing: -.025em; margin: 10px 0 20px; }
 h3, h4 { line-height: 1.4; }
 .lede { max-width: 840px; font-size: 1.14rem; line-height: 1.65; color: var(--st-semantic-text-secondary); }
-.truth-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 26px 0; }
+.truth-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin: 26px 0; }
 .truth-strip span { border-top: 3px solid var(--st-semantic-border-strong); padding-top: 12px; font-size: .9rem; }
 .truth-strip strong { display: block; margin-bottom: 4px; }
 .steps { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 40px; }
