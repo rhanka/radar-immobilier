@@ -76,6 +76,7 @@ RUN npm install --no-save esbuild@0.24.0 \
   "    'api/src/scripts/pull-geo-ogc.ts'," \
   "    'api/src/scripts/graphify-34-enrich.ts'," \
   "    'api/src/scripts/emit-graphify34-candidates.ts'," \
+  "    'api/src/scripts/refresh-pv.ts'," \
   "    'api/src/services/geo/run-geo-mapper.ts'," \
   "    'api/src/services/consistency/run-consistency-snapshot.ts'," \
   "  ]," \
@@ -118,7 +119,7 @@ WORKDIR /workspace
 # Without it the worker silently yields empty text → 0 signal on real PDFs.
 # ~2 MB; keep the image slim by clearing the apt lists afterwards.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends poppler-utils \
+ && apt-get install -y --no-install-recommends poppler-utils util-linux \
  && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 1001 radar \
  && useradd --system --uid 1001 --gid radar radar

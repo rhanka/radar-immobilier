@@ -16,7 +16,9 @@
 - [x] R018-EX2 — owner-approved single 2,157-line generated dependency-pair exception for Graphify 0.18.0 plus the refresh mesh 0.19.0 alias, preserving chat mesh 0.1.2; rollback: revert `api/package.json` and `package-lock.json` together.
 - [x] Allowed C01–C14: `api/package.json`, `package-lock.json`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state,run}.ts`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state}.test.ts`; `api/tests/fixtures/refresh-018/oracle.json`; `api/tests/integration/refresh-018.spec.ts`; `api/src/scripts/refresh-pv.ts`. Braces enumerate exact filenames, not open globs.
 - [x] Forbidden: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent entrypoints, `.track/**`, other branch plans, other repositories.
-- [x] Conditional: C15–C25 remain unreleased until slice tests/reconciliation; Kubernetes operations remain conductor-only. Existing canonical writer, graph store and enrichment are read-only reuse unless a precise amendment is recorded.
+- [x] R018-EX3 — owner-authorized urgent preprod completion releases C15–C19 and C25 plus `deploy/k8s/refresh-cronjobs/refresh-018.mk` for make-only apply/trigger/observe. Impact: one isolated Graphify refresh CronJob, durable keyring PVC/bootstrap references and one controlled preprod Job; rollback: suspend/delete only `radar-refresh-pv` and retain the last complete S3/PG graph. Production, sentropic, geo and poc-k8s remain untouched.
+- [x] Released C15–C19/C25 paths: `api/Dockerfile`; `deploy/k8s/34-refresh-keyring-pvc.yaml`; `deploy/k8s/34-refresh-cronjob.yaml`; `deploy/k8s/refresh-cronjobs/kustomization.yaml`; `deploy/k8s/refresh-cronjobs/refresh-018.mk`; `docs/reviews/refresh-018/acceptance.md`.
+- [x] Conditional: C20–C24 remain unreleased. Existing canonical writer, graph store and enrichment are read-only reuse unless a precise amendment is recorded.
 
 ## Feedback Loop
 - [x] Owner routing: Astra design, Gemini 3.8 High pre-build review via h2a run agy, Sol xhigh build, Gemini 3.8 High post-build review. This is the requested review circuit, not a claim of the skill's two-host consensus.
@@ -83,7 +85,7 @@
 - [x] C14e: retain only allow-listed name/code/status/request and internal stack-origin diagnostics for model failures.
 - [x] C14f: compose the run AbortSignal into the public Codex transport fetch and prove streamed cancellation with redacted diagnostics.
 - [x] C14g: retain nested abrupt-SSE evidence as an accepted limitation; fail closed and resume on the next cycle, with no T1 upstream patch gate.
-- [ ] Lot 4: Gemini independent post-build review; fix verified findings.
+- [x] Lot 4: Fable independent post-build review and post-fix PASS; verified findings fixed.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
 
