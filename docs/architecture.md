@@ -64,7 +64,7 @@ flowchart TB
       PP_API <-->|"OIDC token exchange / JWKS"| pidp
       pidp --> pidb
     end
-    subgraph prod["PRODUCTION · namespaces"]
+    subgraph prod["PRODUCTION · access observed; Immo internals not audited"]
       PR_UI["[PR-UI] radar-ui<br/>radar-immobilier"]
       PR_API["[PR-API] radar-api<br/>radar-immobilier"]
       prodgap["Production DB / S3 / refresh<br/>OVH inventory unavailable<br/>No provider inferred from main"]
@@ -180,9 +180,9 @@ Graphify extraction, evidence and grounding work remains relevant. **Its publica
 
 Grounding is an enrichment of stage 3, not a replacement for graph generation. Its publish-only Kubernetes Job verifies the staged content hash, preserves history and publishes one city. The committed grounding README names Sonnet; newer job commentary names a Codex/llm-mesh run. A single current model cannot be inferred from those conflicting records, so the diagram identifies the runtime boundary rather than asserting one provider/model.
 
-**Current preprod split, measured:** scrape and projection bind to `PP-GRAPH`. The API's default `S3_*` store binds to `PP-RAW`; with no API `SCRAPE_S3_*` override, the code derives a **different** MinIO bucket `PP-DOCS` (the bucket fallback is the literal `radar-immobilier-docs`, not `S3_BUCKET`). Neither API binding is the refresh bucket. The committed `PP-PUBLISH` Job reads `LEGACY-POC/candidats/` and writes `PP-GROUND/graph/`, not `PP-GRAPH/graph/`. No recent grounding Job survived in the inventory to prove a runtime override or an aligned end-to-end publication.
+**Current preprod split, measured:** scrape and projection bind to `PP-GRAPH`. The API's default `S3_*` store binds to `PP-RAW`; with no API `SCRAPE_S3_*` override, the code derives a **different** MinIO bucket `PP-DOCS` (the bucket fallback is the literal `radar-immobilier-docs`, not `S3_BUCKET`). Neither API binding is the refresh bucket. The legacy Job 41 template reads SCW candidates and writes MinIO, but it was absent from the live inventory. That template mismatch is **not evidence of a currently running broken pipeline**. Current stage-3 publication into the refresh bucket remains unverified.
 
-**PDF delivery is another path:** `PP-API` has live `GEO_DOCUMENTS_REPOINT=1` and `GEO_DOCUMENTS_S3_BUCKET=sentropic-geo`. For PV references that map to Geo keys, `/api/documents/raw` reads **only `GEO-S3`**, with no fallback to Immo if those candidates are missing. Non-mapped references retain the legacy `PP-DOCS` then `PP-RAW` lookup. This shares captured documents with Geo; it does not transfer Immo's detection/graphification/SQL projection to Geo. `PP-GEO-S3/normalized/` serves geographic features, not these PDF reads.
+**PDF delivery is another path:** `PP-API` has live `GEO_DOCUMENTS_REPOINT=1` and `GEO_DOCUMENTS_S3_BUCKET=sentropic-geo`. The primary rewrite maps Immo `raw/proces-verbaux-<city>/cas/<sha>.<ext>` to Geo **`raw/pv-index/cas/<sha>.<ext>`**; an optional frozen URL index can add a candidate. `/api/documents/raw` reads **only `GEO-S3`** for mapped candidates, with no Immo fallback on miss. Non-mapped references retain `PP-DOCS` then `PP-RAW`. This shares captured documents, not ownership of Immo's detection/graphification/SQL projection. `PP-GEO-S3/normalized/` serves geographic features, not these PDFs.
 
 A fresh PV can enter `PP-GRAPH/raw/` and the deterministic PG feed without a new canonical graph or a PDF resolvable through the separate Geo document reader. A successful projection can re-read an unchanged canonical graph. These are distinct freshness, graph-publication and evidence-serving boundaries, not proof that any individual document is missing.
 
@@ -191,16 +191,13 @@ A fresh PV can enter `PP-GRAPH/raw/` and the deterministic PG feed without a new
 | Shared ID | Physical resource / binding | Readers and writers | Evidence / cross-view meaning |
 | --- | --- | --- | --- |
 | `PP-DB` | `radar-postgres`, namespace `radar-immobilier-preprod`, PG/PostGIS + PVC | `PP-API` SQL; direct additive `PP-SCRAPE` and atomic `PP-PROJECT` writes | LIVE workload/wiring; **one Immo DB in diagrams 1 and 2** |
-| `PP-MINIO` | `http://radar-minio:9000`, same namespace, PVC-backed service | Hosts the three configured bucket bindings below | LIVE service; buckets/content not enumerated |
+| `PP-MINIO` | `http://radar-minio:9000`, same namespace, PVC-backed service | API bindings `PP-RAW` and `PP-DOCS` | LIVE, ready replicas 1; bucket contents not enumerated |
 | `PP-RAW` | MinIO bucket `radar-immobilier-raw` | `PP-API` default `S3_*` store; state/metadata and legacy document path | LIVE ConfigMap; not `PP-GRAPH` |
 | `PP-DOCS` | MinIO bucket `radar-immobilier-docs` | `PP-API` legacy scrape-document reader, ahead of `PP-RAW` | **Derived** from live absence of API `SCRAPE_S3_*` overrides + `resolveScrapeS3Config`; access/content not tested |
-| `PP-GROUND` | MinIO bucket `radar-immobilier-docs-preprod`, prefix `graph/` | `PP-PUBLISH` writes here, **not** to the projection's bucket | DECLARED Job 41 destination; no recent Job proves an override |
 | `PP-GRAPH` | OVH S3 bucket `radar-immobilier-graph-preprod` | `PP-SCRAPE` writes corpus/derived state; `PP-PROJECT` reads canonical `graph/` | LIVE CronJob bindings. **Corpus and graph roles share this bucket**, not separate stores |
-| `LEGACY-POC` | Scaleway S3 bucket `radar-immobilier-docs-pocs` | Workstation staging `candidats/`; `PP-PUBLISH` reads it; production workflow publishes `graph/` within it | DECLARED. Prod projection also names it; prod **scrape** binding is secret-backed and was not resolved |
 | `PP-GEO-S3` | OVH S3 `sentropic-geo-preprod`, serving prefix `normalized/` | Controlled Geo sync writes; `PP-GEO` reads geographic products | DECLARED overlay / LIVE OGC endpoint; **not the PDF source selected by PP-API** |
 | `GEO-S3` | OVH S3 `sentropic-geo`: raw corpus, registries and `normalized/` products | Geo acquisition writes; `GEO-API` reads products; **`PP-API` reads mapped PV PDFs directly** | LIVE Geo serving URI and Immo reader binding; one bucket in diagrams 1–3, distinct prefixes |
-| `GEO-DB` | `geo/postgis`, PG16 + PostGIS3.4 | No current `GEO-API → GEO-DB` dependency demonstrated | LIVE workload; not Immo's `PP-DB`/`PR-DB`; omitted from processing views because no role was verified |
-| `PR-DB`, `PR-MINIO` | `radar-postgres` and `radar-minio` in namespace `radar-immobilier` | Production Immo workloads; API base S3 configuration targets MinIO | DECLARED, not a live prod inventory. Do not copy preprod's bindings or infer prod override values |
+| `GEO-DB` | `geo/postgis`, PG16 + PostGIS3.4 | No current OGC serving or batch-join dependency demonstrated | LIVE workload; separate from Immo's DB; explicitly unconnected in the Geo view |
 | `PP-SSO-DB`, `PR-SSO-DB` | SSO platform PostgreSQL, respective Sentropic namespaces | Identity-provider workloads, not PV processing | Platform records; neither is an Immo graph DB. Diagram 1 only |
 | `PP-BACKUP` | OVH S3 `radar-preprod-snapshot` | Completed snapshot-restore Job reads it | LIVE Job binding; operational restore source, **not** the corpus or canonical graph |
 
@@ -208,10 +205,20 @@ OVH S3 endpoint: `https://s3.bhs.io.cloud.ovh.net`. An S3 bucket is external to 
 
 **Production counterpart, not a second copy of diagram 2:** `PR-DB` replaces `PP-DB`; production refresh manifests name `LEGACY-POC` for canonical projection, while the scrape target remains unresolved without the secret-backed configuration. The production grounding workflow runs on GitHub Actions and publishes `candidats/ → graph/` **within `LEGACY-POC`**, not through preprod Job 41/MinIO. Production OGC is `GEO-API → GEO-S3`. Live production API-store overrides and PDF-reader activation remain unverified. This is why diagram 2 is explicitly preprod rather than falsely symmetric.
 
+**Main-only references, excluded from operational diagrams:** the following are templates, not verified production or preprod execution. The preceding production description is a manifest contract only.
+
+| Reference ID | Main declaration | Runtime qualification |
+| --- | --- | --- |
+| `PP-GROUND` | Job 41 destination: MinIO `radar-immobilier-docs-preprod/graph/` | Job absent live; no active writer/reader or bridge to `PP-GRAPH` established |
+| `LEGACY-POC` | SCW `radar-immobilier-docs-pocs`, prefixes `candidats/` and `graph/` | Job 41 source, prod grounding workflow and prod projection declaration; **no current execution asserted** |
+| `PR-DB`, `PR-MINIO` | Base `radar-postgres` / `radar-minio` in `radar-immobilier` | Unknown OVH runtime; #670's September 11 retention note is historical, not today's inventory |
+
+The completed snapshot-restore Job is likewise historical, not an active PV stage. Its retained SCW image name does not prove an ongoing image pull or S3 dependency. No restore-to-DB edge is asserted without inspecting its target.
+
 | Scheduler / Job | Cadence | What it does | State at inspection |
 | --- | --- | --- | --- |
-| Immo `radar-refresh-scrape` | Daily **03:17 UTC** | Stages 1 + 2 | Preprod LIVE, enabled; last scheduled 2026-09-13 |
-| Immo `radar-refresh-projection` | Daily **04:30 UTC** | Stage 4 from OVH graph-preprod | Preprod LIVE, enabled; last scheduled 2026-09-13 |
+| Immo `radar-refresh-scrape` | Daily **03:17 UTC** | Stages 1 + 2 | Preprod LIVE, enabled; last success Sep 13 **06:13:54 UTC** |
+| Immo `radar-refresh-projection` | Daily **04:30 UTC** | Stage 4 from OVH graph-preprod | Preprod LIVE, enabled; last scheduled Sep 13, last success **Sep 11 04:30:13 UTC** |
 | Immo production refresh pair | Same two UTC schedules | Prod corpus scrape / graph projection | DECLARED; activation gated by `REFRESH_CRONJOB_PROD_ENABLED`; not checked live |
 | Immo `radar-consistency-snapshot` | Daily **04:45 UTC** | PG consistency / coverage snapshot | Preprod LIVE, **suspended** |
 | Immo `radar-populate-geo-daily` | Daily **04:17 America/Toronto** | Import zones/lots and run reference resolution | DECLARED; absent from preprod live CronJobs |
@@ -235,12 +242,10 @@ flowchart TB
     lots["Cadastral parcels / assessment data<br/>Québec MRNF and municipal sources"]
     env["Environment<br/>BDZI floods · GRHQ hydrography · CPTAQ agriculture"]
   end
-  GEO_S3[("[GEO-S3] sentropic-geo<br/>OVH S3 · raw corpus + normalized/ products")]
-  PP_GEO_S3[("[PP-GEO-S3] sentropic-geo-preprod<br/>OVH S3 · normalized/ serving copy")]
   subgraph processing["Geo processing · source-specific runners / bounded Jobs"]
     capture["Capture on cluster<br/>Raw bytes + URL + retrieved_at + SHA-256"]
     normalize["Parse / normalize / validate provenance<br/>Geometries, PV, regulations, norms"]
-    join["Spatial join: parcel ∩ zoning polygons<br/>Area-majority / centroid fallback / multi-zone status"]
+    join["In-process spatial join: parcel ∩ zoning<br/>Area-majority / centroid fallback / multi-zone status"]
     fold["Semantic joins<br/>Canonical zone code → regulation / norms<br/>Parcel + zone + norms → enriched lot"]
     constraints["Normalize / intersect constraints<br/>Evidence and explicit missing-data status"]
     capture -->|"WRITE raw / manifests"| GEO_S3
@@ -261,14 +266,21 @@ flowchart TB
   local["Workstation-assisted extraction where required<br/>OCR / vision / LLM for document tables<br/>Reads captured corpus; not local source capture"]
   local -->|"READ captured corpus"| GEO_S3
   local -->|"Validated extraction products"| normalize
-  GEO_API["[GEO-API] geo-api · geo<br/>api.geo.sent-tech.ca"] -->|"READ normalized/"| GEO_S3
+  subgraph geoprod["PRODUCTION / SHARED CORPUS · OVH S3 outside cluster"]
+    GEO_API["[GEO-API] geo-api · geo<br/>api.geo.sent-tech.ca"] -->|"READ normalized/"| GEO_S3
+    GEO_S3[("[GEO-S3] sentropic-geo<br/>OVH S3 · raw corpus + normalized/ products")]
+    GEO_DB[("[GEO-DB] geo/postgis<br/>LIVE · no OGC DB dependency demonstrated")]
+    PR_API["[PR-API] radar-api<br/>radar-immobilier"] -->|"READ OGC"| GEO_API
+  end
   sync["Controlled preprod sync<br/>coherence_id + count + set_hash<br/>Refresh index and verify through API"]
   sync -.->|"READ normalized/"| GEO_S3
   sync -.->|"WRITE normalized/"| PP_GEO_S3
-  PP_GEO["[PP-GEO] geo-api · geo-preprod<br/>api.preprod.geo.sent-tech.ca"] -->|"READ normalized/"| PP_GEO_S3
-  PR_API["[PR-API] radar-api<br/>radar-immobilier"] -->|"READ OGC"| GEO_API
-  PP_API["[PP-API] radar-api<br/>radar-immobilier-preprod"] -->|"READ OGC"| PP_GEO
-  PP_API -->|"READ mapped PV PDFs · LIVE<br/>same dependency as diagrams 1 and 2"| GEO_S3
+  subgraph geopreprod["PREPRODUCTION · OVH S3 outside cluster"]
+    PP_GEO["[PP-GEO] geo-api · geo-preprod<br/>api.preprod.geo.sent-tech.ca"] -->|"READ normalized/"| PP_GEO_S3
+    PP_GEO_S3[("[PP-GEO-S3] sentropic-geo-preprod<br/>OVH S3 · normalized/ serving copy")]
+    PP_API["[PP-API] radar-api<br/>radar-immobilier-preprod"] -->|"READ OGC"| PP_GEO
+  end
+  PP_API -->|"CROSS-ENV READ raw/pv-index/cas/<br/>Same dependency as diagrams 1 and 2"| GEO_S3
   site["geo.sent-tech.ca<br/>Static catalogue · GitHub Pages"] -->|"OGC links / requests"| GEO_API
 ```
 
@@ -313,7 +325,7 @@ The September full-auto design selects `@sentropic/s3-dag` reconciliation with d
 ## 6. Questions for the architecture walkthrough
 
 1. **Address:** should `preprod.sent-tech.ca` become an alias/portal, or was it shorthand for the observed `preprod.immo.sent-tech.ca`? This document retains the verified URLs until clarified.
-2. **Storage transition:** what is the intended alignment of `PP-PUBLISH → PP-GROUND` versus `PP-PROJECT → PP-GRAPH`, and the freshness contract between Immo's scraped corpus and its separate `GEO-S3` PDF reader? The current document-repoint is deliberate code, not automatically a defect to migrate back. This document records the state; it authorizes no migration.
+2. **Storage transition:** the owner now requests completion of i-cond's refresh refactoring with the Graphify upgrade, then definitive preprod MinIO/SCW removal and production cutover. The migration must verify remaining clients and preserve objects before retirement; production bindings and the current Graphify contract must be obtained first. The separate Geo PDF-reader freshness contract remains to be reconciled.
 3. **Automation scope:** should the future worker own only Immo graphify/grounding, or also Geo's remaining assisted regulation/grid extraction? Both dependencies are relevant, but no new architecture decision is assumed here.
 
 ## 7. Evidence and reproducibility
@@ -322,7 +334,7 @@ The September full-auto design selects `@sentropic/s3-dag` reconciliation with d
 | --- | --- | --- |
 | `radar-immobilier` | `097036783006226afea53a6b49383bf70890774f` (`origin/main`, 2026-09-11 commit with Sep-12 migration notes) | Current deploy/workflow/source baseline; this document is on an isolated branch from it |
 | `geo` | `f68d8ddf` (`origin/main`, 2026-09-12) | Current serving overlays, S3 target, joins and acquisition code; local root HEAD was older |
-| `poc-k8s` | `03acdfd` (local HEAD, 2026-09-05) | OVH runbook, shared platform and tenant ownership; its local remote-tracking ref was older |
+| `poc-k8s` | `03acdfd` (local HEAD, 2026-09-05); freshly fetched main remains `346e49b8` (July 4) | OVH runbooks are newer local work, **not main**; live endpoint evidence takes precedence over the older main's SCW platform description |
 | `i-cond` | Local `.lanes/conductor/docs/PLAN_PIPELINE_DONNEES_PREPROD.md`, dated 2026-09-03 | Operational context, workstation requirement and publish-only boundary; historical status superseded where live evidence exists |
 | Immo full-auto design | `6296396fed804cf9a3d4a6e031c452af57313357` (`origin/design/fullauto-pipeline-consolidated`, September 5) | Follow-up ownership/transition audit: E1–E5, geographic seam, interim feed and future sole writer; design, not deployed state |
 | Immo Graphify CAS work | `73172214a369ebfba0aab530dadde873341baa4a` (`feat/graphify-v23-cas-ingest`, September 11) | Follow-up branch inspection against its pre-change parent `8e18f01b`; changes remain in Immo tools and plan; qualification not inferred |
@@ -337,6 +349,6 @@ Read-only live checks: Immo login redirects in both environments; OIDC discovery
 
 At inspection, Immo preprod API/UI/MCP images were tagged `8e18f01`; Geo production API used digest `sha256:73332b22315a85991ebaefde7cabc3fce8760ab3d06d0ea5ee22acf3ff9b7220`. These identify observed workloads, not the source revision of every diagram component.
 
-Follow-up resource audit on 2026-09-13: whitelisted fields from preprod `Deployment/radar-api`, `ConfigMap/radar-api`, refresh CronJobs and snapshot-restore Job. It found the enabled Geo document repoint, its `sentropic-geo` bucket binding, and the API scrape-store default omitted in the earlier diagrams. No Secret values or object contents were read. The requested Gemini review launch was blocked by environment security pending approval of the external payload; the correction is locally verified, **not independently Gemini-approved**.
+Follow-up [main/runtime audit](architecture/storage-audit.md) confirms the MinIO API / OVH refresh split and #670's unmerged state. Gemini completed the requested text-only review via **h2a run agy**, requested model `gemini-3.8-flash-high`, effort high: **NEEDS CHANGES** at `2ab8da2b`. Its [findings](architecture/gemini-review/response-findings.md) are [reconciled](architecture/gemini-review/review-inline.md), not treated as live cluster evidence. In particular, an absent legacy Job does not establish an active broken pipeline, and an unverified restore target must not be invented. This is a single third-party review, not multi-peer consensus or a reapproval of the revised diagrams.
 
 The local HTML companion is generated from this Markdown with the **FocusSnapshot render core shipped in h2a**, then enhanced with Mermaid rendering. It is an architecture orientation document, not a Track approval or a live decision form.
