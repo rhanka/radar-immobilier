@@ -302,11 +302,12 @@ spec:
                 - /bin/sh
                 - -ceu
                 - |
-                  flock -x /keyring/.bootstrap.lock -c '
-                    if [ ! -f /keyring/.key ]; then
-                      cp -a /bootstrap/. /keyring/
-                      chmod 0700 /keyring
-                      chmod 0600 /keyring/.key /keyring/*.json
+                  mkdir -p /keyring/runtime
+                  flock -x /keyring/runtime/.bootstrap.lock -c '
+                    if [ ! -f /keyring/runtime/.key ]; then
+                      cp -a /bootstrap/. /keyring/runtime/
+                      chmod 0700 /keyring/runtime
+                      chmod 0600 /keyring/runtime/.key /keyring/runtime/*.json
                     fi
                   '
               resources:
@@ -324,7 +325,7 @@ spec:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: true
                 capabilities: { drop: ["ALL"] }
-              command: ["/usr/bin/flock", "-n", "/keyring/.refresh.lock", "node", "dist/scripts/refresh-pv.js", "waterloo"]
+              command: ["/usr/bin/flock", "-n", "/keyring/runtime/.refresh.lock", "node", "dist/scripts/refresh-pv.js", "waterloo"]
               envFrom:
                 - configMapRef: { name: radar-api }
               env:
@@ -337,7 +338,7 @@ spec:
                 - { name: REFRESH_BUDGET_LIMIT, value: "20000" }
                 - { name: REFRESH_MAX_OUTPUT_TOKENS, value: "4096" }
                 - { name: REFRESH_ACQUISITION_LIMIT, value: "10" }
-                - { name: SENTROPIC_LLM_MESH_KEYRING_DIR, value: "/keyring" }
+                - { name: SENTROPIC_LLM_MESH_KEYRING_DIR, value: "/keyring/runtime" }
                 - name: REFRESH_PRINCIPAL_REF
                   valueFrom: { secretKeyRef: { name: radar-refresh-runtime, key: REFRESH_PRINCIPAL_REF } }
                 - name: REFRESH_OWNER_SCOPE_REF
