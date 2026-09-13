@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -uo pipefail
+export LC_ALL=C
 
 usage() {
   cat >&2 <<'EOF'

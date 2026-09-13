@@ -57,6 +57,14 @@ case "$op" in
           '{Key:$key,Size:$size,ETag:$etag}' >>"$all"
       done < <(find "$objects" -type f | sort)
     fi
+    if [ "${FAKE_EMPTY_TRUNCATED_SIDE:-}" = "$side" ]; then
+      empty_counter="$FAKE_S3_TMP/empty-truncated-counter"
+      empty_seen="$(cat "$empty_counter" 2>/dev/null || printf 0)"
+      if [ "$empty_seen" -lt "${FAKE_EMPTY_TRUNCATED_ATTEMPTS:-0}" ]; then
+        printf '%s' "$((empty_seen + 1))" >"$empty_counter"
+        printf '{"Contents":[],"IsTruncated":true,"NextContinuationToken":"empty"}\n'; exit 0
+      fi
+    fi
     if [ -n "$start_after" ]; then
       start="$(jq -s --arg key "$start_after" \
         '[to_entries[] | select(.value.Key > $key) | .key][0] // length' "$all")"
@@ -157,6 +165,7 @@ reset_store() {
     "$TEST_TMP/store/destination/dst/objects" "$TEST_TMP/store/destination/dst/meta" \
     "$TEST_TMP/reports"
   : >"$AWS_LOG"; rm -f "$TEST_TMP/version" "$TEST_TMP/failure-counter" "$TEST_TMP/clock"
+  rm -f "$TEST_TMP/empty-truncated-counter"
   fingerprint="$(printf DST_KEY | sha256sum | awk '{print $1}')"
   jq -n --arg fingerprint "$fingerprint" '{schemaVersion:1,provider:"fake-s3",providerVersion:"1",
     destination:{endpoint:"https://destination.test",region:"bhs",bucket:"dst",pathStyle:false},
@@ -165,7 +174,8 @@ reset_store() {
     transcriptSha256:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     capabilities:{ifNoneMatchCreate:true,ifMatchUpdate:true}}' >"$TEST_TMP/conditional-write-proof.json"
   unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_ATTEMPTS FAKE_FAIL_KEY
-  unset FAKE_VERSIONING FAKE_CLOCK_STEP
+  unset FAKE_VERSIONING FAKE_CLOCK_STEP FAKE_EMPTY_TRUNCATED_SIDE
+  unset FAKE_EMPTY_TRUNCATED_ATTEMPTS
 }
 put_fixture() {
   local side="$1" bucket="$2" key="$3" content="$4" extra="${5:-}"
@@ -191,6 +201,8 @@ invoke_tool() {
     FAKE_CLOCK_STEP="${FAKE_CLOCK_STEP:-}" FAKE_CLOCK_FILE="$TEST_TMP/clock" \
     FAKE_FAIL_SIDE="${FAKE_FAIL_SIDE:-}" FAKE_FAIL_OPERATION="${FAKE_FAIL_OPERATION:-}" \
     FAKE_FAIL_ATTEMPTS="${FAKE_FAIL_ATTEMPTS:-0}" FAKE_FAIL_KEY="${FAKE_FAIL_KEY:-}" \
+    FAKE_EMPTY_TRUNCATED_SIDE="${FAKE_EMPTY_TRUNCATED_SIDE:-}" \
+    FAKE_EMPTY_TRUNCATED_ATTEMPTS="${FAKE_EMPTY_TRUNCATED_ATTEMPTS:-0}" \
     MIGRATION_RUN_ID=test-run MIGRATION_SOURCE_ACCESS_KEY_ID=SRC_KEY \
     MIGRATION_SOURCE_SECRET_ACCESS_KEY=SRC_SECRET \
     MIGRATION_DESTINATION_ACCESS_KEY_ID=DST_KEY \
@@ -324,6 +336,8 @@ if jq -e '.resumeRequired == true and .cutoverReady == false' \
     "$TEST_TMP/resume-checkpoint/provisional/source/index-receipt-000001.json" >/dev/null; then
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
+printf '{"key":"uncommitted-tail","size":0,"etag":""}\n' \
+  >"$TEST_TMP/resume-checkpoint/provisional/source/index-page-000002.jsonl"
 unset FAKE_CLOCK_STEP; : >"$AWS_LOG"
 TEST_NAME='resume continues exclusively after the last committed key'
 expect_ok run_tool inventory "$TEST_TMP/reports/resume-second" \
@@ -331,6 +345,8 @@ expect_ok run_tool inventory "$TEST_TMP/reports/resume-second" \
 if grep -Eq $'^source\tlist-objects-v2\t.*--start-after raw/a.txt' "$AWS_LOG" &&
   jq -e '.sequence == 2 and .startAfter == "raw/a.txt" and .isTruncated == false' \
     "$TEST_TMP/resume-checkpoint/provisional/source/index-receipt-000002.json" >/dev/null &&
+  jq -e -s '.[0].key == "raw/b.txt" and length == 1' \
+    "$TEST_TMP/resume-checkpoint/provisional/source/index-page-000002.jsonl" >/dev/null &&
   jq -e '.resumeRequired == false and .indexComplete == true and .cutoverReady == false' \
     "$TEST_TMP/resume-checkpoint/progress.json" >/dev/null; then
   ok "$TEST_NAME"
@@ -377,6 +393,28 @@ if jq -e '.firstKey == null and .lastKey == null and .isTruncated == false' \
     "$TEST_TMP/empty-checkpoint/provisional/source/body-receipt-000001.json" >/dev/null; then
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/a.txt alpha; put_fixture destination dst raw/a.txt alpha
+FAKE_EMPTY_TRUNCATED_SIDE=source FAKE_EMPTY_TRUNCATED_ATTEMPTS=1
+TEST_NAME='empty truncated page is retried without advancing its receipt'
+expect_ok run_tool inventory "$TEST_TMP/reports/empty-truncated" \
+  --checkpoint-dir "$TEST_TMP/empty-truncated" --page-size 1 --time-budget-seconds 30
+if [ "$(grep -c $'^source\tlist-objects-v2\t' "$AWS_LOG")" = 2 ] &&
+  jq -e '.sequence == 1 and .objects == 1 and .firstKey == "raw/a.txt"' \
+    "$TEST_TMP/empty-truncated/provisional/source/index-receipt-000001.json" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/oversized.txt alpha
+TEST_NAME='oversized checkpoint object remains an explicit completeness blocker'
+expect_status 1 run_tool inventory "$TEST_TMP/reports/oversized" \
+  --checkpoint-dir "$TEST_TMP/oversized" --page-size 1 --time-budget-seconds 30 \
+  --max-object-bytes 4
+if [ ! -e "$TEST_TMP/oversized/provisional/source/body-receipt-000001.json" ] &&
+  jq -e '.inventoryCheckpoint.toolComplete == false and .counts.failures == 1' \
+    "$TEST_TMP/reports/oversized/summary.json" >/dev/null; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 
 reset_store
 put_fixture source src raw/stable.txt alpha '{"VersionId":null}'
