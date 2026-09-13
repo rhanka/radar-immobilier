@@ -115,7 +115,7 @@ The four-stage decomposition is **collect → parse/exploit → graphify/ground 
 This is the **as-is** view, not the full-auto target. The older refresh study explains the four-stage baseline; the September 5 consolidated design describes its evolution (mapping below). Current code/manifests and live reads take precedence for deployed wiring.
 
 ```mermaid
-flowchart TB
+flowchart LR
   websites["Municipal websites<br/>PV PDFs / HTML / public notices"]
   provider["LLM provider<br/>Inference may be remote; orchestration is local"]
   subgraph immo["IMMO · preprod PV chain"]

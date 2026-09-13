@@ -43,3 +43,4 @@ summary { cursor: pointer; }
 .focus-amendment-trace { margin-top: 45px; padding-top: 20px; border-top: 1px solid #d2dfea; font-size: 12px; color: #738394; }
 @media(max-width: 900px) { aside { position: relative; width: auto; padding: 18px 22px; border-right: 0; } nav { display: flex; flex-wrap: wrap; margin: 12px 0; gap: 4px 18px; } nav a { max-width: 230px; } aside .note { display: none; } main { margin-left: 0; padding: 28px 20px; } .diagram-canvas { height: 480px; } }
 @media print { aside, .diagram-toolbar, details, #render-status { display: none; } main { margin: 0; padding: 0; } .diagram-canvas { height: auto; overflow: visible; } .diagram-canvas svg { width: 100% !important; } .focus-diagram { break-inside: avoid; } }
+.diagram-toolbar select { max-width: 100%; padding: 0.5rem; border: 1px solid #bdcbd9; border-radius: 4px; color: #162b45; background: #f7f9fc; }

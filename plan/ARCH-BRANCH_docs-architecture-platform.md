@@ -4,6 +4,7 @@
 - [x] Document immo, geo and poc-k8s components, access and current processing boundaries.
 
 ## Scope / Guardrails
+- [x] September 13 owner gate: present a decision dossier BEFORE any refresh refactoring, migration or deployment.
 - [x] Documentation only; no deployment, data mutation or application changes.
 - [x] Worktree: `tmp/architecture-platform`, branch `docs/architecture-platform`.
 - [x] Commands through Make; environment argument last; no application stack started.
@@ -60,6 +61,7 @@
   - [ ] Exclude unobserved legacy paths from operational diagrams and regenerate Focus.
   - [x] Remove unobserved SCW/grounding templates and unverified production storage from diagrams 1–2; keep live MinIO API bindings.
   - [x] Separate main-only templates in the register; record runtime success timestamps and Geo CAS prefix/environment boundaries.
+  - [x] Fit complete diagrams on entry; PV view reduced from 4669×1067 to 1779×1555, with zoom/full-screen/Escape and no page overflow.
 - [ ] **Lot 7 — Prepare the owner-requested implementation continuation.**
   - [x] Request existing i-cond, i-infra and Graphify conductor handoffs through h2a; no overlapping implementation dispatched.
   - [x] Read September 11 continuation briefs; correct the lowercase-feed/served-Signal boundary and document 3.4 post-projection processing.
@@ -67,4 +69,10 @@
   - [ ] Establish the exact current plan, upgrade contract, scope and deployment gates before opening implementation work.
 
 ## Merge / Close
+- [ ] **Lot 8 — Replace the orientation prototype with a native Focus decision dossier.**
+  - [x] Read the September 7 Sentropic decision-kit reference and owner-validated Focus dossier contract.
+  - [ ] Reconcile the newer in-process Graphify mesh proposal and current upstream PRs.
+  - [ ] Present eight decision sections, symmetric options, acceptance criteria and real reviewer findings.
+  - [ ] Map Mermaid identities and relationships to native SvelteFlow groups and navigable subflows.
+  - [ ] Verify the offline HTML, mapping coverage, navigation and local-only owner notes.
 - [ ] Local documentation handoff; no production action or branch merge requested.
