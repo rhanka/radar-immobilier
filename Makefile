@@ -581,7 +581,8 @@ object-storage-docs-preprod-copy-canonical: ## Import the PROD manifest and copy
 	  prod_server="$$( KUBECONFIG="$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
 	  prod_namespace="$$( KUBECONFIG="$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )"; \
 	  [ "$$preprod_server" = "$(OBJECT_STORAGE_OVH_SERVER)" ] && [ "$$prod_server" = "$(OBJECT_STORAGE_OVH_SERVER)" ] && \
-	    [ "$$preprod_namespace" = "$$namespace" ] && [ "$$prod_namespace" = radar-immobilier ] || \
+	    [ "$$preprod_namespace" = "$$namespace" ] && \
+	    { [ -z "$$prod_namespace" ] || [ "$$prod_namespace" = radar-immobilier ]; } || \
 	    { echo '[object-storage-docs] refused: exact OVH namespaces are unproved'; exit 1; }; \
 	  [ "$$(sha256sum "$$manifest" | awk '{print $$1}')" = "$$digest" ] || \
 	    { echo '[object-storage-docs] canonical digest differs'; exit 1; }; \
