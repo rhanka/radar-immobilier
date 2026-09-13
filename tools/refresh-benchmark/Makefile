@@ -4,22 +4,28 @@ BENCHMARK_ROOT := $(abspath ../..)
 MAIN_ROOT := $(abspath $(BENCHMARK_ROOT)/../..)
 T1_ROOT := $(abspath $(BENCHMARK_ROOT)/../refresh-018)
 RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/candidates
+V3_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v3
 RUNTIME_TEXT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/runtime-text
 CAS_ROOT := $(MAIN_ROOT)/.lanes/conductor/tmp/graphify-cas/run-dryrun2-final-20260911T215911Z
 NODE_IMAGE := node:22-bookworm-slim
 ROOT_MODULES := radar-test-refresh-018_radar-test-root-node-modules
 OWNER_SCOPE := cli:antoinefa-ROG-Flow-Z13-GZ302EA-GZ302EA
 T1_COMMIT := f9b311da536bda2e1442d154a05599c35b482518
+T1_COMMIT_V3 := 8f10ba1690a67e223851a467508f06e59d2ec668
 KEYRING_SOURCE := /home/antoinefa/.sentropic/llm-mesh-keyring
+BASELINE_GOLD := $(MAIN_ROOT)/.lanes/conductor/tmp/bench-llm/bench/v2/gold.json
 
-.PHONY: test runtime-text prepare-prompts run-case quota inspect-validation
+.PHONY: test test-v3 runtime-text freeze-v3 prepare-prompts-v3 run-v3 preflight-v3 run-v3-sol-normal quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
 ST_BART := ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845
 ST_ETIENNE := 27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d
 WATERLOO_31 := 132187c152d73a08da3c2d48eece98d4e415379c899bdc4c8dfb261d0d2b372e
-RUNTIME_FILES := $(addprefix $(RUNTIME_TEXT)/,$(addsuffix .txt,$(WATERLOO_18) $(WICKHAM) $(ST_BART) $(ST_ETIENNE) $(WATERLOO_31)))
+LAC_16 := 6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96
+VALCOURT := 31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d
+V3_DOCS := lac-des-seize-iles-2026-09-agenda saint-etienne-de-bolton-2026-08-04 valcourt-2026-06-01-agenda saint-barthelemy-2026-09-08 waterloo-2026-08-18
+RUNTIME_FILES := $(addprefix $(RUNTIME_TEXT)/,$(addsuffix .txt,$(WATERLOO_18) $(WICKHAM) $(ST_BART) $(ST_ETIENNE) $(WATERLOO_31) $(LAC_16) $(VALCOURT)))
 
 runtime-text: $(RUNTIME_FILES)
 
@@ -38,6 +44,12 @@ $(RUNTIME_TEXT)/$(ST_ETIENNE).txt:
 $(RUNTIME_TEXT)/$(WATERLOO_31).txt:
 	mkdir -p $(RUNTIME_TEXT)
 	pdftotext -q -enc UTF-8 $(CAS_ROOT)/workers/waterloo/corpus/$(WATERLOO_31).pdf $@
+$(RUNTIME_TEXT)/$(LAC_16).txt:
+	mkdir -p $(RUNTIME_TEXT)
+	pdftotext -q -enc UTF-8 $(CAS_ROOT)/workers/lac-des-seize-iles/corpus/$(LAC_16).pdf $@
+$(RUNTIME_TEXT)/$(VALCOURT).txt:
+	mkdir -p $(RUNTIME_TEXT)
+	pdftotext -q -enc UTF-8 $(CAS_ROOT)/workers/valcourt--le-val-saint-francois/corpus/$(VALCOURT).pdf $@
 
 test: runtime-text
 	test "$(ENV)" = "test-refresh-benchmark"
@@ -46,6 +58,60 @@ test: runtime-text
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) \
 	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
 	  node --test tools/refresh-benchmark/benchmark.test.mjs
+
+test-v3: runtime-text
+	test "$(ENV)" = "test-refresh-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v3 \
+	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V3) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node --test tools/refresh-benchmark/benchmark.test.mjs
+
+freeze-v3: runtime-text
+	test "$(ENV)" = "test-refresh-benchmark"
+	mkdir -p $(V3_RESULTS)/candidates
+	docker run --rm --network none \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V3_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAS_ROOT=$(CAS_ROOT) \
+	  -e BENCHMARK_BASELINE_GOLD=$(BASELINE_GOLD) -e BENCHMARK_T1_ROOT=$(T1_ROOT) \
+	  -e BENCHMARK_OUTPUT_DIR=/results -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/freeze-v3.mjs
+
+prepare-prompts-v3:
+	test "$(ENV)" = "test-refresh-benchmark"
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V3_RESULTS),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  --mount type=volume,source=$(ROOT_MODULES),target=$(T1_ROOT)/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v3 \
+	  -e BENCHMARK_FREEZE_OUTPUT=/results/prompt-freeze.json \
+	  -e BENCHMARK_T1_ROOT=$(T1_ROOT) -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V3) \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  /workspace/node_modules/.bin/tsx tools/refresh-benchmark/prepare-prompts.mjs
+
+run-v3:
+	$(MAKE) run-case DOC=$(DOC) VARIANT=$(VARIANT) CAMPAIGN=v3 \
+	  CAMPAIGN_RESULTS=$(V3_RESULTS)/candidates T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V3) ENV=$(ENV)
+
+preflight-v3:
+	test "$(ENV)" = "test-refresh-benchmark"
+	docker run --rm --tmpfs /workspace --tmpfs /run \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V3_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_PREFLIGHT_OUTPUT=/results/preflight-before.json \
+	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_MODEL=gpt-5.6-sol \
+	  -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec node tools/refresh-benchmark/codex-preflight.mjs'
+
+run-v3-sol-normal:
+	test "$(ENV)" = "test-refresh-benchmark"
+	test -f $(V3_RESULTS)/preflight-before.json
+	printf '%s\n' $(V3_DOCS) | xargs -n1 -P3 sh -c \
+	  '$(MAKE) run-v3 DOC="$$1" VARIANT=sol-normal ENV=test-refresh-benchmark' _
 
 prepare-prompts: runtime-text
 	test "$(ENV)" = "test-refresh-benchmark"
@@ -63,12 +129,13 @@ run-case: runtime-text
 	test -n "$(DOC)" && test -n "$(VARIANT)"
 	docker run --rm --tmpfs /workspace --tmpfs /run --tmpfs /tmp \
 	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
-	  --mount type=bind,source=$(RESULTS),target=/results \
+	  --mount type=bind,source=$(or $(CAMPAIGN_RESULTS),$(RESULTS)),target=/results \
 	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
 	  --mount type=volume,source=$(ROOT_MODULES),target=$(T1_ROOT)/node_modules,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=$(T1_ROOT) \
-	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT) -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
+	  -e BENCHMARK_T1_COMMIT=$(or $(T1_CAMPAIGN_COMMIT),$(T1_COMMIT)) -e BENCHMARK_CAMPAIGN=$(CAMPAIGN) \
+	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
 	  -e BENCHMARK_OUTPUT_DIR=/results -e BENCHMARK_DOCUMENT=$(DOC) \
 	  -e BENCHMARK_VARIANT=$(VARIANT) -e BENCHMARK_ATTEMPT=$(or $(ATTEMPT),1) \
 	  -e BENCHMARK_RETRY_REASON='$(RETRY_REASON)' -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \

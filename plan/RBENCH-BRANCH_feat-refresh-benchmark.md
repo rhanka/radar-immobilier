@@ -29,6 +29,7 @@
 - [x] Lot 1: qualify exact model/effort transport support and enrolled account/quota interfaces; freeze five source PDFs and original pages.
 - [x] Lot 2: implement the smallest replayable mesh runner with isolated hermetic tests and quota/usage receipts, without a new framework.
 - [ ] Lot 3: v1 stopped after 7 unique cases because its citation/evidence contract was incomplete; preserve all 8 attempts and resume only as a separately frozen v2 campaign.
+- [x] Lot 3a: freeze the owner-prioritized five-PDF current-HEAD v3 campaign and fail-closed subscription preflight before its first Sol medium calls.
 - [ ] Lot 4: v1 evidence and quota handoff recorded; judging and a model recommendation require the reviewed v2 campaign and faithful Fable enrollment.
 
 ## Merge / Close
