@@ -84,4 +84,5 @@
   - [x] Add mapping completeness, native parent bounds, resource identity and rejected-syntax regression tests.
   - [x] Preserve Codex's six actual findings; disclose Opus weekly-limit failure and keep the dossier incomplete.
   - [x] Reconcile all six findings in D2: shared-consumer inventory, credential continuity, recovery consistency and explicit SCW retirement gates.
+  - [x] Add Chromium checks for all 18 scenes, cross-view DB navigation, local notes, evidence dialogs, mobile and offline use.
 - [ ] Local documentation handoff; no production action or branch merge requested.
