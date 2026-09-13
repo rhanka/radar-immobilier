@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 -include .env
+-include deploy/ci/object-storage-prod.mk
 
 # ── Environment / project ─────────────────────────────────────────────
 ENV ?= dev

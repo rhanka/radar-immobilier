@@ -11,6 +11,7 @@ Usage: migrate-object-storage.sh <inventory|copy|verify|delta> [options]
   --destination-endpoint URL --destination-region REGION
   --destination-bucket BUCKET --destination-path-style <true|false>
   --prefix PREFIX/ [--prefix PREFIX/ ...] --report-dir DIR
+  [--include-root-objects]
   [--exclude-prefix PREFIX/ ...] [--expected-manifest FILE]
   [--execute-copy] [--fence-record FILE]
   [--reconcile-owned --ledger FILE]
@@ -33,7 +34,7 @@ SOURCE_ENDPOINT="" SOURCE_REGION="" SOURCE_BUCKET="" SOURCE_PATH_STYLE=""
 DESTINATION_ENDPOINT="" DESTINATION_REGION="" DESTINATION_BUCKET=""
 DESTINATION_PATH_STYLE="" EXPECTED_MANIFEST="" FENCE_RECORD="" LEDGER=""
 CONDITIONAL_WRITE_PROOF="" CHECKPOINT_DIR="" RESUME=false CHECKPOINT_REQUESTED=false
-INVENTORY_PROOF=""
+INVENTORY_PROOF="" INCLUDE_ROOT_OBJECTS=false
 PAGE_SIZE=100 TIME_BUDGET_SECONDS=300
 CONCURRENCY=4 RETRIES=3 MAX_FAILURES=20 MAX_OBJECT_BYTES=5000000000
 PREFIXES=() EXCLUDE_PREFIXES=()
@@ -51,6 +52,7 @@ while [ "$#" -gt 0 ]; do
     --destination-bucket) need_value "$@"; DESTINATION_BUCKET="$2"; shift 2 ;;
     --destination-path-style) need_value "$@"; DESTINATION_PATH_STYLE="$2"; shift 2 ;;
     --prefix) need_value "$@"; PREFIXES+=("$2"); shift 2 ;;
+    --include-root-objects) INCLUDE_ROOT_OBJECTS=true; shift ;;
     --exclude-prefix) need_value "$@"; EXCLUDE_PREFIXES+=("$2"); shift 2 ;;
     --report-dir) need_value "$@"; REPORT_DIR="$2"; shift 2 ;;
     --expected-manifest) need_value "$@"; EXPECTED_MANIFEST="$2"; shift 2 ;;
@@ -76,6 +78,8 @@ done
 case "$OPERATION" in inventory|copy|verify|delta) ;; *) usage ;; esac
 case "$ENVIRONMENT" in preprod|prod) ;; *) die 'invalid environment' ;; esac
 case "$PLANE" in RAW|DOCS) ;; *) die 'invalid plane' ;; esac
+$INCLUDE_ROOT_OBJECTS && [ "$PLANE" = DOCS ] || ! $INCLUDE_ROOT_OBJECTS || \
+  die '--include-root-objects is valid only for the DOCS plane'
 [ "$PLANE" != DOCS ] || [ "$OPERATION" = inventory ] || [ -n "$EXPECTED_MANIFEST" ] || \
   die 'DOCS copy, verify, and delta require --expected-manifest'
 [ "$OPERATION" = copy ] || { ! $EXECUTE_COPY && ! $RECONCILE_OWNED; } || \
@@ -194,6 +198,7 @@ initialize_checkpoint() {
   exclusions="$(jq -cn --args '$ARGS.positional | sort' -- "${EXCLUDE_PREFIXES[@]}")"
   core="$WORK_DIR/checkpoint-config-core.json"; candidate="$WORK_DIR/checkpoint-config.json"
   jq -n --argjson prefixes "$prefixes" --argjson exclusions "$exclusions" \
+    --argjson includeRootObjects "$INCLUDE_ROOT_OBJECTS" \
     --arg environment "$ENVIRONMENT" --arg plane "$PLANE" \
     --arg se "$SOURCE_ENDPOINT" --arg sr "$SOURCE_REGION" --arg sb "$SOURCE_BUCKET" \
     --argjson sp "$SOURCE_PATH_STYLE" --arg sf "$SOURCE_IDENTITY_FINGERPRINT" \
@@ -206,7 +211,8 @@ initialize_checkpoint() {
       source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,
       identityFingerprint:$sf},destination:{endpoint:$de,region:$dr,bucket:$db,
       pathStyle:$dp,identityFingerprint:$df},classification:{prefixes:$prefixes,
-      excludePrefixes:$exclusions},limits:{pageSize:$page,retries:$retries,
+      excludePrefixes:$exclusions,includeRootObjects:$includeRootObjects},
+      limits:{pageSize:$page,retries:$retries,
       concurrency:$concurrency,maxFailures:$failures,maxObjectBytes:$bytes}}' >"$core"
   digest="$(sha256sum "$core" | awk '{print $1}')"
   jq --arg digest "$digest" '. + {configDigest:$digest}' "$core" >"$candidate"
@@ -288,6 +294,8 @@ matches_any() {
 classify_key() {
   local key="$1"
   if matches_any "$key" "${PREFIXES[@]}"; then
+    printf included
+  elif $INCLUDE_ROOT_OBJECTS && [[ "$key" != */* ]]; then
     printf included
   elif matches_any "$key" "${EXCLUDE_PREFIXES[@]}"; then
     printf excluded
@@ -921,6 +929,7 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
   --arg db "$DESTINATION_BUCKET" --argjson dp "$DESTINATION_PATH_STYLE" \
   --arg df "$DESTINATION_IDENTITY_FINGERPRINT" --argjson prefixes "$PREFIX_JSON" \
   --argjson exclusions "$EXCLUDE_PREFIX_JSON" --argjson missingProof "$MISSING_PROOF_JSON" \
+  --argjson includeRootObjects "$INCLUDE_ROOT_OBJECTS" \
   --arg expectedDigest "$EXPECTED_MANIFEST_DIGEST" --arg fenceDigest "$FENCE_EVIDENCE_DIGEST" \
   --argjson executeCopy "$EXECUTE_COPY" --argjson reconcileOwned "$RECONCILE_OWNED" \
   --arg conditionalDigest "$CONDITIONAL_WRITE_PROOF_DIGEST" \
@@ -947,7 +956,7 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
    reconcileOwned:$reconcileOwned,
    source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,identityFingerprint:$sf},
    destination:{endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp,identityFingerprint:$df},
-   prefixes:$prefixes,excludePrefixes:$exclusions,
+   prefixes:$prefixes,excludePrefixes:$exclusions,includeRootObjects:$includeRootObjects,
    conditionalWriteCapability:{required:$executeCopy,proofAccepted:$conditionalAccepted,
      proofDigest:(if $conditionalDigest == "null" then null else $conditionalDigest end),
      providerEnforcementValidated:false},
