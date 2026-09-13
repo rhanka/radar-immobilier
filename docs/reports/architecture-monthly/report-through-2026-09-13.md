@@ -8,7 +8,8 @@ signature, deployment record or replacement for preserved source reports.
 - Timezone: America/Toronto.
 - Requested start: the real preceding invoice/report boundary, **unverified**.
 - Requested end: September 13 inclusive (`2026-09-14T00:00:00-04:00` exclusive).
-- Architecture capture cutoff: last cited live check `2026-09-13T15:38:00Z`.
+- Runtime architecture cutoff: last cited live check `2026-09-13T15:38:00Z`.
+- Transition implementation cutoff: last cited progress `2026-09-13T15:39:00Z`.
 - Unified delivery/token/billing cutoff: **not frozen or verified**; September 13
   is incomplete in the available evidence.
 - Owner correction captured `2026-09-13T15:10:18.423Z`; this is provenance of

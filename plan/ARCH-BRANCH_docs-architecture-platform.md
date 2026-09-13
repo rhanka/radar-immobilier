@@ -141,3 +141,4 @@
     - [x] Adapt browser and real-clipboard gates to the final-target entry and fixed-instruction export.
   - [x] Show the retained TEM email relation in every proposed platform state and keep it explicitly qualified.
   - [x] Correct the replay guide to count all eight sanitized Mermaid renderings.
+  - [x] Separate the 15:38 runtime and 15:39 implementation cutoffs from the still-open unified report cutoff.

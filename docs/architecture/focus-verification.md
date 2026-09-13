@@ -6,7 +6,7 @@ Documentation-only worktree: `docs/architecture-platform`.
 | --- | --- | --- |
 | Exact exit command | PASS | `make -f docs/architecture/focus/Makefile test build browser clipboard ENV=test-architecture` |
 | Docker build | PASS; portable HTML approximately 1.50 MB | Vite warns about a >500 kB bundle; one offline artifact is intentional |
-| Mapping / instructions / provenance | 9/9 PASS | Eight graphs: 210 node occurrences, 208 edges, 37 subflows; repeated IDs remain the same resources |
+| Mapping / instructions / provenance | 9/9 PASS | Eight graphs: 210 node occurrences, 214 edges, 37 subflows; repeated IDs remain the same resources |
 | Complete nested diagrams | 8/8 PASS at 45 viewport positions | All leaves, edges and original-ID `parentId` boxes remain simultaneous; navigation only changes the viewport |
 | Default visual entry | PASS: `target-3` | Existant → T1 → T2 → T3 is selectable above the canvas; complete target is labelled **PROPOSED / NOT DEPLOYED** |
 | Mermaid visual render | 8/8 PASS | Exact node/group/labelled-edge text; strict sanitized SVG; HTTP(S) blocked during prerender |
@@ -32,7 +32,8 @@ CDP page readiness now retries only the protocol's destroyed-context race; all
 content assertions remain fail-closed.
 
 The requested period ends at `2026-09-14T00:00:00-04:00`, but its real preceding
-invoice/report start and unified September 13 data-capture cutoff remain unverified.
+invoice/report start and unified September 13 data-capture cutoff remain unverified;
+runtime architecture and transition-progress evidence stop at 15:38Z and 15:39Z.
 The one existing b3-8 rate is 0.082 CAD/h; period hours and amount remain unknown.
 The 720 h / 59.04 CAD values are historical illustration only. LLM tokens were not
 parsed and the previous actual invoice identity/tariffs remain evidence to obtain.
