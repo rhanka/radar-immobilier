@@ -240,6 +240,28 @@ expect_bad env PATH="$TEST_TMP/bin:$PATH" FAKE_S3_ROOT="$TEST_TMP/store" \
   "$TOOL" inventory "${BASE_ARGS[@]}" --report-dir "$TEST_TMP/reports/missing-credential"
 
 reset_store
+TEST_NAME='checkpoint controls are limited to inventory'
+expect_bad run_tool verify "$TEST_TMP/reports/checkpoint-verify" \
+  --checkpoint-dir "$TEST_TMP/checkpoint-verify"
+TEST_NAME='resume requires an initialized checkpoint'
+expect_bad run_tool inventory "$TEST_TMP/reports/uninitialized-resume" \
+  --checkpoint-dir "$TEST_TMP/uninitialized-checkpoint" --resume
+TEST_NAME='inventory persists a credential-free canonical checkpoint configuration'
+expect_ok run_tool inventory "$TEST_TMP/reports/checkpoint-initial" \
+  --checkpoint-dir "$TEST_TMP/checkpoint" --page-size 1 --time-budget-seconds 30
+if jq -e '.schemaVersion == 1 and (.configDigest | test("^[0-9a-f]{64}$")) and
+    .limits.pageSize == 1 and .classification.prefixes == ["raw/"]' \
+    "$TEST_TMP/checkpoint/config.json" >/dev/null &&
+  ! grep -R -E 'SRC_SECRET|DST_SECRET' "$TEST_TMP/checkpoint" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+: >"$AWS_LOG"
+TEST_NAME='resume rejects a changed checkpoint configuration before storage access'
+expect_bad run_tool inventory "$TEST_TMP/reports/checkpoint-mismatch" \
+  --checkpoint-dir "$TEST_TMP/checkpoint" --page-size 2 --time-budget-seconds 30 --resume
+if [ ! -s "$AWS_LOG" ]; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
 FAKE_FAIL_SIDE=destination FAKE_FAIL_OPERATION=head-bucket FAKE_FAIL_ATTEMPTS=99
 TEST_NAME='fails when the credential cannot prove the exact destination target'
 expect_bad run_tool inventory "$TEST_TMP/reports/target-identity" --retries 1
