@@ -57,28 +57,23 @@ test('unsupported syntax and dangling references fail closed', () => {
   assert.throws(() => parseMermaid('flowchart LR\na --> b --> c', 'bad', 'bad'), /unsupported/);
 });
 
-test('D5 leads with complete sequential architecture and keeps fixed billing instructions last', () => {
+test('D6 separates before, effective transition and after while billing stays last', () => {
   assert.equal(presentation.length, 8);
-  assert.match(presentation[0], /architecture finale complète.*un seul b3-8/si);
-  assert.match(presentation[1], /Existant.*T1.*T2.*T3/s);
-  assert.match(presentation[1], /15:38 UTC/);
-  assert.match(presentation[2], /candidat frais.*3\.4.*publication.*projection PG.*Signal typé.*PDF exact/s);
-  assert.match(presentation[2], /0\.18\.0.*BLOCK.*ac3a7150.*537b9e0c.*3d9ed43c.*34\/34.*4\/4.*re-review.*0\.19\.0.*UND_ERR_SOCKET.*cycle suivant.*sans corruption.*0\.19\.1.*faux\/non prioritaire.*cross-repo.*#585.*s-conductor.*cinq PDF.*v1\/v2\/v3.*Cloud Code.*aucun score/s);
-  assert.match(presentation[3], /PP-RAW-OVH.*PP-DOCS-OVH.*préprod avant prod/s);
-  assert.match(presentation[3], /PP-RAW.*PP-DOCS.*vide.*PP-DOCS-LEGACY.*2 821 583 B.*MIGRATE\+RETAIN.*ee84ae29.*cef6d7ed.*aaf0cbf7.*91242223.*Aucun copy/s);
-  assert.match(presentation[4], /NO-GO.*1 840m.*5 907,82 Mi.*4 095m.*8 442 Mi.*5 273 Mi.*16 PVC.*15 Cinder RWO.*deux nœuds/s);
-  assert.match(presentation[7], /ANNEXE FACTURATION · EN DERNIER/);
-  assert.match(presentation[7], /vraie frontière.*non vérifiée.*2026-09-14T00:00:00-04:00/s);
-  assert.match(presentation[7], /mêmes tarifs unitaires.*facture réelle du mois précédent/s);
+  assert.match(presentation[0], /AVANT.*API raw sur MinIO.*poste/s);
+  assert.match(presentation[1], /TRANSITION EFFECTIVE.*0\.18\.0.*Luna high.*avant l’appel LLM.*\.html.*PDF/s);
+  assert.match(presentation[1], /RAW.*PP-RAW-OVH.*144 193.*59 017.*12 534 514 457 B/s);
+  assert.match(presentation[3], /production SCW.*59 017.*keys\+hashes.*85 176.*diff manifest.*copie sélective.*retrait récupérable/s);
+  assert.match(presentation[4], /NO-GO.*4 095m.*8 442 Mi.*1 840m.*5 907,82 Mi.*16 PVC.*15 Cinder RWO.*deux nœuds/s);
+  assert.match(presentation[7], /FACTURATION · EN DERNIER.*10 août.*13 septembre.*840 heures.*68,88 CAD/s);
+  assert.match(presentation[7], /251,215438 CAD LLM.*320,095438 CAD/s);
   assert.doesNotMatch(presentation.slice(0, 7).join('\n'), /question.*allocation LLM|choisir.*DIRECT/i);
   assert.equal(docs['decision-dossier'].match(/^## /gm).length, 8);
-  assert.match(docs['decision-dossier'], /Revision \*\*D5/);
-  assert.match(docs['decision-dossier'], /option` is `null`: no method was selected/);
-  assert.match(docs['decision-dossier'], /BLOCK.*ac3a7150.*537b9e0c.*3d9ed43c.*34\/34.*4\/4.*Fable re-review.*five.*PDFs.*historical\/manual.*v1, v2 and v3.*Cloud Code.*no score/s);
-  assert.match(docs.transitions, /inside the requested period/);
-  assert.match(currentReport, /Prior timestamped runtime check:.*2026-09-13T15:38:00Z/);
-  assert.match(currentReport, /Prior timestamped T1 implementation progress:.*2026-09-13T15:39:00Z/);
-  assert.match(currentReport, /Follow-up T1\/T2\/T3 state:.*exact UTC cutoff \*\*not supplied\*\*/s);
+  assert.match(docs['decision-dossier'], /Revision \*\*D6/);
+  assert.match(docs['decision-dossier'], /exact initial.*canonical reference.*59,017.*keys and hashes/s);
+  assert.match(docs.transitions, /August 10 through September 13 inclusive/);
+  assert.match(currentReport, /10 août → 13 septembre 2026/);
+  assert.match(currentReport, /59,017 keys et hashes.*85,176.*non-canoniques/s);
+  assert.match(currentReport, /251\.215438 CAD/);
   assert.equal((docs['transitions-target'].match(/```mermaid/g) ?? []).length, 3);
 });
 
@@ -86,7 +81,7 @@ test('transition states preserve physical IDs and final-target exclusions', () =
   const [t1, t2, t3, detail] = ['target-1', 'target-2', 'target-3', 'detail-1'].map(id => graphs.find(graph => graph.id === id));
   for (const graph of [t1, t2, t3]) for (const id of ['PP_UI', 'PP_API', 'PP_MCP', 'PP_DB', 'PP_REFRESH', 'PR_UI', 'PR_API', 'PR_MCP', 'PR_DB', 'PR_REFRESH', 'GEO_API', 'GEO_DB', 'GEO_S3']) assert.ok(graph.nodes.some(node => node.id === id), `${graph.id}/${id}`);
   for (const id of ['T1_CHANGE', 'T1_KEEP', 'T1_REMOVE', 'T1_GATES', 'T1_EVIDENCE']) assert.ok(t1.nodes.some(node => node.id === id));
-  for (const id of ['PP_RAW', 'PP_DOCS', 'PP_DOCS_LEGACY', 'PP_RAW_OVH', 'PP_DOCS_OVH']) assert.ok(t2.nodes.some(node => node.id === id));
+  for (const id of ['PP_RAW', 'PP_DOCS', 'PP_DOCS_LEGACY', 'PP_RAW_OVH', 'PP_DOCS_OVH', 'PR_DOCS_SCW', 'DOCS_DIFF', 'DOCS_CANONICAL', 'DOCS_COPY', 'DOCS_PARITY', 'DOCS_PRUNE']) assert.ok(t2.nodes.some(node => node.id === id));
   for (const id of ['PP_RAW_OVH', 'PP_DOCS_OVH', 'PR_RAW_OVH', 'PR_DOCS_OVH', 'TEM', 'PV_SRC', 'ZONES_SRC', 'REGULATIONS_SRC', 'LOTS_SRC', 'ENV_SRC']) assert.ok(t3.nodes.some(node => node.id === id));
   for (const removed of ['PP_RAW', 'PP_DOCS', 'PP_DOCS_LEGACY', 'SCW_RESIDUE']) assert.ok(!t3.nodes.some(node => node.id === removed));
   assert.ok(!t3.groups.some(group => group.id === 'ppminio'));
