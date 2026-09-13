@@ -34,6 +34,16 @@ data:
   S3_REGION: "fr-par"
   S3_BUCKET: "radar-immobilier-raw"
   S3_FORCE_PATH_STYLE: "true"
+  # Dedicated OVH BHS DOCS coordinates. Credentials are bound per workload
+  # through radar-graph-s3-credentials and radar-scrape-s3-credentials.
+  GRAPH_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
+  GRAPH_S3_REGION: "bhs"
+  GRAPH_S3_BUCKET: "radar-immobilier-docs"
+  GRAPH_S3_FORCE_PATH_STYLE: "false"
+  SCRAPE_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
+  SCRAPE_S3_REGION: "bhs"
+  SCRAPE_S3_BUCKET: "radar-immobilier-docs"
+  SCRAPE_S3_FORCE_PATH_STYLE: "false"
   OBSCURA_CDP_URL: "http://radar-obscura:9222"
   # ── Scaleway TEM outbound (invitation / enrolment mail) ───────────────────
   # SMTP egress (:587) is BLOCKED at the Kapsule platform level (BR-37b), so the

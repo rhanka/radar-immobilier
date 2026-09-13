@@ -23,6 +23,7 @@ OBJECT_STORAGE_DOCS_PROD_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 .PHONY: object-storage-docs-prod-validate
 object-storage-docs-prod-validate: ## Validate the PROD DOCS support and inventory Job offline
 	@bash -n deploy/ci/migrate-object-storage.sh deploy/ci/object-storage-checkpoint.sh
+	@bash deploy/ci/docs-prod-runtime-secrets.hermetic.test.sh
 	@node --check deploy/ci/inventory-docs-prod-fast.mjs
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	  $(OBJECT_STORAGE_DOCS_PROD_DIR) >/dev/null
@@ -153,6 +154,60 @@ object-storage-docs-prod-copy-failures: ## Aggregate PROD copy failures without 
 	    -l "job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
 	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
 	    'report=/evidence/reports/$${MIGRATION_RUN_ID}/copy-ledger.json; node -e '\''const fs=require("node:fs"),items=JSON.parse(fs.readFileSync(process.argv[1],"utf8")),counts={};for(const item of items)if(item.status==="failed")counts[item.reason]=(counts[item.reason]||0)+1;console.log(JSON.stringify(counts))'\'' "$$report"'
+
+.PHONY: object-storage-docs-prod-bind
+object-storage-docs-prod-bind: ## Bind future PROD DOCS workers after exact canonical parity
+	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
+	  [ "$(OBJECT_STORAGE_DOCS_PROD_BIND_CONFIRM)" != 1 ] || \
+	  [[ "$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB)" != radar-object-storage-copy-docs-prod-* ]] || \
+	  ! [[ "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" =~ ^[0-9a-f]{64}$$ ]]; then \
+	  echo '[object-storage-docs-prod] require exact Job, digest, confirmation, KUBECONFIG, ENV=prod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
+	    "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]; \
+	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )" = "$$namespace" ]; \
+	  pod="$$( $(KUBECTL) -n "$$namespace" get pods \
+	    -l "job-name=$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  summary="$$( $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
+	    'cat /evidence/reports/$${MIGRATION_RUN_ID}/summary.json' )"; \
+	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
+	    '.processed == 59017 and .failed == 0 and .canonicalDigest == $$digest and .exactParity == true and .complete == true' \
+	    <<<"$$summary" >/dev/null; \
+	  quota="$$( $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json )"; \
+	  jq -e '.status.hard.secrets == "15" and (.status.used.secrets == "13" or .status.used.secrets == "15")' \
+	    <<<"$$quota" >/dev/null; \
+	  source="$$( $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials -o json )"; \
+	  jq -e -f deploy/ci/validate-docs-secret.jq <<<"$$source" >/dev/null; \
+	  jq -e '(.data.DOCS_S3_ENDPOINT | @base64d) == "https://s3.bhs.io.cloud.ovh.net" and \
+	    (.data.DOCS_S3_REGION | @base64d) == "bhs" and \
+	    (.data.DOCS_S3_BUCKET | @base64d) == "radar-immobilier-docs" and \
+	    (.data.DOCS_S3_FORCE_PATH_STYLE | @base64d) == "false"' <<<"$$source" >/dev/null; \
+	  if [ "$$(jq -r '.status.used.secrets' <<<"$$quota")" = 13 ]; then \
+	    ! $(KUBECTL) -n "$$namespace" get secret/radar-graph-s3-credentials >/dev/null 2>&1; \
+	    ! $(KUBECTL) -n "$$namespace" get secret/radar-scrape-s3-credentials >/dev/null 2>&1; \
+	    jq -f deploy/ci/docs-prod-runtime-secrets.jq <<<"$$source" | \
+	      $(KUBECTL) apply -f - >/dev/null; \
+	  fi; \
+	  $(KUBECTL) -n "$$namespace" patch configmap/radar-api --type=merge \
+	    -p '{"data":{"GRAPH_S3_ENDPOINT":"https://s3.bhs.io.cloud.ovh.net","GRAPH_S3_REGION":"bhs","GRAPH_S3_BUCKET":"radar-immobilier-docs","GRAPH_S3_FORCE_PATH_STYLE":"false","SCRAPE_S3_ENDPOINT":"https://s3.bhs.io.cloud.ovh.net","SCRAPE_S3_REGION":"bhs","SCRAPE_S3_BUCKET":"radar-immobilier-docs","SCRAPE_S3_FORCE_PATH_STYLE":"false"}}' >/dev/null; \
+	  runtime="$$( $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials \
+	    secret/radar-graph-s3-credentials secret/radar-scrape-s3-credentials -o json )"; \
+	  jq -e 'INDEX(.items[];.metadata.name) as $$s | ($$s["radar-docs-s3-credentials"].data) as $$d | \
+	    ($$s["radar-graph-s3-credentials"].data == {GRAPH_S3_ACCESS_KEY:$$d.DOCS_S3_ACCESS_KEY,GRAPH_S3_SECRET_KEY:$$d.DOCS_S3_SECRET_KEY}) and \
+	    ($$s["radar-scrape-s3-credentials"].data == {SCRAPE_S3_ACCESS_KEY:$$d.DOCS_S3_ACCESS_KEY,SCRAPE_S3_SECRET_KEY:$$d.DOCS_S3_SECRET_KEY})' \
+	    <<<"$$runtime" >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get configmap/radar-api -o json | jq -e \
+	    '.data.GRAPH_S3_ENDPOINT == "https://s3.bhs.io.cloud.ovh.net" and .data.GRAPH_S3_REGION == "bhs" and \
+	     .data.GRAPH_S3_BUCKET == "radar-immobilier-docs" and .data.GRAPH_S3_FORCE_PATH_STYLE == "false" and \
+	     .data.SCRAPE_S3_ENDPOINT == "https://s3.bhs.io.cloud.ovh.net" and .data.SCRAPE_S3_REGION == "bhs" and \
+	     .data.SCRAPE_S3_BUCKET == "radar-immobilier-docs" and .data.SCRAPE_S3_FORCE_PATH_STYLE == "false"' >/dev/null; \
+	  for _ in $$(seq 1 30); do \
+	    used="$$( $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o jsonpath='{.status.used.secrets}' )"; \
+	    [ "$$used" = 15 ] && break; sleep 1; \
+	  done; \
+	  [ "$$used" = 15 ]; \
+	  echo '[object-storage-docs-prod] graph/scrape credentials bound; Secret quota hard=15 used=15'
 
 .PHONY: object-storage-docs-prod-expand-pvc-quota
 object-storage-docs-prod-expand-pvc-quota: ## Guardedly expand only the PROD PVC count quota from 2 to 3
