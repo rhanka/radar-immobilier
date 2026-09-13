@@ -11,8 +11,9 @@
   "captureCutoffs": {
     "architectureRuntime": "2026-09-13T15:38:00Z",
     "transitionImplementation": "2026-09-13T15:39:00Z",
+    "latestTransitionAudit": null,
     "unifiedDeliveryTokenBilling": null,
-    "status": "September 13 incomplete; unified cutoff not frozen"
+    "status": "Follow-up transition evidence dated September 13; exact latest UTC and unified cutoffs not supplied"
   },
   "ownerCorrection": {
     "capturedAt": "2026-09-13T15:10:18.423Z",
@@ -26,15 +27,20 @@
   "transitionRelation": "inside-requested-period; observed-versus-planned",
   "monetaryEvidence": "incomplete",
   "deploymentClaim": "none; T1, T2 and T3 are explicitly proposed/not deployed",
+  "transitionState": {
+    "t1": "GO_WITH_GATES preprod success; NO-GO unattended/retry/prod before unpublished llm-mesh 0.19.1",
+    "t2": "MIGRATE+RETAIN; 25ec9e04 starts remediation; no copy/cutover/deletion",
+    "t3": "NO-GO today; T2 then rightsizing/constraints/verified two-node step before one"
+  },
   "focus": {
     "html": "architecture-transition-2026-09-13.html",
-    "htmlSha256": "42ed84abfde382426032556f44b90d1524e8a465b11d4c3652f55d36194feb55",
-    "artifactInputHash": "d0f75881cc00ec6fc87ddef71677c3ea5c2439b19b1b0820e196568b0f883933",
-    "architectureHash": "6f754f5d385d0af15d41021305c3560bc83e4d752eb56e555292b3a9a4ba78df",
-    "transitionTargetsHash": "9fa08fa0d1568135550976d973810a7d49cea3318364da4ebcc4078cb41589bd",
-    "dossierHash": "3f28f99b2f6acc2f9c8f7a91c67cf8648fb6280df24d299e8365a7fdab578e37",
-    "presentationHash": "07382ae5388acc35fd80556e7e50588a041dbc6288879eb7b867f178324f7863",
-    "choicesHash": "abd92e9b253c2536f9f1b4e300e9a3c690cd14270905f1b9441778e02e30f97c",
+    "htmlSha256": "e558e140fd0fe9182ffb7ec5358bbb65106b4c6041a5eeed0a2e5873d3eeee67",
+    "artifactInputHash": "757e3b81e6b7d796bce6e527109414e5ad3522bf819ea2a3e51aa5223d434ab9",
+    "architectureHash": "0b9e788fa74a01beaea228272cdfdfb6e35ca1a48d4be89e4a36d3853f6d97bc",
+    "transitionTargetsHash": "2636d65badf5e247b1185ec21be087c6ff7ef90414d60573107fadf1064a1e22",
+    "dossierHash": "0aee65a7ad22b1db465405a0af74cddcc6a4605a3d6d0b9dfe4c38ee7dff2d96",
+    "presentationHash": "2d5422cf7fb4a95aed5d730dfc0a65a30d3b3154f7041e85f87caba447ad596c",
+    "choicesHash": "76f2d19a57a09b9993265b76d975d9f23219d8fa631f478ee0f68914450fdee5",
     "referenceFocusNodeHash": "e3065f43b9c5c38d7eda25f8f9efa080cceca7c4fb413474367d98def71a781c",
     "nativeFocusRouterHash": "98fa601349246bbdcfaa0f5200c3b4e4c4e9d1573ec193d8b8d5200b39abc7d4"
   },
@@ -65,32 +71,32 @@
     {
       "path": "docs/architecture.md",
       "role": "current-state",
-      "sha256": "6f754f5d385d0af15d41021305c3560bc83e4d752eb56e555292b3a9a4ba78df"
+      "sha256": "0b9e788fa74a01beaea228272cdfdfb6e35ca1a48d4be89e4a36d3853f6d97bc"
     },
     {
       "path": "docs/architecture/transitions-target.md",
       "role": "T1-T2-T3-targets-nondeployed",
-      "sha256": "9fa08fa0d1568135550976d973810a7d49cea3318364da4ebcc4078cb41589bd"
+      "sha256": "2636d65badf5e247b1185ec21be087c6ff7ef90414d60573107fadf1064a1e22"
     },
     {
       "path": "docs/architecture/proposal.md",
       "role": "T1-causal-detail-nondeployed",
-      "sha256": "35500da655d239bb0a66f606548d9bba1e1d5e159795c219eadbffe1626b112f"
+      "sha256": "e5645dc9fd96b64a89ce99c0b3bcc7d93098794bb9b6e1e5b79a082a8f0c154c"
     },
     {
       "path": "docs/architecture/transitions.md",
       "role": "in-period-transition-register",
-      "sha256": "c490c03016f62e143dae1e573569598147feb911896044d2a883a7a5115f50bd"
+      "sha256": "cf2b090a7a31ee459e996addabb3442e80a14bb9e8ffd2546e933750ac164f72"
     },
     {
       "path": "docs/architecture/decision-dossier.md",
       "role": "D5",
-      "sha256": "3f28f99b2f6acc2f9c8f7a91c67cf8648fb6280df24d299e8365a7fdab578e37"
+      "sha256": "0aee65a7ad22b1db465405a0af74cddcc6a4605a3d6d0b9dfe4c38ee7dff2d96"
     },
     {
       "path": "docs/reports/architecture-monthly/report-through-2026-09-13.md",
       "role": "current-companion",
-      "sha256": "ee5fc7abebaafd93eff217892f6926deafa1b210192212da722b36ea7c849279"
+      "sha256": "b757069cc11442aae00ec65994e5bce025a7de102a0cbffc9c33aba8b5bf2f2f"
     },
     {
       "path": "docs/reports/couts-2026-07-13_2026-08-09.md",
