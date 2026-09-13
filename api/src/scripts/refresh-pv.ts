@@ -89,10 +89,12 @@ async function main(): Promise<void> {
     async generateJson(input: Parameters<typeof bundle.textClient.generateJson>[0]) {
       modelCalls += 1;
       const startedAt = Date.now();
+      const schemaSha256 = createHash("sha256").update(input.schema).digest("hex");
+      const promptSha256 = createHash("sha256").update(input.prompt).digest("hex");
       try { return await bundle.textClient.generateJson(input); }
       finally {
         logger.info({ modelCalls, latencyMs: Date.now() - startedAt, provider: selectedProvider,
-          model, effort }, "refresh-pv: model call finished");
+          model, effort, schemaSha256, promptSha256 }, "refresh-pv: model call finished");
       }
     } };
   logger.info({ city, provider: selectedProvider, model, effort, timeoutMs }, "refresh-pv: starting");
