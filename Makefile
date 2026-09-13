@@ -44,11 +44,13 @@ K8S_MANIFEST_DIR     ?= deploy/k8s
 K8S_NAMESPACE        ?= radar-immobilier
 OBJECT_STORAGE_INVENTORY_DIR := deploy/k8s/object-storage-inventory-preprod
 OBJECT_STORAGE_INVENTORY_NAMESPACE := radar-immobilier-preprod
+OBJECT_STORAGE_OVH_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 OBJECT_STORAGE_RAW_REBIND_PATCH := $(OBJECT_STORAGE_INVENTORY_DIR)/raw-api-rebind-patch.yaml
 OBJECT_STORAGE_DOCS_BUCKET_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-bucket-job.yaml
 OBJECT_STORAGE_DOCS_INVENTORY_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-inventory-job.yaml
 OBJECT_STORAGE_DOCS_PROOF_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-conditional-proof-job.yaml
 OBJECT_STORAGE_DOCS_COPY_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-copy-job.yaml
+OBJECT_STORAGE_DOCS_CANONICAL_COPY_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-canonical-copy-job.yaml
 # Set to 1 only when a real KUBECONFIG is present to additionally run a
 # server-side dry-run. Offline render works with no cluster.
 K8S_VALIDATE_WITH_CLUSTER ?= 0
@@ -436,8 +438,11 @@ object-storage-docs-preprod-validate: ## Render support and validate the DOCS bu
 	@jq -n -f deploy/ci/docs-secret-from-raw.jq >/dev/null
 	@jq -n -f deploy/ci/validate-docs-secret.jq >/dev/null
 	@jq -n '{items:[]}' | jq -f deploy/ci/docs-zero-writer-bindings.jq >/dev/null
+	@jq -n -f deploy/ci/docs-prod-source-secret.jq >/dev/null
 	@bash -n deploy/ci/prove-docs-conditional-writes.sh \
-	  deploy/ci/build-docs-expected-manifest.sh
+	  deploy/ci/build-docs-expected-manifest.sh deploy/ci/copy-canonical-docs.sh \
+	  deploy/ci/copy-canonical-docs.hermetic.test.sh
+	@bash deploy/ci/copy-canonical-docs.hermetic.test.sh
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
 	@$(KUBECTL) create --dry-run=client --validate=false \
@@ -448,6 +453,8 @@ object-storage-docs-preprod-validate: ## Render support and validate the DOCS bu
 	  -f $(OBJECT_STORAGE_DOCS_PROOF_JOB) -o name >/dev/null
 	@$(KUBECTL) create --dry-run=client --validate=false \
 	  -f $(OBJECT_STORAGE_DOCS_COPY_JOB) -o name >/dev/null
+	@$(KUBECTL) create --dry-run=client --validate=false \
+	  -f $(OBJECT_STORAGE_DOCS_CANONICAL_COPY_JOB) -o name >/dev/null
 
 .PHONY: object-storage-docs-preprod-provision
 object-storage-docs-preprod-provision: ## Create the concern-specific Secret and exact BHS DOCS bucket
@@ -552,6 +559,53 @@ object-storage-docs-preprod-copy: ## Disabled until the exact PROD-canonical sub
 	    $(OBJECT_STORAGE_INVENTORY_DIR) >"$$render"; \
 	  $(KUBECTL) apply -f "$$render" >/dev/null; \
 	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_COPY_JOB) -o name
+
+.PHONY: object-storage-docs-preprod-copy-canonical
+object-storage-docs-preprod-copy-canonical: ## Import the PROD manifest and copy its exact corpus SCW-to-OVH
+	@if [ "$(OBJECT_STORAGE_DOCS_CANONICAL_COPY_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" ] || \
+	  [ ! -s "$(OBJECT_STORAGE_DOCS_CANONICAL_MANIFEST)" ] || \
+	  ! [[ "$(OBJECT_STORAGE_DOCS_CANONICAL_DIGEST)" =~ ^[0-9a-f]{64}$$ ]]; then \
+	  echo '[object-storage-docs] refused: require both kubeconfigs, canonical manifest/digest, confirmation, ENV=preprod'; \
+	  exit 1; \
+	fi
+	@set -euo pipefail; manifest="$(OBJECT_STORAGE_DOCS_CANONICAL_MANIFEST)"; \
+	  digest="$(OBJECT_STORAGE_DOCS_CANONICAL_DIGEST)"; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  preprod_server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
+	  preprod_namespace="$$( $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )"; \
+	  prod_server="$$( KUBECONFIG="$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
+	  prod_namespace="$$( KUBECONFIG="$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )"; \
+	  [ "$$preprod_server" = "$(OBJECT_STORAGE_OVH_SERVER)" ] && [ "$$prod_server" = "$(OBJECT_STORAGE_OVH_SERVER)" ] && \
+	    [ "$$preprod_namespace" = "$$namespace" ] && [ "$$prod_namespace" = radar-immobilier ] || \
+	    { echo '[object-storage-docs] refused: exact OVH namespaces are unproved'; exit 1; }; \
+	  [ "$$(sha256sum "$$manifest" | awk '{print $$1}')" = "$$digest" ] || \
+	    { echo '[object-storage-docs] canonical digest differs'; exit 1; }; \
+	  jq -es 'length == 59017 and (map(.size)|add) == 12534514457 and \
+	    ([.[].key]|length == (unique|length)) and all(.[].sha256; test("^[0-9a-f]{64}$$"))' \
+	    "$$manifest" >/dev/null || { echo '[object-storage-docs] canonical corpus contract differs'; exit 1; }; \
+	  KUBECONFIG="$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" $(KUBECTL) -n radar-immobilier \
+	    get secret radar-s3-credentials -o json | jq -e -f deploy/ci/docs-prod-source-secret.jq | \
+	    $(KUBECTL) apply -f - >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-docs-canonical \
+	    --from-literal="manifestSha256=$$digest" --dry-run=client -o yaml | \
+	    $(KUBECTL) apply -f - >/dev/null; \
+	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
+	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
+	    $(OBJECT_STORAGE_INVENTORY_DIR) >"$$render"; $(KUBECTL) apply -f "$$render" >/dev/null; \
+	  job_ref="$$( $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_CANONICAL_COPY_JOB) -o name )"; \
+	  job="$${job_ref#job.batch/}"; pod=''; running=false; \
+	  for ((attempt=1; attempt<=300; attempt++)); do \
+	    pod="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o jsonpath='{.items[0].metadata.name}' )"; \
+	    if [ -n "$$pod" ] && [ "$$( $(KUBECTL) -n "$$namespace" get pod "$$pod" -o jsonpath='{.status.phase}' )" = Running ]; then \
+	      running=true; break; \
+	    fi; \
+	    sleep 2; \
+	  done; \
+	  $$running || { echo '[object-storage-docs] canonical copy Pod did not start'; exit 1; }; \
+	  $(KUBECTL) -n "$$namespace" exec -i "$$pod" -- /bin/bash -ceu \
+	    'umask 077; target=/evidence/prod-canonical-manifest.jsonl; if [ -e "$$target" ]; then [ "$$(sha256sum "$$target" | awk '\''{print $$1}'\'')" = "$$1" ]; exit; fi; cat >"$$target.tmp"; [ "$$(sha256sum "$$target.tmp" | awk '\''{print $$1}'\'')" = "$$1" ]; sync -f "$$target.tmp"; mv "$$target.tmp" "$$target"' \
+	    -- "$$digest" <"$$manifest"; \
+	  echo "[object-storage-docs] canonical copy started as $$job_ref"
 
 .PHONY: object-storage-raw-preprod-rebind
 object-storage-raw-preprod-rebind: ## Roll radar-api RAW bindings to OVH without changing the shared ConfigMap
