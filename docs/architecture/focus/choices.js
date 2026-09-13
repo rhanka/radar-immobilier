@@ -14,12 +14,16 @@ export const fixedInstructions = {
       docsBucketProvisioned: true, docsSecretProvisioned: true,
       docsInventory: { preprodMinio: { objects: 144193, gigabytes: 28.34 }, productionScwDocsPocs: { objects: 59017, bytes: 12534514457 } },
       canonicalReference: 'production SCW docs-pocs exact 59,017 keys+hashes', preprodSurplusMigrated: false,
-      copyTooling: { branch: 'chore/scw-final-sweep', head: 'be362561', onOriginMain: false },
-      copyToolingCommitted: true, docsCopy: false, docsParityRecovery: false, docsRebind: false,
-      productionAuditMigration: 'launched; completed outcome unknown', minioRetainedUntilExactParityAndRecovery: true,
+      implementation: { branch: 'chore/scw-final-sweep', head: '2ccabfc8', onOriginMain: false },
+      preproduction: { status: 'accepted', objects: 59017, bytes: 12534514457,
+        canonicalManifestSha256: '52646a7b…0425', failed: 0, docsOvhActive: true,
+        removed: ['MinIO StatefulSet', 'MinIO Pod', 'MinIO Service', '40 Gi data PVC', 'six MinIO NetworkPolicies'],
+        retained: ['migration/checkpoint PVC'], quotaBefore: { pvcs: 4, storageGi: 47 }, quotaAfter: { pvcs: 3, storageGi: 7 },
+        workloadsReady: { api: '1/1', mcp: '1/1', ui: '1/1' } },
+      production: { status: 'in-progress', accepted: false },
     },
-    t3: { status: 'not-started', verdict: 'NO-GO today', targetNodes: 1,
-      requiredSequence: ['T2 complete', 'rightsizing', 'constraints reconciled', 'verified two-node step', 'one-node test'] },
+    t3: { status: 'gated', verdict: 'await production T2 and post-cleanup capacity proof', targetNodes: 1,
+      requiredSequence: ['production T2 complete', 'post-cleanup remeasurement', 'rightsizing', 'constraints reconciled', 'verified two-node step', 'one-node test'] },
   },
   reporting: {
     timezone: 'America/Toronto', startInclusive: '2026-08-10T00:00:00-04:00',
@@ -74,15 +78,15 @@ export function responsePack(manifest, selections = {}, comments = {}, remarks =
       selection, decisionStatus: selection === null ? (question.criticality === 'non-critical' ? 'open-non-blocking' : 'open') : 'owner-draft-not-ratified',
       comment: comments[question.key] ?? '', options: question.options };
   });
-  return { schema: 'immo-focus-owner-response/v5', dossier: 'immo-before-after-and-reporting', revision: 'D7',
+  return { schema: 'immo-focus-owner-response/v6', dossier: 'immo-before-after-and-reporting', revision: 'D8',
     dossierHash: manifest.dossierHash, artifactInputHash: manifest.artifactInputHash, capturedAt,
     buildOnly: true, status: 'draft-not-ratified',
     authority: 'open answers captured as a local draft; fixed owner decisions remain unchanged; no deployment, invoice or Track decision emitted',
     responses,
     fixedInstructions, unresolvedEvidence: [
       'T1 valid-PDF provider completion, typed Signal/exact PDF, replay and schedule acceptance',
-      'T2 DOCS copy, parity/recovery and rebind',
-      'production object audit/migration outcome', 'T3 capacity and placement acceptance',
+      'production T2 DOCS copy, parity/recovery, rebind and MinIO removal',
+      'T3 post-cleanup capacity and placement acceptance',
       'external invoice identity, if it differs from the merged repository report boundary',
     ], remarks };
 }

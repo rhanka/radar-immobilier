@@ -27,7 +27,7 @@ const sharedNodes = {
   PR_REFRESH: immo('cronjob', 'Autonomous Immo refresh', 'Target role · physical binding TBD', 'transitions-target.md:production bindings'),
   PR_GRAPH: immo('s3', 'OVH Object Storage · S3', 'Target graph/corpus role · binding TBD', 'transitions-target.md:production bindings'),
   PP_RAW_OVH: immo('s3', 'OVH Object Storage · S3', 'Active API raw role · parity + rebind verified', 'chore/scw-final-sweep:2870c801; f5f90c99'),
-  PP_DOCS_OVH: immo('s3', 'OVH Object Storage · S3', 'Provisioned DOCS target · inventory in progress', 'chore/scw-final-sweep:be362561'),
+  PP_DOCS_OVH: immo('s3', 'OVH Object Storage · S3', 'Active canonical DOCS · 59,017 objects / 12,534,514,457 B · manifest 52646a7b…0425 · failed 0', 'decision-dossier.md:D8 preproduction receipt'),
   PR_RAW_OVH: immo('s3', 'OVH Object Storage · S3', 'Target API raw role · binding TBD', 'transitions-target.md:T2'),
   PR_DOCS_OVH: immo('s3', 'OVH Object Storage · S3', 'Target canonical DOCS role · acceptance state qualified per view', 'transitions-target.md:DOCS convergence'),
   PR_DOCS_SCW: immo('s3', 'Scaleway Object Storage · S3', 'Production DOCS migration source · inventory reference', 'transitions-target.md:effective DOCS inventory'),
