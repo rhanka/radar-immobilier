@@ -28,7 +28,9 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0: identify exact existing consumer/runner/canonical writer/projection/3.4 contracts and reusable CAS work; evidence and decisions in `docs/spec/SPEC_EVOL_REFRESH_018.md`.
-- [ ] Lot 1: deliver the shortest executable continuation spec and precise build file scope, tests and runtime gates; expose real blockers without broad redesign.
+- [x] Lot 1: deliver numbered continuation decisions, proposed exact build paths/commit caps and acceptance gates in `docs/spec/SPEC_EVOL_REFRESH_018.md` and `docs/reviews/refresh-018/build-handoff.md`; static design only.
+- [x] Lot 1 gate: report first design handoff through h2a for independent Gemini review; package, typed Signal/PDF and scheduled-run acceptance remain unexecuted.
+- [ ] Scope release: conductor reconciles Gemini findings and releases the exact C01–C25 paths from `docs/reviews/refresh-018/build-handoff.md`; no build permission is implied by this proposal.
 - [ ] Lot 2: Gemini independent design review and conductor reconciliation.
 - [ ] Lot 3: Sol builds the released scope with isolated tests and atomic commits.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
