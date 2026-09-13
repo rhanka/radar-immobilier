@@ -73,6 +73,11 @@ grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs' \
 for rel in scripts/mount-scw.sh scripts/umount-scw.sh; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
 done
+[ ! -e "$ROOT/deploy/k8s/25-minio.yaml" ] || fail 'deploy/k8s/25-minio.yaml must be retired'
+for rel in deploy/k8s/kustomization.yaml deploy/k8s/70-networkpolicy.yaml; do
+  grep -Eiq 'radar-minio|component:[[:space:]]*minio|25-minio\.yaml' "$ROOT/$rel" &&
+    fail "$rel retains a PROD MinIO resource"
+done
 for rel in "${PENDING_CLIENTS[@]}"; do
   [ -f "$ROOT/$rel" ] || fail "$rel is missing from the explicit pending-client ledger"
 done

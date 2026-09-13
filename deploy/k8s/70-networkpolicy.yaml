@@ -123,40 +123,6 @@ spec:
         - protocol: TCP
           port: 5432
 ---
-# ADDITIVE: let the api pod reach MinIO on :9000 (object storage).
-#
-# The api's /health probe (and every RECUEIL object PUT/GET) calls the S3 API on
-# `radar-minio:9000`. The operator baseline `allow-api-to-runtime-dependencies`
-# opens api -> {postgres:5432, obscura:9222, maildev:1025/1080} but OMITS MinIO;
-# under default-deny, api -> minio:9000 is DROPPED, so the S3 SDK HANGS (silent —
-# no error) and /health never returns -> readiness/liveness fail -> CrashLoop.
-# This purely-additive policy opens api -> minio:9000 so object-store access (and
-# therefore /health) works. (Mirror of the operator baseline, scoped to MinIO.)
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-api-to-minio
-  namespace: radar-immobilier
-  labels:
-    app.kubernetes.io/name: radar-immobilier
-    app.kubernetes.io/part-of: sentropic
-    app.kubernetes.io/component: minio
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: radar-immobilier
-      app.kubernetes.io/component: minio
-  policyTypes: ["Ingress"]
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: radar-immobilier
-              app.kubernetes.io/component: api
-      ports:
-        - protocol: TCP
-          port: 9000
----
 # ADDITIVE: let public Traefik traffic reach the immo MCP HTTP server
 # (40-immo-mcp-http-deploy.yaml + 41-immo-mcp-ingress.yaml).
 #
