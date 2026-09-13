@@ -129,6 +129,32 @@ trigger-preprod: guard-preprod
 	@test -n "$(RUN_ID)" || { echo "RUN_ID is required" >&2; exit 1; }
 	@$(K) create job "radar-refresh-pv-$(RUN_ID)" --from=cronjob/radar-refresh-pv
 
+.PHONY: observe-scheduled-preprod
+observe-scheduled-preprod: guard-preprod
+	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }
+	@before="$$($(K) get cronjob radar-refresh-pv -o jsonpath='{.status.lastScheduleTime}')"; \
+	  restore() { $(K) patch cronjob radar-refresh-pv --type=merge \
+	    -p '{"spec":{"schedule":"17 5 * * *"}}' >/dev/null; }; \
+	  trap restore EXIT; \
+	  $(K) patch cronjob radar-refresh-pv --type=merge \
+	    -p '{"spec":{"schedule":"* * * * *"}}' >/dev/null; \
+	  current=""; \
+	  for attempt in $$(seq 1 24); do \
+	    current="$$($(K) get cronjob radar-refresh-pv -o jsonpath='{.status.lastScheduleTime}')"; \
+	    test -n "$$current" -a "$$current" != "$$before" && break; \
+	    sleep 5; \
+	  done; \
+	  test -n "$$current" -a "$$current" != "$$before" \
+	    || { echo "CronJob controller did not schedule within 120 seconds" >&2; exit 1; }; \
+	  restore; trap - EXIT; \
+	  job="$$($(K) get jobs \
+	    -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.ownerReferences[0].name}{"\t"}{.metadata.creationTimestamp}{"\n"}{end}' \
+	    | awk '$$2 == "radar-refresh-pv" { print }' | sort -k3 | tail -1 | cut -f1)"; \
+	  test -n "$$job" || { echo "Scheduled Job owner reference not found" >&2; exit 1; }; \
+	  $(K) wait --for=condition=complete "job/$$job" --timeout=1200s; \
+	  $(K) get "job/$$job" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,IMAGE:.spec.template.spec.containers[0].image,START:.status.startTime,END:.status.completionTime; \
+	  $(K) logs "job/$$job" --all-containers=true
+
 .PHONY: replace-zero-pod-preprod
 replace-zero-pod-preprod: guard-preprod
 	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }

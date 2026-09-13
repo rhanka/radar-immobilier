@@ -93,8 +93,9 @@
 - [x] C18c: return the live pilot to one acquired document after Waterloo proved the exact-PDF path, avoiding an unpaced positional search window.
 - [x] C18d: filter the source index before the one-document limit and pace the selected PDF fetch by two seconds.
 - [x] Lot 4: Fable independent post-build review and post-fix PASS; verified findings fixed.
-- [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
+- [x] Lot 5a: conductor-controlled preprod end-to-end and Kubernetes-controller scheduled refresh acceptance on the exact immutable image.
+- [ ] Lot 5b: gated production promotion after OVH S3/PVC/runtime binding; the base remains deliberately dormant.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
 
 ## Merge / Close
-- [ ] CI and live acceptance evidenced; conductor integrates by merge commit only, preserving branch history.
+- [x] CI and preprod live acceptance evidenced; conductor integrates by merge commit only, preserving branch history.
