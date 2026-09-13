@@ -435,6 +435,7 @@ object-storage-docs-preprod-validate: ## Render support and validate the DOCS bu
 	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[object-storage-docs] kubectl not found"; exit 1; }
 	@jq -n -f deploy/ci/docs-secret-from-raw.jq >/dev/null
 	@jq -n -f deploy/ci/validate-docs-secret.jq >/dev/null
+	@jq -n '{items:[]}' | jq -f deploy/ci/docs-zero-writer-bindings.jq >/dev/null
 	@bash -n deploy/ci/prove-docs-conditional-writes.sh \
 	  deploy/ci/build-docs-expected-manifest.sh
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
@@ -515,8 +516,31 @@ object-storage-docs-preprod-prove-conditional-write: ## Retain one exact source 
 	  $(KUBECTL) -n "$$namespace" wait --for=condition=complete "$$job_ref" --timeout=900s >/dev/null; \
 	  echo "[object-storage-docs] conditional proof committed by $$job_ref"
 
+.PHONY: object-storage-docs-preprod-fence
+object-storage-docs-preprod-fence: ## Record zero live MinIO DOCS writers after validated provisional evidence
+	@if [ "$(OBJECT_STORAGE_DOCS_FENCE_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ] || ! [[ "$(OBJECT_STORAGE_DOCS_PROVISIONAL_DIGEST)" =~ ^[0-9a-f]{64}$$ ]]; then \
+	  echo "[object-storage-docs] refused: require KUBECONFIG, provisional digest, confirmation, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  api="$$(mktemp)"; cron="$$(mktemp)"; pods="$$(mktemp)"; trap 'rm -f "$$api" "$$cron" "$$pods"' EXIT; \
+	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json >"$$api"; \
+	  $(KUBECTL) -n "$$namespace" get cronjobs/radar-refresh-scrape cronjobs/radar-refresh-projection -o json >"$$cron"; \
+	  $(KUBECTL) -n "$$namespace" get pods -o json >"$$pods"; \
+	  jq -e -f deploy/ci/raw-api-ovh-binding.jq "$$api" >/dev/null; \
+	  jq -e -f deploy/ci/docs-zero-writer-bindings.jq "$$cron" >/dev/null; \
+	  jq -e '[.items[] | select(.status.phase == "Running" or .status.phase == "Pending") | select(any(.metadata.ownerReferences[]?; .kind == "Job")) | select(.metadata.labels["app.kubernetes.io/component"] != "object-storage-inventory")] | length == 0' "$$pods" >/dev/null; \
+	  stamp="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
+	  payload="$$(printf 'schemaVersion=1\nenvironment=preprod\nplane=DOCS\ncanonicalSource=prod-scw-docs-pocs\nprovisionalDigest=%s\nminioDocsWriters=0\nobservedAt=%s\n' "$(OBJECT_STORAGE_DOCS_PROVISIONAL_DIGEST)" "$$stamp")"; \
+	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-docs-fence \
+	    --from-literal="fence.txt=$$payload" --dry-run=client -o yaml | \
+	    $(KUBECTL) apply -f - >/dev/null; \
+	  echo '[object-storage-docs] zero MinIO DOCS writers recorded'
+
 .PHONY: object-storage-docs-preprod-copy
-object-storage-docs-preprod-copy: ## Start the guarded full-prefix DOCS copy from finalized fenced evidence
+object-storage-docs-preprod-copy: ## Disabled until the exact PROD-canonical subset replaces full-prefix copy
+	@echo '[object-storage-docs] refused: full preprod source is not the canonical PROD corpus'; exit 1
 	@if [ "$(OBJECT_STORAGE_DOCS_COPY_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
 	  [ -z "$$KUBECONFIG" ]; then \
 	  echo "[object-storage-docs] refused: require KUBECONFIG, OBJECT_STORAGE_DOCS_COPY_CONFIRM=1, ENV=preprod"; \
