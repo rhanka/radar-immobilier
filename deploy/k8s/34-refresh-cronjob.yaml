@@ -336,7 +336,7 @@ spec:
                 - { name: REFRESH_TIMEOUT_MS, value: "900000" }
                 - { name: REFRESH_BUDGET_LIMIT, value: "20000" }
                 - { name: REFRESH_MAX_OUTPUT_TOKENS, value: "4096" }
-                - { name: REFRESH_ACQUISITION_LIMIT, value: "1" }
+                - { name: REFRESH_ACQUISITION_LIMIT, value: "10" }
                 - { name: SENTROPIC_LLM_MESH_KEYRING_DIR, value: "/keyring" }
                 - name: REFRESH_PRINCIPAL_REF
                   valueFrom: { secretKeyRef: { name: radar-refresh-runtime, key: REFRESH_PRINCIPAL_REF } }
