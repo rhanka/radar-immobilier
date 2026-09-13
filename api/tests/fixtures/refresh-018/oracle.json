@@ -1,0 +1,14 @@
+{
+  "citySlug": "waterloo",
+  "meetingDate": "2026-08-18",
+  "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+  "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+  "originalKey": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+  "parsedTextSha256": "f94a4872ef4c85875359698405f4462e49d54e55e493e2ecf7ca9e83b7175647",
+  "page": 3,
+  "resolution": "26.08.22.1",
+  "bylawNumber": "26-956-2",
+  "stage": "adoption",
+  "excerpt": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés tel que soumis",
+  "forbiddenProperties": ["in_force", "nb_unites_min", "nb_unites_max"]
+}
