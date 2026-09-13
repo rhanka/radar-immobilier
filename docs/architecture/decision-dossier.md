@@ -48,9 +48,13 @@ and memory, and required anti-affinity is incompatible with one node (§5).
 **BLOCK** at Immo `ac3a7150`. Corrective commits `537b9e0c` and `3d9ed43c` pass
 scoped 34/34, integration 4/4 and typecheck; Fable re-review is still in progress.
 The internal PDF contract remains `immo-pv-extraction-v3`, not a Graphify release.
-The nested `UND_ERR_SOCKET` belongs to llm-mesh 0.19.0; delegated 0.19.1 remains
-unpublished. T1 is **BLOCKED** pending re-review and the remaining acceptance gates.
-No real-provider Signal or Kubernetes acceptance exists.
+Retain llm-mesh 0.19.0. On rare nested `UND_ERR_SOCKET`, Graphify fails closed,
+the Job fails and the next cycle resumes from durable state; no corruption or
+in-process retry is claimed. The 0.19.1 need is not established or prioritized.
+Cross-repository implementation is unauthorized; PR #585 is closed and its branches
+are removed. Diagnosis is deferred to `s-conductor` without an implementation request.
+T1 remains **BLOCKED** pending re-review and the remaining acceptance gates. No
+real-provider Signal or Kubernetes acceptance exists.
 Every target
 production role may be named as a contract, but its physical binding remains
 TBD rather than inferred from source defaults or the old SCW cluster.
@@ -68,8 +72,8 @@ atomic PG projection → typed Signal plus exact PDF. [Detailed T1 flow](proposa
 
 [FACT] Immo owns every step; Geo owns geographic inputs. T1 keeps the existing
 API MinIO roles until T2. The corrective test envelope passes, but Fable re-review,
-operated keyring, durable lock, real-provider Signal, llm-mesh 0.19.1 and Kubernetes
-qualification remain open.
+operated keyring, durable lock, real-provider Signal and Kubernetes qualification
+remain open. llm-mesh 0.19.1 is not an acceptance gate.
 
 [JUDGMENT] Before any real extraction, run one neutral benchmark over the same five
 PDFs: historical/manual baseline versus contract versions v1, v2 and v3. Every run

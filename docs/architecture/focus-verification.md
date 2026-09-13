@@ -44,8 +44,9 @@ No Kubernetes mutation, object migration, database write, application implementa
 stack start, production action, root-checkout edit, Track write, agent launch, merge
 or remote publication was performed. T1, T2 and T3 are architecture proposals, not
 deployment claims. T1 remains blocked pending Fable re-review, the five-PDF
-non-simulated benchmark, published llm-mesh 0.19.1, a real-provider Signal and K8s
-acceptance; no model, Cloud Code enrollment or benchmark score exists. T2 checkpoint
+non-simulated benchmark, a real-provider Signal and K8s acceptance; no model, Cloud
+Code enrollment or benchmark score exists. llm-mesh 0.19.0 remains the target with
+fail-closed Job failure and next-cycle durable resume; 0.19.1 is not a gate. T2 checkpoint
 work remains under construction and still lacks object copy, parity, recovery,
 cutover and deletion. T3 remains NO-GO until T2, rightsizing, constraint reconciliation
 and a verified two-node step precede any one-node test.

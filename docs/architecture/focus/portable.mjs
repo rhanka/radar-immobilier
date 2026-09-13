@@ -36,7 +36,7 @@ const evidence = {
   ownerCorrection: { capturedAt: '2026-09-13T15:10:18.423Z', sourceRevision: 'D4', dossierHash: 'b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451', artifactInputHash: '92b87297fbc8ed0f2670fa4fd07e1dde6d061d04533d3695275c1f386b3b032e', option: null, interpretation: 'no allocation vote; D5 fixed instructions' },
   snapshotAt: '2026-09-13', transitionRelation: 'inside-requested-period; observed-versus-planned', monetaryEvidence: 'incomplete',
   deploymentClaim: 'none; T1, T2 and T3 are explicitly proposed/not deployed',
-  transitionState: { t1: 'BLOCKED; fixes pass 34/34 + 4/4 + typecheck; Fable re-review, benchmark, provider and K8s open', t2: 'MIGRATE+RETAIN; checkpoint mechanism under construction; no object copy', t3: 'NO-GO today; T2 then rightsizing/constraints/verified two-node step before one' },
+  transitionState: { t1: 'BLOCKED; keep llm-mesh 0.19.0 with fail-closed next-cycle resume; Fable re-review, benchmark, provider and K8s open', t2: 'MIGRATE+RETAIN; checkpoint mechanism under construction; no object copy', t3: 'NO-GO today; T2 then rightsizing/constraints/verified two-node step before one' },
   focus: { html: 'architecture-transition-2026-09-13.html', htmlSha256: sha256(html),
     artifactInputHash: manifest.artifactInputHash, architectureHash: manifest.architectureHash,
     transitionTargetsHash: manifest.transitionTargetsHash,

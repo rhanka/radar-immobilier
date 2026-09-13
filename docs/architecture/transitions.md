@@ -44,6 +44,12 @@ re-review is in progress. Graphify remains exactly 0.18.0 and fail-closes correc
 `immo-pv-extraction-v3` remains an internal contract name. No provider Signal or
 Kubernetes acceptance exists, and T1 remains blocked rather than accepted.
 
+[FACT · owner correction] Keep llm-mesh 0.19.0. A rare nested `UND_ERR_SOCKET`
+fails the Job closed; durable state is resumed at the next cycle. No corruption or
+in-process retry is claimed. The 0.19.1 need is not established or prioritized:
+cross-repository implementation is unauthorized, PR #585 is closed and its branches
+are removed. Diagnosis is deferred to `s-conductor`, with no implementation request.
+
 [FACT · gate] Before real extraction, compare the historical/manual baseline with
 v1, v2 and v3 on the same five PDFs. Runs must be non-simulated and traceable.
 The model is not selected, Cloud Code is not enrolled and no score is available.

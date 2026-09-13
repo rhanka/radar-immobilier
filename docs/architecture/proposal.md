@@ -6,9 +6,11 @@ preproduction MinIO API roles until T2. Graphify stays exactly 0.18.0; the PDF
 contract name `immo-pv-extraction-v3` is not a 0.18.3 dependency version. At
 Fable returned BLOCK at Immo `ac3a7150`. Corrective commits `537b9e0c` and
 `3d9ed43c` pass scoped 34/34, integration 4/4 and typecheck, while Fable re-review
-remains in progress. Graphify fail-closes correctly; nested `UND_ERR_SOCKET`
-belongs to the llm-mesh 0.19.0 normalizer. Its delegated 0.19.1 patch is unpublished.
-T1 remains blocked; real-provider Signal and Kubernetes acceptance are absent.
+remains in progress. Retain llm-mesh 0.19.0: on rare nested `UND_ERR_SOCKET`,
+Graphify fails closed, the Job fails and the next cycle resumes from durable state.
+No corruption or in-process retry is claimed. Diagnosis is deferred to `s-conductor`
+without an implementation request; 0.19.1 is not a T1 gate. T1 remains blocked;
+real-provider Signal and Kubernetes acceptance are absent.
 
 ```mermaid
 flowchart LR
@@ -17,7 +19,7 @@ flowchart LR
     acquire["1 Acquire + parse<br/>CAS bytes, original page map, immutable input manifest"]
     subgraph llm_target["2 Profile extraction + grounding · Immo hosts Graphify 0.18.0"]
       materialize["Materialize checked S3 inputs<br/>stable document/page mappings"]
-      graphify["Graphify 0.18.0 + llm-mesh 0.19.0<br/>0.19.1 normalizer patch unpublished"]
+      graphify["Graphify 0.18.0 + llm-mesh 0.19.0<br/>rare socket error: fail Job → durable next-cycle resume"]
       evidence["Validate profile + grounding<br/>schema, source, page, excerpt before success"]
       materialize --> graphify
       graphify --> evidence

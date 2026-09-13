@@ -19,6 +19,9 @@ test('fixed owner instructions export without an allocation vote or current amou
   assert.match(result.fixedInstructions.reporting.september13Transitions, /inside requested period/);
   assert.equal(result.fixedInstructions.transitionEvidence.t1.graphify, '0.18.0');
   assert.equal(result.fixedInstructions.transitionEvidence.t1.status, 'BLOCKED');
+  assert.equal(result.fixedInstructions.transitionEvidence.t1.llmMesh, '0.19.0');
+  assert.equal(result.fixedInstructions.transitionEvidence.t1.llmMesh0191Required, false);
+  assert.equal(result.fixedInstructions.transitionEvidence.t1.implementationRequested, false);
   assert.deepEqual(result.fixedInstructions.transitionEvidence.t1.correctiveCommits, ['537b9e0c', '3d9ed43c']);
   assert.equal(result.fixedInstructions.transitionEvidence.extractionBenchmark.pdfCount, 5);
   assert.equal(result.fixedInstructions.transitionEvidence.extractionBenchmark.scores, null);
