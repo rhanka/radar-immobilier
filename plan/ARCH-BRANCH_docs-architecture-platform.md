@@ -92,6 +92,7 @@
 - [ ] Local documentation handoff; no production action or branch merge requested.
 - [ ] **Lot 9 — Owner correction: complete nested diagrams and Focus choices.**
   - [x] Diagnose the mismatch: sceneFor collapses each child group; Mermaid is shown as plain source only.
+  - [x] Regression reproduced: infrastructure showed 8 native nodes instead of all 29 leaves and boxes; replace collapsed representation with complete recursive layout.
   - [ ] Render every node/edge simultaneously with native nested parentId boxes; navigation only changes the viewport.
   - [ ] Render the exact Mermaid sources visually, keeping offline use and sanitization.
   - [ ] Add DS Tile/Radio options, comment, local persistence and copyable JSON response pack.
