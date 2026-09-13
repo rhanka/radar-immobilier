@@ -10,7 +10,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadConfig } from "../../src/config.js";
 import { createDb, type Database } from "../../src/db/client.js";
 import { graphEdges, graphNodes } from "../../src/db/schema.js";
-import { subgraphForCity } from "../../src/services/graph/graph-store.js";
+import { subgraphForCity, upsertGraphAtomic } from "../../src/services/graph/graph-store.js";
 import type { RefreshProfileContext } from "../../src/services/graph/refresh-profile.js";
 import { runPvRefresh, type RunPvRefreshOptions } from "../../src/services/graph/refresh-run.js";
 import { canonicalGraphKey } from "../../src/storage/object-store.js";
@@ -40,7 +40,7 @@ async function clean(city: string) {
   await db.delete(graphNodes).where(eq(graphNodes.citySlug, city));
 }
 
-async function fixture(city: string) {
+async function fixture(city: string, afterGeneration?: () => Promise<void>) {
   const sourceId = `proces-verbaux-${city}`;
   const bytes = new TextEncoder().encode(`%PDF refresh ${city}`);
   const sha = createHash("sha256").update(bytes).digest("hex");
@@ -64,6 +64,7 @@ async function fixture(city: string) {
       await input.validateResponse?.(body);
       await mkdir(dirname(input.outputPath!), { recursive: true });
       await writeFile(input.outputPath!, body);
+      await afterGeneration?.();
       return { status: "completed", provider: "test", mode: "mesh", outputPath: input.outputPath!, audit: {} } as const;
     } } satisfies TextJsonGenerationClient;
   const acquire: NonNullable<RunPvRefreshOptions["acquire"]> = async () => [{
@@ -94,4 +95,42 @@ describe("refresh 0.18 real storage integration", () => {
       expect((await subgraphForCity(db, city)).nodes).toHaveLength(1);
     } finally { await clean(city); }
   }, 60_000);
+
+  it("enforces the canonical guard and rejects a concurrent publisher", async () => {
+    const city = `refresh-018-${randomUUID()}`;
+    const key = canonicalGraphKey(city);
+    const fx = await fixture(city, async () => {
+      const current = await store.head(key);
+      await store.putCanonicalGraph(key, JSON.stringify({ nodes: [{ id: `${city}:rival`,
+        type: "Signal", label: "Concurrent signal" }], edges: [] }), "application/json",
+      { ifMatch: current!.etag! });
+    });
+    await expect(store.put(key, "unguarded", "application/json"))
+      .rejects.toThrow("refusing unguarded write");
+    await expect(runPvRefresh(options(city, fx, db)))
+      .rejects.toThrow("changed since it was read");
+  }, 60_000);
+
+  it("keeps the PG signal when its original PDF provenance would regress", async () => {
+    const city = `refresh-018-${randomUUID()}`;
+    const fx = await fixture(city);
+    const oldSha = "f".repeat(64);
+    await upsertGraphAtomic(db, city, { nodes: [{ id: `${city}:signal`, type: "Signal",
+      label: "Existing complete signal", refs: [{ docSha: oldSha, rawRef: `raw/old/cas/${oldSha}.pdf`,
+        excerpt: "existing proof", page: 1 }] }] });
+    try {
+      await expect(runPvRefresh(options(city, fx, db)))
+        .rejects.toThrow("Postgres projection refused");
+      const saved = (await subgraphForCity(db, city)).nodes[0]?.props as { refs?: { docSha?: string }[] };
+      expect(saved.refs?.[0]?.docSha).toBe(oldSha);
+    } finally { await clean(city); }
+  }, 60_000);
+
+  it("treats a skipped selected city as failure before model execution", async () => {
+    const city = `refresh-018-${randomUUID()}`;
+    const fx = await fixture(city);
+    const skipped = { ...options(city, fx, db), acquire: async () => [] };
+    await expect(runPvRefresh(skipped)).rejects.toThrow("Selected city acquisition failed");
+    expect(fx.calls()).toBe(0);
+  });
 });
