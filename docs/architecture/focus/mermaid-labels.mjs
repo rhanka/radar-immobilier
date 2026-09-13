@@ -1,6 +1,10 @@
 // Runs against both build-time SVG and the final, sanitized browser DOM.
 export function missingMermaidLabels(svg, graph) {
-  const compact = text => text.replace(/\s+/g, '');
+  const compact = text => text
+    .replace(/&(?:amp;)?gt;/g, '>')
+    .replace(/&(?:amp;)?lt;/g, '<')
+    .replace(/&(?:amp;)?amp;/g, '&')
+    .replace(/\s+/g, '');
   const missing = [];
   for (const [items, selector] of [[graph.nodes, 'g.node'], [graph.groups, 'g.cluster']]) {
     const elements = [...svg.querySelectorAll(selector)];
