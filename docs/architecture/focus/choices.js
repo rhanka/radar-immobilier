@@ -12,8 +12,9 @@ export const fixedInstructions = {
   retainScwTemUntilValidatedReplacement: true,
   transitionEvidence: {
     asOfDate: '2026-09-13', exactLatestUtcCutoff: null,
-    t1: { graphify: '0.18.0', pdfContract: 'immo-pv-extraction-v3', head: 'ac3a7150', targetedTests: '8/8 + 7/7', status: 'GO_WITH_GATES preprod success; NO-GO unattended/retry/prod before unpublished llm-mesh 0.19.1' },
-    t2: { decision: 'MIGRATE+RETAIN', remediationHead: '25ec9e04', copyStarted: false, cutoverStarted: false, deletionStarted: false, retainLegacyUntil: 'complete parity and recovery' },
+    t1: { graphify: '0.18.0', fableBlockAt: 'ac3a7150', correctiveCommits: ['537b9e0c', '3d9ed43c'], tests: { scoped: '34/34', integration: '4/4', typecheck: 'pass' }, fableRereview: 'in progress', providerSignal: false, kubernetesAcceptance: false, status: 'BLOCKED' },
+    extractionBenchmark: { requiredBeforeRealExtraction: true, pdfCount: 5, tracks: ['historical/manual', 'v1', 'v2', 'v3'], simulatedRunsAccepted: false, modelSelected: false, cloudCodeEnrolled: false, scores: null },
+    t2: { decision: 'MIGRATE+RETAIN', remediationCommits: ['ee84ae29', 'f2ac3825', 'c30467ca', 'cef6d7ed'], checkpointCommits: ['aaf0cbf7', '91242223'], checkpointStatus: 'under construction', copyStarted: false, cutoverStarted: false, deletionStarted: false, retainLegacyUntil: 'complete parity and recovery' },
     t3: { verdict: 'NO-GO today', nodes: 3, requests: '4095m/8442Mi', currentPodMemoryMi: 5273, oneNodeAllocatable: '1840m/5907.82Mi', pvc: '16 total / 15 Cinder RWO', requiredSequence: ['T2 complete', 'rightsizing', 'constraints reconciled', 'verified two-node step', 'one-node test'] },
   },
   reporting: {
