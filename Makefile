@@ -41,6 +41,8 @@ export UI_IMAGE ?= $(REGISTRY)/radar-ui
 KUBECTL              ?= kubectl
 K8S_MANIFEST_DIR     ?= deploy/k8s
 K8S_NAMESPACE        ?= radar-immobilier
+OBJECT_STORAGE_INVENTORY_DIR := deploy/k8s/object-storage-inventory-preprod
+OBJECT_STORAGE_INVENTORY_NAMESPACE := radar-immobilier-preprod
 # Set to 1 only when a real KUBECONFIG is present to additionally run a
 # server-side dry-run. Offline render works with no cluster.
 K8S_VALIDATE_WITH_CLUSTER ?= 0
@@ -399,6 +401,58 @@ deploy-k8s: ## Validate manifests; apply ONLY with K8S_DEPLOY_CONFIRM=1 + KUBECO
 	  echo "  Human deploy step (with cluster creds):"; \
 	  echo "    KUBECONFIG=<path> make deploy-k8s K8S_DEPLOY_CONFIRM=1 ENV=poc"; \
 	fi
+
+.PHONY: object-storage-inventory-preprod-validate
+object-storage-inventory-preprod-validate: ## Render the dedicated RAW inventory Job and support offline
+	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[object-storage-inventory] kubectl not found"; exit 1; }
+	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
+	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
+	@$(KUBECTL) create --dry-run=client --validate=false \
+	  -f $(OBJECT_STORAGE_INVENTORY_DIR)/job.yaml -o name >/dev/null
+
+.PHONY: object-storage-inventory-preprod-start
+object-storage-inventory-preprod-start: ## Apply support and create one RAW read-only inventory Job
+	@if [ "$(OBJECT_STORAGE_INVENTORY_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ]; then \
+	  echo "[object-storage-inventory] refused: require KUBECONFIG, OBJECT_STORAGE_INVENTORY_CONFIRM=1, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@$(MAKE) object-storage-inventory-preprod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
+	@set -euo pipefail; render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
+	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
+	    $(OBJECT_STORAGE_INVENTORY_DIR) >"$$render"; \
+	  $(KUBECTL) apply -f "$$render" >/dev/null; \
+	  $(KUBECTL) create -f $(OBJECT_STORAGE_INVENTORY_DIR)/job.yaml -o name
+
+.PHONY: object-storage-inventory-preprod-status
+object-storage-inventory-preprod-status: ## Read one inventory Job and Pod status (OBJECT_STORAGE_INVENTORY_JOB=...)
+	@if [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_INVENTORY_JOB)" ]; then \
+	  echo "[object-storage-inventory] require KUBECONFIG and OBJECT_STORAGE_INVENTORY_JOB"; exit 1; \
+	fi
+	@$(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get \
+	  "job/$(OBJECT_STORAGE_INVENTORY_JOB)" -o wide
+	@$(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pods \
+	  -l "job-name=$(OBJECT_STORAGE_INVENTORY_JOB)" -o wide
+
+.PHONY: object-storage-inventory-preprod-fetch
+object-storage-inventory-preprod-fetch: ## Fetch receipts without printing them (requires JOB and EVIDENCE_DIR)
+	@if [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_INVENTORY_JOB)" ] || \
+	  [ -z "$(OBJECT_STORAGE_INVENTORY_EVIDENCE_DIR)" ]; then \
+	  echo "[object-storage-inventory] require KUBECONFIG, OBJECT_STORAGE_INVENTORY_JOB and OBJECT_STORAGE_INVENTORY_EVIDENCE_DIR"; \
+	  exit 1; \
+	fi
+	@set -euo pipefail; destination="$(OBJECT_STORAGE_INVENTORY_EVIDENCE_DIR)"; \
+	  [ ! -e "$$destination" ] || { echo "[object-storage-inventory] evidence destination already exists"; exit 1; }; \
+	  pod="$$( $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pods \
+	    -l "job-name=$(OBJECT_STORAGE_INVENTORY_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  [ -n "$$pod" ] || { echo "[object-storage-inventory] Job Pod is absent"; exit 1; }; \
+	  mkdir -p "$$destination"; \
+	  $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) cp \
+	    "$$pod:/evidence/." "$$destination" >/dev/null; \
+	  cd "$$destination"; \
+	  find . -type f ! -name SHA256SUMS -print0 | LC_ALL=C sort -z | \
+	    xargs -0 -r sha256sum >SHA256SUMS; \
+	  echo "[object-storage-inventory] evidence fetched and hashed at $$destination"
 
 .PHONY: deploy-db-migrate-k8s
 deploy-db-migrate-k8s: ## Run the one-shot DB migrator Job in the live namespace
