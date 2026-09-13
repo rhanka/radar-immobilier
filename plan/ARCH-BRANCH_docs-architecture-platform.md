@@ -125,7 +125,7 @@
   - [x] Replace Option A with the actual T1 refresh sequence and preserve its acceptance boundaries.
   - [ ] Render every transition as complete native nested SvelteFlow and sanitized Mermaid; open on the final target (mapping wired; UI default pending).
   - [x] Replace the allocation referendum with fixed invoice-tariff instructions, unresolved period evidence and D4 provenance.
-  - [ ] Make target architecture and sequential transitions the primary Focus reading path; keep billing last.
+  - [x] Make target architecture and sequential transitions the primary Focus reading path; keep billing last.
     - [x] Open on the complete target and place the Existant → T1 → T2 → T3 path before prose.
     - [x] Move billing to the final section.
   - [ ] Publish a current report-through-September-13 companion and supersede the older window without rewriting its sources.
