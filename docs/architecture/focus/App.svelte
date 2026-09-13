@@ -41,24 +41,24 @@
       <header class="masthead">
         <Flex justify="between" align="center" wrap gap={2}>
           <span class="eyebrow">h2a Focus · dossier de décision · Immo / Geo / Kubernetes</span>
-          <Badge tone="warning">EXÉCUTION ENGAGÉE · facturation incomplète</Badge>
+          <Badge tone="warning">CIBLE COMPLÈTE PROPOSÉE · NON DÉPLOYÉE</Badge>
         </Flex>
         <h1>Des nouveaux PV<br>aux signaux visibles.</h1>
-        <p class="lede">Suivre T1 refresh, T2 MinIO/SCW et T3 un nœud ; choisir séparément une méthode auditable d’allocation LLM.</p>
+        <p class="lede">Voir d’abord la cible complète, puis parcourir Existant → T1 refresh → T2 objets OVH → T3 un nœud. Les coûts sont relégués à la dernière annexe.</p>
         <div class="truth-strip"><span><strong>T1</strong> Graphify 0.18.0 publié · intégration Immo ouverte</span><span><strong>T2</strong> MinIO + SCW · TEM excepté</span><span><strong>T3</strong> cible non déployée : un b3-8</span></div>
       </header>
+      <Explorer graphs={data.graphs} />
       <nav class="steps" aria-label="Sections du dossier">
         {#each titles as title, index}<button class:active={step === index} aria-current={step === index ? 'step' : undefined} onclick={() => step = index}><span>{index + 1}</span>{title}</button>{/each}
       </nav>
       <ProgressBar value={step + 1} max={8} label={`Section ${step + 1} sur 8`} size="sm" />
       <section class="decision-content">
-        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D4 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
+        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D5 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
         <!-- The French reading surface links to the complete repository dossier. -->
         {#if step === 3}<Choices manifest={data.manifest} remarks={note} />{:else}<div class="prose" onclick={link} role="presentation">{@html html(presentation[step])}</div>{/if}
         <Button variant="ghost" size="sm" onclick={() => source = 'decision-dossier'}>Dossier source complet · références et qualification des faits</Button>
         {#if step === 4}<Button variant="secondary" onclick={() => source = 'decision-reviews'}>Lire les avis réels des reviewers</Button>{/if}
       </section>
-      <Explorer graphs={data.graphs} />
       <section class="notes"><h2>Vos remarques · brouillon local</h2>
         <p>Cette page ne signe rien, ne crée aucune décision Track et ne lance aucun traitement. Les notes restent dans ce navigateur.</p>
         <Textarea label="Remarques sur les décisions et critères manquants" value={note} oninput={event => save(event.currentTarget.value)} rows={4} />

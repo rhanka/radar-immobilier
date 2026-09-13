@@ -28,6 +28,10 @@ h3, h4 { line-height: 1.4; }
 .prose th { background: var(--st-semantic-surface-subtle); }
 pre { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--st-semantic-surface-subtle); padding: 18px; font-size: .8rem; }
 .explorer { border: 1px solid var(--st-semantic-border-subtle); padding: 20px; background: var(--st-semantic-surface-default); }
+.journey { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 0 22px; padding: 18px; background: var(--st-semantic-surface-subtle); }
+.journey button { display: flex; align-items: center; gap: 8px; border: 1px solid var(--st-semantic-border-strong); padding: 10px 14px; background: var(--st-semantic-surface-default); color: var(--st-semantic-text-primary); }
+.journey button span { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--st-semantic-surface-subtle); font-size: .72rem; }
+.journey button.active { border-color: var(--st-semantic-action-primary); color: var(--st-semantic-action-primary); font-weight: 700; }
 .explorer label { display: grid; gap: 6px; font-size: .8rem; color: var(--st-semantic-text-secondary); min-width: 0; }
 select { color: var(--st-semantic-text-primary); background: var(--st-semantic-surface-default); padding: 9px 12px; border: 1px solid var(--st-semantic-border-strong); max-width: 100%; border-radius: 0; }
 .breadcrumbs { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
@@ -62,7 +66,7 @@ details { margin-top: 18px; font-size: .8rem; }
 .source-mermaid svg { display: block; width: 100%; height: auto; min-width: 750px; }
 @media (max-width: 850px) {
   .dossier { padding: 20px 16px 40px; } .truth-strip { grid-template-columns: 1fr; gap: 14px; }
-  .steps { grid-template-columns: repeat(4, 1fr); gap: 4px; } .explorer { padding: 12px; }
+  .steps { grid-template-columns: repeat(4, 1fr); gap: 4px; } .explorer { padding: 12px; } .journey { overflow-x: auto; justify-content: flex-start; } .journey b { display: none; }
   .explorer-tools { grid-template-columns: 1fr; } .graph-layout.inspecting { grid-template-columns: minmax(0, 1fr); }
   .flow { height: 520px; } .inspector { max-height: 340px; } .source-sheet { padding: 20px; }
 }
