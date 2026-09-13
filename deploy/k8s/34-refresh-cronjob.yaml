@@ -309,6 +309,9 @@ spec:
                       chmod 0600 /keyring/.key /keyring/*.json
                     fi
                   '
+              resources:
+                requests: { cpu: 5m, memory: 16Mi }
+                limits: { cpu: 50m, memory: 64Mi }
               volumeMounts:
                 - { name: keyring, mountPath: /keyring }
                 - { name: keyring-bootstrap, mountPath: /bootstrap, readOnly: true }
