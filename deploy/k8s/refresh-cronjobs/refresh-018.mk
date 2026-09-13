@@ -119,6 +119,16 @@ trigger-preprod: guard-preprod
 	@test -n "$(RUN_ID)" || { echo "RUN_ID is required" >&2; exit 1; }
 	@$(K) create job "radar-refresh-pv-$(RUN_ID)" --from=cronjob/radar-refresh-pv
 
+.PHONY: replace-zero-pod-preprod
+replace-zero-pod-preprod: guard-preprod
+	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }
+	@test -n "$(RUN_ID)" || { echo "RUN_ID is required" >&2; exit 1; }
+	@test -z "$$($(K) get pods -l "job-name=radar-refresh-pv-$(RUN_ID)" -o name)" \
+	  || { echo "refusing to replace a Job that created a Pod" >&2; exit 1; }
+	@$(K) get job "radar-refresh-pv-$(RUN_ID)" -o name >/dev/null
+	@$(K) delete job "radar-refresh-pv-$(RUN_ID)" --wait=true
+	@$(K) create job "radar-refresh-pv-$(RUN_ID)" --from=cronjob/radar-refresh-pv
+
 .PHONY: status-preprod
 status-preprod: guard-preprod
 	@test -n "$(RUN_ID)" || { echo "RUN_ID is required" >&2; exit 1; }
