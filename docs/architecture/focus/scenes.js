@@ -1,5 +1,6 @@
 import { graphlib } from 'dagre-d3-es';
 import { layout } from 'dagre-d3-es/src/dagre/layout.js';
+import { routeEdge } from '/kit/src/architecture-routing.js';
 
 export function sceneFor(graph, scope = null) {
   const all = new Map([...graph.groups, ...graph.nodes].map(n => [n.id, n]));
@@ -43,8 +44,8 @@ export function sceneFor(graph, scope = null) {
   });
   if (scope) nodes.unshift({ id: 'scope-frame', type: 'group', position: { x: 0, y: 0 }, data: { label: '' },
     width: frameWidth, height: frameHeight, style: `width:${frameWidth}px;height:${frameHeight}px`, selectable: false });
-  return { nodes, edges: edges.map(e => ({ ...e, type: 'smoothstep',
-    sourceHandle: 'source-right-4', targetHandle: 'target-left-4',
+  const routed = edges.map(edge => routeEdge(edge, nodes.filter(n => n.id !== 'scope-frame'), [], edges));
+  return { nodes, edges: routed.map(e => ({ ...e, type: 'architecture',
     markerEnd: { type: 'arrowclosed' }, ...(e.both ? { markerStart: { type: 'arrowclosed' } } : {}),
     style: `stroke:var(--st-semantic-text-secondary);stroke-width:2;${e.dashed ? 'stroke-dasharray:7 5' : ''}`,
     labelStyle: { fontSize: 12, fontWeight: 600 }, labelBgPadding: [8, 5],
