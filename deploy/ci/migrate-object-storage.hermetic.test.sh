@@ -268,6 +268,16 @@ if [ ! -e "$TEST_TMP/store/destination/dst/objects/raw/mismatched-capability.txt
   ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 
 reset_store
+put_fixture source src raw/empty-fence.txt payload
+: >"$TEST_TMP/empty-copy-fence.txt"
+TEST_NAME='empty fence exits one before a plain copy writes'
+expect_status 1 run_tool copy "$TEST_TMP/reports/empty-copy-fence" --execute-copy \
+  --fence-record "$TEST_TMP/empty-copy-fence.txt"
+TEST_NAME='empty fence prevents every plain-copy destination write'
+if [ ! -e "$TEST_TMP/store/destination/dst/objects/raw/empty-fence.txt" ] &&
+  ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
 put_fixture source src raw/a.txt alpha; put_fixture source src raw/b.txt beta
 put_fixture destination dst raw/a.txt alpha; put_fixture destination dst raw/b.txt beta
 FAKE_PAGE_SIZE=1
