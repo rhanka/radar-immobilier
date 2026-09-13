@@ -18,7 +18,10 @@ import {
   type TextJsonGenerationClient,
 } from "@sentropic/graphify";
 
-import type { RefreshCorpusChunk } from "./refresh-corpus.js";
+import {
+  containsNormalizedPdfExcerpt,
+  type RefreshCorpusChunk,
+} from "./refresh-corpus.js";
 
 export interface RefreshProfileContext {
   readonly profile: NormalizedOntologyProfile;
@@ -111,9 +114,6 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
       "An empty nodes/edges/evidence extraction is valid; the enclosing chunk retains the verified PDF identity."],
   });
 }
-function normalized(value: string): string {
-  return value.replace(/\s+/g, " ").trim();
-}
 function physicalPageTexts(chunk: RefreshCorpusChunk): ReadonlyMap<number, string> {
   const markers = [...chunk.text.matchAll(/^\[PDF PAGE ([1-9]\d*)\]\n/gm)];
   const actualPages = markers.map((marker) => Number(marker[1]));
@@ -139,8 +139,8 @@ function validatePdfRecord(value: Record<string, unknown>, chunk: RefreshCorpusC
     throw new Error(`Model output has invalid original PDF page for chunk ${chunk.id}`);
   }
   const excerpt = value["excerpt"];
-  if (typeof excerpt !== "string" || !normalized(excerpt)
-    || !normalized(pageTexts.get(page as number) ?? "").includes(normalized(excerpt))) {
+  if (typeof excerpt !== "string"
+    || !containsNormalizedPdfExcerpt(pageTexts.get(page as number) ?? "", excerpt)) {
     throw new Error(`Model output has ungrounded PDF excerpt for chunk ${chunk.id}`);
   }
 }

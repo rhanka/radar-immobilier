@@ -54,7 +54,7 @@ async function fixture(city: string, afterGeneration?: () => Promise<void>) {
     file_type: "document", source_file: key, node_type: "Signal", status: "candidate",
     resolution: "26.08.22.1", etape: "adoption", etape_date: "2026-08-18",
     reglement_number: "26-956-2", citations: [{ source_file: key, rawRef: key, sourceUrl: url,
-      docSha: sha, modality: "pdf", page: 3, quote: "adopte le règlement 26-956-2" }] }],
+      docSha: sha, modality: "pdf", page: 3, excerpt: "adopte le règlement 26-956-2" }] }],
     edges: [], input_tokens: 10, output_tokens: 10 };
   let calls = 0;
   const textClient = { mode: "mesh", provider: "test", model: "test",
@@ -92,7 +92,11 @@ describe("refresh 0.18 real storage integration", () => {
       expect(fx.calls()).toBe(1);
       await expect(runPvRefresh(options(city, fx, db))).resolves.toMatchObject({ citySlug: city });
       expect(fx.calls()).toBe(1);
-      expect((await subgraphForCity(db, city)).nodes).toHaveLength(1);
+      const nodes = (await subgraphForCity(db, city)).nodes;
+      expect(nodes).toHaveLength(1);
+      expect(nodes[0]?.props).toMatchObject({ properties: { status: "candidate",
+        resolution: "26.08.22.1", etape: "adoption", etape_date: "2026-08-18",
+        reglement_number: "26-956-2" } });
     } finally { await clean(city); }
   }, 60_000);
 

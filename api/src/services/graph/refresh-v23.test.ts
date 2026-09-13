@@ -54,10 +54,14 @@ function extraction(page = 3): Extraction {
         source_file: originalKey,
         node_type: "Signal",
         citations: [cited],
+        status: "candidate",
+        resolution: "26.08.22.1",
+        etape: "adoption",
+        etape_date: "2026-08-18",
+        reglement_number: "26-956-2",
         properties: {
           description: "Le conseil adopte le règlement de zonage.",
           category: "modification_zonage",
-          resolution: "26.08.22.1",
         },
       },
       {
@@ -117,6 +121,18 @@ describe("refresh v2.3 candidate", () => {
     expect(candidate.nodes.find((node) => node.id === "signal:26-956-2")?.refs).toEqual([expected]);
     expect(candidate.edges?.[0]?.refs).toEqual([expected]);
     expect(candidate.pv_count).toBe(1);
+  });
+
+  it("should preserve typed top-level Signal fields in properties", () => {
+    expect(convert().nodes.find((node) => node.id === "signal:26-956-2")?.properties)
+      .toMatchObject({ status: "candidate", resolution: "26.08.22.1", etape: "adoption",
+        etape_date: "2026-08-18", reglement_number: "26-956-2" });
+  });
+
+  it("should ground an excerpt across PDF whitespace and line breaks", () => {
+    const wrapped = extraction();
+    wrapped.nodes[1]!.citations![0]!.excerpt = "Que le conseil\nmunicipal adopte le Règlement 26-956-2";
+    expect(() => convert(wrapped)).not.toThrow();
   });
 
   it("should refuse an excerpt attributed to the wrong original page", () => {
