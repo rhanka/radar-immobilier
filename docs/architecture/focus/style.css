@@ -40,6 +40,7 @@ select { color: var(--st-semantic-text-primary); background: var(--st-semantic-s
 .architecture-node { height: 100%; }
 .svelte-flow__node-group { background: color-mix(in srgb, var(--st-semantic-action-primary) 4%, transparent); border: 2px dashed var(--st-semantic-border-strong); }
 .svelte-flow__edge-text { fill: var(--st-semantic-text-primary); }
+.route-label { position: absolute; max-width: 215px; padding: 4px 7px; font-size: 12px; line-height: 1.3; white-space: pre-line; background: var(--st-semantic-surface-default); color: var(--st-semantic-text-primary); pointer-events: none; }
 .inspector { padding: 18px; border-left: 1px solid var(--st-semantic-border-subtle); max-height: 660px; overflow-y: auto; }
 .inspector h3 { white-space: pre-line; font-size: 1rem; }
 .inspector p, .inspector li { font-size: .8rem; line-height: 1.6; }

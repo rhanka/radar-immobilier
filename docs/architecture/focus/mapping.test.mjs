@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { parseMermaid } from './parse-mermaid.mjs';
 import { sceneFor } from './scenes.js';
+import { routeAvoidsNodes } from '/kit/src/architecture-routing.js';
+import { presentation } from './presentation-fr.js';
 const { graphs, docs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
 
 test('every Mermaid node, relationship and group survives native scene navigation', () => {
@@ -23,6 +25,7 @@ test('every Mermaid node, relationship and group survives native scene navigatio
         }
       }
       for (const edge of scene.edges) {
+        assert.ok(routeAvoidsNodes(edge, scene.nodes.filter(n => n.id !== 'scope-frame')), `route crosses a component: ${edge.id}`);
         assert.ok(scene.nodes.some(n => n.id === edge.source));
         assert.ok(scene.nodes.some(n => n.id === edge.target));
         if (edge.source === edge.originalSource && edge.target === edge.originalTarget) seenEdges.add(edge.id);
@@ -59,6 +62,9 @@ test('unsupported syntax and dangling references fail closed', () => {
 });
 
 test('dossier remains a presentation with eight sections and the fixed TEM exception', () => {
+  assert.equal(presentation.length, 8);
+  assert.match(presentation.join('\n'), /TEM reste/);
+  assert.match(presentation[7], /Pas de demande d’approbation/);
   assert.equal(docs['decision-dossier'].match(/^## /gm).length, 8);
   assert.match(docs['decision-dossier'], /INCOMPLETE/);
   assert.match(docs['decision-dossier'], /retain SCW TEM/);
