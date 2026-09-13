@@ -1,0 +1,38 @@
+# Documentation: Two dated architecture transitions
+
+## Objective
+- [ ] Specify two independent before/after pairs for the Focus dossier and report; hand off the exact design HEAD for two adversarial reviews before implementation.
+
+## Scope / Guardrails
+- [x] Worktree: `tmp/architecture-two-transitions`; branch: `docs/architecture-two-transitions`; base: `4d5cb8f7f5e7934196b57e29305fec37813bf7a9`.
+- [x] Design only: no Focus implementation, generated report, provider call, deployment, data mutation or cost/window change.
+- [x] Make-only and Docker-first; commands end in `ENV=test-architecture-two-transitions`; no stack or ports allocated in this design phase.
+- [x] Preserve root dev/UAT and all unrelated work; English artifacts, French discussion.
+
+## Branch Scope Boundaries (MANDATORY)
+- [x] Allowed: `docs/spec/SPEC_EVOL_ARCHITECTURE_TWO_TRANSITIONS.md`, this branch plan.
+- [x] Forbidden: `Makefile`, `docker-compose*.yml`, `rules/**`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.track/**`, other plans, implementation and generated artifacts.
+- [x] Conditional: Focus/report implementation requires a later reviewed scope amendment with exact paths, impact and rollback; no such release is claimed here.
+- [x] Cross-repository sources are read-only; no Geo or poc-k8s write is authorized by this plan.
+
+## Feedback Loop
+- [x] ARCH2-EX1: the owner requires spec+plan commits only; the conductor retains Track import/write ownership. Harness recorder output is execution evidence, not a persisted Track event.
+- [x] The installed harness recorder emits a placeholder `1970-01-01` timestamp; it is not a historical observation timestamp.
+- [ ] Reconcile two independent reviews at the handed-off HEAD; preserve unresolved disagreements and owner decisions.
+
+## Orchestration Mode (AI-selected)
+- [x] One isolated documentation branch; no cherry-pick, delegated implementation or parallel writer.
+- [x] Conductor dispatches two independent adversarial reviews after the initial design handoff.
+
+## UAT Management (in orchestration context)
+- [x] No application UAT or root checkout switch for spec-only work.
+- [ ] A later implementation must qualify the same HEAD in isolated browser checks before owner-facing UAT.
+
+## Plan / Todo (lot-based)
+- [x] Lot 0: read rules and skills; open `harness branch init`, `harness brainstorm --peers 2 --ladder evol`, and `harness plan --lots 5` through Make/container execution.
+- [x] Lot 1: freeze scope, dated evidence, decisions and rendering invariants in the EVOL; gate: selective diff and whitespace check.
+- [ ] Lot 2: specify four graph topologies and state qualifications; gate: source-to-node/edge review, no projected production activation.
+- [ ] Lot 3: specify M1 options, evidence/judges and comment+JSON capture; gate: no invented measurements, no preselected winner.
+- [ ] Lot 4: hand off immutable HEAD for historical correctness and product/decision-integrity reviews; do not mark design accepted before reconciliation.
+- [ ] Conductor: import the reviewed plan into Track, release bounded implementation lots, then run required Focus mapping/browser/clipboard/report checks without changing billing.
+- [ ] Later close: consolidate reviewed EVOL, push/open PR, verify CI, merge commit only and preserve branch; no merge authorization is inferred from this design handoff.
