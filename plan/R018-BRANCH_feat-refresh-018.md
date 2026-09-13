@@ -48,6 +48,7 @@
 - [x] C04b: materialize selected PDF bytes and metadata with checksum, page-text and input-hash validation.
 - [x] C04c: retain explicit physical-page markers inside bounded profile prompt chunks.
 - [x] C05: cover checksum/path/duplicate refusal, physical pages, changed input identity and bounded UTF-8 chunks.
+- [x] C08: port baseline-first v2.3 mapping with exclusions and exact original-PDF references on nodes and edges.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
