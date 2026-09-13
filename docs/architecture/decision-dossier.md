@@ -1,24 +1,27 @@
 # Decision dossier — Immo refresh and storage retirement
 
-Revision **D3**, 2026-09-13. **INCOMPLETE / presentation only**: production inventory,
-credential operations and the Opus review (weekly limit) are unresolved. No implementation,
-migration, package integration or deployment is authorized by opening this page.
+Revision **D4**, 2026-09-13. **Execution direction confirmed; acceptance incomplete**.
+The owner authorized continuation in the order below. Production inventory,
+credential operations and review gaps remain acceptance requirements, not a renewed
+presentation-only hold. Opening this page itself performs no action.
 Author: Codex / gpt-6-astra / xhigh. This is not an owner signature or Track decision.
 
 ## 1. Decision asked
 
-[JUDGMENT] Review the framing of a **future delivery-sequence decision**. As the
-owner requested, Focus now allows a local draft choice, comment and JSON copy;
-these are not ratification or execution authorization. The alternatives are:
-**A** staged in-pod Graphify refresh, then verified storage cutover;
-**B** full E1–E5 DAG before cutover; **C** storage first, workstation refresh temporarily.
-Scope: Immo preprod first, then a separately gated production promotion; Graphify
-consumer contract, Geo evidence-reader boundary and poc-k8s operations are affected.
+[FACT · owner] The sequence is decided: **T1 autonomous PV/Signal refresh in
+Kubernetes → T2 MinIO and remaining SCW retirement → T3 one b3-8 node**. Execute
+the existing plan and update this reference at every transition; include dated
+renderings in the monthly report. [Transition register](transitions.md).
+
+[JUDGMENT] The remaining commercial question is: **which auditable method should
+allocate LLM expense to Immo/Geo for August 12–September 10?** Focus choices are
+drafts pending the token re-audit, not another vote on architecture order.
+One-node infrastructure billing is fixed; extra node capacity is not passed through.
 
 [FACT] Already fixed by the owner: all PV-to-Signal stages remain Immo-owned;
 resume i-cond work, preserve Graphify's extraction effort, eradicate MinIO and SCW
 storage/image dependencies, **retain SCW TEM until a replacement is validated**;
-present this dossier before starting. Do not re-ask those decisions.
+use this dossier to accompany execution. Do not re-ask those decisions.
 
 ## 2. Context: facts, assumptions and unknowns
 
@@ -34,8 +37,9 @@ NXDOMAIN. OVH production Immo inventory is RBAC-denied; old SCW resources are ex
 
 [FACT] [Continuation audit](continuation-audit.md): #678 is an open CAS draft,
 reporting a successful candidate-only dry run, not live publication. Graphify #330
-targets 0.18.0 / mesh 0.19 with an ESM-only mesh subpath; publication and Immo
-acceptance are not established. The latest i-cond study proposes **in-process
+is merged and **0.18.0 is published**, with mesh 0.19 and an ESM-only mesh subpath.
+Producer installation passed; Immo acceptance is pending ([evidence](transitions.md)).
+The latest i-cond study proposes **in-process
 mesh in the pod**, not a mandatory network service. Immo chat need not share it.
 
 [FACT] Direct scraping writes lowercase graph types; routes serve exact `Signal`
@@ -58,9 +62,13 @@ geographic sources, joins and OGC/document products; Graphify owns its reusable
 library; poc-k8s owns shared ingress, tenancy, storage and credential operations.
 These are cross-owner contracts, not just image/tag substitutions.
 
-## 4. Options
+## 4. Historical alternatives and the engaged plan
 
-All cost, benefit and reversibility assessments below are **[JUDGMENT]**, not quotes.
+The following architecture alternatives are **historical, not open choices**.
+The owner selected refresh first; storage-first and a complete new DAG before the
+first refresh do not match that direction. Preserve E4/E5 exclusive-writer and
+retry invariants in the in-pod continuation. See [T1–T3](transitions.md) for the
+existing work retained and remaining acceptance. Assessments are [JUDGMENT].
 
 | ID | Choice | Strongest case FOR | Strongest case AGAINST | Cost | Reversibility | Wins if |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -68,20 +76,19 @@ All cost, benefit and reversibility assessments below are **[JUDGMENT]**, not qu
 | B | Complete layered S3-DAG E1–E5 before cutover | Establishes sole merge/projection ownership immediately; gives durable recomputation boundaries | Broadest change before first acceptance; adds contracts and orchestration to the storage release | Highest initial engineering scope; unpriced | Reverting contracts and mixed-version outputs is harder | Parallelism, resumability or multi-writer risks make a sequential slice unsafe |
 | C | Migrate storage first; retain workstation LLM temporarily | Isolates provider retirement from extraction change; exercises all existing reader/writer paths | Does not deliver autonomous fresh Signals and migrates publishers that may soon change | Smaller initial code change; additional migration coordination; unpriced | Easier code rollback, not automatic data rollback | An urgent storage risk outweighs the cost of temporary workstation dependence |
 
-## 5. Recommendation and counter-case
+## 5. Execution basis and counter-case
 
-[JUDGMENT] **Provisional preference A; defer execution.** Qualify the smallest
-vertical slice on a published Graphify version, preserve guarded canonical writes,
-then migrate validated store roles. This is not approval to implement a new DAG or
-silently abandon its invariants. Use B if A cannot prove exclusive writers/recovery.
-The comparative effort is unverified: measure A/B/C against the same served-Signal,
-PDF, exclusive-writer, credential-continuity and recovery boundary before selection.
+[FACT · owner] Proceed with T1, then T2, then T3. [JUDGMENT] Reuse the canonical
+writer, projection/3.4 and i-cond's library boundary; do not create another publisher
+or network mesh service. Acceptance, not the dossier UI, gates cutover. The release
+dependency is closed; an installed package alone does not qualify the refresh.
 
 [JUDGMENT] **Strongest argument against A:** it could create a disposable second
 orchestrator, duplicate credential handling, and postpone the only robust writer
 boundary. B can be cheaper overall if the DAG integration is already close to ready.
-**Overturn condition:** authoritative handoff shows A violates single-writer rules,
-or B's tested remaining scope is comparable; urgent storage risk can favor C.
+**Implementation stop condition:** the continuation would violate single-writer
+or recovery guarantees. Resolve that concrete defect; do not silently change the
+owner-fixed order or reopen the entire architecture choice.
 
 [JUDGMENT] **Pre-mortem:** six months later Jobs are green but new PVs still do not
 reach served Signals, PDFs point at a different corpus, and an ephemeral keyring
@@ -133,20 +140,19 @@ recovery point/time and retention; none is silently assumed.
 | Effective main + Kubernetes, not legacy guesses | Owner | Runtime/continuation audits | OVH production inventory |
 | Same DB/S3 identities across diagrams; all PV stages Immo | Owner | Mermaid → Focus mapping and subflows | Mapping tests pass; browser verification recorded separately |
 | New PV → visible typed Signal + resolvable evidence | Owner refresh request + route contract | G1/G2 document-hash-to-UI trace, second-run idempotence, failure/retry tests | Not executed; outside this dossier branch |
-| Graphify upgrade preserves extraction and public contracts | Owner + i-cond | Installed published package, ESM consumer smoke, independent route/cancellation/schema tests | Final release and Immo B2 acceptance |
+| Graphify upgrade preserves extraction and public contracts | Owner + i-cond | Published 0.18.0 producer proof; ESM consumer smoke required | Immo B2 acceptance |
 | Durable unattended credentials | Latest i-cond study + independent review | G1b unique refresh writer, persistence, restart/recovery tests | Operated identity contract |
 | No data loss or competing writers during retirement | Repo rules + owner | G3/G4 parity manifests, IAM/writer matrix, restore rehearsal | Inventory/volume/recovery criteria |
-| Preprod first, separate production release, TEM retained | Owner | G0–G6; explicit TEM exclusion | Production evidence; no release authorized |
+| Preprod first, gated production release, TEM retained | Owner | G0–G6; explicit TEM exclusion | Production acceptance evidence |
 | Honest decision surface, alternatives and actual reviews | Owner + Focus contract | This dossier, source links, local notes, individual review records | Codex completed; Opus unavailable (weekly limit) |
 
 ## 8. What is needed next
 
-[JUDGMENT] This **incomplete presentation does not request approval**. The smallest
-missing owner input is the acceptable recovery/maintenance envelope (downtime,
-RPO/RTO and retention), not a renewed TEM or ownership decision. Obtain the authorized
-OVH production inventory and final upstream contract before a complete execution
-dossier. Local Focus notes are drafts only; they neither sign nor deploy anything.
-[JUDGMENT] Before selecting a sequence, also establish refresh-versus-retirement
-priority, acceptable duration of workstation dependence, effort ceiling, required
-freshness/coverage/evidence availability and the accepting owner for each contract.
-These are missing criteria, not five defaults or a forced questionnaire.
+[FACT] No renewed sequence, one-node, Immo ownership or TEM decision is requested.
+[JUDGMENT] Gather runtime, credential and recovery evidence during implementation;
+ask only for an unresolved cutover criterion before an irreversible action.
+The **billing re-audit remains incomplete**. Local Focus choices are drafts only,
+not a final invoice or an implicitly selected commercial method. Separate the
+monthly delivery totals from September 13 post-period transitions. Geo SCW closure
+remains open until active code, Jobs, CI, storage and backups are checked, not just
+the registry rollout. Preserve historical evidence and shared MatchID resources.
