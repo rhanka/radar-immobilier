@@ -78,5 +78,6 @@
   - [ ] Map Mermaid identities and relationships to native SvelteFlow groups and navigable subflows.
   - [x] Add a fail-closed Mermaid adapter and source/hash manifest; independent text reviews launched via h2a.
   - [x] Implement native SvelteFlow subflows with parentId groups and the unchanged Sentropic Focus ArchitectureNode component.
+  - [x] Add Focus dossier navigation, shared-resource cross-links, embedded evidence and local-only notes without approval controls.
   - [ ] Verify the offline HTML, mapping coverage, navigation and local-only owner notes.
 - [ ] Local documentation handoff; no production action or branch merge requested.
