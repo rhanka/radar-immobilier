@@ -56,9 +56,17 @@ done
 for rel in scripts/mount-scw.sh scripts/umount-scw.sh; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
 done
-grep -Fqx 'S3_ENDPOINT=http://minio:9000' "$ROOT/.env.example" || fail '.env.example local MinIO endpoint changed'
+for expected in \
+  'S3_ENDPOINT=http://minio:9000' \
+  'S3_REGION=fr-par' \
+  'S3_BUCKET=radar-immobilier-raw' \
+  'S3_ACCESS_KEY=minioadmin' \
+  'S3_SECRET_KEY=minioadmin'; do
+  grep -Fqx "$expected" "$ROOT/.env.example" || fail ".env.example local setting changed: $expected"
+done
 grep -Fq 'value: "http://radar-minio:9000"' "$ROOT/deploy/k8s/refresh-diag/diag-refresh-job.yaml" || fail 'refresh diagnostic binding changed'
 grep -Fq 'SCW_TEM_API_BASE_URL: "https://api.scaleway.com"' "$ROOT/deploy/k8s/30-api.yaml" || fail 'TEM configuration changed'
+grep -Fq 'name: radar-tem-credentials' "$ROOT/deploy/k8s/30-api.yaml" || fail 'TEM Secret reference changed'
 
 if [ "$FAIL" -ne 0 ]; then
   echo "object-storage binding check: $FAIL failure(s)" >&2

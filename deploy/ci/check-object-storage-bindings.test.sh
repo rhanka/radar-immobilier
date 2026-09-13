@@ -40,5 +40,8 @@ run_bad "$CASE_ROOT" 'rejects a generic credential fallback'; rm -rf "$CASE_ROOT
 fixture; mkdir -p "$CASE_ROOT/scripts"; touch "$CASE_ROOT/scripts/mount-scw.sh"
 run_bad "$CASE_ROOT" 'rejects a restored legacy mount'; rm -rf "$CASE_ROOT"
 
+fixture; sed -i 's/S3_BUCKET=radar-immobilier-raw/S3_BUCKET=changed/' "$CASE_ROOT/.env.example"
+run_bad "$CASE_ROOT" 'protects local development settings'; rm -rf "$CASE_ROOT"
+
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]
