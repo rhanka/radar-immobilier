@@ -136,3 +136,4 @@
   - [ ] Regenerate the current/dated portable HTML and evidence manifest with D5 hashes.
   - [ ] Pass static, build, browser, clipboard, scope and diff gates; record limitations without deployment claims.
     - [x] Adapt fail-closed mapping/provenance assertions for all eight D5 graphs.
+    - [x] Adapt browser and real-clipboard gates to the final-target entry and fixed-instruction export.

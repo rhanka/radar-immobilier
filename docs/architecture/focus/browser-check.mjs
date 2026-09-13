@@ -27,14 +27,20 @@ console.log(await evaluate(`(async () => {
   const settle = () => new Promise(resolve => setTimeout(resolve, 180));
   const choose = (label, value) => { const e = document.querySelector('select[aria-label="' + label + '"]'); e.value = value; e.dispatchEvent(new Event('change', { bubbles: true })); };
   if (document.querySelectorAll('.steps button').length !== 8) throw Error('Eight dossier sections missing');
-  if (!document.querySelector('.masthead').textContent.includes('EXÉCUTION ENGAGÉE')) throw Error('D4 execution state missing');
+  if (!document.querySelector('.masthead').textContent.includes('CIBLE COMPLÈTE PROPOSÉE')) throw Error('D5 target state missing');
+  if (document.querySelector('.flow').dataset.graph !== 'target-3') throw Error('Complete final target is not the default');
+  const path = [...document.querySelectorAll('.journey button')].map(button => button.textContent.trim());
+  if (path.join('|') !== '0Existant|1T1 refresh|2T2 objets OVH|3T3 cible 1 nœud') throw Error('Sequential path missing: ' + path);
   const views = [...document.querySelector('select[aria-label="Vue architecture"]').options].map(o => o.value);
+  if (views.join('|') !== 'asis-1|asis-2|asis-3|asis-4|target-1|target-2|target-3|detail-1') throw Error('D5 graph set/order mismatch: ' + views);
   let checked = 0;
   for (const view of views) {
     choose('Vue architecture', view); await settle();
     const scopes = [...document.querySelector('select[aria-label="Zoomer sur un sous-flow"]').options].map(o => o.value);
-    const expected = { 'asis-1': [25, 4, 34], 'asis-2': [14, 3, 14], 'asis-3': [20, 4, 24], 'asis-4': [13, 0, 12], 'target-1': [15, 2, 19] }[view];
     const source = window.expectedGraphs.find(g => g.id === view);
+    const expected = [source.nodes.length, source.groups.length, source.edges.length];
+    const initialCanvas = document.querySelector('.flow').getBoundingClientRect();
+    for (const node of document.querySelectorAll('.svelte-flow__node')) { const r = node.getBoundingClientRect(); if (r.left < initialCanvas.left - 1 || r.top < initialCanvas.top - 1 || r.right > initialCanvas.right + 1 || r.bottom > initialCanvas.bottom + 1) throw Error('Initial full graph clipped: ' + view + '/' + node.dataset.id); }
     for (const item of [...source.nodes, ...source.groups]) {
       const box = document.querySelector('.svelte-flow__node[data-id="' + item.id + '"]');
       if (box.querySelector('.repo-label')?.textContent !== item.provenance.repoLabel || box.querySelector('[data-service-icon]')?.dataset.serviceIcon !== item.provenance.icon) throw Error('Missing icon/repository: ' + view + '/' + item.id);
@@ -78,27 +84,24 @@ console.log(await evaluate(`(async () => {
   if (!document.querySelector('.expanded')) throw Error('Fullscreen failed');
   window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); await settle();
   if (document.querySelector('.expanded')) throw Error('Escape failed');
-  document.querySelectorAll('.steps button')[3].click(); await settle();
-  if (!document.querySelector('.choices').textContent.includes('Quelle méthode auditable doit allouer la dépense LLM')) throw Error('LLM allocation question missing');
-  if (document.querySelectorAll('input[type="radio"]:checked').length) throw Error('Unexpected default owner choice');
-  for (const option of ['DIRECT', 'USAGE', 'CAPACITY']) {
-    document.querySelector('input[type="radio"][value="' + option + '"]').click(); await settle();
-    if (document.querySelectorAll('input[type="radio"]:checked').length !== 1 || document.querySelector('input[type="radio"]:checked').value !== option) throw Error('Choice failed: ' + option);
-  }
+  document.querySelectorAll('.steps button')[7].click(); await settle();
+  const instructions = document.querySelector('.choices');
+  if (!instructions.textContent.includes('Aucun choix DIRECT / USAGE / CAPACITY') || !instructions.textContent.includes('0,082 CAD/h') || !instructions.textContent.includes('59,04 CAD est une ancienne illustration')) throw Error('Fixed billing instructions missing');
+  if (document.querySelectorAll('input[type="radio"]').length) throw Error('D5 must not force an allocation choice');
   const comment = document.querySelector('.choices textarea'); comment.value = 'Vérifier la reprise avant bascule.'; comment.dispatchEvent(new Event('input', { bubbles: true })); await settle();
   const preview = JSON.parse(document.querySelector('.choice-json textarea').value);
-  if (preview.decision.option !== 'CAPACITY' || preview.decision.key !== 'llm-allocation-method' || preview.decision.note !== comment.value || preview.options.length !== 3 || preview.status !== 'draft-not-ratified') throw Error('JSON response pack lost choice/comment');
-  if (preview.fixedDecisions.executionOrder[0] !== 'T1-refresh-graphify-0.18.0' || preview.fixedDecisions.infrastructureBilling.projectedNodeCad !== 59.04 || preview.fixedDecisions.monetaryProposalAudit !== 'incomplete' || 'finalBillableCad' in preview) throw Error('JSON response pack lost fixed decisions or invented a bill');
+  if (preview.revision !== 'D5' || preview.ownerCorrection.option !== null || preview.note !== comment.value || preview.fixedInstructions.billing.allocationMethodChoiceRequired !== false) throw Error('JSON instructions lost provenance/comment');
+  if (preview.fixedInstructions.reporting.start !== null || preview.fixedInstructions.billing.node.periodHours !== null || preview.fixedInstructions.billing.node.projectedAmountCad !== null || preview.fixedInstructions.billing.historicalIllustrationOnly.currentPeriodAmount !== false || 'decision' in preview || 'options' in preview || 'finalBillableCad' in preview) throw Error('JSON instructions invented a period, vote or bill');
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.testCopiedChoice = text; } } });
-  [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier la réponse en JSON').click(); await settle();
-  if (JSON.parse(window.testCopiedChoice).decision.note !== comment.value || !document.querySelector('.choices').textContent.includes('copiés en JSON')) throw Error('Copy action failed');
-  document.querySelectorAll('.steps button')[2].click(); await settle(); document.querySelectorAll('.steps button')[3].click(); await settle();
-  if (document.querySelector('input[type="radio"]:checked')?.value !== 'CAPACITY' || document.querySelector('.choices textarea').value !== preview.decision.note) throw Error('Draft persistence failed');
+  [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier les instructions en JSON').click(); await settle();
+  if (JSON.parse(window.testCopiedChoice).note !== comment.value || !document.querySelector('.choices').textContent.includes('copiés en JSON')) throw Error('Copy action failed');
+  document.querySelectorAll('.steps button')[2].click(); await settle(); document.querySelectorAll('.steps button')[7].click(); await settle();
+  if (document.querySelector('.choices textarea').value !== preview.note) throw Error('Instruction comment persistence failed');
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw Error('Denied'); } } });
-  [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier la réponse en JSON').click(); await settle();
+  [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier les instructions en JSON').click(); await settle();
   if (!document.querySelector('.choice-json').open || !document.querySelector('.choices').textContent.includes('Copie refusée')) throw Error('Denied clipboard not explained');
-  [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Retirer le choix').click();
-  const clear = document.querySelector('.choices textarea'); clear.value = ''; clear.dispatchEvent(new Event('input', { bubbles: true })); await settle();
+  [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Effacer le commentaire').click(); await settle();
+  if (document.querySelector('.choices textarea').value) throw Error('Instruction comment clear failed');
   document.querySelectorAll('.steps button')[0].click(); await settle();
   const input = document.querySelector('textarea'), previous = input.value;
   input.value = 'Automated test — local draft'; input.dispatchEvent(new Event('input', { bubbles: true })); await settle();
@@ -111,6 +114,13 @@ console.log(await evaluate(`(async () => {
   [...document.querySelectorAll('.source-links button')].find(b => b.textContent === 'transitions').click(); await settle();
   if (!document.querySelector('dialog[open]')?.textContent.includes('T1 — autonomous PV → Signal cron')) throw Error('Transition evidence missing');
   document.querySelector('dialog').close(); await settle();
+  [...document.querySelectorAll('.source-links button')].find(b => b.textContent === 'transitions-target').click(); await settle();
+  if (document.querySelectorAll('dialog .source-mermaid svg').length !== 3) throw Error('Three transition Mermaid sources are not rendered');
+  [...document.querySelectorAll('dialog .source-mermaid svg')].forEach((svg, index) => {
+    const missing = window.checkMermaidLabels(svg, window.expectedGraphs[index + 4]);
+    if (missing.length) throw Error('Lost transition-source labels: ' + JSON.stringify(missing));
+  });
+  document.querySelector('dialog').close(); await settle();
   [...document.querySelectorAll('.source-links button')].find(b => b.textContent === 'architecture').click(); await settle();
   if (document.querySelectorAll('dialog .source-mermaid svg').length !== 4) throw Error('Mermaid in the source document is not rendered');
   [...document.querySelectorAll('dialog .source-mermaid svg')].forEach((svg, index) => {
@@ -119,13 +129,15 @@ console.log(await evaluate(`(async () => {
   });
   document.querySelector('dialog').close(); await settle();
   if (document.documentElement.scrollWidth > innerWidth) throw Error('Desktop overflow');
+  choose('Vue architecture', 'target-3'); await settle();
+  if (!document.querySelector('.svelte-flow__node[data-id="T3_CARD"]') || !document.querySelector('.svelte-flow__node[data-id="PP_RAW_OVH"]') || document.querySelector('.svelte-flow__node[data-id="ppminio"]')) throw Error('Final target entry content mismatch');
   document.querySelector('.explorer').scrollIntoView({ behavior: 'instant' });
-  return { status: 'pass', completeNestedViews: views.length, viewportChecks: checked, mermaidRendered: 5, resourceCrossLink: true, fullscreen: true, choices: 'LLM allocation + comment + JSON + persistence', clipboard: 'action and denial simulated', evidence: 'transitions embedded and diagrams rendered' };
+  return { status: 'pass', defaultView: 'target-3', sequentialPath: true, completeNestedViews: views.length, viewportChecks: checked, mermaidRendered: views.length, resourceCrossLink: true, fullscreen: true, instructions: 'fixed billing + comment + JSON + persistence', clipboard: 'action and denial simulated', evidence: 'current plus transition diagrams rendered' };
 })()`));
 await writeFile('/out/flow-preview.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
 await evaluate('window.scrollTo(0, 0)');
 await writeFile('/out/dossier-preview.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
-for (const [label, value, file] of [['Retrouver un composant', 'PP_DB', 'service-preview.png'], ['Zoomer sur un sous-flow', 'ppminio', 'stores-preview.png']]) {
+for (const [label, value, file] of [['Retrouver un composant', 'PP_DB', 'service-preview.png'], ['Zoomer sur un sous-flow', 'OVH_OBJECTS', 'stores-preview.png']]) {
   await evaluate(`(async () => {
     document.querySelector('.inspector .close')?.click();
     const select = document.querySelector('select[aria-label="' + ${JSON.stringify(label)} + '"]');
@@ -144,7 +156,7 @@ await call('Network.setBlockedURLs', { urls: ['http://*', 'https://*'] });
 await call('Page.navigate', { url: 'file:///home/antoinefa/src/radar-immobilier/tmp/architecture-platform/docs/architecture/decision-focus.html' });
 await evaluate(`new Promise((resolve, reject) => { const until = Date.now() + 2000; const check = () => document.querySelector('.svelte-flow__node') ? resolve(true) : Date.now() > until ? reject(Error('Offline native flow missing')) : requestAnimationFrame(check); check(); })`);
 await call('Page.navigate', { url: 'file:///home/antoinefa/src/radar-immobilier/tmp/architecture-platform/docs/reports/architecture-monthly/architecture-transition-2026-09-13.html' });
-await evaluate(`new Promise((resolve, reject) => { const until = Date.now() + 2000; const check = () => document.querySelector('.svelte-flow__node') && document.body.textContent.includes('EXÉCUTION ENGAGÉE') ? resolve(true) : Date.now() > until ? reject(Error('Dated monthly Focus rendering missing')) : requestAnimationFrame(check); check(); })`);
+await evaluate(`new Promise((resolve, reject) => { const until = Date.now() + 2000; const check = () => document.querySelector('.flow')?.dataset.graph === 'target-3' && document.body.textContent.includes('CIBLE COMPLÈTE PROPOSÉE') ? resolve(true) : Date.now() > until ? reject(Error('Dated monthly D5 Focus rendering missing')) : requestAnimationFrame(check); check(); })`);
 if (errors.length || external.length) throw Error(JSON.stringify({ errors, external }));
 console.log(JSON.stringify({ mobile, offline: true, monthlyDatedRendering: true, externalRequests: external.length, runtimeErrors: errors.length }));
 clearTimeout(timeout); ws.close(); await fetch(`${base}/json/close/${page.id}`);
