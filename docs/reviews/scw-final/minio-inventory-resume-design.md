@@ -1,8 +1,8 @@
 # Resumable whole-bucket MinIO inventory design
 
 Date: 2026-09-13
-Status: **design only — not built or released**
-Scope: future extension of `deploy/ci/migrate-object-storage.sh`; no live
+Status: **implemented and hermetically verified through `ba08043c`; not deployed**
+Scope: extension of `deploy/ci/migrate-object-storage.sh`; no live
 storage, cluster, provider, IAM, Secret, object, database, or workload operation
 was performed for this design.
 
@@ -179,10 +179,10 @@ continue to report `fenceValidated:false` and
 14. Executed copy consumes the finalized proof, never monolithic inventory, and
     still re-hashes each source body before any conditional PUT.
 
-## Future implementation lots
+## Implementation lots
 
-After independent design review only: (1) provisional root index/checkpoint and
-resume, (2) body shards and independent resume, (3) resumable fenced chains and
-finalizer, then (4) immutable proof consumption by copy plus operator
-documentation. Each commit must stay at or below 145 changed lines.
-This document authorizes none of those changes or any live operation.
+The four reviewed lots landed as atomic commits: provisional root chain,
+independent body shards, resumable fenced finalization, and immutable proof
+consumption by copy. The implementation changes no provider or runtime state;
+live inventory, fence validation, copy, cutover, and deletion remain separate
+operator gates.
