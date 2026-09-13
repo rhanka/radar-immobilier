@@ -3,8 +3,8 @@
   import Flow from './Flow.svelte';
   import Mermaid from './Mermaid.svelte';
   let { graphs } = $props();
-  const journey = [{ id: 'asis-1', label: 'Existant' }, { id: 'target-1', label: 'T1 refresh' }, { id: 'target-2', label: 'T2 objets OVH' }, { id: 'target-3', label: 'T3 cible 1 nœud' }];
-  let graphId = $state('target-3'), scope = $state(null), selected = $state(null), expanded = $state(false);
+  const journey = [{ id: 'asis-1', label: 'Avant' }, { id: 'target-1', label: 'Transition effective' }, { id: 'target-2', label: 'Après T2' }, { id: 'target-3', label: 'Après cible' }];
+  let graphId = $state('target-1'), scope = $state(null), selected = $state(null), expanded = $state(false);
   let graph = $derived(graphs.find(g => g.id === graphId));
   let trail = $derived.by(() => {
     const result = []; let current = graph.groups.find(g => g.id === scope);
@@ -29,7 +29,7 @@
     <label>Vue <select aria-label="Vue architecture" value={graphId} onchange={event => change(event.currentTarget.value)}>
       {#each graphs as item}<option value={item.id}>{item.title}</option>{/each}
     </select></label>
-    <Badge tone={graphId.startsWith('target') || graphId.startsWith('detail') ? 'warning' : 'neutral'}>{graphId.startsWith('target') || graphId.startsWith('detail') ? 'PROPOSED / NOT DEPLOYED' : 'EXISTANT · vérifié as-of 2026-09-13'}</Badge>
+    <Badge tone={graphId === 'target-1' ? 'success' : graphId.startsWith('target') || graphId.startsWith('detail') ? 'warning' : 'neutral'}>{graphId === 'target-1' ? 'TRANSITION EFFECTIVE · 2026-09-13' : graphId.startsWith('target') || graphId.startsWith('detail') ? 'APRÈS CIBLE · NON DÉPLOYÉ' : 'AVANT · CAPTURE DU 2026-09-13'}</Badge>
     <Button variant="secondary" size="sm" onclick={() => expanded = !expanded}>{expanded ? 'Réduire' : 'Plein écran'}</Button>
   </Flex>
   <nav class="breadcrumbs" aria-label="Sous-flows">
