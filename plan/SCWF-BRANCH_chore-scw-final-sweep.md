@@ -42,7 +42,8 @@
 - [x] Lot 3e1: retire uncalled SCW mount executables.
 - [x] Lot 3e2: correct active object-storage deployment guidance.
 - [x] Lot 3f: add and pass scoped offline storage-binding regression checks.
-- [ ] Lot 3g: record remaining clients, run final offline gates, and complete independent post-build review.
+- [x] Lot 3g1: record the first-slice checkpoint and explicit remaining-client list.
+- [ ] Lot 3g2: run final offline gates and complete independent post-build review.
 - [ ] Lot 4: after T1, conductor verifies copy/parity/fencing/recovery and preprod then production cutovers.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
 
