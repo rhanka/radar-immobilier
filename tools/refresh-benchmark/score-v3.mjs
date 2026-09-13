@@ -68,16 +68,19 @@ if (process.env.BENCHMARK_SCORE_OUTPUT) {
   const cases = [];
   for (const document of manifest.documents) {
     const stem = `${document.id}--sol-normal`;
-    let receipt;
-    try { receipt = await readJson(resolve(rootPath, "candidates", `${stem}.receipt.json`)); }
-    catch (error) { if (error.code !== "ENOENT") throw error; }
+    const receipts = [];
+    for (const suffix of ["", ".attempt-2"]) {
+      try { receipts.push(await readJson(resolve(rootPath, "candidates", `${stem}${suffix}.receipt.json`))); }
+      catch (error) { if (error.code !== "ENOENT") throw error; }
+    }
+    const receipt = receipts.at(-1);
     const state = classifyReceipt(receipt);
     let quality = null;
     if (state === "completed_valid") {
       const output = await readJson(resolve(rootPath, "candidates", `${stem}.output.json`));
       quality = scoreValid(output, document, oracle.units.filter((unit) => unit.doc_sha === document.sha256));
     }
-    cases.push({ caseId: stem, state, receipt: receipt ? { status: receipt.status,
+    cases.push({ caseId: stem, state, attemptCount: receipts.length, receipt: receipt ? { status: receipt.status,
       extractionAccepted: receipt.extractionAccepted, requested: receipt.requested,
       actual: receipt.actual && { modelId: receipt.actual.modelId, usage: receipt.actual.usage },
       timing: receipt.timing, error: receipt.error } : null, quality });
