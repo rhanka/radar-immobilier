@@ -624,14 +624,9 @@ object-storage-docs-preprod-stop-secondary-inventory: ## Stop only the supersede
 	fi
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
 	  job="$(OBJECT_STORAGE_DOCS_STOP_JOB)"; \
+	  jq -n -f deploy/ci/docs-secondary-inventory-stop.jq >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get "job/$$job" -o json | \
-	    jq -e '.metadata.labels["app.kubernetes.io/component"] == "object-storage-inventory" and \
-	      (.status.active // 0) == 1 and (.status.succeeded // 0) == 0 and \
-	      (.status.failed // 0) == 0 and .spec.template.spec.containers == \
-	      [(.spec.template.spec.containers[0] | select(.name == "inventory" and \
-	        (.args[0] | contains("/evidence/docs-checkpoint-v2"))))] and \
-	      any(.spec.template.spec.volumes[]?; .persistentVolumeClaim.claimName == \
-	        "radar-object-storage-inventory-checkpoint")' >/dev/null; \
+	    jq -e -f deploy/ci/docs-secondary-inventory-stop.jq >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" delete "job/$$job" --cascade=foreground --wait=true >/dev/null; \
 	  [ "$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o json | jq '.items|length' )" = 0 ]; \
 	  [ "$$( $(KUBECTL) -n "$$namespace" get pvc/radar-object-storage-inventory-checkpoint \
