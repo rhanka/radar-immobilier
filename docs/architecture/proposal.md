@@ -67,4 +67,3 @@ replacement and credential refresh. Only then may a separately gated production
 promotion begin. No version bump, manual Job success or nonempty graph substitutes
 for those acceptance levels. The workstation becomes optional enrollment/admin,
 not a routine T1 runtime.
-

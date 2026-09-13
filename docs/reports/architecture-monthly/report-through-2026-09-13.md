@@ -84,4 +84,3 @@ make -f docs/architecture/focus/Makefile test build browser clipboard ENV=test-a
 
 Preview: `http://127.0.0.1:5188/`. The build uses the existing Sentropic Focus
 kit read-only and starts no application stack.
-
