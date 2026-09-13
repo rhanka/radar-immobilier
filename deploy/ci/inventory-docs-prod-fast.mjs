@@ -1,7 +1,10 @@
+import { Buffer } from "node:buffer";
+import console from "node:console";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { closeSync, fsyncSync, openSync, readdirSync, readFileSync, renameSync,
   writeFileSync, writeSync } from "node:fs";
+import process from "node:process";
 
 const require = createRequire("/workspace/package.json");
 const { GetObjectCommand, GetObjectTaggingCommand, ListObjectsV2Command, S3Client } =

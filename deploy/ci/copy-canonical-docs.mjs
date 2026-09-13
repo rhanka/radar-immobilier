@@ -1,9 +1,12 @@
+import { Buffer } from "node:buffer";
+import console from "node:console";
 import { createHash } from "node:crypto";
 import { once } from "node:events";
 import { closeSync, createReadStream, createWriteStream, fsyncSync, openSync,
   readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { Agent as HttpsAgent } from "node:https";
 import { createRequire } from "node:module";
+import process from "node:process";
 
 const require = createRequire("/workspace/package.json");
 const { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } =
@@ -64,7 +67,7 @@ const digestBody = async (response, outputPath) => {
     }
     if (output) { output.end(); await once(output, "close"); }
   } catch (error) {
-    output?.destroy(); if (outputPath) { try { unlinkSync(outputPath); } catch {} } throw error;
+    output?.destroy(); if (outputPath) { try { unlinkSync(outputPath); } catch { /* Best-effort cleanup. */ } } throw error;
   }
   return { bytes, sha256: hash.digest("hex") };
 };
@@ -135,7 +138,7 @@ const copyOne = async (item, index) => {
     return { status: "copied", key: item.key, size: item.size, etag: response.ETag ?? "" };
   } catch (error) {
     return failed(stage, error, item);
-  } finally { try { unlinkSync(bodyPath); } catch {} }
+  } finally { try { unlinkSync(bodyPath); } catch { /* Best-effort cleanup. */ } }
 };
 for (let offset = 0; offset < objects.length; offset += concurrency) {
   const batch = objects.slice(offset, offset + concurrency);
