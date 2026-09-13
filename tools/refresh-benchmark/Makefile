@@ -5,6 +5,7 @@ MAIN_ROOT := $(abspath $(BENCHMARK_ROOT)/../..)
 T1_ROOT := $(abspath $(BENCHMARK_ROOT)/../refresh-018)
 RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/candidates
 V3_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v3
+V4_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v4
 RUNTIME_TEXT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/runtime-text
 CAS_ROOT := $(MAIN_ROOT)/.lanes/conductor/tmp/graphify-cas/run-dryrun2-final-20260911T215911Z
 NODE_IMAGE := node:22-bookworm-slim
@@ -16,7 +17,7 @@ KEYRING_SOURCE := /home/antoinefa/.sentropic/llm-mesh-keyring
 BASELINE_GOLD := $(MAIN_ROOT)/.lanes/conductor/tmp/bench-llm/bench/v2/gold.json
 PREFLIGHT_FILE ?= preflight-before.json
 
-.PHONY: test test-v3 test-score-v3 score-v3 freeze-blind-v3 runtime-text freeze-v3 prepare-prompts-v3 run-v3 preflight-v3 run-v3-sol-normal quota inspect-validation
+.PHONY: test test-v3 test-v4 test-score-v3 score-v3 freeze-blind-v3 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 run-v3-sol-normal run-v4-all quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -68,6 +69,13 @@ test-v3: runtime-text
 	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V3) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
 	  node --test tools/refresh-benchmark/benchmark.test.mjs
 
+test-v4: runtime-text
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v3 \
+	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V3) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node --test tools/refresh-benchmark/benchmark.test.mjs tools/refresh-benchmark/runtime-config.test.mjs
+
 test-score-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
@@ -117,6 +125,16 @@ run-v3:
 	$(MAKE) run-case DOC=$(DOC) VARIANT=$(VARIANT) CAMPAIGN=v3 \
 	  CAMPAIGN_RESULTS=$(V3_RESULTS)/candidates T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V3) ENV=$(ENV)
 
+run-v4:
+	$(MAKE) run-case DOC=$(DOC) VARIANT=$(VARIANT) CAMPAIGN=v4 \
+	  CAMPAIGN_RESULTS=$(V4_RESULTS)/candidates T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V3) ENV=$(ENV)
+
+run-v4-all:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	mkdir -p $(V4_RESULTS)/candidates
+	printf '%s\n' $(V3_DOCS) | xargs -n1 -P2 sh -c \
+	  '$(MAKE) run-v4 DOC="$$1" VARIANT="$(VARIANT)" ENV=test-t1-model-benchmark' _
+
 preflight-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
 	docker run --rm --tmpfs /workspace --tmpfs /run \
@@ -147,7 +165,7 @@ prepare-prompts: runtime-text
 	  /workspace/node_modules/.bin/tsx tools/refresh-benchmark/prepare-prompts.mjs
 
 run-case: runtime-text
-	test "$(ENV)" = "test-refresh-benchmark"
+	test "$(ENV)" = "test-refresh-benchmark" -o "$(ENV)" = "test-t1-model-benchmark"
 	test -n "$(DOC)" && test -n "$(VARIANT)"
 	docker run --rm --tmpfs /workspace --tmpfs /run --tmpfs /tmp \
 	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
