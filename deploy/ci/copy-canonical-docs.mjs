@@ -212,12 +212,16 @@ if (summary.processed === 59017 && summary.failed === 0 && structuralExact) {
       if (result.conflict) attributeConflicts.push(result.conflict); else targetVerifiedBytes += result.size;
     }
   }
-  summary.targetObservedAt = new Date().toISOString();
 }
+const targetFinalDiff = corpusDiff(await listBucket(destinationClient, destination));
+atomicJson(`${reportDir}/target-final-diff.json`, targetFinalDiff);
+const targetStructuralExact = targetFinalDiff.missing.length === 0 && targetFinalDiff.extra.length === 0 &&
+  targetFinalDiff.sizeConflicts.length === 0;
+if (summary.sourceObservedAt !== null) summary.targetObservedAt = new Date().toISOString();
 atomicJson(`${reportDir}/target-attribute-conflicts.json`, attributeConflicts);
 summary.targetVerifiedObjects = summary.targetObservedAt ? objects.length - attributeConflicts.length : 0;
 summary.targetVerifiedBytes = targetVerifiedBytes;
-summary.targetExactParity = summary.targetObservedAt !== null && attributeConflicts.length === 0 &&
+summary.targetExactParity = targetStructuralExact && summary.targetObservedAt !== null && attributeConflicts.length === 0 &&
   targetVerifiedBytes === 12534514457;
 summary.exactParity = summary.targetExactParity && summary.sourceExact;
 summary.complete = summary.processed === 59017 && summary.failed === 0 && summary.exactParity;
