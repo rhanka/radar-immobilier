@@ -1,0 +1,36 @@
+{
+  "receiptId": "t1-attempt2-after-20260913T170229Z",
+  "capturedAt": "2026-09-13T17:02:29.009Z",
+  "phase": "separate corrected T1 attempt 2; not a benchmark candidate case",
+  "accountPseudonym": "acct-c015cb459d",
+  "quota": {
+    "httpStatus": 200,
+    "plan": "chatgpt-pro",
+    "primary": {
+      "usedPercent": 88,
+      "limitWindowSeconds": 604800,
+      "resetAfterSeconds": 497529,
+      "resetAt": 1789816477,
+      "limitReached": false
+    },
+    "secondary": null
+  },
+  "observedGlobalDelta": {
+    "beforeReceiptId": "t1-smoke-after-20260913T164154Z",
+    "usedPercentPoints": 2,
+    "attributable": false,
+    "reason": "The same subscription had concurrent development activity."
+  },
+  "attemptReceipt": {
+    "modelId": "gpt-5.6-sol",
+    "effort": "medium",
+    "latencyMs": 232010,
+    "finishedAt": "2026-09-13T16:51:12.869Z",
+    "schemaSha256": "133ecf5c185d0036999f0c1e5eb800716c0d0ea894c1be667ee520363326fdc4",
+    "promptSha256": "e1fd4b827707f4e2c0ad41c8b5ea580dbe7e090db84aee68f1f16fe2087e5d7e",
+    "wrapperOutcome": "interrupted/external-supervision",
+    "providerCompletionObserved": false,
+    "persistedOutputObserved": false,
+    "accepted": false
+  }
+}

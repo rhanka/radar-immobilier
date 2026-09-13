@@ -1,0 +1,24 @@
+{
+  "receiptId": "candidates-before-20260913T170807Z",
+  "capturedAt": "2026-09-13T17:08:07.901Z",
+  "accountPseudonym": "acct-c015cb459d",
+  "quota": {
+    "httpStatus": 200,
+    "plan": "chatgpt-pro",
+    "primary": {
+      "usedPercent": 89,
+      "limitWindowSeconds": 604800,
+      "resetAfterSeconds": 497190,
+      "resetAt": 1789816477,
+      "limitReached": false
+    },
+    "secondary": null,
+    "credits": {
+      "hasCredits": false,
+      "unlimited": false,
+      "overageLimitReached": false
+    }
+  },
+  "phaseNote": "Captured after the separate T1 attempts and before the first benchmark candidate call.",
+  "attributionWarning": "The subscription is shared with concurrent development; later global quota change is not attributable to benchmark calls."
+}
