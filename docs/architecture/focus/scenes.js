@@ -2,6 +2,8 @@ import { graphlib } from 'dagre-d3-es';
 import { layout } from 'dagre-d3-es/src/dagre/layout.js';
 import { routeEdge } from '/kit/src/architecture-routing.js';
 
+const SUBFLOW_HEADER_SPACE = 112;
+
 // Each Mermaid subgraph is a real parent box, never a replacement for its leaves.
 export function sceneFor(graph) {
   const all = new Map([...graph.groups, ...graph.nodes].map(n => [n.id, n]));
@@ -24,10 +26,10 @@ export function sceneFor(graph) {
     layout(dag);
     for (const child of children) {
       const p = dag.node(child.id), size = dimensions.get(child.id);
-      positions.set(child.id, { x: p.x - size.width / 2, y: p.y - size.height / 2 + (parent ? 104 : 0) });
+      positions.set(child.id, { x: p.x - size.width / 2, y: p.y - size.height / 2 + (parent ? SUBFLOW_HEADER_SPACE : 0) });
     }
     const headerWidth = parent ? all.get(parent).label.length * 9 + 124 : 0;
-    return { width: Math.max(470, headerWidth, dag.graph().width ?? 0), height: Math.max(350, (dag.graph().height ?? 0) + 104) };
+    return { width: Math.max(470, headerWidth, dag.graph().width ?? 0), height: Math.max(350, (dag.graph().height ?? 0) + SUBFLOW_HEADER_SPACE) };
   }
   arrange();
   const nodes = [], absolute = new Map();

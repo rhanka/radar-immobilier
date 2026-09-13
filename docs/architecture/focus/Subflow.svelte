@@ -14,7 +14,7 @@
   .subflow-box[data-depth='1'] { background: var(--st-semantic-surface-default); border-color: var(--st-semantic-data-category1); }
   .subflow-box[data-depth='2'] { background: var(--st-semantic-surface-subtle); border-color: var(--st-semantic-data-category2); }
   .subflow-box[data-depth='3'] { background: var(--st-semantic-surface-default); border-color: var(--st-semantic-data-category7); }
-  header { height: 102px; padding: 10px 18px; border-bottom: 1px solid var(--st-semantic-border-subtle); display: flex; align-items: center; gap: 16px; }
+  header { height: 110px; padding: 10px 18px; border-bottom: 1px solid var(--st-semantic-border-subtle); display: flex; align-items: center; gap: 16px; }
   header div { display: flex; flex-direction: column; gap: 4px; }
   span, small { font-size: 11px; color: var(--st-semantic-text-secondary); }
   strong { font-size: 18px; color: var(--st-semantic-text-primary); }
