@@ -5,8 +5,10 @@ the former Option A and not an observed deployment. It keeps the existing
 preproduction MinIO API roles until T2. Graphify stays exactly 0.18.0; the PDF
 contract name `immo-pv-extraction-v3` is not a 0.18.3 dependency version. At
 Immo HEAD `ac3a7150`, targeted suites pass 8/8 + 7/7 and the full typecheck plus
-scope/branch checks pass. Real-provider Signal, nested `UND_ERR_SOCKET` analysis,
-operated keyring, durable lock and Kubernetes acceptance remain open.
+scope/branch checks pass. Graphify fail-closes correctly; nested `UND_ERR_SOCKET`
+belongs to the llm-mesh 0.19.0 normalizer. Its delegated 0.19.1 patch is unpublished.
+The preprod success path is GO_WITH_GATES; unattended/retry/production is NO-GO
+before 0.19.1. Real-provider Signal and Kubernetes acceptance remain open.
 
 ```mermaid
 flowchart LR
@@ -15,7 +17,7 @@ flowchart LR
     acquire["1 Acquire + parse<br/>CAS bytes, original page map, immutable input manifest"]
     subgraph llm_target["2 Profile extraction + grounding · Immo hosts Graphify 0.18.0"]
       materialize["Materialize checked S3 inputs<br/>stable document/page mappings"]
-      graphify["Graphify 0.18.0 + mesh 0.19 alias<br/>host planner/adapters · bounded attempts"]
+      graphify["Graphify 0.18.0 + llm-mesh 0.19.0<br/>0.19.1 normalizer patch unpublished"]
       evidence["Validate profile + grounding<br/>schema, source, page, excerpt before success"]
       materialize --> graphify
       graphify --> evidence

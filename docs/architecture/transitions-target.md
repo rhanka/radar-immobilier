@@ -19,8 +19,8 @@ flowchart TB
     T1_CHANGE["CHANGES<br/>In-pod Immo refresh: fresh candidate → deterministic 3.4 → guarded graph → atomic PG"]
     T1_KEEP["KEPT<br/>PP-DB, PP-GRAPH, API/UI/MCP, Geo evidence, MinIO API roles + legacy history"]
     T1_REMOVE["REMOVED<br/>Routine workstation LLM and parallel legacy canonical publishers"]
-    T1_GATES["GATES<br/>Installed contract + durable identity/lock + preprod E2E THEN production"]
-    T1_EVIDENCE["EVIDENCE<br/>Graphify exactly 0.18.0; PDF contract immo-pv-extraction-v3<br/>HEAD ac3a7150; targeted 8/8 + 7/7; typecheck + scope/branch PASS<br/>no real-provider Signal or K8s acceptance; nested UND_ERR_SOCKET analysis pending"]
+    T1_GATES["GATES<br/>GO_WITH_GATES: preprod success path<br/>NO-GO unattended/retry/prod before llm-mesh 0.19.1 + K8s acceptance"]
+    T1_EVIDENCE["EVIDENCE<br/>Graphify exactly 0.18.0 fail-closes; PDF contract immo-pv-extraction-v3<br/>HEAD ac3a7150; targeted 8/8 + 7/7; typecheck + scope/branch PASS<br/>UND_ERR_SOCKET is llm-mesh 0.19.0; 0.19.1 unpublished; no real-provider Signal"]
   end
   user["User / browser"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]

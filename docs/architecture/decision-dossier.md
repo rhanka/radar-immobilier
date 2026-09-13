@@ -47,8 +47,10 @@ one node's 5,907.82 Mi allocatable; MinIO accounts for only ~347 Mi.
 [FACT] Graphify remains exactly 0.18.0. At Immo HEAD `ac3a7150`, targeted suites
 pass 8/8 + 7/7, and the full typecheck plus scope/branch checks pass. The internal
 PDF contract is named `immo-pv-extraction-v3`; it is not a Graphify 0.18.3 release.
-That is implementation evidence, not a real-provider Signal or Kubernetes
-acceptance. Upstream analysis of the nested `UND_ERR_SOCKET` failure is pending.
+Graphify fail-closes correctly. The nested `UND_ERR_SOCKET` is confirmed in the
+llm-mesh 0.19.0 normalizer; its delegated 0.19.1 patch is not published. T1 is
+GO_WITH_GATES for the preprod success path, but unattended/retry/production is
+NO-GO before 0.19.1. No real-provider Signal or Kubernetes acceptance exists.
 Every target
 production role may be named as a contract, but its physical binding remains
 TBD rather than inferred from source defaults or the old SCW cluster.
@@ -65,7 +67,7 @@ atomic PG projection → typed Signal plus exact PDF. [Detailed T1 flow](proposa
 
 [FACT] Immo owns every step; Geo owns geographic inputs. T1 keeps the existing
 API MinIO roles until T2. Consumer code gates pass at `ac3a7150`; operated keyring,
-durable lock, real-provider Signal and Kubernetes qualification remain pending.
+durable lock, real-provider Signal, llm-mesh 0.19.1 and Kubernetes qualification remain open.
 
 [JUDGMENT] Acceptance requires the actual installed contract, durable credentials,
 one lock shared by scheduled/manual execution, failure/resume and a CronJob-created
