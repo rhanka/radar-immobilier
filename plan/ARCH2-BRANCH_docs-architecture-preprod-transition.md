@@ -48,4 +48,4 @@
   - [x] Pass Focus tests, browser/clipboard checks and PDF report gates.
 - [ ] **Lot 4 — Review and handoff.**
   - [x] Verify scope and atomic commit limits.
-  - [ ] Push the branch and open a PR; report exact commits and gates.
+  - [x] Push the branch and open PR #681; report exact commits and gates.
