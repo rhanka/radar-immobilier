@@ -1,0 +1,222 @@
+import { createHash } from "node:crypto";
+
+import { mergeExtractions, type TextJsonGenerationClient } from "@sentropic/graphify";
+
+import type { Database } from "../../db/client.js";
+import type { ObjectStore } from "../../storage/object-store.js";
+import {
+  runLiveScrape,
+  type LiveScrapeCityRecap,
+  type RunLiveScrapeOptions,
+} from "../sources/live-scrape.js";
+import { readCanonicalCityGraph, type CanonicalReadAnchor } from "./canonical-graph-writer.js";
+import { graphifyGraphSchema, upsertGraphAtomic } from "./graph-store.js";
+import { enrichGraphify34Snapshot, type Graphify34Snapshot } from "./graphify-34-enrichment.js";
+import { applyGraphify34Snapshots, applyPlanKey, buildGraphify34Manifest,
+  type Graphify34SnapshotStore } from "./graphify-34-snapshot.js";
+import { materializeRefreshCorpus } from "./refresh-corpus.js";
+import { extractRefreshProfile, type RefreshProfileChunk,
+  type RefreshProfileContext } from "./refresh-profile.js";
+import { canonicalHash } from "./replay/canonical-json.js";
+import { extractionToV23Graph } from "./refresh-v23.js";
+import { completeRefreshChunk, findPublishedRefreshState, openRefreshState, readCompletedRefreshChunk,
+  reserveRefreshChunk, writeRefreshCandidate, writeRefreshStageReceipt,
+  type RefreshStage, type RefreshStateHandle } from "./refresh-state.js";
+
+export type RefreshAcquire = (
+  cities: readonly string[] | undefined,
+  options: RunLiveScrapeOptions,
+) => Promise<LiveScrapeCityRecap[]>;
+
+export interface AcquireRefreshPdfOptions {
+  readonly citySlug: string;
+  readonly store: ObjectStore;
+  readonly signal?: AbortSignal;
+  readonly limit?: number;
+  readonly acquire?: RefreshAcquire;
+}
+
+export interface RefreshPdfSelection {
+  readonly manifestKey: string;
+  readonly recap: LiveScrapeCityRecap;
+}
+
+const MANIFEST_HEADER = "source_id\tcity_slug\tsha\trepresentation_key\tsidecar_key";
+const SHA256 = /^[0-9a-f]{64}$/;
+
+/** Default two-second source pacing with the project-required ±300 ms jitter. */
+export function refreshSourceDelayMs(random = Math.random): number {
+  return 1_700 + Math.floor(random() * 601);
+}
+
+/** Convert one successful existing RECUEIL result into C04's immutable PDF selection. */
+export async function acquireRefreshPdfManifest(
+  options: AcquireRefreshPdfOptions,
+): Promise<RefreshPdfSelection> {
+  const acquire = options.acquire ?? runLiveScrape;
+  const recaps = await acquire([options.citySlug], {
+    store: options.store,
+    exploit: false,
+    acceptRef: (ref) => ref.contentType?.toLowerCase().startsWith("application/pdf") === true
+      || /\.pdf(?:[?#]|$)/i.test(ref.url),
+    beforeFetch: async () => {
+      await new Promise((resolve) => setTimeout(resolve, refreshSourceDelayMs()));
+    },
+    ...(options.signal !== undefined ? { signal: options.signal } : {}),
+    ...(options.limit !== undefined ? { limit: options.limit } : {}),
+  });
+  if (options.signal?.aborted) throw new Error("Refresh aborted after acquisition");
+  const recap = recaps[0];
+  if (recaps.length !== 1 || !recap || recap.city !== options.citySlug
+    || recap.status === "error" || recap.count < 1 || recap.casKeys.length !== recap.count) {
+    throw new Error(`Selected city acquisition failed: ${options.citySlug}`);
+  }
+  if (!recap.sourceId || /[\t\n]/.test(recap.sourceId)) {
+    throw new Error(`Invalid selected source id: ${options.citySlug}`);
+  }
+  const prefix = `raw/${recap.sourceId}/cas/`;
+  const acquired = recap.casKeys.map((key) => {
+    const suffix = key.startsWith(prefix) ? key.slice(prefix.length) : "";
+    const match = suffix.match(/^([0-9a-f]{64})\.(pdf|html|txt)$/);
+    if (!match || !SHA256.test(match[1]!)) {
+      throw new Error(`Selected city input is not an exact CAS representation: ${key}`);
+    }
+    return { key, sha: match[1]!, extension: match[2]! };
+  });
+  const selectedPdf = acquired.find((entry) => entry.extension === "pdf");
+  if (!selectedPdf) {
+    throw new Error(`Selected city acquisition produced no exact PDF: ${options.citySlug}`);
+  }
+  const rows = [`${recap.sourceId}\t${recap.city}\t${selectedPdf.sha}\t${selectedPdf.key}`
+    + `\t${selectedPdf.key}.meta.json`];
+  const body = `${MANIFEST_HEADER}\n${rows.join("\n")}\n`;
+  const digest = createHash("sha256").update(body).digest("hex");
+  const manifestKey = `refresh/018/${options.citySlug}/inputs/${digest}.tsv`;
+  await options.store.put(manifestKey, body, "text/tab-separated-values");
+  return { manifestKey, recap };
+}
+
+export interface RunPvRefreshOptions {
+  readonly citySlug: string;
+  readonly store: Graphify34SnapshotStore & ObjectStore;
+  readonly db: Database;
+  readonly profileContext: RefreshProfileContext;
+  readonly textClient: TextJsonGenerationClient;
+  readonly extractPdf: (bytes: Uint8Array, sourceUrl: string) => Promise<string>;
+  readonly profileHash: string;
+  readonly registryHash: string;
+  readonly packageVersion: string;
+  readonly modelPolicy: string;
+  readonly budgetLimit: number;
+  readonly maximumAttempts: number;
+  readonly maxOutputTokens: number;
+  readonly acquisitionLimit?: number;
+  readonly excludedNodeIds?: readonly string[];
+  readonly signal?: AbortSignal;
+  readonly now?: () => Date;
+  readonly acquire?: RefreshAcquire;
+}
+
+async function completeStage(store: ObjectStore, handle: RefreshStateHandle,
+  stage: RefreshStage, artifactHash: string, now: () => Date) {
+  return writeRefreshStageReceipt(store, handle, {
+    stage, status: "completed", artifactHash, recordedAt: now().toISOString(),
+  });
+}
+
+function requireRunning(signal: AbortSignal | undefined, where: string): void {
+  if (signal?.aborted) throw new Error(`Refresh aborted ${where}`);
+}
+
+async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshStateHandle,
+  snapshot: Graphify34Snapshot, readAnchor: CanonicalReadAnchor, now: () => Date) {
+  let handle = initial;
+  const snapshotHash = canonicalHash(snapshot);
+  const backupId = `refresh-018-${handle.state.identityHash.slice(7)}`;
+  requireRunning(options.signal, "before publication");
+  const resume = await options.store.head(applyPlanKey(backupId)) !== null;
+  await applyGraphify34Snapshots(options.store, [{ municipality: options.citySlug, snapshot,
+    manifest: buildGraphify34Manifest(options.citySlug, snapshot), readAnchor }], backupId,
+  async (target) => {
+    handle = await completeStage(options.store, handle, "published", snapshotHash, now);
+    const failProjection = async (reason: string, message: string): Promise<never> => {
+      handle = await writeRefreshStageReceipt(options.store, handle, { stage: "projected",
+        status: "failed", reason, recordedAt: now().toISOString() });
+      throw new Error(message);
+    };
+    if (options.signal?.aborted) await failProjection("aborted-before-projection",
+      "Refresh aborted before projection");
+    let projected;
+    try { projected = await upsertGraphAtomic(options.db, options.citySlug, target.snapshot); }
+    catch (error) {
+      handle = await writeRefreshStageReceipt(options.store, handle, { stage: "projected",
+        status: "failed", reason: "postgres-write-failed", recordedAt: now().toISOString() });
+      throw error;
+    }
+    if (projected.aborted) await failProjection("postgres-regression-refused",
+      `Postgres projection refused: ${projected.reason ?? "regression"}`);
+    if (options.signal?.aborted) await failProjection("aborted-after-projection",
+      "Refresh aborted after projection");
+    handle = await completeStage(options.store, handle, "projected", snapshotHash, now);
+  }, { resume, now });
+  return { citySlug: options.citySlug, candidateHash: snapshotHash, stateKey: handle.key };
+}
+
+/** One selected city: RECUEIL -> exact PDF -> profiled v2.3 -> 3.4 -> guarded S3 -> atomic PG. */
+export async function runPvRefresh(options: RunPvRefreshOptions) {
+  const now = options.now ?? (() => new Date());
+  requireRunning(options.signal, "before acquisition");
+  const selected = await acquireRefreshPdfManifest({ citySlug: options.citySlug,
+    store: options.store, ...(options.signal ? { signal: options.signal } : {}),
+    ...(options.acquire ? { acquire: options.acquire } : {}),
+    ...(options.acquisitionLimit ? { limit: options.acquisitionLimit } : {}) });
+  const corpus = await materializeRefreshCorpus({ citySlug: options.citySlug,
+    manifestKey: selected.manifestKey, reader: options.store, extractPdf: options.extractPdf });
+  const read = await readCanonicalCityGraph(options.store, options.citySlug, now);
+  if (!read) throw new Error(`Missing canonical baseline for ${options.citySlug}`);
+  const baselineJson: unknown = JSON.parse(new TextDecoder().decode(read.body));
+  const baseline = graphifyGraphSchema.parse(baselineJson);
+  const baselineHash = canonicalHash(baseline);
+  const scope = {
+    citySlug: options.citySlug, inputHash: `sha256:${corpus.inputHash}`,
+    profileHash: options.profileHash, registryHash: options.registryHash, packageVersion: options.packageVersion,
+    modelPolicy: options.modelPolicy, exclusions: options.excludedNodeIds ?? [],
+  };
+  const prior = await findPublishedRefreshState(options.store, { ...scope, publishedHash: baselineHash });
+  if (prior?.state.receipts.projected?.status === "completed") {
+    return { citySlug: options.citySlug, inputHash: corpus.inputHash,
+      candidateHash: baselineHash, stateKey: prior.key };
+  }
+  if (prior) {
+    const resumed = baselineJson as Graphify34Snapshot;
+    if (canonicalHash(resumed) !== baselineHash) throw new Error("Published refresh state no longer matches canonical bytes");
+    return { ...await publishSnapshot(options, prior, resumed, read.anchor, now), inputHash: corpus.inputHash };
+  }
+  let handle = await openRefreshState(options.store, { ...scope, baselineHash }, options.budgetLimit, now);
+  handle = await completeStage(options.store, handle, "corpus", `sha256:${corpus.inputHash}`, now);
+  const profiled: RefreshProfileChunk[] = [];
+  for (const chunk of corpus.chunks) {
+    const reserved = await reserveRefreshChunk(options.store, handle, chunk.id, options.maximumAttempts);
+    handle = reserved;
+    if (!reserved.shouldCall) {
+      profiled.push(await readCompletedRefreshChunk(options.store, handle, chunk.id));
+      continue;
+    }
+    const result = (await extractRefreshProfile([chunk], { textClient: options.textClient,
+      context: options.profileContext, maxOutputTokens: options.maxOutputTokens }))[0]!;
+    handle = await completeRefreshChunk(options.store, handle, chunk.id, result);
+    profiled.push(result);
+  }
+  const extraction = profiled.map((item) => item.extraction).reduce(mergeExtractions);
+  handle = await completeStage(options.store, handle, "profile", canonicalHash(extraction), now);
+  const candidate = extractionToV23Graph(extraction, { municipality: options.citySlug,
+    generatedAt: handle.state.createdAt, documents: corpus.documents, baseline,
+    excludedNodeIds: new Set(options.excludedNodeIds ?? []) });
+  handle = await writeRefreshCandidate(options.store, handle, candidate);
+  handle = await completeStage(options.store, handle, "candidate", canonicalHash(candidate), now);
+  const { snapshot } = enrichGraphify34Snapshot(candidate, options.citySlug);
+  const snapshotHash = canonicalHash(snapshot);
+  handle = await completeStage(options.store, handle, "enriched", snapshotHash, now);
+  return { ...await publishSnapshot(options, handle, snapshot, read.anchor, now),
+    inputHash: corpus.inputHash };
+}
