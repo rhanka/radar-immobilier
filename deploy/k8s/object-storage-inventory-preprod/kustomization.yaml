@@ -24,3 +24,4 @@ configMapGenerator:
       - object-storage-checkpoint.sh=../../ci/object-storage-checkpoint.sh
       - prove-docs-conditional-writes.sh=../../ci/prove-docs-conditional-writes.sh
       - build-docs-expected-manifest.sh=../../ci/build-docs-expected-manifest.sh
+      - copy-canonical-docs.sh=../../ci/copy-canonical-docs.sh
