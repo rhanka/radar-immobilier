@@ -73,6 +73,9 @@
       - [x] Require DOCS unions, complete credentials and exact target access proof.
     - [x] Cover exact owned reconciliation, versioning refusal, foreign change and fenced delta.
       - [x] Emit missing fence proof and repeat expected-manifest digests in reconciliation receipts.
+      - [x] Refuse every destination write while any `missingProof` remains.
+      - [x] Reset and assert the exact retry counter bound in the hermetic shim.
+      - [ ] Require conditional-write capability evidence before every executed copy.
     - [x] Extend the binding gate and retain the explicit pending-client ledger.
     - [x] Invoke the combined offline object-storage gate once from CI quality.
     - [x] Document the bounded operator contract and explicit non-acceptance limits.
