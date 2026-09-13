@@ -62,8 +62,13 @@ console.log(await evaluate(`(async () => {
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.copiedJson = text; } } });
   [...document.querySelectorAll('.choices button')].find(button => button.textContent === 'Copier les réponses en JSON').click(); await settle();
   if (JSON.parse(window.copiedJson).responses[0].comment !== comment.value || !document.querySelector('.choices').textContent.includes('réellement copiés')) throw Error('Actual JSON copy action failed');
+  const summary = document.querySelector('.monthly-summary');
+  if (!summary || !summary.textContent.includes('Résumé du rapport mensuel') || !summary.textContent.includes('10 août → 13 septembre 2026 inclus') || !summary.textContent.includes('68,88 CAD') || !summary.textContent.includes('251,215438 CAD') || !summary.textContent.includes('non ratifié') || !summary.textContent.includes('320,095438 CAD')) throw Error('Monthly summary facts missing');
+  if (summary.querySelectorAll('[data-transition]').length !== 3 || !summary.textContent.includes('T1 · validation') || !summary.textContent.includes('T2 · partiel') || !summary.textContent.includes('T3 · NO-GO')) throw Error('Three transition states missing');
+  const reportLinks = [...summary.querySelectorAll('a[download]')];
+  if (reportLinks.length !== 2 || !reportLinks.some(link => link.href.endsWith('report-through-2026-09-13.html')) || !reportLinks.some(link => link.href.endsWith('report-through-2026-09-13.pdf'))) throw Error('Report download links missing');
   if (document.documentElement.scrollWidth > innerWidth) throw Error('Desktop overflow');
-  return { status: 'pass', architectureViews: views, completeGraphs: 2, viewportChecks, explicitQuestions: 3, selectableOptions: 9, actualJsonCopy: true };
+  return { status: 'pass', architectureViews: views, completeGraphs: 2, viewportChecks, explicitQuestions: 3, selectableOptions: 9, actualJsonCopy: true, monthlySummary: true };
 })()`));
 await writeFile('/out/dossier-preview.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
 await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
