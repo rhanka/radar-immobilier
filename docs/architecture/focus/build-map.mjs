@@ -15,12 +15,13 @@ docs.architecture = architecture; docs.proposal = proposal;
 const kitNode = await readFile('/kit/src/ArchitectureNode.svelte', 'utf8');
 const kitRouter = await readFile('/kit/src/architecture-routing.js', 'utf8');
 const presentation = await readFile('presentation-fr.js', 'utf8');
+const choices = await readFile('choices.js', 'utf8');
 const manifest = { schema: 'immo-focus-mermaid-map/v1', architectureHash: sha256(architecture),
   proposalHash: sha256(proposal), dossierHash: sha256(docs['decision-dossier']),
   reference: 'Sentropic decision-kit / September 7, 2026',
   nativeFocusNodeHash: sha256(kitNode), nativeFocusRouterHash: sha256(kitRouter),
-  presentationHash: sha256(presentation), artifactInputHash: sha256(JSON.stringify({ docs, graphs, presentation })),
-  mapping: 'Every node, edge and subgraph retained; collapsed internal edges remain in navigable subflows.',
+  presentationHash: sha256(presentation), choicesHash: sha256(choices), artifactInputHash: sha256(JSON.stringify({ docs, graphs, presentation, choices })),
+  mapping: 'Every node and exact edge is rendered simultaneously; subgraphs are native nested parentId boxes. Navigation changes only the viewport.',
   geometry: 'Node bounds and route/node clearance checked; edge/label/arrow crossings are NOT certified zero-overlap.',
   graphs: graphs.map(g => ({ id: g.id, nodes: g.nodes.length, edges: g.edges.length, subflows: g.groups.length })) };
 await mkdir('.generated', { recursive: true });

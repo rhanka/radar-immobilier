@@ -13,10 +13,11 @@
   let step = $state(0), note = $state(''), saved = $state(false), storageError = $state(false), source = $state(null);
   const key = `immo-focus-decision:${data.manifest.artifactInputHash}:draft`;
   const renderer = new marked.Renderer();
+  renderer.html = () => '';
   const code = renderer.code.bind(renderer);
   renderer.code = token => {
     const graph = token.lang === 'mermaid' && data.graphs.find(g => g.source.trim() === token.text.trim());
-    return graph ? `<figure class="source-mermaid">${mermaid[graph.id].svg}</figure>` : code(token);
+    return graph ? `<figure class="source-mermaid">${mermaid[graph.id].svg.replaceAll(`mermaid-${graph.id}`, `source-mermaid-${graph.id}`)}</figure>` : code(token);
   };
   const html = text => DOMPurify.sanitize(marked.parse(text, { renderer }), { FORBID_TAGS: ['script', 'iframe', 'form', 'foreignObject'] });
   onMount(() => { try { note = localStorage.getItem(key) ?? ''; } catch { storageError = true; } });

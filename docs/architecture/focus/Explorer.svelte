@@ -37,7 +37,7 @@
       <option value="">Schéma intégral · toutes les boîtes ouvertes</option>
       {#each graph.groups as item}<option value={item.id}>{item.label}</option>{/each}
     </select></label>
-    <label>Retrouver le même composant <select aria-label="Retrouver un composant" value="" onchange={event => locate(event.currentTarget.value)}>
+    <label>Retrouver le même composant <select aria-label="Retrouver un composant" value={selected?.resource ? selected.id : ''} onchange={event => locate(event.currentTarget.value)}>
       <option value="">Choisir une identité…</option>
       {#each graph.nodes.filter(n => n.resource) as item}<option value={item.id}>{item.resource}</option>{/each}
     </select></label>
