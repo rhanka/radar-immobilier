@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 checkpoint_phase() {
+  if [ -n "${CHECKPOINT_PHASE_OVERRIDE:-}" ]; then printf '%s' "$CHECKPOINT_PHASE_OVERRIDE"; return; fi
   if [ "$FENCE_EVIDENCE_DIGEST" = null ]; then printf provisional; else printf fenced; fi
 }
 
@@ -261,4 +262,67 @@ build_manifest_checkpoint() {
       fi
     fi
   done
+}
+
+checkpoint_phase_summary() {
+  local side="$1" phase="$2" output="$3" dir="$CHECKPOINT_DIR/$phase/$side"
+  local manifest="$dir/manifest.jsonl" tmp="$dir/manifest.jsonl.tmp" index_root body_root
+  local manifest_hash count bytes
+  local -a pages=("$dir"/index-page-*.jsonl) indexes=("$dir"/index-receipt-*.json)
+  local -a bodies=("$dir"/body-manifest-*.jsonl) body_receipts=("$dir"/body-receipt-*.json)
+  [ -e "${pages[0]}" ] && [ "${#pages[@]}" -eq "${#indexes[@]}" ] &&
+    [ "${#pages[@]}" -eq "${#bodies[@]}" ] &&
+    [ "${#pages[@]}" -eq "${#body_receipts[@]}" ] || return 1
+  cat "${bodies[@]}" >"$tmp"; sync -f "$tmp" && mv "$tmp" "$manifest"
+  index_root="$(sha256sum "${indexes[${#indexes[@]}-1]}" | awk '{print $1}')"
+  body_root="$(sha256sum "${body_receipts[@]}" | awk '{print $1}' | sha256sum | awk '{print $1}')"
+  manifest_hash="$(sha256sum "$manifest" | awk '{print $1}')"
+  count="$(jq -s length "$manifest")"; bytes="$(jq -s 'map(.size) | add // 0' "$manifest")"
+  jq -n --arg index "$index_root" --arg body "$body_root" --arg manifest "$manifest_hash" \
+    --argjson pages "${#pages[@]}" --argjson count "$count" --argjson bytes "$bytes" '
+    {indexReceiptRootSha256:$index,bodyReceiptRootSha256:$body,
+     manifestSha256:$manifest,pages:$pages,objects:$count,bytes:$bytes}' >"$output"
+}
+
+checkpoint_validate_phase() {
+  local phase="$1" fence="$2" saved_phase="${CHECKPOINT_PHASE_OVERRIDE:-}"
+  local saved_fence="$FENCE_EVIDENCE_DIGEST"
+  CHECKPOINT_PHASE_OVERRIDE="$phase" FENCE_EVIDENCE_DIGEST="$fence"
+  checkpoint_load_index source "$WORK_DIR/$phase-source-index.jsonl"
+  $CHECKPOINT_TERMINAL || die "$phase source index has no terminal receipt"
+  checkpoint_validate_bodies source
+  checkpoint_load_index destination "$WORK_DIR/$phase-destination-index.jsonl"
+  checkpoint_validate_bodies destination
+  $CHECKPOINT_TERMINAL || die "$phase destination index has no terminal receipt"
+  CHECKPOINT_PHASE_OVERRIDE="$saved_phase" FENCE_EVIDENCE_DIGEST="$saved_fence"
+}
+
+checkpoint_finalize() {
+  local fence="$FENCE_EVIDENCE_DIGEST" target="$CHECKPOINT_DIR/final-inventory.json" tmp
+  local ps="$WORK_DIR/provisional-source-summary.json"
+  local pd="$WORK_DIR/provisional-destination-summary.json"
+  local fs="$WORK_DIR/fenced-source-summary.json" fd="$WORK_DIR/fenced-destination-summary.json"
+  [ "$fence" != null ] || return 1
+  checkpoint_validate_phase provisional null
+  checkpoint_validate_phase fenced "$fence"
+  checkpoint_phase_summary source provisional "$ps" &&
+    checkpoint_phase_summary destination provisional "$pd" &&
+    checkpoint_phase_summary source fenced "$fs" &&
+    checkpoint_phase_summary destination fenced "$fd" || return 1
+  cmp -s "$CHECKPOINT_DIR/provisional/source/manifest.jsonl" \
+    "$CHECKPOINT_DIR/fenced/source/manifest.jsonl" || return 1
+  cmp -s "$CHECKPOINT_DIR/provisional/destination/manifest.jsonl" \
+    "$CHECKPOINT_DIR/fenced/destination/manifest.jsonl" || return 1
+  jq -se 'all(.[]; .classification != "unclassified")' \
+    "$CHECKPOINT_DIR/fenced/source/manifest.jsonl" >/dev/null || return 1
+  tmp="$target.tmp"
+  jq -n --arg config "$(jq -r '.configDigest' "$CHECKPOINT_DIR/config.json")" \
+    --arg fence "$fence" --slurpfile ps "$ps" --slurpfile pd "$pd" \
+    --slurpfile fs "$fs" --slurpfile fd "$fd" '
+    {schemaVersion:1,configDigest:$config,fenceEvidenceDigest:$fence,
+     toolComplete:true,fenceValidated:false,providerEnforcementValidated:false,
+     source:{provisional:$ps[0],fenced:$fs[0]},
+     destination:{provisional:$pd[0],fenced:$fd[0]}}' >"$tmp"
+  sync -f "$tmp" && mv "$tmp" "$target"
+  CHECKPOINT_FINAL_DIGEST="$(sha256sum "$target" | awk '{print $1}')"
 }
