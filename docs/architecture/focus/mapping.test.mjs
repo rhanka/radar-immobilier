@@ -63,7 +63,7 @@ test('D5 leads with complete sequential architecture and keeps fixed billing ins
   assert.match(presentation[1], /Existant.*T1.*T2.*T3/s);
   assert.match(presentation[1], /15:38 UTC/);
   assert.match(presentation[2], /candidat frais.*3\.4.*publication.*projection PG.*Signal typé.*PDF exact/s);
-  assert.match(presentation[2], /0\.18\.0.*immo-pv-extraction-v3.*ac3a7150.*8\/8 \+ 7\/7.*UND_ERR_SOCKET/s);
+  assert.match(presentation[2], /0\.18\.0.*immo-pv-extraction-v3.*ac3a7150.*8\/8 \+ 7\/7.*llm-mesh.*0\.19\.0.*0\.19\.1.*GO_WITH_GATES.*NO-GO/s);
   assert.match(presentation[3], /PP-RAW-OVH.*PP-DOCS-OVH.*préprod avant prod/s);
   assert.match(presentation[4], /9 454 Mi.*5 907,82 Mi.*347 Mi/s);
   assert.match(presentation[7], /ANNEXE FACTURATION · EN DERNIER/);
@@ -73,7 +73,7 @@ test('D5 leads with complete sequential architecture and keeps fixed billing ins
   assert.equal(docs['decision-dossier'].match(/^## /gm).length, 8);
   assert.match(docs['decision-dossier'], /Revision \*\*D5/);
   assert.match(docs['decision-dossier'], /option` is `null`: no method was selected/);
-  assert.match(docs['decision-dossier'], /ac3a7150.*8\/8 \+ 7\/7.*no real-provider Signal.*UND_ERR_SOCKET/s);
+  assert.match(docs['decision-dossier'], /ac3a7150.*8\/8 \+ 7\/7.*UND_ERR_SOCKET.*llm-mesh 0\.19\.0.*GO_WITH_GATES.*NO-GO/s);
   assert.match(docs.transitions, /inside the requested period/);
   assert.match(currentReport, /Runtime architecture cutoff:.*2026-09-13T15:38:00Z/);
   assert.match(currentReport, /Transition implementation cutoff:.*2026-09-13T15:39:00Z/);

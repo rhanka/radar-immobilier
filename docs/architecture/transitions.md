@@ -27,7 +27,7 @@ execution; it is not a request to vote again on those three objectives.
 
 | Transition | Existing work retained | Remaining acceptance | Current status |
 | --- | --- | --- | --- |
-| T1 — autonomous PV → Signal cron | Immo CAS #678; four-stage pipeline; canonical writer; projection; 3.4 EMIT/APPLY; i-cond's in-pod Graphify study; existing scrape/projection CronJobs | Resolve nested `UND_ERR_SOCKET`; prove a real-provider Signal using `immo-pv-extraction-v3`; durable unattended identity; run the CronJob's Job template, then observe scheduled execution | HEAD `ac3a7150`: exact Graphify 0.18.0; targeted 8/8 + 7/7, full typecheck and scope/branch PASS; no real-provider Signal or K8s acceptance |
+| T1 — autonomous PV → Signal cron | Immo CAS #678; four-stage pipeline; canonical writer; projection; 3.4 EMIT/APPLY; existing CronJobs | Publish/adopt llm-mesh 0.19.1; prove a real-provider Signal via `immo-pv-extraction-v3`; durable identity; CronJob-created Job and schedule | **GO_WITH_GATES** preprod success; **NO-GO** unattended/retry/prod before 0.19.1; no provider/K8s acceptance |
 | T2 — remove MinIO and remaining SCW dependencies | #677 OVH refresh bindings; live API `PP-RAW`; empty `PP-DOCS`; useful `PP-DOCS-LEGACY`; #671/#672 GHCR work | Complete the `25ec9e04` fail-before-write suite and conditional-write capability; copy + integrity + recovery; fence/repoint/test; retain legacy until complete parity/recovery; close SCW except TEM | **MIGRATE+RETAIN** decided; remediation underway, not accepted; no copy, cutover or deletion |
 | T3 — one OVH b3-8 | poc-k8s `cluster-rightsizing-plan.md`, `rightsizing-status-2026-09-13.md`, `b3-8-service-plan.md` | Include Immo prod and the new refresh Job in full capacity budget; verify PDB/affinity/PVC placement, batch and wake peaks; preserve data and active services; controlled consolidation then pool min=max=desired=1 | Owner-fixed target; not yet a demonstrated safe placement |
 
@@ -40,10 +40,12 @@ history, not current release status.
 
 [FACT] The earlier H2A progress envelope `env:d5-live-progress-20260913T1539`
 reported dependency commit `d0595d9f`; the follow-up reaches Immo HEAD `ac3a7150`.
-Graphify remains exactly 0.18.0; `immo-pv-extraction-v3` is an internal contract
-name, not version 0.18.3. Targeted suites pass 8/8 + 7/7, and the full typecheck
-plus scope/branch gates pass. No real-provider Signal or Kubernetes acceptance
-is established; upstream analysis of nested `UND_ERR_SOCKET` remains pending.
+Graphify remains exactly 0.18.0 and fail-closes correctly; `immo-pv-extraction-v3`
+is an internal contract name, not version 0.18.3. Targeted suites pass 8/8 + 7/7,
+and the full typecheck plus scope/branch gates pass. Nested `UND_ERR_SOCKET` is
+confirmed in the llm-mesh 0.19.0 normalizer, not Graphify; a delegated 0.19.1 patch
+is not yet published. The preprod success path is **GO_WITH_GATES**; unattended,
+retry and production remain **NO-GO** before 0.19.1. No provider/K8s acceptance exists.
 
 [JUDGMENT] The shortest continuation is the engaged in-pod library integration,
 not a new mesh network service, another CLI orchestration layer or completion of
