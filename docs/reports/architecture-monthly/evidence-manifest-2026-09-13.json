@@ -27,8 +27,8 @@
   "deploymentClaim": "none; T1, T2 and T3 are explicitly proposed/not deployed",
   "focus": {
     "html": "architecture-transition-2026-09-13.html",
-    "htmlSha256": "28d60a49c071301a66e1c48ab8db89b776c936d4a2d9bc2a691185579337406c",
-    "artifactInputHash": "22ff8b4e5bc9db72b28deae9b8bbcd01eadc639229bd768c7127eda14df7c9d4",
+    "htmlSha256": "fa1d29ea38795712027ed30df3811c4f2001419576deb4cc32d74f448b3bfdbd",
+    "artifactInputHash": "67ebcb54916cb46503fdb516131a93f08bd88a33620b8cb3ba9313f20d740a15",
     "architectureHash": "fc7e26ff9462fbba5fb8cd3328133b218dff4883007355775887181392f78b67",
     "transitionTargetsHash": "ec4d7d14cffa065b08f335d8fc1257703e998e6c5db5ff0051f83c095ce93fab",
     "dossierHash": "d82c61ad6b9566d0c87eb8b4daa034c873974f91762aed65146bf070ea3cff21",
@@ -74,7 +74,7 @@
     {
       "path": "docs/architecture/proposal.md",
       "role": "T1-causal-detail-nondeployed",
-      "sha256": "cf0f4b45ae8fe24f9f3608f895b645a7280a38289f9564d4baa558f2b22cc653"
+      "sha256": "a6e525bbbbde41c4fa3a4cffb092ccc6826696448c5bc142c6903b28dfc8ac4d"
     },
     {
       "path": "docs/architecture/transitions.md",
@@ -89,7 +89,7 @@
     {
       "path": "docs/reports/architecture-monthly/report-through-2026-09-13.md",
       "role": "current-companion",
-      "sha256": "455823331311fd95cabed380860e1db0255c9d5d899d11b764740ebd8db8c011"
+      "sha256": "757d381d59580617e1f8c85e160451ecd2f8b1eb7cc5e720722e73a9270e2b82"
     },
     {
       "path": "docs/reports/couts-2026-07-13_2026-08-09.md",
