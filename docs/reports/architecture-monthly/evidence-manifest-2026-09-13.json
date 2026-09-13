@@ -1,61 +1,108 @@
 {
-  "schema": "immo-architecture-monthly-evidence/v1",
-  "period": {
+  "schema": "immo-architecture-monthly-evidence/v2",
+  "revision": "D5",
+  "requestedPeriod": {
     "timezone": "America/Toronto",
-    "from": "2026-08-12T00:00:00-04:00",
-    "to": "2026-09-10T23:59:59-04:00"
+    "start": null,
+    "startDefinition": "real preceding invoice/report boundary",
+    "startVerified": false,
+    "endExclusive": "2026-09-14T00:00:00-04:00"
+  },
+  "captureCutoffs": {
+    "architectureLiveCheck": "2026-09-13T12:37:00Z",
+    "unifiedDeliveryTokenBilling": null,
+    "status": "September 13 incomplete; unified cutoff not frozen"
+  },
+  "ownerCorrection": {
+    "capturedAt": "2026-09-13T15:10:18.423Z",
+    "sourceRevision": "D4",
+    "dossierHash": "b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451",
+    "artifactInputHash": "92b87297fbc8ed0f2670fa4fd07e1dde6d061d04533d3695275c1f386b3b032e",
+    "option": null,
+    "interpretation": "no allocation vote; D5 fixed instructions"
   },
   "snapshotAt": "2026-09-13",
-  "transitionRelation": "post-period",
-  "monetaryProposalAudit": "incomplete",
-  "deploymentClaim": "none; the target view is explicitly nondeployed",
+  "transitionRelation": "inside-requested-period; observed-versus-planned",
+  "monetaryEvidence": "incomplete",
+  "deploymentClaim": "none; T1, T2 and T3 are explicitly proposed/not deployed",
   "focus": {
     "html": "architecture-transition-2026-09-13.html",
-    "htmlSha256": "359e42404337f8b40755c58899e326de4cff445812b8417f298537cc9f79a67e",
-    "artifactInputHash": "92b87297fbc8ed0f2670fa4fd07e1dde6d061d04533d3695275c1f386b3b032e",
-    "architectureHash": "592a415acc6113ea006cb5434f85c0d742dfdb580c0665509bea3e1bff758e49",
-    "dossierHash": "b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451",
-    "presentationHash": "410fd3f626769203e1629174a98befce7a231f98f172b4254197a00fb751d9e7",
-    "choicesHash": "71301edf2610fd2362147430637d1dfefbc705327b70730917ecd22adedcfa38",
+    "htmlSha256": "28d60a49c071301a66e1c48ab8db89b776c936d4a2d9bc2a691185579337406c",
+    "artifactInputHash": "22ff8b4e5bc9db72b28deae9b8bbcd01eadc639229bd768c7127eda14df7c9d4",
+    "architectureHash": "fc7e26ff9462fbba5fb8cd3328133b218dff4883007355775887181392f78b67",
+    "transitionTargetsHash": "ec4d7d14cffa065b08f335d8fc1257703e998e6c5db5ff0051f83c095ce93fab",
+    "dossierHash": "d82c61ad6b9566d0c87eb8b4daa034c873974f91762aed65146bf070ea3cff21",
+    "presentationHash": "7f991244e119490516a79f84cdce6e59ee7792a64312d9761108b593e61a9a22",
+    "choicesHash": "56520903ef46dbc0431373db0286f869ef3c77181a63b24ab8553e8d338b8275",
     "referenceFocusNodeHash": "e3065f43b9c5c38d7eda25f8f9efa080cceca7c4fb413474367d98def71a781c",
     "nativeFocusRouterHash": "98fa601349246bbdcfaa0f5200c3b4e4c4e9d1573ec193d8b8d5200b39abc7d4"
   },
-  "verifiedCostBoundaries": {
-    "b3_8Bhs5HourlyCad": 0.082,
-    "projectedHours": 720,
-    "oneNodeProjectionCad": 59.04,
-    "historicalLlmCapacityAllocationCad": 214.743159,
-    "extraNodePassThrough": false,
-    "nonNodeAndProductAllocation": "audit-incomplete"
+  "billingInstructions": {
+    "position": "last-annex",
+    "allocationMethodChoiceRequired": false,
+    "node": {
+      "quantity": 1,
+      "sku": "b3-8",
+      "region": "BHS5",
+      "hourlyRateCad": 0.082,
+      "periodHours": null,
+      "projectedAmountCad": null
+    },
+    "historicalIllustrationOnly": {
+      "hours": 720,
+      "projectedAmountCad": 59.04,
+      "currentPeriodAmount": false
+    },
+    "llm": {
+      "tariffRule": "same unit tariffs as previous month actual invoice",
+      "previousInvoiceIdentity": null,
+      "previousInvoiceVerified": false,
+      "tokenCountStatus": "not parsed"
+    }
   },
   "sourceFiles": [
     {
       "path": "docs/architecture.md",
       "role": "current-state",
-      "sha256": "592a415acc6113ea006cb5434f85c0d742dfdb580c0665509bea3e1bff758e49"
+      "sha256": "fc7e26ff9462fbba5fb8cd3328133b218dff4883007355775887181392f78b67"
+    },
+    {
+      "path": "docs/architecture/transitions-target.md",
+      "role": "T1-T2-T3-targets-nondeployed",
+      "sha256": "ec4d7d14cffa065b08f335d8fc1257703e998e6c5db5ff0051f83c095ce93fab"
     },
     {
       "path": "docs/architecture/proposal.md",
-      "role": "target-nondeployed",
-      "sha256": "1f55c4bfab50b81cab7bcc7ce2c8602b99e452301ca96ade1b40dd766f5ffe79"
+      "role": "T1-causal-detail-nondeployed",
+      "sha256": "cf0f4b45ae8fe24f9f3608f895b645a7280a38289f9564d4baa558f2b22cc653"
     },
     {
       "path": "docs/architecture/transitions.md",
-      "role": "post-period-register",
-      "sha256": "6d09764545ab4dd2e145f890be650643d294658d9a91d8615edde8e6ec86a456"
+      "role": "in-period-transition-register",
+      "sha256": "94677d528b48bc1d843500128d8939d023cdd61c6365475fe21d8cec03d815c4"
     },
     {
       "path": "docs/architecture/decision-dossier.md",
-      "role": "D4",
-      "sha256": "b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451"
+      "role": "D5",
+      "sha256": "d82c61ad6b9566d0c87eb8b4daa034c873974f91762aed65146bf070ea3cff21"
     },
     {
-      "path": "docs/reports/architecture-monthly/2026-08-12_2026-09-10-companion.md",
-      "role": "monthly-companion",
-      "sha256": "6a62978fc56a6a5140b0e3617c7050aaca243038754a09cfb5bce9a7dd026d6d"
+      "path": "docs/reports/architecture-monthly/report-through-2026-09-13.md",
+      "role": "current-companion",
+      "sha256": "455823331311fd95cabed380860e1db0255c9d5d899d11b764740ebd8db8c011"
+    },
+    {
+      "path": "docs/reports/couts-2026-07-13_2026-08-09.md",
+      "role": "preceding-local-report-not-invoice-proof",
+      "sha256": "93b34620760c78dafa76cda071cc67d40d4e52a554827c8a5042a4d3b334f64b"
+    },
+    {
+      "path": "docs/reports/methode-unites-facturation.md",
+      "role": "older-Wave-method-not-latest-tariff-proof",
+      "sha256": "e96a1dbb0fa4526da6f300f69343e763a7348d4e9b4d3fcfdcc9a03fdd9c2000"
     }
   ],
-  "externalReadOnlyEvidence": [
+  "historicalD4ReadOnlyEvidence": [
     {
       "path": ".lanes/conductor/docs/reports/rapport-mois-2026-08-12_2026-09-10.md",
       "sha256": "9feec9b82cabba0df368ab8c8d3d33a4b887756beab2ca595b8920c16ac3ea14"
