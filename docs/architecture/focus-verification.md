@@ -5,7 +5,7 @@ Documentation-only worktree: `docs/architecture-platform`.
 | Check | Result | Boundary |
 | --- | --- | --- |
 | Exact exit command | PASS | `make -f docs/architecture/focus/Makefile test build browser clipboard ENV=test-architecture` |
-| Docker build | PASS; portable HTML 1,492,597 bytes | Vite warns about a >500 kB bundle; one offline artifact is intentional |
+| Docker build | PASS; portable HTML approximately 1.50 MB | Vite warns about a >500 kB bundle; one offline artifact is intentional |
 | Mapping / instructions / provenance | 9/9 PASS | Eight graphs: 210 node occurrences, 208 edges, 37 subflows; repeated IDs remain the same resources |
 | Complete nested diagrams | 8/8 PASS at 45 viewport positions | All leaves, edges and original-ID `parentId` boxes remain simultaneous; navigation only changes the viewport |
 | Default visual entry | PASS: `target-3` | Existant → T1 → T2 → T3 is selectable above the canvas; complete target is labelled **PROPOSED / NOT DEPLOYED** |
@@ -20,7 +20,7 @@ Documentation-only worktree: `docs/architecture-platform`.
 | Actual clipboard | PASS in isolated context; previous clipboard restored | Read-back verifies D5, exact comment, prior null and current amount `null`; denial handling is also tested |
 | Desktop / mobile | PASS at 1440×1100 and 390×844 | No page horizontal overflow; diagrams retain pan/zoom |
 | Offline and served HTML | PASS | Latest dossier served at `http://127.0.0.1:5188/`; dated HTML renders offline; zero external requests/runtime exceptions |
-| Dated evidence | PASS | HTML SHA-256 `fa1d29ea38795712027ed30df3811c4f2001419576deb4cc32d74f448b3bfdbd`; artifact-input hash `67ebcb54916cb46503fdb516131a93f08bd88a33620b8cb3ba9313f20d740a15` |
+| Dated evidence | PASS | The generated manifest pins the final HTML and artifact-input SHA-256 values without creating a self-referential verification hash |
 | Scope allowlist | PASS through the repository Make helper | Only allowed architecture, Focus, monthly-report and own-plan paths differ from D4 baseline |
 | Independent D5 review | Not performed here | Owner prohibited agent launches; conductor owns any post-build review, with no consensus implied |
 
