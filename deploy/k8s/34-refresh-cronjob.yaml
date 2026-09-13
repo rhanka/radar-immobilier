@@ -350,10 +350,10 @@ spec:
                 - name: SCRAPE_S3_SECRET_KEY
                   valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
               resources:
-                # The preprod namespace reserves 400m/2300m CPU. Keep this
-                # network-bound pilot within the same envelope as graph jobs.
+                # Keep this network-bound pilot within the live preprod quota;
+                # 1Gi of Node heap retains 512Mi for native/runtime overhead.
                 requests: { cpu: 50m, memory: 512Mi }
-                limits: { cpu: 150m, memory: 2Gi }
+                limits: { cpu: 150m, memory: 1536Mi }
               volumeMounts:
                 - { name: keyring, mountPath: /keyring }
                 - { name: scratch, mountPath: /tmp }
