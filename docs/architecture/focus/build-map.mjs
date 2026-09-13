@@ -10,7 +10,7 @@ const graphs = [...extractDiagrams(architecture, ['Accès & composants', 'PV →
 for (const graph of graphs) for (const item of [...graph.nodes, ...graph.groups]) item.provenance = provenanceFor(graph.id, item.id);
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 const docs = {};
-for (const name of ['decision-dossier', 'continuation-audit', 'storage-audit', 'service-provenance', 'decision-reviews', 'decision-review-codex', 'README', 'focus-verification', 'focus-service-review', 'gemini-review/response-findings', 'gemini-review/review-inline', 'gemini-review/response-mapping']) {
+for (const name of ['decision-dossier', 'transitions', 'continuation-audit', 'storage-audit', 'service-provenance', 'decision-reviews', 'decision-review-codex', 'README', 'focus-verification', 'focus-service-review', 'gemini-review/response-findings', 'gemini-review/review-inline', 'gemini-review/response-mapping']) {
   docs[name.split('/').at(-1)] = await readFile(`../${name}.md`, 'utf8');
 }
 docs.architecture = architecture; docs.proposal = proposal;

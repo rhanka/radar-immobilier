@@ -111,7 +111,7 @@
 - [ ] **Lot 11 — Accompany the engaged transitions and monthly report.**
   - [x] Record the owner-fixed order, published Graphify 0.18.0, existing-plan mapping, diagram update contract and one-node-only billing basis.
   - [x] Replace the obsolete refresh-sequence response with neutral LLM-allocation methods and fixed owner decisions in draft JSON.
-  - [ ] Replace obsolete unasked sequence options with explicit remaining questions and the engaged plan.
+  - [x] Replace obsolete unasked sequence options with the explicit LLM-allocation question and the engaged plan.
   - [x] D4 records the owner execution direction and published release; former architecture alternatives are explicitly historical.
   - [ ] Reconcile monthly token usage and cost-calculation alternatives from dated evidence.
   - [ ] Embed the dated Mermaid/SvelteFlow rendering into the monthly companion; retain post-period separation.

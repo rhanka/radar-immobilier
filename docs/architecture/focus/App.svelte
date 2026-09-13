@@ -9,7 +9,7 @@
   import Choices from './Choices.svelte';
   import mermaid from './.generated/mermaid.json';
   import data from './.generated/data.json';
-  const titles = ['Décision & périmètre', 'Existant & incertitudes', 'Enjeux & responsabilités', 'Trois options', 'Avis & contre-arguments', 'Bascule & retour arrière', 'Critères de réussite', 'Points à compléter'];
+  const titles = ['Décisions engagées', 'Existant & incertitudes', 'Enjeux & responsabilités', 'Question LLM', 'Avis & contre-arguments', 'Bascule & retour arrière', 'Critères de réussite', 'Points à compléter'];
   let step = $state(0), note = $state(''), saved = $state(false), storageError = $state(false), source = $state(null);
   const key = `immo-focus-decision:${data.manifest.artifactInputHash}:draft`;
   const renderer = new marked.Renderer();
@@ -41,18 +41,18 @@
       <header class="masthead">
         <Flex justify="between" align="center" wrap gap={2}>
           <span class="eyebrow">h2a Focus · dossier de décision · Immo / Geo / Kubernetes</span>
-          <Badge tone="warning">INCOMPLET · consultation, aucun démarrage</Badge>
+          <Badge tone="warning">EXÉCUTION ENGAGÉE · facturation incomplète</Badge>
         </Flex>
         <h1>Des nouveaux PV<br>aux signaux visibles.</h1>
-        <p class="lede">Clarifier le refresh et la sortie de MinIO/SCW avant de lancer les travaux. Même ressource, même identité, d’un diagramme à l’autre.</p>
-        <div class="truth-strip"><span><strong>Préprod</strong> API : MinIO · refresh : OVH</span><span><strong>Production</strong> stockage effectif non inventorié</span><span><strong>Acté</strong> chaîne Immo · TEM conservé</span></div>
+        <p class="lede">Suivre T1 refresh, T2 MinIO/SCW et T3 un nœud ; choisir séparément une méthode auditable d’allocation LLM.</p>
+        <div class="truth-strip"><span><strong>T1</strong> Graphify 0.18.0 publié · intégration Immo ouverte</span><span><strong>T2</strong> MinIO + SCW · TEM excepté</span><span><strong>T3</strong> cible non déployée : un b3-8</span></div>
       </header>
       <nav class="steps" aria-label="Sections du dossier">
         {#each titles as title, index}<button class:active={step === index} aria-current={step === index ? 'step' : undefined} onclick={() => step = index}><span>{index + 1}</span>{title}</button>{/each}
       </nav>
       <ProgressBar value={step + 1} max={8} label={`Section ${step + 1} sur 8`} size="sm" />
       <section class="decision-content">
-        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D3 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
+        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D4 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
         <!-- The French reading surface links to the complete repository dossier. -->
         {#if step === 3}<Choices manifest={data.manifest} remarks={note} />{:else}<div class="prose" onclick={link} role="presentation">{@html html(presentation[step])}</div>{/if}
         <Button variant="ghost" size="sm" onclick={() => source = 'decision-dossier'}>Dossier source complet · références et qualification des faits</Button>
@@ -64,7 +64,7 @@
         <Textarea label="Remarques sur les décisions et critères manquants" value={note} oninput={event => save(event.currentTarget.value)} rows={4} />
         <Flex align="center" gap={2}><Button variant="secondary" onclick={download}>Exporter mes remarques</Button><span role="status">{storageError ? 'Stockage local indisponible : exporter avant de fermer.' : saved ? 'Brouillon enregistré localement — non ratifié' : 'Aucune approbation enregistrée'}</span></Flex>
       </section>
-      <footer><strong>Preuves embarquées · accès hors ligne</strong><div class="source-links">{#each ['architecture', 'storage-audit', 'service-provenance', 'continuation-audit', 'decision-dossier', 'decision-reviews', 'proposal'] as name}<button onclick={() => source = name}>{name}</button>{/each}</div>
+      <footer><strong>Preuves embarquées · accès hors ligne</strong><div class="source-links">{#each ['architecture', 'transitions', 'storage-audit', 'service-provenance', 'continuation-audit', 'decision-dossier', 'decision-reviews', 'proposal'] as name}<button onclick={() => source = name}>{name}</button>{/each}</div>
         <p>Composants Focus, SvelteFlow natif intégral et boîtes parentId imbriquées. Tous les liens sont conservés ; absence de croisements d’arêtes non certifiée.</p>
       </footer>
     </main>
