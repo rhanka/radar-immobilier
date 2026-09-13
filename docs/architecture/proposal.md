@@ -4,11 +4,11 @@
 the former Option A and not an observed deployment. It keeps the existing
 preproduction MinIO API roles until T2. Graphify stays exactly 0.18.0; the PDF
 contract name `immo-pv-extraction-v3` is not a 0.18.3 dependency version. At
-Immo HEAD `ac3a7150`, targeted suites pass 8/8 + 7/7 and the full typecheck plus
-scope/branch checks pass. Graphify fail-closes correctly; nested `UND_ERR_SOCKET`
+Fable returned BLOCK at Immo `ac3a7150`. Corrective commits `537b9e0c` and
+`3d9ed43c` pass scoped 34/34, integration 4/4 and typecheck, while Fable re-review
+remains in progress. Graphify fail-closes correctly; nested `UND_ERR_SOCKET`
 belongs to the llm-mesh 0.19.0 normalizer. Its delegated 0.19.1 patch is unpublished.
-The preprod success path is GO_WITH_GATES; unattended/retry/production is NO-GO
-before 0.19.1. Real-provider Signal and Kubernetes acceptance remain open.
+T1 remains blocked; real-provider Signal and Kubernetes acceptance are absent.
 
 ```mermaid
 flowchart LR
@@ -66,8 +66,11 @@ flowchart LR
   served -.->|"Must prove scheduled Job, not job-green proxy"| credentials
 ```
 
-[JUDGMENT] The preproduction ladder is installed-package → consumer/integration
-tests → one real typed Signal with exact PDF → unattended schedule after pod
+[JUDGMENT] Before real extraction, compare the historical/manual baseline with
+v1, v2 and v3 over the same five PDFs, using only non-simulated traceable runs.
+The model is not selected, Cloud Code is not enrolled and no score is claimed.
+The remaining preproduction ladder is installed-package → consumer/integration
+tests → Fable re-review → benchmark → one real typed Signal with exact PDF → unattended schedule after pod
 replacement and credential refresh. Only then may a separately gated production
 promotion begin. No version bump, manual Job success or nonempty graph substitutes
 for those acceptance levels. The workstation becomes optional enrollment/admin,

@@ -44,13 +44,13 @@ the proposed Graphify 0.18 refresh, PVC/storage class or production internals.
 platform audit has three b3-8 nodes; requests exceed one node's allocatable CPU
 and memory, and required anti-affinity is incompatible with one node (§5).
 
-[FACT] Graphify remains exactly 0.18.0. At Immo HEAD `ac3a7150`, targeted suites
-pass 8/8 + 7/7, and the full typecheck plus scope/branch checks pass. The internal
-PDF contract is named `immo-pv-extraction-v3`; it is not a Graphify 0.18.3 release.
-Graphify fail-closes correctly. The nested `UND_ERR_SOCKET` is confirmed in the
-llm-mesh 0.19.0 normalizer; its delegated 0.19.1 patch is not published. T1 is
-GO_WITH_GATES for the preprod success path, but unattended/retry/production is
-NO-GO before 0.19.1. No real-provider Signal or Kubernetes acceptance exists.
+[FACT] Graphify remains exactly 0.18.0 and fail-closes correctly. Fable returned
+**BLOCK** at Immo `ac3a7150`. Corrective commits `537b9e0c` and `3d9ed43c` pass
+scoped 34/34, integration 4/4 and typecheck; Fable re-review is still in progress.
+The internal PDF contract remains `immo-pv-extraction-v3`, not a Graphify release.
+The nested `UND_ERR_SOCKET` belongs to llm-mesh 0.19.0; delegated 0.19.1 remains
+unpublished. T1 is **BLOCKED** pending re-review and the remaining acceptance gates.
+No real-provider Signal or Kubernetes acceptance exists.
 Every target
 production role may be named as a contract, but its physical binding remains
 TBD rather than inferred from source defaults or the old SCW cluster.
@@ -67,10 +67,16 @@ fresh candidate **before** canonical publication → guarded full-graph write �
 atomic PG projection → typed Signal plus exact PDF. [Detailed T1 flow](proposal.md).
 
 [FACT] Immo owns every step; Geo owns geographic inputs. T1 keeps the existing
-API MinIO roles until T2. Consumer code gates pass at `ac3a7150`; operated keyring,
-durable lock, real-provider Signal, llm-mesh 0.19.1 and Kubernetes qualification remain open.
+API MinIO roles until T2. The corrective test envelope passes, but Fable re-review,
+operated keyring, durable lock, real-provider Signal, llm-mesh 0.19.1 and Kubernetes
+qualification remain open.
 
-[JUDGMENT] Acceptance requires the actual installed contract, durable credentials,
+[JUDGMENT] Before any real extraction, run one neutral benchmark over the same five
+PDFs: historical/manual baseline versus contract versions v1, v2 and v3. Every run
+must be non-simulated and traceable. The model is not yet selected, Cloud Code is
+not enrolled, and no score or winner is claimed before those runs and frozen metrics.
+
+[JUDGMENT] Acceptance requires the benchmark gate, actual installed contract, durable credentials,
 one lock shared by scheduled/manual execution, failure/resume and a CronJob-created
 Job surviving pod replacement and credential refresh. A bump, manual Job green or
 nonempty graph cannot substitute for a fresh typed Signal and its exact PDF.

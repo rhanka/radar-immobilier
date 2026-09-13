@@ -27,7 +27,7 @@ execution; it is not a request to vote again on those three objectives.
 
 | Transition | Existing work retained | Remaining acceptance | Current status |
 | --- | --- | --- | --- |
-| T1 — autonomous PV → Signal cron | Immo CAS #678; four-stage pipeline; canonical writer; projection; 3.4 EMIT/APPLY; existing CronJobs | Publish/adopt llm-mesh 0.19.1; prove a real-provider Signal via `immo-pv-extraction-v3`; durable identity; CronJob-created Job and schedule | **GO_WITH_GATES** preprod success; **NO-GO** unattended/retry/prod before 0.19.1; no provider/K8s acceptance |
+| T1 — autonomous PV → Signal cron | Immo CAS #678; Fable BLOCK at `ac3a7150`; fixes `537b9e0c` + `3d9ed43c`; scoped 34/34 + integration 4/4 + typecheck | Complete Fable re-review; benchmark historical/manual and v1/v2/v3 on the same five PDFs with non-simulated runs; then provider Signal and K8s schedule acceptance | **BLOCKED** pending re-review and acceptance; model unselected, Cloud Code not enrolled, no benchmark scores |
 | T2 — remove MinIO and remaining SCW dependencies | #677 OVH refresh bindings; live API `PP-RAW`; empty `PP-DOCS`; useful `PP-DOCS-LEGACY`; #671/#672 GHCR work | Complete the `25ec9e04` fail-before-write suite and conditional-write capability; copy + integrity + recovery; fence/repoint/test; retain legacy until complete parity/recovery; close SCW except TEM | **MIGRATE+RETAIN** decided; remediation underway, not accepted; no copy, cutover or deletion |
 | T3 — one OVH b3-8 | Three b3-8; service plan; 16 PVC/15 Cinder RWO inventory | Finish T2; rightsize; reconcile required affinity/PVC constraints; prove controlled two-node operation; only then test one-node preprod before production | **NO-GO today**: requests and required anti-affinity do not fit one node |
 
@@ -38,14 +38,15 @@ contract tests passed on the producer side. H2A envelope
 dependency, not the Immo consumer acceptance. Earlier open-PR references are dated
 history, not current release status.
 
-[FACT] The earlier H2A progress envelope `env:d5-live-progress-20260913T1539`
-reported dependency commit `d0595d9f`; the follow-up reaches Immo HEAD `ac3a7150`.
-Graphify remains exactly 0.18.0 and fail-closes correctly; `immo-pv-extraction-v3`
-is an internal contract name, not version 0.18.3. Targeted suites pass 8/8 + 7/7,
-and the full typecheck plus scope/branch gates pass. Nested `UND_ERR_SOCKET` is
-confirmed in the llm-mesh 0.19.0 normalizer, not Graphify; a delegated 0.19.1 patch
-is not yet published. The preprod success path is **GO_WITH_GATES**; unattended,
-retry and production remain **NO-GO** before 0.19.1. No provider/K8s acceptance exists.
+[FACT] Fable returned **BLOCK** at Immo `ac3a7150`. Corrective commits `537b9e0c`
+and `3d9ed43c` now pass scoped 34/34, integration 4/4 and typecheck, while Fable
+re-review is in progress. Graphify remains exactly 0.18.0 and fail-closes correctly;
+`immo-pv-extraction-v3` remains an internal contract name. No provider Signal or
+Kubernetes acceptance exists, and T1 remains blocked rather than accepted.
+
+[FACT · gate] Before real extraction, compare the historical/manual baseline with
+v1, v2 and v3 on the same five PDFs. Runs must be non-simulated and traceable.
+The model is not selected, Cloud Code is not enrolled and no score is available.
 
 [JUDGMENT] The shortest continuation is the engaged in-pod library integration,
 not a new mesh network service, another CLI orchestration layer or completion of
