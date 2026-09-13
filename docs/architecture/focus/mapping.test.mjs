@@ -7,40 +7,35 @@ import { routeAvoidsNodes } from '/kit/src/architecture-routing.js';
 import { presentation } from './presentation-fr.js';
 const { graphs, docs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
 
-test('every Mermaid node, relationship and group survives native scene navigation', () => {
+test('complete native scenes preserve exact identities and route around absolute leaf bounds', () => {
   assert.equal(graphs.length, 5);
   for (const graph of graphs) {
-    const seenNodes = new Set(), seenEdges = new Set();
-    for (const scope of [null, ...graph.groups.map(g => g.id)]) {
-      const scene = sceneFor(graph, scope), frame = scene.nodes.find(n => n.id === 'scope-frame');
-      if (scope) assert.ok(frame, `native parent frame missing: ${scope}`);
+      const scene = sceneFor(graph), leaves = scene.absoluteNodes.filter(n => !n.data.group);
       for (const node of scene.nodes) {
-        seenNodes.add(node.id);
         assert.ok(Number.isFinite(node.position.x) && Number.isFinite(node.position.y));
         if (node.parentId) {
-          assert.equal(node.parentId, 'scope-frame');
+          const frame = scene.nodes.find(n => n.id === node.parentId);
           assert.ok(node.position.x >= 0 && node.position.y >= 0);
           assert.ok(node.position.x + node.width <= frame.width + .01);
           assert.ok(node.position.y + node.height <= frame.height + .01);
         }
       }
       for (const edge of scene.edges) {
-        assert.ok(routeAvoidsNodes(edge, scene.nodes.filter(n => n.id !== 'scope-frame')), `route crosses a component: ${edge.id}`);
+        assert.ok(routeAvoidsNodes(edge, leaves), `route crosses a component: ${edge.id}`);
         assert.ok(scene.nodes.some(n => n.id === edge.source));
         assert.ok(scene.nodes.some(n => n.id === edge.target));
-        if (edge.source === edge.originalSource && edge.target === edge.originalTarget) seenEdges.add(edge.id);
+        assert.equal(edge.source, edge.originalSource); assert.equal(edge.target, edge.originalTarget);
         const original = graph.edges.find(e => e.id === edge.id);
         assert.equal(edge.label, original.label); assert.equal(edge.dashed, original.dashed); assert.equal(edge.both, original.both);
       }
-      const nodes = scene.nodes.filter(n => n.id !== 'scope-frame');
+      const nodes = leaves;
       for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j];
         const overlap = a.position.x < b.position.x + b.width && a.position.x + a.width > b.position.x && a.position.y < b.position.y + b.height && a.position.y + a.height > b.position.y;
-        assert.equal(overlap, false, `${graph.id}/${scope}: overlapping nodes ${a.id}, ${b.id}`);
+        assert.equal(overlap, false, `${graph.id}: overlapping nodes ${a.id}, ${b.id}`);
       }
-    }
-    for (const node of [...graph.nodes, ...graph.groups]) assert.ok(seenNodes.has(node.id), `lost node/group ${node.id}`);
-    for (const edge of graph.edges) assert.ok(seenEdges.has(edge.id), `lost exact relationship ${edge.id}`);
+    for (const node of [...graph.nodes, ...graph.groups]) assert.ok(scene.nodes.some(n => n.id === node.id), `lost node/group ${node.id}`);
+    for (const edge of graph.edges) assert.ok(scene.edges.some(e => e.id === edge.id), `lost exact relationship ${edge.id}`);
   }
 });
 

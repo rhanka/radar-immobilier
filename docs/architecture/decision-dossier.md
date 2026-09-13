@@ -1,14 +1,15 @@
 # Decision dossier — Immo refresh and storage retirement
 
-Revision **D2**, 2026-09-13. **INCOMPLETE / presentation only**: production inventory,
+Revision **D3**, 2026-09-13. **INCOMPLETE / presentation only**: production inventory,
 credential operations and the Opus review (weekly limit) are unresolved. No implementation,
 migration, package integration or deployment is authorized by opening this page.
 Author: Codex / gpt-6-astra / xhigh. This is not an owner signature or Track decision.
 
 ## 1. Decision asked
 
-[JUDGMENT] Review the framing of a **future delivery-sequence decision**; no option
-selection is requested now. The eventual alternatives are:
+[JUDGMENT] Review the framing of a **future delivery-sequence decision**. As the
+owner requested, Focus now allows a local draft choice, comment and JSON copy;
+these are not ratification or execution authorization. The alternatives are:
 **A** staged in-pod Graphify refresh, then verified storage cutover;
 **B** full E1–E5 DAG before cutover; **C** storage first, workstation refresh temporarily.
 Scope: Immo preprod first, then a separately gated production promotion; Graphify

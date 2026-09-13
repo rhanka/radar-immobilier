@@ -96,4 +96,5 @@
   - [x] Render every node/edge simultaneously with native nested parentId boxes; navigation only changes the viewport.
   - [x] Add strict, sanitized Mermaid prerendering with source hashes and node/group parity; embed the visual and exact code offline.
   - [x] Add the same DS Tile/Radio choice pattern as the Sentropic dossier, with comments, local drafts and copy/download JSON containing all options and provenance.
+  - [x] Integrate choice cards into section 4 and render embedded source-document Mermaid blocks too; retain draft-only authority in D3.
   - [ ] Verify simultaneous completeness, nested bounds, Mermaid rendering and A/B/C comment/export behavior.
