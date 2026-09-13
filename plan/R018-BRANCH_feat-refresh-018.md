@@ -44,6 +44,7 @@
 - [ ] Lot 3: Sol builds the released scope with isolated tests and atomic commits.
 - [x] C02: compose the public owner-scoped Graphify mesh with explicit refresh adapters, model and run abort signal.
 - [x] C03: prove schema/token forwarding, three-copy mesh interop, owner isolation, classified failure, abort propagation and log silence.
+- [x] C03b: forward runtime-configured reasoning effort through the public mesh request.
 - [x] C04a: define strict immutable-manifest, original-page and bounded UTF-8 corpus chunk contracts.
 - [x] C04b: materialize selected PDF bytes and metadata with checksum, page-text and input-hash validation.
 - [x] C04c: retain explicit physical-page markers inside bounded profile prompt chunks.

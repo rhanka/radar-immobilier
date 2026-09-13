@@ -9,6 +9,7 @@ import {
   CodexRuntimeClient,
   GeminiAdapter,
   OpenAIAdapter,
+  type GenerateRequest,
   type GeminiAdapterClient,
   type OpenAIAdapterClient,
   type VerifiedRoutingSubject,
@@ -27,6 +28,7 @@ export interface RefreshMeshOptions {
   readonly keyring?: KeyringAdapter;
   readonly provider: RefreshProvider;
   readonly model: string;
+  readonly reasoning?: GenerateRequest["reasoning"];
   readonly signal: AbortSignal;
   readonly geminiClient?: GeminiAdapterClient;
   readonly openAiClient?: OpenAIAdapterClient;
@@ -40,14 +42,15 @@ export interface RefreshMeshBundle {
 export function bindRefreshAbortSignal(
   mesh: GraphifyMesh,
   signal: AbortSignal,
+  reasoning?: GenerateRequest["reasoning"],
 ): GraphifyMesh {
   return {
     listProviders: mesh.listProviders,
     listModels: mesh.listModels,
-    generate: (request) => mesh.generate({ ...request, signal }),
+    generate: (request) => mesh.generate({ ...request, ...(reasoning ? { reasoning } : {}), signal }),
     generateValidated: (request, validate) =>
-      mesh.generateValidated({ ...request, signal }, validate),
-    stream: (request) => mesh.stream({ ...request, signal }),
+      mesh.generateValidated({ ...request, ...(reasoning ? { reasoning } : {}), signal }, validate),
+    stream: (request) => mesh.stream({ ...request, ...(reasoning ? { reasoning } : {}), signal }),
   };
 }
 
@@ -74,7 +77,7 @@ export function createRefreshMesh(options: RefreshMeshOptions): RefreshMeshBundl
     },
     createRoutePlanner: (runtime) => facade.createRoutePlanner(runtime),
   });
-  const abortable = bindRefreshAbortSignal(mesh, options.signal);
+  const abortable = bindRefreshAbortSignal(mesh, options.signal, options.reasoning);
   return {
     mesh: abortable,
     textClient: meshTextJsonClient(abortable, {
