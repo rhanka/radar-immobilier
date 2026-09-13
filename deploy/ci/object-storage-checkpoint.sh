@@ -123,7 +123,7 @@ checkpoint_write_progress() {
 }
 
 list_objects_checkpoint() {
-  local side="$1" output="$2" bucket token="" response next truncated elapsed
+  local side="$1" output="$2" bucket token="" response next truncated elapsed validation_attempt
   local -a args
   bucket="$(bucket_for "$side")"; checkpoint_load_index "$side" "$output"
   if $CHECKPOINT_TERMINAL; then
@@ -138,10 +138,15 @@ list_objects_checkpoint() {
     elif [ -n "$CHECKPOINT_LAST_KEY" ]; then
       args+=(--start-after "$CHECKPOINT_LAST_KEY")
     fi
-    retry_json "$response" "$side" "${args[@]}" || return 1
-    truncated="$(jq -r '.IsTruncated // false' "$response")"
-    case "$truncated" in true|false) ;; *) return 1 ;; esac
-    checkpoint_commit_page "$side" "$response" "$truncated" || return 1
+    validation_attempt=1
+    while :; do
+      retry_json "$response" "$side" "${args[@]}" || return 1
+      truncated="$(jq -r '.IsTruncated // false' "$response")"
+      case "$truncated" in true|false) ;; *) return 1 ;; esac
+      checkpoint_commit_page "$side" "$response" "$truncated" && break
+      validation_attempt=$((validation_attempt + 1))
+      [ "$validation_attempt" -le "$RETRIES" ] || return 1
+    done
     cat "$CHECKPOINT_COMMITTED_PAGE" >>"$output"
     if [ "$truncated" = false ]; then
       printf '%s\n' "$((CHECKPOINT_SEQUENCE - 1))" >"$REPORT_DIR/$side-pages.txt"
