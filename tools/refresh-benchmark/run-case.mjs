@@ -140,13 +140,14 @@ try {
   error = caught instanceof Error ? { name: caught.name, message: caught.message } : { message: String(caught) };
 } finally { clearTimeout(timeout); }
 const completed = Date.now();
-if (generated?.text) await writeFile(outputPath, generated.text, "utf8");
+if (generated?.text) await writeFile(outputPath, JSON.stringify(JSON.parse(generated.text)), "utf8");
 const receipt = { schemaVersion: 1, caseId, status, t1Commit, profileModuleSha256,
   documentId: document.id, input: { pdfSha256: document.sha256, textSha256: document.textSha256 },
   requested: { providerId: "openai", modelId: variant.model, effort: variant.effort,
     maxOutputTokens: frozen.maxOutputTokens, transportTimeoutMs: 480_000 }, accountPseudonym, wire,
   actual: generated ? { responseId: generated.id, providerId: generated.providerId,
-    modelId: generated.modelId, finishReason: generated.finishReason, usage: generated.usage } : null,
+    modelId: generated.modelId, finishReason: generated.finishReason,
+    responseTextSha256: sha256(generated.text ?? ""), usage: generated.usage } : null,
   hashes: inputHashes, timing: { startedAt: new Date(started).toISOString(),
     completedAt: new Date(completed).toISOString(), totalMs: completed - started,
     queueMs: wire && generationStarted ? Date.parse(wire.fetchStartedAt) - generationStarted : null,
