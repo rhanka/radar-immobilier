@@ -32,10 +32,11 @@ const sourceFiles = await Promise.all([
 const evidence = {
   schema: 'immo-architecture-monthly-evidence/v2', revision: 'D5',
   requestedPeriod: { timezone: 'America/Toronto', start: null, startDefinition: 'real preceding invoice/report boundary', startVerified: false, endExclusive: '2026-09-14T00:00:00-04:00' },
-  captureCutoffs: { architectureRuntime: '2026-09-13T15:38:00Z', transitionImplementation: '2026-09-13T15:39:00Z', unifiedDeliveryTokenBilling: null, status: 'September 13 incomplete; unified cutoff not frozen' },
+  captureCutoffs: { architectureRuntime: '2026-09-13T15:38:00Z', transitionImplementation: '2026-09-13T15:39:00Z', latestTransitionAudit: null, unifiedDeliveryTokenBilling: null, status: 'Follow-up transition evidence dated September 13; exact latest UTC and unified cutoffs not supplied' },
   ownerCorrection: { capturedAt: '2026-09-13T15:10:18.423Z', sourceRevision: 'D4', dossierHash: 'b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451', artifactInputHash: '92b87297fbc8ed0f2670fa4fd07e1dde6d061d04533d3695275c1f386b3b032e', option: null, interpretation: 'no allocation vote; D5 fixed instructions' },
   snapshotAt: '2026-09-13', transitionRelation: 'inside-requested-period; observed-versus-planned', monetaryEvidence: 'incomplete',
   deploymentClaim: 'none; T1, T2 and T3 are explicitly proposed/not deployed',
+  transitionState: { t1: 'GO_WITH_GATES preprod success; NO-GO unattended/retry/prod before unpublished llm-mesh 0.19.1', t2: 'MIGRATE+RETAIN; 25ec9e04 starts remediation; no copy/cutover/deletion', t3: 'NO-GO today; T2 then rightsizing/constraints/verified two-node step before one' },
   focus: { html: 'architecture-transition-2026-09-13.html', htmlSha256: sha256(html),
     artifactInputHash: manifest.artifactInputHash, architectureHash: manifest.architectureHash,
     transitionTargetsHash: manifest.transitionTargetsHash,

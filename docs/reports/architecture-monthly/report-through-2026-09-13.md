@@ -8,8 +8,9 @@ signature, deployment record or replacement for preserved source reports.
 - Timezone: America/Toronto.
 - Requested start: the real preceding invoice/report boundary, **unverified**.
 - Requested end: September 13 inclusive (`2026-09-14T00:00:00-04:00` exclusive).
-- Runtime architecture cutoff: last cited live check `2026-09-13T15:38:00Z`.
-- Transition implementation cutoff: last cited progress `2026-09-13T15:39:00Z`.
+- Prior timestamped runtime check: `2026-09-13T15:38:00Z`.
+- Prior timestamped T1 implementation progress: `2026-09-13T15:39:00Z`.
+- Follow-up T1/T2/T3 state: dated September 13; exact UTC cutoff **not supplied**.
 - Unified delivery/token/billing cutoff: **not frozen or verified**; September 13
   is incomplete in the available evidence.
 - Owner correction captured `2026-09-13T15:10:18.423Z`; this is provenance of
@@ -35,10 +36,10 @@ states](../../architecture/transitions-target.md), [T1 causal detail](../../arch
 
 | State | Observed in available September 13 evidence | Planned / not deployed |
 | --- | --- | --- |
-| Existant | Preprod API uses MinIO `PP-RAW`/`PP-DOCS`; refresh uses same OVH `PP-GRAPH`; same `PP-DB`; Geo PDF corpus is separate. Prod access observed; private bindings unavailable. | None inferred from production source defaults. |
-| T1 | Graphify 0.18.0 published; dependency commit `d0595d9f`, typecheck PASS and scoped tests underway by 15:39 UTC. | Finish the in-pod consumer, durable keyring/lock, full fresh candidate→3.4→guarded graph→atomic PG path, typed Signal/PDF and scheduled acceptance. |
-| T2 | Preprod refresh graph binding is already OVH; API MinIO and executable SCW residue remain evidenced. | New `PP-RAW-OVH`/`PP-DOCS-OVH` roles, reader/writer parity, fencing, recovery, zero-consumer retirement, separately inventoried prod, final SCW sweep; TEM retained. |
-| T3 | Three b3-8 nodes; ~9,454 Mi instantaneous memory; 5,907.82 Mi allocatable per node; MinIO ~347 Mi. | One existing b3-8 for Immo+Geo only after full peak/requests/affinity/PDB/PVC/drain acceptance. |
+| Existant | API uses MinIO `PP-RAW`; `PP-DOCS` fallback is empty; distinct `PP-DOCS-LEGACY` has useful replay/history. Refresh uses OVH `PP-GRAPH`; prod private bindings remain unavailable. | No production symmetry inferred. |
+| T1 | Exact Graphify 0.18.0; `immo-pv-extraction-v3`; HEAD `ac3a7150`; targeted 8/8 + 7/7; full typecheck and scope/branch PASS. Graphify fail-closes. | llm-mesh 0.19.1 unpublished; preprod success GO_WITH_GATES, unattended/retry/prod NO-GO; no real-provider Signal or K8s acceptance. |
+| T2 | Legacy partial inventory: baseline 1/2,821,583 B; graph 4/639,226 B; ontology 530/34,257,805 B; parsed ≥4,884/≥272,554,144 B; raw unknown; runs ≥445. `25ec9e04` starts fail-before-write. | **MIGRATE+RETAIN**; finish suite + conditional-write, parity and recovery. No copy, cutover or deletion; TEM retained. |
+| T3 | Three b3-8; one allocatable 1,840m/5,907.82 Mi; requests 4,095m/8,442 Mi; pods 5,273 Mi; 16 PVC/15 Cinder RWO; required anti-affinity incompatible. | **NO-GO today**. Complete T2, rightsize, reconcile constraints, verify two nodes, then test one. |
 
 ## 4. Complete final target
 
@@ -52,11 +53,11 @@ private bindings are target roles marked TBD/UNVERIFIED, not observed facts.
 
 ## 5. Transition gates and limits
 
-Preproduction precedes production for every transition. T1 requires a real fresh
-typed Signal with exact PDF, idempotent resume and unattended schedule after pod
-and credential refresh. T2 requires full parity, writer fence, real-client tests,
-paired object/DB recovery, retention and zero consumers before deletion. T3
-requires the complete shared peak and one-node safety/placement proof.
+Preproduction precedes production for every transition. T1 requires llm-mesh
+0.19.1, a real fresh typed Signal with exact PDF and K8s retry/schedule acceptance.
+T2 requires fail-before-write plus conditional-write capability, full parity,
+paired recovery and retention. T3 requires T2, rightsizing, reconciled placement,
+a verified two-node step, then one-node preprod safety before production.
 
 No T1/T2/T3 deployment, object copy, deletion, credential action, cluster change
 or billing calculation occurred in this documentation build.

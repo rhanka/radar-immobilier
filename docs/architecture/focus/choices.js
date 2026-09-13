@@ -10,12 +10,18 @@ export const fixedInstructions = {
   architectureOrder: ['existing', 'T1-refresh-graphify-0.18.0', 'T2-ovh-object-cutover-final-scw-sweep', 'T3-one-existing-b3-8'],
   rolloutOrder: ['preproduction', 'production'], pvPipelineOwner: 'Immo',
   retainScwTemUntilValidatedReplacement: true,
+  transitionEvidence: {
+    asOfDate: '2026-09-13', exactLatestUtcCutoff: null,
+    t1: { graphify: '0.18.0', pdfContract: 'immo-pv-extraction-v3', head: 'ac3a7150', targetedTests: '8/8 + 7/7', status: 'GO_WITH_GATES preprod success; NO-GO unattended/retry/prod before unpublished llm-mesh 0.19.1' },
+    t2: { decision: 'MIGRATE+RETAIN', remediationHead: '25ec9e04', copyStarted: false, cutoverStarted: false, deletionStarted: false, retainLegacyUntil: 'complete parity and recovery' },
+    t3: { verdict: 'NO-GO today', nodes: 3, requests: '4095m/8442Mi', currentPodMemoryMi: 5273, oneNodeAllocatable: '1840m/5907.82Mi', pvc: '16 total / 15 Cinder RWO', requiredSequence: ['T2 complete', 'rightsizing', 'constraints reconciled', 'verified two-node step', 'one-node test'] },
+  },
   reporting: {
     timezone: 'America/Toronto', start: null,
     startDefinition: 'real preceding invoice/report boundary', startVerified: false,
     requestedEndExclusive: '2026-09-14T00:00:00-04:00',
-    captureCutoffs: { architectureRuntime: '2026-09-13T15:38:00Z', transitionImplementation: '2026-09-13T15:39:00Z', unifiedDeliveryTokenBilling: null },
-    captureCutoffStatus: 'September 13 incomplete; unified delivery/token/billing cutoff not frozen',
+    captureCutoffs: { architectureRuntime: '2026-09-13T15:38:00Z', transitionImplementation: '2026-09-13T15:39:00Z', latestTransitionAudit: null, unifiedDeliveryTokenBilling: null },
+    captureCutoffStatus: 'Follow-up transition evidence is dated September 13 without an exact UTC cutoff; unified delivery/token/billing cutoff not frozen',
     september13Transitions: 'inside requested period; classify observed versus planned',
   },
   billing: {

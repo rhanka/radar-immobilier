@@ -14,8 +14,12 @@ test('fixed owner instructions export without an allocation vote or current amou
   assert.equal(result.fixedInstructions.reporting.requestedEndExclusive, '2026-09-14T00:00:00-04:00');
   assert.equal(result.fixedInstructions.reporting.captureCutoffs.architectureRuntime, '2026-09-13T15:38:00Z');
   assert.equal(result.fixedInstructions.reporting.captureCutoffs.transitionImplementation, '2026-09-13T15:39:00Z');
+  assert.equal(result.fixedInstructions.reporting.captureCutoffs.latestTransitionAudit, null);
   assert.equal(result.fixedInstructions.reporting.captureCutoffs.unifiedDeliveryTokenBilling, null);
   assert.match(result.fixedInstructions.reporting.september13Transitions, /inside requested period/);
+  assert.equal(result.fixedInstructions.transitionEvidence.t1.graphify, '0.18.0');
+  assert.equal(result.fixedInstructions.transitionEvidence.t2.decision, 'MIGRATE+RETAIN');
+  assert.equal(result.fixedInstructions.transitionEvidence.t3.verdict, 'NO-GO today');
   assert.equal(result.fixedInstructions.billing.allocationMethodChoiceRequired, false);
   assert.equal(result.fixedInstructions.billing.node.hourlyRateCad, 0.082);
   assert.equal(result.fixedInstructions.billing.node.periodHours, null);
