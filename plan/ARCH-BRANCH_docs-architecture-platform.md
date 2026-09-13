@@ -40,6 +40,11 @@
 - [x] **Lot 3 — Verify Mermaid rendering, links and documentation diff.**
   - [x] Scope check and static syntax checks pass; all four diagrams render in Chromium.
   - [x] Browser checks: zoom, full-screen, Escape, seven navigation links; no page overflow at 1440px/390px.
+- [x] **Lot 4 — Owner feedback: PV ownership and refactoring baseline.**
+  - [x] Compare September full-auto design and current Graphify CAS work, not only the June refresh study.
+  - [x] Show all four stages inside Immo ownership, the direct deterministic PG feed and atomic canonical projection.
+  - [x] Distinguish the deployed paths from E1–E5 target and Geo's geographic contribution.
+  - [x] Regenerate Focus HTML; Chromium renders four diagrams with zoom/full-screen/Escape and no desktop/mobile page overflow.
 
 ## Merge / Close
 - [ ] Local documentation handoff; no production action or branch merge requested.
