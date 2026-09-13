@@ -10,7 +10,8 @@ vendor logos: an S3 icon does **not** imply AWS, nor a DB icon Google Cloud SQL.
 manifest, client binding or transformation. The smaller role line disambiguates
 these responsibilities. It does **not** certify deployment or bucket creation.
 External actors/sources/providers have no generating repo. Unassigned credential
-operations stay `repo: à décider`; no secret service or owner is invented.
+operations stay `repo: à décider`; no secret service or owner is invented. Target
+production bindings are repo-owned roles marked TBD, not asserted runtime objects.
 
 | Component family | Repository and evidence |
 | --- | --- |
@@ -19,12 +20,14 @@ operations stay `repo: à décider`; no secret service or owner is invented.
 | Geo API, PostGIS, S3 bindings, capture, joins, sync | `geo` main `f68d8ddf`: `deploy/k8s/`, `acquisition/config/s3-target.json`, `packages/geo/src/zonage/lotZoneJoin.ts`; bucket creation outside audit |
 | Shared cluster, ingress/TLS, namespace envelopes | `poc-k8s` local `03acdfd`: `platform/overlays/ovh/`, `tenants/`; this is not the older remote main |
 | SSO application and its PostgreSQL | `sentropic`: `deploy/k8s/base/{35-auth-idp,20-postgres}.yaml`, included by base kustomization; local HEAD `97fe9f53e8079694e35771227c11544ce8658316`, read September 13 for ownership only. `poc-k8s/tenants/sentropic-preprod/README.md` explicitly assigns workloads to Sentropic |
-| Proposed Graphify library | `graphify` PR #330; consumer/integration remains `radar-immobilier`. A library dependency is not a transfer of the PV chain to Graphify |
+| Published Graphify library | `graphify` 0.18.0; consumer/integration remains `radar-immobilier`. A library dependency is not a transfer of the PV chain to Graphify |
+| T1/T2/T3 target roles | `transitions-target.md`; Immo/Geo application roles retain their repos, shared cluster roles use `poc-k8s`, and new OVH bindings stay explicitly TBD until provisioned/verified |
 | Release/copy and mixed Geo views | Both `radar-immobilier` and `geo` where the box combines their operations; individual child boxes retain their specific repo |
 
 The explicit map in `focus/service-provenance.js` covers every leaf and group;
 unknown IDs fail the build. Shared resource IDs reuse the same attribution across
-all views, including the proposal. The detailed inspector exposes the evidence
+all views, including the three transition states and T1 detail. The detailed inspector exposes the evidence
 path. This complements the dated runtime register in [architecture](../architecture.md),
 not a new live audit. MinIO remains shown in preprod; production unknowns and the
-owner's SCW TEM retention exception are unchanged.
+owner's SCW TEM retention exception are unchanged. No target view uses the
+`unknown` icon or a permissive provenance fallback; an unmapped ID fails closed.

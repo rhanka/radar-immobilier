@@ -1,7 +1,8 @@
-# Local Focus decision dossier
+# Local Focus architecture dossier — D5
 
 The entry point is [decision-dossier.md](decision-dossier.md), with effective-state
-evidence in [architecture.md](../architecture.md) and [storage-audit.md](storage-audit.md).
+evidence in [architecture.md](../architecture.md), proposed T1/T2/T3 states in
+[transitions-target.md](transitions-target.md) and [storage audit](storage-audit.md).
 The owner-facing page uses the September 7 Sentropic decision-kit format: DS
 AppShell/ThemeProvider, Focus orthogonal routing and **native SvelteFlow**, not a
 Mermaid SVG wrapped in an HTML card. The local service-node renderer extends the
@@ -17,12 +18,15 @@ make -f docs/architecture/Makefile serve ENV=docs-architecture
 Open **http://127.0.0.1:5188/** or the generated **decision-focus.html** directly.
 The HTML embeds JS, CSS, French presentation and complete source/review documents;
 it works offline and does not require a Claude session, server or external CDN.
-The same build emits the dated monthly companion HTML and evidence manifest under
+The same build emits the dated monthly companion HTML and D5 evidence manifest under
 `docs/reports/architecture-monthly/`; the browser gate opens that copy offline too.
 
 ## Navigation and authority
 
-- Eight decision sections; five graph views, including a separately labelled proposal.
+- Eight architecture-first sections; eight graph views: four existing details,
+  three complete platform transitions and one causal T1 detail. The default is T3.
+- A prominent selector follows **Existant → T1 → T2 → T3**. Every proposed view
+  says `PROPOSED / NOT DEPLOYED`; existing evidence keeps its as-of date.
 - All components, edges and nested boxes are shown **simultaneously**. Every
   Mermaid subgraph maps to a native SvelteFlow `parentId` box with its original ID.
   Click a box or use its selector to zoom; no content is collapsed or replaced.
@@ -38,16 +42,14 @@ The same build emits the dated monthly companion HTML and evidence manifest unde
   unresolved ownership. These are generic symbols, not cloud-vendor logos.
 - Every node/edge/subgraph is covered by tests; dashed and bidirectional semantics
   are preserved. Full-diagram fitting uses explicit absolute nested bounds.
-- Section 4 uses the example's DS **Tile + Radio** pattern for the remaining
-  LLM-allocation question: DIRECT, USAGE or CAPACITY, comment, local persistence,
-  **copy JSON** and download. The response includes all three methods, fixed
-  T1/T2/T3 and billing decisions, selected ID, remarks and source hashes.
-  Choices start empty and remain **drafts**; no final amount is inferred.
+- Section 8 uses DS Tiles for fixed billing instructions, unresolved evidence,
+  comment, local persistence, **copy JSON** and download. There are no allocation
+  radios. The JSON preserves D4 `option:null` as no vote, the exact owner-response
+  hashes/time, unknown period start/cutoff/hours/amount and the prior-invoice tariff rule.
   Clipboard denial is explicit; the JSON remains keyboard-selectable/downloadable.
 - Sources open in an accessible dialog; external evidence links require a click.
-- The D4 dossier accompanies the engaged T1→T2→T3 execution and remains
-  **INCOMPLETE** for monetary audit, production inventory/recovery criteria and
-  post-build independent review. Earlier reviews are not reused as D4 approval.
+- The D5 dossier remains **INCOMPLETE** for runtime acceptance, production
+  inventory/recovery criteria and monetary evidence. Rendering is not deployment.
 
 ## Build and verification
 
@@ -66,10 +68,11 @@ make -f docs/architecture/focus/Makefile browser ENV=test-architecture
 make -f docs/architecture/focus/Makefile clipboard ENV=test-architecture
 ```
 
-`browser` verifies five complete diagrams at 18 viewport positions, visible nested
-bounds, every icon/repo label, card/header overflow, exact SvelteFlow/Mermaid texts,
-shared-DB navigation, full-screen/Escape, the LLM-allocation choice,
-comments, persistence, source dialogs, clipboard failure, responsive and offline use.
+`browser` verifies eight complete diagrams at every root/subflow viewport, visible
+nested bounds, every icon/repo label, card/header overflow, exact SvelteFlow/Mermaid
+texts, target-path navigation, shared-DB navigation, full-screen/Escape, fixed
+instructions, comments, persistence, source dialogs, clipboard failure, responsive
+and offline use.
 `clipboard` checks actual clipboard read-back in a fresh browser context, then
 restores its previous contents and disposes only that test context.
 No API/UI/DB application stack or data volume is started or modified.
