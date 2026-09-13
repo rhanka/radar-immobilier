@@ -184,11 +184,7 @@ BASE_ARGS=(--environment preprod --plane RAW
   --source-path-style true --destination-endpoint https://destination.test
   --destination-region bhs --destination-bucket dst --destination-path-style false
   --prefix raw/)
-run_tool() {
-  local operation="$1" report="$2" status; shift 2
-  local -a conditional_args=()
-  [ "${OMIT_CONDITIONAL_WRITE_PROOF:-false}" = true ] || \
-    conditional_args=(--conditional-write-proof "$TEST_TMP/conditional-write-proof.json")
+invoke_tool() {
   env PATH="$TEST_TMP/bin:$PATH" FAKE_S3_ROOT="$TEST_TMP/store" \
     FAKE_S3_TMP="$TEST_TMP" FAKE_AWS_LOG="$AWS_LOG" \
     FAKE_PAGE_SIZE="${FAKE_PAGE_SIZE:-}" FAKE_VERSIONING="${FAKE_VERSIONING:-Enabled}" \
@@ -199,8 +195,41 @@ run_tool() {
     MIGRATION_SOURCE_SECRET_ACCESS_KEY=SRC_SECRET \
     MIGRATION_DESTINATION_ACCESS_KEY_ID=DST_KEY \
     MIGRATION_DESTINATION_SECRET_ACCESS_KEY=DST_SECRET \
-    "$TOOL" "$operation" "${BASE_ARGS[@]}" --report-dir "$report" \
-    "${conditional_args[@]}" "$@"
+    "$TOOL" "$@"
+}
+PROOF_SERIAL=0
+make_inventory_proof() {
+  local requested_fence="$1" plane="$2" checkpoint report1 report2
+  PROOF_SERIAL=$((PROOF_SERIAL + 1)); checkpoint="$TEST_TMP/generated-proof-$PROOF_SERIAL"
+  report1="$TEST_TMP/proof-reports-$PROOF_SERIAL-a"; report2="$TEST_TMP/proof-reports-$PROOF_SERIAL-b"
+  GENERATED_FENCE="$TEST_TMP/generated-fence-$PROOF_SERIAL.txt"
+  printf 'hermetic writers fenced\n' >"$GENERATED_FENCE"
+  [ -z "$requested_fence" ] || [ ! -s "$requested_fence" ] || GENERATED_FENCE="$requested_fence"
+  invoke_tool inventory "${BASE_ARGS[@]}" --plane "$plane" --report-dir "$report1" \
+    --checkpoint-dir "$checkpoint" --page-size 100 --time-budget-seconds 30 >/dev/null 2>&1 || true
+  invoke_tool inventory "${BASE_ARGS[@]}" --plane "$plane" --report-dir "$report2" \
+    --checkpoint-dir "$checkpoint" --page-size 100 --time-budget-seconds 30 \
+    --fence-record "$GENERATED_FENCE" --resume >/dev/null 2>&1 || true
+  GENERATED_INVENTORY_PROOF="$checkpoint/final-inventory.json"
+}
+run_tool() {
+  local operation="$1" report="$2" status execute=false explicit_fence="" plane=RAW index; shift 2
+  local -a conditional_args=() inventory_args=() fence_args=() passed=("$@")
+  [ "${OMIT_CONDITIONAL_WRITE_PROOF:-false}" = true ] || \
+    conditional_args=(--conditional-write-proof "$TEST_TMP/conditional-write-proof.json")
+  for ((index=0; index<${#passed[@]}; index++)); do
+    [ "${passed[index]}" != --execute-copy ] || execute=true
+    [ "${passed[index]}" != --fence-record ] || explicit_fence="${passed[index+1]}"
+    [ "${passed[index]}" != --plane ] || plane="${passed[index+1]}"
+  done
+  if $execute && [ "${OMIT_INVENTORY_PROOF:-false}" != true ]; then
+    make_inventory_proof "$explicit_fence" "$plane"
+    inventory_args=(--inventory-proof "$GENERATED_INVENTORY_PROOF")
+    [ -n "$explicit_fence" ] || fence_args=(--fence-record "$GENERATED_FENCE")
+    : >"$AWS_LOG"
+  fi
+  invoke_tool "$operation" "${BASE_ARGS[@]}" --report-dir "$report" \
+    "${conditional_args[@]}" "${inventory_args[@]}" "${fence_args[@]}" "$@"
   status=$?
   [ "$status" -eq 0 ] || {
     [ ! -f "$report/summary.json" ] || jq . "$report/summary.json" >&2
@@ -209,6 +238,7 @@ run_tool() {
   return "$status"
 }
 run_tool_without_capability() { OMIT_CONDITIONAL_WRITE_PROOF=true run_tool "$@"; }
+run_tool_without_inventory() { OMIT_INVENTORY_PROOF=true run_tool "$@"; }
 
 make_expected_union() {
   local evidence="$1" output="$2" proof
@@ -413,6 +443,16 @@ TEST_NAME='fails when the credential cannot prove the exact destination target'
 expect_bad run_tool inventory "$TEST_TMP/reports/target-identity" --retries 1
 
 reset_store
+put_fixture source src raw/inventory-proof.txt payload
+TEST_NAME='executed copy exits one without finalized inventory evidence'
+expect_status 1 run_tool_without_inventory copy "$TEST_TMP/reports/no-inventory-proof" --execute-copy
+TEST_NAME='missing inventory proof prevents listing and every destination write'
+if ! grep -Eq $'\t(list-objects-v2|put-object)\t' "$AWS_LOG" &&
+  jq -e '.inventoryProof.required == true and .inventoryProof.accepted == false and
+    (.missingProof | index("executed copy requires a finalized inventory proof"))' \
+    "$TEST_TMP/reports/no-inventory-proof/summary.json" >/dev/null; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
 put_fixture source src raw/capability.txt capability
 TEST_NAME='execute-copy exits one without conditional-write capability evidence'
 expect_status 1 run_tool_without_capability copy "$TEST_TMP/reports/no-capability" --execute-copy
@@ -482,7 +522,10 @@ if cmp -s "$TEST_TMP/store/source/src/objects/raw/meta.txt" \
   jq -e '.counts.missing == 0 and .counts.conflicting == 0' \
     "$TEST_TMP/reports/copy/summary.json" >/dev/null &&
   jq -e '.object.metadata.origin == "municipal" and .object.tags[0].Key == "plane"' \
-    "$TEST_TMP/reports/copy/copy-ledger.jsonl" >/dev/null; then
+    "$TEST_TMP/reports/copy/copy-ledger.jsonl" >/dev/null &&
+  jq -e '.inventoryProof.accepted == true and .inventoryProof.proofDigest != null' \
+    "$TEST_TMP/reports/copy/summary.json" >/dev/null &&
+  ! grep -Eq $'\tlist-objects-v2\t' "$AWS_LOG"; then
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
 TEST_NAME='receipts bind accepted conditional-write evidence without validating it'
@@ -491,6 +534,19 @@ if jq -e '.conditionalWriteCapability.required == true and
   .conditionalWriteCapability.proofDigest != null and
   .conditionalWriteCapability.providerEnforcementValidated == false' \
   "$TEST_TMP/reports/copy/summary.json" >/dev/null; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/tampered-proof.txt payload
+make_inventory_proof '' RAW
+manual_proof="$GENERATED_INVENTORY_PROOF"; manual_fence="$GENERATED_FENCE"
+jq '.source.fenced.objects += 1' "$manual_proof" >"$manual_proof.tmp" && mv "$manual_proof.tmp" "$manual_proof"
+TEST_NAME='tampered inventory chain proof exits one before storage access'
+expect_status 1 run_tool copy "$TEST_TMP/reports/tampered-proof-copy" --execute-copy \
+  --inventory-proof "$manual_proof" --fence-record "$manual_fence"
+if ! grep -Eq $'\t(list-objects-v2|put-object)\t' "$AWS_LOG" &&
+  jq -e '.inventoryProof.accepted == false and
+    (.missingProof | index("finalized inventory proof is invalid or mismatched"))' \
+    "$TEST_TMP/reports/tampered-proof-copy/summary.json" >/dev/null; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 
 reset_store
 put_fixture source src raw/multipart.bin same '{"ETag":"\"source-2\""}'
