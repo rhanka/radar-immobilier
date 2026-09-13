@@ -143,3 +143,9 @@
   - [x] Correct the replay guide to count all eight sanitized Mermaid renderings.
   - [x] Separate the 15:38 runtime and 15:39 implementation cutoffs from the still-open unified report cutoff.
   - [x] Regenerate the dated D5 HTML and evidence hashes after the final native-graph corrections.
+- [ ] **Lot 13 — Reconcile the final September 13 transition evidence.**
+  - [x] Pin T1 to Graphify 0.18.0, `immo-pv-extraction-v3`, HEAD `ac3a7150` and its qualified test gates without claiming provider/Kubernetes acceptance.
+  - [ ] Distinguish the live empty fallback bucket from retained legacy replay/history and encode MIGRATE+RETAIN plus writer-safety gates.
+  - [ ] Record the real three-node capacity/placement NO-GO and the required T2 → rightsizing → constraints → two-node → one-node ladder.
+  - [ ] Align the Focus presentation/export and current monthly companion without changing the unresolved reporting start or inventing billing values.
+  - [ ] Regenerate and verify the portable Mermaid/SvelteFlow dossier and dated evidence.

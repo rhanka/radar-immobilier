@@ -43,10 +43,12 @@ the proposed Graphify 0.18 refresh, PVC/storage class or production internals.
 platform observation has three b3-8 nodes. Its instantaneous ~9,454 Mi exceeds
 one node's 5,907.82 Mi allocatable; MinIO accounts for only ~347 Mi.
 
-[FACT] Graphify 0.18.0 is published. By 15:39 UTC Immo had committed the refresh
-dependency pins at `d0595d9f`, passed typecheck and started scoped tests. That is
-observed implementation progress, not consumer completion, a scheduled refresh
-or typed Signal/PDF acceptance. Every target
+[FACT] Graphify remains exactly 0.18.0. At Immo HEAD `ac3a7150`, targeted suites
+pass 8/8 + 7/7, and the full typecheck plus scope/branch checks pass. The internal
+PDF contract is named `immo-pv-extraction-v3`; it is not a Graphify 0.18.3 release.
+That is implementation evidence, not a real-provider Signal or Kubernetes
+acceptance. Upstream analysis of the nested `UND_ERR_SOCKET` failure is pending.
+Every target
 production role may be named as a contract, but its physical binding remains
 TBD rather than inferred from source defaults or the old SCW cluster.
 
@@ -61,8 +63,8 @@ fresh candidate **before** canonical publication → guarded full-graph write �
 atomic PG projection → typed Signal plus exact PDF. [Detailed T1 flow](proposal.md).
 
 [FACT] Immo owns every step; Geo owns geographic inputs. T1 keeps the existing
-API MinIO roles until T2. Consumer implementation is underway; operated keyring,
-durable lock and end-to-end qualification remain pending.
+API MinIO roles until T2. Consumer code gates pass at `ac3a7150`; operated keyring,
+durable lock, real-provider Signal and Kubernetes qualification remain pending.
 
 [JUDGMENT] Acceptance requires the actual installed contract, durable credentials,
 one lock shared by scheduled/manual execution, failure/resume and a CronJob-created
