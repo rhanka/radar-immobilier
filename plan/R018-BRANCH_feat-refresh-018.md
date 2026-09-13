@@ -74,6 +74,7 @@
 - [x] C07f: freeze the provider-free Waterloo v2 contract receipt without relabeling benchmark v1 outputs.
 - [x] C07g: name the strict internal contract `immo-pv-extraction-v3` and enforce exact physical-page marker boundaries; Graphify remains 0.18.0.
 - [x] C07h: freeze the provider-free Waterloo `immo-pv-extraction-v3` receipt with exact source, schema and prompt hashes; preserve v1/v2 evidence unchanged.
+- [x] C07i: keep the strict legacy-excerpt-alias regression type-safe without weakening runtime rejection.
 - [x] C14b: emit a redacted model-call count and latency receipt without prompts, outputs or account material.
 - [x] C14c: identify the exact live schema and prompt by digest in the redacted model-call receipt.
 - [x] C14d: distinguish completed generation from failure instead of treating cleanup as a provider response.
