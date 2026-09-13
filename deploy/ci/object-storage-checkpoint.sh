@@ -366,13 +366,15 @@ consume_inventory_proof() {
     --arg de "$DESTINATION_ENDPOINT" --arg dr "$DESTINATION_REGION" \
     --arg db "$DESTINATION_BUCKET" --argjson dp "$DESTINATION_PATH_STYLE" \
     --arg df "$DESTINATION_IDENTITY_FINGERPRINT" --argjson prefixes "$prefixes" \
-    --argjson exclusions "$exclusions" --argjson retries "$RETRIES" \
+    --argjson exclusions "$exclusions" --argjson includeRootObjects "$INCLUDE_ROOT_OBJECTS" \
+    --argjson retries "$RETRIES" \
     --argjson concurrency "$CONCURRENCY" --argjson failures "$MAX_FAILURES" \
     --argjson bytes "$MAX_OBJECT_BYTES" '
     .schemaVersion == 1 and .environment == $environment and .plane == $plane and
     .source == {endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,identityFingerprint:$sf} and
     .destination == {endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp,identityFingerprint:$df} and
-    .classification == {prefixes:$prefixes,excludePrefixes:$exclusions} and
+    .classification == {prefixes:$prefixes,excludePrefixes:$exclusions,
+      includeRootObjects:$includeRootObjects} and
     .limits.retries == $retries and .limits.concurrency == $concurrency and
     .limits.maxFailures == $failures and .limits.maxObjectBytes == $bytes' "$config" >/dev/null ||
     return 1

@@ -672,6 +672,22 @@ TEST_NAME='blocks genuinely unclassified source keys'
 expect_bad run_tool inventory "$TEST_TMP/reports/unclassified"
 
 reset_store
+put_fixture source src raw/in-prefix.txt prefixed
+put_fixture source src root.json root
+TEST_NAME='includes slashless root objects only when DOCS opts in explicitly'
+expect_ok run_tool inventory "$TEST_TMP/reports/docs-root" --plane DOCS \
+  --include-root-objects
+TEST_NAME='records root inclusion in the manifest and summary'
+if jq -e 'select(.key == "root.json" and .classification == "included")' \
+    "$TEST_TMP/reports/docs-root/source-included-manifest.jsonl" >/dev/null &&
+  jq -e '.plane == "DOCS" and .includeRootObjects == true and
+    .counts.source == 2' "$TEST_TMP/reports/docs-root/summary.json" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+TEST_NAME='rejects root-object inclusion outside the DOCS plane'
+expect_bad run_tool inventory "$TEST_TMP/reports/raw-root" --include-root-objects
+
+reset_store
 put_fixture source src raw/retry.txt retry; put_fixture destination dst raw/retry.txt retry
 FAKE_FAIL_SIDE=source FAKE_FAIL_OPERATION=head-object FAKE_FAIL_ATTEMPTS=2
 TEST_NAME='retries a failed object operation up to the configured bound'
