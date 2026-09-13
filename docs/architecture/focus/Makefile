@@ -25,7 +25,7 @@ test: map
 	$(RUN) --test mapping.test.mjs nested.test.mjs choices.test.mjs provenance.test.mjs
 	git diff --check
 browser:
-	docker run --rm --network host --user "$$(id -u):$$(id -g)" -e FOCUS_PORT=$(PORT) -v $(FOCUS_DIR):/out -w /out $(NODE_IMAGE) node browser-check.mjs
+	docker run --rm --network host --user "$$(id -u):$$(id -g)" -e FOCUS_PORT=$(PORT) -e FOCUS_FILE_ROOT=$(FOCUS_DIR)/.. -v $(FOCUS_DIR):/out -w /out $(NODE_IMAGE) node browser-check.mjs
 clipboard:
 	docker run --rm --network host --user "$$(id -u):$$(id -g)" -e FOCUS_PORT=$(PORT) -v $(FOCUS_DIR):/out -w /out $(NODE_IMAGE) node clipboard-check.mjs
 inspect-live:

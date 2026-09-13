@@ -3,8 +3,8 @@
   const reportPrefix = location.pathname.includes('/reports/architecture-monthly/') ? './' : '../reports/architecture-monthly/';
   const transitions = [
     { key: 'T1', status: 'validation', detail: 'Premier run arrêté avant le LLM; PDF valide, provider, Signal/preuve et schedule restent à accepter.', tone: 'warning' },
-    { key: 'T2', status: 'partiel', detail: 'RAW OVH actif; copie, parité/reprise et rebind DOCS restent ouverts.', tone: 'warning' },
-    { key: 'T3', status: 'NO-GO', detail: 'Un b3-8 seulement après T2, rightsizing, contraintes et étape deux nœuds vérifiée.', tone: 'danger' },
+    { key: 'T2', status: 'préprod accepté', detail: 'OVH 59 017 objets / 12 534 514 457 octets, failed 0; MinIO et PVC data retirés. Production en cours.', tone: 'success' },
+    { key: 'T3', status: 'gated', detail: 'Aucune réduction avant T2 production, re-mesure post-cleanup et étape deux nœuds vérifiée.', tone: 'warning' },
   ];
 </script>
 

@@ -4,7 +4,7 @@
   import { questions, responsePack } from './choices.js';
   let { manifest, remarks = '' } = $props();
   let selections = $state({}), comments = $state({}), status = $state(''), copyError = $state('');
-  let storageKey = $derived(`immo-focus-d7-responses:${manifest.artifactInputHash}`);
+  let storageKey = $derived(`immo-focus-d8-responses:${manifest.artifactInputHash}`);
   let json = $derived(JSON.stringify(responsePack(manifest, selections, comments, remarks, null), null, 2));
   onMount(() => {
     try {
@@ -27,7 +27,7 @@
   }
   function download() {
     const url = URL.createObjectURL(new Blob([packText()], { type: 'application/json' }));
-    const a = document.createElement('a'); a.href = url; a.download = 'immo-reponses-d7.json'; a.click(); URL.revokeObjectURL(url);
+    const a = document.createElement('a'); a.href = url; a.download = 'immo-reponses-d8.json'; a.click(); URL.revokeObjectURL(url);
   }
 </script>
 
@@ -54,7 +54,7 @@
   {/each}
   <Flex gap={2} wrap><Button variant="primary" onclick={copy}>Copier les réponses en JSON</Button><Button variant="secondary" onclick={download}>Télécharger les réponses en JSON</Button><Button variant="ghost" onclick={() => { selections = {}; comments = {}; persist(); }}>Effacer les réponses</Button></Flex>
   <p role="status">{copyError || status}</p>
-  <details class="choice-json" open={Boolean(copyError)}><summary>Voir le JSON réel des questions, options, choix et commentaires</summary><textarea aria-label="JSON des réponses D7" readonly value={json} rows={20}></textarea></details>
+  <details class="choice-json" open={Boolean(copyError)}><summary>Voir le JSON réel des questions, options, choix et commentaires</summary><textarea aria-label="JSON des réponses D8" readonly value={json} rows={20}></textarea></details>
 </section>
 <style>
   .choices { margin-block: 24px; } .question-block { border-top: 1px solid var(--st-semantic-border-subtle); padding-block: 24px; }
