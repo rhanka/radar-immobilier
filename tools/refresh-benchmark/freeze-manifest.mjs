@@ -4,6 +4,8 @@ import { resolve } from "node:path";
 
 const corpusRoot = process.env.BENCHMARK_CORPUS_ROOT;
 if (!corpusRoot) throw new Error("BENCHMARK_CORPUS_ROOT is required");
+const runtimeTextRoot = process.env.BENCHMARK_RUNTIME_TEXT_ROOT;
+if (!runtimeTextRoot) throw new Error("BENCHMARK_RUNTIME_TEXT_ROOT is required");
 
 const selections = [
   ["waterloo-2026-08-18", "waterloo", "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd", ["Que le conseil municipal adopte le Règlement 26-956-2"]],
@@ -21,7 +23,7 @@ for (const [id, city, sha, terms] of selections) {
   const meta = JSON.parse(await readFile(`${pdfPath}.meta.json`, "utf8"));
   const pdf = await readFile(pdfPath);
   if (sha256(pdf) !== sha || meta.sha256 !== sha) throw new Error(`SHA mismatch: ${id}`);
-  const parsedPath = resolve(worker, "parsed", city, `${sha}.txt`);
+  const parsedPath = resolve(runtimeTextRoot, `${sha}.txt`);
   const text = await readFile(parsedPath, "utf8");
   const pages = text.split("\f").map((page) => page.replace(/\r\n/g, "\n"));
   if (pages.at(-1) === "") pages.pop();

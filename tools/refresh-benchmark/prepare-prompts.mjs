@@ -23,7 +23,7 @@ const documents = [];
 for (const document of manifest.documents) {
   const workerRoot = resolve(manifest.sourceRunRoot, "workers", document.city);
   const pdfPath = resolve(workerRoot, "corpus", `${document.sha256}.pdf`);
-  const parsedPath = resolve(workerRoot, "parsed", document.city, `${document.sha256}.txt`);
+  const parsedPath = resolve(repositoryRoot, document.runtimeTextRelativePath);
   const pdf = await readFile(pdfPath);
   const parsedText = await readFile(parsedPath, "utf8");
   if (sha256(pdf) !== document.sha256 || sha256(parsedText) !== document.textSha256) {
@@ -40,8 +40,8 @@ for (const document of manifest.documents) {
   const corpus = await materializeRefreshCorpus({ citySlug: document.city, manifestKey, reader,
     extractPdf: async () => parsedText });
   if (corpus.chunks.length !== 1) throw new Error(`Expected one T1 chunk: ${document.id}`);
-  const context = loadRefreshProfileContext({ root: workerRoot,
-    configPath: resolve(workerRoot, "graphify.yaml") });
+  const context = loadRefreshProfileContext({ root: t1Root,
+    profilePath: resolve(t1Root, "radar/ontology/ontology-profile.yaml"), unregisteredOnly: true });
   let captured;
   const sentinel = new Error("prompt captured");
   try {

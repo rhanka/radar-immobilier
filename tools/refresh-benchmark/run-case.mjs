@@ -44,7 +44,7 @@ for (const path of [receiptPath, outputPath]) await access(path).then(
 const runRoot = resolve(repositoryRoot, manifest.sourceRunRoot);
 const workerRoot = resolve(runRoot, "workers", document.city);
 const pdfPath = resolve(workerRoot, "corpus", `${document.sha256}.pdf`);
-const parsedPath = resolve(workerRoot, "parsed", document.city, `${document.sha256}.txt`);
+const parsedPath = resolve(repositoryRoot, document.runtimeTextRelativePath);
 const pdf = await readFile(pdfPath);
 const parsedText = await readFile(parsedPath, "utf8");
 if (sha256(pdf) !== document.sha256 || sha256(parsedText) !== document.textSha256) {
@@ -69,8 +69,8 @@ const reader = { async get(key) {
 const corpus = await materializeRefreshCorpus({ citySlug: document.city, manifestKey, reader,
   extractPdf: async () => parsedText });
 if (corpus.chunks.length !== 1) throw new Error("Pilot requires exactly one T1 chunk per document");
-const context = loadRefreshProfileContext({ root: workerRoot,
-  configPath: resolve(workerRoot, "graphify.yaml") });
+const context = loadRefreshProfileContext({ root: t1Root,
+  profilePath: resolve(t1Root, "radar/ontology/ontology-profile.yaml"), unregisteredOnly: true });
 
 const facade = createLlmMeshFacade({ mode: "cli",
   configResolver: { async resolveConfig() { return {}; } },
