@@ -45,6 +45,45 @@ and extended with the sentropic-app integration.
 | `60-ingress.yaml` | public Traefik Ingress for `immo.sent-tech.ca` + cert-manager TLS |
 | `70-networkpolicy.yaml` | tenant-side additive NetworkPolicy: Traefik → `radar-ui`:8080 (see "Ingress reaches the UI pod, not the api") |
 | `80-auth.yaml` | declarative record of the sentropic OIDC delegation (`radar-sentropic-auth` ConfigMap) |
+
+### RAW preprod read-only inventory Job
+
+`object-storage-inventory-preprod/` is a separate operator bundle; it is not in
+the application kustomization. It mounts the reviewed migration scripts from a
+ConfigMap but hard-codes the `inventory` operation. Source coordinates come
+from the deployed `radar-api` ConfigMap and `radar-s3-credentials`; destination
+coordinates come only from `radar-raw-s3-credentials`. The Job cannot select a
+copy mode and no target below deletes a Job, PVC, object, or report.
+
+Validate offline, then create one bounded attempt with explicit preprod cluster
+authority:
+
+```text
+make object-storage-inventory-preprod-validate \
+  API_PORT=8882 UI_PORT=5382 MAILDEV_UI_PORT=1182 ENV=test-scw-final
+KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-start \
+  OBJECT_STORAGE_INVENTORY_CONFIRM=1 ENV=preprod
+```
+
+The start target applies only the generated tool ConfigMap, 1 Gi checkpoint
+PVC, and selector-scoped MinIO ingress policy, then creates a new generated-name
+Job. A non-zero bounded attempt keeps its checkpoint on the PVC; repeat the
+same start command to resume automatically. Inspect status without logs and
+fetch receipts into a fresh ignored/local directory without printing their
+contents:
+
+```text
+KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-status \
+  OBJECT_STORAGE_INVENTORY_JOB=<job-name> ENV=preprod
+KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-fetch \
+  OBJECT_STORAGE_INVENTORY_JOB=<job-name> \
+  OBJECT_STORAGE_INVENTORY_EVIDENCE_DIR=tmp/object-storage-inventory/<job-name> \
+  ENV=preprod
+```
+
+Fetch writes `SHA256SUMS` locally. The checkpoint and reports contain object
+keys, so retain them under operator custody. This path is RAW-only; DOCS remains
+fail-closed until its exact OVH destination and identity are approved.
 | `kustomization.yaml` | bundles the resources; stamps the `sentropic` part-of + workspace labels |
 | `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / legacy SCW registry pull (transitional, see `10-rbac.yaml`) |
 
