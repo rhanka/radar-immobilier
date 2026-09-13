@@ -86,6 +86,7 @@
 - [x] C14e: retain only allow-listed name/code/status/request and internal stack-origin diagnostics for model failures.
 - [x] C14f: compose the run AbortSignal into the public Codex transport fetch and prove streamed cancellation with redacted diagnostics.
 - [x] C14g: retain nested abrupt-SSE evidence as an accepted limitation; fail closed and resume on the next cycle, with no T1 upstream patch gate.
+- [x] C18a: run the preprod pilot against the frozen Waterloo oracle after the provisional Lac-des-Seize-Îles input proved scanned.
 - [x] Lot 4: Fable independent post-build review and post-fix PASS; verified findings fixed.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
