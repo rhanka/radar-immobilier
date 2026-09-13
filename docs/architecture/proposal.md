@@ -1,53 +1,70 @@
-# Option A — proposed execution boundary
+# T1 detailed refresh pipeline — proposed, not deployed
 
-[JUDGMENT] This is an option, not an active deployment. The current application
-still reads MinIO. Replacement OVH API buckets and durable credential operations
-are intentionally unresolved until the inventory and owner recovery criteria exist.
-Source: [decision dossier](decision-dossier.md), [continuation audit](continuation-audit.md).
+[FACT] This is the current T1 design from the September 13 refresh handoff, not
+the former Option A and not an observed deployment. It keeps the existing
+preproduction MinIO API roles until T2. Graphify 0.18.0 is published; Immo's
+mesh 0.19 host composition, operated keyring, durable lock and scheduled
+acceptance remain pending implementation.
 
 ```mermaid
 flowchart LR
   municipal["Municipal PV / CAS documents"]
-  subgraph immo_target["PROPOSED · IMMO-owned refresh Job · checkpointed"]
-    acquire["1 Collect + 2 parse/exploit<br/>Immutable document-set manifest"]
-    subgraph llm_target["3 Interpret / ground · Immo consumer of Graphify library"]
-      materialize["Immo · S3 materialization<br/>Document and input-set hashes"]
-      graphify["Graphify 0.18.0 candidate<br/>In-process mesh 0.19 · ESM subpath"]
-      evidence["Immo · extraction / grounding gates<br/>Source, page, citation, schema"]
+  subgraph immo_target["T1 · IMMO-owned refresh · PROPOSED / NOT DEPLOYED"]
+    acquire["1 Acquire + parse<br/>CAS bytes, original page map, immutable input manifest"]
+    subgraph llm_target["2 Profile extraction + grounding · Immo hosts Graphify 0.18.0"]
+      materialize["Materialize checked S3 inputs<br/>stable document/page mappings"]
+      graphify["Graphify 0.18.0 + mesh 0.19 alias<br/>host planner/adapters · bounded attempts"]
+      evidence["Validate profile + grounding<br/>schema, source, page, excerpt before success"]
       materialize --> graphify
       graphify --> evidence
     end
-    publish["Immo · guarded canonical writer<br/>Exclusive publisher / checkpoint"]
-    project["4 Atomic projection<br/>Exclusive PG writer at validated cutover"]
-    post["Immo · 3.4 EMIT then APPLY<br/>APPLY recomputes from PG"]
+    candidate["3 Preserved fresh candidate<br/>complete baseline + stable IDs + manifest/hash receipts"]
+    post["4 Deterministic 3.4 on FRESH candidate<br/>before canonical publication"]
+    publish["5 Guarded full-graph publish<br/>one canonical writer · archive + expected ETag"]
+    project["6 Atomic PG projection<br/>same validated canonical bytes · resumable callback"]
+    served["7 Typed Signal + exact PDF proof<br/>API/UI acceptance · idempotent rerun"]
     acquire --> materialize
-    evidence --> publish
+    evidence --> candidate
+    candidate --> post
+    post --> publish
     publish --> project
-    project --> post
+    project --> served
   end
-  PP_GRAPH[("[PP-GRAPH] Existing OVH refresh bucket<br/>Corpus and canonical prefixes remain distinct roles")]
-  PP_DB[("[PP-DB] Same preprod PostgreSQL<br/>No new Graphify database")]
-  PP_API["[PP-API] Same preprod API<br/>Typed Signals / evidence reader"]
-  PP_UI["[PP-UI] Same preprod UI<br/>Visible findings + PDF proof"]
-  GEO_S3[("[GEO-S3] Shared Geo corpus<br/>Mapped raw/pv-index/cas/ evidence")]
-  credentials["OPEN · credential operations<br/>Writable keyring, unique refresh owner, recovery"]
-  providers["LLM providers<br/>Explicit routing subject / bounded retries"]
+  PP_GRAPH[("[PP-GRAPH] same existing OVH bucket<br/>corpus + candidates + canonical graph roles")]
+  PP_DB[("[PP-DB] same preprod PostgreSQL<br/>atomic projection target")]
+  PP_API["[PP-API] same preprod API<br/>Signal / DesignationEvent + evidence reader"]
+  PP_UI["[PP-UI] same preprod UI<br/>visible Signal + PDF viewer"]
+  PP_MCP["[PP-MCP] same OAuth remote MCP"]
+  subgraph ppminio["[PP-MINIO] existing API store · retained until T2"]
+    PP_RAW[("[PP-RAW] existing MinIO raw role")]
+    PP_DOCS[("[PP-DOCS] existing MinIO documents role")]
+  end
+  GEO_S3[("[GEO-S3] Geo-owned corpus<br/>mapped raw/pv-index/cas/ evidence")]
+  PP_GEO["[PP-GEO] Geo geographic API<br/>input contract; Geo owns geographic data"]
+  credentials["OPEN acceptance · durable keyring + lock<br/>scheduled/manual exclusion, refresh/restart/recovery"]
+  providers["LLM providers<br/>explicit owner scope / model policy"]
   municipal --> acquire
-  acquire -->|"WRITE corpus"| PP_GRAPH
+  acquire -->|"WRITE immutable corpus/state"| PP_GRAPH
   materialize -->|"READ selected corpus"| PP_GRAPH
-  publish -->|"WRITE graph only after gates"| PP_GRAPH
-  project -->|"READ graph"| PP_GRAPH
+  publish -->|"Guarded WRITE complete graph"| PP_GRAPH
+  project -->|"READ published canonical bytes"| PP_GRAPH
   project -->|"Atomic WRITE"| PP_DB
-  post -->|"READ and guarded reproject"| PP_DB
-  post -->|"Guarded canonical WRITE"| PP_GRAPH
+  PP_API -->|"READ typed graph"| PP_DB
+  PP_API -->|"READ exact mapped PDF"| GEO_S3
+  PP_API -->|"READ/WRITE · unchanged through T1"| PP_RAW
+  PP_API -->|"Legacy READ · unchanged through T1"| PP_DOCS
+  PP_API -->|"READ OGC / geographic input"| PP_GEO
+  PP_UI -->|"Application"| PP_API
+  PP_MCP -->|"Authorized tools"| PP_API
   graphify -.->|"Requires operated identity"| credentials
   graphify -->|"plan / prepare / complete"| providers
-  PP_API -->|"READ Signal / DesignationEvent"| PP_DB
-  PP_API -->|"Mapped PDF READ; coverage gate"| GEO_S3
-  PP_UI -->|"Read application"| PP_API
+  served -.->|"Must prove scheduled Job, not job-green proxy"| credentials
 ```
 
-[JUDGMENT] No service mesh network component is required by this option. The
-keyring box denotes an unresolved contract, not a newly selected secret service.
-The existing MinIO API roles must be inventoried and migrated separately; this
-refresh diagram does not assert their removal or choose their replacement buckets.
+[JUDGMENT] The preproduction ladder is installed-package → consumer/integration
+tests → one real typed Signal with exact PDF → unattended schedule after pod
+replacement and credential refresh. Only then may a separately gated production
+promotion begin. No version bump, manual Job success or nonempty graph substitutes
+for those acceptance levels. The workstation becomes optional enrollment/admin,
+not a routine T1 runtime.
+

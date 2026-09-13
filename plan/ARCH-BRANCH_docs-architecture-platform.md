@@ -122,7 +122,7 @@
     - [x] T1 full-platform source.
     - [x] T2 full-platform source.
     - [x] T3 full-platform source.
-  - [ ] Replace Option A with the actual T1 refresh sequence and preserve its acceptance boundaries.
+  - [x] Replace Option A with the actual T1 refresh sequence and preserve its acceptance boundaries.
   - [ ] Render every transition as complete native nested SvelteFlow and sanitized Mermaid; open on the final target.
   - [ ] Replace the allocation referendum with fixed invoice-tariff instructions, unresolved period evidence and D4 provenance.
   - [ ] Make target architecture and sequential transitions the primary Focus reading path; keep billing last.
