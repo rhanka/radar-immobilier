@@ -46,7 +46,8 @@ case "$op" in
     ;;
   list-objects-v2)
     start="$(arg --continuation-token "$@")"; start="${start:-0}"
-    page_size="${FAKE_PAGE_SIZE:-1000}"; all="$FAKE_S3_TMP/all.jsonl"; : >"$all"
+    start_after="$(arg --start-after "$@")"; requested="$(arg --max-keys "$@")"
+    page_size="${FAKE_PAGE_SIZE:-${requested:-1000}}"; all="$FAKE_S3_TMP/all.jsonl"; : >"$all"
     if [ -d "$objects" ]; then
       while IFS= read -r file; do
         rel="${file#"$objects/"}"; size="$(wc -c <"$file")"
@@ -54,6 +55,10 @@ case "$op" in
         jq -cn --arg key "$rel" --argjson size "$size" --arg etag "$etag" \
           '{Key:$key,Size:$size,ETag:$etag}' >>"$all"
       done < <(find "$objects" -type f | sort)
+    fi
+    if [ -n "$start_after" ]; then
+      start="$(jq -s --arg key "$start_after" \
+        '[to_entries[] | select(.value.Key > $key) | .key][0] // length' "$all")"
     fi
     jq -s --argjson start "$start" --argjson size "$page_size" '
       length as $total | (.[$start:($start+$size)]) as $page |
@@ -117,6 +122,18 @@ esac
 AWS
 chmod +x "$TEST_TMP/bin/aws"
 
+cat >"$TEST_TMP/bin/date" <<'DATE'
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "${1:-}" = +%s ] && [ -n "${FAKE_CLOCK_STEP:-}" ]; then
+  current="$(cat "$FAKE_CLOCK_FILE" 2>/dev/null || printf 1000)"
+  printf '%s\n' "$current"; printf '%s' "$((current + FAKE_CLOCK_STEP))" >"$FAKE_CLOCK_FILE"
+else
+  exec /usr/bin/date "$@"
+fi
+DATE
+chmod +x "$TEST_TMP/bin/date"
+
 PASS=0 FAIL=0
 ok() { PASS=$((PASS + 1)); echo "ok: $1"; }
 bad() { FAIL=$((FAIL + 1)); echo "FAIL: $1" >&2; }
@@ -138,7 +155,7 @@ reset_store() {
   mkdir -p "$TEST_TMP/store/source/src/objects" "$TEST_TMP/store/source/src/meta" \
     "$TEST_TMP/store/destination/dst/objects" "$TEST_TMP/store/destination/dst/meta" \
     "$TEST_TMP/reports"
-  : >"$AWS_LOG"; rm -f "$TEST_TMP/version" "$TEST_TMP/failure-counter"
+  : >"$AWS_LOG"; rm -f "$TEST_TMP/version" "$TEST_TMP/failure-counter" "$TEST_TMP/clock"
   fingerprint="$(printf DST_KEY | sha256sum | awk '{print $1}')"
   jq -n --arg fingerprint "$fingerprint" '{schemaVersion:1,provider:"fake-s3",providerVersion:"1",
     destination:{endpoint:"https://destination.test",region:"bhs",bucket:"dst",pathStyle:false},
@@ -146,7 +163,7 @@ reset_store() {
     observedAt:((now - 3600) | todateiso8601),expiresAt:((now + 82800) | todateiso8601),
     transcriptSha256:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     capabilities:{ifNoneMatchCreate:true,ifMatchUpdate:true}}' >"$TEST_TMP/conditional-write-proof.json"
-  unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_ATTEMPTS FAKE_VERSIONING
+  unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_ATTEMPTS FAKE_VERSIONING FAKE_CLOCK_STEP
 }
 put_fixture() {
   local side="$1" bucket="$2" key="$3" content="$4" extra="${5:-}"
@@ -172,7 +189,8 @@ run_tool() {
     conditional_args=(--conditional-write-proof "$TEST_TMP/conditional-write-proof.json")
   env PATH="$TEST_TMP/bin:$PATH" FAKE_S3_ROOT="$TEST_TMP/store" \
     FAKE_S3_TMP="$TEST_TMP" FAKE_AWS_LOG="$AWS_LOG" \
-    FAKE_PAGE_SIZE="${FAKE_PAGE_SIZE:-1000}" FAKE_VERSIONING="${FAKE_VERSIONING:-Enabled}" \
+    FAKE_PAGE_SIZE="${FAKE_PAGE_SIZE:-}" FAKE_VERSIONING="${FAKE_VERSIONING:-Enabled}" \
+    FAKE_CLOCK_STEP="${FAKE_CLOCK_STEP:-}" FAKE_CLOCK_FILE="$TEST_TMP/clock" \
     FAKE_FAIL_SIDE="${FAKE_FAIL_SIDE:-}" FAKE_FAIL_OPERATION="${FAKE_FAIL_OPERATION:-}" \
     FAKE_FAIL_ATTEMPTS="${FAKE_FAIL_ATTEMPTS:-0}" \
     MIGRATION_RUN_ID=test-run MIGRATION_SOURCE_ACCESS_KEY_ID=SRC_KEY \
@@ -260,6 +278,31 @@ TEST_NAME='resume rejects a changed checkpoint configuration before storage acce
 expect_bad run_tool inventory "$TEST_TMP/reports/checkpoint-mismatch" \
   --checkpoint-dir "$TEST_TMP/checkpoint" --page-size 2 --time-budget-seconds 30 --resume
 if [ ! -s "$AWS_LOG" ]; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/a.txt alpha; put_fixture source src raw/b.txt beta
+put_fixture destination dst raw/a.txt alpha; put_fixture destination dst raw/b.txt beta
+FAKE_CLOCK_STEP=2
+TEST_NAME='bounded inventory exits one with a durable resume receipt'
+expect_status 1 run_tool inventory "$TEST_TMP/reports/resume-first" \
+  --checkpoint-dir "$TEST_TMP/resume-checkpoint" --page-size 1 --time-budget-seconds 1
+if jq -e '.resumeRequired == true and .cutoverReady == false' \
+    "$TEST_TMP/reports/resume-first/summary.json" >/dev/null &&
+  jq -e '.sequence == 1 and .startAfter == null and .isTruncated == true' \
+    "$TEST_TMP/resume-checkpoint/provisional/source/index-receipt-000001.json" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+unset FAKE_CLOCK_STEP; : >"$AWS_LOG"
+TEST_NAME='resume continues exclusively after the last committed key'
+expect_ok run_tool inventory "$TEST_TMP/reports/resume-second" \
+  --checkpoint-dir "$TEST_TMP/resume-checkpoint" --page-size 1 --time-budget-seconds 30 --resume
+if grep -Eq $'^source\tlist-objects-v2\t.*--start-after raw/a.txt' "$AWS_LOG" &&
+  jq -e '.sequence == 2 and .startAfter == "raw/a.txt" and .isTruncated == false' \
+    "$TEST_TMP/resume-checkpoint/provisional/source/index-receipt-000002.json" >/dev/null &&
+  jq -e '.resumeRequired == false and .indexComplete == true and .cutoverReady == false' \
+    "$TEST_TMP/resume-checkpoint/progress.json" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
 
 reset_store
 FAKE_FAIL_SIDE=destination FAKE_FAIL_OPERATION=head-bucket FAKE_FAIL_ATTEMPTS=99

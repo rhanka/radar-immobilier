@@ -92,6 +92,7 @@
   - [x] Reconcile resumable-inventory design findings F1-F10 before implementation.
   - [ ] Conditional after independent review: build the resumable whole-bucket `StartAfter` inventory design without weakening copy gates.
     - [x] Bind resumable checkpoints to a canonical credential-free configuration digest.
+    - [x] Commit provisional root pages and resume with exclusive `StartAfter` boundaries.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
 - [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.

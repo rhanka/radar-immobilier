@@ -99,4 +99,60 @@ checkpoint_commit_page() {
      fenceEvidenceDigest:(if $fence=="null" then null else $fence end),
      configDigest:$config,observedAt:(now|todateiso8601)}' >"$tmp_receipt"
   sync -f "$tmp_page" "$tmp_receipt" && mv "$tmp_page" "$page" && mv "$tmp_receipt" "$receipt"
+  CHECKPOINT_COMMITTED_PAGE="$page"
+  CHECKPOINT_PREVIOUS_RECEIPT="$(sha256sum "$receipt" | awk '{print $1}')"
+  [ -z "$last" ] || CHECKPOINT_LAST_KEY="$last"
+  CHECKPOINT_SEQUENCE=$((CHECKPOINT_SEQUENCE + 1))
+  [ "$truncated" = true ] || CHECKPOINT_TERMINAL=true
+}
+
+checkpoint_write_progress() {
+  local side="$1" required="$2" complete="${3:-false}" target="$CHECKPOINT_DIR/progress.json" tmp
+  tmp="$target.tmp"
+  jq -n --arg side "$side" --arg phase "$(checkpoint_phase)" \
+    --arg config "$(jq -r '.configDigest' "$CHECKPOINT_DIR/config.json")" \
+    --arg fence "$FENCE_EVIDENCE_DIGEST" --arg last "$CHECKPOINT_LAST_KEY" \
+    --argjson sequence "$CHECKPOINT_SEQUENCE" --argjson required "$required" \
+    --argjson complete "$complete" '
+    {schemaVersion:1,activeSide:$side,phase:$phase,configDigest:$config,
+     fenceEvidenceDigest:(if $fence=="null" then null else $fence end),
+     nextSequence:$sequence,lastKey:(if $last=="" then null else $last end),
+     resumeRequired:$required,indexComplete:$complete,cutoverReady:false}' >"$tmp"
+  sync -f "$tmp" && mv "$tmp" "$target"
+}
+
+list_objects_checkpoint() {
+  local side="$1" output="$2" bucket token="" response next truncated elapsed
+  local -a args
+  bucket="$(bucket_for "$side")"; checkpoint_load_index "$side" "$output"
+  if $CHECKPOINT_TERMINAL; then
+    printf '%s\n' "$((CHECKPOINT_SEQUENCE - 1))" >"$REPORT_DIR/$side-pages.txt"
+    return 0
+  fi
+  while :; do
+    response="$WORK_DIR/$side-checkpoint-page-$CHECKPOINT_SEQUENCE.json"
+    args=(list-objects-v2 --bucket "$bucket" --max-keys "$PAGE_SIZE")
+    if [ -n "$token" ]; then
+      args+=(--continuation-token "$token")
+    elif [ -n "$CHECKPOINT_LAST_KEY" ]; then
+      args+=(--start-after "$CHECKPOINT_LAST_KEY")
+    fi
+    retry_json "$response" "$side" "${args[@]}" || return 1
+    truncated="$(jq -r '.IsTruncated // false' "$response")"
+    case "$truncated" in true|false) ;; *) return 1 ;; esac
+    checkpoint_commit_page "$side" "$response" "$truncated" || return 1
+    cat "$CHECKPOINT_COMMITTED_PAGE" >>"$output"
+    if [ "$truncated" = false ]; then
+      printf '%s\n' "$((CHECKPOINT_SEQUENCE - 1))" >"$REPORT_DIR/$side-pages.txt"
+      return 0
+    fi
+    next="$(jq -r '.NextContinuationToken // empty' "$response")"
+    [ -n "$next" ] || return 1; token="$next"
+    elapsed=$(( $(date +%s) - CHECKPOINT_RUN_STARTED_EPOCH ))
+    if [ "$elapsed" -ge "$TIME_BUDGET_SECONDS" ]; then
+      CHECKPOINT_RESUME_REQUIRED=true
+      checkpoint_write_progress "$side" true
+      return 2
+    fi
+  done
 }
