@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: radar-immobilier
+
+resources:
+  - checkpoint-pvc.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    app.kubernetes.io/component: object-storage-inventory
+
+configMapGenerator:
+  - name: radar-object-storage-docs-prod-tool
+    files:
+      - migrate-object-storage.sh=../../ci/migrate-object-storage.sh
+      - object-storage-checkpoint.sh=../../ci/object-storage-checkpoint.sh
