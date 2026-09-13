@@ -10,7 +10,7 @@ make -f docs/architecture/Makefile render ENV=docs-architecture
 make -f docs/architecture/Makefile serve ENV=docs-architecture
 ```
 
-Open `http://127.0.0.1:5188`. Each diagram provides zoom, fit, full-screen and Mermaid source controls. Escape exits the expanded view. The server binds only to loopback and serves an explicit file allowlist; it does not expose the repository.
+Open `http://127.0.0.1:5188`. Each diagram opens at a readable scale with scrolling and provides zoom, fit, full-screen and Mermaid source controls. Use **Ajuster** for the whole-diagram overview. Escape exits the expanded view. The server binds only to loopback and serves an explicit file allowlist; it does not expose the repository.
 
 `assets` downloads pinned Marked, DOMPurify and Mermaid browser bundles. They are served locally afterward: viewing the document does not send its content to a rendering service. External evidence links only open when followed. `vendor/`, `architecture.html` and the inspection screenshot are generated local artifacts, ignored by Git.
 

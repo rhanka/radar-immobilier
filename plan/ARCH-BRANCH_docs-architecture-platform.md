@@ -39,6 +39,7 @@
 - [x] **Lot 2 — Render with h2a Focus and open the local HTML page.**
 - [x] **Lot 3 — Verify Mermaid rendering, links and documentation diff.**
   - [x] Scope check and static syntax checks pass; all four diagrams render in Chromium.
+  - [x] Browser checks: zoom, full-screen, Escape, seven navigation links; no page overflow at 1440px/390px.
 
 ## Merge / Close
 - [ ] Local documentation handoff; no production action or branch merge requested.
