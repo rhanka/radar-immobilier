@@ -10,7 +10,6 @@ labels:
 
 resources:
   - checkpoint-pvc.yaml
-  - minio-ingress.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
