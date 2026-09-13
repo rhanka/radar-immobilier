@@ -16,7 +16,7 @@ KEYRING_SOURCE := /home/antoinefa/.sentropic/llm-mesh-keyring
 BASELINE_GOLD := $(MAIN_ROOT)/.lanes/conductor/tmp/bench-llm/bench/v2/gold.json
 PREFLIGHT_FILE ?= preflight-before.json
 
-.PHONY: test test-v3 test-score-v3 score-v3 runtime-text freeze-v3 prepare-prompts-v3 run-v3 preflight-v3 run-v3-sol-normal quota inspect-validation
+.PHONY: test test-v3 test-score-v3 score-v3 freeze-blind-v3 runtime-text freeze-v3 prepare-prompts-v3 run-v3 preflight-v3 run-v3-sol-normal quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -80,6 +80,14 @@ score-v3:
 	  --mount type=bind,source=$(V3_RESULTS),target=/results \
 	  -e BENCHMARK_SCORE_ROOT=/results -e BENCHMARK_SCORE_OUTPUT=/results/comparison.json \
 	  -w /src $(NODE_IMAGE) node tools/refresh-benchmark/score-v3.mjs
+
+freeze-blind-v3:
+	test "$(ENV)" = "test-refresh-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V3_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_BUNDLE_ROOT=/results \
+	  -w /src $(NODE_IMAGE) node tools/refresh-benchmark/freeze-blind-v3.mjs
 
 freeze-v3: runtime-text
 	test "$(ENV)" = "test-refresh-benchmark"
