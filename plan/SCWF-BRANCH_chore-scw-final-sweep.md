@@ -101,6 +101,7 @@
     - [x] Bound each checkpoint-mode storage call by the declared time budget.
     - [x] Propagate page and phase-summary durable commit failures before live inventory.
     - [x] Document full fenced body re-reads and inventory-proof freshness custody.
+    - [x] Prepare a guarded RAW-only preprod Job with durable checkpoints and exact credential references.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
 - [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
