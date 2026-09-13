@@ -53,6 +53,7 @@
 - [x] C08: port baseline-first v2.3 mapping with exclusions and exact original-PDF references on nodes and edges.
 - [x] C09: cover stable IDs, baseline/exclusion/source preservation, wrong-page refusal and 3.4 field derivation.
 - [x] C10a: persist canonical run identity and conservative maximum-attempt chunk reservations in S3.
+- [x] C10b: persist immutable candidate hashes and redacted per-city stage receipts in S3.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
