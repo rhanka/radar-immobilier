@@ -91,10 +91,16 @@ async function main(): Promise<void> {
       const startedAt = Date.now();
       const schemaSha256 = createHash("sha256").update(input.schema).digest("hex");
       const promptSha256 = createHash("sha256").update(input.prompt).digest("hex");
-      try { return await bundle.textClient.generateJson(input); }
-      finally {
-        logger.info({ modelCalls, latencyMs: Date.now() - startedAt, provider: selectedProvider,
-          model, effort, schemaSha256, promptSha256 }, "refresh-pv: model call finished");
+      const receipt = { modelCalls, provider: selectedProvider, model, effort, schemaSha256, promptSha256 };
+      try {
+        const result = await bundle.textClient.generateJson(input);
+        logger.info({ ...receipt, latencyMs: Date.now() - startedAt,
+          status: "completed" }, "refresh-pv: model call completed");
+        return result;
+      } catch (error) {
+        logger.warn({ ...receipt, latencyMs: Date.now() - startedAt, status: "failed",
+          aborted: controller.signal.aborted }, "refresh-pv: model call failed");
+        throw error;
       }
     } };
   logger.info({ city, provider: selectedProvider, model, effort, timeoutMs }, "refresh-pv: starting");
