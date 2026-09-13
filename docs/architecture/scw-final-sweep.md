@@ -91,21 +91,21 @@ copy and cutover must preserve this single-writer contract.
 | `deploy/k8s/refresh-cronjobs/**` | Both preprod CronJobs unsuspended and patched to OVH graph bucket | Active, already OVH |
 | `deploy/k8s/refresh-cronjobs-prod/**` | Unsuspends base CronJobs without replacing SCW values; enable variable absent | Active-capable dormant, critical before arming |
 | `deploy/k8s/71-networkpolicy-graph-projection-minio-preprod.yaml`, `72-networkpolicy-grounding-minio-preprod.yaml` | Manual-apply MinIO policies; runtime presence unproved | Active-capable manual |
-| `.env.example`, `docker-compose*.yml`, Makefile MinIO defaults | Developer/test MinIO; deployed prescriptions within `.env.example` need separation | Local-only except deployment guidance |
-| `scripts/mount-scw.sh`, `scripts/umount-scw.sh` | Executable legacy manual SCW mounts | Active-capable manual |
+| `.env.example`, `docker-compose*.yml`, Makefile MinIO defaults | Developer/test MinIO; `.env.example` no longer prescribes a deployed provider | Local-only |
+| `scripts/mount-scw.sh`, `scripts/umount-scw.sh` | Executables removed in the first source slice; historical references retained | Retired from active source |
 
 ## Jobs and CronJobs
 
 | Manifests | Storage behavior | Disposition |
 | --- | --- | --- |
-| `31-graph-projection-job.yaml` | Inherits configured object store/optional scrape credentials | Rebind explicitly per environment |
-| `32-graph-projection-only-job.yaml`, `33-scrape-job.yaml`, `33b-scrape-cities-job.yaml` | Direct SCW docs-pocs | Remove literal and obsolete duplicate route |
+| `31-graph-projection-job.yaml`, `32-graph-projection-only-job.yaml` | Required `GRAPH_S3_*` ConfigMap/Secret refs; no literal or optional fallback | Source-prepared; dispatch blocked until namespace bindings are verified |
+| `33-scrape-job.yaml`, `33b-scrape-cities-job.yaml` | Required `SCRAPE_S3_*` ConfigMap/Secret refs; no literal or optional fallback | Source-prepared; dispatch blocked until namespace bindings are verified |
 | `32b-reproject-etape-job.yaml` | Direct SCW, old image, manual legacy | Retire |
 | `34-refresh-cronjob.yaml` | Two suspended base CronJobs with direct SCW; overlays may unsuspend | Make base provider-neutral; require per-env OVH binding |
 | `35-consistency-snapshot-job.yaml`, `35-consistency-snapshot-cronjob.yaml`, `35-run-geo-mapper-job.yaml` | PostgreSQL only; CronJob is suspended | Retain; not an object-store dependency |
 | `35a-populate-geo-job.yaml`, `35b-populate-geo-cronjob.yaml` | PostgreSQL/Geo HTTP; scheduled definition not bundled | Retain; prove absence/presence in runtime inventory |
-| `36-db-migrate-job.yaml` | PostgreSQL work but inherits unused S3 secret/config | Remove unnecessary S3 privilege during remediation |
-| `37-graphify34-apply-job.yaml`, `38-graphify34-emit-candidates-job.yaml`, `39-export-graph-nodes-job.yaml`, `40-export-gt-designation-events-job.yaml` | Direct SCW docs-pocs | Rebind or retire with stale run-job options |
+| `36-db-migrate-job.yaml` | PostgreSQL-only command; unused S3 Secret reference removed | Source-prepared; safe for existing CD path |
+| `37-graphify34-apply-job.yaml`, `38-graphify34-emit-candidates-job.yaml`, `39-export-graph-nodes-job.yaml`, `40-export-gt-designation-events-job.yaml` | Required `GRAPH_S3_*` ConfigMap/Secret refs; no literal or optional fallback | Source-prepared; dispatch blocked until namespace bindings are verified |
 | `41-grounding-citation-job.yaml` | SCW source to MinIO destination | Retire after T1 replacement and parity proof |
 | preprod projection and refresh diagnostic Jobs | Direct MinIO destinations | Rebind before MinIO decommission |
 
@@ -121,6 +121,32 @@ copy and cutover must preserve this single-writer contract.
   SCW PVC/ingress/suspended Jobs were not purged at handoff. Those are shared
   blockers to a global claim, not Immo mutation authority.
 - Shared MatchID registry scopes remain under reconciliation with `poc-k8s`.
+
+## First source slice checkpoint and remaining clients
+
+This branch has prepared provider-neutral bindings for the released manual Jobs,
+removed unused migration credentials, and retired the two uncalled mount scripts.
+It has not provisioned a bucket, copied data, deployed a manifest, or migrated a
+runtime. The required `radar-api` graph/scrape keys are absent in the freshly read
+preproduction ConfigMap; the scrape Secret is absent and production is unverified.
+
+Remaining executable clients, in risk order:
+
+1. The armed production grounding publisher still writes the legacy SCW docs-pocs
+   bucket. T1 replacement, parity, fencing, and recovery proof gate retirement.
+2. The deployed API raw store and derived scrape store still use in-cluster MinIO
+   in preproduction; production bindings remain unverified.
+3. The armed refresh diagnostic still writes the MinIO documents bucket. Its
+   manifest and CI variable were deliberately left unchanged in this slice.
+4. Production refresh manifests still inherit SCW storage if armed; their enable
+   variable is absent, but the executable definitions remain.
+5. The preproduction grounding bridge and its MinIO policies remain until T1
+   acceptance; `32b-reproject-etape-job.yaml` remains a manual legacy SCW client.
+6. `.github/workflows/run-job.yaml` still exposes manual routes, including the
+   duplicate scrape route. The source-prepared Jobs now fail closed until their
+   required bindings exist; the workflow itself was outside this slice.
+7. The MinIO StatefulSet, Service, PVC and network policies remain intentionally.
+   Their deletion requires copy/parity, paired DB/object recovery, and zero consumers.
 
 ## Minimal remediation file map
 
