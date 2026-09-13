@@ -78,6 +78,9 @@ run_bad "$CASE_ROOT" 'rejects a restored MinIO grounding workflow'; rm -rf "$CAS
 fixture; touch "$CASE_ROOT/deploy/k8s/41-grounding-citation-job.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored SCW-to-MinIO grounding Job'; rm -rf "$CASE_ROOT"
 
+fixture; mkdir -p "$CASE_ROOT/deploy/k8s/grounding-preprod"; touch "$CASE_ROOT/deploy/k8s/grounding-preprod/kustomization.yaml"
+run_bad "$CASE_ROOT" 'rejects a restored MinIO grounding overlay'; rm -rf "$CASE_ROOT"
+
 fixture; mkdir -p "$CASE_ROOT/deploy/k8s/refresh-diag"; touch "$CASE_ROOT/deploy/k8s/refresh-diag/diag-refresh-job.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored refresh diagnostic manifest'; rm -rf "$CASE_ROOT"
 
