@@ -74,6 +74,7 @@
   - [x] Reconcile the newer in-process Graphify mesh proposal and current upstream PRs; relay the no-start gate to Graphify.
   - [ ] Present eight decision sections, symmetric options, acceptance criteria and real reviewer findings.
   - [x] Draft D1 with three symmetric delivery sequences, G0–G6 gates and explicit unresolved recovery criteria.
+  - [x] Add an explicitly proposed, Immo-owned in-process Graphify scene; no invented replacement API bucket.
   - [ ] Map Mermaid identities and relationships to native SvelteFlow groups and navigable subflows.
   - [ ] Verify the offline HTML, mapping coverage, navigation and local-only owner notes.
 - [ ] Local documentation handoff; no production action or branch merge requested.
