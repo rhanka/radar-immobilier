@@ -106,3 +106,28 @@ object-storage-docs-prod-status: ## Read the PROD DOCS inventory Job and Pod sta
 	  job/$(OBJECT_STORAGE_DOCS_PROD_JOB) -o wide
 	@$(KUBECTL) -n $(OBJECT_STORAGE_DOCS_PROD_NAMESPACE) get pods \
 	  -l 'job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)' -o wide
+
+.PHONY: object-storage-minio-prod-scale-zero
+object-storage-minio-prod-scale-zero: ## Scale only the proven-empty, unconsumed PROD MinIO to zero
+	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
+	  [ "$(OBJECT_STORAGE_MINIO_PROD_SCALE_CONFIRM)" != 1 ]; then \
+	  echo '[object-storage-minio-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
+	  [ "$$server" = "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ] || \
+	    { echo '[object-storage-minio-prod] refused non-OVH context'; exit 1; }; \
+	  replicas="$$( $(KUBECTL) -n "$$namespace" get statefulset/radar-minio \
+	    -o jsonpath='{.spec.replicas}' )"; \
+	  if [ "$$replicas" = 1 ]; then \
+	    buckets="$$( $(KUBECTL) -n "$$namespace" exec radar-minio-0 -- /bin/sh -ceu \
+	      'mc alias set local http://127.0.0.1:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" >/dev/null; mc ls --json local' )"; \
+	    [ -z "$$buckets" ] || { echo '[object-storage-minio-prod] MinIO is not empty'; exit 1; }; \
+	    $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | \
+	      jq -e 'any(.spec.template.spec.containers[].env[]?; .name == "S3_ENDPOINT" and .value == "https://s3.fr-par.scw.cloud")' >/dev/null; \
+	    [ "$$( $(KUBECTL) -n "$$namespace" get cronjobs -o json | jq '.items|length' )" = 0 ]; \
+	    $(KUBECTL) -n "$$namespace" scale statefulset/radar-minio --replicas=0 >/dev/null; \
+	    $(KUBECTL) -n "$$namespace" wait --for=delete pod/radar-minio-0 \
+	      --timeout=120s >/dev/null; \
+	  else [ "$$replicas" = 0 ]; fi; \
+	  echo '[object-storage-minio-prod] empty unconsumed MinIO replicas=0'
