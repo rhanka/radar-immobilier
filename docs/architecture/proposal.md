@@ -1,25 +1,21 @@
-# T1 detailed refresh pipeline — proposed, not deployed
+# T1 detailed refresh pipeline — implemented, acceptance in progress
 
-[FACT] This is the current T1 design from the September 13 refresh handoff, not
-the former Option A and not an observed deployment. It keeps the existing
-preproduction MinIO API roles until T2. Graphify stays exactly 0.18.0; the PDF
-contract name `immo-pv-extraction-v3` is not a 0.18.3 dependency version. At
-Fable returned BLOCK at Immo `ac3a7150`. Corrective commits `537b9e0c` and
-`3d9ed43c` pass scoped 34/34, integration 4/4 and typecheck, while Fable re-review
-remains in progress. Retain llm-mesh 0.19.0: on rare nested `UND_ERR_SOCKET`,
-Graphify fails closed, the Job fails and the next cycle resumes from durable state.
-No corruption or in-process retry is claimed. Diagnosis is deferred to `s-conductor`
-without an implementation request; 0.19.1 is not a T1 gate. T1 remains blocked;
-real-provider Signal and Kubernetes acceptance are absent.
+[FACT] This is the implemented T1 path under acceptance on September 13. Graphify
+stays exactly 0.18.0; the PDF contract name `immo-pv-extraction-v3` is not a
+0.18.3 dependency version. Luna high is selected through llm-mesh. The first
+Kubernetes run failed before invoking the LLM because the chosen input object was
+`.html`, while the extraction profile requires PDF. That result proves input
+validation and fail-closed behavior only: provider completion, a typed Signal,
+the exact PDF and unattended scheduling remain open.
 
 ```mermaid
 flowchart LR
   municipal["Municipal PV / CAS documents"]
-  subgraph immo_target["T1 · IMMO-owned refresh · PROPOSED / NOT DEPLOYED"]
+  subgraph immo_target["T1 · IMMO-owned refresh · IMPLEMENTED / ACCEPTANCE OPEN"]
     acquire["1 Acquire + parse<br/>CAS bytes, original page map, immutable input manifest"]
     subgraph llm_target["2 Profile extraction + grounding · Immo hosts Graphify 0.18.0"]
       materialize["Materialize checked S3 inputs<br/>stable document/page mappings"]
-      graphify["Graphify 0.18.0 + llm-mesh 0.19.0<br/>rare socket error: fail Job → durable next-cycle resume"]
+      graphify["Graphify 0.18.0 + llm-mesh<br/>Luna high selected · first run did not reach LLM"]
       evidence["Validate profile + grounding<br/>schema, source, page, excerpt before success"]
       materialize --> graphify
       graphify --> evidence
@@ -41,15 +37,16 @@ flowchart LR
   PP_API["[PP-API] same preprod API<br/>Signal / DesignationEvent + evidence reader"]
   PP_UI["[PP-UI] same preprod UI<br/>visible Signal + PDF viewer"]
   PP_MCP["[PP-MCP] same OAuth remote MCP"]
-  subgraph ppminio["[PP-MINIO] existing API store · retained until T2"]
-    PP_RAW[("[PP-RAW] existing MinIO raw role")]
+  subgraph ppminio["[PP-MINIO] document/history store · retained until T2 gates"]
+    PP_RAW[("[PP-RAW] old raw identity · recovery only")]
     PP_DOCS[("[PP-DOCS] empty MinIO fallback")]
     PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] useful replay/history<br/>retained for T2 parity + recovery")]
   end
+  PP_RAW_OVH[("[PP-RAW-OVH] active API raw role<br/>parity + rebind verified")]
   GEO_S3[("[GEO-S3] Geo-owned corpus<br/>mapped raw/pv-index/cas/ evidence")]
   PP_GEO["[PP-GEO] Geo geographic API<br/>input contract; Geo owns geographic data"]
   credentials["OPEN acceptance · durable keyring + lock<br/>scheduled/manual exclusion, refresh/restart/recovery"]
-  providers["LLM providers<br/>explicit owner scope / model policy"]
+  providers["Luna high<br/>selected provider path · not reached on first run"]
   municipal --> acquire
   acquire -->|"WRITE immutable corpus/state"| PP_GRAPH
   materialize -->|"READ selected corpus"| PP_GRAPH
@@ -58,7 +55,7 @@ flowchart LR
   project -->|"Atomic WRITE"| PP_DB
   PP_API -->|"READ typed graph"| PP_DB
   PP_API -->|"READ exact mapped PDF"| GEO_S3
-  PP_API -->|"READ/WRITE · unchanged through T1"| PP_RAW
+  PP_API -->|"READ/WRITE after RAW cutover"| PP_RAW_OVH
   PP_API -->|"Legacy READ · unchanged through T1"| PP_DOCS
   PP_API -->|"READ OGC / geographic input"| PP_GEO
   PP_UI -->|"Application"| PP_API
@@ -68,12 +65,9 @@ flowchart LR
   served -.->|"Must prove scheduled Job, not job-green proxy"| credentials
 ```
 
-[JUDGMENT] Before real extraction, compare the historical/manual baseline with
-v1, v2 and v3 over the same five PDFs, using only non-simulated traceable runs.
-The model is not selected, Cloud Code is not enrolled and no score is claimed.
-The remaining preproduction ladder is installed-package → consumer/integration
-tests → Fable re-review → benchmark → one real typed Signal with exact PDF → unattended schedule after pod
-replacement and credential refresh. Only then may a separately gated production
-promotion begin. No version bump, manual Job success or nonempty graph substitutes
-for those acceptance levels. The workstation becomes optional enrollment/admin,
-not a routine T1 runtime.
+[JUDGMENT] Correct the input selection to a real PDF, then require a traceable
+provider completion, one real typed Signal with its exact PDF, idempotent replay
+and unattended schedule after pod replacement and credential refresh. Only then
+may a separately gated production promotion begin. Model selection or a started
+Job does not substitute for those acceptance levels. The workstation remains
+available for administration/fallback until T1 is accepted.
