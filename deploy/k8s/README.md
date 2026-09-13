@@ -235,6 +235,8 @@ deploy/ci/migrate-object-storage.sh <inventory|copy|verify|delta>
   [--execute-copy] [--fence-record FILE]
   [--reconcile-owned --ledger FILE]
   [--conditional-write-proof FILE]
+  [--checkpoint-dir DIR] [--page-size N] [--time-budget-seconds N] [--resume]
+  [--inventory-proof FILE]
   [--concurrency N] [--retries N] [--max-failures N]
   [--max-object-bytes N]
 ```
@@ -250,6 +252,11 @@ Every executed copy also requires a capability proof, no older and valid for no
 more than 48 hours, bound to the exact destination and migration identity. The
 operator must validate and retain its external probe transcript; tool receipts
 keep `providerEnforcementValidated:false`.
+For a large inventory, use `--checkpoint-dir` with a fresh `--report-dir` on
+each attempt; add `--resume` after the first. Complete the separate provisional
+and fenced chains before any write. `copy --execute-copy` then requires
+`--inventory-proof <checkpoint>/final-inventory.json` plus the same non-empty
+`--fence-record`; it never treats `fenceValidated:false` as external approval.
 
 DOCS `copy`, `verify`, and `delta` require `--expected-manifest`. The versioned
 JSON document has top-level `sources[]` and `objects[]`; every object holds the
