@@ -46,14 +46,18 @@
   - [x] Distinguish the deployed paths from E1–E5 target and Geo's geographic contribution.
   - [x] Regenerate Focus HTML; Chromium renders four diagrams with zoom/full-screen/Escape and no desktop/mobile page overflow.
 - [ ] **Lot 5 — Reconcile infrastructure and processing resource identities.**
-  - [ ] Obtain the owner-requested independent Gemini 3.8 High review.
+  - [x] Obtain the owner-requested independent Gemini 3.8 High review via h2a run agy; verdict NEEDS CHANGES at 2ab8da2b.
   - [x] Add environment-qualified store identities and the live Geo PDF reader to the infrastructure overview.
   - [x] Map each Immo DB and object-store role to environment-qualified shared identifiers in both diagrams.
   - [x] Verify reader/writer arrows against source and whitelisted deployment configuration.
   - [x] Reuse Geo bucket/API identities in diagram 3; distinguish shared PDF reads from preprod normalized products.
   - [x] Regenerate Focus; verify 16 shared resource identities and all four diagrams in Chromium.
   - [x] Confirm the resource check rejects baseline 73762926 and passes the corrected document.
-  - [ ] Reconcile independent reviewer findings: Gemini launch rejected by security; owner payload approval pending.
+  - [ ] Reconcile independent findings against main and runtime; do not promote declared legacy Jobs to active paths.
+- [ ] **Lot 6 — Owner feedback: effective storage and eradication status.**
+  - [ ] Re-fetch main, check migration PRs and re-audit whitelisted live preprod bindings.
+  - [ ] Obtain OVH production read-only evidence; never substitute the legacy SCW cluster.
+  - [ ] Exclude unobserved legacy paths from operational diagrams and regenerate Focus.
 
 ## Merge / Close
 - [ ] Local documentation handoff; no production action or branch merge requested.
