@@ -14,7 +14,7 @@
 - [x] Allowed: `plan/R018-BRANCH_feat-refresh-018.md`, `docs/spec/SPEC_EVOL_REFRESH_018.md`, `docs/reviews/refresh-018/**`.
 - [x] R018-EX1 — owner-requested build released after Fable GO_WITH_CHANGES; exact C01–C14 paths below. Impact: isolated application/dependency/tests only; rollback: revert branch commits; no deployed state changes.
 - [x] R018-EX2 — owner-approved single 2,157-line generated dependency-pair exception for Graphify 0.18.0 plus the refresh mesh 0.19.0 alias, preserving chat mesh 0.1.2; rollback: revert `api/package.json` and `package-lock.json` together.
-- [x] Allowed C01–C14: `api/package.json`, `package-lock.json`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state,run}.ts`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state}.test.ts`; `api/tests/fixtures/refresh-018/oracle.json`; `api/tests/integration/refresh-018.spec.ts`; `api/src/scripts/refresh-pv.ts`. Braces enumerate exact filenames, not open globs.
+- [x] Allowed C01–C14: `api/package.json`, `package-lock.json`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state,run}.ts`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state,run}.test.ts`; `api/tests/fixtures/refresh-018/oracle.json`; `api/tests/integration/refresh-018.spec.ts`; `api/src/scripts/refresh-pv.ts`. Braces enumerate exact filenames, not open globs.
 - [x] Forbidden: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent entrypoints, `.track/**`, other branch plans, other repositories.
 - [x] R018-EX3 — owner-authorized urgent preprod completion releases C15–C19 and C25 plus `deploy/k8s/refresh-cronjobs/{refresh-018.mk,keyring-summary.mjs,enroll-cloud-code.mjs,oauth-consent.mjs}` for make-only enrollment/consent/inspect/apply/trigger/observe. Impact: one isolated Graphify refresh CronJob, durable keyring PVC/bootstrap references and one controlled preprod Job; rollback: suspend/delete only `radar-refresh-pv` and retain the last complete S3/PG graph. Production, sentropic, geo and poc-k8s remain untouched.
 - [x] Released C15–C19/C25 paths: `api/Dockerfile`; `deploy/k8s/34-refresh-keyring-pvc.yaml`; `deploy/k8s/34-refresh-cronjob.yaml`; `deploy/k8s/refresh-cronjobs/kustomization.yaml`; `deploy/k8s/refresh-cronjobs/refresh-018.mk`; `deploy/k8s/refresh-cronjobs/keyring-summary.mjs`; `deploy/k8s/refresh-cronjobs/enroll-cloud-code.mjs`; `deploy/k8s/refresh-cronjobs/oauth-consent.mjs`; `docs/reviews/refresh-018/acceptance.md`.
@@ -88,6 +88,7 @@
 - [x] C14g: retain nested abrupt-SSE evidence as an accepted limitation; fail closed and resume on the next cycle, with no T1 upstream patch gate.
 - [x] C18a: run the preprod pilot against the frozen Waterloo oracle after the provisional Lac-des-Seize-Îles input proved scanned.
 - [x] C18b: seed the encrypted keyring into a non-root-owned PVC subdirectory so llm-mesh can enforce its required directory mode.
+- [x] C18c: return the live pilot to one acquired document after Waterloo proved the exact-PDF path, avoiding an unpaced positional search window.
 - [x] Lot 4: Fable independent post-build review and post-fix PASS; verified findings fixed.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
