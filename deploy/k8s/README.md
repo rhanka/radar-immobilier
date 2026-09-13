@@ -199,6 +199,80 @@ namespace has been inventoried and all referenced keys have been validated.
 The armed refresh diagnostic remains on its existing binding pending that later
 cutover; this first slice deliberately does not edit or deploy it.
 
+## RAW/DOCS object-storage migration proof tool
+
+`deploy/ci/migrate-object-storage.sh` is a bounded, non-destructive RAW/DOCS
+inventory and copy tool. It does not support GRAPH, Geo, TEM, deletion, bucket
+provisioning, IAM changes, writer fencing, deployment, or rollback. Its output
+is offline/operator evidence, not runtime acceptance.
+
+The source and destination credentials are separate process inputs and are
+never written to reports:
+
+```text
+MIGRATION_SOURCE_ACCESS_KEY_ID
+MIGRATION_SOURCE_SECRET_ACCESS_KEY
+MIGRATION_DESTINATION_ACCESS_KEY_ID
+MIGRATION_DESTINATION_SECRET_ACCESS_KEY
+```
+
+Every invocation supplies complete endpoint, region, bucket, and path-style
+coordinates for both sides, at least one classified `prefix/`, and a fresh
+report directory. `head-bucket` proves that each supplied identity can address
+the exact target. Reports contain only a SHA-256 fingerprint of each access-key
+ID. `copy` is a dry run unless `--execute-copy` is present; there is no delete
+operation.
+
+```text
+deploy/ci/migrate-object-storage.sh <inventory|copy|verify|delta>
+  --environment <preprod|prod> --plane <RAW|DOCS>
+  --source-endpoint URL --source-region REGION --source-bucket BUCKET
+  --source-path-style <true|false>
+  --destination-endpoint URL --destination-region REGION
+  --destination-bucket BUCKET --destination-path-style <true|false>
+  --prefix PREFIX/ [--prefix PREFIX/ ...] --report-dir DIR
+  [--exclude-prefix PREFIX/ ...] [--expected-manifest FILE]
+  [--execute-copy] [--fence-record FILE]
+  [--reconcile-owned --ledger FILE]
+  [--concurrency N] [--retries N] [--max-failures N]
+  [--max-object-bytes N]
+```
+
+Included prefixes may not overlap each other or any repeated explicit
+exclusion. Every source key is streamed and classified as included, excluded,
+or unclassified; any unclassified key blocks proof. Manifests record byte size,
+streamed SHA-256, content headers, user metadata, tags, diagnostic ETag, and
+VersionId. ETags are never treated as content hashes. Defaults are concurrency
+4, three attempts per operation, 20 object failures, and a 5 GB per-object
+temporary-file ceiling; the bounded overrides are recorded in `summary.json`.
+
+DOCS `copy`, `verify`, and `delta` require `--expected-manifest`. The versioned
+JSON document has top-level `sources[]` and `objects[]`; every object holds the
+approved content fields above plus `sources[]` with exact physical coordinate
+provenance. Multi-source entries require `observedAt`, `manifestSha256`, and
+`fenceSha256` for every physical source. The tool hashes this input, refuses
+source overlap with different bytes or metadata, and permits destination extras
+only when they are objects in the approved union. It never selects which source
+is authoritative and never claims the supplied fence was validated.
+
+Missing objects are uploaded from bounded temporary files with
+`If-None-Match: *`, then completely re-read and entered in
+`copy-ledger.jsonl`. A normal conflict is never overwritten. The exceptional
+`--reconcile-owned` mode additionally requires a non-empty fence record, the
+original immutable ledger, enabled destination versioning, exact current
+destination equality with that ledger, and a readable non-null prior VersionId.
+It re-reads the prior version's body and metadata before an `If-Match` write,
+then records distinct recoverable prior/new versions and hashes. Any foreign or
+independently modified object fails closed.
+
+Only `delta` can set `cutoverReady: true`, and only for complete hash/metadata
+parity with zero errors plus a non-empty fence artifact digest. The receipt
+also records `fenceValidated: false`: the conductor must separately validate
+writer fencing, freshness across every physical source, application bindings,
+real reads/writes, paired DB/object recovery, and the preprod-before-production
+cutover. Source retention and any later deletion remain separately approved
+operator actions.
+
 ## Production refresh CronJobs
 
 - Arm the CD step with `gh variable set REFRESH_CRONJOB_PROD_ENABLED --body true`.

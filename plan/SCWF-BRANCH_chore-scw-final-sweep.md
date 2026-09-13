@@ -72,6 +72,7 @@
     - [x] Cover exact owned reconciliation, versioning refusal, foreign change and fenced delta.
     - [x] Extend the binding gate and retain the explicit pending-client ledger.
     - [x] Invoke the combined offline object-storage gate once from CI quality.
+    - [x] Document the bounded operator contract and explicit non-acceptance limits.
 - [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
 - [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
