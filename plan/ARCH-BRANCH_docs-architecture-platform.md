@@ -71,7 +71,7 @@
 ## Merge / Close
 - [ ] **Lot 8 — Replace the orientation prototype with a native Focus decision dossier.**
   - [x] Read the September 7 Sentropic decision-kit reference and owner-validated Focus dossier contract.
-  - [ ] Reconcile the newer in-process Graphify mesh proposal and current upstream PRs.
+  - [x] Reconcile the newer in-process Graphify mesh proposal and current upstream PRs; relay the no-start gate to Graphify.
   - [ ] Present eight decision sections, symmetric options, acceptance criteria and real reviewer findings.
   - [ ] Map Mermaid identities and relationships to native SvelteFlow groups and navigable subflows.
   - [ ] Verify the offline HTML, mapping coverage, navigation and local-only owner notes.
