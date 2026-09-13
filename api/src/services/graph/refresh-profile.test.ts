@@ -193,8 +193,9 @@ describe("refresh profile extraction", () => {
       modality: "pdf", page: oracle.page, excerpt: oracle.excerpt }]; }, "invalid original PDF identity");
     await reject((value) => { value.nodes[0]!.citations![0]!.excerpt = ""; }, "ungrounded PDF excerpt");
     await reject((value) => { const citation = value.nodes[0]!.citations![0]!;
-      delete citation.excerpt; citation.quote = oracle.excerpt; }, "ungrounded PDF excerpt");
-    await reject((value) => { delete value.nodes[0]!.source_file; }, "Invalid Graphify extraction");
+      delete (citation as { excerpt?: string }).excerpt; citation.quote = oracle.excerpt; }, "ungrounded PDF excerpt");
+    await reject((value) => { delete (value.nodes[0]! as { source_file?: string }).source_file; },
+      "Invalid Graphify extraction");
   });
 
   it("should reject non-completed output and unsupported empty scanned chunks", async () => {
