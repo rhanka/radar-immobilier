@@ -1,3 +1,4 @@
+import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { readFileSync } from "node:fs";
@@ -18,7 +19,9 @@ import {
 import { InMemoryKeyring } from "@sentropic/llm-mesh-refresh/node";
 import { describe, expect, it, vi } from "vitest";
 
-import { bindRefreshAbortSignal, createRefreshMesh } from "./refresh-mesh.js";
+import {
+  bindRefreshAbortSignal, bindRefreshFetchSignal, createRefreshMesh, refreshErrorDiagnostic,
+} from "./refresh-mesh.js";
 
 const response = {
   id: "response-1",
@@ -146,6 +149,43 @@ describe("refresh mesh", () => {
     await bound.generateValidated({ messages: [] }, () => undefined);
     expect(seen).toEqual([controller.signal, controller.signal]);
     expect(efforts).toEqual(["high", "high"]);
+  });
+
+  it("should abort an active response stream through the bound transport fetch", async () => {
+    const server = createServer((_request, reply) => {
+      reply.writeHead(200, { "content-type": "text/event-stream" });
+      reply.write("data: partial\n\n");
+    });
+    await new Promise<void>((resolveListen) => server.listen(0, "127.0.0.1", resolveListen));
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("Expected a TCP test address");
+    const run = new AbortController();
+    const request = new AbortController();
+    try {
+      const reply = await bindRefreshFetchSignal(fetch, run.signal)(
+        `http://127.0.0.1:${address.port}`, { signal: request.signal },
+      );
+      const reader = reply.body!.getReader();
+      expect(new TextDecoder().decode((await reader.read()).value)).toContain("partial");
+      const pending = reader.read();
+      run.abort();
+      await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+      expect(request.signal.aborted).toBe(false);
+    } finally {
+      server.closeAllConnections();
+      await new Promise<void>((resolveClose, reject) => server.close((error) =>
+        error ? reject(error) : resolveClose()));
+    }
+  });
+
+  it("should classify transport metadata without exposing error messages", () => {
+    const secret = "Bearer secret-provider-output";
+    const error = Object.assign(new TypeError(secret), { statusCode: 502, requestId: "req:test-1",
+      cause: Object.assign(new Error(secret), { code: "UND_ERR_SOCKET" }) });
+    const diagnostic = refreshErrorDiagnostic(error);
+    expect(diagnostic).toMatchObject({ errorName: "TypeError", statusCode: 502,
+      requestId: "req:test-1", causeName: "Error", causeCode: "UND_ERR_SOCKET" });
+    expect(JSON.stringify(diagnostic)).not.toContain(secret);
   });
 
   it("should forward schema and token cap through all installed mesh copies", async () => {
