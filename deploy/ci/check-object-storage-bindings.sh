@@ -65,7 +65,7 @@ for rel in "${FILES[@]}"; do
 done
 for suffix in ENDPOINT BUCKET REGION FORCE_PATH_STYLE ACCESS_KEY SECRET_KEY; do
   binding deploy/k8s/30-api.yaml "S3_$suffix" secretKeyRef \
-    radar-raw-s3-credentials "RAW_S3_$suffix"
+    radar-docs-s3-credentials "DOCS_S3_$suffix"
 done
 grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs' \
   "$ROOT/deploy/k8s/30-api.yaml" && fail 'deploy/k8s/30-api.yaml retains a legacy storage binding'

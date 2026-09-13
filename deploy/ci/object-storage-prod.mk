@@ -26,6 +26,12 @@ object-storage-docs-prod-context: ## Read the non-secret PROD context coordinate
 	  namespace="$$( $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )"; \
 	  jq -n --arg server "$$server" --arg namespace "$$namespace" '{server:$$server,namespace:$$namespace}'
 
+.PHONY: object-storage-docs-prod-api-status
+object-storage-docs-prod-api-status: ## Read only API storage references and rollout status
+	@$(KUBECTL) -n $(OBJECT_STORAGE_DOCS_PROD_NAMESPACE) get deployment/radar-api -o json | jq \
+	  '[.spec.template.spec.containers[] | select(.name == "api") | .env[]? | select(.name | startswith("S3_")) | {name,value,secret:.valueFrom.secretKeyRef.name,key:.valueFrom.secretKeyRef.key}]'
+	@$(KUBECTL) -n $(OBJECT_STORAGE_DOCS_PROD_NAMESPACE) rollout status deployment/radar-api --timeout=60s
+
 .PHONY: object-storage-docs-prod-validate
 object-storage-docs-prod-validate: ## Validate the PROD DOCS support and inventory Job offline
 	@bash -n deploy/ci/migrate-object-storage.sh deploy/ci/object-storage-checkpoint.sh
@@ -46,6 +52,8 @@ object-storage-docs-prod-validate: ## Validate the PROD DOCS support and invento
 	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/conditional-proof-job.yaml -o name >/dev/null
 	@$(KUBECTL) create --dry-run=client --validate=false \
 	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml -o name >/dev/null
+	@$(KUBECTL) create --dry-run=client --validate=false \
+	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/api-rebind-patch.yaml -o name >/dev/null
 	@! grep -Eq '(^|[[:space:]])jq([[:space:]]|$$)' \
 	  $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml
 
@@ -213,6 +221,33 @@ object-storage-docs-prod-bind: ## Bind future PROD DOCS workers after exact cano
 	  [ "$$used" = 15 ]; \
 	  echo '[object-storage-docs-prod] graph/scrape credentials bound; Secret quota hard=15 used=15'
 
+.PHONY: object-storage-docs-prod-api-rebind
+object-storage-docs-prod-api-rebind: ## Roll PROD API from SCW to canonical OVH DOCS
+	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
+	  [ "$(OBJECT_STORAGE_DOCS_PROD_API_REBIND_CONFIRM)" != 1 ] || \
+	  [[ "$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB)" != radar-object-storage-copy-docs-prod-* ]] || \
+	  ! [[ "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" =~ ^[0-9a-f]{64}$$ ]]; then \
+	  echo '[object-storage-docs-prod] require exact parity Job/digest, confirmation, KUBECONFIG, ENV=prod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
+	    "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]; \
+	  summary="$$( $(KUBECTL) -n "$$namespace" logs \
+	    job/$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB) --all-containers=true | tail -n 1 )"; \
+	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
+	    '.status == "complete" and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .exactParity == true and .complete == true' \
+	    <<<"$$summary" >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials -o json | \
+	    jq -e -f deploy/ci/validate-docs-secret.jq >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" patch deployment/radar-api --type=strategic \
+	    --patch-file $(OBJECT_STORAGE_DOCS_PROD_DIR)/api-rebind-patch.yaml >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" rollout status deployment/radar-api --timeout=180s >/dev/null; \
+	  deployment="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json )"; \
+	  jq -e -f deploy/ci/docs-api-ovh-binding.jq <<<"$$deployment" >/dev/null; \
+	  jq -e 'any(.spec.template.spec.containers[] | select(.name == "api") | .env[]?; .name == "SCW_TEM_SECRET_KEY" and .valueFrom.secretKeyRef.name == "radar-tem-credentials")' \
+	    <<<"$$deployment" >/dev/null; \
+	  echo '[object-storage-docs-prod] API rolled to canonical OVH DOCS; TEM preserved'
+
 .PHONY: object-storage-docs-prod-expand-pvc-quota
 object-storage-docs-prod-expand-pvc-quota: ## Guardedly expand only the PROD PVC count quota from 2 to 3
 	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
@@ -257,9 +292,12 @@ object-storage-docs-prod-final-status: ## Prove PROD DOCS binding and MinIO abse
 	    jq -e '.status.hard.secrets == "15" and .status.used.secrets == "15" and .status.hard.persistentvolumeclaims == "3" and .status.used.persistentvolumeclaims == "2"' >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get configmap/radar-api -o json | jq -e \
 	    '.data.GRAPH_S3_BUCKET == "radar-immobilier-docs" and .data.SCRAPE_S3_BUCKET == "radar-immobilier-docs" and .data.SCW_TEM_API_BASE_URL == "https://api.scaleway.com"' >/dev/null; \
-	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | jq -e \
-	    'any(.spec.template.spec.containers[] | select(.name == "api") | .env[]?; .name == "SCW_TEM_SECRET_KEY" and .valueFrom.secretKeyRef.name == "radar-tem-credentials" and .valueFrom.secretKeyRef.key == "SCW_TEM_SECRET_KEY")' >/dev/null; \
+	  deployment="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json )"; \
+	  jq -e -f deploy/ci/docs-api-ovh-binding.jq <<<"$$deployment" >/dev/null; \
+	  jq -e 'any(.spec.template.spec.containers[] | select(.name == "api") | .env[]?; .name == "SCW_TEM_SECRET_KEY" and .valueFrom.secretKeyRef.name == "radar-tem-credentials" and .valueFrom.secretKeyRef.key == "SCW_TEM_SECRET_KEY")' \
+	    <<<"$$deployment" >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get secret/radar-tem-credentials >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" rollout status deployment/radar-api --timeout=60s >/dev/null; \
 	  jq -n '{minio:{statefulSet:false,service:false,pvc:false},checkpoint:{phase:"Bound",capacity:"1Gi"},quota:{secrets:{hard:15,used:15},pvcs:{hard:3,used:2}},docs:{bucket:"radar-immobilier-docs",graphBinding:true,scrapeBinding:true},tem:{apiBase:"https://api.scaleway.com",secretReference:"radar-tem-credentials",preserved:true}}'
 
 .PHONY: object-storage-docs-prod-start
