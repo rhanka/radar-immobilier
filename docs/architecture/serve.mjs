@@ -2,12 +2,13 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 
 const files = new Map([
-  ['/', ['architecture/architecture.html', 'text/html']],
+  ['/', ['architecture/decision-focus.html', 'text/html']],
+  ['/decision-focus.html', ['architecture/decision-focus.html', 'text/html']],
   ['/architecture.html', ['architecture/architecture.html', 'text/html']],
   ['/architecture.md', ['architecture.md', 'text/plain']],
   ['/style.css', ['architecture/style.css', 'text/css']],
   ['/viewer.js', ['architecture/viewer.js', 'text/javascript']],
-  ...['storage-audit.md', 'gemini-review/response-findings.md',
+  ...['storage-audit.md', 'decision-dossier.md', 'continuation-audit.md', 'decision-reviews.md', 'decision-review-codex.md', 'proposal.md', 'gemini-review/response-findings.md',
     'gemini-review/response-mapping.md', 'gemini-review/review-inline.md'].map(name =>
     [`/architecture/${name}`, [`architecture/${name}`, 'text/plain']]),
   ...['marked.min.js', 'purify.min.js', 'mermaid.min.js'].map(name => [`/vendor/${name}`, [`architecture/vendor/${name}`, 'text/javascript']]),

@@ -1,13 +1,14 @@
 # Decision dossier — Immo refresh and storage retirement
 
-Revision **D1**, 2026-09-13. **INCOMPLETE / presentation only**: production inventory,
-credential operations and independent reviews are unresolved. No implementation,
+Revision **D2**, 2026-09-13. **INCOMPLETE / presentation only**: production inventory,
+credential operations and the Opus review (weekly limit) are unresolved. No implementation,
 migration, package integration or deployment is authorized by opening this page.
 Author: Codex / gpt-6-astra / xhigh. This is not an owner signature or Track decision.
 
 ## 1. Decision asked
 
-[JUDGMENT] Decide the **delivery sequence**, not whether to remove MinIO eventually:
+[JUDGMENT] Review the framing of a **future delivery-sequence decision**; no option
+selection is requested now. The eventual alternatives are:
 **A** staged in-pod Graphify refresh, then verified storage cutover;
 **B** full E1–E5 DAG before cutover; **C** storage first, workstation refresh temporarily.
 Scope: Immo preprod first, then a separately gated production promotion; Graphify
@@ -72,6 +73,8 @@ All cost, benefit and reversibility assessments below are **[JUDGMENT]**, not qu
 vertical slice on a published Graphify version, preserve guarded canonical writes,
 then migrate validated store roles. This is not approval to implement a new DAG or
 silently abandon its invariants. Use B if A cannot prove exclusive writers/recovery.
+The comparative effort is unverified: measure A/B/C against the same served-Signal,
+PDF, exclusive-writer, credential-continuity and recovery boundary before selection.
 
 [JUDGMENT] **Strongest argument against A:** it could create a disposable second
 orchestrator, duplicate credential handling, and postpone the only robust writer
@@ -92,15 +95,31 @@ shown individually in [review records](decision-reviews.md); absence is not cons
 
 ## 6. Reversibility and cost
 
-[JUDGMENT] Gate sequence: **G0** inventory/contract/owner criteria → **G1** isolated
-one-document extraction/candidate test (no PG) → **G2** publish/project/3.4/API/PDF
-end-to-end and retry tests → **G3** object parity, client repoint and write fencing
-in preprod → **G4** restore rehearsal + retention window → **G5** MinIO removal
-only after no clients remain → **G6** separate production inventory/backup/promotion.
+[JUDGMENT] Gate sequence: **G0** inventory/contract/owner criteria for **every
+affected consumer, including production if a resource is shared** → **G1** isolated
+one-document extraction/candidate test (no PG) → **G1b** durable credential owner,
+exclusive refresh writer, persistence and refresh/restart/recovery tests → **G2**
+preprod publish/project/3.4/API/PDF end-to-end and retry tests → **G3** preprod
+object parity, client repoint and write fencing → **G4** preprod restore rehearsal
++ retention window → **G5** removal of **verified preprod-exclusive** MinIO/resources
+only after no consumers remain → **G6** separately authorized production
+inventory/backup/promotion, repeating G1b–G5 there before any production deletion.
+Shared-resource deletion requires all consumers' inventory and acceptance first.
 No dual writers during the handoff. Backups are rollback artifacts, not live fallbacks.
+
+[JUDGMENT] G0/G3/G5 also cover **SCW storage and image dependencies**: inventory
+executable endpoints, image coordinates and every reader/writer; validate OVH
+object parity and replacement image provenance/pulls (including rollback images);
+then remove obsolete active templates/configuration. Historical audit evidence is
+not rewritten. **TEM stays excluded**; MinIO removal alone does not close SCW retirement.
 
 [JUDGMENT] Before cutover, revert code/config. After writes, stop writers, restore
 the captured graph/DB checkpoint and reconcile objects before routing clients back.
+The proposed recovery point fences relevant writers and records the canonical graph
+hash, SQL checkpoint/version, exact evidence-object set and run input hash together.
+Intervening writes must be either prevented or journaled/replayed within the agreed
+RPO; do not assume a cross-S3/SQL transaction or silently discard newer API writes.
+G4 must verify that this recovered version serves its Signals and their exact PDFs.
 Do not reactivate two stores. Permanent deletion is not instantly reversible.
 Time/cost are **not estimated** until volume, credential route, maintenance window
 and restore throughput are measured. Required owner criteria: acceptable downtime,
@@ -111,12 +130,13 @@ recovery point/time and retention; none is silently assumed.
 | Criterion | Source | Covered by | Gap |
 | --- | --- | --- | --- |
 | Effective main + Kubernetes, not legacy guesses | Owner | Runtime/continuation audits | OVH production inventory |
-| Same DB/S3 identities across diagrams; all PV stages Immo | Owner | Mermaid → Focus mapping and subflows | Browser/mapping checks pending |
+| Same DB/S3 identities across diagrams; all PV stages Immo | Owner | Mermaid → Focus mapping and subflows | Mapping tests pass; browser verification recorded separately |
 | New PV → visible typed Signal + resolvable evidence | Owner refresh request + route contract | G1/G2 document-hash-to-UI trace, second-run idempotence, failure/retry tests | Not executed; outside this dossier branch |
 | Graphify upgrade preserves extraction and public contracts | Owner + i-cond | Installed published package, ESM consumer smoke, independent route/cancellation/schema tests | Final release and Immo B2 acceptance |
+| Durable unattended credentials | Latest i-cond study + independent review | G1b unique refresh writer, persistence, restart/recovery tests | Operated identity contract |
 | No data loss or competing writers during retirement | Repo rules + owner | G3/G4 parity manifests, IAM/writer matrix, restore rehearsal | Inventory/volume/recovery criteria |
 | Preprod first, separate production release, TEM retained | Owner | G0–G6; explicit TEM exclusion | Production evidence; no release authorized |
-| Honest decision surface, alternatives and actual reviews | Owner + Focus contract | This dossier, source links, local notes, individual review records | Independent Codex + Opus review pending |
+| Honest decision surface, alternatives and actual reviews | Owner + Focus contract | This dossier, source links, local notes, individual review records | Codex completed; Opus unavailable (weekly limit) |
 
 ## 8. What is needed next
 
@@ -125,3 +145,7 @@ missing owner input is the acceptable recovery/maintenance envelope (downtime,
 RPO/RTO and retention), not a renewed TEM or ownership decision. Obtain the authorized
 OVH production inventory and final upstream contract before a complete execution
 dossier. Local Focus notes are drafts only; they neither sign nor deploy anything.
+[JUDGMENT] Before selecting a sequence, also establish refresh-versus-retirement
+priority, acceptable duration of workstation dependence, effort ceiling, required
+freshness/coverage/evidence availability and the accepting owner for each contract.
+These are missing criteria, not five defaults or a forced questionnaire.

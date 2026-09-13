@@ -43,7 +43,7 @@
       </nav>
       <ProgressBar value={step + 1} max={8} label={`Section ${step + 1} sur 8`} size="sm" />
       <section class="decision-content">
-        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D1 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
+        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D2 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
         <!-- Sanitized Markdown is the authoritative eight-section dossier. -->
         <div class="prose" onclick={link} role="presentation">{@html html(`## ${sections[step]}`)}</div>
         {#if step === 4}<Button variant="secondary" onclick={() => source = 'decision-reviews'}>Lire les avis réels des reviewers</Button>{/if}
