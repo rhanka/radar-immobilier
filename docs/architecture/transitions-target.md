@@ -84,9 +84,11 @@ flowchart TB
   PP_REFRESH --> providers
   PP_API --> GEO_S3
   PP_API --> PP_GEO
+  PP_API -.->|"DECLARED invitation email"| TEM
   PR_REFRESH -.-> PR_GRAPH
   PR_REFRESH -.-> PR_DB
   PR_API --> GEO_API
+  PR_API -.->|"Target email role · binding unverified"| TEM
   PP_GEO --> PP_GEO_S3
   GEO_API --> GEO_S3
   GEO_API -.-> GEO_DB
@@ -179,6 +181,8 @@ flowchart TB
   PR_REFRESH -.-> PR_GRAPH
   PR_REFRESH -.-> PR_DB
   PR_API --> GEO_API
+  PP_API -.->|"DECLARED invitation email"| TEM
+  PR_API -.->|"Target email role · binding unverified"| TEM
   PP_GEO --> PP_GEO_S3
   GEO_API --> GEO_S3
   GEO_API -.-> GEO_DB
@@ -285,6 +289,8 @@ flowchart TB
   PR_REFRESH -.-> PR_DB
   PR_REFRESH -.-> providers
   PR_API --> GEO_API
+  PP_API -.->|"DECLARED invitation email"| TEM
+  PR_API -.->|"Target email role · binding unverified"| TEM
   PP_GEO --> PP_GEO_S3
   GEO_API --> GEO_S3
   GEO_API -.-> GEO_DB
