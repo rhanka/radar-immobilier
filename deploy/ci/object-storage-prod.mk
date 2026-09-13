@@ -288,6 +288,15 @@ object-storage-docs-prod-status: ## Read the PROD DOCS inventory Job and Pod sta
 	@$(KUBECTL) -n $(OBJECT_STORAGE_DOCS_PROD_NAMESPACE) get pods \
 	  -l 'job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)' -o wide
 
+.PHONY: object-storage-docs-prod-runtime
+object-storage-docs-prod-runtime: ## Read aggregate PROD Job runtime health without object keys
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  pod="$$( $(KUBECTL) -n "$$namespace" get pods \
+	    -l "job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  $(KUBECTL) -n "$$namespace" get pod/"$$pod" -o json | jq \
+	    '{phase:.status.phase,podIP:.status.podIP,startedAt:.status.startTime,conditions:[.status.conditions[]|{type,status,reason}],containers:[.status.containerStatuses[]|{name,ready,restartCount,started:.state.running.startedAt,waiting:.state.waiting.reason,terminated:.state.terminated.reason}]}' ; \
+	  $(KUBECTL) -n "$$namespace" top pod "$$pod"
+
 .PHONY: object-storage-minio-prod-scale-zero
 object-storage-minio-prod-scale-zero: ## Scale only the proven-empty, unconsumed PROD MinIO to zero
 	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
