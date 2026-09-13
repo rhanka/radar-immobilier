@@ -18,10 +18,19 @@ const evaluate = async expression => {
   if (result.exceptionDetails) throw Error(JSON.stringify(result.exceptionDetails));
   return result.result.value;
 };
+const waitUntil = async (expression, failure) => {
+  const until = Date.now() + 3000;
+  do {
+    try { if (await evaluate(expression)) return; }
+    catch (error) { if (error?.code !== -32000) throw error; }
+    await new Promise(resolve => setTimeout(resolve, 50));
+  } while (Date.now() < until);
+  throw Error(failure);
+};
 const timeout = setTimeout(() => { console.error('Browser verification timed out'); process.exit(1); }, 45000);
 await call('Runtime.enable'); await call('Network.enable');
 await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
-await evaluate(`new Promise((resolve, reject) => { const until = Date.now() + 2000; const check = () => document.querySelector('.svelte-flow__node') ? resolve(true) : Date.now() > until ? reject(Error('Native flow missing')) : requestAnimationFrame(check); check(); })`);
+await waitUntil(`Boolean(document.querySelector('.svelte-flow__node'))`, 'Native flow missing');
 await evaluate(`window.checkMermaidLabels = ${missingMermaidLabels.toString()}; window.expectedGraphs = ${JSON.stringify(graphs)}; true`);
 console.log(await evaluate(`(async () => {
   const settle = () => new Promise(resolve => setTimeout(resolve, 180));
@@ -154,9 +163,9 @@ const mobile = await evaluate('({ width: innerWidth, content: document.documentE
 if (mobile.content > mobile.width) throw Error(`Mobile overflow ${JSON.stringify(mobile)}`);
 await call('Network.setBlockedURLs', { urls: ['http://*', 'https://*'] });
 await call('Page.navigate', { url: 'file:///home/antoinefa/src/radar-immobilier/tmp/architecture-platform/docs/architecture/decision-focus.html' });
-await evaluate(`new Promise((resolve, reject) => { const until = Date.now() + 2000; const check = () => document.querySelector('.svelte-flow__node') ? resolve(true) : Date.now() > until ? reject(Error('Offline native flow missing')) : requestAnimationFrame(check); check(); })`);
+await waitUntil(`Boolean(document.querySelector('.svelte-flow__node'))`, 'Offline native flow missing');
 await call('Page.navigate', { url: 'file:///home/antoinefa/src/radar-immobilier/tmp/architecture-platform/docs/reports/architecture-monthly/architecture-transition-2026-09-13.html' });
-await evaluate(`new Promise((resolve, reject) => { const until = Date.now() + 2000; const check = () => document.querySelector('.flow')?.dataset.graph === 'target-3' && document.body.textContent.includes('CIBLE COMPLÈTE PROPOSÉE') ? resolve(true) : Date.now() > until ? reject(Error('Dated monthly D5 Focus rendering missing')) : requestAnimationFrame(check); check(); })`);
+await waitUntil(`document.querySelector('.flow')?.dataset.graph === 'target-3' && document.body.textContent.includes('CIBLE COMPLÈTE PROPOSÉE')`, 'Dated monthly D5 Focus rendering missing');
 if (errors.length || external.length) throw Error(JSON.stringify({ errors, external }));
 console.log(JSON.stringify({ mobile, offline: true, monthlyDatedRendering: true, externalRequests: external.length, runtimeErrors: errors.length }));
 clearTimeout(timeout); ws.close(); await fetch(`${base}/json/close/${page.id}`);
