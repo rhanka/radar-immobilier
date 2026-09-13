@@ -55,7 +55,7 @@ spec:
               set -e
               marker="/evidence/export-ready/${MIGRATION_RUN_ID}"
               mkdir -p "$(dirname "$marker")"
-              jq -n --argjson status "$status" '{status:$status}' >"$marker.tmp"
+              printf '{"status":%s}\n' "$status" >"$marker.tmp"
               sync -f "$marker.tmp" && mv "$marker.tmp" "$marker"
               sleep 300
               exit "$status"

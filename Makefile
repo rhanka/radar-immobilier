@@ -645,9 +645,10 @@ object-storage-minio-preprod-remove: ## Irreversibly remove exact preprod MinIO 
 	  uid="$$( $(KUBECTL) -n "$$namespace" get "job/$$job" -o jsonpath='{.metadata.uid}' )"; \
 	  pod="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o jsonpath='{.items[0].metadata.name}' )"; \
 	  [ -n "$$pod" ] || { echo '[object-storage-minio] parity evidence Pod is absent'; exit 1; }; \
-	  parity_digest="$$( $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
-	    'summary="/evidence/reports/$$1/summary.json"; jq -e --arg digest "$$2" '\''.complete == true and .exactParity == true and .expected == 59017 and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest'\'' "$$summary" >/dev/null; sha256sum "$$summary" | awk '\''{print $$1}'\''' \
-	    -- "$$uid" "$$expected_digest" )"; \
+	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- cat "/evidence/reports/$$uid/summary.json" >"$$work/parity.json"; \
+	  jq -e --arg digest "$$expected_digest" '.complete == true and .exactParity == true and .expected == 59017 and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest' \
+	    "$$work/parity.json" >/dev/null; \
+	  parity_digest="$$(sha256sum "$$work/parity.json" | awk '{print $$1}')"; \
 	  [[ "$$parity_digest" =~ ^[0-9a-f]{64}$$ ]] || { echo '[object-storage-minio] parity receipt is invalid'; exit 1; }; \
 	  $(KUBECTL) -n "$$namespace" get statefulset/radar-minio service/radar-minio \
 	    pvc/minio-data-radar-minio-0 networkpolicy/allow-api-to-minio \
