@@ -36,6 +36,18 @@ keyring-summary:
 	  -v "$(OVERLAY)/keyring-summary.mjs:/workspace/keyring-summary.mjs:ro" "$(LOCAL_IMAGE)" \
 	  /bin/sh -ceu 'mkdir /keyring; cp -a /source/. /keyring/; node /workspace/keyring-summary.mjs'
 
+.PHONY: enroll-cloud-code
+enroll-cloud-code:
+	@test "$(ENV)" = "test-refresh-018" || { echo "ENV=test-refresh-018 is required" >&2; exit 1; }
+	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
+	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
+	@test -n "$(CLOUD_CODE_OWNER_SCOPE_REF)" || { echo "CLOUD_CODE_OWNER_SCOPE_REF is required" >&2; exit 1; }
+	@docker run --rm --network host --user "$$(id -u):$$(id -g)" \
+	  -e CLOUD_CODE_OWNER_SCOPE_REF="$(CLOUD_CODE_OWNER_SCOPE_REF)" \
+	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
+	  -v "$(OVERLAY)/enroll-cloud-code.mjs:/workspace/enroll-cloud-code.mjs:ro" "$(LOCAL_IMAGE)" \
+	  node /workspace/enroll-cloud-code.mjs
+
 .PHONY: push-immutable
 push-immutable:
 	@test "$(ENV)" = "preprod" || { echo "ENV=preprod is required" >&2; exit 1; }
