@@ -108,11 +108,10 @@ active. Checkpoints therefore contain two distinct chains per side:
 
 Both chains use the same page size and deterministic serialization. The fenced
 chain must reproduce the complete ordered key, size, diagnostic ETag, and
-VersionId index. A provisional body SHA-256 may be reused only when a non-null
-VersionId is exactly equal in both chains. With a null or changed VersionId,
-the full body, headers, metadata, and tags are re-read under the fence; ETag
-equality alone never re-binds body evidence. Insertions, deletions, reordering,
-tail additions, or changes invalidate finalization.
+VersionId index. Every fenced body, header, metadata set, and tag set is re-read
+even when a non-null VersionId matches the provisional chain; VersionId and
+ETag are diagnostic only and never authorize shard reuse. Insertions,
+deletions, reordering, tail additions, or changes invalidate finalization.
 
 The final artifact binds both chain roots, both manifests, `configDigest`, and
 the fence digest. It may say `toolComplete:true` only after every fenced page
@@ -174,8 +173,8 @@ continue to report `fenceValidated:false` and
     preserve strict ordering across page boundaries.
 12. Resume accepts a different time budget but rejects every `configDigest`
     input change before a storage call; each run requires a fresh report dir.
-13. Null-VersionId provisional objects are re-hashed under the fence, while an
-    exact non-null VersionId permits deterministic body-shard reuse.
+13. Every provisional object is re-read and re-hashed under the fence,
+    including objects whose non-null VersionId is unchanged.
 14. Executed copy consumes the finalized proof, never monolithic inventory, and
     still re-hashes each source body before any conditional PUT.
 

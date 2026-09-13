@@ -63,7 +63,7 @@ make --no-print-directory --eval '.PHONY: test-scw-storage-gate' \
 ```
 
 Result: binding checker `PASS=11 FAIL=0`; migration suite
-`PASS=88 FAIL=0`. The suite covers bounded and resumed provisional/fenced
+`PASS=92 FAIL=0`. The suite covers bounded and resumed provisional/fenced
 chains, selective body resume, empty/truncated pages, uncommitted tails,
 configuration and receipt tampering, hidden same-size/ETag body drift,
 oversized blockers, mandatory proof consumption, zero PUT without proof, no

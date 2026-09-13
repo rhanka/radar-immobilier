@@ -99,7 +99,11 @@ checkpoint_commit_page() {
      previousReceiptSha256:(if $previous=="" then null else $previous end),
      fenceEvidenceDigest:(if $fence=="null" then null else $fence end),
      configDigest:$config,observedAt:(now|todateiso8601)}' >"$tmp_receipt"
-  sync -f "$tmp_page" "$tmp_receipt" && mv "$tmp_page" "$page" && mv "$tmp_receipt" "$receipt"
+  if ! sync -f "$tmp_page" "$tmp_receipt" || ! mv "$tmp_page" "$page" ||
+    ! mv "$tmp_receipt" "$receipt"; then
+    rm -f "$tmp_page" "$tmp_receipt" "$page" "$receipt"
+    return 1
+  fi
   CHECKPOINT_COMMITTED_PAGE="$page"
   CHECKPOINT_PREVIOUS_RECEIPT="$(sha256sum "$receipt" | awk '{print $1}')"
   [ -z "$last" ] || CHECKPOINT_LAST_KEY="$last"
@@ -279,7 +283,10 @@ checkpoint_phase_summary() {
   [ -e "${pages[0]}" ] && [ "${#pages[@]}" -eq "${#indexes[@]}" ] &&
     [ "${#pages[@]}" -eq "${#bodies[@]}" ] &&
     [ "${#pages[@]}" -eq "${#body_receipts[@]}" ] || return 1
-  cat "${bodies[@]}" >"$tmp"; sync -f "$tmp" && mv "$tmp" "$manifest"
+  if ! cat "${bodies[@]}" >"$tmp" || ! sync -f "$tmp" || ! mv "$tmp" "$manifest"; then
+    rm -f "$tmp"
+    return 1
+  fi
   index_root="$(sha256sum "${indexes[${#indexes[@]}-1]}" | awk '{print $1}')"
   body_root="$(sha256sum "${body_receipts[@]}" | awk '{print $1}' | sha256sum | awk '{print $1}')"
   manifest_hash="$(sha256sum "$manifest" | awk '{print $1}')"
