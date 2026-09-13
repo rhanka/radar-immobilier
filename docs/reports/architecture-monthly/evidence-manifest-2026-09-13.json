@@ -1,7 +1,7 @@
 {
   "schema": "immo-architecture-monthly-evidence/v5",
   "revision": "D8",
-  "generatedAt": "2026-09-13T22:46:11.477Z",
+  "generatedAt": "2026-09-13T22:55:05.016Z",
   "period": {
     "timezone": "America/Toronto",
     "startInclusive": "2026-08-10T00:00:00-04:00",
@@ -81,8 +81,8 @@
   },
   "focus": {
     "html": "architecture-before-after-2026-09-13.html",
-    "htmlSha256": "9b35551b86238eeb6456d1fc96a09c688463cd0dbe30d81eb6d046bb38e484da",
-    "artifactInputHash": "bf96b62f9475e4727c54c2db73c5c3f185d742c540cbae0b32d225cc2469dc83",
+    "htmlSha256": "f59ff8166aa9113f1fc1e9f3eb66c494dd1ed292dfeb9548207dc0bb98b008c7",
+    "artifactInputHash": "e8e3eaa3b6e272bb8ba37dd7cd76cc1877fa03e9bb1c90712d90b3e0da014bcd",
     "architectureHash": "85759954afba141dace08405ed3382833350b472889e3ea786bdb32cb841b4fd",
     "transitionTargetsHash": "ca590533cede86b1713edfb0fbfbe95da25e1e6fc95eab2672d36dfd31384a81",
     "dossierHash": "e032da5a8cae6483bf3988eb7a84af5d550adbda2fcda6e14cfc05d25d8a4714",
@@ -161,14 +161,14 @@
       "sha256": "93b34620760c78dafa76cda071cc67d40d4e52a554827c8a5042a4d3b334f64b"
     }
   ],
-  "replay": "make -f docs/architecture/focus/Makefile tokens test build browser clipboard ENV=test-architecture",
+  "replay": "make -f docs/architecture/focus/Makefile tokens test build browser clipboard report-check ENV=test-architecture",
   "report": {
     "markdown": "report-through-2026-09-13.md",
     "html": "report-through-2026-09-13.html",
     "pdf": "report-through-2026-09-13.pdf",
     "markdownSha256": "a79bab5d8123a041b45eb6ed59989f69bb3be2d43af9e6345c2e3f03fd1c962b",
-    "htmlSha256": "76b0a524f3fb7f77f761f793151ef64e854414bca40946b106e4f22640ae8617",
-    "pdfSha256": "d68fe2f8df6396251717ef01f219263bb97f3fb1ac1264e9020df2e7c7d5f355",
+    "htmlSha256": "fa5a6ca145860cd3adb291f8a44aee862d685ef804d759a1445023f6b6dce851",
+    "pdfSha256": "444963b8c262becf7bbaaba7b06e61cc9ef6bb371edd6dd9db79033cc58e31af",
     "staticDiagrams": [
       "asis-1",
       "target-3"
