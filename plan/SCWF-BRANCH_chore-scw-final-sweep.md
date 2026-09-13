@@ -68,6 +68,7 @@
     - [x] Build a filesystem-backed AWS CLI shim with version and metadata semantics.
     - [x] Cover dry-run, validation, pagination, copy, metadata, ETag, conflicts and exclusions.
     - [x] Cover retries, the failure cap and complete multi-source union provenance.
+      - [x] Require DOCS unions, complete credentials and exact target access proof.
     - [x] Cover exact owned reconciliation, versioning refusal, foreign change and fenced delta.
     - [x] Extend the binding gate and retain the explicit pending-client ledger.
     - [x] Invoke the combined offline object-storage gate once from CI quality.

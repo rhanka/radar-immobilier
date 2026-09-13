@@ -63,6 +63,8 @@ done
 case "$OPERATION" in inventory|copy|verify|delta) ;; *) usage ;; esac
 case "$ENVIRONMENT" in preprod|prod) ;; *) die 'invalid environment' ;; esac
 case "$PLANE" in RAW|DOCS) ;; *) die 'invalid plane' ;; esac
+[ "$PLANE" != DOCS ] || [ "$OPERATION" = inventory ] || [ -n "$EXPECTED_MANIFEST" ] || \
+  die 'DOCS copy, verify, and delta require --expected-manifest'
 [ "$OPERATION" = copy ] || { ! $EXECUTE_COPY && ! $RECONCILE_OWNED; } || \
   die 'copy flags are valid only with the copy operation'
 $RECONCILE_OWNED && $EXECUTE_COPY || ! $RECONCILE_OWNED || \
