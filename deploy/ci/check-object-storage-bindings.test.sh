@@ -84,6 +84,9 @@ run_bad "$CASE_ROOT" 'rejects a restored MinIO grounding overlay'; rm -rf "$CASE
 fixture; touch "$CASE_ROOT/deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored MinIO grounding policy'; rm -rf "$CASE_ROOT"
 
+fixture; touch "$CASE_ROOT/deploy/k8s/41-grounding-worklist-configmap.yaml"
+run_bad "$CASE_ROOT" 'rejects a restored grounding publish worklist'; rm -rf "$CASE_ROOT"
+
 fixture; mkdir -p "$CASE_ROOT/deploy/k8s/refresh-diag"; touch "$CASE_ROOT/deploy/k8s/refresh-diag/diag-refresh-job.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored refresh diagnostic manifest'; rm -rf "$CASE_ROOT"
 
