@@ -63,6 +63,7 @@
     - [x] Re-inventory copied keys and write the immutable ownership ledger.
     - [x] Gate reconciliation on an exact ledger, fence, versioning and prior VersionId.
       - [x] Reuse bounded workers with atomic missing-versus-owned write preconditions.
+      - [x] Re-read the ledger-owned prior VersionId body and metadata before overwrite.
   - [ ] Enforce hermetic failure paths, binding checks and the CI gate.
     - [x] Build a filesystem-backed AWS CLI shim with version and metadata semantics.
     - [x] Cover dry-run, validation, pagination, copy, metadata, ETag, conflicts and exclusions.

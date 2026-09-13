@@ -315,6 +315,7 @@ expect_ok run_tool copy "$TEST_TMP/reports/owned-reconcile" --execute-copy --rec
   --ledger "$TEST_TMP/reports/owned-first/copy-ledger.jsonl" --fence-record "$TEST_TMP/fence.txt"
 TEST_NAME='records recoverable prior and distinct new versions and hashes'
 if [ "$(cat "$TEST_TMP/store/destination/dst/objects/raw/owned.txt")" = corrected ] &&
+  grep -Eq $'^destination\tget-object\t.*--version-id v1' "$AWS_LOG" &&
   jq -e '.prior.versionId == "v1" and .new.versionId == "v2" and
     .prior.sha256 != .new.sha256 and .fenceValidated == false' \
     "$TEST_TMP/reports/owned-reconcile/reconciliation-ledger.jsonl" >/dev/null; then

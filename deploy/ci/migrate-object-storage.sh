@@ -252,6 +252,17 @@ retry_get_object() {
   return 1
 }
 
+retry_get_version() {
+  local output="$1" body="$2" key="$3" version="$4" attempt=1
+  while [ "$attempt" -le "$RETRIES" ]; do
+    rm -f "$body"
+    if aws_side destination get-object --bucket "$DESTINATION_BUCKET" --key "$key" \
+      --version-id "$version" "$body" >"$output" 2>"$WORK_DIR/aws-error"; then return 0; fi
+    attempt=$((attempt + 1))
+  done
+  rm -f "$body"; return 1
+}
+
 build_manifest() {
   local side="$1" listing="$2" output="$3" bucket item key size class index=0
   local head tags body getout sha scratch="$WORK_DIR/$side-manifest.unsorted.jsonl"
@@ -616,10 +627,11 @@ reconcile_owned_objects() {
       $owned.putVersionId != null and $current.versionId == $owned.putVersionId and
       $owned.expectedManifestDigest == (if $expected == "null" then null else $expected end)) |
     $sourceObject + {_priorEtag:$current.etag,_priorVersionId:$current.versionId,
-      _priorHash:$current.sha256}' >"$tasks"
+      _priorHash:$current.sha256,_priorObject:$current}' >"$tasks"
   eligible_count="$(jq -s length "$tasks")"
   [ "$eligible_count" -eq "$conflict_count" ] || {
     add_missing_proof 'foreign or independently modified conflicts cannot be reconciled'; return 1; }
+  prove_recoverable_priors "$tasks" || return 1
   run_copy_tasks "$tasks" "$WORK_DIR/reconciliation-results" reconcile "$output"
   list_objects destination "$DESTINATION_LISTING" &&
     build_manifest destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST" || {
@@ -641,6 +653,36 @@ reconcile_owned_objects() {
   [ "$(jq -s length "$REPORT_DIR/reconciliation-ledger.jsonl")" -eq "$eligible_count" ] || {
     record_failure destination '' reconciliation-proof
     add_missing_proof 'reconciliation lacks recoverable prior/new version proof'; return 1; }
+}
+
+prove_recoverable_priors() {
+  local tasks="$1" item key version index=0 head tags body getout actual expected
+  while IFS= read -r item; do
+    index=$((index + 1)); key="$(jq -r '.key' <<<"$item")"
+    version="$(jq -r '._priorVersionId' <<<"$item")"
+    head="$WORK_DIR/prior-head-$index.json"; tags="$WORK_DIR/prior-tags-$index.json"
+    body="$WORK_DIR/prior-body-$index"; getout="$WORK_DIR/prior-get-$index.json"
+    if ! retry_json "$head" destination head-object --bucket "$DESTINATION_BUCKET" \
+      --key "$key" --version-id "$version" ||
+      ! retry_get_version "$getout" "$body" "$key" "$version" ||
+      ! retry_json "$tags" destination get-object-tagging --bucket "$DESTINATION_BUCKET" \
+        --key "$key" --version-id "$version"; then
+      record_failure destination "$key" prior-version-read
+      add_missing_proof 'a prior destination VersionId is not recoverable'; return 1
+    fi
+    actual="$(jq -cn --slurpfile head "$head" --slurpfile tags "$tags" --arg key "$key" \
+      --arg sha "$(sha256sum "$body" | awk '{print $1}')" '
+      {key:$key,size:$head[0].ContentLength,sha256:$sha,
+       contentType:($head[0].ContentType // null),contentEncoding:($head[0].ContentEncoding // null),
+       cacheControl:($head[0].CacheControl // null),
+       contentDisposition:($head[0].ContentDisposition // null),metadata:($head[0].Metadata // {}),
+       tags:(($tags[0].TagSet // []) | sort_by(.Key))}')"; rm -f "$body"
+    expected="$(jq -c '._priorObject | del(.etag,.versionId,.classification,.sources)' <<<"$item")"
+    if [ "$actual" != "$expected" ]; then
+      record_failure destination "$key" prior-version-mismatch
+      add_missing_proof 'a prior destination VersionId differs from the ownership ledger'; return 1
+    fi
+  done <"$tasks"
 }
 
 FENCE_EVIDENCE_DIGEST=null
