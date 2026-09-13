@@ -17,8 +17,7 @@ test("the five immutable PDFs and page texts match the manifest", async () => {
   for (const document of manifest.documents) {
     const worker = resolve(manifest.sourceRunRoot, "workers", document.city);
     const pdf = await readFile(resolve(worker, "corpus", `${document.sha256}.pdf`));
-    const text = await readFile(resolve(worker, "parsed", document.city,
-      `${document.sha256}.txt`), "utf8");
+    const text = await readFile(resolve(root, document.runtimeTextRelativePath), "utf8");
     const pages = text.split("\f").map((page) => page.replace(/\r\n/g, "\n"));
     if (pages.at(-1) === "") pages.pop();
     assert.equal(sha256(pdf), document.sha256);
