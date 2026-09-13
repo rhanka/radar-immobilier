@@ -117,3 +117,15 @@
   - [x] Extend the Docker-only portable build and browser gate to the dated monthly rendering and hash manifest.
   - [x] Embed the dated Mermaid/SvelteFlow rendering into the monthly companion; retain post-period separation.
   - [x] Pin the dated rendering, architecture inputs and read-only monthly evidence in a reproducible SHA-256 manifest.
+- [ ] **Lot 12 — D5 owner correction: architecture-first Focus dossier.**
+  - [ ] Add committed full-platform T1, T2 and T3 Mermaid states with stable resource identities and explicit stage cards.
+    - [x] T1 full-platform source.
+    - [ ] T2 full-platform source.
+    - [ ] T3 full-platform source.
+  - [ ] Replace Option A with the actual T1 refresh sequence and preserve its acceptance boundaries.
+  - [ ] Render every transition as complete native nested SvelteFlow and sanitized Mermaid; open on the final target.
+  - [ ] Replace the allocation referendum with fixed invoice-tariff instructions, unresolved period evidence and D4 provenance.
+  - [ ] Make target architecture and sequential transitions the primary Focus reading path; keep billing last.
+  - [ ] Publish a current report-through-September-13 companion and supersede the older window without rewriting its sources.
+  - [ ] Regenerate the current/dated portable HTML and evidence manifest with D5 hashes.
+  - [ ] Pass static, build, browser, clipboard, scope and diff gates; record limitations without deployment claims.
