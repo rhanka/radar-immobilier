@@ -208,6 +208,50 @@ validate-prod: storage-ready-prod
 	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp" ENV=test-refresh-prod-018; \
 	  $(KP) apply --dry-run=server -f "$$tmp" >/dev/null
 
+.PHONY: seed-prod
+seed-prod: storage-ready-prod
+	@test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }
+	@test "$$($(K) get cronjob radar-refresh-pv -o jsonpath='{.spec.suspend}')" = "false"
+	@test "$$($(K) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')" = "$(APPROVED_IMAGE)" \
+	  || { echo "preproduction source route is not on the accepted image" >&2; exit 1; }
+	@test -n "$$($(K) get secret radar-refresh-keyring-bootstrap -o go-template='{{index .data ".key"}}')" \
+	  || { echo "accepted preproduction keyring bootstrap is missing" >&2; exit 1; }
+	@test -n "$$($(K) get secret radar-refresh-runtime -o jsonpath='{.data.REFRESH_OWNER_SCOPE_REF}')" \
+	  || { echo "accepted preproduction owner scope is missing" >&2; exit 1; }
+	@set -o pipefail; $(K) get secret radar-refresh-keyring-bootstrap -o json \
+	  | jq 'del(.metadata.annotations,.metadata.creationTimestamp,.metadata.managedFields,.metadata.resourceVersion,.metadata.uid) | .metadata.namespace="$(PROD_NAMESPACE)"' \
+	  | $(KP) apply -f - >/dev/null
+	@set -o pipefail; $(K) get secret radar-refresh-runtime -o json \
+	  | jq 'del(.metadata.annotations,.metadata.creationTimestamp,.metadata.managedFields,.metadata.resourceVersion,.metadata.uid) | .metadata.namespace="$(PROD_NAMESPACE)" | .data.REFRESH_PRINCIPAL_REF=("radar-refresh-pv-prod" | @base64)' \
+	  | $(KP) apply -f - >/dev/null
+
+.PHONY: runtime-ready-prod
+runtime-ready-prod: guard-prod
+	@test -n "$$($(KP) get secret radar-refresh-keyring-bootstrap -o go-template='{{index .data ".key"}}')" \
+	  || { echo "production keyring bootstrap is missing" >&2; exit 1; }
+	@test -n "$$($(KP) get secret radar-refresh-runtime -o jsonpath='{.data.REFRESH_PRINCIPAL_REF}')"
+	@test -n "$$($(KP) get secret radar-refresh-runtime -o jsonpath='{.data.REFRESH_OWNER_SCOPE_REF}')" \
+	  || { echo "production refresh runtime identity is incomplete" >&2; exit 1; }
+
+.PHONY: apply-prod
+apply-prod: storage-ready-prod runtime-ready-prod
+	@test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }
+	@set -e; tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp" ENV=test-refresh-prod-018; \
+	  $(KP) apply --dry-run=server -f "$$tmp" >/dev/null; \
+	  $(KP) apply -f "$$tmp" >/dev/null; \
+	  test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.suspend}')" = "false"; \
+	  test "$$($(KP) get cronjob radar-refresh-scrape -o jsonpath='{.spec.suspend}')" = "true"; \
+	  test "$$($(KP) get cronjob radar-refresh-projection -o jsonpath='{.spec.suspend}')" = "true"; \
+	  test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')" = "$(APPROVED_IMAGE)"
+
+.PHONY: suspend-prod
+suspend-prod: guard-prod
+	@test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }
+	@for cronjob in radar-refresh-pv radar-refresh-scrape radar-refresh-projection; do \
+	  $(KP) patch cronjob "$$cronjob" --type=merge -p '{"spec":{"suspend":true}}' >/dev/null; \
+	done
+
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
 	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }
