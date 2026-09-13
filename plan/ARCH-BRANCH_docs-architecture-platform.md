@@ -58,7 +58,7 @@
 - [ ] **Lot 6 — Owner feedback: effective storage and eradication status.**
   - [x] Re-fetch main, check migration PRs and re-audit whitelisted live preprod bindings; #670 remains draft, MinIO still configured for API.
   - [ ] Obtain OVH production read-only evidence; never substitute the legacy SCW cluster.
-  - [ ] Exclude unobserved legacy paths from operational diagrams and regenerate Focus.
+  - [x] Exclude unobserved legacy paths from operational diagrams and regenerate the native Focus companion.
   - [x] Remove unobserved SCW/grounding templates and unverified production storage from diagrams 1–2; keep live MinIO API bindings.
   - [x] Separate main-only templates in the register; record runtime success timestamps and Geo CAS prefix/environment boundaries.
   - [x] Fit complete diagrams on entry; PV view reduced from 4669×1067 to 1779×1555, with zoom/full-screen/Escape and no page overflow.
@@ -72,14 +72,14 @@
 - [ ] **Lot 8 — Replace the orientation prototype with a native Focus decision dossier.**
   - [x] Read the September 7 Sentropic decision-kit reference and owner-validated Focus dossier contract.
   - [x] Reconcile the newer in-process Graphify mesh proposal and current upstream PRs; relay the no-start gate to Graphify.
-  - [ ] Present eight decision sections, symmetric options, acceptance criteria and real reviewer findings.
+  - [x] Present eight decision sections, symmetric options, acceptance criteria and real reviewer findings; dossier explicitly incomplete.
   - [x] Draft D1 with three symmetric delivery sequences, G0–G6 gates and explicit unresolved recovery criteria.
   - [x] Add an explicitly proposed, Immo-owned in-process Graphify scene; no invented replacement API bucket.
-  - [ ] Map Mermaid identities and relationships to native SvelteFlow groups and navigable subflows.
+  - [x] Map Mermaid identities and relationships to native SvelteFlow groups and navigable subflows.
   - [x] Add a fail-closed Mermaid adapter and source/hash manifest; independent text reviews launched via h2a.
   - [x] Implement native SvelteFlow subflows with parentId groups and the unchanged Sentropic Focus ArchitectureNode component.
   - [x] Add Focus dossier navigation, shared-resource cross-links, embedded evidence and local-only notes without approval controls.
-  - [ ] Verify the offline HTML, mapping coverage, navigation and local-only owner notes.
+  - [x] Verify the offline HTML, mapping coverage, navigation and local-only owner notes; record test boundaries.
   - [x] Add a Docker-only build reusing the Sentropic kit read-only; portable HTML embeds JS, CSS and evidence.
   - [x] Add mapping completeness, native parent bounds, resource identity and rejected-syntax regression tests.
   - [x] Preserve Codex's six actual findings; disclose Opus weekly-limit failure and keep the dossier incomplete.
@@ -87,4 +87,5 @@
   - [x] Add Chromium checks for all 18 scenes, cross-view DB navigation, local notes, evidence dialogs, mobile and offline use.
   - [x] Use the DS full-width container, French decision reading surface and automatic zoom on a selected shared resource.
   - [x] Reuse the Focus orthogonal router to prevent edges crossing unrelated components; keep unverified edge/label crossings explicit.
+  - [x] Document build/replay instructions and hash-scope local notes to the complete embedded input set.
 - [ ] Local documentation handoff; no production action or branch merge requested.

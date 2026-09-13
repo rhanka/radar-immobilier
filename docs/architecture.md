@@ -268,7 +268,7 @@ flowchart TB
   local["Workstation-assisted extraction where required<br/>OCR / vision / LLM for document tables<br/>Reads captured corpus; not local source capture"]
   local -->|"READ captured corpus"| GEO_S3
   local -->|"Validated extraction products"| normalize
-  subgraph geoprod["PRODUCTION / SHARED CORPUS · OVH S3 outside cluster"]
+  subgraph geoprod["PRODUCTION / SHARED CORPUS · cluster services + external OVH S3"]
     GEO_API["[GEO-API] geo-api · geo<br/>api.geo.sent-tech.ca"] -->|"READ normalized/"| GEO_S3
     GEO_S3[("[GEO-S3] sentropic-geo<br/>OVH S3 · raw corpus + normalized/ products")]
     GEO_DB[("[GEO-DB] geo/postgis<br/>LIVE · no OGC DB dependency demonstrated")]
@@ -277,7 +277,7 @@ flowchart TB
   sync["Controlled preprod sync<br/>coherence_id + count + set_hash<br/>Refresh index and verify through API"]
   sync -.->|"READ normalized/"| GEO_S3
   sync -.->|"WRITE normalized/"| PP_GEO_S3
-  subgraph geopreprod["PREPRODUCTION · OVH S3 outside cluster"]
+  subgraph geopreprod["PREPRODUCTION · cluster service + external OVH S3"]
     PP_GEO["[PP-GEO] geo-api · geo-preprod<br/>api.preprod.geo.sent-tech.ca"] -->|"READ normalized/"| PP_GEO_S3
     PP_GEO_S3[("[PP-GEO-S3] sentropic-geo-preprod<br/>OVH S3 · normalized/ serving copy")]
     PP_API["[PP-API] radar-api<br/>radar-immobilier-preprod"] -->|"READ OGC"| PP_GEO
@@ -356,4 +356,4 @@ At inspection, Immo preprod API/UI/MCP images were tagged `8e18f01`; Geo product
 
 Follow-up [main/runtime audit](architecture/storage-audit.md) confirms the MinIO API / OVH refresh split and #670's unmerged state. Gemini completed the requested text-only review via **h2a run agy**, requested model `gemini-3.8-flash-high`, effort high: **NEEDS CHANGES** at `2ab8da2b`. Its [findings](architecture/gemini-review/response-findings.md) are [reconciled](architecture/gemini-review/review-inline.md), not treated as live cluster evidence. In particular, an absent legacy Job does not establish an active broken pipeline, and an unverified restore target must not be invented. This is a single third-party review, not multi-peer consensus or a reapproval of the revised diagrams.
 
-The local HTML companion is generated from this Markdown with the **FocusSnapshot render core shipped in h2a**, then enhanced with Mermaid rendering. It is an architecture orientation document, not a Track approval or a live decision form.
+The current [local companion](architecture/README.md) is a **native Focus-format decision dossier**: Sentropic DS/Focus components, SvelteFlow parent groups and navigable subflows mapped from all four Mermaid diagrams plus the explicitly proposed target. The earlier FocusSnapshot/Mermaid orientation page is superseded. The new page embeds source evidence and local-only notes; it is neither a Track approval nor authorization to start implementation.

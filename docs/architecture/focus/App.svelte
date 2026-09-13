@@ -9,12 +9,12 @@
   import data from './.generated/data.json';
   const titles = ['Décision & périmètre', 'Existant & incertitudes', 'Enjeux & responsabilités', 'Trois options', 'Avis & contre-arguments', 'Bascule & retour arrière', 'Critères de réussite', 'Points à compléter'];
   let step = $state(0), note = $state(''), saved = $state(false), storageError = $state(false), source = $state(null);
-  const key = `immo-focus-decision:${data.manifest.dossierHash}:draft`;
+  const key = `immo-focus-decision:${data.manifest.artifactInputHash}:draft`;
   const html = text => DOMPurify.sanitize(marked.parse(text), { FORBID_TAGS: ['script', 'iframe', 'style', 'form'] });
   onMount(() => { try { note = localStorage.getItem(key) ?? ''; } catch { storageError = true; } });
   function save(value) { note = value; try { localStorage.setItem(key, value); saved = true; } catch { storageError = true; } }
   function download() {
-    const blob = new Blob([JSON.stringify({ schema: 'immo-focus-owner-notes/v1', status: 'draft-not-ratified', dossierHash: data.manifest.dossierHash, notes: note }, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify({ schema: 'immo-focus-owner-notes/v1', status: 'draft-not-ratified', dossierHash: data.manifest.dossierHash, artifactInputHash: data.manifest.artifactInputHash, notes: note }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'immo-decision-notes.json'; a.click(); URL.revokeObjectURL(a.href);
   }
   function link(event) {
