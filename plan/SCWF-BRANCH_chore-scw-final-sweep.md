@@ -52,6 +52,11 @@
 - [x] Lot 3h1a: preserve independent Fable cutover findings B1-B5 separately; conflict convergence, multi-source identity and declared exclusions require reconciliation before tool release.
 - [x] Lot 3h2: conductor reconciles independent findings A1-A3/B1-B5 and releases only the tool, tests and CI gate; runtime bindings remain gated separately.
 - [ ] Lot 3h3: build and hermetically test the dry-run-default, non-destructive migration/proof tool.
+  - [x] Freeze the fail-closed CLI, coordinate, credential, prefix and resource-limit guards.
+  - [ ] Inventory every page/body and emit complete classified manifests.
+  - [ ] Compare single-source or approved-union parity and proof inputs.
+  - [ ] Copy missing objects and reconcile only exact migration-owned versions.
+  - [ ] Enforce hermetic failure paths, binding checks and the CI gate.
 - [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
 - [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
