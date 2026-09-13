@@ -12,6 +12,13 @@ GRAPH_FILES=(
 )
 SCRAPE_FILES=(deploy/k8s/33-scrape-job.yaml deploy/k8s/33b-scrape-cities-job.yaml)
 FILES=("${GRAPH_FILES[@]}" "${SCRAPE_FILES[@]}" deploy/k8s/36-db-migrate-job.yaml)
+PUBLIC_IMAGE_FILES=(
+  deploy/k8s/10-rbac.yaml
+  deploy/k8s/11-ci-deployer-preprod-rbac.yaml
+  deploy/k8s/object-storage-docs-prod/copy-job.yaml
+  deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml
+  deploy/k8s/secrets.example.yaml
+)
 PENDING_CLIENTS=(
   deploy/k8s/32b-reproject-etape-job.yaml
   deploy/k8s/refresh-diag/diag-refresh-job.yaml
@@ -71,6 +78,10 @@ grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|radar-s
   "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" && fail 'deploy/k8s/34-refresh-cronjob.yaml retains a legacy storage binding'
 grep -Fq 'name: radar-refresh-pv' "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" ||
   fail 'deploy/k8s/34-refresh-cronjob.yaml lost radar-refresh-pv'
+for rel in "${PUBLIC_IMAGE_FILES[@]}"; do
+  grep -Eiq 'radar-registry-pull|rg\.fr-par\.scw\.cloud' "$ROOT/$rel" &&
+    fail "$rel retains a legacy SCW registry reference"
+done
 
 for rel in scripts/mount-scw.sh scripts/umount-scw.sh; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"

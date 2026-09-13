@@ -20,6 +20,9 @@ FILES=(
   deploy/k8s/40-export-gt-designation-events-job.yaml
   deploy/k8s/32b-reproject-etape-job.yaml deploy/k8s/34-refresh-cronjob.yaml
   deploy/k8s/refresh-cronjobs-prod/kustomization.yaml
+  deploy/k8s/10-rbac.yaml deploy/k8s/11-ci-deployer-preprod-rbac.yaml
+  deploy/k8s/object-storage-docs-prod/copy-job.yaml
+  deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml deploy/k8s/secrets.example.yaml
   .github/workflows/grounding-preprod.yml .github/workflows/grounding-publish-prod.yml
   .github/workflows/run-job.yaml
 )
@@ -59,6 +62,9 @@ run_bad "$CASE_ROOT" 'rejects a generic refresh credential binding'; rm -rf "$CA
 
 fixture; sed -i '/name: radar-refresh-pv/d' "$CASE_ROOT/deploy/k8s/34-refresh-cronjob.yaml"
 run_bad "$CASE_ROOT" 'preserves the new radar-refresh-pv CronJob'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i '/automountServiceAccountToken/i\imagePullSecrets: [{ name: radar-registry-pull }]' "$CASE_ROOT/deploy/k8s/10-rbac.yaml"
+run_bad "$CASE_ROOT" 'rejects a restored SCW image pull secret'; rm -rf "$CASE_ROOT"
 
 fixture; rm -f "$CASE_ROOT/deploy/k8s/32b-reproject-etape-job.yaml"
 run_bad "$CASE_ROOT" 'keeps every gated client explicit'; rm -rf "$CASE_ROOT"
