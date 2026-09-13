@@ -163,6 +163,8 @@ mkdir -p "$REPORT_DIR" || die 'cannot create report directory'
 for command in aws jq sha256sum mktemp; do
   command -v "$command" >/dev/null 2>&1 || die "$command is required"
 done
+$CHECKPOINT_REQUESTED && command -v timeout >/dev/null 2>&1 || ! $CHECKPOINT_REQUESTED || \
+  die 'timeout is required for checkpoint inventory'
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/object-storage-migration.XXXXXX")" || \
   die 'cannot create work directory'
 trap 'rm -rf "$WORK_DIR"' EXIT
@@ -217,6 +219,7 @@ $CHECKPOINT_REQUESTED && initialize_checkpoint
 AWS_COMMON=(--no-cli-pager --no-paginate --output json)
 aws_side() {
   local side="$1" endpoint region access secret config
+  local -a deadline=()
   shift
   if [ "$side" = source ]; then
     endpoint="$SOURCE_ENDPOINT"; region="$SOURCE_REGION"
@@ -227,9 +230,10 @@ aws_side() {
     access="$MIGRATION_DESTINATION_ACCESS_KEY_ID"
     secret="$MIGRATION_DESTINATION_SECRET_ACCESS_KEY"; config="$DESTINATION_CONFIG"
   fi
+  $CHECKPOINT_REQUESTED && deadline=(timeout --foreground "${TIME_BUDGET_SECONDS}s")
   AWS_ACCESS_KEY_ID="$access" AWS_SECRET_ACCESS_KEY="$secret" AWS_SESSION_TOKEN= \
     AWS_CONFIG_FILE="$config" AWS_EC2_METADATA_DISABLED=true \
-    aws "${AWS_COMMON[@]}" --endpoint-url "$endpoint" --region "$region" s3api "$@"
+    "${deadline[@]}" aws "${AWS_COMMON[@]}" --endpoint-url "$endpoint" --region "$region" s3api "$@"
 }
 
 retry_json() {
