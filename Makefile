@@ -446,6 +446,9 @@ object-storage-inventory-preprod-fetch: ## Fetch receipts without printing them 
 	  pod="$$( $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pods \
 	    -l "job-name=$(OBJECT_STORAGE_INVENTORY_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
 	  [ -n "$$pod" ] || { echo "[object-storage-inventory] Job Pod is absent"; exit 1; }; \
+	  ready="$$( $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pod "$$pod" \
+	    -o jsonpath='{.status.containerStatuses[0].ready}' )"; \
+	  [ "$$ready" = true ] || { echo "[object-storage-inventory] evidence is not ready"; exit 1; }; \
 	  mkdir -p "$$destination"; \
 	  $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) cp \
 	    "$$pod:/evidence/." "$$destination" >/dev/null; \

@@ -43,7 +43,8 @@ spec:
               report="/evidence/reports/${MIGRATION_RUN_ID}"
               resume=()
               if [ -r "$checkpoint/config.json" ]; then resume=(--resume); fi
-              exec /bin/bash /tool/migrate-object-storage.sh inventory \
+              set +e
+              /bin/bash /tool/migrate-object-storage.sh inventory \
                 --environment preprod --plane RAW \
                 --source-endpoint "$SOURCE_ENDPOINT" \
                 --source-region "$SOURCE_REGION" --source-bucket "$SOURCE_BUCKET" \
@@ -57,6 +58,15 @@ spec:
                 --checkpoint-dir "$checkpoint" --page-size 100 \
                 --time-budget-seconds 300 --concurrency 1 --retries 3 \
                 --max-failures 20 --max-object-bytes 1000000000 "${resume[@]}"
+              status=$?
+              set -e
+              marker="/evidence/export-ready/${MIGRATION_RUN_ID}"
+              mkdir -p "$(dirname "$marker")"
+              printf '%s\n' "$status" >"$marker.tmp"
+              sync -f "$marker.tmp"
+              mv "$marker.tmp" "$marker"
+              sleep 300
+              exit "$status"
           env:
             - name: MIGRATION_RUN_ID
               valueFrom: { fieldRef: { fieldPath: metadata.uid } }
@@ -87,6 +97,12 @@ spec:
           resources:
             requests: { cpu: 100m, memory: 256Mi, ephemeral-storage: 64Mi }
             limits: { cpu: 500m, memory: 1Gi, ephemeral-storage: 1200Mi }
+          readinessProbe:
+            exec:
+              command: ["/bin/bash", "-c", "test -f /evidence/export-ready/${MIGRATION_RUN_ID}"]
+            periodSeconds: 2
+            timeoutSeconds: 1
+            failureThreshold: 300
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
