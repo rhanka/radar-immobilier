@@ -5,7 +5,7 @@
 
 ## Scope / Guardrails
 - [x] Worktree `tmp/scw-final-sweep`, branch `chore/scw-final-sweep`, base `097036783006226afea53a6b49383bf70890774f`.
-- [x] Prepare in parallel; deploy only after T1 acceptance and conductor handoff.
+- [x] September 13 owner amendment: START T2 implementation immediately in parallel with T1; environment cutover remains conductor-controlled, preprod before prod.
 - [x] Make-only, Docker-first; test environment `test-scw-final`; API_PORT=8882 UI_PORT=5382 MAILDEV_UI_PORT=1182. Verify ports before starting any service.
 - [x] Read-only runtime audit, no Secret values, deletion, migration, provisioning, push or deploy by the audit delegate.
 - [x] TEM retained; preserve historical evidence and protective URL-rejection tests. Shared MatchID dependencies require reconciled scope before any mutation.
@@ -14,11 +14,13 @@
 - [x] Allowed audit outputs: `docs/architecture/scw-final-sweep.md`, `docs/reviews/scw-final/**`, this plan.
 - [x] Read main, recent retirement branches and the Geo/poc-k8s handoffs; do not change other worktrees or repositories.
 - [x] Forbidden: root `Makefile`, `docker-compose*.yml`, `rules/**`, entrypoints, `.track/**`, other plans, application/infra/workflow edits during the audit phase.
-- [x] Conditional: exact remediation paths released only after Astra design and Gemini review.
+- [x] SCWF-EX1: extend this audit branch to the exact implementation paths in `docs/reviews/scw-final/build-design.md`, after independent review reconciliation; impact is branch-local manifests/scripts/tests, rollback by reverting the relevant atomic commits, no runtime changes by builders.
+- [x] Conditional: legacy grounding retirement requires T1 canonical writer acceptance; resource/data deletion requires parity, recovery and zero-consumer proof. These do not block independent T2 code preparation.
 
 ## Feedback Loop
 - [x] Owner requests a FINAL eradication sweep: endpoints/buckets, images/rollback, suspended Jobs/CronJobs, CI/manual workflows, backup/restore, bootstrap, secret references and executable instructions. A registry migration is not closure.
 - [x] Report to `codex:radar-immobilier:98cef8dfc274`, loop `loop:immo-transitions-2026-09-13`; no overall loop completion.
+- [x] Owner-selected routing: Astra design, authorized Fable 5 independent review fallback, Sol xhigh build, independent post-build review; no two-peer consensus claim.
 
 ## Orchestration Mode (AI-selected)
 - [x] Independent audit in a separate worktree; no overlap with refresh writer.
@@ -31,6 +33,8 @@
 - [x] Lot 1: map clients to DB/S3 physical resources in preprod and production, recording unknowns and RBAC limits.
 - [x] Lot 2: reuse existing #670 work; produce minimal remediation file map and repeatable final SCW acceptance checks.
 - [ ] Lot 3: Astra design and Gemini review, then Sol implementation and Gemini post-build review.
+- [x] Lot 3a: conductor defines the bounded parallel implementation and cutover dependencies in `docs/reviews/scw-final/build-design.md`.
+- [ ] Lot 3b: reconcile the independent review, then release the exact build slice to Sol.
 - [ ] Lot 4: after T1, conductor verifies copy/parity/fencing/recovery and preprod then production cutovers.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
 
