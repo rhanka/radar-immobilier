@@ -127,12 +127,36 @@ render-preprod:
 
 .PHONY: render-prod
 render-prod:
-	@[[ "$(IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
-	  || { echo "IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
+	@test "$(IMAGE_REF)" = "$(APPROVED_IMAGE)" \
+	  || { echo "IMAGE_REF must be the accepted Graphify 0.18 image" >&2; exit 1; }
 	@test -n "$(RENDER_OUT)" || { echo "RENDER_OUT is required" >&2; exit 1; }
 	@set -o pipefail; umask 077; kubectl kustomize --load-restrictor LoadRestrictionsNone "$(PROD_OVERLAY)" \
 	  | sed "s#$(PLACEHOLDER)#$(IMAGE_REF)#g" > "$(RENDER_OUT)"
 	@! grep -q 'PINNED-BY-CI\|radar-api:latest' "$(RENDER_OUT)"
+
+.PHONY: verify-render-prod
+verify-render-prod:
+	@set -e; tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp" ENV=test-refresh-prod-018; \
+	  ! grep -Eqi 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|SCW_' "$$tmp" \
+	    || { echo "production render retains forbidden SCW or MinIO storage" >&2; exit 1; }; \
+	  ! grep -q 'name: radar-s3-credentials' "$$tmp" \
+	    || { echo "production render retains generic storage credentials" >&2; exit 1; }; \
+	  grep -q 'name: radar-scrape-s3-credentials' "$$tmp"; \
+	  grep -q 'name: radar-refresh-keyring-bootstrap' "$$tmp"; \
+	  grep -q 'claimName: radar-refresh-keyring' "$$tmp"; \
+	  test "$$(grep -c "image: $(APPROVED_IMAGE)" "$$tmp")" -eq 4; \
+	  awk '\
+	    /^kind: CronJob$$/ { kind="CronJob" } \
+	    kind == "CronJob" && /^  name: radar-refresh-/ { name=$$2 } \
+	    kind == "CronJob" && /^  suspend:/ { suspend[name]=$$2 } \
+	    END { \
+	      if (suspend["radar-refresh-pv"] != "false") exit 1; \
+	      if (suspend["radar-refresh-scrape"] != "true") exit 1; \
+	      if (suspend["radar-refresh-projection"] != "true") exit 1; \
+	      if (length(suspend) != 3) exit 1; \
+	    }' "$$tmp" \
+	    || { echo "production render must activate only radar-refresh-pv" >&2; exit 1; }
 
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
