@@ -18,3 +18,4 @@ configMapGenerator:
       - inventory-docs-prod-fast.mjs=../../ci/inventory-docs-prod-fast.mjs
       - prove-docs-conditional-writes.sh=../../ci/prove-docs-conditional-writes.sh
       - copy-canonical-docs.mjs=../../ci/copy-canonical-docs.mjs
+      - copy-canonical-docs-parity.mjs=../../ci/copy-canonical-docs-parity.mjs
