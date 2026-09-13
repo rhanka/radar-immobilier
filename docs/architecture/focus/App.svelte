@@ -6,11 +6,19 @@
   import { entropicTheme } from '@sentropic/design-system-themes';
   import Explorer from './Explorer.svelte';
   import { presentation } from './presentation-fr.js';
+  import Choices from './Choices.svelte';
+  import mermaid from './.generated/mermaid.json';
   import data from './.generated/data.json';
   const titles = ['Décision & périmètre', 'Existant & incertitudes', 'Enjeux & responsabilités', 'Trois options', 'Avis & contre-arguments', 'Bascule & retour arrière', 'Critères de réussite', 'Points à compléter'];
   let step = $state(0), note = $state(''), saved = $state(false), storageError = $state(false), source = $state(null);
   const key = `immo-focus-decision:${data.manifest.artifactInputHash}:draft`;
-  const html = text => DOMPurify.sanitize(marked.parse(text), { FORBID_TAGS: ['script', 'iframe', 'style', 'form'] });
+  const renderer = new marked.Renderer();
+  const code = renderer.code.bind(renderer);
+  renderer.code = token => {
+    const graph = token.lang === 'mermaid' && data.graphs.find(g => g.source.trim() === token.text.trim());
+    return graph ? `<figure class="source-mermaid">${mermaid[graph.id].svg}</figure>` : code(token);
+  };
+  const html = text => DOMPurify.sanitize(marked.parse(text, { renderer }), { FORBID_TAGS: ['script', 'iframe', 'form', 'foreignObject'] });
   onMount(() => { try { note = localStorage.getItem(key) ?? ''; } catch { storageError = true; } });
   function save(value) { note = value; try { localStorage.setItem(key, value); saved = true; } catch { storageError = true; } }
   function download() {
@@ -43,9 +51,9 @@
       </nav>
       <ProgressBar value={step + 1} max={8} label={`Section ${step + 1} sur 8`} size="sm" />
       <section class="decision-content">
-        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D2 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
+        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D3 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
         <!-- The French reading surface links to the complete repository dossier. -->
-        <div class="prose" onclick={link} role="presentation">{@html html(presentation[step])}</div>
+        {#if step === 3}<Choices manifest={data.manifest} remarks={note} />{:else}<div class="prose" onclick={link} role="presentation">{@html html(presentation[step])}</div>{/if}
         <Button variant="ghost" size="sm" onclick={() => source = 'decision-dossier'}>Dossier source complet · références et qualification des faits</Button>
         {#if step === 4}<Button variant="secondary" onclick={() => source = 'decision-reviews'}>Lire les avis réels des reviewers</Button>{/if}
       </section>
@@ -56,7 +64,7 @@
         <Flex align="center" gap={2}><Button variant="secondary" onclick={download}>Exporter mes remarques</Button><span role="status">{storageError ? 'Stockage local indisponible : exporter avant de fermer.' : saved ? 'Brouillon enregistré localement — non ratifié' : 'Aucune approbation enregistrée'}</span></Flex>
       </section>
       <footer><strong>Preuves embarquées · accès hors ligne</strong><div class="source-links">{#each ['architecture', 'storage-audit', 'continuation-audit', 'decision-dossier', 'decision-reviews', 'proposal'] as name}<button onclick={() => source = name}>{name}</button>{/each}</div>
-        <p>Composant de nœud Focus réutilisé sans modification ; SvelteFlow natif, groupes parentId et sous-flows navigables. Mapping complet des Mermaid ; absence de croisements d’arêtes non certifiée.</p>
+        <p>Composants Focus, SvelteFlow natif intégral et boîtes parentId imbriquées. Tous les liens sont conservés ; absence de croisements d’arêtes non certifiée.</p>
       </footer>
     </main>
     {#if source}<dialog class="source-overlay" use:modal onclose={() => source = null} aria-label={`Source ${source}`}><section class="source-sheet"><Button variant="secondary" onclick={() => source = null}>Fermer la source</Button><div class="prose" onclick={link} role="presentation">{@html html(data.docs[source])}</div></section></dialog>{/if}
