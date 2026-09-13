@@ -42,7 +42,7 @@
     </select></label>
   </div>
   <div class="graph-layout" class:inspecting={selected}>
-    <Flow {graph} {scope} {open} select={item => selected = item} />
+    <Flow {graph} {scope} {open} focusId={selected?.edge ? null : selected?.id} select={item => selected = item} />
     {#if selected}<aside class="inspector" aria-label="Identité du composant">
       <button class="close" aria-label="Fermer le détail" onclick={() => selected = null}>×</button>
       <Badge tone="neutral">{selected.resource ?? selected.id}</Badge>

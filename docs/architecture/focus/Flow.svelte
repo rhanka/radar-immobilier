@@ -3,7 +3,8 @@
   import ArchitectureNode from '@kit/ArchitectureNode.svelte';
   import '@xyflow/svelte/dist/style.css';
   import { sceneFor } from './scenes.js';
-  let { graph, scope, open, select } = $props();
+  import Viewport from './Viewport.svelte';
+  let { graph, scope, open, select, focusId } = $props();
   const nodeTypes = { architecture: ArchitectureNode };
   let scene = $derived(sceneFor(graph, scope));
 </script>
@@ -18,6 +19,7 @@
       <Background gap={24} size={1} />
       <Controls showInteractive={false} />
       <MiniMap pannable zoomable />
+      <Viewport {focusId} />
     </SvelteFlow>
   {/key}
 </div>
