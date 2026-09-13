@@ -4,10 +4,15 @@ ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../../..)
 OVERLAY := $(ROOT)/deploy/k8s/refresh-cronjobs
 PROD_OVERLAY := $(ROOT)/deploy/k8s/refresh-cronjobs-prod
 NAMESPACE := radar-immobilier-preprod
+PROD_NAMESPACE := radar-immobilier
 EXPECTED_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 K := kubectl --kubeconfig "$(KUBECONFIG)" -n $(NAMESPACE)
+KP := kubectl --kubeconfig "$(KUBECONFIG)" -n $(PROD_NAMESPACE)
 PLACEHOLDER := ghcr.io/rhanka/radar-api:PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
 API_IMAGE := ghcr.io/rhanka/radar-api
+APPROVED_IMAGE := ghcr.io/rhanka/radar-api@sha256:d4a46b5615a7510fd5bf3384f65dea8b881cb75ae3226a3dc3751a7f9271119e
+OVH_S3_ENDPOINT := https://s3.bhs.io.cloud.ovh.net
+OVH_DOCS_BUCKET := radar-immobilier-docs
 
 .PHONY: guard-preprod
 guard-preprod:
@@ -32,6 +37,37 @@ inspect-preprod: guard-preprod
 	  $(K) get pvc radar-refresh-keyring --ignore-not-found \
 	    -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,CLASS:.spec.storageClassName,ACCESS:.spec.accessModes[*]; \
 	else echo 'PVC inventory: unavailable to this identity'; fi
+
+.PHONY: guard-prod
+guard-prod:
+	@test "$(ENV)" = "prod" || { echo "ENV=prod is required" >&2; exit 1; }
+	@test -n "$(KUBECONFIG)" -a -f "$(KUBECONFIG)" || { echo "KUBECONFIG file is required" >&2; exit 1; }
+	@server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"; \
+	  case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected API server" >&2; exit 1;; esac
+	@$(KP) get serviceaccount radar-app -o name >/dev/null
+
+.PHONY: inspect-prod
+inspect-prod: guard-prod
+	@kubectl --kubeconfig "$(KUBECONFIG)" auth whoami -o jsonpath='{.status.userInfo.username}{"\n"}'
+	@for check in 'get cronjobs.batch' 'create cronjobs.batch' 'patch cronjobs.batch' 'create jobs.batch' 'get secrets' 'create secrets' 'get persistentvolumeclaims' 'create persistentvolumeclaims'; do \
+	  set -- $$check; printf '%-34s %s\n' "$$1 $$2" "$$($(KP) auth can-i "$$1" "$$2")"; \
+	done
+	@$(KP) get cronjob radar-refresh-scrape radar-refresh-projection radar-refresh-pv --ignore-not-found \
+	  -o custom-columns=NAME:.metadata.name,SUSPEND:.spec.suspend,SCHEDULE:.spec.schedule,IMAGE:.spec.jobTemplate.spec.template.spec.containers[0].image
+	@$(KP) get configmap radar-api --ignore-not-found \
+	  -o custom-columns=NAME:.metadata.name,GRAPH_ENDPOINT:.data.GRAPH_S3_ENDPOINT,GRAPH_REGION:.data.GRAPH_S3_REGION,GRAPH_BUCKET:.data.GRAPH_S3_BUCKET,SCRAPE_ENDPOINT:.data.SCRAPE_S3_ENDPOINT,SCRAPE_REGION:.data.SCRAPE_S3_REGION,SCRAPE_BUCKET:.data.SCRAPE_S3_BUCKET
+	@if [ "$$($(KP) auth can-i get secrets)" = yes ]; then \
+	  $(KP) get secret radar-graph-s3-credentials radar-scrape-s3-credentials radar-refresh-keyring-bootstrap radar-refresh-runtime --ignore-not-found -o name; \
+	else echo 'secret inventory: unavailable to this identity'; fi
+	@if [ "$$($(KP) auth can-i get persistentvolumeclaims)" = yes ]; then \
+	  $(KP) get pvc radar-refresh-keyring --ignore-not-found \
+	    -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,CLASS:.spec.storageClassName,ACCESS:.spec.accessModes[*]; \
+	else echo 'PVC inventory: unavailable to this identity'; fi
+	@$(KP) get statefulset radar-minio --ignore-not-found -o name
+	@$(KP) get service radar-minio --ignore-not-found -o name
+	@$(KP) get pvc minio-data-radar-minio-0 --ignore-not-found -o name
+	@$(KP) get jobs -o custom-columns=NAME:.metadata.name,ACTIVE:.status.active,FAILED:.status.failed,SUCCEEDED:.status.succeeded --no-headers \
+	  | awk '$$1 ~ /(object-storage|docs|copy|inventory|proof)/ { print }'
 
 .PHONY: keyring-summary
 keyring-summary:
