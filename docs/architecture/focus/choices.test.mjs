@@ -1,14 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { responsePack } from './choices.js';
+import { questions, responsePack } from './choices.js';
 
-test('D6 exports effective facts and audited billing without a fake choice', () => {
-  const result = responsePack({ dossierHash: 'd', artifactInputHash: 'a' }, 'Réserve', 'Notes', '2026-09-13T23:00:00Z');
-  assert.equal(result.revision, 'D6');
+test('D7 exports explicit open questions, selections and comments without reopening fixed decisions', () => {
+  assert.deepEqual(questions.map(({ key }) => key), ['preprod-address', 'automation-scope', 'llm-billing']);
+  assert.ok(questions.every(question => question.question.endsWith('?')));
+  assert.equal(questions.find(question => question.key === 'llm-billing').criticality, 'non-critical');
+  const selections = { 'preprod-address': 'KEEP_VERIFIED', 'automation-scope': 'IMMO_ONLY', 'llm-billing': null };
+  const comments = { 'preprod-address': 'Conserver le lien observé.', 'automation-scope': '', 'llm-billing': 'À rapprocher.' };
+  const result = responsePack({ dossierHash: 'd', artifactInputHash: 'a' }, selections, comments, 'Notes', '2026-09-13T23:00:00Z');
+  assert.equal(result.revision, 'D7');
   assert.equal(result.buildOnly, true);
-  assert.equal(result.option, null);
-  assert.match(result.optionInterpretation, /No genuine balanced decision/);
-  assert.deepEqual(result.fixedInstructions.architectureOrder, ['before', 'effective-transition-2026-09-13', 'after-T2', 'after-T3-one-b3-8']);
+  assert.equal(result.status, 'draft-not-ratified');
+  assert.equal(result.responses[0].selection, 'KEEP_VERIFIED');
+  assert.equal(result.responses[0].comment, 'Conserver le lien observé.');
+  assert.equal(result.responses[2].selection, null);
+  assert.equal(result.responses[2].criticality, 'non-critical');
+  assert.equal(result.responses[2].decisionStatus, 'open-non-blocking');
+  assert.deepEqual(result.fixedInstructions.architectureOrder, ['before', 'after-T3-one-b3-8']);
   assert.equal(result.fixedInstructions.transitionEvidence.t1.graphify, '0.18.0');
   assert.equal(result.fixedInstructions.transitionEvidence.t1.model, 'Luna high');
   assert.equal(result.fixedInstructions.transitionEvidence.t1.firstKubernetesRun, 'failed-before-LLM');
@@ -28,7 +37,9 @@ test('D6 exports effective facts and audited billing without a fake choice', () 
   assert.equal(result.fixedInstructions.billing.node.quantity, 1);
   assert.equal(result.fixedInstructions.billing.node.projectedAmountCad, 68.88);
   assert.equal(result.fixedInstructions.billing.llm.totalFacturableCad, 251.21543767641742);
+  assert.equal(result.fixedInstructions.billing.llm.ratificationStatus, 'open-non-blocking');
   assert.equal(result.fixedInstructions.billing.indicativeTotalCad, 320.0954376764174);
-  assert.equal('decision' in result, false);
-  assert.equal('options' in result, false);
+  assert.equal(result.fixedInstructions.transitionEvidence.t2.decision, 'MIGRATE+RETAIN');
+  assert.equal(result.fixedInstructions.retainScwTemUntilValidatedReplacement, true);
+  assert.throws(() => responsePack({}, { 'preprod-address': 'UNKNOWN' }, {}, '', null), /Unknown option/);
 });
