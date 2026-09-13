@@ -211,6 +211,19 @@ TEST_NAME='rejects identical normalized source and destination tuples'
 expect_bad run_tool inventory "$TEST_TMP/reports/tuple" \
   --destination-endpoint http://source.test --destination-region local \
   --destination-bucket src --destination-path-style true
+TEST_NAME='requires an approved union for every DOCS proof or copy operation'
+expect_bad run_tool verify "$TEST_TMP/reports/docs-no-union" --plane DOCS
+TEST_NAME='requires a complete destination credential family'
+expect_bad env PATH="$TEST_TMP/bin:$PATH" FAKE_S3_ROOT="$TEST_TMP/store" \
+  FAKE_S3_TMP="$TEST_TMP" FAKE_AWS_LOG="$AWS_LOG" \
+  MIGRATION_SOURCE_ACCESS_KEY_ID=SRC_KEY MIGRATION_SOURCE_SECRET_ACCESS_KEY=SRC_SECRET \
+  MIGRATION_DESTINATION_ACCESS_KEY_ID=DST_KEY MIGRATION_DESTINATION_SECRET_ACCESS_KEY= \
+  "$TOOL" inventory "${BASE_ARGS[@]}" --report-dir "$TEST_TMP/reports/missing-credential"
+
+reset_store
+FAKE_FAIL_SIDE=destination FAKE_FAIL_OPERATION=head-bucket FAKE_FAIL_ATTEMPTS=99
+TEST_NAME='fails when the credential cannot prove the exact destination target'
+expect_bad run_tool inventory "$TEST_TMP/reports/target-identity" --retries 1
 
 reset_store
 put_fixture source src raw/a.txt alpha; put_fixture source src raw/b.txt beta
