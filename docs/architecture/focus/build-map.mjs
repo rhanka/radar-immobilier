@@ -1,14 +1,16 @@
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { extractDiagrams } from './parse-mermaid.mjs';
+import { provenanceFor } from './service-provenance.js';
 
 const architecture = await readFile('../../architecture.md', 'utf8');
 const proposal = await readFile('../proposal.md', 'utf8');
 const graphs = [...extractDiagrams(architecture, ['Accès & composants', 'PV → Signaux · Immo', 'Geo · sources & jointures', 'Livraison ≠ refresh'], 'asis'),
   ...extractDiagrams(proposal, ['Option A · cible proposée, non déployée'], 'target')];
+for (const graph of graphs) for (const item of [...graph.nodes, ...graph.groups]) item.provenance = provenanceFor(graph.id, item.id);
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 const docs = {};
-for (const name of ['decision-dossier', 'continuation-audit', 'storage-audit', 'decision-reviews', 'decision-review-codex', 'README', 'focus-verification', 'gemini-review/response-findings', 'gemini-review/review-inline', 'gemini-review/response-mapping']) {
+for (const name of ['decision-dossier', 'continuation-audit', 'storage-audit', 'service-provenance', 'decision-reviews', 'decision-review-codex', 'README', 'focus-verification', 'gemini-review/response-findings', 'gemini-review/review-inline', 'gemini-review/response-mapping']) {
   docs[name.split('/').at(-1)] = await readFile(`../${name}.md`, 'utf8');
 }
 docs.architecture = architecture; docs.proposal = proposal;
