@@ -1,187 +1,117 @@
-# Architecture dossier — complete target and sequential transitions
+# Architecture dossier — before, effective transition, after
 
-Revision **D5**, 2026-09-13. **Target architecture proposed; no deployment
-claimed.** The complete final target and T1→T2→T3 states are the primary reading
-surface. Production inventory and every transition's acceptance remain open.
-Opening this page performs no action and creates no Track event.
-Author: Codex documentation build. This is not an owner signature or invoice.
+Revision **D6**, 2026-09-13. The dossier separates a preserved before capture,
+the later effective state on the same day, and two after targets. Opening the
+Focus page performs no action, creates no Track event and is not an invoice.
 
-## 1. Complete target and fixed path
+## 1. Three levels of truth
 
-[FACT · owner] Present and execute the existing direction in order:
-**Existant → T1 autonomous PV/Signal refresh → T2 OVH object cutover plus final
-SCW sweep → T3 one existing b3-8**. Preproduction precedes a separately gated
-production promotion. [Selectable target states](transitions-target.md) and
-[transition register](transitions.md) are the sources of truth for this dossier.
+The reading path is **Before → Effective transition on September 13 → After T2
+→ After T3**. [The three transition diagrams](transitions-target.md) and the
+[register](transitions.md) are canonical for the effective and target states.
+Every diagram exposes changes, retained elements, removals, gates and evidence.
 
-[JUDGMENT] The complete target has one OVH b3-8 housing the Immo and Geo tenants,
-subject to shared capacity and safety acceptance. It retains prod/preprod URLs
-and SSO; Immo UI/API/MCP/PG/refresh and object roles; Geo API, uncertain database
-dependency, corpus/products, official sources and in-process joins. No MinIO or
-other Scaleway service is active in the final target; **TEM is the sole retained
-exception** until replacement is validated. MatchID is excluded.
+The complete target keeps the Immo/Geo product chain, prod/preprod URL and SSO,
+and moves object roles to OVH. It proposes both tenants on one existing b3-8 only
+after safety acceptance. SCW TEM is retained until its replacement is validated.
 
-[FACT · owner correction] Billing is the final annex, not a critical-path choice.
-No DIRECT/USAGE/CAPACITY selection is requested. Later token accounting uses the
-same unit tariffs as the preceding month's **actual** invoice once that invoice
-is verified.
+## 2. Before capture
 
-## 2. Existing state and evidence boundary
+The [before source](../architecture.md) was observed earlier on September 13:
+the API used MinIO `PP-RAW` and empty fallback `PP-DOCS`; separate
+`PP-DOCS-LEGACY` held useful history. Refresh used OVH `PP-GRAPH` and `PP-DB`,
+while the LLM-derived path still required a workstation. Production access was
+observed, but its private bindings were not inventoried.
 
-[FACT] The September 13 current-state snapshot verifies preproduction storage:
-the API uses MinIO `PP-RAW`; its `PP-DOCS` fallback is empty; distinct
-`PP-DOCS-LEGACY` contains useful replay/history. These remain physical MinIO roles;
-scrape/projection use the same existing OVH `PP-GRAPH`; PG remains `PP-DB`.
-Mapped PDF evidence reads `GEO-S3/raw/pv-index/cas/`. Production application
-access is observed, but private Immo DB/object/refresh bindings are **UNVERIFIED**.
+Observed surfaces include `preprod.immo.sent-tech.ca`, `immo.sent-tech.ca`,
+`preprod.auth.sent-tech.ca` and `auth.sent-tech.ca`. Repository provenance is
+shown on every node: radar-immobilier owns Immo application paths, geo owns Geo
+data/services, and poc-k8s owns the shared Kubernetes platform.
 
-[FACT] A dedicated Immo read at 15:38 UTC confirmed one ready preprod API, UI
-and MCP replica plus the existing scrape/projection CronJobs. It did not observe
-the proposed Graphify 0.18 refresh, PVC/storage class or production internals.
+## 3. Effective transition — T1
 
-[FACT] `immo.sent-tech.ca`, `preprod.immo.sent-tech.ca`, `auth.sent-tech.ca` and
-`preprod.auth.sent-tech.ca` are the observed access/SSO surfaces. The current
-platform audit has three b3-8 nodes; requests exceed one node's allocatable CPU
-and memory, and required anti-affinity is incompatible with one node (§5).
+Graphify **0.18.0** is integrated and **Luna high** is selected. The first
+Kubernetes validation run failed before invoking the LLM: its chosen input was
+`.html`, while the extraction contract requires PDF. This is a real fail-closed
+input-validation result, not provider completion or T1 acceptance.
 
-[FACT] Graphify remains exactly 0.18.0 and fail-closes correctly. Fable returned
-**BLOCK** at Immo `ac3a7150`. Corrective commits `537b9e0c` and `3d9ed43c` pass
-scoped 34/34, integration 4/4 and typecheck; Fable re-review is still in progress.
-The internal PDF contract remains `immo-pv-extraction-v3`, not a Graphify release.
-Retain llm-mesh 0.19.0. On rare nested `UND_ERR_SOCKET`, Graphify fails closed,
-the Job fails and the next cycle resumes from durable state; no corruption or
-in-process retry is claimed. The 0.19.1 need is judged probably false and not prioritized.
-Cross-repository implementation is unauthorized; PR #585 is closed and its branches
-are removed. Diagnosis is deferred to `s-conductor` without an implementation request.
-T1 remains **BLOCKED** pending re-review and the remaining acceptance gates. No
-real-provider Signal or Kubernetes acceptance exists.
-Every target
-production role may be named as a contract, but its physical binding remains
-TBD rather than inferred from source defaults or the old SCW cluster.
+The next run must use a valid PDF and prove provider completion, a typed Signal
+with its exact PDF, idempotent replay and unattended scheduling. The workstation
+remains available for administration/fallback until those gates pass. The
+[causal T1 pipeline](proposal.md) shows acquisition, Graphify, guarded graph
+publication, atomic PostgreSQL projection and served proof.
 
-[FACT] The 15:38 runtime read and 15:39 implementation progress are earlier
-timestamped cutoffs. Later September 13 transition audits have no supplied exact
-UTC cutoff. No unified delivery, token or billing cutoff is frozen.
+## 4. Effective transition — T2
 
-## 3. T1 — autonomous Immo refresh
+Preproduction RAW passed parity and the API was rebound to `PP-RAW-OVH`; the old
+raw identity is fenced/recovery-only. DOCS inventory observes preprod MinIO at
+144,193 objects / 28.34 GB and canonical production SCW `docs-pocs` at
+59,017 / 12,534,514,457 B.
+The OVH bucket and Secret are provisioned and guarded copy tooling is committed
+on `chore/scw-final-sweep` through `be362561`; it is **not on `origin/main`** at
+this snapshot.
 
-[FACT · design] The causal chain is acquisition/parse → profile extraction and
-grounding → preserved fresh candidate → deterministic 3.4 enrichment on that
-fresh candidate **before** canonical publication → guarded full-graph write →
-atomic PG projection → typed Signal plus exact PDF. [Detailed T1 flow](proposal.md).
+By explicit owner decision, the production source is the **exact initial
+canonical reference**. OVH prod and preprod must each contain those same 59,017
+keys and hashes. The surplus 85,176 preprod objects is non-canonical and is not
+migrated. The gate is manifest diff → production canonical set → selective copy
+→ exact keys/hash parity → recovery proof → recoverable removal of all MinIO.
+Copy, parity/recovery and rebind are **not complete**; production migration has
+no completed outcome. TEM remains until replacement validation.
 
-[FACT] Immo owns every step; Geo owns geographic inputs. T1 keeps the existing
-API MinIO roles until T2. The corrective test envelope passes, but Fable re-review,
-operated keyring, durable lock, real-provider Signal and Kubernetes qualification
-remain open. llm-mesh 0.19.1 is not an acceptance gate.
+## 5. After targets and one-node gate
 
-[JUDGMENT] Before any real extraction, run one neutral benchmark over the same five
-PDFs: historical/manual baseline versus contract versions v1, v2 and v3. Every run
-must be non-simulated and traceable. The model is not yet selected, Cloud Code is
-not enrolled, and no score or winner is claimed before those runs and frozen metrics.
+After T2, RAW and DOCS use distinct accepted OVH roles, with exactly 59,017
+canonical DOCS keys/hashes in prod and preprod. Only then may every MinIO
+consumer, object, workload and PVC be removed through the recoverable gate. The
+target never reuses a MinIO physical identity for an OVH bucket.
 
-[JUDGMENT] Acceptance requires the benchmark gate, actual installed contract, durable credentials,
-one lock shared by scheduled/manual execution, failure/resume and a CronJob-created
-Job surviving pod replacement and credential refresh. A bump, manual Job green or
-nonempty graph cannot substitute for a fresh typed Signal and its exact PDF.
+T3 has **not started** and is **NO-GO today**. One node exposes 1,840m CPU and
+5,907.82 Mi allocatable, versus 4,095m/8,442 Mi requests and 5,273 Mi current pod
+memory. Required anti-affinity and 16 PVC/15 Cinder RWO add placement constraints.
+The mandatory sequence is T2 complete → rightsizing → constraints reconciled →
+verified two-node operation → one-node preprod test → production authorization.
 
-## 4. T2 — object cutover and final SCW sweep
+## 6. Gates and rollback
 
-[JUDGMENT] Create new target bindings `PP-RAW-OVH` / `PP-DOCS-OVH`; never reuse
-the physical MinIO IDs. The decision is **MIGRATE+RETAIN**: migrate every reader/writer with
-key/size/hash and application decode parity, fence old writers, repoint real
-clients, rehearse recovery and retain `PP-DOCS-LEGACY` until complete parity and recovery.
+T1: valid PDF → provider → Signal/PDF → replay → schedule. T2: inventory →
+conditional copy → parity → restore → writer fence → rebind, preprod before prod.
+T3: T2 → capacity/placement → two nodes → one node.
 
-[FACT] The partial legacy inventory is baseline 1/2,821,583 B; graph 4/639,226 B;
-ontology 530/34,257,805 B; parsed ≥4,884/≥272,554,144 B; raw unknown; runs ≥445.
-Remediation has advanced through `ee84ae29`, `f2ac3825`, `c30467ca` and
-`cef6d7ed`. The checkpoint mechanism at `aaf0cbf7` / `91242223` remains under
-construction. These commits are implementation progress, not migration acceptance;
-no object copy has occurred.
+Object rollback restores an app-consistent set of canonical graph hash, SQL
+checkpoint/version, proof objects and input set. It never assumes a cross-S3/SQL
+transaction or permits dual writers. A partial transition authorizes no deletion,
+credential revocation or node reduction.
 
-[FACT] Preproduction goes first, then separately inventoried production. Production
-private bindings are still TBD/UNVERIFIED. Retire MinIO only at zero consumers.
-The final Immo sweep covers images, old digests, Jobs, manual/CI/backup/bootstrap and executable/secret references. TEM remains the sole exception.
+## 7. Rendered evidence and limits
 
-## 5. T3 — one existing b3-8
-
-[FACT] The current audit has three b3-8 nodes. One node has 1,840m CPU / 5,907.82
-Mi allocatable; requests total 4,095m / 8,442 Mi and current pod memory is 5,273
-Mi. Required CoreDNS, konnectivity and Traefik anti-affinity is incompatible with
-one node. There are 16 PVCs, including 15 Cinder RWO volumes. Verdict: **NO-GO today**.
-
-[JUDGMENT] T3 consolidates both Immo and Geo tenants on one **existing** b3-8 only
-after a complete shared peak including Immo production and the new refresh. It
-must settle realistic requests, hibernation/wake choices, anti-affinity, PDBs,
-PVC placement/attachment, batch overlap, health probes and recovery on one failure
-domain. No second per-tenant node is part of the target or billing projection.
-
-[JUDGMENT] The counter-case is explicit: the workload may not fit safely. Until
-T2 completes, requests are rightsized, placement constraints are reconciled and a
-controlled two-node state is verified, the one-node target cannot be attempted.
-It remains proposed and no capacity reduction is claimed.
-
-## 6. Gates, promotion and recovery
-
-[JUDGMENT] **T1 gates:** installed-package compatibility → consumer/integration
-tests → real preprod Signal/PDF and idempotent resume → unattended scheduled run
-after pod and credential refresh. **T2 gates:** complete client/IAM/object inventory
-→ new destination controls → full and final-delta parity → fence → repoint → real
-client tests → scheduled observation → isolated recovery → zero consumers → later
-deletion. **T3 gates:** T2 complete → rightsizing → affinity/PVC constraints →
-verified two-node operation → controlled one-node preprod health → separately
-authorized production consolidation.
-
-[JUDGMENT] Every stage is preprod first and production second. Shared resources
-require all consumers' acceptance. Suspended/manual paths are still executable and
-must be inventoried. Backups are rollback artifacts, not live fallbacks; no dual
-writer is permitted during handoff.
-
-[JUDGMENT] After writes, stop and fence writers, restore an app-consistent set of
-canonical graph hash, SQL checkpoint/version, evidence objects and run input hash,
-then prove the recovered Signals and exact PDFs. Prevent or journal/replay intervening
-writes within the accepted RPO. Do not assume a cross-S3/SQL transaction or discard
-newer writes. RPO/RTO, retention, volume and restore throughput remain unresolved.
-
-## 7. Evidence, provenance and limitations
-
-| Surface | D5 representation | Evidence still required |
+| State | Effective fact | Still open |
 | --- | --- | --- |
-| Current state | Four existing detailed diagrams; verified preprod as-of timestamp | Authorized production private inventory |
-| T1 / T2 / T3 | Three complete platform states plus detailed T1, each native SvelteFlow and Mermaid | Deployment and per-stage runtime acceptance |
-| Identity | Stable old MinIO, new OVH, PG, graph and Geo IDs; explicit repo/service on every leaf/group | Final OVH target bindings and IAM |
-| Safety | Preprod→prod gates, single writer, paired recovery, one-node counter-evidence | RPO/RTO, parity, peak and drain results |
+| Before | Captured MinIO/API/workstation topology | Historical baseline only |
+| Transition | RAW OVH active; T1 pre-LLM failure; DOCS inventory | T1 acceptance; DOCS/prod completion |
+| After T2 | Complete OVH object target | Not deployed |
+| After T3 | Complete one-node target | Not started; NO-GO today |
 
-[FACT · owner-response provenance] The D4 response was captured at
-`2026-09-13T15:10:18.423Z` with dossier hash
-`b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451`
-and artifact-input hash
-`92b87297fbc8ed0f2670fa4fd07e1dde6d061d04533d3695275c1f386b3b032e`.
-Its allocation `option` is `null`: no method was selected. D5 preserves the
-owner's correction as instructions; it does not turn that null into ratification.
+Eight Mermaid sources are rendered to sanitized SVG and complete native
+SvelteFlow. Nested boxes use `parentId`; service icons and repo labels are
+mandatory for every node and group. No genuine balanced owner decision is open,
+so no fake option is shown; the JSON action copies facts and remaining gates.
 
-[FACT] This docs build launches no implementation or reviewer agent and writes no
-Track event. Earlier D4/Gemini/Codex reviews remain historical evidence, not D5
-approval. Production bindings, T1/T2/T3 deployments and monetary closure are not
-claimed by rendered completeness.
+## 8. Billing annex
 
-## 8. Billing annex — evidence incomplete
+The last cost report merged on `origin/main` ends **2026-08-09**, making the
+joined period **2026-08-10 through 2026-09-13 inclusive**: 35 days / 840 hours,
+America/Toronto. This proves the repository-report boundary, not an unavailable
+external invoice identity.
 
-[FACT · owner] The requested report starts at the real preceding invoice/report
-boundary, which is **not yet verified**. It ends September 13 inclusive in
-America/Toronto (`2026-09-14T00:00:00-04:00` exclusive). Record the actual data
-capture cutoff separately because September 13 is incomplete. September 13
-transitions are **inside** the requested period and must be labelled observed or
-planned, never moved to a post-period appendix.
+Infrastructure is only the requested projection of **one b3-8 BHS5**:
+`840 × 0.082 = 68.88 CAD`. The two/three-node observed platform costs are
+pass-through/internal and excluded from the billable projection.
 
-[FACT · owner] Infrastructure uses one b3-8 BHS5 projection at `0.082 CAD/h`.
-Period hours and projected amount are unknown until the start is verified.
-`720 h × 0.082 = 59.04 CAD` is an old 30-day illustration only, never the current
-period amount.
-
-[FACT · owner] LLM accounting comes last. Later, count tokens using the **same
-unit tariffs as the previous month's actual invoice**; do not open a new allocation
-method choice. The strongest local earlier cost report ends nominally August 9 and
-was generated that day with partial data; it does not prove the invoice boundary.
-The Wave 250804-028 method note covers June 8–July 5 and does not prove the latest
-invoice or tariff. D5 does not parse tokens or infer a price.
+The refreshed deduplicated session audit retains the previous report's unit
+basis and allocation formula: two Claude seats and one ChatGPT Pro seat at
+200 USD/month, seven-day capacity, USD→CAD 1.37 and LLM margin ×1.15. It gives
+139.337732 CAD immo + 111.877705 CAD geo = **251.215438 CAD LLM**. The indicative
+sum is **320.095438 CAD**. These are allocations from local session logs, not
+provider invoice lines; [the monthly report](../reports/architecture-monthly/report-through-2026-09-13.md)
+documents sources, method and uncertainty.
