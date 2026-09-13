@@ -13,7 +13,7 @@ build: mermaid
 	$(RUN) node_modules/vite/bin/vite.js build --config vite.config.js --configLoader runner
 	$(RUN) portable.mjs
 test: map
-	$(RUN) --test mapping.test.mjs nested.test.mjs choices.test.mjs
+	$(RUN) --test mapping.test.mjs nested.test.mjs choices.test.mjs provenance.test.mjs
 	git diff --check
 browser:
 	docker run --rm --network host --user "$$(id -u):$$(id -g)" -v $(FOCUS_DIR):/out -w /out $(NODE_IMAGE) node browser-check.mjs

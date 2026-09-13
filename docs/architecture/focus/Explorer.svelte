@@ -48,6 +48,10 @@
       <button class="close" aria-label="Fermer le détail" onclick={() => selected = null}>×</button>
       <Badge tone="neutral">{selected.resource ?? selected.id}</Badge>
       <h3>{selected.label}</h3>
+      {#if selected.provenance}
+        <p><strong>{selected.provenance.repoLabel}</strong><br>{selected.provenance.service}<br>{selected.provenance.role}</p>
+        <p>Référence d’attribution : <code>{selected.provenance.evidence}</code></p>
+      {/if}
       <p>Source Mermaid : ligne {selected.line}. Une autre vue ne crée pas une autre ressource.</p>
       {#if selected.edge}<p>{selected.edge.label || 'Relation non étiquetée dans la source.'}</p>{/if}
       {#if selected.resource}<h4>Autres vues de cette identité</h4>
@@ -59,6 +63,7 @@
     </aside>{/if}
   </div>
   <p class="caption">Tous les sous-flows sont emboîtés et affichés dans le même schéma. Cliquer sur une boîte zoome dessus sans masquer les autres composants ni leurs liens.
-    {graph.nodes.length} composants · {graph.edges.length} relations · {graph.groups.length} sous-flows. Flèches READ : consommateur → store.</p>
+    {graph.nodes.length} composants · {graph.edges.length} relations · {graph.groups.length} sous-flows. Flèches READ : consommateur → store.
+    Icônes de service génériques, sans implication de fournisseur. « repo » : code, manifests ou configuration selon le rôle indiqué ; pas une preuve de déploiement.</p>
   {#key graph.id}<Mermaid {graph} />{/key}
 </section>

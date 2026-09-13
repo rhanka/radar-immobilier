@@ -64,7 +64,7 @@
         <Textarea label="Remarques sur les décisions et critères manquants" value={note} oninput={event => save(event.currentTarget.value)} rows={4} />
         <Flex align="center" gap={2}><Button variant="secondary" onclick={download}>Exporter mes remarques</Button><span role="status">{storageError ? 'Stockage local indisponible : exporter avant de fermer.' : saved ? 'Brouillon enregistré localement — non ratifié' : 'Aucune approbation enregistrée'}</span></Flex>
       </section>
-      <footer><strong>Preuves embarquées · accès hors ligne</strong><div class="source-links">{#each ['architecture', 'storage-audit', 'continuation-audit', 'decision-dossier', 'decision-reviews', 'proposal'] as name}<button onclick={() => source = name}>{name}</button>{/each}</div>
+      <footer><strong>Preuves embarquées · accès hors ligne</strong><div class="source-links">{#each ['architecture', 'storage-audit', 'service-provenance', 'continuation-audit', 'decision-dossier', 'decision-reviews', 'proposal'] as name}<button onclick={() => source = name}>{name}</button>{/each}</div>
         <p>Composants Focus, SvelteFlow natif intégral et boîtes parentId imbriquées. Tous les liens sont conservés ; absence de croisements d’arêtes non certifiée.</p>
       </footer>
     </main>
