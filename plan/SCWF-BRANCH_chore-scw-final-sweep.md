@@ -60,7 +60,8 @@
   - [x] Compare single-source or approved-union parity and proof inputs.
   - [ ] Copy missing objects and reconcile only exact migration-owned versions.
     - [x] Add bounded conditional copy workers preserving all contracted object attributes.
-    - [ ] Re-inventory copied keys, write the immutable ownership ledger and gate reconciliation.
+    - [x] Re-inventory copied keys and write the immutable ownership ledger.
+    - [ ] Gate reconciliation on an exact ledger, fence, versioning and prior VersionId.
   - [ ] Enforce hermetic failure paths, binding checks and the CI gate.
 - [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.

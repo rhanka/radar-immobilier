@@ -487,16 +487,56 @@ copy_missing_objects() {
 }
 
 PARITY="$REPORT_DIR/parity.json"
-jq -n --slurpfile expected "$TARGET_MANIFEST" --slurpfile actual "$DESTINATION_MANIFEST" '
-  def core: del(.etag,.versionId,.classification,.sources);
-  def bykey($items;$key): $items | map(select(.key == $key)) | first;
-  {missing:[$expected[] | select(bykey($actual;.key) == null) | .key],
-   extra:[$actual[] | select(bykey($expected;.key) == null) | .key],
-   conflicting:[$expected[] as $want | bykey($actual;$want.key) as $got |
-     select($got != null and (($want|core) != ($got|core))) | $want.key],
-   matching:[$expected[] as $want | bykey($actual;$want.key) as $got |
-     select($got != null and (($want|core) == ($got|core))) | $want.key]}' \
-  >"$PARITY"
+compute_parity() {
+  jq -n --slurpfile expected "$TARGET_MANIFEST" --slurpfile actual "$DESTINATION_MANIFEST" '
+    def core: del(.etag,.versionId,.classification,.sources);
+    def bykey($items;$key): $items | map(select(.key == $key)) | first;
+    {missing:[$expected[] | select(bykey($actual;.key) == null) | .key],
+     extra:[$actual[] | select(bykey($expected;.key) == null) | .key],
+     conflicting:[$expected[] as $want | bykey($actual;$want.key) as $got |
+       select($got != null and (($want|core) != ($got|core))) | $want.key],
+     matching:[$expected[] as $want | bykey($actual;$want.key) as $got |
+       select($got != null and (($want|core) == ($got|core))) | $want.key]}' >"$PARITY"
+}
+compute_parity
+
+write_copy_ledger() {
+  local ledger="$REPORT_DIR/copy-ledger.jsonl" run_id
+  run_id="${MIGRATION_RUN_ID:-run-$(date -u +%Y%m%dT%H%M%SZ)}"
+  jq -cn --slurpfile copied "$REPORT_DIR/copy-results.jsonl" \
+    --slurpfile source "$REPORT_DIR/source-included-manifest.jsonl" \
+    --slurpfile destination "$DESTINATION_MANIFEST" --arg runId "$run_id" \
+    --arg se "$SOURCE_ENDPOINT" --arg sr "$SOURCE_REGION" --arg sb "$SOURCE_BUCKET" \
+    --argjson sp "$SOURCE_PATH_STYLE" --arg de "$DESTINATION_ENDPOINT" \
+    --arg dr "$DESTINATION_REGION" --arg db "$DESTINATION_BUCKET" \
+    --argjson dp "$DESTINATION_PATH_STYLE" --arg expected "$EXPECTED_MANIFEST_DIGEST" '
+    def core: del(.etag,.versionId,.classification,.sources);
+    $copied[] as $copy |
+    ($source | map(select(.key == $copy.key)) | first) as $sourceObject |
+    ($destination | map(select(.key == $copy.key)) | first) as $object |
+    select($object != null and (($object|core) == ($sourceObject|core))) |
+    {schemaVersion:1,migrationId:$runId,
+     source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp},
+     destination:{endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp},
+     key:$copy.key,sourceObject:$sourceObject,object:$object,
+     putVersionId:$copy.putVersionId,
+     expectedManifestDigest:(if $expected == "null" then null else $expected end)}' >"$ledger"
+  if [ "$(jq -s length "$ledger")" != "$(jq -s length "$REPORT_DIR/copy-results.jsonl")" ]; then
+    record_failure destination '' post-copy-ledger
+    add_missing_proof 'not every copied object has re-read destination evidence'
+  fi
+}
+
+if [ "$OPERATION" = copy ] && $EXECUTE_COPY && ! $RECONCILE_OWNED; then
+  copy_missing_objects
+  if list_objects destination "$DESTINATION_LISTING" &&
+    build_manifest destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST"; then
+    compute_parity
+    write_copy_ledger
+  else
+    add_missing_proof 'post-copy destination evidence is incomplete'
+  fi
+fi
 
 FENCE_EVIDENCE_DIGEST=null
 if [ -n "$FENCE_RECORD" ]; then
