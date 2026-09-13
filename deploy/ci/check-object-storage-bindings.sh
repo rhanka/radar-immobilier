@@ -88,6 +88,8 @@ grep -Eiq 'radar-grounding|deploy/grounding' "$ROOT/.github/workflows/build-push
   fail '.github/workflows/grounding-preprod.yml must be retired'
 [ ! -e "$ROOT/.github/workflows/grounding-publish-prod.yml" ] ||
   fail '.github/workflows/grounding-publish-prod.yml must be retired'
+[ ! -e "$ROOT/deploy/k8s/41-grounding-citation-job.yaml" ] ||
+  fail 'deploy/k8s/41-grounding-citation-job.yaml must be retired'
 for rel in deploy/k8s/refresh-diag/diag-refresh-job.yaml deploy/k8s/refresh-diag/kustomization.yaml; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
 done
