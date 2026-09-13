@@ -31,7 +31,7 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: read rules and skills; open `harness branch init`, `harness brainstorm --peers 2 --ladder evol`, and `harness plan --lots 5` through Make/container execution.
 - [x] Lot 1: freeze scope, dated evidence, decisions and rendering invariants in the EVOL; gate: selective diff and whitespace check.
-- [ ] Lot 2: specify four graph topologies and state qualifications; gate: source-to-node/edge review, no projected production activation.
+- [x] Lot 2: specify four graph topologies and state qualifications; gate: source-to-node/edge review, no projected production activation.
 - [ ] Lot 3: specify M1 options, evidence/judges and comment+JSON capture; gate: no invented measurements, no preselected winner.
 - [ ] Lot 4: hand off immutable HEAD for historical correctness and product/decision-integrity reviews; do not mark design accepted before reconciliation.
 - [ ] Conductor: import the reviewed plan into Track, release bounded implementation lots, then run required Focus mapping/browser/clipboard/report checks without changing billing.

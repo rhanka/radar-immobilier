@@ -54,3 +54,120 @@ Status: EVOL design, awaiting two independent adversarial reviews. No Focus impl
 - Inspect every full Mermaid/SvelteFlow render and every PDF graph page for missing nodes, clipping, unreadable labels, lost nested containment or contradictory status.
 - Compare protected billing content and period against the input report: exact values/method/window unchanged. Textual corrections elsewhere must not regenerate or reinterpret billing.
 - Reject a report presented as completed T2, a three-model winner or active production refresh without the corresponding new dated acceptance evidence.
+
+## Graph contracts — design sketches, not deployment manifests
+
+These four Mermaid sketches specify topology and state. Implementation adds the common service icons, `repo:` labels and source metadata to every node/container through the existing renderer; those decorations must not alter evidence classes. Solid edges express the documented dependency, not success of every request; dashed edges explicitly qualify mirroring, declared scheduling or dormant execution.
+
+### A-before — production storage and registry, August 9
+
+```mermaid
+flowchart LR
+  A_USER["User / browser"] --> A_URL["immo.sent-tech.ca"]
+  subgraph A_CLOUD["OVH BHS5 · production · 2 b3-8 observed"]
+    A_EDGE["Shared ingress / TLS"]
+    subgraph A_IMMO["Immo · radar-immobilier"]
+      A_UI["radar-ui"] -->|"/api"| A_API["radar-api"]
+      A_API -->|"SQL"| A_DB[("PostgreSQL / PostGIS")]
+      A_API -->|"Declared API object binding"| A_MINIO[("MinIO + PVC · raw / derived docs")]
+      A_CLIENTS["Graph/scrape storage clients · declarations"]
+    end
+    A_SSO["Sentropic SSO · auth.sent-tech.ca"]
+    A_GEO["Geo OGC API · stable dependency"]
+    A_EDGE --> A_UI
+    A_EDGE --> A_SSO
+    A_UI -->|"OGC collections"| A_GEO
+    A_API <-->|"OIDC / JWKS"| A_SSO
+  end
+  A_URL --> A_EDGE
+  A_USER <-->|"Login redirects"| A_SSO
+  A_GEO --> A_GEOS3[("OVH sentropic-geo · already migrated")]
+  A_CLIENTS -.->|"Graph binding; projection suspended"| A_SCWGRAPH[("SCW docs-pocs · graph")]
+  A_CLIENTS -.->|"Scrape contract; live secret not audited"| A_SCWDOCS[("SCW docs · raw / parsed")]
+  A_SCWREG["SCW application registry"] -->|"Declared image source"| A_API
+  A_SCWREG -->|"Declared image source"| A_UI
+  A_SCWREG -.->|"Best-effort mirror; success unverified"| A_GHCR["GHCR mirror"]
+```
+
+### A-after — production storage and registry, September 13
+
+```mermaid
+flowchart LR
+  A_USER["User / browser"] --> A_URL["immo.sent-tech.ca"]
+  subgraph A_CLOUD["OVH BHS5 · production · no one-node cutover claimed"]
+    A_EDGE["Shared ingress / TLS"]
+    subgraph A_IMMO["Immo · radar-immobilier"]
+      A_UI["radar-ui"] -->|"/api"| A_API["radar-api"]
+      A_API -->|"SQL"| A_DB[("PostgreSQL / PostGIS")]
+      A_CLIENTS["Graph/scrape storage clients · OVH bindings"]
+    end
+    A_SSO["Sentropic SSO · auth.sent-tech.ca"]
+    A_GEO["Geo OGC API · stable dependency"]
+    A_EDGE --> A_UI
+    A_EDGE --> A_SSO
+    A_UI -->|"OGC collections"| A_GEO
+    A_API <-->|"OIDC / JWKS"| A_SSO
+  end
+  A_URL --> A_EDGE
+  A_USER <-->|"Login redirects"| A_SSO
+  A_GEO --> A_GEOS3[("OVH sentropic-geo · unchanged")]
+  A_API -->|"Dedicated S3 binding; rolled out"| A_DOCS[("OVH radar-immobilier-docs · canonical store")]
+  A_CLIENTS -->|"GRAPH / SCRAPE coordinates observed"| A_DOCS
+  A_GHCR["GHCR application registry"] -->|"Integrated image source"| A_API
+  A_GHCR -->|"Integrated image source"| A_UI
+```
+
+[FACT/JUDGMENT: S5,S6] A-after removes MinIO because absence is observed, consolidates object roles into the canonical OVH bucket and removes SCW from these application binding paths. Caption: `Runtime cutover observed 23:39Z; final object-attribute/source-freshness parity and global legacy dependency sweep remain open. Retained source/recovery resources are not represented as live application stores.` Distinguish GHCR integration evidence from a fresh Immo production imageID read, which this receipt does not supply. TEM remains outside scope in text. Geo's historical SCW archive does not become an OGC dependency.
+
+### B-before — production PV-to-Signal refresh, August 9
+
+```mermaid
+flowchart LR
+  B_CITY["Municipal PV sources"] --> B_COLLECT["Immo collect / parse tools · manual invocation"]
+  B_COLLECT --> B_CORPUS[("PV corpus · CAS / parsed / manifests")]
+  subgraph B_WORKSTATION["Operator workstation · manual agent orchestration"]
+    B_OPERATOR["Operator"] --> B_EXTRACT["Graphify agents · model/effort not historically attested"]
+  end
+  B_CORPUS -->|"Read source evidence"| B_EXTRACT
+  B_EXTRACT -->|"Validated graph output"| B_GRAPH[("SCW graph/city/latest.json")]
+  subgraph B_CLOUD["OVH · production Immo"]
+    B_PROJECT["Projection Job · manual"] -->|"Atomic upsert"| B_DB[("PostgreSQL graph")]
+    B_SCHEDULE["Scrape / projection CronJobs · SUSPENDED"]
+    B_DB --> B_API["radar-api"] --> B_UI["radar-ui"]
+  end
+  B_GRAPH --> B_PROJECT
+  B_OPERATOR -.->|"Manual launch; no scheduled success inferred"| B_PROJECT
+  B_SCHEDULE -.->|"Declared only"| B_COLLECT
+  B_SCHEDULE -.->|"Declared only"| B_PROJECT
+  B_UI --> B_USER["User · immo.sent-tech.ca"]
+```
+
+[UNKNOWN: S8] Collection execution placement and exact secret-resolved scrape endpoint are not reconstructed from the mere presence of a Job template. Keep collect/parse outside the cluster containment until dated runtime evidence locates it. The manually controlled pipeline is evidenced as an operating method, not a receipt for a complete August 9 run. Its corpus is separate from the canonical graph store.
+
+### B-after — production refresh implementation, September 13; activation dormant
+
+```mermaid
+flowchart LR
+  B_CITY["Municipal PV sources"] -.-> B_COLLECT["Immo collect / parse"]
+  B_COLLECT -.-> B_CORPUS[("OVH PV corpus / durable checkpoints")]
+  B_ADMIN["Admin workstation · enrollment / configuration only"] -.-> B_IDENTITY["Workload enrollment / durable keyring"]
+  subgraph B_CLOUD["OVH · production Immo"]
+    subgraph B_REFRESH["New refresh workload · PRODUCTION DORMANT until promotion"]
+      B_CRON["radar-refresh-pv · gated CronJob"] -.-> B_DRIVER["Causal refresh run"]
+      B_DRIVER -.-> B_EXTRACT["Graphify 0.18.0 + llm-mesh · in-process libraries"]
+      B_EXTRACT -.-> B_VALIDATE["Typed Signal / exact PDF validation"]
+      B_PROJECT["Atomic projection · same causal run"]
+    end
+    B_PROJECT -.-> B_DB[("PostgreSQL graph")]
+    B_DB --> B_API["radar-api"] --> B_UI["radar-ui"]
+  end
+  B_DRIVER -.-> B_COLLECT
+  B_CORPUS -.-> B_EXTRACT
+  B_IDENTITY -.-> B_EXTRACT
+  B_EXTRACT -.-> B_MODEL["Subscription model · to ratify through M1"]
+  B_VALIDATE -.-> B_GRAPH[("OVH canonical graph · validated publication")]
+  B_GRAPH -.-> B_PROJECT
+  B_UI --> B_USER["User · immo.sent-tech.ca"]
+```
+
+[FACT/JUDGMENT: S9] Mandatory separate annotation: `Preproduction accepted: real Luna high Waterloo Signal/PDF, immutable release replay, controller-created Job at 22:21Z. Production promotion remains pending; dashed refresh paths describe the integrated dormant implementation.` The annotation is not a preprod resource subgraph. Existing API/UI/DB serving is distinct from the dormant new writer. A successful replay without additional model calls proves idempotence, not a new benchmark result. Administrator enrollment is not a per-cycle extraction dependency.
