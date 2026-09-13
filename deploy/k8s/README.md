@@ -86,6 +86,17 @@ KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-fetch \
 Fetch writes `SHA256SUMS` locally. The checkpoint and reports contain object
 keys, so retain them under operator custody. This path is RAW-only; DOCS remains
 fail-closed until its exact OVH destination and identity are approved.
+
+After provisional parity is independently validated, fence the only proven RAW
+writer and start the same Job again. The new attempt sees the non-empty mounted
+fence record and builds the distinct fenced chain:
+
+```text
+KUBECONFIG=<preprod-kubeconfig> make object-storage-raw-preprod-fence \
+  OBJECT_STORAGE_FENCE_CONFIRM=1 ENV=preprod
+KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-start \
+  OBJECT_STORAGE_INVENTORY_CONFIRM=1 ENV=preprod
+```
 | `kustomization.yaml` | bundles the resources; stamps the `sentropic` part-of + workspace labels |
 | `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / legacy SCW registry pull (transitional, see `10-rbac.yaml`) |
 
