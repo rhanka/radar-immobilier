@@ -1,6 +1,14 @@
 # Immo, Geo and Kubernetes architecture
 
-Snapshot: **2026-09-13**, refreshed against remote **main `09703678`**, read-only preprod storage checks at **12:33–12:37 UTC**, a workload/CronJob recheck at **15:38 UTC** and later dated transition audits whose exact UTC cutoff was not supplied. This describes observed configuration, not an assertion that every configured path succeeds. The workstation is still required for the deployed LLM-derived graph path.
+**BEFORE baseline.** Snapshot captured on **2026-09-13** against remote **main
+`09703678`**, with read-only preprod storage checks at **12:33–12:37 UTC** and a
+workload/CronJob recheck at **15:38 UTC**. It is intentionally preserved as the
+before view; it is no longer the latest effective transition state. See the
+[dated transition snapshot and after targets](architecture/transitions-target.md)
+for the later September 13 RAW rebind, T1 Kubernetes attempt and DOCS migration
+progress. This baseline describes observed configuration, not an assertion that
+every configured path succeeds. The workstation was still required for the
+deployed LLM-derived graph path at this capture.
 
 Evidence labels: **LIVE** = observed during this inspection; **DECLARED** = repository configuration, not proof of deployment; **PLANNED** = documented evolution. Links and source revisions are collected at the end.
 
@@ -12,7 +20,9 @@ an explicit **repo + responsibility** label inside every component and nested bo
 code/manifests, platform provisioning, S3 client bindings and external services;
 neither an icon nor a repo label is a new claim of runtime activation.
 
-**Storage migration is partial, not complete** ([dated audit and migration PRs](architecture/storage-audit.md)):
+**Storage migration at this BEFORE capture was partial, not complete** ([dated
+audit and migration PRs](architecture/storage-audit.md)). Later that day RAW
+reached OVH parity/rebind; the table below remains the auditable before state:
 
 | Effective path | Preproduction | Production |
 | --- | --- | --- |
@@ -22,6 +32,15 @@ neither an icon nor a repo label is a new claim of runtime activation.
 | Eradication work | #677 migrated preprod CronJobs, not API; #674 retains/pins MinIO | #670 is **OPEN DRAFT**, not merged; registry migration #671/#672 is not storage migration |
 
 Do not read the old SCW cluster's retained workloads as today's production. The public production application is reachable, but the available OVH credential cannot inventory its namespace. No SCW S3 path is asserted as live here solely because a main manifest names it.
+
+A later September 13 inventory established the two DOCS source populations used
+for migration planning: preprod MinIO has **144,193 objects / 28.34 GB** and the
+production SCW `docs-pocs` source has **59,017 objects / 12,534,514,457 B**. These counts
+do not prove equivalence. By owner decision, the production population is the
+exact initial canonical reference: OVH prod and preprod must each end with those
+same **59,017 keys and hashes**. The preprod surplus is classified non-canonical
+and is not migrated. All MinIO content/store is removed only after exact parity
+and recovery evidence, never prematurely.
 
 ## 1. User access and environment boundaries
 
@@ -53,7 +72,7 @@ flowchart TB
       subgraph ppminio["[PP-MINIO] radar-minio · PVC"]
         PP_RAW[("[PP-RAW] radar-immobilier-raw<br/>MinIO · API state / legacy objects")]
         PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · empty derived reader fallback")]
-        PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] radar-immobilier-docs-preprod<br/>MinIO · useful replay/history · inventory partial")]
+        PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] radar-immobilier-docs-preprod<br/>MinIO · 144,193 objects / 28.34 GB later inventoried")]
       end
       PP_SCRAPE["[PP-SCRAPE] radar-refresh-scrape<br/>1 collect + 2 parse/exploit · 03:17 UTC"]
       PP_PROJECT["[PP-PROJECT] radar-refresh-projection<br/>Stage 4 · daily 04:30 UTC"]
@@ -98,6 +117,7 @@ flowchart TB
   user <-->|"Login redirects, same environment"| pidp
   user <-->|"Login redirects, same environment"| idp
   PP_GRAPH[("[PP-GRAPH] radar-immobilier-graph-preprod<br/>OVH S3 · corpus AND canonical graph")]
+  PR_DOCS_SCW[("[PR-DOCS-SCW] canonical docs-pocs source<br/>SCW · 59,017 objects / 12,534,514,457 B")]
   PP_GEO_S3[("[PP-GEO-S3] sentropic-geo-preprod<br/>OVH S3 · normalized/ serving copy")]
   GEO_S3[("[GEO-S3] sentropic-geo<br/>OVH S3 · raw corpus + normalized/ products")]
   WS_IMMO["[WS-IMMO] Immo Graphify / grounding<br/>Operator workstation · LLM stage 3"]
@@ -107,6 +127,7 @@ flowchart TB
   PP_GEO -->|"READ normalized/"| PP_GEO_S3
   GEO_API -->|"READ normalized/"| GEO_S3
   PP_API -->|"READ raw/pv-index/cas/<br/>Shared PV corpus · LIVE repoint"| GEO_S3
+  prodgap -.->|"Later inventory reference; binding not inferred"| PR_DOCS_SCW
 ```
 
 **Isolation is not absolute:** preprod has its own application DB and OGC serving copy, but `PP-API` currently reads mapped PV documents from `GEO-S3` (`sentropic-geo`), not from `PP-GEO-S3`. This read-only corpus dependency is separate from map/OGC traffic. Production Immo overrides and its document-repoint activation have not been inventoried live; do not infer them by symmetry.
@@ -135,7 +156,7 @@ flowchart LR
     subgraph ppminio["[PP-MINIO] radar-minio · PVC"]
       PP_RAW[("[PP-RAW] radar-immobilier-raw<br/>MinIO · API state / legacy objects")]
       PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · empty derived reader fallback")]
-      PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] radar-immobilier-docs-preprod<br/>MinIO · useful replay/history · inventory partial")]
+      PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] radar-immobilier-docs-preprod<br/>MinIO · 144,193 objects / 28.34 GB later inventoried")]
     end
   end
   WS_IMMO["[WS-IMMO] Immo Graphify / grounding<br/>Operator workstation · LLM stage 3"]
