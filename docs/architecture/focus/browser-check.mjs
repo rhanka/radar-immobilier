@@ -47,6 +47,12 @@ console.log(await evaluate(`(async () => {
   [...document.querySelectorAll('.cross-link')].find(b => b.textContent.includes('PV →')).click(); await settle();
   if (document.querySelector('.flow').dataset.graph !== 'asis-2' || !document.querySelector('.inspector').textContent.includes('PP-DB')) throw Error('Shared DB cross-view navigation failed');
   choose('Vue architecture', 'asis-1'); await settle();
+  await settle();
+  const canvas = document.querySelector('.flow').getBoundingClientRect();
+  for (const node of document.querySelectorAll('.svelte-flow__node')) {
+    const r = node.getBoundingClientRect();
+    if (r.left < canvas.left - 1 || r.top < canvas.top - 1 || r.right > canvas.right + 1 || r.bottom > canvas.bottom + 1) throw Error('Full diagram clipped: ' + node.dataset.id);
+  }
   const rectangle = id => document.querySelector('.svelte-flow__node[data-id="' + id + '"]').getBoundingClientRect();
   for (const [parent, child] of [['cloud', 'preprod'], ['preprod', 'ppminio'], ['ppminio', 'PP_RAW']]) {
     const a = rectangle(parent), b = rectangle(child);
@@ -63,7 +69,7 @@ console.log(await evaluate(`(async () => {
     if (document.querySelectorAll('input[type="radio"]:checked').length !== 1 || document.querySelector('input[type="radio"]:checked').value !== option) throw Error('Choice failed: ' + option);
   }
   const comment = document.querySelector('.choices textarea'); comment.value = 'Vérifier la reprise avant bascule.'; comment.dispatchEvent(new Event('input', { bubbles: true })); await settle();
-  const preview = JSON.parse(document.querySelector('.choice-json pre').textContent);
+  const preview = JSON.parse(document.querySelector('.choice-json textarea').value);
   if (preview.decision.option !== 'C' || preview.decision.note !== comment.value || preview.options.length !== 3 || preview.status !== 'draft-not-ratified') throw Error('JSON response pack lost choice/comment');
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.testCopiedChoice = text; } } });
   [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier les choix en JSON').click(); await settle();

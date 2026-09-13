@@ -4,7 +4,7 @@
   import { options, responsePack } from './choices.js';
   let { manifest, remarks = '' } = $props();
   let selectedOption = $state(null), note = $state(''), status = $state(''), copyError = $state('');
-  const storageKey = `immo-focus-choices:${manifest.artifactInputHash}`;
+  let storageKey = $derived(`immo-focus-choices:${manifest.artifactInputHash}`);
   let json = $derived(JSON.stringify(responsePack(manifest, selectedOption, note, remarks, null), null, 2));
   onMount(() => {
     try { const saved = JSON.parse(localStorage.getItem(storageKey) ?? 'null');
@@ -42,12 +42,13 @@
   <Textarea label="Commentaire sur le choix de parcours" helperText="Réserve, condition ou justification incluse dans le JSON." value={note} rows={4} oninput={event => { note = event.currentTarget.value; persist(); }} />
   <Flex gap={2} wrap><Button variant="primary" onclick={copy}>Copier les choix en JSON</Button><Button variant="secondary" onclick={download}>Télécharger les choix en JSON</Button><Button variant="ghost" onclick={() => { selectedOption = null; persist(); }}>Retirer le choix</Button></Flex>
   <p role="status">{copyError || status}</p>
-  <details class="choice-json" open={Boolean(copyError)}><summary>Voir le JSON des options, du choix et du commentaire</summary><pre tabindex="0">{json}</pre></details>
+  <details class="choice-json" open={Boolean(copyError)}><summary>Voir le JSON des options, du choix et du commentaire</summary><textarea aria-label="JSON des options et du commentaire" readonly value={json} rows={14}></textarea></details>
 </section>
 <style>
   .choices { margin-block: 24px; }
   .option-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-block: 20px; }
   h3 { margin: 0; font-size: 1.15rem; } p, dl { font-size: .9rem; line-height: 1.5; }
   dl { margin: 0; } dl > div { margin-bottom: 12px; } dt { font-weight: 700; } dd { margin: 4px 0 0; }
+  .choice-json textarea { width: 100%; margin-top: 16px; font-family: monospace; font-size: .8rem; }
   @media (max-width: 850px) { .option-grid { grid-template-columns: 1fr; } }
 </style>

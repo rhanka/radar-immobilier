@@ -98,4 +98,6 @@
   - [x] Add the same DS Tile/Radio choice pattern as the Sentropic dossier, with comments, local drafts and copy/download JSON containing all options and provenance.
   - [x] Integrate choice cards into section 4 and render embedded source-document Mermaid blocks too; retain draft-only authority in D3.
   - [x] Extend browser regression checks to simultaneous counts, visual nesting, Mermaid SVG parity, radio choices, comments, persistence and clipboard failure reporting.
+  - [x] Keep clipboard-denied JSON keyboard-selectable, hash option definitions and suppress raw source HTML while rendering the controlled Mermaid SVGs.
+  - [x] Fit the full diagram from explicit absolute nested bounds; verify every box and component stays inside the initial viewport.
   - [ ] Verify simultaneous completeness, nested bounds, Mermaid rendering and A/B/C comment/export behavior.
