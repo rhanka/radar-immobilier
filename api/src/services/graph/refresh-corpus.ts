@@ -14,6 +14,16 @@ export interface RefreshCorpusChunk {
   readonly text: string;
 }
 
+export function containsNormalizedPdfExcerpt(
+  pageText: string,
+  excerpt: string,
+): boolean {
+  const normalize = (value: string): string => value.replace(/\s+/g, " ").trim();
+  const normalizedExcerpt = normalize(excerpt);
+
+  return normalizedExcerpt.length > 0 && normalize(pageText).includes(normalizedExcerpt);
+}
+
 export interface RefreshCorpusDocument {
   readonly sourceId: string;
   readonly citySlug: string;

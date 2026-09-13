@@ -1,6 +1,9 @@
 import type { Extraction, OntologyCitation } from "@sentropic/graphify";
 
-import type { RefreshCorpusDocument } from "./refresh-corpus.js";
+import {
+  containsNormalizedPdfExcerpt,
+  type RefreshCorpusDocument,
+} from "./refresh-corpus.js";
 import {
   graphifyGraphSchema,
   type GraphifyGraph,
@@ -30,12 +33,13 @@ function record(value: unknown): Record<string, unknown> {
 }
 
 function integerPage(value: unknown): number | null {
-  const page = typeof value === "string" ? Number(value) : value;
-  return typeof page === "number" && Number.isInteger(page) && page > 0 ? page : null;
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : null;
 }
 
 function citationExcerpt(citation: OntologyCitation, evidence: Record<string, unknown>): string | null {
-  for (const value of [citation.excerpt, citation.quote, evidence["quote"], evidence["text"]]) {
+  for (const value of [citation.excerpt, evidence["excerpt"]]) {
     if (typeof value === "string" && value.trim()) return value.trim();
   }
   return null;
@@ -60,7 +64,8 @@ function refsFor(
     const page = integerPage(citation.page ?? evidence["page"]);
     const excerpt = citationExcerpt(citation, evidence);
     const pageText = page === null ? undefined : document.pages.find((item) => item.page === page)?.text;
-    if (page === null || !excerpt || !pageText?.includes(excerpt)) {
+    if (page === null || !excerpt
+      || !containsNormalizedPdfExcerpt(pageText ?? "", excerpt)) {
       throw new Error(`Citation is not grounded on original PDF page: ${citation.source_file}`);
     }
     return {
@@ -73,6 +78,22 @@ function refsFor(
   });
 }
 
+const TOP_LEVEL_ONTOLOGY_PROPERTY_KEYS = [
+  "status",
+  "resolution",
+  "etape",
+  "etape_date",
+  "reglement_number",
+] as const;
+
+function ontologyProperties(values: Record<string, unknown>): Record<string, unknown> {
+  const properties = { ...record(values["properties"]) };
+  for (const key of TOP_LEVEL_ONTOLOGY_PROPERTY_KEYS) {
+    if (values[key] !== undefined) properties[key] = values[key];
+  }
+  return properties;
+}
+
 function mapNode(
   node: Extraction["nodes"][number],
   evidence: ReadonlyMap<string, Record<string, unknown>>,
@@ -81,7 +102,7 @@ function mapNode(
   const values = record(node);
   const nodeType = node.node_type ?? values["type"] ?? node.file_type;
   if (typeof nodeType !== "string" || !nodeType) throw new Error(`Missing node type for ${node.id}`);
-  const properties = record(values["properties"]);
+  const properties = ontologyProperties(values);
   const refs = refsFor(node.citations, node.evidence_refs, evidence, documents);
   return {
     id: node.id,
