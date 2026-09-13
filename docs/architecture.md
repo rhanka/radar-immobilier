@@ -4,6 +4,8 @@ Snapshot: **2026-09-13**, with read-only cluster checks at **11:38 UTC**. This d
 
 Evidence labels: **LIVE** = observed during this inspection; **DECLARED** = repository configuration, not proof of deployment; **PLANNED** = documented evolution. Links and source revisions are collected at the end.
 
+**Reading the diagrams:** bracketed IDs identify the **same resource in every view**. `PP-` = preproduction, `PR-` = production; `GEO-S3` and `LEGACY-POC` are shared/reference buckets, not environment-isolated copies. Diagram 1 locates resources, diagram 2 zooms into **preprod Immo** using those exact IDs, and diagram 3 follows Geo products. An arrow labelled READ is a reader dependency, not a write or replication. Dashed edges are declared/conditional paths, not verified transfers. The resource register in §3 is the cross-view key.
+
 ## 1. User access and environment boundaries
 
 | Surface | Production | Preproduction | Evidence |
@@ -27,51 +29,82 @@ flowchart TB
   user --> prurl
   subgraph cloud["OVHcloud Canada · BHS · shared Kubernetes cluster poc-ca"]
     edge["Shared load balancer → Traefik<br/>TLS: cert-manager / Let's Encrypt"]
-    subgraph preprod["PREPRODUCTION · separate namespaces and data"]
-      pui["radar-immobilier-preprod<br/>radar-ui · Svelte + nginx :8080"]
-      papi["radar-api · Hono / Node :3000"]
-      pdb[("radar-postgres<br/>PostgreSQL 16 + PostGIS / PVC")]
+    subgraph preprod["PREPRODUCTION · namespaces"]
+      PP_UI["[PP-UI] radar-ui<br/>radar-immobilier-preprod"]
+      PP_API["[PP-API] radar-api<br/>radar-immobilier-preprod"]
+      PP_DB[("[PP-DB] radar-postgres<br/>radar-immobilier-preprod · PG/PostGIS")]
+      subgraph ppminio["[PP-MINIO] radar-minio · PVC"]
+        PP_RAW[("[PP-RAW] radar-immobilier-raw<br/>MinIO · API state / legacy objects")]
+        PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · API scrape-store default")]
+        PP_GROUND[("[PP-GROUND] radar-immobilier-docs-preprod<br/>MinIO · Job 41 target, DECLARED")]
+      end
+      PP_SCRAPE["[PP-SCRAPE] radar-refresh-scrape<br/>Stages 1 + 2 · daily 03:17 UTC"]
+      PP_PROJECT["[PP-PROJECT] radar-refresh-projection<br/>Stage 4 · daily 04:30 UTC"]
+      PP_PUBLISH["[PP-PUBLISH] Job 41<br/>Publish-only · DECLARED"]
       pidp["sentropic-preprod · auth-idp<br/>preprod.auth.sent-tech.ca"]
-      pidb[("SSO platform PostgreSQL")]
-      pgeo["geo-preprod · geo-api :8787<br/>api.preprod.geo.sent-tech.ca"]
-      pui -->|"/api/*"| papi
-      papi --> pdb
-      pui -->|"/api/geo/collections*"| pgeo
-      papi -->|"GEO_OGC_BASE_URL"| pgeo
-      papi <-->|"OIDC token exchange / JWKS"| pidp
+      pidb[("[PP-SSO-DB] SSO PostgreSQL<br/>Not PP-DB · platform record")]
+      PP_GEO["[PP-GEO] geo-api · geo-preprod<br/>api.preprod.geo.sent-tech.ca"]
+      PP_UI -->|"/api/*"| PP_API
+      PP_API -->|"SQL read/write"| PP_DB
+      PP_API -->|"READ/WRITE API store"| PP_RAW
+      PP_API -->|"Legacy document READ"| PP_DOCS
+      PP_SCRAPE -->|"Direct additive WRITE"| PP_DB
+      PP_PROJECT -->|"Atomic WRITE"| PP_DB
+      PP_PUBLISH -.->|"WRITE graph/"| PP_GROUND
+      PP_UI -->|"/api/geo/collections*"| PP_GEO
+      PP_API -->|"READ OGC"| PP_GEO
+      PP_API <-->|"OIDC token exchange / JWKS"| pidp
       pidp --> pidb
     end
-    subgraph prod["PRODUCTION · separate namespaces and data"]
-      ui["radar-immobilier<br/>radar-ui · Svelte + nginx :8080"]
-      api["radar-api · Hono / Node :3000"]
-      db[("radar-postgres<br/>PostgreSQL 16 + PostGIS / PVC")]
+    subgraph prod["PRODUCTION · namespaces"]
+      PR_UI["[PR-UI] radar-ui<br/>radar-immobilier"]
+      PR_API["[PR-API] radar-api<br/>radar-immobilier"]
+      PR_DB[("[PR-DB] radar-postgres<br/>radar-immobilier · PG/PostGIS · DECLARED")]
+      PR_MINIO[("[PR-MINIO] radar-minio / PVC<br/>API stores · DECLARED; overrides unverified")]
+      PR_REFRESH["[PR-REFRESH] refresh CronJobs<br/>DECLARED · activation not audited"]
       idp["sentropic · auth-idp<br/>auth.sent-tech.ca"]
-      idb[("SSO platform PostgreSQL")]
-      geo["geo · geo-api :8787<br/>api.geo.sent-tech.ca"]
-      geopg[("geo · postgis<br/>LIVE · not the OGC serving backend")]
-      ui -->|"/api/*"| api
-      api --> db
-      ui -->|"/api/geo/collections*"| geo
-      api -->|"Geographic queries"| geo
-      api <-->|"OIDC token exchange / JWKS"| idp
+      idb[("[PR-SSO-DB] SSO PostgreSQL<br/>Not PR-DB · platform record")]
+      GEO_API["[GEO-API] geo-api · geo<br/>api.geo.sent-tech.ca"]
+      GEO_DB[("[GEO-DB] geo/postgis<br/>LIVE · no OGC DB dependency demonstrated")]
+      PR_UI -->|"/api/*"| PR_API
+      PR_API -->|"SQL read/write"| PR_DB
+      PR_API -.->|"Base S3 configuration"| PR_MINIO
+      PR_REFRESH -.->|"WRITE"| PR_DB
+      PR_UI -->|"/api/geo/collections*"| GEO_API
+      PR_API -->|"READ OGC"| GEO_API
+      PR_API <-->|"OIDC token exchange / JWKS"| idp
       idp --> idb
     end
-    edge --> pui
-    edge --> ui
+    edge --> PP_UI
+    edge --> PR_UI
     edge --> pidp
     edge --> idp
-    edge --> pgeo
-    edge --> geo
+    edge --> PP_GEO
+    edge --> GEO_API
   end
   ppurl --> edge
   prurl --> edge
   user <-->|"Login redirects, same environment"| pidp
   user <-->|"Login redirects, same environment"| idp
-  pstore[("OVH S3 · sentropic-geo-preprod<br/>normalized/")]
-  gstore[("OVH S3 · sentropic-geo<br/>normalized/")]
-  pgeo -->|"Read collections"| pstore
-  geo -->|"Read collections"| gstore
+  PP_GRAPH[("[PP-GRAPH] radar-immobilier-graph-preprod<br/>OVH S3 · corpus AND canonical graph")]
+  PP_GEO_S3[("[PP-GEO-S3] sentropic-geo-preprod<br/>OVH S3 · normalized/ serving copy")]
+  GEO_S3[("[GEO-S3] sentropic-geo<br/>OVH S3 · raw corpus + normalized/ products")]
+  LEGACY_POC[("[LEGACY-POC] radar-immobilier-docs-pocs<br/>Scaleway S3 · candidats/ + graph/ · DECLARED")]
+  WS_IMMO["[WS-IMMO] Immo Graphify / grounding<br/>Operator workstation · LLM stage 3"]
+  WS_IMMO -.->|"Run-selected corpus READ / validated graph WRITE"| PP_GRAPH
+  WS_IMMO -.->|"Declared staging WRITE candidats/"| LEGACY_POC
+  PP_BACKUP[("[PP-BACKUP] radar-preprod-snapshot<br/>OVH S3 · restore source, not the PV corpus")]
+  restore["Snapshot-restore Job<br/>Completed; separate from refresh"] -->|"READ"| PP_BACKUP
+  PP_SCRAPE -->|"WRITE raw/ parsed/ ontology/ runs/"| PP_GRAPH
+  PP_PROJECT -->|"READ graph/"| PP_GRAPH
+  PP_PUBLISH -.->|"READ candidats/"| LEGACY_POC
+  PR_REFRESH -.->|"Declared graph READ; scrape target secret-backed"| LEGACY_POC
+  PP_GEO -->|"READ normalized/"| PP_GEO_S3
+  GEO_API -->|"READ normalized/"| GEO_S3
+  PP_API -->|"READ PV PDFs · LIVE repoint<br/>shared corpus, NOT PP-GEO-S3"| GEO_S3
 ```
+
+**Isolation is not absolute:** preprod has its own application DB and OGC serving copy, but `PP-API` currently reads mapped PV documents from `GEO-S3` (`sentropic-geo`), not from `PP-GEO-S3`. This read-only corpus dependency is separate from map/OGC traffic. Production Immo overrides and its document-repoint activation have not been inventoried live; do not infer them by symmetry.
 
 The cluster endpoint is `https://hlhedx.c1.bhs5.k8s.ovh.net`. `poc-k8s` owns the cluster, shared ingress/TLS, namespace quotas, RBAC, network policies and storage provisioning. Immo and Geo own their application workloads and images. Cloudflare provides DNS for `sent-tech.ca`; it is not the application host. The old Scaleway cluster description in `poc-k8s/README.md` is historical.
 
