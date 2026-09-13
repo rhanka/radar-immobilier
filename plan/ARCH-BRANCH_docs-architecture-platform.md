@@ -51,7 +51,9 @@
   - [x] Map each Immo DB and object-store role to environment-qualified shared identifiers in both diagrams.
   - [x] Verify reader/writer arrows against source and whitelisted deployment configuration.
   - [x] Reuse Geo bucket/API identities in diagram 3; distinguish shared PDF reads from preprod normalized products.
-  - [ ] Reconcile reviewer findings, regenerate Focus and check the final browser rendering.
+  - [x] Regenerate Focus; verify 16 shared resource identities and all four diagrams in Chromium.
+  - [x] Confirm the resource check rejects baseline 73762926 and passes the corrected document.
+  - [ ] Reconcile independent reviewer findings: Gemini launch rejected by security; owner payload approval pending.
 
 ## Merge / Close
 - [ ] Local documentation handoff; no production action or branch merge requested.
