@@ -65,13 +65,20 @@ export async function acquireRefreshPdfManifest(
     throw new Error(`Invalid selected source id: ${options.citySlug}`);
   }
   const prefix = `raw/${recap.sourceId}/cas/`;
-  const rows = [...recap.casKeys].sort().map((key) => {
-    const sha = key.startsWith(prefix) && key.endsWith(".pdf")
-      ? key.slice(prefix.length, -4)
-      : "";
-    if (!SHA256.test(sha)) throw new Error(`Selected city input is not an exact PDF: ${key}`);
-    return `${recap.sourceId}\t${recap.city}\t${sha}\t${key}\t${key}.meta.json`;
+  const acquired = recap.casKeys.map((key) => {
+    const suffix = key.startsWith(prefix) ? key.slice(prefix.length) : "";
+    const match = suffix.match(/^([0-9a-f]{64})\.(pdf|html|txt)$/);
+    if (!match || !SHA256.test(match[1]!)) {
+      throw new Error(`Selected city input is not an exact CAS representation: ${key}`);
+    }
+    return { key, sha: match[1]!, extension: match[2]! };
   });
+  const selectedPdf = acquired.find((entry) => entry.extension === "pdf");
+  if (!selectedPdf) {
+    throw new Error(`Selected city acquisition produced no exact PDF: ${options.citySlug}`);
+  }
+  const rows = [`${recap.sourceId}\t${recap.city}\t${selectedPdf.sha}\t${selectedPdf.key}`
+    + `\t${selectedPdf.key}.meta.json`];
   const body = `${MANIFEST_HEADER}\n${rows.join("\n")}\n`;
   const digest = createHash("sha256").update(body).digest("hex");
   const manifestKey = `refresh/018/${options.citySlug}/inputs/${digest}.tsv`;

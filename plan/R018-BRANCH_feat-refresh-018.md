@@ -69,6 +69,7 @@
 - [x] C12c: resume post-publication projection without repeating same-input extraction.
 - [x] C12d: preserve the exact published JSON object on post-publication projection resume.
 - [x] C12e: retain the validated raw canonical object so resume reproduces identical bytes.
+- [x] C12f: select the first exact PDF from a bounded mixed-representation acquisition after the first preprod run returned HTML before PDF.
 - [x] C13a: prove real S3 publication and real PG resume without repeating model extraction.
 - [x] C13b: prove guarded conflict, PG provenance regression and selected-city failure.
 - [x] C14: add a bounded, redacted refresh command with deterministic saved-PDF smoke input.
