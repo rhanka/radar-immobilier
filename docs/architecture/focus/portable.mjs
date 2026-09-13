@@ -10,6 +10,7 @@ html = html.replace('<script type="module"></script>', () => `<script type="modu
 html = html.replace(css, () => `<style>${''}</style>`);
 const style = (await readFile(asset(css), 'utf8')).replaceAll('</style', '<\\/style');
 html = html.replace('<style></style>', () => `<style>${style}</style>`);
-if (/<(?:script|link|img)\b[^>]+(?:src|href)=/i.test(html)) throw Error('External asset remains');
+const shell = html.replace(/<script type="module">[\s\S]*?<\/script>/gi, '').replace(/<style>[\s\S]*?<\/style>/gi, '');
+if (/<(?:script|link|img)\b[^>]+(?:src|href)=/i.test(shell)) throw Error('External asset remains');
 await writeFile('../decision-focus.html', html);
 console.log(`Portable native Focus dossier: ${Buffer.byteLength(html)} bytes`);

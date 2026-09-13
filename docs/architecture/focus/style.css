@@ -55,7 +55,7 @@ details { margin-top: 18px; font-size: .8rem; }
 .notes p, .notes [role=status] { font-size: .85rem; line-height: 1.5; }
 .notes textarea { margin-bottom: 16px; }
 .source-links { display: flex; flex-wrap: wrap; gap: 18px; margin: 15px 0; }
-.source-overlay { position: fixed; inset: 0; z-index: 200; background: var(--st-semantic-surface-subtle); overflow: auto; }
+.source-overlay { position: fixed; inset: 0; z-index: 200; background: var(--st-semantic-surface-subtle); color: var(--st-semantic-text-primary); overflow: auto; margin: 0; width: 100%; max-width: none; height: 100%; max-height: none; padding: 0; border: 0; }
 .source-sheet { max-width: 1200px; margin: auto; padding: 36px; background: var(--st-semantic-surface-default); }
 @media (max-width: 850px) {
   .dossier { padding: 20px 16px 40px; } .truth-strip { grid-template-columns: 1fr; gap: 14px; }
