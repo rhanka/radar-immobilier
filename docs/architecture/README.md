@@ -1,4 +1,4 @@
-# Local Focus architecture dossier — D7
+# Local Focus architecture dossier — D8
 
 The entry point is [decision-dossier.md](decision-dossier.md), with the preserved
 BEFORE state in [architecture.md](../architecture.md), the complete AFTER target
@@ -21,7 +21,7 @@ Open **http://127.0.0.1:5188/**, generated **decision-focus.html**, or the commi
 The HTML embeds JS, CSS, French presentation and complete source/review documents;
 it works offline and does not require a Claude session, server or external CDN.
 The same build emits the dated interactive architecture HTML, report HTML/PDF,
-token audit and D7 evidence manifest under `docs/reports/architecture-monthly/`.
+token audit and D8 evidence manifest under `docs/reports/architecture-monthly/`.
 
 ## Navigation and authority
 
@@ -49,8 +49,9 @@ token audit and D7 evidence manifest under `docs/reports/architecture-monthly/`.
   selected; fixed architecture/storage decisions are exported unchanged.
   Clipboard denial is explicit; the JSON remains keyboard-selectable/downloadable.
 - Sources open in an accessible dialog; external evidence links require a click.
-- The D7 dossier remains **INCOMPLETE** for T1 acceptance, DOCS copy/parity/rebind,
-  completed production migration and T3. Rendering is not deployment.
+- The D8 dossier records accepted preproduction T2 parity and MinIO removal. It
+  remains **INCOMPLETE** for T1 acceptance, production T2 and T3. Rendering is
+  not deployment.
 
 ## Build and verification
 

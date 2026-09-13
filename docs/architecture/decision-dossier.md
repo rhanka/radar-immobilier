@@ -1,6 +1,6 @@
 # Architecture decision dossier — before and after
 
-Revision **D7**, 2026-09-13. The owner-facing comparison contains exactly two
+Revision **D8**, 2026-09-13. The owner-facing comparison contains exactly two
 complete architecture views: **BEFORE** and **AFTER**. Effective transition facts
 are supporting text and gates, not a third primary graph. Opening the Focus page
 performs no action, creates no Track event and is not an invoice.
@@ -25,9 +25,10 @@ boundaries while moving RAW/DOCS object roles to OVH and running the Immo refres
 with in-process Graphify/llm-mesh in Kubernetes. SCW TEM remains shown until a
 replacement is validated.
 
-AFTER is not deployed. T3 is **NO-GO today**: one node exposes 1,840m CPU and
-5,907.82 Mi allocatable versus 4,095m/8,442 Mi requests; required anti-affinity
-and 16 PVCs/15 Cinder RWO volumes add placement constraints.
+AFTER is not deployed as a complete architecture. Its preproduction T2 storage
+slice is accepted, production T2 remains in progress and T3 stays gated. The
+pre-T2 audit found one node exposes 1,840m CPU and 5,907.82 Mi allocatable versus
+4,095m/8,442 Mi requests; placement must be remeasured after storage cleanup.
 
 ## 3. Effective delta — context, not a third architecture
 
@@ -35,10 +36,13 @@ Graphify **0.18.0** is integrated and **Luna high** selected. The first
 Kubernetes run failed before invoking the LLM because its input was `.html`, not
 a PDF. Preproduction RAW passed parity and its API was rebound to OVH.
 
-DOCS OVH bucket/Secret and guarded copy tooling exist, but copy, exact
-parity/recovery and rebind remain open; the launched production migration has no
-reported outcome. These facts explain the gap between BEFORE and AFTER without
-introducing another graph.
+Preproduction DOCS now has exact OVH parity: **59,017 objects / 12,534,514,457
+bytes**, canonical manifest SHA-256 `52646a7b…0425`, `failed=0`. Its MinIO
+StatefulSet, Pod, Service, 40 Gi data PVC and six NetworkPolicies are removed;
+the checkpoint/migration PVC is retained. The namespace storage quota moved
+from four PVCs / 47 Gi to three PVCs / 7 Gi, while API, MCP and UI remain 1/1.
+Production T2 is still in progress. These facts explain the gap between BEFORE
+and AFTER without introducing another primary graph.
 
 ## 4. Fixed owner decisions and gates
 
@@ -49,17 +53,20 @@ preproduction surplus is not migrated. Immo retains PV pipeline ownership and
 SCW TEM is retained until its replacement is validated.
 
 T1 requires a valid PDF, provider completion, typed Signal/exact PDF,
-idempotent replay and unattended schedule. T2 requires manifest diff, selective
-copy, exact parity, recovery proof, writer fence and rebind. T3 requires T2,
-rightsizing, reconciled placement, a verified two-node state, then one-node
-preproduction acceptance before production authorization.
+idempotent replay and unattended schedule. Preproduction T2 has passed its
+object parity and removal gate; production must independently pass the same
+canonical manifest, recovery, fence, rebind and removal checks. T3 requires
+production T2 completion, rightsizing, remeasured placement, a verified
+two-node state, then one-node preproduction acceptance before production
+authorization.
 
 ## 5. Rollback boundary
 
 Object rollback restores an application-consistent set of canonical graph hash,
 SQL checkpoint/version, evidence objects and input set. It never assumes a
-cross-S3/SQL transaction or permits dual writers. A partial transition
-authorizes no object deletion, credential revocation or node reduction.
+cross-S3/SQL transaction or permits dual writers. Preproduction retains the
+migration/checkpoint PVC as recovery evidence. In-progress production T2
+authorizes no credential revocation or node reduction.
 
 ## 6. Explicit open questions
 
@@ -83,8 +90,9 @@ SvelteFlow. Nested boxes use `parentId`; service icons and repo labels are
 mandatory for every node and group. Browser checks cover every node, edge and
 subflow, full-graph fit, zoom, offline use, comments and actual clipboard JSON.
 
-Known limits remain explicit: T1 has not reached provider acceptance, DOCS is
-not copied/rebound, the production outcome is unknown and T3 has not started.
+Known limits remain explicit: T1 has not reached provider acceptance,
+production T2 is still in progress and T3 remains gated. Preproduction T2 is
+not represented as completion of the full AFTER target.
 
 ## 8. Billing annex
 
