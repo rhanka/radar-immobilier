@@ -27,23 +27,26 @@ const sourceFiles = await Promise.all([
   ['docs/architecture/transitions-target.md', '../transitions-target.md', 'effective-transition-and-after-targets'],
   ['docs/architecture/proposal.md', '../proposal.md', 'T1-causal-detail'],
   ['docs/architecture/transitions.md', '../transitions.md', 'transition-register'],
-  ['docs/architecture/decision-dossier.md', '../decision-dossier.md', 'D6-dossier'],
+  ['docs/architecture/decision-dossier.md', '../decision-dossier.md', 'D8-dossier'],
   ['docs/reports/architecture-monthly/report-through-2026-09-13.md', `${monthlyDir}/report-through-2026-09-13.md`, 'monthly-report'],
   ['docs/reports/architecture-monthly/token-audit-2026-08-10_2026-09-13.json', `${monthlyDir}/token-audit-2026-08-10_2026-09-13.json`, 'token-audit'],
   ['docs/reports/couts-2026-07-13_2026-08-09.md', '../../reports/couts-2026-07-13_2026-08-09.md', 'preceding-merged-report'],
 ].map(async ([path, local, role]) => ({ path, role, sha256: await hashFile(local) })));
 const evidence = {
-  schema: 'immo-architecture-monthly-evidence/v4', revision: 'D7', generatedAt: new Date().toISOString(),
+  schema: 'immo-architecture-monthly-evidence/v5', revision: 'D8', generatedAt: new Date().toISOString(),
   period: { timezone: 'America/Toronto', startInclusive: '2026-08-10T00:00:00-04:00', endExclusive: '2026-09-14T00:00:00-04:00', days: 35, hours: 840,
     joinEvidence: 'last cost report merged on origin/main ends 2026-08-09', externalInvoiceIdentityVerified: false,
     tokenCaptureCutoff: tokenAudit.generatedAt, september13TokensAfterCutoffIncluded: false },
   transitionState: {
     t1: { graphify: '0.18.0', model: 'Luna high', firstKubernetesRun: 'failed before LLM because input was .html, PDF required', accepted: false },
-    t2: { rawParityAndOvhRebind: true, docsPreprod: { objects: 144193, gigabytes: 28.34 }, docsProductionScwReference: { bucket: 'docs-pocs', objects: 59017, bytes: 12534514457 },
+    t2: { rawParityAndOvhRebind: true, docsHistoricalPreprodMinio: { objects: 144193, gigabytes: 28.34 }, docsProductionScwReference: { bucket: 'docs-pocs', objects: 59017, bytes: 12534514457 },
       ownerDecision: 'production source is exact initial canonical set; OVH prod and preprod converge to same 59,017 keys+hashes; preprod surplus not migrated',
-      toolingCommit: { branch: 'chore/scw-final-sweep', head: 'be362561', onOriginMain: false },
-      docsCopyParityRebind: false, productionMigration: 'launched; completed outcome unknown', minioRemoval: 'only after exact parity and recoverability' },
-    t3: { status: 'not-started', verdict: 'NO-GO today' }, scwTem: 'retained until replacement validated',
+      implementationCommit: { branch: 'chore/scw-final-sweep', head: '2ccabfc8', onOriginMain: false },
+      preproduction: { status: 'accepted', objects: 59017, bytes: 12534514457, canonicalManifestSha256: '52646a7b…0425', failed: 0,
+        docsOvhActive: true, removed: ['MinIO StatefulSet', 'MinIO Pod', 'MinIO Service', '40 Gi data PVC', 'six MinIO NetworkPolicies'],
+        retained: ['migration/checkpoint PVC'], quotaBefore: { pvcs: 4, storageGi: 47 }, quotaAfter: { pvcs: 3, storageGi: 7 }, workloadsReady: { api: '1/1', mcp: '1/1', ui: '1/1' } },
+      production: { status: 'in-progress', accepted: false } },
+    t3: { status: 'gated', verdict: 'await production T2 and post-cleanup capacity proof' }, scwTem: 'retained until replacement validated',
   },
   focus: { html: 'architecture-before-after-2026-09-13.html', htmlSha256: sha256(html),
     artifactInputHash: manifest.artifactInputHash, architectureHash: manifest.architectureHash,
@@ -57,10 +60,10 @@ const evidence = {
     llmAllocation: { immoCad: 139.33773242975033, geoCad: 111.87770524666708, totalCad: 251.21543767641742,
       method: 'previous-report subscription capacity allocation and unit basis; refreshed deduplicated local sessions' },
     indicativeTotalCad: 320.0954376764174 },
-  claims: { deployment: 'partial effective transition only; AFTER is not deployed', invoice: 'none',
+  claims: { deployment: 'preproduction T2 accepted; production T2 in progress; complete AFTER is not deployed', invoice: 'none',
     decisionOptions: 'three explicit open questions; local drafts only; fixed owner decisions unchanged', llmRatification: 'open-non-blocking' },
   sourceFiles,
   replay: 'make -f docs/architecture/focus/Makefile tokens test build browser clipboard ENV=test-architecture',
 };
 await writeFile(`${monthlyDir}/evidence-manifest-2026-09-13.json`, `${JSON.stringify(evidence, null, 2)}\n`);
-console.log(`Portable D7 Focus: ${Buffer.byteLength(html)} bytes; ${sha256(html)}`);
+console.log(`Portable D8 Focus: ${Buffer.byteLength(html)} bytes; ${sha256(html)}`);
