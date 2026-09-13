@@ -591,6 +591,16 @@ object-storage-inventory-preprod-status: ## Read one inventory Job and Pod statu
 	@$(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pods \
 	  -l "job-name=$(OBJECT_STORAGE_INVENTORY_JOB)" -o wide
 
+.PHONY: object-storage-docs-preprod-progress
+object-storage-docs-preprod-progress: ## Aggregate DOCS checkpoint pages without printing object keys
+	@if [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_INVENTORY_JOB)" ]; then \
+	  echo "[object-storage-docs] require KUBECONFIG and OBJECT_STORAGE_INVENTORY_JOB"; exit 1; \
+	fi
+	@set -euo pipefail; pod="$$( $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pods \
+	  -l "job-name=$(OBJECT_STORAGE_INVENTORY_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  [ -n "$$pod" ] || { echo "[object-storage-docs] Job Pod is absent"; exit 1; }; \
+	  $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) exec "$$pod" -- /bin/bash -ceu 'shopt -s nullglob; for phase in provisional fenced; do for side in source destination; do files=(/evidence/docs-checkpoint/$$phase/$$side/index-receipt-*.json); if [ "$${#files[@]}" -gt 0 ]; then jq -s --arg phase "$$phase" --arg side "$$side" '\''{phase:$$phase,side:$$side,pages:length,objects:(map(.objects)|add//0),bytes:(map(.bytes)|add//0)}'\'' "$${files[@]}"; fi; done; done'
+
 .PHONY: object-storage-inventory-preprod-fetch
 object-storage-inventory-preprod-fetch: ## Fetch receipts without printing them (requires JOB and EVIDENCE_DIR)
 	@if [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_INVENTORY_JOB)" ] || \
