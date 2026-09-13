@@ -122,8 +122,9 @@ Audit checkpoint: inventory, file map, and acceptance gates are recorded in
 `docs/architecture/scw-final-sweep.md`. The completed PROD Job reports the
 canonical object count, byte count and manifest digest, but final parity is
 reopened for destination attributes and final-source freshness. The fresh
-non-secret PROD receipt also records the `ci-deployer` ResourceQuota read
-denial instead of treating the whole final-status target as green. MinIO
+non-secret PROD receipt records both the `ci-deployer` ResourceQuota read
+denial and the successful full final-status run under the existing read-only
+operator context on the same OVH server and explicit namespace. MinIO
 workloads, Services and data PVCs are recorded absent in both namespaces, while
 the explicit Scaleway TEM configuration and Secret reference remain present.
 
