@@ -315,6 +315,7 @@ build_manifest() {
 
 MISSING_PROOF=()
 add_missing_proof() { MISSING_PROOF+=("$1"); }
+proof_is_complete() { [ "${#MISSING_PROOF[@]}" -eq 0 ]; }
 SOURCE_LISTING="$WORK_DIR/source-listing.jsonl"
 DESTINATION_LISTING="$WORK_DIR/destination-listing.jsonl"
 SOURCE_MANIFEST="$REPORT_DIR/source-manifest.jsonl"
@@ -573,7 +574,8 @@ write_copy_ledger() {
   fi
 }
 
-if [ "$OPERATION" = copy ] && $EXECUTE_COPY && ! $RECONCILE_OWNED; then
+if [ "$OPERATION" = copy ] && $EXECUTE_COPY && ! $RECONCILE_OWNED &&
+  proof_is_complete; then
   copy_missing_objects
   if list_objects destination "$DESTINATION_LISTING" &&
     build_manifest destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST"; then
@@ -697,7 +699,8 @@ if [ -n "$FENCE_RECORD" ]; then
     add_missing_proof 'fence record is unreadable or empty'
   fi
 fi
-if [ "$OPERATION" = copy ] && $EXECUTE_COPY && $RECONCILE_OWNED; then
+if [ "$OPERATION" = copy ] && $EXECUTE_COPY && $RECONCILE_OWNED &&
+  proof_is_complete; then
   reconcile_owned_objects || true
 fi
 

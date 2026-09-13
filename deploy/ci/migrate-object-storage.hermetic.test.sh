@@ -131,7 +131,7 @@ reset_store() {
   mkdir -p "$TEST_TMP/store/source/src/objects" "$TEST_TMP/store/source/src/meta" \
     "$TEST_TMP/store/destination/dst/objects" "$TEST_TMP/store/destination/dst/meta" \
     "$TEST_TMP/reports"
-  : >"$AWS_LOG"; rm -f "$TEST_TMP/version"
+  : >"$AWS_LOG"; rm -f "$TEST_TMP/version" "$TEST_TMP/failure-counter"
   unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_ATTEMPTS FAKE_VERSIONING
 }
 put_fixture() {
@@ -291,6 +291,8 @@ put_fixture source src raw/retry.txt retry; put_fixture destination dst raw/retr
 FAKE_FAIL_SIDE=source FAKE_FAIL_OPERATION=head-object FAKE_FAIL_ATTEMPTS=2
 TEST_NAME='retries a failed object operation up to the configured bound'
 expect_ok run_tool verify "$TEST_TMP/reports/retry" --retries 3
+TEST_NAME='uses exactly the configured retry bound'
+if [ "$(grep -c $'^source\thead-object\t' "$AWS_LOG")" = 3 ]; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 reset_store
 put_fixture source src raw/a.txt a; put_fixture source src raw/b.txt b
 FAKE_FAIL_SIDE=source FAKE_FAIL_OPERATION=head-object FAKE_FAIL_ATTEMPTS=99
@@ -298,6 +300,16 @@ TEST_NAME='aborts object evidence at the configured failure cap'
 expect_bad run_tool inventory "$TEST_TMP/reports/cap" --retries 1 --max-failures 1
 TEST_NAME='does not inspect a second object after reaching the cap'
 if [ "$(grep -c $'^source\thead-object\t' "$AWS_LOG")" = 1 ]; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/unapproved.txt unapproved
+printf '{}\n' >"$TEST_TMP/invalid-union.json"
+TEST_NAME='invalid DOCS union prevents every destination write'
+expect_bad run_tool copy "$TEST_TMP/reports/invalid-union-copy" --plane DOCS \
+  --expected-manifest "$TEST_TMP/invalid-union.json" --execute-copy
+TEST_NAME='invalid DOCS union leaves the destination untouched'
+if [ ! -e "$TEST_TMP/store/destination/dst/objects/raw/unapproved.txt" ] &&
+  ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 
 reset_store
 put_fixture source src raw/from-source.txt alpha
@@ -319,6 +331,19 @@ jq 'del(.sources[1].fenceSha256)' "$TEST_TMP/expected-union.json" >"$TEST_TMP/in
 TEST_NAME='rejects incomplete per-source fenced observation provenance'
 expect_bad run_tool verify "$TEST_TMP/reports/incomplete-union" \
   --expected-manifest "$TEST_TMP/incomplete-union.json"
+
+reset_store
+put_fixture source src raw/owned.txt original
+run_tool copy "$TEST_TMP/reports/empty-fence-first" --execute-copy >/dev/null
+put_fixture source src raw/owned.txt corrected
+: >"$TEST_TMP/empty-fence.txt"; : >"$AWS_LOG"
+TEST_NAME='empty fence prevents every owned-reconciliation write'
+expect_bad run_tool copy "$TEST_TMP/reports/empty-fence-reconcile" --execute-copy --reconcile-owned \
+  --ledger "$TEST_TMP/reports/empty-fence-first/copy-ledger.jsonl" \
+  --fence-record "$TEST_TMP/empty-fence.txt"
+TEST_NAME='empty fence leaves migration-owned destination bytes untouched'
+if [ "$(cat "$TEST_TMP/store/destination/dst/objects/raw/owned.txt")" = original ] &&
+  ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 
 reset_store
 put_fixture source src raw/owned.txt original
