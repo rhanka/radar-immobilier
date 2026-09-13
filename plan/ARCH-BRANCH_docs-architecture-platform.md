@@ -90,3 +90,9 @@
   - [x] Document build/replay instructions and hash-scope local notes to the complete embedded input set.
   - [x] Embed replay instructions and verification evidence too; leave unresolved execution decisions and production inventory open.
 - [ ] Local documentation handoff; no production action or branch merge requested.
+- [ ] **Lot 9 — Owner correction: complete nested diagrams and Focus choices.**
+  - [x] Diagnose the mismatch: sceneFor collapses each child group; Mermaid is shown as plain source only.
+  - [ ] Render every node/edge simultaneously with native nested parentId boxes; navigation only changes the viewport.
+  - [ ] Render the exact Mermaid sources visually, keeping offline use and sanitization.
+  - [ ] Add DS Tile/Radio options, comment, local persistence and copyable JSON response pack.
+  - [ ] Verify simultaneous completeness, nested bounds, Mermaid rendering and A/B/C comment/export behavior.
