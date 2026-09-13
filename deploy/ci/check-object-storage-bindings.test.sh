@@ -12,6 +12,7 @@ run_bad() { bash "$CHECK" "$1" >/dev/null 2>&1 && bad "$2" || ok "$2"; }
 
 FILES=(
   .env.example deploy/k8s/30-api.yaml deploy/k8s/refresh-diag/diag-refresh-job.yaml
+  deploy/k8s/kustomization.yaml deploy/k8s/70-networkpolicy.yaml
   deploy/k8s/31-graph-projection-job.yaml deploy/k8s/32-graph-projection-only-job.yaml
   deploy/k8s/33-scrape-job.yaml deploy/k8s/33b-scrape-cities-job.yaml
   deploy/k8s/36-db-migrate-job.yaml deploy/k8s/37-graphify34-apply-job.yaml
@@ -58,6 +59,9 @@ run_bad "$CASE_ROOT" 'keeps every gated client explicit'; rm -rf "$CASE_ROOT"
 
 fixture; mkdir -p "$CASE_ROOT/scripts"; touch "$CASE_ROOT/scripts/mount-scw.sh"
 run_bad "$CASE_ROOT" 'rejects a restored legacy mount'; rm -rf "$CASE_ROOT"
+
+fixture; touch "$CASE_ROOT/deploy/k8s/25-minio.yaml"
+run_bad "$CASE_ROOT" 'rejects a restored PROD MinIO manifest'; rm -rf "$CASE_ROOT"
 
 fixture; sed -i 's/S3_BUCKET=radar-immobilier-raw/S3_BUCKET=changed/' "$CASE_ROOT/.env.example"
 run_bad "$CASE_ROOT" 'protects local development settings'; rm -rf "$CASE_ROOT"
