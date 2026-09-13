@@ -36,7 +36,7 @@ select { color: var(--st-semantic-text-primary); background: var(--st-semantic-s
 .graph-layout { display: grid; grid-template-columns: minmax(0, 1fr); }
 .graph-layout.inspecting { grid-template-columns: minmax(0, 1fr) 300px; }
 .flow { width: 100%; height: 660px; background: var(--st-semantic-surface-subtle); }
-.svelte-flow__node-architecture { width: 290px; height: 190px; }
+.svelte-flow__node-architecture { width: 350px; height: 260px; }
 .architecture-node { height: 100%; }
 .svelte-flow__node-group { background: color-mix(in srgb, var(--st-semantic-action-primary) 4%, transparent); border: 2px dashed var(--st-semantic-border-strong); }
 .svelte-flow__edge-text { fill: var(--st-semantic-text-primary); }

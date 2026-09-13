@@ -104,5 +104,5 @@
   - [x] Verify simultaneous completeness, nested bounds, Mermaid rendering and A/B/C comment/export behavior; real clipboard read-back passes.
 - [ ] **Lot 10 — Service icons, repository attribution and complete Mermaid text.**
   - [x] Reproduce missing labels: Mermaid 11 nodes used foreignObject despite the flowchart-only flag; global htmlLabels:false preserves SVG text without relaxing sanitization. Build and browser assertions now check every label, not just box counts.
-  - [ ] Add service pictograms and explicit repository/configuration ownership to every native node and subflow.
+  - [x] Add 19 original SVG pictograms, service labels and repo/role attribution to every native node and subflow. Preserve the Focus port contract and orthogonal router; expand bounds for complete labels.
   - [ ] Verify text, nested geometry, provenance parity and offline rendering in Chromium.

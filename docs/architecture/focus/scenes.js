@@ -13,7 +13,7 @@ export function sceneFor(graph) {
   };
   function arrange(parent = null) {
     const children = [...all.values()].filter(n => n.parent === parent);
-    for (const child of children) dimensions.set(child.id, groupIds.has(child.id) ? arrange(child.id) : { width: 290, height: 190 });
+    for (const child of children) dimensions.set(child.id, groupIds.has(child.id) ? arrange(child.id) : { width: 350, height: 260 });
     const dag = new graphlib.Graph({ multigraph: true })
       .setGraph({ rankdir: 'LR', nodesep: 100, ranksep: 160, marginx: 44, marginy: 44 }).setDefaultEdgeLabel(() => ({}));
     for (const child of children) dag.setNode(child.id, dimensions.get(child.id));
@@ -24,9 +24,10 @@ export function sceneFor(graph) {
     layout(dag);
     for (const child of children) {
       const p = dag.node(child.id), size = dimensions.get(child.id);
-      positions.set(child.id, { x: p.x - size.width / 2, y: p.y - size.height / 2 + (parent ? 64 : 0) });
+      positions.set(child.id, { x: p.x - size.width / 2, y: p.y - size.height / 2 + (parent ? 104 : 0) });
     }
-    return { width: Math.max(410, dag.graph().width ?? 0), height: Math.max(310, (dag.graph().height ?? 0) + 64) };
+    const headerWidth = parent ? all.get(parent).label.length * 9 + 124 : 0;
+    return { width: Math.max(470, headerWidth, dag.graph().width ?? 0), height: Math.max(350, (dag.graph().height ?? 0) + 104) };
   }
   arrange();
   const nodes = [], absolute = new Map();
@@ -40,7 +41,7 @@ export function sceneFor(graph) {
         data: { kind: item.resource ?? (item.store ? 'STORE' : 'COMPOSANT'), title: item.label.split('\n')[0],
           function: item.label.split('\n')[1] ?? '', detail: item.label.split('\n').slice(2).join(' · '),
           tone: item.store ? 'data' : 'entry', statusLabel: 'Cliquer : identité, relations et autres vues',
-          entity: item, group, depth, label: item.label } };
+          entity: item, group, depth, label: item.label, provenance: item.provenance } };
       nodes.push(node); absolute.set(item.id, { ...node, position: globalPosition });
       if (group) emit(item.id, globalPosition, depth + 1);
     }
