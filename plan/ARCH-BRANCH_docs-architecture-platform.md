@@ -36,8 +36,9 @@
 ## Plan / Todo (lot-based)
 - [x] **Lot 0 — Read rules, inventory sources and establish scope.**
 - [x] **Lot 1 — Architecture diagrams and evidence register.**
-- [ ] **Lot 2 — Render with h2a Focus and open the local HTML page.**
-- [ ] **Lot 3 — Verify Mermaid rendering, links and documentation diff.**
+- [x] **Lot 2 — Render with h2a Focus and open the local HTML page.**
+- [x] **Lot 3 — Verify Mermaid rendering, links and documentation diff.**
+  - [x] Scope check and static syntax checks pass; all four diagrams render in Chromium.
 
 ## Merge / Close
 - [ ] Local documentation handoff; no production action or branch merge requested.

@@ -55,6 +55,7 @@ async function enhanceArchitecture() {
     });
     status.textContent = `${rendered} diagrammes Mermaid · source vérifiable · lecture seule`;
     status.dataset.state = 'ready';
+    if (/^#section-\d+$/.test(location.hash)) document.querySelector(location.hash)?.scrollIntoView({ behavior: 'instant' });
   } catch (error) {
     status.textContent = `Rendering incomplete: ${error.message}. The source remains available below.`;
     status.dataset.state = 'error'; console.error(error);
