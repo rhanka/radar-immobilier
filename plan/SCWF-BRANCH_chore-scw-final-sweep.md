@@ -65,6 +65,7 @@
       - [x] Reuse bounded workers with atomic missing-versus-owned write preconditions.
   - [ ] Enforce hermetic failure paths, binding checks and the CI gate.
     - [x] Build a filesystem-backed AWS CLI shim with version and metadata semantics.
+    - [x] Cover dry-run, validation, pagination, copy, metadata, ETag, conflicts and exclusions.
 - [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
 - [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.

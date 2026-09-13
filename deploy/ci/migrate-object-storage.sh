@@ -202,7 +202,7 @@ list_objects() {
     args=(list-objects-v2 --bucket "$bucket" --max-keys 1000)
     [ -z "$token" ] || args+=(--continuation-token "$token")
     retry_json "$response" "$side" "${args[@]}" || return 1
-    jq -ce '.Contents[]? | {key:.Key,size:.Size,etag:(.ETag // "")}' \
+    jq -c '.Contents[]? | {key:.Key,size:.Size,etag:(.ETag // "")}' \
       "$response" >>"$output" || return 1
     truncated="$(jq -r '.IsTruncated // false' "$response")"
     [ "$truncated" = true ] || break

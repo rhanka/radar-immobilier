@@ -12,7 +12,7 @@ AWS_LOG="$TEST_TMP/aws.log"; : >"$AWS_LOG"
 
 cat >"$TEST_TMP/bin/aws" <<'AWS'
 #!/usr/bin/env bash
-set -uo pipefail
+set -euo pipefail
 side=destination
 [ "${AWS_ACCESS_KEY_ID:-}" = SRC_KEY ] && side=source
 root="$FAKE_S3_ROOT/$side"; log="$FAKE_AWS_LOG"
@@ -47,10 +47,10 @@ case "$op" in
           '{Key:$key,Size:$size,ETag:$etag}' >>"$all"
       done < <(find "$objects" -type f | sort)
     fi
-    jq -sn --slurpfile items "$all" --argjson start "$start" --argjson size "$page_size" '
-      ($items | length) as $total | ($items[$start:($start+$size)]) as $page |
+    jq -s --argjson start "$start" --argjson size "$page_size" '
+      length as $total | (.[$start:($start+$size)]) as $page |
       {Contents:$page,IsTruncated:($start+$size < $total),
-       NextContinuationToken:(if $start+$size < $total then (($start+$size)|tostring) else null end)}'
+       NextContinuationToken:(if $start+$size < $total then (($start+$size)|tostring) else null end)}' "$all"
     ;;
   head-object)
     [ -f "$object" ] || exit 45
@@ -87,7 +87,7 @@ case "$op" in
     [ "${FAKE_VERSIONING:-Enabled}" = Enabled ] || version_id=""
     content_type="$(arg --content-type "$@")"; encoding="$(arg --content-encoding "$@")"
     cache="$(arg --cache-control "$@")"; disposition="$(arg --content-disposition "$@")"
-    user_meta="$(arg --metadata "$@")"; user_meta="${user_meta:-{}}"
+    user_meta="$(arg --metadata "$@")"; [ -n "$user_meta" ] || user_meta='{}'
     tagging="$(arg --tagging "$@")"
     tags="$(printf '%s' "$tagging" | jq -R 'if length == 0 then [] else
       split("&") | map(split("=") | {Key:.[0],Value:.[1]}) end')"
@@ -111,5 +111,132 @@ chmod +x "$TEST_TMP/bin/aws"
 PASS=0 FAIL=0
 ok() { PASS=$((PASS + 1)); echo "ok: $1"; }
 bad() { FAIL=$((FAIL + 1)); echo "FAIL: $1" >&2; }
-expect_ok() { "$@" >/dev/null 2>&1 && ok "$TEST_NAME" || bad "$TEST_NAME"; }
+expect_ok() {
+  local log="$TEST_TMP/last-command.log"
+  if "$@" >"$log" 2>&1; then ok "$TEST_NAME"; else bad "$TEST_NAME"; cat "$log" >&2; fi
+}
 expect_bad() { "$@" >/dev/null 2>&1 && bad "$TEST_NAME" || ok "$TEST_NAME"; }
+
+reset_store() {
+  rm -rf "$TEST_TMP/store" "$TEST_TMP/reports"
+  mkdir -p "$TEST_TMP/store/source/src/objects" "$TEST_TMP/store/source/src/meta" \
+    "$TEST_TMP/store/destination/dst/objects" "$TEST_TMP/store/destination/dst/meta" \
+    "$TEST_TMP/reports"
+  : >"$AWS_LOG"; rm -f "$TEST_TMP/version"
+}
+put_fixture() {
+  local side="$1" bucket="$2" key="$3" content="$4" extra="${5:-}"
+  local base="$TEST_TMP/store/$side/$bucket" file
+  [ -n "$extra" ] || extra='{}'
+  file="$base/objects/$key"
+  mkdir -p "$(dirname "$file")" "$(dirname "$base/meta/$key.json")"
+  printf '%s' "$content" >"$file"
+  jq -n --argjson extra "$extra" '
+    {ContentType:"application/octet-stream",ContentEncoding:null,CacheControl:null,
+     ContentDisposition:null,Metadata:{},TagSet:[],ETag:"fixture-etag",VersionId:"fixture-v1"}
+     * $extra' >"$base/meta/$key.json"
+}
+BASE_ARGS=(--environment preprod --plane RAW
+  --source-endpoint http://source.test --source-region local --source-bucket src
+  --source-path-style true --destination-endpoint https://destination.test
+  --destination-region bhs --destination-bucket dst --destination-path-style false
+  --prefix raw/)
+run_tool() {
+  local operation="$1" report="$2" status; shift 2
+  env PATH="$TEST_TMP/bin:$PATH" FAKE_S3_ROOT="$TEST_TMP/store" \
+    FAKE_S3_TMP="$TEST_TMP" FAKE_AWS_LOG="$AWS_LOG" \
+    FAKE_PAGE_SIZE="${FAKE_PAGE_SIZE:-1000}" FAKE_VERSIONING="${FAKE_VERSIONING:-Enabled}" \
+    MIGRATION_RUN_ID=test-run MIGRATION_SOURCE_ACCESS_KEY_ID=SRC_KEY \
+    MIGRATION_SOURCE_SECRET_ACCESS_KEY=SRC_SECRET \
+    MIGRATION_DESTINATION_ACCESS_KEY_ID=DST_KEY \
+    MIGRATION_DESTINATION_SECRET_ACCESS_KEY=DST_SECRET \
+    "$TOOL" "$operation" "${BASE_ARGS[@]}" --report-dir "$report" "$@"
+  status=$?
+  [ "$status" -eq 0 ] || {
+    [ ! -f "$report/summary.json" ] || jq . "$report/summary.json" >&2
+    cat "$AWS_LOG" >&2
+  }
+  return "$status"
+}
+
+reset_store; put_fixture source src raw/a.txt alpha
+TEST_NAME='copy defaults to a read-only dry run'
+expect_ok run_tool copy "$TEST_TMP/reports/dry"
+TEST_NAME='dry run reports missing without writing'
+if [ ! -e "$TEST_TMP/store/destination/dst/objects/raw/a.txt" ] &&
+  jq -e '.counts.missing == 1 and .executeCopy == false' "$TEST_TMP/reports/dry/summary.json" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+reset_store
+TEST_NAME='rejects an empty root prefix'
+expect_bad run_tool inventory "$TEST_TMP/reports/root" --prefix ''
+TEST_NAME='rejects traversal prefixes'
+expect_bad run_tool inventory "$TEST_TMP/reports/traversal" --prefix 'raw/../docs/'
+TEST_NAME='rejects duplicate or overlapping prefixes'
+expect_bad run_tool inventory "$TEST_TMP/reports/overlap" --prefix 'raw/a/'
+TEST_NAME='rejects identical normalized source and destination tuples'
+expect_bad run_tool inventory "$TEST_TMP/reports/tuple" \
+  --destination-endpoint http://source.test --destination-region local \
+  --destination-bucket src --destination-path-style true
+
+reset_store
+put_fixture source src raw/a.txt alpha; put_fixture source src raw/b.txt beta
+put_fixture destination dst raw/a.txt alpha; put_fixture destination dst raw/b.txt beta
+FAKE_PAGE_SIZE=1
+TEST_NAME='exhausts continuation-token pagination'
+expect_ok run_tool verify "$TEST_TMP/reports/pages"
+unset FAKE_PAGE_SIZE
+TEST_NAME='records every source and destination page'
+if [ "$(cat "$TEST_TMP/reports/pages/source-pages.txt")" = 2 ] &&
+  [ "$(cat "$TEST_TMP/reports/pages/destination-pages.txt")" = 2 ]; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+reset_store
+meta='{"ContentType":"text/plain","ContentEncoding":"gzip","CacheControl":"max-age=60","ContentDisposition":"inline","Metadata":{"origin":"municipal"},"TagSet":[{"Key":"plane","Value":"raw"}]}'
+put_fixture source src raw/meta.txt payload "$meta"
+TEST_NAME='copies a missing object and preserves metadata'
+expect_ok run_tool copy "$TEST_TMP/reports/copy" --execute-copy
+TEST_NAME='re-reads copied content and writes ownership evidence'
+if cmp -s "$TEST_TMP/store/source/src/objects/raw/meta.txt" \
+    "$TEST_TMP/store/destination/dst/objects/raw/meta.txt" &&
+  jq -e '.counts.missing == 0 and .counts.conflicting == 0' \
+    "$TEST_TMP/reports/copy/summary.json" >/dev/null &&
+  jq -e '.object.metadata.origin == "municipal" and .object.tags[0].Key == "plane"' \
+    "$TEST_TMP/reports/copy/copy-ledger.jsonl" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/multipart.bin same '{"ETag":"\"source-2\""}'
+put_fixture destination dst raw/multipart.bin same '{"ETag":"\"destination-7\""}'
+TEST_NAME='uses streamed SHA-256 instead of multipart ETags'
+expect_ok run_tool verify "$TEST_TMP/reports/multipart"
+
+reset_store
+put_fixture source src raw/conflict.txt wanted
+put_fixture destination dst raw/conflict.txt foreign
+TEST_NAME='refuses a foreign destination conflict without overwrite'
+expect_bad run_tool copy "$TEST_TMP/reports/conflict" --execute-copy
+TEST_NAME='never invokes a delete and preserves foreign bytes'
+if [ "$(cat "$TEST_TMP/store/destination/dst/objects/raw/conflict.txt")" = foreign ] &&
+  ! grep -Eq $'\t(delete-object|delete-objects)\t' "$AWS_LOG"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
+TEST_NAME='delta refuses to run without fence evidence'
+expect_bad run_tool delta "$TEST_TMP/reports/no-fence"
+
+reset_store
+put_fixture source src raw/a.txt alpha; put_fixture source src graph/a.json graph
+TEST_NAME='classifies explicit disjoint exclusions'
+expect_ok run_tool inventory "$TEST_TMP/reports/excluded" --exclude-prefix graph/
+TEST_NAME='records the complete excluded object set'
+if [ "$(jq -s length "$TEST_TMP/reports/excluded/excluded-source-manifest.jsonl")" = 1 ]; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+TEST_NAME='blocks genuinely unclassified source keys'
+expect_bad run_tool inventory "$TEST_TMP/reports/unclassified"
+
+echo "PASS=$PASS FAIL=$FAIL"
+[ "$FAIL" -eq 0 ]
