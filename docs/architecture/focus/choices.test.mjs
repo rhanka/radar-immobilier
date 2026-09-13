@@ -18,7 +18,14 @@ test('fixed owner instructions export without an allocation vote or current amou
   assert.equal(result.fixedInstructions.reporting.captureCutoffs.unifiedDeliveryTokenBilling, null);
   assert.match(result.fixedInstructions.reporting.september13Transitions, /inside requested period/);
   assert.equal(result.fixedInstructions.transitionEvidence.t1.graphify, '0.18.0');
+  assert.equal(result.fixedInstructions.transitionEvidence.t1.status, 'BLOCKED');
+  assert.deepEqual(result.fixedInstructions.transitionEvidence.t1.correctiveCommits, ['537b9e0c', '3d9ed43c']);
+  assert.equal(result.fixedInstructions.transitionEvidence.extractionBenchmark.pdfCount, 5);
+  assert.equal(result.fixedInstructions.transitionEvidence.extractionBenchmark.scores, null);
+  assert.equal(result.fixedInstructions.transitionEvidence.extractionBenchmark.cloudCodeEnrolled, false);
   assert.equal(result.fixedInstructions.transitionEvidence.t2.decision, 'MIGRATE+RETAIN');
+  assert.deepEqual(result.fixedInstructions.transitionEvidence.t2.checkpointCommits, ['aaf0cbf7', '91242223']);
+  assert.equal(result.fixedInstructions.transitionEvidence.t2.copyStarted, false);
   assert.equal(result.fixedInstructions.transitionEvidence.t3.verdict, 'NO-GO today');
   assert.equal(result.fixedInstructions.billing.allocationMethodChoiceRequired, false);
   assert.equal(result.fixedInstructions.billing.node.hourlyRateCad, 0.082);

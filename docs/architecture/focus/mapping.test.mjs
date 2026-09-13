@@ -63,9 +63,9 @@ test('D5 leads with complete sequential architecture and keeps fixed billing ins
   assert.match(presentation[1], /Existant.*T1.*T2.*T3/s);
   assert.match(presentation[1], /15:38 UTC/);
   assert.match(presentation[2], /candidat frais.*3\.4.*publication.*projection PG.*Signal typé.*PDF exact/s);
-  assert.match(presentation[2], /0\.18\.0.*immo-pv-extraction-v3.*ac3a7150.*8\/8 \+ 7\/7.*llm-mesh.*0\.19\.0.*0\.19\.1.*GO_WITH_GATES.*NO-GO/s);
+  assert.match(presentation[2], /0\.18\.0.*BLOCK.*ac3a7150.*537b9e0c.*3d9ed43c.*34\/34.*4\/4.*re-review.*cinq PDF.*v1\/v2\/v3.*Cloud Code.*aucun score/s);
   assert.match(presentation[3], /PP-RAW-OVH.*PP-DOCS-OVH.*préprod avant prod/s);
-  assert.match(presentation[3], /PP-RAW.*PP-DOCS.*vide.*PP-DOCS-LEGACY.*2 821 583 B.*MIGRATE\+RETAIN.*25ec9e04.*Aucun copy, cutover ou deletion/s);
+  assert.match(presentation[3], /PP-RAW.*PP-DOCS.*vide.*PP-DOCS-LEGACY.*2 821 583 B.*MIGRATE\+RETAIN.*ee84ae29.*cef6d7ed.*aaf0cbf7.*91242223.*Aucun copy/s);
   assert.match(presentation[4], /NO-GO.*1 840m.*5 907,82 Mi.*4 095m.*8 442 Mi.*5 273 Mi.*16 PVC.*15 Cinder RWO.*deux nœuds/s);
   assert.match(presentation[7], /ANNEXE FACTURATION · EN DERNIER/);
   assert.match(presentation[7], /vraie frontière.*non vérifiée.*2026-09-14T00:00:00-04:00/s);
@@ -74,7 +74,7 @@ test('D5 leads with complete sequential architecture and keeps fixed billing ins
   assert.equal(docs['decision-dossier'].match(/^## /gm).length, 8);
   assert.match(docs['decision-dossier'], /Revision \*\*D5/);
   assert.match(docs['decision-dossier'], /option` is `null`: no method was selected/);
-  assert.match(docs['decision-dossier'], /ac3a7150.*8\/8 \+ 7\/7.*UND_ERR_SOCKET.*llm-mesh 0\.19\.0.*GO_WITH_GATES.*NO-GO/s);
+  assert.match(docs['decision-dossier'], /BLOCK.*ac3a7150.*537b9e0c.*3d9ed43c.*34\/34.*4\/4.*Fable re-review.*five.*PDFs.*historical\/manual.*v1, v2 and v3.*Cloud Code.*no score/s);
   assert.match(docs.transitions, /inside the requested period/);
   assert.match(currentReport, /Prior timestamped runtime check:.*2026-09-13T15:38:00Z/);
   assert.match(currentReport, /Prior timestamped T1 implementation progress:.*2026-09-13T15:39:00Z/);

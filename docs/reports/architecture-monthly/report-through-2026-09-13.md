@@ -37,8 +37,8 @@ states](../../architecture/transitions-target.md), [T1 causal detail](../../arch
 | State | Observed in available September 13 evidence | Planned / not deployed |
 | --- | --- | --- |
 | Existant | API uses MinIO `PP-RAW`; `PP-DOCS` fallback is empty; distinct `PP-DOCS-LEGACY` has useful replay/history. Refresh uses OVH `PP-GRAPH`; prod private bindings remain unavailable. | No production symmetry inferred. |
-| T1 | Exact Graphify 0.18.0; `immo-pv-extraction-v3`; HEAD `ac3a7150`; targeted 8/8 + 7/7; full typecheck and scope/branch PASS. Graphify fail-closes. | llm-mesh 0.19.1 unpublished; preprod success GO_WITH_GATES, unattended/retry/prod NO-GO; no real-provider Signal or K8s acceptance. |
-| T2 | Legacy partial inventory: baseline 1/2,821,583 B; graph 4/639,226 B; ontology 530/34,257,805 B; parsed ≥4,884/≥272,554,144 B; raw unknown; runs ≥445. `25ec9e04` starts fail-before-write. | **MIGRATE+RETAIN**; finish suite + conditional-write, parity and recovery. No copy, cutover or deletion; TEM retained. |
+| T1 | Fable BLOCK at `ac3a7150`; fixes `537b9e0c` + `3d9ed43c`; scoped 34/34, integration 4/4 and typecheck pass. | **BLOCKED** while Fable re-review runs. Before real extraction, benchmark historical/manual and v1/v2/v3 on five PDFs with non-simulated runs. Model unselected, Cloud Code not enrolled, no scores, provider Signal or K8s acceptance. |
+| T2 | Legacy inventory unchanged; remediation reaches `ee84ae29` / `f2ac3825` / `c30467ca` / `cef6d7ed`; checkpoint work at `aaf0cbf7` / `91242223`. | **MIGRATE+RETAIN**; checkpoint mechanism under construction. No object copy; parity, recovery and cutover remain open; TEM retained. |
 | T3 | Three b3-8; one allocatable 1,840m/5,907.82 Mi; requests 4,095m/8,442 Mi; pods 5,273 Mi; 16 PVC/15 Cinder RWO; required anti-affinity incompatible. | **NO-GO today**. Complete T2, rightsize, reconcile constraints, verify two nodes, then test one. |
 
 ## 4. Complete final target
@@ -53,9 +53,9 @@ private bindings are target roles marked TBD/UNVERIFIED, not observed facts.
 
 ## 5. Transition gates and limits
 
-Preproduction precedes production for every transition. T1 requires llm-mesh
-0.19.1, a real fresh typed Signal with exact PDF and K8s retry/schedule acceptance.
-T2 requires fail-before-write plus conditional-write capability, full parity,
+Preproduction precedes production for every transition. T1 requires Fable re-review,
+the neutral five-PDF non-simulated benchmark, a real fresh typed Signal with exact
+PDF and K8s retry/schedule acceptance. T2 requires completed checkpoint/writer safety, full parity,
 paired recovery and retention. T3 requires T2, rightsizing, reconciled placement,
 a verified two-node step, then one-node preprod safety before production.
 

@@ -19,8 +19,8 @@ flowchart TB
     T1_CHANGE["CHANGES<br/>In-pod Immo refresh: fresh candidate → deterministic 3.4 → guarded graph → atomic PG"]
     T1_KEEP["KEPT<br/>PP-DB, PP-GRAPH, API/UI/MCP, Geo evidence, MinIO API roles + legacy history"]
     T1_REMOVE["REMOVED<br/>Routine workstation LLM and parallel legacy canonical publishers"]
-    T1_GATES["GATES<br/>GO_WITH_GATES: preprod success path<br/>NO-GO unattended/retry/prod before llm-mesh 0.19.1 + K8s acceptance"]
-    T1_EVIDENCE["EVIDENCE<br/>0.18.0 fail-closed; immo-pv-extraction-v3; ac3a7150; 8/8 + 7/7; gates PASS<br/>llm-mesh 0.19.0 socket fault; 0.19.1 unpublished; no provider Signal"]
+    T1_GATES["GATES · BLOCKED<br/>Fable re-review → five-PDF real benchmark: historical/manual vs v1/v2/v3<br/>then provider Signal + K8s; model TBD; Cloud Code not enrolled"]
+    T1_EVIDENCE["EVIDENCE<br/>Fable BLOCK ac3a7150; fixes 537b9e0c + 3d9ed43c<br/>scoped 34/34 + integration 4/4 + typecheck; no score/provider/K8s"]
   end
   user["User / browser"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
@@ -111,7 +111,7 @@ flowchart TB
     T2_KEEP["KEPT<br/>PP-DB, PP-GRAPH, refresh, Geo corpus, PP-DOCS-LEGACY recovery and TEM"]
     T2_REMOVE["REMOVED AFTER GATE<br/>MinIO consumers + workload/PVC; SCW images/digests/jobs/manual/CI/backup/bootstrap/secret refs"]
     T2_GATES["GATES<br/>Fail before write + conditional-write capability<br/>parity + recovery + writer fence + zero consumers; preprod THEN production"]
-    T2_EVIDENCE["EVIDENCE<br/>RAW live; docs empty; legacy baseline 1 / graph 4 / ontology 530 / parsed at least 4884 / runs at least 445<br/>25ec9e04 first fix; suite + conditional-write open; no copy/cutover/deletion"]
+    T2_EVIDENCE["EVIDENCE<br/>remediation ee84ae29 / f2ac3825 / c30467ca / cef6d7ed<br/>checkpoint aaf0cbf7 / 91242223 building; no object copy"]
   end
   user["User / browser"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
