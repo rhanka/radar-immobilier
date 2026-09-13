@@ -1,6 +1,6 @@
 <script>
   import { SvelteFlow, Background, Controls, MiniMap } from '@xyflow/svelte';
-  import ArchitectureNode from '@kit/ArchitectureNode.svelte';
+  import ArchitectureNode from './ServiceNode.svelte';
   import '@xyflow/svelte/dist/style.css';
   import { sceneFor } from './scenes.js';
   import Viewport from './Viewport.svelte';
