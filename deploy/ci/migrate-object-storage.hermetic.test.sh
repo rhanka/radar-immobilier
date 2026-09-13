@@ -21,12 +21,6 @@ while [ "$#" -gt 0 ] && [ "$1" != s3api ]; do shift; done
 shift; op="$1"; shift
 printf '%s\t%s\t%s\n' "$side" "$op" "$*" >>"$log"
 trap 'status=$?; [ "$status" -eq 0 ] || printf "shim-error\t%s\t%s\t%s\n" "$op" "$status" "$LINENO" >>"$log"' EXIT
-if [ "${FAKE_FAIL_SIDE:-}" = "$side" ] && [ "${FAKE_FAIL_OPERATION:-}" = "$op" ]; then
-  counter="$FAKE_S3_TMP/failure-counter"; seen="$(cat "$counter" 2>/dev/null || printf 0)"
-  if [ "$seen" -lt "${FAKE_FAIL_ATTEMPTS:-0}" ]; then
-    printf '%s' "$((seen + 1))" >"$counter"; exit 71
-  fi
-fi
 arg() {
   local wanted="$1" previous="" value
   shift
@@ -37,6 +31,13 @@ arg() {
   return 0
 }
 bucket="$(arg --bucket "$@")"; key="$(arg --key "$@")"
+if [ "${FAKE_FAIL_SIDE:-}" = "$side" ] && [ "${FAKE_FAIL_OPERATION:-}" = "$op" ] &&
+  { [ -z "${FAKE_FAIL_KEY:-}" ] || [ "$FAKE_FAIL_KEY" = "$key" ]; }; then
+  counter="$FAKE_S3_TMP/failure-counter"; seen="$(cat "$counter" 2>/dev/null || printf 0)"
+  if [ "$seen" -lt "${FAKE_FAIL_ATTEMPTS:-0}" ]; then
+    printf '%s' "$((seen + 1))" >"$counter"; exit 71
+  fi
+fi
 objects="$root/$bucket/objects"; meta="$root/$bucket/meta"
 object="$objects/$key"; metadata="$meta/$key.json"
 case "$op" in
@@ -163,7 +164,8 @@ reset_store() {
     observedAt:((now - 3600) | todateiso8601),expiresAt:((now + 82800) | todateiso8601),
     transcriptSha256:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     capabilities:{ifNoneMatchCreate:true,ifMatchUpdate:true}}' >"$TEST_TMP/conditional-write-proof.json"
-  unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_ATTEMPTS FAKE_VERSIONING FAKE_CLOCK_STEP
+  unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_ATTEMPTS FAKE_FAIL_KEY
+  unset FAKE_VERSIONING FAKE_CLOCK_STEP
 }
 put_fixture() {
   local side="$1" bucket="$2" key="$3" content="$4" extra="${5:-}"
@@ -192,7 +194,7 @@ run_tool() {
     FAKE_PAGE_SIZE="${FAKE_PAGE_SIZE:-}" FAKE_VERSIONING="${FAKE_VERSIONING:-Enabled}" \
     FAKE_CLOCK_STEP="${FAKE_CLOCK_STEP:-}" FAKE_CLOCK_FILE="$TEST_TMP/clock" \
     FAKE_FAIL_SIDE="${FAKE_FAIL_SIDE:-}" FAKE_FAIL_OPERATION="${FAKE_FAIL_OPERATION:-}" \
-    FAKE_FAIL_ATTEMPTS="${FAKE_FAIL_ATTEMPTS:-0}" \
+    FAKE_FAIL_ATTEMPTS="${FAKE_FAIL_ATTEMPTS:-0}" FAKE_FAIL_KEY="${FAKE_FAIL_KEY:-}" \
     MIGRATION_RUN_ID=test-run MIGRATION_SOURCE_ACCESS_KEY_ID=SRC_KEY \
     MIGRATION_SOURCE_SECRET_ACCESS_KEY=SRC_SECRET \
     MIGRATION_DESTINATION_ACCESS_KEY_ID=DST_KEY \
@@ -301,6 +303,48 @@ if grep -Eq $'^source\tlist-objects-v2\t.*--start-after raw/a.txt' "$AWS_LOG" &&
     "$TEST_TMP/resume-checkpoint/provisional/source/index-receipt-000002.json" >/dev/null &&
   jq -e '.resumeRequired == false and .indexComplete == true and .cutoverReady == false' \
     "$TEST_TMP/resume-checkpoint/progress.json" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/a.txt alpha; put_fixture source src raw/b.txt beta
+put_fixture destination dst raw/a.txt alpha; put_fixture destination dst raw/b.txt beta
+FAKE_FAIL_SIDE=source FAKE_FAIL_OPERATION=get-object FAKE_FAIL_KEY=raw/b.txt FAKE_FAIL_ATTEMPTS=99
+TEST_NAME='failed body shard preserves each earlier committed shard'
+expect_status 1 run_tool inventory "$TEST_TMP/reports/body-first" \
+  --checkpoint-dir "$TEST_TMP/body-checkpoint" --page-size 1 --time-budget-seconds 30 --retries 1
+if [ -s "$TEST_TMP/body-checkpoint/provisional/source/body-receipt-000001.json" ] &&
+  [ ! -e "$TEST_TMP/body-checkpoint/provisional/source/body-receipt-000002.json" ]; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_KEY FAKE_FAIL_ATTEMPTS
+rm -f "$TEST_TMP/failure-counter"; : >"$AWS_LOG"
+TEST_NAME='body resume reads only the previously failed shard'
+expect_ok run_tool inventory "$TEST_TMP/reports/body-second" \
+  --checkpoint-dir "$TEST_TMP/body-checkpoint" --page-size 1 --time-budget-seconds 30 \
+  --retries 1 --resume
+if ! grep -Eq $'^source\tget-object\t.*--key raw/a.txt' "$AWS_LOG" &&
+  grep -Eq $'^source\tget-object\t.*--key raw/b.txt' "$AWS_LOG" &&
+  [ -s "$TEST_TMP/body-checkpoint/provisional/source/body-receipt-000002.json" ]; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+printf '{"key":"tampered","size":0}\n' \
+  >"$TEST_TMP/body-checkpoint/provisional/source/body-manifest-000001.jsonl"
+: >"$AWS_LOG"
+TEST_NAME='tampered body checkpoint fails before storage access'
+expect_bad run_tool inventory "$TEST_TMP/reports/body-tampered" \
+  --checkpoint-dir "$TEST_TMP/body-checkpoint" --page-size 1 --time-budget-seconds 30 \
+  --retries 1 --resume
+if [ ! -s "$AWS_LOG" ]; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
+TEST_NAME='empty buckets commit anchored terminal index and body receipts'
+expect_ok run_tool inventory "$TEST_TMP/reports/empty-checkpoint" \
+  --checkpoint-dir "$TEST_TMP/empty-checkpoint" --page-size 1 --time-budget-seconds 30
+if jq -e '.firstKey == null and .lastKey == null and .isTruncated == false' \
+    "$TEST_TMP/empty-checkpoint/provisional/source/index-receipt-000001.json" >/dev/null &&
+  jq -e '.objects == 0 and .failures == 0' \
+    "$TEST_TMP/empty-checkpoint/provisional/source/body-receipt-000001.json" >/dev/null; then
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
 

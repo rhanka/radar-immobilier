@@ -229,3 +229,36 @@ checkpoint_commit_body() {
      observedAt:(now|todateiso8601)}' >"$tmp_receipt"
   sync -f "$tmp_body" "$tmp_receipt" && mv "$tmp_body" "$body" && mv "$tmp_receipt" "$receipt"
 }
+
+build_manifest_checkpoint() {
+  local side="$1" output="$2" phase dir sequence=1 page body tmp before after elapsed next body_status
+  phase="$(checkpoint_phase)"; dir="$CHECKPOINT_DIR/$phase/$side"; : >"$output"
+  while :; do
+    printf -v page '%s/index-page-%06d.jsonl' "$dir" "$sequence"
+    [ -e "$page" ] || break
+    checkpoint_validate_body_shard "$side" "$sequence"
+    printf -v body '%s/body-manifest-%06d.jsonl' "$dir" "$sequence"
+    if ! $CHECKPOINT_BODY_PRESENT; then
+      tmp="$body.tmp"; before="$(jq -s length "$REPORT_DIR/failures.jsonl")"
+      CHECKPOINT_BUILDING_PAGE=true
+      build_manifest "$side" "$page" "$tmp"; body_status=$?
+      CHECKPOINT_BUILDING_PAGE=false
+      after="$(jq -s length "$REPORT_DIR/failures.jsonl")"
+      if [ "$body_status" -ne 0 ] || [ "$after" -ne "$before" ] ||
+        ! jq -es --slurpfile page "$page" '[.[].key] == [$page[].key]' "$tmp" >/dev/null; then
+        rm -f "$tmp"; return 1
+      fi
+      checkpoint_commit_body "$side" "$sequence" "$tmp" || return 1
+    fi
+    cat "$body" >>"$output"
+    sequence=$((sequence + 1)); printf -v next '%s/index-page-%06d.jsonl' "$dir" "$sequence"
+    if [ -e "$next" ]; then
+      elapsed=$(( $(date +%s) - CHECKPOINT_RUN_STARTED_EPOCH ))
+      if [ "$elapsed" -ge "$TIME_BUDGET_SECONDS" ]; then
+        CHECKPOINT_SEQUENCE="$sequence" CHECKPOINT_RESUME_REQUIRED=true
+        checkpoint_write_progress "$side" true
+        return 2
+      fi
+    fi
+  done
+}
