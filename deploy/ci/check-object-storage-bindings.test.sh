@@ -17,6 +17,10 @@ FILES=(
   deploy/k8s/36-db-migrate-job.yaml deploy/k8s/37-graphify34-apply-job.yaml
   deploy/k8s/38-graphify34-emit-candidates-job.yaml deploy/k8s/39-export-graph-nodes-job.yaml
   deploy/k8s/40-export-gt-designation-events-job.yaml
+  deploy/k8s/32b-reproject-etape-job.yaml deploy/k8s/34-refresh-cronjob.yaml
+  deploy/k8s/refresh-cronjobs-prod/kustomization.yaml
+  .github/workflows/grounding-preprod.yml .github/workflows/grounding-publish-prod.yml
+  .github/workflows/run-job.yaml
 )
 fixture() {
   CASE_ROOT="$(mktemp -d)"
@@ -37,6 +41,18 @@ run_bad "$CASE_ROOT" 'rejects optional credentials'; rm -rf "$CASE_ROOT"
 fixture; sed -i '0,/radar-graph-s3-credentials/{s/radar-graph-s3-credentials/radar-s3-credentials/}' "$CASE_ROOT/deploy/k8s/40-export-gt-designation-events-job.yaml"
 run_bad "$CASE_ROOT" 'rejects a generic credential fallback'; rm -rf "$CASE_ROOT"
 
+fixture; sed -i '0,/SCRAPE_S3_REGION/{s/SCRAPE_S3_REGION/MISSING_SCRAPE_REGION/}' "$CASE_ROOT/deploy/k8s/33-scrape-job.yaml"
+run_bad "$CASE_ROOT" 'rejects an incomplete DOCS binding family'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i '0,/radar-scrape-s3-credentials/{s/radar-scrape-s3-credentials/radar-graph-s3-credentials/}' "$CASE_ROOT/deploy/k8s/33b-scrape-cities-job.yaml"
+run_bad "$CASE_ROOT" 'rejects DOCS reuse of the GRAPH identity'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i '0,/radar-scrape-s3-credentials/{s/radar-scrape-s3-credentials/sentropic-geo-s3-credentials/}' "$CASE_ROOT/deploy/k8s/33b-scrape-cities-job.yaml"
+run_bad "$CASE_ROOT" 'rejects DOCS reuse of a Geo identity'; rm -rf "$CASE_ROOT"
+
+fixture; rm -f "$CASE_ROOT/deploy/k8s/32b-reproject-etape-job.yaml"
+run_bad "$CASE_ROOT" 'keeps every gated client explicit'; rm -rf "$CASE_ROOT"
+
 fixture; mkdir -p "$CASE_ROOT/scripts"; touch "$CASE_ROOT/scripts/mount-scw.sh"
 run_bad "$CASE_ROOT" 'rejects a restored legacy mount'; rm -rf "$CASE_ROOT"
 
@@ -44,4 +60,8 @@ fixture; sed -i 's/S3_BUCKET=radar-immobilier-raw/S3_BUCKET=changed/' "$CASE_ROO
 run_bad "$CASE_ROOT" 'protects local development settings'; rm -rf "$CASE_ROOT"
 
 echo "PASS=$PASS FAIL=$FAIL"
-[ "$FAIL" -eq 0 ]
+if [ "$FAIL" -eq 0 ]; then
+  bash "$HERE/migrate-object-storage.hermetic.test.sh"
+else
+  exit 1
+fi
