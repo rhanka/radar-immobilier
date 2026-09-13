@@ -113,5 +113,5 @@
   - [x] Replace the obsolete refresh-sequence response with neutral LLM-allocation methods and fixed owner decisions in draft JSON.
   - [x] Replace obsolete unasked sequence options with the explicit LLM-allocation question and the engaged plan.
   - [x] D4 records the owner execution direction and published release; former architecture alternatives are explicitly historical.
-  - [ ] Reconcile monthly token usage and cost-calculation alternatives from dated evidence.
+  - [x] Reconcile available monthly evidence, neutral LLM-allocation alternatives and explicit audit gaps without a final amount.
   - [ ] Embed the dated Mermaid/SvelteFlow rendering into the monthly companion; retain post-period separation.
