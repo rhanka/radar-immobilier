@@ -1,0 +1,122 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: radar-object-storage-inventory-docs-prod-
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: object-storage-inventory
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: object-storage-inventory
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: inventory
+          image: amazon/aws-cli:2.34.53@sha256:cf53765c0de54ad3a8ea21818f1c4c845a8cf7ca87831c078a00fef244031493
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/bash", "-ceu", "--"]
+          args:
+            - |
+              umask 077
+              checkpoint=/evidence/docs-prod-checkpoint
+              report="/evidence/reports/${MIGRATION_RUN_ID}"
+              resume=()
+              if [ -r "$checkpoint/config.json" ]; then resume=(--resume); fi
+              printf '[default]\nregion = fr-par\ns3 =\n  addressing_style = virtual\n' >/tmp/source-aws-config
+              AWS_ACCESS_KEY_ID="$MIGRATION_SOURCE_ACCESS_KEY_ID" \
+                AWS_SECRET_ACCESS_KEY="$MIGRATION_SOURCE_SECRET_ACCESS_KEY" \
+                AWS_CONFIG_FILE=/tmp/source-aws-config AWS_EC2_METADATA_DISABLED=true \
+                aws --no-cli-pager --no-paginate --output json \
+                --endpoint-url https://s3.fr-par.scw.cloud --region fr-par s3api \
+                list-objects-v2 --bucket radar-immobilier-docs-pocs \
+                --delimiter / --max-keys 1000 >/tmp/top-level.json
+              jq -e '.IsTruncated == false and ((.CommonPrefixes // []) | length > 0)' \
+                /tmp/top-level.json >/dev/null
+              mapfile -t prefixes < <(jq -er '.CommonPrefixes[].Prefix' /tmp/top-level.json)
+              prefix_args=()
+              for prefix in "${prefixes[@]}"; do prefix_args+=(--prefix "$prefix"); done
+              started=$(date +%s)
+              set +e
+              /bin/bash /tool/migrate-object-storage.sh inventory \
+                --environment prod --plane DOCS \
+                --source-endpoint https://s3.fr-par.scw.cloud --source-region fr-par \
+                --source-bucket radar-immobilier-docs-pocs --source-path-style false \
+                --destination-endpoint "$DESTINATION_ENDPOINT" \
+                --destination-region "$DESTINATION_REGION" \
+                --destination-bucket "$DESTINATION_BUCKET" \
+                --destination-path-style "$DESTINATION_PATH_STYLE" \
+                --include-root-objects "${prefix_args[@]}" \
+                --report-dir "$report" --checkpoint-dir "$checkpoint" \
+                --page-size 1000 --time-budget-seconds 2400 --concurrency 32 \
+                --retries 3 --max-failures 20 --max-object-bytes 5000000000 \
+                "${resume[@]}"
+              status=$?
+              set -e
+              elapsed=$(($(date +%s) - started))
+              marker="/evidence/export-ready/${MIGRATION_RUN_ID}"
+              mkdir -p "$(dirname "$marker")"
+              jq -n --argjson status "$status" --argjson elapsed "$elapsed" \
+                '{status:$status,elapsedSeconds:$elapsed}' >"$marker.tmp"
+              sync -f "$marker.tmp" && mv "$marker.tmp" "$marker"
+              sleep 300
+              exit "$status"
+          env:
+            - name: MIGRATION_RUN_ID
+              valueFrom: { fieldRef: { fieldPath: metadata.uid } }
+            - name: MIGRATION_SOURCE_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: MIGRATION_SOURCE_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            - name: MIGRATION_DESTINATION_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
+            - name: MIGRATION_DESTINATION_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
+            - name: DESTINATION_ENDPOINT
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ENDPOINT } }
+            - name: DESTINATION_REGION
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_REGION } }
+            - name: DESTINATION_BUCKET
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_BUCKET } }
+            - name: DESTINATION_PATH_STYLE
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_FORCE_PATH_STYLE } }
+          resources:
+            requests: { cpu: 100m, memory: 256Mi, ephemeral-storage: 128Mi }
+            limits: { cpu: 500m, memory: 768Mi, ephemeral-storage: 6Gi }
+          readinessProbe:
+            exec:
+              command: ["/bin/bash", "-c", "test -f /evidence/export-ready/${MIGRATION_RUN_ID}"]
+            periodSeconds: 2
+            timeoutSeconds: 1
+            failureThreshold: 1800
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: tool, mountPath: /tool, readOnly: true }
+            - { name: evidence, mountPath: /evidence }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: tool
+          configMap: { name: radar-object-storage-docs-prod-tool, defaultMode: 365 }
+        - name: evidence
+          persistentVolumeClaim: { claimName: radar-object-storage-docs-prod-checkpoint }
+        - name: tmp
+          emptyDir: { sizeLimit: 6Gi }
