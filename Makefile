@@ -619,11 +619,11 @@ object-storage-docs-preprod-copy-progress: ## Report canonical copy progress wit
 	  echo '[object-storage-docs] require KUBECONFIG and exact canonical copy Job'; exit 1; \
 	fi
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; job="$(OBJECT_STORAGE_DOCS_CANONICAL_JOB)"; \
-	  uid="$$( $(KUBECTL) -n "$$namespace" get "job/$$job" -o jsonpath='{.metadata.uid}' )"; \
 	  started="$$( $(KUBECTL) -n "$$namespace" get "job/$$job" -o jsonpath='{.metadata.creationTimestamp}' )"; \
 	  elapsed="$$(( $$(date +%s) - $$(date -d "$$started" +%s) ))"; \
 	  pod="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o jsonpath='{.items[0].metadata.name}' )"; \
 	  [ -n "$$pod" ] || { echo '[object-storage-docs] canonical copy Pod is absent'; exit 1; }; \
+	  uid="$$( $(KUBECTL) -n "$$namespace" get "pod/$$pod" -o jsonpath='{.metadata.uid}' )"; \
 	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- env REPORT_DIR="/evidence/reports/$$uid" \
 	    ELAPSED_SECONDS="$$elapsed" /bin/bash /tool/copy-canonical-docs-progress.sh
 
@@ -642,9 +642,9 @@ object-storage-minio-preprod-remove: ## Irreversibly remove exact preprod MinIO 
 	  [ "$$server" = "$(OBJECT_STORAGE_OVH_SERVER)" ] && [ "$$context_namespace" = "$$namespace" ] || \
 	    { echo '[object-storage-minio] refused: exact OVH preprod context is unproved'; exit 1; }; \
 	  work="$$(mktemp -d)"; trap 'rm -rf "$$work"' EXIT; \
-	  uid="$$( $(KUBECTL) -n "$$namespace" get "job/$$job" -o jsonpath='{.metadata.uid}' )"; \
 	  pod="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o jsonpath='{.items[0].metadata.name}' )"; \
 	  [ -n "$$pod" ] || { echo '[object-storage-minio] parity evidence Pod is absent'; exit 1; }; \
+	  uid="$$( $(KUBECTL) -n "$$namespace" get "pod/$$pod" -o jsonpath='{.metadata.uid}' )"; \
 	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- cat "/evidence/reports/$$uid/summary.json" >"$$work/parity.json"; \
 	  jq -e --arg digest "$$expected_digest" '.complete == true and .exactParity == true and .expected == 59017 and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest' \
 	    "$$work/parity.json" >/dev/null; \
