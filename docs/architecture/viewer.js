@@ -36,11 +36,12 @@ async function enhanceArchitecture() {
       const drawing = canvas.querySelector('svg'); drawing.style.maxWidth = 'none';
       const size = () => Number.parseFloat(drawing.style.width) || canvas.clientWidth;
       const fit = () => { const vb = drawing.viewBox.baseVal; drawing.style.width = `${Math.min(canvas.clientWidth - 24, (canvas.clientHeight - 24) * vb.width / vb.height)}px`; };
+      const readable = () => { drawing.style.width = `${Math.max(canvas.clientWidth - 24, drawing.viewBox.baseVal.width * 0.85)}px`; };
       const controls = [
         ['Zoom +', () => { drawing.style.width = `${size() * 1.3}px`; }],
         ['Zoom −', () => { drawing.style.width = `${Math.max(180, size() / 1.3)}px`; }],
         ['Ajuster', fit],
-        ['Plein écran', (button) => { const expanded = figure.classList.toggle('expanded'); button.textContent = expanded ? 'Fermer' : 'Plein écran'; button.setAttribute('aria-expanded', String(expanded)); document.body.classList.toggle('diagram-open', expanded); fit(); }],
+        ['Plein écran', (button) => { const expanded = figure.classList.toggle('expanded'); button.textContent = expanded ? 'Fermer' : 'Plein écran'; button.setAttribute('aria-expanded', String(expanded)); document.body.classList.toggle('diagram-open', expanded); readable(); }],
       ];
       for (const [label, action] of controls) {
         const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
@@ -48,7 +49,7 @@ async function enhanceArchitecture() {
       }
       const details = document.createElement('details'); const summary = document.createElement('summary'); summary.textContent = 'Code Mermaid';
       pre.before(toolbar, canvas, details); details.append(summary, pre);
-      fit(); rendered++;
+      readable(); rendered++;
     }
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') document.querySelector('.expanded .diagram-toolbar button:last-child')?.click();
