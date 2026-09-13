@@ -2,6 +2,7 @@ SHELL := /bin/bash
 
 ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../../..)
 OVERLAY := $(ROOT)/deploy/k8s/refresh-cronjobs
+PROD_OVERLAY := $(ROOT)/deploy/k8s/refresh-cronjobs-prod
 NAMESPACE := radar-immobilier-preprod
 EXPECTED_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 K := kubectl --kubeconfig "$(KUBECONFIG)" -n $(NAMESPACE)
@@ -85,6 +86,15 @@ render-preprod:
 	  || { echo "IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
 	@test -n "$(RENDER_OUT)" || { echo "RENDER_OUT is required" >&2; exit 1; }
 	@umask 077; kubectl kustomize --load-restrictor LoadRestrictionsNone "$(OVERLAY)" \
+	  | sed "s#$(PLACEHOLDER)#$(IMAGE_REF)#g" > "$(RENDER_OUT)"
+	@! grep -q 'PINNED-BY-CI\|radar-api:latest' "$(RENDER_OUT)"
+
+.PHONY: render-prod
+render-prod:
+	@[[ "$(IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
+	  || { echo "IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
+	@test -n "$(RENDER_OUT)" || { echo "RENDER_OUT is required" >&2; exit 1; }
+	@umask 077; kubectl kustomize --load-restrictor LoadRestrictionsNone "$(PROD_OVERLAY)" \
 	  | sed "s#$(PLACEHOLDER)#$(IMAGE_REF)#g" > "$(RENDER_OUT)"
 	@! grep -q 'PINNED-BY-CI\|radar-api:latest' "$(RENDER_OUT)"
 

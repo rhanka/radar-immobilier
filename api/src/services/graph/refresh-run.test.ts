@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
-import { acquireRefreshPdfManifest } from "./refresh-run.js";
+import { acquireRefreshPdfManifest, refreshSourceDelayMs } from "./refresh-run.js";
 
 class MemoryStore implements ObjectStore {
   readonly objects = new Map<string, Uint8Array>();
@@ -27,6 +27,12 @@ class MemoryStore implements ObjectStore {
 const sha = (digit: string) => digit.repeat(64);
 
 describe("acquireRefreshPdfManifest", () => {
+  it("applies the required two-second pacing jitter bounds", () => {
+    expect(refreshSourceDelayMs(() => 0)).toBe(1_700);
+    expect(refreshSourceDelayMs(() => 0.5)).toBe(2_000);
+    expect(refreshSourceDelayMs(() => 0.999999)).toBe(2_300);
+  });
+
   it("selects exact PDFs while retaining valid non-PDF acquisition evidence", async () => {
     const store = new MemoryStore();
     const sourceId = "proces-verbaux-city";
