@@ -36,9 +36,9 @@
 - [x] **Lot 0 — Baseline and scope.**
   - [x] Read required rules and harness entry point.
   - [x] Create the isolated repository-local worktree from `origin/main` at `7786daf0`.
-- [ ] **Lot 1 — D8 decision and transition sources.**
-  - [ ] Record exact preproduction parity, MinIO removal, retained migration PVC, quota delta, service health and TEM exception.
-  - [ ] Keep production T2 explicitly in progress and T3 gated.
+- [x] **Lot 1 — D8 decision and transition sources.**
+  - [x] Record exact preproduction parity, MinIO removal, retained migration PVC, quota delta, service health and TEM exception.
+  - [x] Keep production T2 explicitly in progress and T3 gated.
 - [ ] **Lot 2 — Focus contract and regression coverage.**
   - [ ] Update owner-facing presentation, summary and response JSON facts.
   - [ ] Keep only `asis-1` and `target-3`; verify complete icons, repo provenance and nested subflows.
