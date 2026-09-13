@@ -74,6 +74,19 @@ if grep -Fq 'name: allow-object-storage-inventory-to-minio' "$RENDER" &&
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
 
+TEST_NAME='uses fence evidence only when its mounted record is non-empty'
+if grep -Fq 'if [ -s /fence/fence.txt ]' "$JOB" &&
+  grep -Fq 'fence=(--fence-record /fence/fence.txt)' "$JOB" &&
+  grep -Fq 'name: radar-object-storage-inventory-fence' "$JOB" &&
+  grep -Fq 'optional: true' "$JOB"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+TEST_NAME='fence target scales only the proven RAW writer and records zero'
+if grep -Fq 'scale deployment/radar-api --replicas=0' "$ROOT/Makefile" &&
+  grep -Fq 'writer=deployment/radar-api' "$ROOT/Makefile" &&
+  ! grep -A35 '^object-storage-raw-preprod-fence:' "$ROOT/Makefile" | grep -Eq 'cronjob|statefulset'; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
 cat >"$TEST_TMP/kubectl" <<'KUBECTL'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >>"$FAKE_KUBECTL_LOG"

@@ -424,6 +424,37 @@ object-storage-inventory-preprod-start: ## Apply support and create one RAW read
 	  $(KUBECTL) apply -f "$$render" >/dev/null; \
 	  $(KUBECTL) create -f $(OBJECT_STORAGE_INVENTORY_DIR)/job.yaml -o name
 
+.PHONY: object-storage-raw-preprod-fence
+object-storage-raw-preprod-fence: ## Scale the proven RAW writer to zero and record fence evidence
+	@if [ "$(OBJECT_STORAGE_FENCE_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ]; then \
+	  echo "[object-storage-fence] refused: require KUBECONFIG, OBJECT_STORAGE_FENCE_CONFIRM=1, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  $(KUBECTL) -n "$$namespace" scale deployment/radar-api --replicas=0 >/dev/null; \
+	  fenced=false; \
+	  for ((attempt=1; attempt<=60; attempt++)); do \
+	    replicas="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
+	      -o jsonpath='{.status.replicas}' )"; \
+	    ready="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
+	      -o jsonpath='{.status.readyReplicas}' )"; \
+	    if [ "$${replicas:-0}" = 0 ] && [ "$${ready:-0}" = 0 ]; then fenced=true; break; fi; \
+	    sleep 2; \
+	  done; \
+	  $$fenced || { echo "[object-storage-fence] radar-api did not reach zero"; exit 1; }; \
+	  generation="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
+	    -o jsonpath='{.metadata.generation}' )"; \
+	  observed="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
+	    -o jsonpath='{.status.observedGeneration}' )"; \
+	  stamp="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
+	  payload="$$(printf 'schemaVersion=1\nenvironment=preprod\nplane=RAW\nwriter=deployment/radar-api\nreplicas=0\nreadyReplicas=0\ngeneration=%s\nobservedGeneration=%s\nobservedAt=%s\n' \
+	    "$$generation" "$$observed" "$$stamp")"; \
+	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-inventory-fence \
+	    --from-literal="fence.txt=$$payload" --dry-run=client -o yaml | \
+	    $(KUBECTL) apply -f - >/dev/null; \
+	  echo "[object-storage-fence] radar-api is zero; fence evidence recorded"
+
 .PHONY: object-storage-inventory-preprod-status
 object-storage-inventory-preprod-status: ## Read one inventory Job and Pod status (OBJECT_STORAGE_INVENTORY_JOB=...)
 	@if [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_INVENTORY_JOB)" ]; then \

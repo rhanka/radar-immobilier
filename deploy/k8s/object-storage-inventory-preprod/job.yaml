@@ -42,7 +42,9 @@ spec:
               checkpoint=/evidence/raw-checkpoint
               report="/evidence/reports/${MIGRATION_RUN_ID}"
               resume=()
+              fence=()
               if [ -r "$checkpoint/config.json" ]; then resume=(--resume); fi
+              if [ -s /fence/fence.txt ]; then fence=(--fence-record /fence/fence.txt); fi
               set +e
               /bin/bash /tool/migrate-object-storage.sh inventory \
                 --environment preprod --plane RAW \
@@ -57,7 +59,8 @@ spec:
                 --prefix jobs/ --prefix state/ --report-dir "$report" \
                 --checkpoint-dir "$checkpoint" --page-size 100 \
                 --time-budget-seconds 300 --concurrency 1 --retries 3 \
-                --max-failures 20 --max-object-bytes 1000000000 "${resume[@]}"
+                --max-failures 20 --max-object-bytes 1000000000 \
+                "${fence[@]}" "${resume[@]}"
               status=$?
               set -e
               marker="/evidence/export-ready/${MIGRATION_RUN_ID}"
@@ -110,6 +113,7 @@ spec:
               drop: ["ALL"]
           volumeMounts:
             - { name: tool, mountPath: /tool, readOnly: true }
+            - { name: fence, mountPath: /fence, readOnly: true }
             - { name: evidence, mountPath: /evidence }
             - { name: tmp, mountPath: /tmp }
       volumes:
@@ -120,6 +124,10 @@ spec:
         - name: evidence
           persistentVolumeClaim:
             claimName: radar-object-storage-inventory-checkpoint
+        - name: fence
+          configMap:
+            name: radar-object-storage-inventory-fence
+            optional: true
         - name: tmp
           emptyDir:
             sizeLimit: 1100Mi
