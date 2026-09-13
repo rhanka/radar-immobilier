@@ -88,23 +88,27 @@ destination_aws "${args[@]}" --if-match "$etag" >"$work/update.json" \
 destination_aws get-object --bucket "$DESTINATION_BUCKET" --key "$key" \
   "$work/destination-body" >"$work/destination-get.json" 2>"$work/destination-error"
 source_hash="$(sha256sum "$work/body" | awk '{print $1}')"
+source_size="$(wc -c <"$work/body" | tr -d ' ')"
 [ "$source_hash" = "$(sha256sum "$work/destination-body" | awk '{print $1}')" ] || {
   echo 'ERROR: conditional proof object body differs' >&2; exit 2; }
 
 observed="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 expires="$(date -u -d '+24 hours' +%Y-%m-%dT%H:%M:%SZ)"
+key_hash="$(printf '%s' "$key" | sha256sum | awk '{print $1}')"
 printf 'bucket=%s\nkeySha256=%s\ncreate=%s\nifNoneMatch=blocked\nifMatch=accepted\nbodySha256=%s\n' \
-  "$DESTINATION_BUCKET" "$(printf '%s' "$key" | sha256sum | awk '{print $1}')" \
+  "$DESTINATION_BUCKET" "$key_hash" \
   "$create_result" "$source_hash" >"$work/transcript"
 mkdir -p "$(dirname "$PROOF_FILE")"
 jq -n --arg endpoint "$DESTINATION_ENDPOINT" --arg region "$DESTINATION_REGION" \
   --arg bucket "$DESTINATION_BUCKET" \
   --arg identity "$(printf '%s' "$MIGRATION_DESTINATION_ACCESS_KEY_ID" | sha256sum | awk '{print $1}')" \
+  --arg keyHash "$key_hash" --arg bodyHash "$source_hash" --argjson size "$source_size" \
   --arg observed "$observed" --arg expires "$expires" \
   --arg transcript "$(sha256sum "$work/transcript" | awk '{print $1}')" \
   '{schemaVersion:1,provider:"OVHcloud Object Storage",providerVersion:"S3 BHS 2026-09-13",
     destination:{endpoint:$endpoint,region:$region,bucket:$bucket,pathStyle:false},
     identityFingerprint:$identity,observedAt:$observed,expiresAt:$expires,
+    object:{keySha256:$keyHash,bodySha256:$bodyHash,size:$size},
     transcriptSha256:$transcript,
     capabilities:{ifNoneMatchCreate:true,ifMatchUpdate:true}}' >"$PROOF_FILE.tmp"
 sync -f "$PROOF_FILE.tmp" && mv "$PROOF_FILE.tmp" "$PROOF_FILE"

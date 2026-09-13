@@ -22,6 +22,8 @@ spec:
               value: null
               valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_FORCE_PATH_STYLE } }
             - name: S3_ACCESS_KEY
+              value: null
               valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
             - name: S3_SECRET_KEY
+              value: null
               valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }

@@ -9,12 +9,13 @@ import { createRequire } from "node:module";
 import process from "node:process";
 
 const require = createRequire("/workspace/package.json");
-const { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } =
+const { DeleteObjectCommand, GetObjectCommand, GetObjectTaggingCommand, ListObjectsV2Command, PutObjectCommand, S3Client } =
   require("@aws-sdk/client-s3");
 const { NodeHttpHandler } = require("@smithy/node-http-handler");
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const manifestPath = required("CANONICAL_MANIFEST");
 const manifestDigest = required("CANONICAL_DIGEST");
+const officialManifestDigest = "52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425";
 const reportDir = required("REPORT_DIR");
 const proofPath = required("CONDITIONAL_WRITE_PROOF");
 const concurrency = Number(process.env.CONCURRENCY ?? "128");
@@ -37,6 +38,7 @@ if (objects.length !== 59017 || objects.reduce((sum, item) => sum + item.size, 0
     !Array.isArray(item.tags) || item.tags.some((tag) => typeof tag.Key !== "string" || typeof tag.Value !== "string"))) {
   throw new Error("canonical PROD corpus contract differs");
 }
+if (manifestDigest !== officialManifestDigest) throw new Error("canonical PROD manifest digest differs");
 const proof = JSON.parse(readFileSync(proofPath, "utf8"));
 const identity = createHash("sha256").update(destinationCredentials.accessKeyId).digest("hex");
 const expiresAt = Date.parse(proof.expiresAt);
@@ -82,10 +84,10 @@ const failed = (stage, error, item) => ({ status: "failed", reason: stage,
   key: item.key, size: item.size });
 const tagging = (tags) => tags.map(({ Key, Value }) =>
   `${encodeURIComponent(Key)}=${encodeURIComponent(Value)}`).join("&");
-const listDestination = async () => {
+const listBucket = async (clientInstance, coordinate) => {
   const listed = []; let continuationToken;
   do {
-    const page = await destinationClient.send(new ListObjectsV2Command({ Bucket: destination.bucket,
+    const page = await clientInstance.send(new ListObjectsV2Command({ Bucket: coordinate.bucket,
       MaxKeys: 1000, ContinuationToken: continuationToken }));
     for (const item of page.Contents ?? []) listed.push({ key: item.Key, size: item.Size, etag: item.ETag ?? "" });
     continuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
@@ -93,12 +95,37 @@ const listDestination = async () => {
   } while (continuationToken);
   return listed.sort((a, b) => Buffer.from(a.key).compare(Buffer.from(b.key)));
 };
-const targetDiff = (listed) => {
+const corpusDiff = (listed) => {
   const expected = new Map(objects.map((item) => [item.key, item.size]));
   const observed = new Map(listed.map((item) => [item.key, item.size]));
   return { missing: objects.filter((item) => !observed.has(item.key)).map(({ key, size }) => ({ key, size })),
     extra: listed.filter((item) => !expected.has(item.key)),
     sizeConflicts: listed.filter((item) => expected.has(item.key) && expected.get(item.key) !== item.size) };
+};
+const sameRecord = (left, right) => {
+  const entries = (value) => Object.entries(value ?? {}).sort(([a], [b]) =>
+    Buffer.from(a).compare(Buffer.from(b)));
+  return JSON.stringify(entries(left)) === JSON.stringify(entries(right));
+};
+const sameTags = (left, right) => {
+  const sorted = (value) => [...(value ?? [])].sort((a, b) =>
+    Buffer.from(`${a.Key}\0${a.Value}`).compare(Buffer.from(`${b.Key}\0${b.Value}`)));
+  return JSON.stringify(sorted(left)) === JSON.stringify(sorted(right));
+};
+const verifySourceOne = async (item) => {
+  const response = await sourceClient.send(new GetObjectCommand({ Bucket: source.bucket, Key: item.key }));
+  const digest = await digestBody(response);
+  const tagged = await sourceClient.send(new GetObjectTaggingCommand({ Bucket: source.bucket, Key: item.key }));
+  const exact = digest.bytes === item.size && Number(response.ContentLength) === item.size &&
+    digest.sha256 === item.sha256 && (response.ContentType ?? null) === item.contentType &&
+    (response.ContentEncoding ?? null) === item.contentEncoding &&
+    (response.CacheControl ?? null) === item.cacheControl &&
+    (response.ContentDisposition ?? null) === item.contentDisposition &&
+    sameRecord(response.Metadata, item.metadata) && sameTags(tagged.TagSet, item.tags) &&
+    (response.ETag ?? "") === (item.etag ?? "") &&
+    (response.VersionId ?? null) === (item.versionId ?? null);
+  if (!exact) throw new Error("canonical source final scan differs");
+  return item.size;
 };
 const progress = () => {
   const elapsedSeconds = Math.max(1, (Date.now() - started) / 1000);
@@ -149,17 +176,40 @@ results.sort((a, b) => Buffer.from(a.key).compare(Buffer.from(b.key)));
 atomicJson(`${reportDir}/copy-ledger.json`, results);
 const summary = JSON.parse(readFileSync(`${reportDir}/progress.json`, "utf8"));
 summary.schemaVersion = 1; summary.canonicalDigest = manifestDigest;
-let listed = await listDestination(); let diff = targetDiff(listed); summary.prunedExtra = 0;
+let listed = await listBucket(destinationClient, destination); let diff = corpusDiff(listed); summary.prunedExtra = 0;
 atomicJson(`${reportDir}/target-diff-before-prune.json`, diff);
 if (summary.processed === 59017 && summary.failed === 0 && diff.missing.length === 0 &&
   diff.sizeConflicts.length === 0 && diff.extra.length === 1 && allowSingleProofPrune) {
   const extra = diff.extra[0];
   if (!extra.etag) throw new Error("single proof extra lacks an ETag");
+  const keySha256 = createHash("sha256").update(extra.key).digest("hex");
+  const observed = await getDigest(destinationClient, destination.bucket, extra.key);
+  if (proof.object?.keySha256 !== keySha256 || proof.object?.bodySha256 !== observed.sha256 ||
+    proof.object?.size !== observed.bytes || observed.bytes !== extra.size) {
+    throw new Error("single extra does not match the conditional proof object");
+  }
   await destinationClient.send(new DeleteObjectCommand({ Bucket: destination.bucket, Key: extra.key, IfMatch: extra.etag }));
-  summary.prunedExtra = 1; listed = await listDestination(); diff = targetDiff(listed);
+  summary.prunedExtra = 1; listed = await listBucket(destinationClient, destination); diff = corpusDiff(listed);
 }
 atomicJson(`${reportDir}/target-diff.json`, diff);
-summary.exactParity = diff.missing.length === 0 && diff.extra.length === 0 && diff.sizeConflicts.length === 0;
+summary.targetExactParity = diff.missing.length === 0 && diff.extra.length === 0 && diff.sizeConflicts.length === 0;
+summary.sourceExact = false;
+if (summary.processed === 59017 && summary.failed === 0 && summary.targetExactParity) {
+  let sourceVerifiedBytes = 0;
+  for (let offset = 0; offset < objects.length; offset += concurrency) {
+    sourceVerifiedBytes += (await Promise.all(objects.slice(offset, offset + concurrency)
+      .map((item) => verifySourceOne(item)))).reduce((sum, size) => sum + size, 0);
+  }
+  const sourceDiff = corpusDiff(await listBucket(sourceClient, source));
+  atomicJson(`${reportDir}/source-final-diff.json`, sourceDiff);
+  summary.sourceVerifiedObjects = objects.length;
+  summary.sourceVerifiedBytes = sourceVerifiedBytes;
+  summary.sourceManifestDigest = manifestDigest;
+  summary.sourceObservedAt = new Date().toISOString();
+  summary.sourceExact = sourceVerifiedBytes === 12534514457 && sourceDiff.missing.length === 0 &&
+    sourceDiff.extra.length === 0 && sourceDiff.sizeConflicts.length === 0;
+}
+summary.exactParity = summary.targetExactParity && summary.sourceExact;
 summary.complete = summary.processed === 59017 && summary.failed === 0 && summary.exactParity;
 atomicJson(`${reportDir}/summary.json`, summary);
 if (!summary.complete) throw new Error("canonical copy did not reach exact parity");

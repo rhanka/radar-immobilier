@@ -7,9 +7,12 @@
       .name == "S3_FORCE_PATH_STYLE" or
       .name == "S3_ACCESS_KEY" or
       .name == "S3_SECRET_KEY"
-    ) |
-    {name, secret: .valueFrom.secretKeyRef.name, key: .valueFrom.secretKeyRef.key}
-  ] | sort_by(.name)) ==
+    )
+  ]) as $bindings |
+($bindings | length) == 6 and
+all($bindings[]; (has("value") | not) and (.valueFrom | type == "object")) and
+([$bindings[] | {name, secret: .valueFrom.secretKeyRef.name, key: .valueFrom.secretKeyRef.key}]
+  | sort_by(.name)) ==
 [
   {name:"S3_ACCESS_KEY",secret:"radar-docs-s3-credentials",key:"DOCS_S3_ACCESS_KEY"},
   {name:"S3_BUCKET",secret:"radar-docs-s3-credentials",key:"DOCS_S3_BUCKET"},
