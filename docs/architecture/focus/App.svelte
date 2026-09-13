@@ -9,7 +9,7 @@
   import Choices from './Choices.svelte';
   import mermaid from './.generated/mermaid.json';
   import data from './.generated/data.json';
-  const titles = ['Cible complète', 'Chemin Existant → T3', 'T1 · refresh autonome', 'T2 · objets OVH / sweep SCW', 'T3 · un b3-8', 'Gates & retour arrière', 'Preuves & limites', 'Annexe facturation'];
+  const titles = ['Avant', 'Transition effective', 'T1 · prochain gate', 'Après T2 · objets OVH', 'Après T3 · un b3-8', 'Gates & retour arrière', 'Preuves & limites', 'Annexe facturation'];
   let step = $state(0), note = $state(''), saved = $state(false), storageError = $state(false), source = $state(null);
   const key = `immo-focus-decision:${data.manifest.artifactInputHash}:draft`;
   const renderer = new marked.Renderer();
@@ -41,11 +41,11 @@
       <header class="masthead">
         <Flex justify="between" align="center" wrap gap={2}>
           <span class="eyebrow">h2a Focus · dossier de décision · Immo / Geo / Kubernetes</span>
-          <Badge tone="warning">CIBLE COMPLÈTE PROPOSÉE · NON DÉPLOYÉE</Badge>
+          <Badge tone="warning">AVANT · TRANSITION EFFECTIVE · APRÈS CIBLE</Badge>
         </Flex>
         <h1>Des nouveaux PV<br>aux signaux visibles.</h1>
-        <p class="lede">Voir d’abord la cible complète, puis parcourir Existant → T1 refresh → T2 objets OVH → T3 un nœud. Les coûts sont relégués à la dernière annexe.</p>
-        <div class="truth-strip"><span><strong>Existant</strong> préprod vérifiée; internals prod non vérifiés</span><span><strong>T1</strong> BLOCKED; re-review + benchmark avant provider/K8s</span><span><strong>T2</strong> MIGRATE+RETAIN; checkpoint en construction, aucune copie</span><span><strong>T3</strong> NO-GO aujourd’hui; cible un b3-8</span></div>
+        <p class="lede">Comparer Avant → Transition effective au 13 septembre → Après T2 → Après cible. Les gates séparent strictement les faits, le travail en cours et la projection.</p>
+        <div class="truth-strip"><span><strong>Avant</strong> API raw MinIO + LLM poste</span><span><strong>Effectif</strong> RAW OVH; T1 pré-LLM; DOCS inventaire</span><span><strong>Après T2</strong> DOCS/prod seulement après preuves</span><span><strong>Après T3</strong> un b3-8; pas commencé</span></div>
       </header>
       <Explorer graphs={data.graphs} />
       <nav class="steps" aria-label="Sections du dossier">
@@ -53,7 +53,7 @@
       </nav>
       <ProgressBar value={step + 1} max={8} label={`Section ${step + 1} sur 8`} size="sm" />
       <section class="decision-content">
-        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D5 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
+        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D6 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
         <!-- The French reading surface links to the complete repository dossier. -->
         {#if step === 7}<Choices manifest={data.manifest} remarks={note} />{:else}<div class="prose" onclick={link} role="presentation">{@html html(presentation[step])}</div>{/if}
         <Button variant="ghost" size="sm" onclick={() => source = 'decision-dossier'}>Dossier source complet · références et qualification des faits</Button>
