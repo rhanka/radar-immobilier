@@ -80,13 +80,8 @@ patches:
                       - name: SCRAPE_S3_SECRET_KEY
                         valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_SECRET_KEY } }
 
-  # CITATIONS/BUCKET ALIGNMENT (i-infra) — the projection CronJob's base 34
-  # hardcodes GRAPH_S3 on the SCW bucket `radar-immobilier-docs-pocs`. En PRÉPROD
-  # le graph store est désormais OVH `radar-immobilier-graph-preprod`
-  # (s3.bhs.io.cloud.ovh.net, région bhs, virtual-host) — migration MinIO→OVH du
-  # 2026-09-12 (144 187 objets mirrorés, src⊆dst vérifié). Les creds viennent du
-  # secret `radar-graph-s3-credentials`, déjà OVH. Le MinIO in-cluster reste en
-  # service jusqu'à sa décommission (#670-B), mais plus aucun CronJob ne le lit.
+  # PREPROD GRAPH ALIGNMENT — keep the projection on the dedicated OVH graph
+  # bucket and identity rather than inheriting the production coordinates.
   - target:
       kind: CronJob
       name: radar-refresh-projection
@@ -126,12 +121,8 @@ patches:
                         value: "false"
                         valueFrom: null
 
-  # SCRAPE bucket/path-style alignment (i-infra) — base 34 ship SCRAPE_S3_ENDPOINT/
-  # BUCKET en `valueFrom: secretKeyRef` (héritage SCW) + SCRAPE_S3_FORCE_PATH_STYLE
-  # =false (SCW → virtual-host → ENOTFOUND sur MinIO). En PREPROD le store est le
-  # store OVH `radar-immobilier-graph-preprod` (virtual-host, path-style false)
-  # (path-style), le MÊME que l'app + la projection. On aligne SCRAPE_S3 dessus
-  # pour que le scrape écrive raw/ dans le bucket préprod unique.
+  # PREPROD SCRAPE ALIGNMENT — use the same OVH store as the app and projection,
+  # with virtual-host addressing, for the preprod refresh pipeline.
   #
   # FIX du patch d'alignement (remplace l'ancien JSON6902 indices 4/5/9, devenu
   # STALE depuis #629 qui a inséré POSTGRES_USER/PASSWORD/DB en 2-4 et décalé

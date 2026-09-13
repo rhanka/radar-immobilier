@@ -7,7 +7,7 @@ name: Build & push images
 # "CI does this on the live path").
 #
 # Deploy (CD) is wired below in the `deploy` job, but ONLY on pushes to `main`
-# (never on PRs / feature branches). It rolls the live Scaleway Kapsule cluster
+# (never on PRs / feature branches). It rolls the live OVH MKS cluster
 # with `kubectl set image` against the same short-sha tag the build just pushed.
 #
 # Auth uses the `KUBE_CONFIG_DATA` gh secret (same pattern as rhanka/surch
@@ -42,8 +42,8 @@ name: Build & push images
 # just-pinned sha back to `:latest`; applying it BEFORE means the following
 # set-image step is always the last word on which image tag actually runs.
 #
-# PRE-FLIGHT / TARGET CLUSTER (2026-07-28): the live tenant moved from Scaleway
-# Kapsule to OVH MKS (BHS5). The Scaleway node pool that hosted it HAS BEEN
+# PRE-FLIGHT / TARGET CLUSTER (2026-07-28): the live tenant moved to OVH MKS
+# (BHS5). The previous provider node pool that hosted it HAS BEEN
 # DELETED, so there is no rollback target left there. The `deploy` job now runs
 # a BLOCKING pre-flight before the first mutating kubectl: it extracts the
 # apiserver HOST from the kubeconfig (`kubectl config view` without --raw, which
@@ -807,7 +807,7 @@ jobs:
             ui="${IMAGE_PREFIX}/radar-ui:${SHA}"
           # Parité immo-mcp (préprod) : le connecteur MCP embarque la même image
           # radar-api ; sans ce set-image il restait sur son ancien registre/tag
-          # (constat k8s 2026-09-11 : rg.fr-par.scw.cloud/…:a132d4a pendant que
+          # (constat k8s 2026-09-11 : ancien tag privé pendant que
           # api/ui étaient sur ghcr.io/…:1a1d218). Guardé : absent ⇒ skip. Le
           # Deployment est patché seulement (pas d'apply de 40-immo-mcp ici, cf.
           # NOTE ci-dessus : namespace hardcodé prod + Role préprod sans CM/SVC).
