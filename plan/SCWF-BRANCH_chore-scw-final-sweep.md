@@ -48,6 +48,8 @@
 - [x] Lot 3g1: record the first-slice checkpoint and explicit remaining-client list.
 - [ ] Lot 3g2: run final offline gates and complete independent post-build review.
   - [x] Builder passes the combined hermetic gate and offline K8s validation.
+  - [x] Preserve the failed first Fable launch as explicit non-review evidence.
+  - [x] Preserve the completed Fable review at `a8e97286`; its required write-path remediations are implemented through `cb5e1f4c`.
   - [ ] Conductor completes the independent post-build review.
 - [x] Lot 3g2a: dispatch the owner-authorized independent Fable review of first-slice commit `332af1e8` and second-slice design `671380f4`; no consensus or acceptance claim until its readable findings are reconciled.
 - [x] Lot 3h1: freeze the implementation-ready RAW/DOCS/GRAPH client matrix, migration-tool contract, and second-slice paths.
@@ -83,6 +85,7 @@
     - [x] Invoke the combined offline object-storage gate once from CI quality.
     - [x] Document the bounded operator contract and explicit non-acceptance limits.
 - [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
+  - [x] Record the bounded live MinIO inventory and classify `radar-immobilier-docs-preprod` as migrate-and-retain, without claiming completeness or parity.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
 - [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
