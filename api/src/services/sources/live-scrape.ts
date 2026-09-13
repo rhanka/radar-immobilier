@@ -24,6 +24,7 @@ import {
   type PdfToText,
   type PvCityConfig,
   type PvFetchLike,
+  type RawDocumentRef,
 } from "@radar/sources";
 
 import type { Database } from "../../db/client.js";
@@ -73,6 +74,10 @@ export interface RunLiveScrapeOptions {
   readonly fetch?: PvFetchLike;
   /** Per-city cap on the number of docs collected (RECUEIL `limit`). */
   readonly limit?: number;
+  /** Optional representation filter applied before the collection limit. */
+  readonly acceptRef?: (ref: RawDocumentRef) => boolean;
+  /** Optional pacing hook invoked immediately before each selected fetch. */
+  readonly beforeFetch?: (ref: RawDocumentRef) => Promise<void>;
   /** Look-back window in days passed to the adapter (defaults to 6 months). */
   readonly windowDays?: number;
   /** Clock injection for deterministic tests (run id + window). */
@@ -187,7 +192,8 @@ export async function runLiveScrape(
   citySlugs: readonly string[] | undefined,
   options: RunLiveScrapeOptions,
 ): Promise<LiveScrapeCityRecap[]> {
-  const { store, fetch, limit, windowDays, now, signal, exploit, reexploit, db } =
+  const { store, fetch, limit, acceptRef, beforeFetch, windowDays, now, signal,
+    exploit, reexploit, db } =
     options;
   const { configs, unknown } = resolveConfigs(citySlugs);
 
@@ -275,6 +281,8 @@ export async function runLiveScrape(
 
     const outcome = await runRecueilWithManifest(config.sourceId, adapter, store, {
       ...(limit !== undefined ? { limit } : {}),
+      ...(acceptRef !== undefined ? { acceptRef } : {}),
+      ...(beforeFetch !== undefined ? { beforeFetch } : {}),
       ...(signal !== undefined ? { signal } : {}),
     });
 

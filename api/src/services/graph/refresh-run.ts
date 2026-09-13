@@ -52,6 +52,11 @@ export async function acquireRefreshPdfManifest(
   const recaps = await acquire([options.citySlug], {
     store: options.store,
     exploit: false,
+    acceptRef: (ref) => ref.contentType?.toLowerCase().startsWith("application/pdf") === true
+      || /\.pdf(?:[?#]|$)/i.test(ref.url),
+    beforeFetch: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 2_000));
+    },
     ...(options.signal !== undefined ? { signal: options.signal } : {}),
     ...(options.limit !== undefined ? { limit: options.limit } : {}),
   });
