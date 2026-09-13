@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-09-13T16:45:00.155Z",
+  "t1Commit": "f9b311da536bda2e1442d154a05599c35b482518",
+  "profileModuleSha256": "96ecf0129b5df4172027aaad2d2f801cb434c2be2f3adb3c7115b7884f91ac85",
+  "corpusModuleSha256": "4651e67417363e738963cecff4f6d0817d60ab70989a2c392814becc4e4830bb",
+  "graphifyVersion": "0.18.0",
+  "meshVersion": "0.19.0",
+  "maxOutputTokens": 16384,
+  "systemPrompt": "You are Graphify's JSON extraction backend. Return only valid JSON matching the requested schema. Do not include Markdown prose outside the JSON object.",
+  "systemPromptSha256": "bdc1327904ac4c5a36b91dfdbe887a6f1a900b8fe5f1427249e54d83c250d461",
+  "documents": [
+    {
+      "id": "waterloo-2026-08-18",
+      "chunkId": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.1",
+      "pages": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
+      "schemaSha256": "d8f741bba3693107f273f2736533e2a73ba446699bb997063450bdceba562c22",
+      "promptSha256": "559978305cea2ba697473f101196623d262b0b08b092e4d3287260a0f85a999a",
+      "schemaBytes": 13192,
+      "promptBytes": 65227
+    },
+    {
+      "id": "wickham-2026-09-15",
+      "chunkId": "7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0.1",
+      "pages": [1, 2],
+      "schemaSha256": "f5b84ccd029cb09b8b8adacf0df780b03bc1bb7db90346648fcf9c80c9a3e50a",
+      "promptSha256": "503a2218273a2782fd96261d6c4f3d7f1fb7d017fe70b323722148d22e9bfbad",
+      "schemaBytes": 13108,
+      "promptBytes": 9311
+    },
+    {
+      "id": "saint-barthelemy-2026-09-08",
+      "chunkId": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.1",
+      "pages": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      "schemaSha256": "65887b2fc6e47c21ffa36ed00ea013e27aa0381b8d8ab5b779f75c943b0d7473",
+      "promptSha256": "07b64451db694d420e19e4f2412ea661ba314f26642b41466a4d7131306a94ba",
+      "schemaBytes": 13285,
+      "promptBytes": 46893
+    },
+    {
+      "id": "saint-etienne-de-bolton-2026-08-04",
+      "chunkId": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.1",
+      "pages": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+      "schemaSha256": "c1a27ca1b6539b96cbd099af9266110dde1e3e9c54657ea059f80afed44662b5",
+      "promptSha256": "8ff4c5d5c49ab9893e2b56a2622ba9a82670002e82aad87149a724d08a68d4ee",
+      "schemaBytes": 13165,
+      "promptBytes": 69532
+    },
+    {
+      "id": "waterloo-2026-08-31-negative",
+      "chunkId": "132187c152d73a08da3c2d48eece98d4e415379c899bdc4c8dfb261d0d2b372e.1",
+      "pages": [1, 2, 3],
+      "schemaSha256": "9b0824bf17a738da9ab7f06226b591e05bf9e3fa4d9edf5d5bf61b88451a8e34",
+      "promptSha256": "646fd497a6686a2614945c5a1ec983508a798063f6ce64a164d66edd4e033300",
+      "schemaBytes": 13156,
+      "promptBytes": 12457
+    }
+  ]
+}
