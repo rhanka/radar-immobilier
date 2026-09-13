@@ -1,7 +1,8 @@
-# Local Focus architecture dossier — D5
+# Local Focus architecture dossier — D6
 
-The entry point is [decision-dossier.md](decision-dossier.md), with effective-state
-evidence in [architecture.md](../architecture.md), proposed T1/T2/T3 states in
+The entry point is [decision-dossier.md](decision-dossier.md), with the preserved
+before state in [architecture.md](../architecture.md), the effective transition
+and after T2/T3 states in
 [transitions-target.md](transitions-target.md) and [storage audit](storage-audit.md).
 The owner-facing page uses the September 7 Sentropic decision-kit format: DS
 AppShell/ThemeProvider, Focus orthogonal routing and **native SvelteFlow**, not a
@@ -11,22 +12,23 @@ reference presentation with icons/repo labels and preserves its exact port contr
 From the documentation worktree:
 
 ```sh
-make -f docs/architecture/focus/Makefile test build ENV=test-architecture
+make -f docs/architecture/focus/Makefile tokens test build ENV=test-architecture
 make -f docs/architecture/Makefile serve ENV=docs-architecture
 ```
 
 Open **http://127.0.0.1:5188/** or the generated **decision-focus.html** directly.
 The HTML embeds JS, CSS, French presentation and complete source/review documents;
 it works offline and does not require a Claude session, server or external CDN.
-The same build emits the dated monthly companion HTML and D5 evidence manifest under
-`docs/reports/architecture-monthly/`; the browser gate opens that copy offline too.
+The same build emits the dated interactive architecture HTML, report HTML/PDF,
+token audit and D6 evidence manifest under `docs/reports/architecture-monthly/`.
 
 ## Navigation and authority
 
-- Eight architecture-first sections; eight graph views: four existing details,
-  three complete platform transitions and one causal T1 detail. The default is T3.
-- A prominent selector follows **Existant → T1 → T2 → T3**. Every proposed view
-  says `PROPOSED / NOT DEPLOYED`; existing evidence keeps its as-of date.
+- Eight architecture-first sections; eight graph views: four before details,
+  one effective transition, two after targets and one causal T1 detail. The
+  default is the effective transition.
+- A prominent selector follows **Avant → Transition effective → Après T2 → Après
+  cible**. Effective facts and non-deployed targets have distinct badges.
 - All components, edges and nested boxes are shown **simultaneously**. Every
   Mermaid subgraph maps to a native SvelteFlow `parentId` box with its original ID.
   Click a box or use its selector to zoom; no content is collapsed or replaced.
@@ -42,15 +44,14 @@ The same build emits the dated monthly companion HTML and D5 evidence manifest u
   unresolved ownership. These are generic symbols, not cloud-vendor logos.
 - Every node/edge/subgraph is covered by tests; dashed and bidirectional semantics
   are preserved. Full-diagram fitting uses explicit absolute nested bounds.
-- Section 8 uses DS Tiles for fixed billing instructions, unresolved evidence,
+- Section 8 uses DS Tiles for audited period/billing facts, unresolved evidence,
   comment, local persistence, **copy JSON** and download. There are no allocation
-  radios. The JSON preserves D4 `option:null` as no vote, the exact owner-response
-  hashes/time, distinct 15:38/15:39 evidence cutoffs, unknown unified cutoff,
-  period start/hours/amount and the prior-invoice tariff rule.
+  radios. The JSON preserves `option:null`, the effective transition, exact
+  35-day boundary, one-node projection and measured LLM allocation.
   Clipboard denial is explicit; the JSON remains keyboard-selectable/downloadable.
 - Sources open in an accessible dialog; external evidence links require a click.
-- The D5 dossier remains **INCOMPLETE** for runtime acceptance, production
-  inventory/recovery criteria and monetary evidence. Rendering is not deployment.
+- The D6 dossier remains **INCOMPLETE** for T1 acceptance, DOCS copy/parity/rebind,
+  completed production migration and T3. Rendering is not deployment.
 
 ## Build and verification
 
@@ -67,6 +68,7 @@ target). The browser renderer blocks HTTP(S); no remote rendering service is use
 ```sh
 make -f docs/architecture/focus/Makefile browser ENV=test-architecture
 make -f docs/architecture/focus/Makefile clipboard ENV=test-architecture
+make -f docs/architecture/focus/Makefile report-check ENV=test-architecture
 ```
 
 `browser` verifies eight complete diagrams at every root/subflow viewport, visible
