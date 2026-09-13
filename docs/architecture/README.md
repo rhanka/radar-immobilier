@@ -1,9 +1,9 @@
-# Local Focus architecture dossier — D6
+# Local Focus architecture dossier — D7
 
 The entry point is [decision-dossier.md](decision-dossier.md), with the preserved
-before state in [architecture.md](../architecture.md), the effective transition
-and after T2/T3 states in
-[transitions-target.md](transitions-target.md) and [storage audit](storage-audit.md).
+BEFORE state in [architecture.md](../architecture.md), the complete AFTER target
+in [transitions-target.md](transitions-target.md) and supporting transition facts
+in the [storage audit](storage-audit.md).
 The owner-facing page uses the September 7 Sentropic decision-kit format: DS
 AppShell/ThemeProvider, Focus orthogonal routing and **native SvelteFlow**, not a
 Mermaid SVG wrapped in an HTML card. The local service-node renderer extends the
@@ -16,26 +16,25 @@ make -f docs/architecture/focus/Makefile tokens test build ENV=test-architecture
 make -f docs/architecture/Makefile serve ENV=docs-architecture
 ```
 
-Open **http://127.0.0.1:5188/** or the generated **decision-focus.html** directly.
+Open **http://127.0.0.1:5188/**, generated **decision-focus.html**, or the committed
+**architecture-before-after-2026-09-13.html** monthly copy directly.
 The HTML embeds JS, CSS, French presentation and complete source/review documents;
 it works offline and does not require a Claude session, server or external CDN.
 The same build emits the dated interactive architecture HTML, report HTML/PDF,
-token audit and D6 evidence manifest under `docs/reports/architecture-monthly/`.
+token audit and D7 evidence manifest under `docs/reports/architecture-monthly/`.
 
 ## Navigation and authority
 
-- Eight architecture-first sections; eight graph views: four before details,
-  one effective transition, two after targets and one causal T1 detail. The
-  default is the effective transition.
-- A prominent selector follows **Avant → Transition effective → Après T2 → Après
-  cible**. Effective facts and non-deployed targets have distinct badges.
+- Eight architecture-first sections and exactly two primary graph views:
+  **Architecture AVANT → Architecture APRÈS**. Transition facts remain prose and
+  gates, not a third graph. The default is BEFORE.
 - All components, edges and nested boxes are shown **simultaneously**. Every
   Mermaid subgraph maps to a native SvelteFlow `parentId` box with its original ID.
   Click a box or use its selector to zoom; no content is collapsed or replaced.
 - Select `PP-DB`, `PP-GRAPH`, etc. to zoom to it and cross-link to the same identity
   in another diagram. External relationships retain original source/target IDs.
 - Mermaid source is **rendered visually**, both beneath the SvelteFlow and in
-  embedded source documents; exact code remains available. Eight strict, sanitized
+  embedded source documents; exact code remains available. Two strict, sanitized
   SVGs are generated locally and embedded offline, with exact node/group/edge text
   checks. Mermaid's global `htmlLabels:false` retains SVG text under sanitization.
 - Every component and nested box has a blue service pictogram, a service name and
@@ -44,13 +43,13 @@ token audit and D6 evidence manifest under `docs/reports/architecture-monthly/`.
   unresolved ownership. These are generic symbols, not cloud-vendor logos.
 - Every node/edge/subgraph is covered by tests; dashed and bidirectional semantics
   are preserved. Full-diagram fitting uses explicit absolute nested bounds.
-- Section 8 uses DS Tiles for audited period/billing facts, unresolved evidence,
-  comment, local persistence, **copy JSON** and download. There are no allocation
-  radios. The JSON preserves `option:null`, the effective transition, exact
-  35-day boundary, one-node projection and measured LLM allocation.
+- Section 6 asks three explicit questions before nine selectable Focus options,
+  with one comment per question, local persistence, actual **copy JSON** and
+  download. The LLM ratification question is non-critical and remains open unless
+  selected; fixed architecture/storage decisions are exported unchanged.
   Clipboard denial is explicit; the JSON remains keyboard-selectable/downloadable.
 - Sources open in an accessible dialog; external evidence links require a click.
-- The D6 dossier remains **INCOMPLETE** for T1 acceptance, DOCS copy/parity/rebind,
+- The D7 dossier remains **INCOMPLETE** for T1 acceptance, DOCS copy/parity/rebind,
   completed production migration and T3. Rendering is not deployment.
 
 ## Build and verification
@@ -71,10 +70,10 @@ make -f docs/architecture/focus/Makefile clipboard ENV=test-architecture
 make -f docs/architecture/focus/Makefile report-check ENV=test-architecture
 ```
 
-`browser` verifies eight complete diagrams at every root/subflow viewport, visible
+`browser` verifies both complete diagrams at their root viewport, visible
 nested bounds, every icon/repo label, card/header overflow, exact SvelteFlow/Mermaid
-texts, target-path navigation, shared-DB navigation, full-screen/Escape, fixed
-instructions, comments, persistence, source dialogs, clipboard failure, responsive
+texts, before/after navigation, explicit questions/options, fixed decisions,
+comments, actual JSON copy, responsive
 and offline use.
 `clipboard` checks actual clipboard read-back in a fresh browser context, then
 restores its previous contents and disposes only that test context.
