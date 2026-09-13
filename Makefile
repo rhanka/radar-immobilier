@@ -441,7 +441,7 @@ object-storage-docs-preprod-validate: ## Render support and validate the DOCS bu
 	@jq -n -f deploy/ci/docs-prod-source-secret.jq >/dev/null
 	@bash -n deploy/ci/prove-docs-conditional-writes.sh \
 	  deploy/ci/build-docs-expected-manifest.sh deploy/ci/copy-canonical-docs.sh \
-	  deploy/ci/copy-canonical-docs.hermetic.test.sh
+	  deploy/ci/copy-canonical-docs.hermetic.test.sh deploy/ci/copy-canonical-docs-progress.sh
 	@bash deploy/ci/copy-canonical-docs.hermetic.test.sh
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
@@ -606,6 +606,20 @@ object-storage-docs-preprod-copy-canonical: ## Import the PROD manifest and copy
 	    'umask 077; target=/evidence/prod-canonical-manifest.jsonl; if [ -e "$$target" ]; then [ "$$(sha256sum "$$target" | awk '\''{print $$1}'\'')" = "$$1" ]; exit; fi; cat >"$$target.tmp"; [ "$$(sha256sum "$$target.tmp" | awk '\''{print $$1}'\'')" = "$$1" ]; sync -f "$$target.tmp"; mv "$$target.tmp" "$$target"' \
 	    -- "$$digest" <"$$manifest"; \
 	  echo "[object-storage-docs] canonical copy started as $$job_ref"
+
+.PHONY: object-storage-docs-preprod-copy-progress
+object-storage-docs-preprod-copy-progress: ## Report canonical copy progress without object keys
+	@if [ -z "$$KUBECONFIG" ] || [[ "$(OBJECT_STORAGE_DOCS_CANONICAL_JOB)" != radar-object-storage-copy-canonical-docs-* ]]; then \
+	  echo '[object-storage-docs] require KUBECONFIG and exact canonical copy Job'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; job="$(OBJECT_STORAGE_DOCS_CANONICAL_JOB)"; \
+	  uid="$$( $(KUBECTL) -n "$$namespace" get "job/$$job" -o jsonpath='{.metadata.uid}' )"; \
+	  started="$$( $(KUBECTL) -n "$$namespace" get "job/$$job" -o jsonpath='{.metadata.creationTimestamp}' )"; \
+	  elapsed="$$(( $$(date +%s) - $$(date -d "$$started" +%s) ))"; \
+	  pod="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  [ -n "$$pod" ] || { echo '[object-storage-docs] canonical copy Pod is absent'; exit 1; }; \
+	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- env REPORT_DIR="/evidence/reports/$$uid" \
+	    ELAPSED_SECONDS="$$elapsed" /bin/bash /tool/copy-canonical-docs-progress.sh
 
 .PHONY: object-storage-raw-preprod-rebind
 object-storage-raw-preprod-rebind: ## Roll radar-api RAW bindings to OVH without changing the shared ConfigMap
