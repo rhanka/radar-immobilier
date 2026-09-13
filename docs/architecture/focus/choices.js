@@ -1,39 +1,39 @@
-export const options = [
-  { key: 'DIRECT', title: 'Dépense fournisseur attribuable',
-    choice: 'Affecter seulement les lignes API ou abonnements reliés sans ambiguïté à Immo/Geo ; garder le reste séparé.',
-    strengths: 'Reste au plus près d’une dépense fournisseur réellement observée.',
-    tradeoffs: 'Les forfaits par siège ne donnent pas tous une ligne par produit ou dépôt.',
-    costRisk: 'Montant inconnu avant rapprochement des factures, comptes, appels et projets.',
-    reversibility: 'Règle simple à rejouer ; une dépense non attribuée reste visible, pas forcée.',
-    winsIf: 'Les exports fournisseur permettent une attribution complète et vérifiable.' },
-  { key: 'USAGE', title: 'Usage audité pondéré',
-    choice: 'Répartir la dépense payée selon les appels dédupliqués de la fenêtre, pondérés par provider et type de tokens.',
-    strengths: 'Relie l’allocation à l’usage du produit dans la période exacte.',
-    tradeoffs: 'Exige attribution des sessions et ventilation input, cache write/read et output sans double compte.',
-    costRisk: 'Montant inconnu tant que la fenêtre, la déduplication, le cache et les tarifs ne sont pas réconciliés.',
-    reversibility: 'Recalculable à partir d’un journal gelé et d’une formule versionnée.',
-    winsIf: 'L’audit exact des appels est complet et les coûts partagés ont une règle explicite.' },
-  { key: 'CAPACITY', title: 'Capacité historique de pointe',
-    choice: 'Conserver la normalisation historique par pic glissant de sept jours projeté sur trente jours.',
-    strengths: 'Préserve la continuité avec le calcul historique déjà documenté.',
-    tradeoffs: 'Mesure une allocation de capacité, pas une facture provider ; le pic peut être hors de la fenêtre produit.',
-    costRisk: '214,743159 CAD est le résultat LLM historique Immo+Geo, pas un montant final audité.',
-    reversibility: 'La formule est rejouable ; son résultat peut être remplacé après audit sans changer les faits d’usage.',
-    winsIf: 'La continuité de capacité est retenue explicitement après l’audit des tokens et dépenses.' },
-];
+export const ownerCorrection = {
+  capturedAt: '2026-09-13T15:10:18.423Z', sourceRevision: 'D4',
+  dossierHash: 'b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451',
+  artifactInputHash: '92b87297fbc8ed0f2670fa4fd07e1dde6d061d04533d3695275c1f386b3b032e',
+  option: null, interpretation: 'No allocation method was selected. D5 records fixed instructions, not a method ratification.',
+  comment: 'LLM costs last; use the same unit tariffs as the previous month actual invoice. Start at the real preceding invoice/report boundary once verified; end September 13 inclusive. September 13 transitions are in-period.',
+};
 
-export function responsePack(manifest, option, note, remarks, capturedAt) {
-  if (option !== null && !options.some(o => o.key === option)) throw Error('Unknown decision option');
-  return { schema: 'immo-focus-decision-response/v2', dossier: 'immo-transitions-and-monthly-allocation', revision: 'D4',
+export const fixedInstructions = {
+  architectureOrder: ['existing', 'T1-refresh-graphify-0.18.0', 'T2-ovh-object-cutover-final-scw-sweep', 'T3-one-existing-b3-8'],
+  rolloutOrder: ['preproduction', 'production'], pvPipelineOwner: 'Immo',
+  retainScwTemUntilValidatedReplacement: true,
+  reporting: {
+    timezone: 'America/Toronto', start: null,
+    startDefinition: 'real preceding invoice/report boundary', startVerified: false,
+    requestedEndExclusive: '2026-09-14T00:00:00-04:00',
+    dataCaptureCutoff: null, dataCaptureCutoffStatus: 'must be recorded when evidence collection is frozen',
+    september13Transitions: 'inside requested period; classify observed versus planned',
+  },
+  billing: {
+    position: 'last-annex', allocationMethodChoiceRequired: false,
+    node: { quantity: 1, sku: 'b3-8', region: 'BHS5', hourlyRateCad: 0.082, periodHours: null, projectedAmountCad: null },
+    historicalIllustrationOnly: { hours: 720, projectedAmountCad: 59.04, currentPeriodAmount: false },
+    llm: { tariffRule: 'same unit tariffs as previous month actual invoice', previousInvoiceIdentity: null, previousInvoiceVerified: false, tokenCountStatus: 'not parsed in D5 docs build' },
+  },
+};
+
+export function responsePack(manifest, note, remarks, capturedAt) {
+  return { schema: 'immo-focus-owner-instructions/v3', dossier: 'immo-target-transitions-and-reporting', revision: 'D5',
     dossierHash: manifest.dossierHash, artifactInputHash: manifest.artifactInputHash, capturedAt,
-    buildOnly: true, status: 'draft-not-ratified', monetaryProposalAudit: 'incomplete',
-    decision: { key: 'llm-allocation-method', option, decisionStatus: 'owner-draft-not-ratified', note },
-    options, remarks, fixedDecisions: {
-      pvPipelineOwner: 'Immo', rolloutOrder: ['preprod', 'production'],
-      executionOrder: ['T1-refresh-graphify-0.18.0', 'T2-minio-final-scw-sweep', 'T3-one-b3-8'],
-      retainScwTemUntilValidatedReplacement: true,
-      infrastructureBilling: { basis: 'one-b3-8-node-projection', region: 'BHS5', hourlyRateCad: 0.082,
-        hours: 720, projectedNodeCad: 59.04, extraNodePassThrough: false, nonNodeCosts: 'audit-incomplete' },
-      reportWindow: '2026-08-12T00:00:00-04:00/2026-09-10T23:59:59-04:00',
-      september13Transitions: 'post-period', monetaryProposalAudit: 'incomplete' } };
+    buildOnly: true, status: 'owner-correction-recorded; period-and-billing-evidence-incomplete',
+    authority: 'instructions captured; no deployment, invoice or Track decision emitted',
+    ownerCorrection, fixedInstructions, unresolvedEvidence: [
+      'preceding actual invoice/report boundary and corresponding period start',
+      'September 13 data capture cutoff', 'previous month actual invoice identity and unit tariffs',
+      'current-period node hours and projected amount', 'current-period token counts using the verified prior tariffs',
+      'production private bindings and T1/T2/T3 acceptance evidence',
+    ], note, remarks };
 }
