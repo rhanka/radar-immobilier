@@ -43,6 +43,7 @@ K8S_MANIFEST_DIR     ?= deploy/k8s
 K8S_NAMESPACE        ?= radar-immobilier
 OBJECT_STORAGE_INVENTORY_DIR := deploy/k8s/object-storage-inventory-preprod
 OBJECT_STORAGE_INVENTORY_NAMESPACE := radar-immobilier-preprod
+OBJECT_STORAGE_RAW_REBIND_PATCH := $(OBJECT_STORAGE_INVENTORY_DIR)/raw-api-rebind-patch.yaml
 # Set to 1 only when a real KUBECONFIG is present to additionally run a
 # server-side dry-run. Offline render works with no cluster.
 K8S_VALIDATE_WITH_CLUSTER ?= 0
@@ -424,36 +425,68 @@ object-storage-inventory-preprod-start: ## Apply support and create one RAW read
 	  $(KUBECTL) apply -f "$$render" >/dev/null; \
 	  $(KUBECTL) create -f $(OBJECT_STORAGE_INVENTORY_DIR)/job.yaml -o name
 
+.PHONY: object-storage-raw-preprod-rebind
+object-storage-raw-preprod-rebind: ## Roll radar-api RAW bindings to OVH without changing the shared ConfigMap
+	@if [ "$(OBJECT_STORAGE_REBIND_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ]; then \
+	  echo "[object-storage-rebind] refused: require KUBECONFIG, OBJECT_STORAGE_REBIND_CONFIRM=1, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  $(KUBECTL) -n "$$namespace" patch deployment/radar-api --type=strategic \
+	    --patch-file $(OBJECT_STORAGE_RAW_REBIND_PATCH) >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" rollout status deployment/radar-api --timeout=180s; \
+	  settled=false; \
+	  for ((attempt=1; attempt<=60; attempt++)); do \
+	    pods="$$( $(KUBECTL) -n "$$namespace" get pods \
+	      -l 'app.kubernetes.io/name=radar-immobilier,app.kubernetes.io/component=api' -o json )"; \
+	    if jq -e '.items | length == 1 and all(.[]; .metadata.deletionTimestamp == null and \
+	      any(.status.conditions[]?; .type == "Ready" and .status == "True"))' \
+	      <<<"$$pods" >/dev/null; then settled=true; break; fi; \
+	    sleep 2; \
+	  done; \
+	  $$settled || { echo "[object-storage-rebind] old API Pod did not terminate"; exit 1; }; \
+	  echo "[object-storage-rebind] radar-api rolled to dedicated RAW references"
+
 .PHONY: object-storage-raw-preprod-fence
-object-storage-raw-preprod-fence: ## Scale the proven RAW writer to zero and record fence evidence
+object-storage-raw-preprod-fence: ## Record that the rolled API leaves no MinIO RAW writer
 	@if [ "$(OBJECT_STORAGE_FENCE_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
 	  [ -z "$$KUBECONFIG" ]; then \
 	  echo "[object-storage-fence] refused: require KUBECONFIG, OBJECT_STORAGE_FENCE_CONFIRM=1, ENV=preprod"; \
 	  exit 1; \
 	fi
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
-	  $(KUBECTL) -n "$$namespace" scale deployment/radar-api --replicas=0 >/dev/null; \
-	  fenced=false; \
-	  for ((attempt=1; attempt<=60; attempt++)); do \
-	    replicas="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
-	      -o jsonpath='{.status.replicas}' )"; \
-	    ready="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
-	      -o jsonpath='{.status.readyReplicas}' )"; \
-	    if [ "$${replicas:-0}" = 0 ] && [ "$${ready:-0}" = 0 ]; then fenced=true; break; fi; \
-	    sleep 2; \
-	  done; \
-	  $$fenced || { echo "[object-storage-fence] radar-api did not reach zero"; exit 1; }; \
+	  deployment="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json )"; \
+	  jq -e '(.spec.template.spec.containers[] | select(.name == "api") | \
+	    [.env[] | select(.name == "S3_ENDPOINT" or .name == "S3_REGION" or \
+	      .name == "S3_BUCKET" or .name == "S3_FORCE_PATH_STYLE" or \
+	      .name == "S3_ACCESS_KEY" or .name == "S3_SECRET_KEY") | \
+	      {name,secret:.valueFrom.secretKeyRef.name,key:.valueFrom.secretKeyRef.key}] | \
+	    sort_by(.name)) == \
+	    [{name:"S3_ACCESS_KEY",secret:"radar-raw-s3-credentials",key:"RAW_S3_ACCESS_KEY"}, \
+	     {name:"S3_BUCKET",secret:"radar-raw-s3-credentials",key:"RAW_S3_BUCKET"}, \
+	     {name:"S3_ENDPOINT",secret:"radar-raw-s3-credentials",key:"RAW_S3_ENDPOINT"}, \
+	     {name:"S3_FORCE_PATH_STYLE",secret:"radar-raw-s3-credentials",key:"RAW_S3_FORCE_PATH_STYLE"}, \
+	     {name:"S3_REGION",secret:"radar-raw-s3-credentials",key:"RAW_S3_REGION"}, \
+	     {name:"S3_SECRET_KEY",secret:"radar-raw-s3-credentials",key:"RAW_S3_SECRET_KEY"}]' \
+	    <<<"$$deployment" >/dev/null || { echo "[object-storage-fence] RAW rebind is unproved"; exit 1; }; \
+	  pods="$$( $(KUBECTL) -n "$$namespace" get pods \
+	    -l 'app.kubernetes.io/name=radar-immobilier,app.kubernetes.io/component=api' -o json )"; \
+	  jq -e '.items | length == 1 and all(.[]; .metadata.deletionTimestamp == null and \
+	    any(.status.conditions[]?; .type == "Ready" and .status == "True"))' \
+	    <<<"$$pods" >/dev/null || { echo "[object-storage-fence] API rollout is unsettled"; exit 1; }; \
+	  pod_uid="$$(jq -r '.items[0].metadata.uid' <<<"$$pods")"; \
 	  generation="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
 	    -o jsonpath='{.metadata.generation}' )"; \
 	  observed="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
 	    -o jsonpath='{.status.observedGeneration}' )"; \
 	  stamp="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
-	  payload="$$(printf 'schemaVersion=1\nenvironment=preprod\nplane=RAW\nwriter=deployment/radar-api\nreplicas=0\nreadyReplicas=0\ngeneration=%s\nobservedGeneration=%s\nobservedAt=%s\n' \
-	    "$$generation" "$$observed" "$$stamp")"; \
+	  payload="$$(printf 'schemaVersion=1\nenvironment=preprod\nplane=RAW\nsourceWriter=deployment/radar-api\nsourceBindingSecret=radar-raw-s3-credentials\nsourcePodUid=%s\ngeneration=%s\nobservedGeneration=%s\nminioRawWriters=0\nobservedAt=%s\n' \
+	    "$$pod_uid" "$$generation" "$$observed" "$$stamp")"; \
 	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-inventory-fence \
 	    --from-literal="fence.txt=$$payload" --dry-run=client -o yaml | \
 	    $(KUBECTL) apply -f - >/dev/null; \
-	  echo "[object-storage-fence] radar-api is zero; fence evidence recorded"
+	  echo "[object-storage-fence] rolled API leaves zero MinIO RAW writers; evidence recorded"
 
 .PHONY: object-storage-inventory-preprod-status
 object-storage-inventory-preprod-status: ## Read one inventory Job and Pod status (OBJECT_STORAGE_INVENTORY_JOB=...)
