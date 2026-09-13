@@ -3,8 +3,9 @@
 The entry point is [decision-dossier.md](decision-dossier.md), with effective-state
 evidence in [architecture.md](../architecture.md) and [storage-audit.md](storage-audit.md).
 The owner-facing page uses the September 7 Sentropic decision-kit format: DS
-AppShell/ThemeProvider, the **unchanged Focus ArchitectureNode**, Focus orthogonal
-routing and **native SvelteFlow**, not a Mermaid SVG wrapped in an HTML card.
+AppShell/ThemeProvider, Focus orthogonal routing and **native SvelteFlow**, not a
+Mermaid SVG wrapped in an HTML card. The local service-node renderer extends the
+reference presentation with icons/repo labels and preserves its exact port contract.
 
 From the documentation worktree:
 
@@ -27,7 +28,12 @@ it works offline and does not require a Claude session, server or external CDN.
   in another diagram. External relationships retain original source/target IDs.
 - Mermaid source is **rendered visually**, both beneath the SvelteFlow and in
   embedded source documents; exact code remains available. Five strict, sanitized
-  SVGs are generated locally and embedded offline, with node/group parity checks.
+  SVGs are generated locally and embedded offline, with exact node/group/edge text
+  checks. Mermaid's global `htmlLabels:false` retains SVG text under sanitization.
+- Every component and nested box has a blue service pictogram, a service name and
+  a `repo:` label with its role. [Attribution evidence](service-provenance.md)
+  distinguishes workload manifests, client configuration, external actors and
+  unresolved ownership. These are generic symbols, not cloud-vendor logos.
 - Every node/edge/subgraph is covered by tests; dashed and bidirectional semantics
   are preserved. Full-diagram fitting uses explicit absolute nested bounds.
 - Section 4 uses the example's DS **Tile + Radio** pattern: A/B/C selection,
@@ -57,7 +63,8 @@ make -f docs/architecture/focus/Makefile clipboard ENV=test-architecture
 ```
 
 `browser` verifies five complete diagrams at 18 viewport positions, visible nested
-bounds, rendered Mermaid parity, shared-DB navigation, full-screen/Escape, choices,
+bounds, every icon/repo label, card/header overflow, exact SvelteFlow/Mermaid texts,
+shared-DB navigation, full-screen/Escape, choices,
 comments, persistence, source dialogs, clipboard failure, responsive and offline use.
 `clipboard` checks actual clipboard read-back in a fresh browser context, then
 restores its previous contents and disposes only that test context.
