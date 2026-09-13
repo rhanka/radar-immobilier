@@ -38,7 +38,7 @@ spec:
           args:
             - |
               umask 077
-              checkpoint=/evidence/docs-checkpoint
+              checkpoint=/evidence/docs-checkpoint-v2
               report="/evidence/reports/${MIGRATION_RUN_ID}"
               resume=()
               fence=()
@@ -71,7 +71,7 @@ spec:
                 --prefix baseline-shaset-20260905/ --prefix graph/ \
                 --prefix ontology/ --prefix parsed/ --prefix raw/ --prefix runs/ \
                 --report-dir "$report" --checkpoint-dir "$checkpoint" \
-                --page-size 100 --time-budget-seconds 600 --concurrency 32 \
+                --page-size 1000 --time-budget-seconds 600 --concurrency 32 \
                 --retries 3 --max-failures 20 --max-object-bytes 5000000000 \
                 "${fence[@]}" "${resume[@]}"
               status=$?

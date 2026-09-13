@@ -10,7 +10,7 @@ export LC_ALL=C AWS_EC2_METADATA_DISABLED=true
 : "${PROOF_FILE:?}"
 [ ! -e "$PROOF_FILE" ] || {
   echo 'ERROR: conditional-write proof already exists' >&2; exit 2; }
-if compgen -G '/evidence/docs-checkpoint/provisional/destination/index-receipt-*.json' \
+if compgen -G '/evidence/docs-checkpoint*/provisional/destination/index-receipt-*.json' \
   >/dev/null; then
   echo 'ERROR: destination inventory already started before proof object' >&2
   exit 2

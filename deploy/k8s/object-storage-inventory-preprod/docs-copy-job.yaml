@@ -39,7 +39,7 @@ spec:
             - |
               umask 077
               expected=/evidence/docs-expected-manifest.json
-              CHECKPOINT_DIR=/evidence/docs-checkpoint FENCE_FILE=/fence/fence.txt \
+              CHECKPOINT_DIR=/evidence/docs-checkpoint-v2 FENCE_FILE=/fence/fence.txt \
                 EXPECTED_MANIFEST="$expected" \
                 /bin/bash /tool/build-docs-expected-manifest.sh
               report="/evidence/reports/${MIGRATION_RUN_ID}"
@@ -55,7 +55,7 @@ spec:
                 --prefix baseline-shaset-20260905/ --prefix graph/ \
                 --prefix ontology/ --prefix parsed/ --prefix raw/ --prefix runs/ \
                 --report-dir "$report" --expected-manifest "$expected" \
-                --inventory-proof /evidence/docs-checkpoint/final-inventory.json \
+                --inventory-proof /evidence/docs-checkpoint-v2/final-inventory.json \
                 --conditional-write-proof /evidence/docs-conditional-write-proof.json \
                 --fence-record /fence/fence.txt --execute-copy --concurrency 32 \
                 --retries 3 --max-failures 20 --max-object-bytes 5000000000
