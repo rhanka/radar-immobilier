@@ -40,6 +40,7 @@ grep -F -- '--argjson size "$size"' "$subject" >/dev/null
 grep -F '"$batch" -eq 32' "$subject" >/dev/null
 grep -F 'IfNoneMatch: "*"' "$node_subject" >/dev/null
 grep -F 'concurrency > 128' "$node_subject" >/dev/null
+grep -F 'maxSockets: concurrency' "$node_subject" >/dev/null
 grep -F 'destination-conflict' "$node_subject" >/dev/null
 grep -F 'diff.extra.length === 1 && allowSingleProofPrune' "$node_subject" >/dev/null
 grep -F 'new DeleteObjectCommand' "$node_subject" >/dev/null

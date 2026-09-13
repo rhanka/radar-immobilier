@@ -2,11 +2,13 @@ import { createHash } from "node:crypto";
 import { once } from "node:events";
 import { closeSync, createReadStream, createWriteStream, fsyncSync, openSync,
   readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
+import { Agent as HttpsAgent } from "node:https";
 import { createRequire } from "node:module";
 
 const require = createRequire("/workspace/package.json");
 const { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } =
   require("@aws-sdk/client-s3");
+const { NodeHttpHandler } = require("@smithy/node-http-handler");
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const manifestPath = required("CANONICAL_MANIFEST");
 const manifestDigest = required("CANONICAL_DIGEST");
@@ -41,7 +43,8 @@ if (proof.schemaVersion !== 1 || Object.keys(destination).some((key) => proof.de
   throw new Error("destination conditional-write proof is invalid");
 }
 const client = (coordinate, credentials) => new S3Client({ endpoint: coordinate.endpoint,
-  region: coordinate.region, forcePathStyle: false, credentials, maxAttempts: 4 });
+  region: coordinate.region, forcePathStyle: false, credentials, maxAttempts: 4,
+  requestHandler: new NodeHttpHandler({ httpsAgent: new HttpsAgent({ keepAlive: true, maxSockets: concurrency }) }) });
 const sourceClient = client(source, sourceCredentials);
 const destinationClient = client(destination, destinationCredentials);
 const allowSingleProofPrune = process.env.PRUNE_SINGLE_EXTRA_CONFIRM === "1";
