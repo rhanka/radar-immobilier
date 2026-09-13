@@ -121,3 +121,110 @@ copy and cutover must preserve this single-writer contract.
   SCW PVC/ingress/suspended Jobs were not purged at handoff. Those are shared
   blockers to a global claim, not Immo mutation authority.
 - Shared MatchID registry scopes remain under reconciliation with `poc-k8s`.
+
+## Minimal remediation file map
+
+This is the implementation boundary for the later design/build chain. Astra
+must settle delete-versus-rebind choices, Gemini 3.8 High reviews that design,
+Sol xhigh builds it, and Gemini performs the post-build review. It is not a
+two-host consensus claim.
+
+| Concern | Exact source surface | Required outcome |
+| --- | --- | --- |
+| Deployed API stores | `deploy/k8s/30-api.yaml`; `deploy/overlays/preprod/kustomization.yaml` | Production bindings explicit in base/prod path; preprod overrides `PP_RAW` and `PP_DOCS`; neither points to MinIO or SCW |
+| Refresh stores | `deploy/k8s/34-refresh-cronjobs.yaml`; `deploy/k8s/refresh-cronjobs/{kustomization.yaml,patch-refresh-s3.yaml}`; `deploy/k8s/refresh-cronjobs-prod/kustomization.yaml` | Provider-neutral base; explicit OVH bucket/region/path-style values in both overlays before either is unsuspended |
+| Diagnostic writer | `deploy/k8s/refresh-diag/diag-refresh-job.yaml`; `.github/workflows/build-push-images.yml` | Diagnostic uses the same environment-specific OVH contract, without an independent MinIO default |
+| Legacy grounding | `.github/workflows/grounding-{preprod,publish-prod}.yml`; `deploy/k8s/41-grounding-citation-job.yaml`; `deploy/k8s/grounding-preprod/**`; `deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml` | Retire once T1 publishes canonical graph/evidence and source/destination parity is recorded |
+| Manual Jobs | `.github/workflows/run-job.yaml`; `deploy/k8s/{31,32,32b,33,33b,34,37,38,39,40}-*.yaml` | Remove obsolete Jobs/routes; remaining clients inherit only an explicit environment OVH binding; eliminate duplicate scrape route |
+| MinIO workload | `deploy/k8s/{25-minio,70-networkpolicy,71-networkpolicy-graph-projection-minio-preprod}.yaml`; `deploy/k8s/kustomization.yaml` | Remove cluster MinIO service, StatefulSet, PVC declaration, and policies only after consumer and recovery gates pass |
+| Secrets/least privilege | `deploy/k8s/{30-api,36-db-migrate,secrets.example}.yaml`; active workflow secret references | Provider-neutral names, no unused S3 access on DB migration, no deployed SCW object credential consumer; TEM secret remains |
+| Registry residue | `deploy/k8s/10-rbac.yaml`; `deploy/k8s/11-ci-deployer-preprod-rbac.yaml`; `deploy/k8s/secrets.example.yaml`; deployment README | Remove `radar-registry-pull` only after both live namespaces prove GHCR/public images and no pull dependency |
+| Manual mount | `scripts/mount-scw.sh`; `scripts/umount-scw.sh` | Delete executable legacy object mounts |
+| Recovery | `.github/workflows/rollback.yml`; `deploy/ci/rollback-release.sh`; DB backup/restore runbook or implementation selected by design | Preserve image rollback and add an evidenced object/DB recovery path; local `make db-restore` alone is insufficient |
+| Active defaults/schema | `.env.example`; `api/src/config.ts`; `packages/radar-sources/src/sources/pv-cities-hard.json` plus its consumers/tests | Separate local MinIO defaults from deployed guidance; neutralize provider-shaped active names without weakening URL-deny tests |
+
+Do not mass-delete Docker Compose, Makefile MinIO test targets, local fixtures,
+historical documents, `.track`, or defensive URL tests. Do not change Geo or
+MatchID resources from this branch.
+
+## Cutover, parity, fencing, and recovery checklist
+
+Apply separately to preproduction, then production, and record bucket/prefix
+identifiers without credentials.
+
+1. Freeze the reviewed client matrix: workload, service account, secret name,
+   endpoint, region, path-style mode, bucket, read/write role, and prefixes.
+   Resolve every unknown with the fixed OVH read-only context.
+2. Provision exact OVH destinations with least-privilege identities, encryption,
+   versioning/retention, lifecycle, CORS, and audit logging as required by the
+   actual client. Do not reuse Geo or shared MatchID credentials.
+3. Take a PostgreSQL backup and record object high-water marks. Bulk-copy each
+   source without deletion; preserve key, bytes, content type/encoding, metadata,
+   and versions where relied upon.
+4. Compare complete key sets and byte sizes, then content hashes. Do not treat a
+   multipart ETag as a content checksum. Sample application-level decodes for
+   raw PDFs, parsed artifacts, graph history, candidates, and exports.
+5. Fence every writer for the environment: API ingestion, scrape/refresh
+   CronJobs, diagnostic and grounding workflows, manual run-job routes, and
+   canonical graph publisher. Verify no unfenced service account can write the
+   old store.
+6. Copy the final delta, repeat zero-difference parity, and capture the current
+   canonical graph key, archived pre-image, expected ETag, and relevant DB
+   references in one cutover record.
+7. Repoint secrets/configuration, deploy, and test through real clients: raw
+   upload/read, scrape write/read, conditional canonical graph publish including
+   stale-ETag rejection, PostgreSQL projection, and exact PDF evidence retrieval.
+   Geo remains read-only at `sentropic-geo/raw/pv-index/cas/`.
+8. Observe one scheduled refresh completion plus targeted manual recovery probes.
+   Confirm Jobs terminate, CronJobs have the intended suspend state, and no pod,
+   CI job, or service account attempts the old endpoints.
+9. Prove recovery in an isolated target: restore the paired DB/object checkpoint,
+   rebuild graph/evidence reads, record RPO/RTO, and exercise the reviewed
+   rollback path. Retain the old store read-only until this succeeds.
+10. Only then revoke old object credentials, remove executable SCW/MinIO paths,
+    snapshot and delete the MinIO PVC/resources, and repeat the full audit. Never
+    delete local developer data as part of the deployed cutover.
+
+## Repeatable final audit
+
+Run commands through the repository or architecture helper with
+`ENV=test-scw-final` last. The audit passes only when all criteria below pass;
+text-search success alone is insufficient.
+
+1. Source sweep: use `rg` over `.github`, `deploy`, `scripts`, application
+   configuration, active runbooks, and environment examples for `scw`,
+   Scaleway endpoints, MinIO endpoints, old buckets, registry hosts,
+   `radar-registry-pull`, and SCW secret names. Classify every hit with this
+   vocabulary. Only TEM, local-only, historical, defensive, or shared hits may
+   remain.
+2. Render/validate all base, preprod, prod, refresh, grounding, and diagnostic
+   paths with `make k8s-validate ENV=test-scw-final`. Also inspect manual YAML
+   not included by kustomization; suspended resources are not exempt.
+3. With `/tmp/radar-architecture-tools.mk cluster`, list only names, image refs,
+   service accounts, CronJob suspend/schedule state, Job status, ConfigMap S3
+   coordinates, PVCs, NetworkPolicies, and Secret **names** in namespaces
+   `radar-immobilier-preprod` and `radar-immobilier`. Never dump Secrets or full
+   environments. A Forbidden result leaves that environment unproved.
+4. GitHub acceptance: active workflow variables match intended gates; no armed
+   or manual workflow references old object endpoints/secrets; backups resolve
+   to OVH; restore and rollback evidence points to the paired checkpoint.
+5. Runtime acceptance: every running/pending/suspended/manual client maps to the
+   approved OVH store or retained TEM/shared contract; both namespaces use
+   GHCR/public images without `radar-registry-pull`; object parity, writer fence,
+   scheduled refresh, rollback, and isolated recovery evidence are attached.
+6. Decommission acceptance: no Immo consumer or credential accesses MinIO/SCW;
+   old buckets/PVCs remain until recovery proof, then their explicit deletion is
+   separately approved and recorded. A missing object due to RBAC is not proof
+   that it is absent.
+
+## Current blockers and handoff
+
+- Fresh preproduction and production runtime proof requires an OVH read-only
+  principal with access to the two Immo namespaces.
+- Production physical buckets/prefixes and recovery objectives must be fixed by
+  the owner-reviewed design; source defaults cannot stand in for live evidence.
+- T1 canonical acquisition/publication acceptance precedes retirement of the
+  grounding bridge and all final writer fencing.
+- Shared Geo legacy cleanup and MatchID registry scopes stay with their owners.
+- This audit deliberately stops before source changes, deployment, copy,
+  credential rotation, resource deletion, or an overall T2 completion claim.
