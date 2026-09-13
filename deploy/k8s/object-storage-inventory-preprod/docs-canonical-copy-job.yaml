@@ -1,0 +1,103 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: radar-object-storage-copy-canonical-docs-
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: object-storage-inventory
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 21600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: object-storage-inventory
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: copy
+          image: amazon/aws-cli:2.34.53@sha256:cf53765c0de54ad3a8ea21818f1c4c845a8cf7ca87831c078a00fef244031493
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/bash", "-ceu", "--"]
+          args:
+            - |
+              umask 077
+              for attempt in $(seq 1 600); do
+                [ ! -s /evidence/prod-canonical-manifest.jsonl ] || break
+                sleep 1
+              done
+              [ -s /evidence/prod-canonical-manifest.jsonl ] || {
+                echo 'ERROR: canonical manifest import timed out' >&2; exit 2; }
+              report="/evidence/reports/${MIGRATION_RUN_ID}"
+              set +e
+              CANONICAL_MANIFEST=/evidence/prod-canonical-manifest.jsonl \
+                CANONICAL_DIGEST="$CANONICAL_DIGEST" REPORT_DIR="$report" \
+                CONDITIONAL_WRITE_PROOF=/evidence/docs-conditional-write-proof.json \
+                SOURCE_ENDPOINT=https://s3.fr-par.scw.cloud SOURCE_REGION=fr-par \
+                SOURCE_BUCKET=radar-immobilier-docs-pocs \
+                /bin/bash /tool/copy-canonical-docs.sh
+              status=$?
+              set -e
+              marker="/evidence/export-ready/${MIGRATION_RUN_ID}"
+              mkdir -p "$(dirname "$marker")"
+              jq -n --argjson status "$status" '{status:$status}' >"$marker.tmp"
+              sync -f "$marker.tmp" && mv "$marker.tmp" "$marker"
+              sleep 300
+              exit "$status"
+          env:
+            - name: MIGRATION_RUN_ID
+              valueFrom: { fieldRef: { fieldPath: metadata.uid } }
+            - name: CANONICAL_DIGEST
+              valueFrom: { configMapKeyRef: { name: radar-object-storage-docs-canonical, key: manifestSha256 } }
+            - name: MIGRATION_SOURCE_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: radar-docs-prod-source-credentials, key: PROD_S3_ACCESS_KEY } }
+            - name: MIGRATION_SOURCE_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-docs-prod-source-credentials, key: PROD_S3_SECRET_KEY } }
+            - name: MIGRATION_DESTINATION_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
+            - name: MIGRATION_DESTINATION_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
+            - name: DESTINATION_ENDPOINT
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ENDPOINT } }
+            - name: DESTINATION_REGION
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_REGION } }
+            - name: DESTINATION_BUCKET
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_BUCKET } }
+          resources:
+            requests: { cpu: 100m, memory: 512Mi, ephemeral-storage: 128Mi }
+            limits: { cpu: 500m, memory: 2Gi, ephemeral-storage: 6Gi }
+          readinessProbe:
+            exec:
+              command: ["/bin/bash", "-c", "test -f /evidence/export-ready/${MIGRATION_RUN_ID}"]
+            periodSeconds: 2
+            timeoutSeconds: 1
+            failureThreshold: 10800
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: tool, mountPath: /tool, readOnly: true }
+            - { name: evidence, mountPath: /evidence }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: tool
+          configMap: { name: radar-object-storage-inventory-tool, defaultMode: 365 }
+        - name: evidence
+          persistentVolumeClaim: { claimName: radar-object-storage-inventory-checkpoint }
+        - name: tmp
+          emptyDir: { sizeLimit: 6Gi }
