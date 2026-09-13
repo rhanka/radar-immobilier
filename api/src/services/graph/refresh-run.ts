@@ -9,9 +9,9 @@ import {
   type LiveScrapeCityRecap,
   type RunLiveScrapeOptions,
 } from "../sources/live-scrape.js";
-import { readCanonicalCityGraph } from "./canonical-graph-writer.js";
+import { readCanonicalCityGraph, type CanonicalReadAnchor } from "./canonical-graph-writer.js";
 import { graphifyGraphSchema, upsertGraphAtomic } from "./graph-store.js";
-import { enrichGraphify34Snapshot } from "./graphify-34-enrichment.js";
+import { enrichGraphify34Snapshot, type Graphify34Snapshot } from "./graphify-34-enrichment.js";
 import { applyGraphify34Snapshots, applyPlanKey, buildGraphify34Manifest,
   type Graphify34SnapshotStore } from "./graphify-34-snapshot.js";
 import { materializeRefreshCorpus } from "./refresh-corpus.js";
@@ -19,9 +19,9 @@ import { extractRefreshProfile, type RefreshProfileChunk,
   type RefreshProfileContext } from "./refresh-profile.js";
 import { canonicalHash } from "./replay/canonical-json.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
-import { completeRefreshChunk, openRefreshState, readCompletedRefreshChunk,
+import { completeRefreshChunk, findPublishedRefreshState, openRefreshState, readCompletedRefreshChunk,
   reserveRefreshChunk, writeRefreshCandidate, writeRefreshStageReceipt,
-  type RefreshStage } from "./refresh-state.js";
+  type RefreshStage, type RefreshStateHandle } from "./refresh-state.js";
 
 export type RefreshAcquire = (
   cities: readonly string[] | undefined,
@@ -100,7 +100,7 @@ export interface RunPvRefreshOptions {
   readonly acquire?: RefreshAcquire;
 }
 
-async function completeStage(store: ObjectStore, handle: Awaited<ReturnType<typeof openRefreshState>>,
+async function completeStage(store: ObjectStore, handle: RefreshStateHandle,
   stage: RefreshStage, artifactHash: string, now: () => Date) {
   return writeRefreshStageReceipt(store, handle, {
     stage, status: "completed", artifactHash, recordedAt: now().toISOString(),
@@ -109,6 +109,40 @@ async function completeStage(store: ObjectStore, handle: Awaited<ReturnType<type
 
 function requireRunning(signal: AbortSignal | undefined, where: string): void {
   if (signal?.aborted) throw new Error(`Refresh aborted ${where}`);
+}
+
+async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshStateHandle,
+  snapshot: Graphify34Snapshot, readAnchor: CanonicalReadAnchor, now: () => Date) {
+  let handle = initial;
+  const snapshotHash = canonicalHash(snapshot);
+  const backupId = `refresh-018-${handle.state.identityHash.slice(7)}`;
+  requireRunning(options.signal, "before publication");
+  const resume = await options.store.head(applyPlanKey(backupId)) !== null;
+  await applyGraphify34Snapshots(options.store, [{ municipality: options.citySlug, snapshot,
+    manifest: buildGraphify34Manifest(options.citySlug, snapshot), readAnchor }], backupId,
+  async (target) => {
+    handle = await completeStage(options.store, handle, "published", snapshotHash, now);
+    const failProjection = async (reason: string, message: string): Promise<never> => {
+      handle = await writeRefreshStageReceipt(options.store, handle, { stage: "projected",
+        status: "failed", reason, recordedAt: now().toISOString() });
+      throw new Error(message);
+    };
+    if (options.signal?.aborted) await failProjection("aborted-before-projection",
+      "Refresh aborted before projection");
+    let projected;
+    try { projected = await upsertGraphAtomic(options.db, options.citySlug, target.snapshot); }
+    catch (error) {
+      handle = await writeRefreshStageReceipt(options.store, handle, { stage: "projected",
+        status: "failed", reason: "postgres-write-failed", recordedAt: now().toISOString() });
+      throw error;
+    }
+    if (projected.aborted) await failProjection("postgres-regression-refused",
+      `Postgres projection refused: ${projected.reason ?? "regression"}`);
+    if (options.signal?.aborted) await failProjection("aborted-after-projection",
+      "Refresh aborted after projection");
+    handle = await completeStage(options.store, handle, "projected", snapshotHash, now);
+  }, { resume, now });
+  return { citySlug: options.citySlug, candidateHash: snapshotHash, stateKey: handle.key };
 }
 
 /** One selected city: RECUEIL -> exact PDF -> profiled v2.3 -> 3.4 -> guarded S3 -> atomic PG. */
@@ -124,12 +158,23 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   const read = await readCanonicalCityGraph(options.store, options.citySlug, now);
   if (!read) throw new Error(`Missing canonical baseline for ${options.citySlug}`);
   const baseline = graphifyGraphSchema.parse(JSON.parse(new TextDecoder().decode(read.body)));
-  let handle = await openRefreshState(options.store, {
+  const baselineHash = canonicalHash(baseline);
+  const scope = {
     citySlug: options.citySlug, inputHash: `sha256:${corpus.inputHash}`,
-    baselineHash: canonicalHash(baseline), profileHash: options.profileHash,
-    registryHash: options.registryHash, packageVersion: options.packageVersion,
+    profileHash: options.profileHash, registryHash: options.registryHash, packageVersion: options.packageVersion,
     modelPolicy: options.modelPolicy, exclusions: options.excludedNodeIds ?? [],
-  }, options.budgetLimit, now);
+  };
+  const prior = await findPublishedRefreshState(options.store, { ...scope, publishedHash: baselineHash });
+  if (prior?.state.receipts.projected?.status === "completed") {
+    return { citySlug: options.citySlug, inputHash: corpus.inputHash,
+      candidateHash: baselineHash, stateKey: prior.key };
+  }
+  if (prior) {
+    const resumed = enrichGraphify34Snapshot(baseline, options.citySlug).snapshot;
+    if (canonicalHash(resumed) !== baselineHash) throw new Error("Published refresh state no longer matches canonical bytes");
+    return { ...await publishSnapshot(options, prior, resumed, read.anchor, now), inputHash: corpus.inputHash };
+  }
+  let handle = await openRefreshState(options.store, { ...scope, baselineHash }, options.budgetLimit, now);
   handle = await completeStage(options.store, handle, "corpus", `sha256:${corpus.inputHash}`, now);
   const profiled: RefreshProfileChunk[] = [];
   for (const chunk of corpus.chunks) {
@@ -154,33 +199,6 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   const { snapshot } = enrichGraphify34Snapshot(candidate, options.citySlug);
   const snapshotHash = canonicalHash(snapshot);
   handle = await completeStage(options.store, handle, "enriched", snapshotHash, now);
-  const backupId = `refresh-018-${handle.state.identityHash.slice(7)}`;
-  requireRunning(options.signal, "before publication");
-  const resume = await options.store.head(applyPlanKey(backupId)) !== null;
-  await applyGraphify34Snapshots(options.store, [{ municipality: options.citySlug, snapshot,
-    manifest: buildGraphify34Manifest(options.citySlug, snapshot), readAnchor: read.anchor }],
-  backupId, async (target) => {
-    handle = await completeStage(options.store, handle, "published", snapshotHash, now);
-    const failProjection = async (reason: string, message: string): Promise<never> => {
-      handle = await writeRefreshStageReceipt(options.store, handle, { stage: "projected",
-        status: "failed", reason, recordedAt: now().toISOString() });
-      throw new Error(message);
-    };
-    if (options.signal?.aborted) await failProjection("aborted-before-projection",
-      "Refresh aborted before projection");
-    let projected;
-    try { projected = await upsertGraphAtomic(options.db, options.citySlug, target.snapshot); }
-    catch (error) {
-      handle = await writeRefreshStageReceipt(options.store, handle, { stage: "projected",
-        status: "failed", reason: "postgres-write-failed", recordedAt: now().toISOString() });
-      throw error;
-    }
-    if (projected.aborted) await failProjection("postgres-regression-refused",
-      `Postgres projection refused: ${projected.reason ?? "regression"}`);
-    if (options.signal?.aborted) await failProjection("aborted-after-projection",
-      "Refresh aborted after projection");
-    handle = await completeStage(options.store, handle, "projected", snapshotHash, now);
-  }, { resume, now });
-  return { citySlug: options.citySlug, inputHash: corpus.inputHash,
-    candidateHash: snapshotHash, stateKey: handle.key };
+  return { ...await publishSnapshot(options, handle, snapshot, read.anchor, now),
+    inputHash: corpus.inputHash };
 }
