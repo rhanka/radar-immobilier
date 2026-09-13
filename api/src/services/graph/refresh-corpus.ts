@@ -91,15 +91,16 @@ function chunkDocument(doc: Omit<RefreshCorpusDocument, "chunks">): RefreshCorpu
   const maxBytes = totalBytes <= 200_000 ? 200_000 : totalBytes <= 400_000 ? 120_000 : 30_000;
   const chunks: { pages: number[]; parts: string[]; bytes: number }[] = [];
   for (const page of doc.pages) {
-    for (const part of splitBounded(page.text, maxBytes)) {
-      const bytes = Buffer.byteLength(part) + 2;
+    const marker = `[PDF PAGE ${page.page}]\n`;
+    for (const part of splitBounded(page.text, maxBytes - Buffer.byteLength(marker) - 2)) {
+      const bytes = Buffer.byteLength(marker) + Buffer.byteLength(part) + 2;
       let current = chunks.at(-1);
       if (!current || current.bytes + bytes > maxBytes) {
         current = { pages: [], parts: [], bytes: 0 };
         chunks.push(current);
       }
       current.pages.push(page.page);
-      current.parts.push(part);
+      current.parts.push(`${marker}${part}`);
       current.bytes += bytes;
     }
   }
