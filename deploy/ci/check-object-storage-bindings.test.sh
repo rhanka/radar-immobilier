@@ -19,7 +19,7 @@ FILES=(
   deploy/k8s/36-db-migrate-job.yaml deploy/k8s/37-graphify34-apply-job.yaml
   deploy/k8s/38-graphify34-emit-candidates-job.yaml deploy/k8s/39-export-graph-nodes-job.yaml
   deploy/k8s/40-export-gt-designation-events-job.yaml
-  deploy/k8s/32b-reproject-etape-job.yaml deploy/k8s/34-refresh-cronjob.yaml
+  deploy/k8s/34-refresh-cronjob.yaml
   deploy/k8s/refresh-cronjobs-prod/kustomization.yaml
   deploy/k8s/10-rbac.yaml deploy/k8s/11-ci-deployer-preprod-rbac.yaml
   deploy/k8s/object-storage-docs-prod/copy-job.yaml
@@ -90,8 +90,8 @@ run_bad "$CASE_ROOT" 'rejects a restored grounding publish worklist'; rm -rf "$C
 fixture; mkdir -p "$CASE_ROOT/deploy/k8s/refresh-diag"; touch "$CASE_ROOT/deploy/k8s/refresh-diag/diag-refresh-job.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored refresh diagnostic manifest'; rm -rf "$CASE_ROOT"
 
-fixture; rm -f "$CASE_ROOT/deploy/k8s/32b-reproject-etape-job.yaml"
-run_bad "$CASE_ROOT" 'keeps every gated client explicit'; rm -rf "$CASE_ROOT"
+fixture; touch "$CASE_ROOT/deploy/k8s/32b-reproject-etape-job.yaml"
+run_bad "$CASE_ROOT" 'rejects a restored SCW reprojection Job'; rm -rf "$CASE_ROOT"
 
 fixture; mkdir -p "$CASE_ROOT/scripts"; touch "$CASE_ROOT/scripts/mount-scw.sh"
 run_bad "$CASE_ROOT" 'rejects a restored legacy mount'; rm -rf "$CASE_ROOT"
