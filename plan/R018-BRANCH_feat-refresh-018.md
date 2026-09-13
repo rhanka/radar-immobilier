@@ -62,6 +62,7 @@
 - [x] C12b: compose resumable profile extraction, v2.3/3.4, guarded publish and atomic projection.
 - [x] C12c: resume post-publication projection without repeating same-input extraction.
 - [x] C12d: preserve the exact published JSON object on post-publication projection resume.
+- [x] C12e: retain the validated raw canonical object so resume reproduces identical bytes.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
