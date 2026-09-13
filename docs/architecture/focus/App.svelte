@@ -45,7 +45,7 @@
         </Flex>
         <h1>Des nouveaux PV<br>aux signaux visibles.</h1>
         <p class="lede">Voir d’abord la cible complète, puis parcourir Existant → T1 refresh → T2 objets OVH → T3 un nœud. Les coûts sont relégués à la dernière annexe.</p>
-        <div class="truth-strip"><span><strong>Existant</strong> préprod vérifiée; internals prod non vérifiés</span><span><strong>T1</strong> refresh autonome proposé</span><span><strong>T2</strong> objets OVH + sweep; TEM excepté</span><span><strong>T3</strong> cible proposée : un b3-8</span></div>
+        <div class="truth-strip"><span><strong>Existant</strong> préprod vérifiée; internals prod non vérifiés</span><span><strong>T1</strong> succès préprod GO_WITH_GATES; unattended NO-GO</span><span><strong>T2</strong> MIGRATE+RETAIN; remédiation avant copie</span><span><strong>T3</strong> NO-GO aujourd’hui; cible un b3-8</span></div>
       </header>
       <Explorer graphs={data.graphs} />
       <nav class="steps" aria-label="Sections du dossier">

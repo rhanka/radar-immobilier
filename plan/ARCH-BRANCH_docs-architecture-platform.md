@@ -148,5 +148,5 @@
   - [x] Attribute nested `UND_ERR_SOCKET` to llm-mesh 0.19.0 and keep unattended/retry/production NO-GO until the delegated 0.19.1 patch is published.
   - [x] Distinguish the live empty fallback bucket from retained legacy replay/history and encode MIGRATE+RETAIN plus writer-safety gates.
   - [x] Record the real three-node capacity/placement NO-GO and the required T2 → rightsizing → constraints → two-node → one-node ladder.
-  - [ ] Align the Focus presentation/export and current monthly companion without changing the unresolved reporting start or inventing billing values.
+  - [x] Align the Focus presentation/export and current monthly companion without changing the unresolved reporting start or inventing billing values.
   - [ ] Regenerate and verify the portable Mermaid/SvelteFlow dossier and dated evidence.
