@@ -7,6 +7,7 @@ import { closeSync, createReadStream, createWriteStream, fsyncSync, openSync,
 import { Agent as HttpsAgent } from "node:https";
 import { createRequire } from "node:module";
 import process from "node:process";
+import { readObjectRecord, sameDestinationRecord } from "./copy-canonical-docs-parity.mjs";
 
 const require = createRequire("/workspace/package.json");
 const { DeleteObjectCommand, GetObjectCommand, GetObjectTaggingCommand, ListObjectsV2Command, PutObjectCommand, S3Client } =
@@ -39,7 +40,9 @@ if (objects.length !== 59017 || objects.reduce((sum, item) => sum + item.size, 0
   throw new Error("canonical PROD corpus contract differs");
 }
 if (manifestDigest !== officialManifestDigest) throw new Error("canonical PROD manifest digest differs");
-const proof = JSON.parse(readFileSync(proofPath, "utf8"));
+const proofBytes = readFileSync(proofPath);
+const proof = JSON.parse(proofBytes.toString("utf8"));
+const proofDigest = createHash("sha256").update(proofBytes).digest("hex");
 const identity = createHash("sha256").update(destinationCredentials.accessKeyId).digest("hex");
 const expiresAt = Date.parse(proof.expiresAt);
 if (proof.schemaVersion !== 1 || Object.keys(destination).some((key) => proof.destination?.[key] !== destination[key]) ||
@@ -78,6 +81,9 @@ const getDigest = async (clientInstance, bucket, key, outputPath) => {
   const digest = await digestBody(response, outputPath);
   return { ...digest, contentLength: Number(response.ContentLength) };
 };
+const readRecord = (clientInstance, bucket, key, outputPath) => readObjectRecord({
+  client: clientInstance, bucket, key, GetObjectCommand, GetObjectTaggingCommand, digestBody, outputPath,
+});
 const missing = (error) => error?.name === "NoSuchKey" || error?.$metadata?.httpStatusCode === 404;
 const failed = (stage, error, item) => ({ status: "failed", reason: stage,
   errorName: String(error?.name ?? "Error"), httpStatus: error?.$metadata?.httpStatusCode ?? null,
@@ -102,28 +108,10 @@ const corpusDiff = (listed) => {
     extra: listed.filter((item) => !expected.has(item.key)),
     sizeConflicts: listed.filter((item) => expected.has(item.key) && expected.get(item.key) !== item.size) };
 };
-const sameRecord = (left, right) => {
-  const entries = (value) => Object.entries(value ?? {}).sort(([a], [b]) =>
-    Buffer.from(a).compare(Buffer.from(b)));
-  return JSON.stringify(entries(left)) === JSON.stringify(entries(right));
-};
-const sameTags = (left, right) => {
-  const sorted = (value) => [...(value ?? [])].sort((a, b) =>
-    Buffer.from(`${a.Key}\0${a.Value}`).compare(Buffer.from(`${b.Key}\0${b.Value}`)));
-  return JSON.stringify(sorted(left)) === JSON.stringify(sorted(right));
-};
 const verifySourceOne = async (item) => {
-  const response = await sourceClient.send(new GetObjectCommand({ Bucket: source.bucket, Key: item.key }));
-  const digest = await digestBody(response);
-  const tagged = await sourceClient.send(new GetObjectTaggingCommand({ Bucket: source.bucket, Key: item.key }));
-  const exact = digest.bytes === item.size && Number(response.ContentLength) === item.size &&
-    digest.sha256 === item.sha256 && (response.ContentType ?? null) === item.contentType &&
-    (response.ContentEncoding ?? null) === item.contentEncoding &&
-    (response.CacheControl ?? null) === item.cacheControl &&
-    (response.ContentDisposition ?? null) === item.contentDisposition &&
-    sameRecord(response.Metadata, item.metadata) && sameTags(tagged.TagSet, item.tags) &&
-    (response.ETag ?? "") === (item.etag ?? "") &&
-    (response.VersionId ?? null) === (item.versionId ?? null);
+  const observed = await readRecord(sourceClient, source.bucket, item.key);
+  const exact = sameDestinationRecord(item, observed) && observed.etag === (item.etag ?? "") &&
+    observed.versionId === (item.versionId ?? null);
   if (!exact) throw new Error("canonical source final scan differs");
   return item.size;
 };
@@ -139,8 +127,8 @@ const progress = () => {
 };
 const copyOne = async (item, index) => {
   try {
-    const observed = await getDigest(destinationClient, destination.bucket, item.key);
-    return observed.bytes === item.size && observed.contentLength === item.size && observed.sha256 === item.sha256
+    const observed = await readRecord(destinationClient, destination.bucket, item.key);
+    return sameDestinationRecord(item, observed)
       ? { status: "matching", key: item.key, size: item.size }
       : { status: "failed", reason: "destination-conflict", key: item.key, size: item.size };
   } catch (error) { if (!missing(error)) return failed("destination-read", error, item); }
@@ -158,8 +146,8 @@ const copyOne = async (item, index) => {
       ContentDisposition: item.contentDisposition ?? undefined, Metadata: item.metadata,
       Tagging: item.tags.length ? tagging(item.tags) : undefined }));
     stage = "post-copy-read";
-    const observed = await getDigest(destinationClient, destination.bucket, item.key);
-    if (observed.bytes !== item.size || observed.sha256 !== item.sha256) {
+    const observed = await readRecord(destinationClient, destination.bucket, item.key);
+    if (!sameDestinationRecord(item, observed)) {
       return { status: "failed", reason: "post-copy-read", key: item.key, size: item.size };
     }
     return { status: "copied", key: item.key, size: item.size, etag: response.ETag ?? "" };
@@ -192,9 +180,13 @@ if (summary.processed === 59017 && summary.failed === 0 && diff.missing.length =
   summary.prunedExtra = 1; listed = await listBucket(destinationClient, destination); diff = corpusDiff(listed);
 }
 atomicJson(`${reportDir}/target-diff.json`, diff);
-summary.targetExactParity = diff.missing.length === 0 && diff.extra.length === 0 && diff.sizeConflicts.length === 0;
-summary.sourceExact = false;
-if (summary.processed === 59017 && summary.failed === 0 && summary.targetExactParity) {
+const structuralExact = diff.missing.length === 0 && diff.extra.length === 0 && diff.sizeConflicts.length === 0;
+summary.conditionalWriteProofDigest = proofDigest;
+summary.destinationIdentityFingerprint = identity;
+summary.sourceObservedAt = null; summary.targetObservedAt = null; summary.completedAt = null;
+summary.sourceExact = false; summary.targetExactParity = false;
+const attributeConflicts = []; let targetVerifiedBytes = 0;
+if (summary.processed === 59017 && summary.failed === 0 && structuralExact) {
   let sourceVerifiedBytes = 0;
   for (let offset = 0; offset < objects.length; offset += concurrency) {
     sourceVerifiedBytes += (await Promise.all(objects.slice(offset, offset + concurrency)
@@ -208,9 +200,28 @@ if (summary.processed === 59017 && summary.failed === 0 && summary.targetExactPa
   summary.sourceObservedAt = new Date().toISOString();
   summary.sourceExact = sourceVerifiedBytes === 12534514457 && sourceDiff.missing.length === 0 &&
     sourceDiff.extra.length === 0 && sourceDiff.sizeConflicts.length === 0;
+  for (let offset = 0; offset < objects.length; offset += concurrency) {
+    const batch = await Promise.all(objects.slice(offset, offset + concurrency).map(async (item) => {
+      try {
+        const observed = await readRecord(destinationClient, destination.bucket, item.key);
+        return sameDestinationRecord(item, observed) ? { size: item.size } :
+          { conflict: { status: "failed", reason: "destination-record", key: item.key, size: item.size } };
+      } catch (error) { return { conflict: failed("destination-final-read", error, item) }; }
+    }));
+    for (const result of batch) {
+      if (result.conflict) attributeConflicts.push(result.conflict); else targetVerifiedBytes += result.size;
+    }
+  }
+  summary.targetObservedAt = new Date().toISOString();
 }
+atomicJson(`${reportDir}/target-attribute-conflicts.json`, attributeConflicts);
+summary.targetVerifiedObjects = summary.targetObservedAt ? objects.length - attributeConflicts.length : 0;
+summary.targetVerifiedBytes = targetVerifiedBytes;
+summary.targetExactParity = summary.targetObservedAt !== null && attributeConflicts.length === 0 &&
+  targetVerifiedBytes === 12534514457;
 summary.exactParity = summary.targetExactParity && summary.sourceExact;
 summary.complete = summary.processed === 59017 && summary.failed === 0 && summary.exactParity;
+summary.completedAt = new Date().toISOString();
 atomicJson(`${reportDir}/summary.json`, summary);
 if (!summary.complete) throw new Error("canonical copy did not reach exact parity");
 console.log(JSON.stringify({ status: "complete", ...summary }));
