@@ -30,6 +30,11 @@ object-storage-docs-prod-context: ## Read the non-secret PROD context coordinate
 object-storage-docs-prod-validate: ## Validate the PROD DOCS support and inventory Job offline
 	@bash -n deploy/ci/migrate-object-storage.sh deploy/ci/object-storage-checkpoint.sh
 	@bash deploy/ci/docs-prod-runtime-secrets.hermetic.test.sh
+	@set -o pipefail; $(MAKE) --no-print-directory -n object-storage-minio-prod-finalize \
+	  OBJECT_STORAGE_MINIO_PROD_FINALIZE_CONFIRM=1 \
+	  OBJECT_STORAGE_DOCS_PROD_PARITY_JOB=radar-object-storage-copy-docs-prod-hermetic \
+	  OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST=52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425 \
+	  KUBECONFIG=/nonsecret/hermetic.kubeconfig ENV=prod | bash -n
 	@node --check deploy/ci/inventory-docs-prod-fast.mjs
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	  $(OBJECT_STORAGE_DOCS_PROD_DIR) >/dev/null
@@ -234,6 +239,29 @@ object-storage-docs-prod-quota-status: ## Read safe PROD quota coordinates only
 	  get resourcequota/tenant-quota -o json | \
 	  jq '{hard:.status.hard,used:.status.used}'
 
+.PHONY: object-storage-docs-prod-final-status
+object-storage-docs-prod-final-status: ## Prove PROD DOCS binding and MinIO absence without Secret values
+	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ]; then \
+	  echo '[object-storage-docs-prod] require KUBECONFIG, ENV=prod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
+	    "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]; \
+	  ! $(KUBECTL) -n "$$namespace" get statefulset/radar-minio >/dev/null 2>&1; \
+	  ! $(KUBECTL) -n "$$namespace" get service/radar-minio >/dev/null 2>&1; \
+	  ! $(KUBECTL) -n "$$namespace" get pvc/minio-data-radar-minio-0 >/dev/null 2>&1; \
+	  ! $(KUBECTL) -n "$$namespace" get networkpolicy/allow-api-to-minio >/dev/null 2>&1; \
+	  $(KUBECTL) -n "$$namespace" get pvc/radar-object-storage-docs-prod-checkpoint -o json | \
+	    jq -e '.status.phase == "Bound" and .status.capacity.storage == "1Gi"' >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json | \
+	    jq -e '.status.hard.secrets == "15" and .status.used.secrets == "15" and .status.hard.persistentvolumeclaims == "3" and .status.used.persistentvolumeclaims == "2"' >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get configmap/radar-api -o json | jq -e \
+	    '.data.GRAPH_S3_BUCKET == "radar-immobilier-docs" and .data.SCRAPE_S3_BUCKET == "radar-immobilier-docs" and .data.SCW_TEM_API_BASE_URL == "https://api.scaleway.com"' >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | jq -e \
+	    'any(.spec.template.spec.containers[] | select(.name == "api") | .env[]?; .name == "SCW_TEM_SECRET_KEY" and .valueFrom.secretKeyRef.name == "radar-tem-credentials" and .valueFrom.secretKeyRef.key == "SCW_TEM_SECRET_KEY")' >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get secret/radar-tem-credentials >/dev/null; \
+	  jq -n '{minio:{statefulSet:false,service:false,pvc:false},checkpoint:{phase:"Bound",capacity:"1Gi"},quota:{secrets:{hard:15,used:15},pvcs:{hard:3,used:2}},docs:{bucket:"radar-immobilier-docs",graphBinding:true,scrapeBinding:true},tem:{apiBase:"https://api.scaleway.com",secretReference:"radar-tem-credentials",preserved:true}}'
+
 .PHONY: object-storage-docs-prod-start
 object-storage-docs-prod-start: ## Create the resumable PROD DOCS inventory Job
 	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
@@ -345,3 +373,30 @@ object-storage-minio-prod-remove: ## Remove the proven-empty, unconsumed PROD Mi
 	  ! $(KUBECTL) -n "$$namespace" get statefulset/radar-minio service/radar-minio \
 	    pvc/$$claim >/dev/null 2>&1; \
 	  echo '[object-storage-minio-prod] removed empty StatefulSet, Service and 5Gi PVC'
+
+.PHONY: object-storage-minio-prod-finalize
+object-storage-minio-prod-finalize: ## Remove the orphan PROD MinIO policy after canonical parity
+	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
+	  [ "$(OBJECT_STORAGE_MINIO_PROD_FINALIZE_CONFIRM)" != 1 ] || \
+	  [[ "$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB)" != radar-object-storage-copy-docs-prod-* ]] || \
+	  ! [[ "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" =~ ^[0-9a-f]{64}$$ ]]; then \
+	  echo '[object-storage-minio-prod] require exact parity Job/digest, confirmation, KUBECONFIG, ENV=prod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
+	    "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]; \
+	  summary="$$( $(KUBECTL) -n "$$namespace" logs \
+	    job/$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB) --all-containers=true | tail -n 1 )"; \
+	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
+	    '.status == "complete" and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .exactParity == true and .complete == true' \
+	    <<<"$$summary" >/dev/null; \
+	  ! $(KUBECTL) -n "$$namespace" get statefulset/radar-minio >/dev/null 2>&1; \
+	  ! $(KUBECTL) -n "$$namespace" get service/radar-minio >/dev/null 2>&1; \
+	  ! $(KUBECTL) -n "$$namespace" get pvc/minio-data-radar-minio-0 >/dev/null 2>&1; \
+	  $(KUBECTL) -n "$$namespace" get networkpolicy/allow-api-to-minio -o json | \
+	    jq -e '.spec.podSelector.matchLabels["app.kubernetes.io/component"] == "minio"' >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" delete networkpolicy/allow-api-to-minio --wait=true >/dev/null; \
+	  ! $(KUBECTL) -n "$$namespace" get networkpolicy/allow-api-to-minio >/dev/null 2>&1; \
+	  $(KUBECTL) -n "$$namespace" get configmap/radar-api -o json | \
+	    jq -e '.data.SCW_TEM_API_BASE_URL == "https://api.scaleway.com"' >/dev/null; \
+	  echo '[object-storage-minio-prod] removed orphan NetworkPolicy/allow-api-to-minio; TEM preserved'
