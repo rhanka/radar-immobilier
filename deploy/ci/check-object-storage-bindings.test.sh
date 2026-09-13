@@ -54,6 +54,12 @@ run_bad "$CASE_ROOT" 'rejects DOCS reuse of a Geo identity'; rm -rf "$CASE_ROOT"
 fixture; sed -i '0,/DOCS_S3_BUCKET/{s/DOCS_S3_BUCKET/S3_BUCKET/}' "$CASE_ROOT/deploy/k8s/30-api.yaml"
 run_bad "$CASE_ROOT" 'rejects a generic PROD canonical credential binding'; rm -rf "$CASE_ROOT"
 
+fixture; sed -i '0,/radar-scrape-s3-credentials/{s/radar-scrape-s3-credentials/radar-s3-credentials/}' "$CASE_ROOT/deploy/k8s/34-refresh-cronjob.yaml"
+run_bad "$CASE_ROOT" 'rejects a generic refresh credential binding'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i '/name: radar-refresh-pv/d' "$CASE_ROOT/deploy/k8s/34-refresh-cronjob.yaml"
+run_bad "$CASE_ROOT" 'preserves the new radar-refresh-pv CronJob'; rm -rf "$CASE_ROOT"
+
 fixture; rm -f "$CASE_ROOT/deploy/k8s/32b-reproject-etape-job.yaml"
 run_bad "$CASE_ROOT" 'keeps every gated client explicit'; rm -rf "$CASE_ROOT"
 

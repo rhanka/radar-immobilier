@@ -14,9 +14,7 @@ SCRAPE_FILES=(deploy/k8s/33-scrape-job.yaml deploy/k8s/33b-scrape-cities-job.yam
 FILES=("${GRAPH_FILES[@]}" "${SCRAPE_FILES[@]}" deploy/k8s/36-db-migrate-job.yaml)
 PENDING_CLIENTS=(
   deploy/k8s/32b-reproject-etape-job.yaml
-  deploy/k8s/34-refresh-cronjob.yaml
   deploy/k8s/refresh-diag/diag-refresh-job.yaml
-  deploy/k8s/refresh-cronjobs-prod/kustomization.yaml
   .github/workflows/grounding-preprod.yml
   .github/workflows/grounding-publish-prod.yml
   .github/workflows/run-job.yaml
@@ -69,6 +67,10 @@ for suffix in ENDPOINT BUCKET REGION FORCE_PATH_STYLE ACCESS_KEY SECRET_KEY; do
 done
 grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs' \
   "$ROOT/deploy/k8s/30-api.yaml" && fail 'deploy/k8s/30-api.yaml retains a legacy storage binding'
+grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|radar-s3-credentials|optional:[[:space:]]*true' \
+  "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" && fail 'deploy/k8s/34-refresh-cronjob.yaml retains a legacy storage binding'
+grep -Fq 'name: radar-refresh-pv' "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" ||
+  fail 'deploy/k8s/34-refresh-cronjob.yaml lost radar-refresh-pv'
 
 for rel in scripts/mount-scw.sh scripts/umount-scw.sh; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"

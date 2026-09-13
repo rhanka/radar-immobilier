@@ -106,27 +106,19 @@ spec:
                   valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
                 - name: POSTGRES_DB
                   valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
-                - name: S3_ACCESS_KEY
-                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
-                - name: S3_SECRET_KEY
-                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
-                # SCRAPE_S3 EXPLICITE vers Scaleway (bucket scrape = radar-immobilier-docs-pocs,
-                # même que raw/proces-verbaux-<city>/cas/). Le secret radar-scrape-s3-credentials
-                # est ABSENT sur OVH → le worker retombait sur l'endpoint MinIO in-cluster
-                # (radar-immobilier-docs.radar-minio, virtual-hosted) → ENOTFOUND (échec 2026-08-03).
-                # Creds depuis radar-s3-credentials (le secret Scaleway qui marche pour emit/apply).
+                # Dedicated provider-neutral canonical DOCS binding.
                 - name: SCRAPE_S3_ENDPOINT
-                  value: "https://s3.fr-par.scw.cloud"
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_ENDPOINT } }
                 - name: SCRAPE_S3_BUCKET
-                  value: "radar-immobilier-docs-pocs"
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_BUCKET } }
                 - name: SCRAPE_S3_REGION
-                  value: "fr-par"
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_REGION } }
                 - name: SCRAPE_S3_ACCESS_KEY
-                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY } }
                 - name: SCRAPE_S3_SECRET_KEY
-                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
                 - name: SCRAPE_S3_FORCE_PATH_STYLE
-                  value: "false"
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_FORCE_PATH_STYLE } }
               resources:
                 # 256Mi structurally too low (node heap ~240-280Mi + poppler/pdftotext
                 # in the same cgroup) — this is the latent OOM masked while the CronJob
@@ -209,43 +201,19 @@ spec:
                   valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
                 - name: POSTGRES_DB
                   valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
-                - name: S3_ACCESS_KEY
-                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
-                - name: S3_SECRET_KEY
-                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
-                # ── Store de graphes EXPLICITE (GRAPH_S3_*) ───────────────────
-                # Garantit le bon bucket SCW (radar-immobilier-docs-pocs)
-                # INDÉPENDAMMENT du secret radar-scrape-s3-credentials, absent en
-                # prod (sa disparition faisait tomber resolveGraphS3Config sur
-                # S3_ENDPOINT=radar-minio + bucket "radar-immobilier-docs" →
-                # ENOTFOUND, projection gelée). GRAPH_S3_* a priorité sur
-                # SCRAPE_S3_*/S3_* dans resolveGraphS3Config (config.ts).
+                # Dedicated provider-neutral canonical graph binding.
                 - name: GRAPH_S3_ENDPOINT
-                  value: "https://s3.fr-par.scw.cloud"
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_ENDPOINT } }
                 - name: GRAPH_S3_BUCKET
-                  value: "radar-immobilier-docs-pocs"
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_BUCKET } }
                 - name: GRAPH_S3_REGION
-                  value: "fr-par"
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_REGION } }
                 - name: GRAPH_S3_FORCE_PATH_STYLE
-                  value: "false"
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_FORCE_PATH_STYLE } }
                 - name: GRAPH_S3_ACCESS_KEY
-                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+                  valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_ACCESS_KEY } }
                 - name: GRAPH_S3_SECRET_KEY
-                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
-                # Bloc SCRAPE_S3_* conservé (optional:true → ne gêne pas ; sert de
-                # repli quand GRAPH_S3_* ne serait pas fourni). Sans effet ici.
-                - name: SCRAPE_S3_ENDPOINT
-                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ENDPOINT, optional: true } }
-                - name: SCRAPE_S3_BUCKET
-                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_BUCKET, optional: true } }
-                - name: SCRAPE_S3_REGION
-                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_REGION, optional: true } }
-                - name: SCRAPE_S3_ACCESS_KEY
-                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY, optional: true } }
-                - name: SCRAPE_S3_SECRET_KEY
-                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY, optional: true } }
-                - name: SCRAPE_S3_FORCE_PATH_STYLE
-                  value: "false"
+                  valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_SECRET_KEY } }
               resources:
                 requests: { cpu: 50m, memory: 96Mi }
                 limits: { cpu: 150m, memory: 256Mi }
@@ -349,10 +317,18 @@ spec:
                   valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
                 - name: POSTGRES_DB
                   valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+                - name: SCRAPE_S3_ENDPOINT
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_ENDPOINT } }
+                - name: SCRAPE_S3_BUCKET
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_BUCKET } }
+                - name: SCRAPE_S3_REGION
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_REGION } }
+                - name: SCRAPE_S3_FORCE_PATH_STYLE
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_FORCE_PATH_STYLE } }
                 - name: SCRAPE_S3_ACCESS_KEY
-                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY } }
                 - name: SCRAPE_S3_SECRET_KEY
-                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
               resources:
                 # Keep this network-bound pilot within the live preprod quota;
                 # 1Gi of Node heap retains 512Mi for native/runtime overhead.
