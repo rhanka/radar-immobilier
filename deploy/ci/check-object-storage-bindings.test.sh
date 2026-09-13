@@ -70,6 +70,9 @@ run_bad "$CASE_ROOT" 'rejects a restored SCW image pull secret'; rm -rf "$CASE_R
 fixture; echo 'REFRESH_DIAG_ENABLED' >>"$CASE_ROOT/.github/workflows/build-push-images.yml"
 run_bad "$CASE_ROOT" 'rejects a restored MinIO refresh diagnostic'; rm -rf "$CASE_ROOT"
 
+fixture; echo 'image: radar-grounding' >>"$CASE_ROOT/.github/workflows/build-push-images.yml"
+run_bad "$CASE_ROOT" 'rejects a restored grounding image build'; rm -rf "$CASE_ROOT"
+
 fixture; mkdir -p "$CASE_ROOT/deploy/k8s/refresh-diag"; touch "$CASE_ROOT/deploy/k8s/refresh-diag/diag-refresh-job.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored refresh diagnostic manifest'; rm -rf "$CASE_ROOT"
 

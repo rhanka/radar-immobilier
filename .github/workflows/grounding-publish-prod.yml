@@ -1,34 +1,7 @@
 name: Grounding publish (prod, SCW docs-pocs, GH-runner)
 
-# One-shot PROD publish of a host-staged grounded candidate, intra-docs-pocs:
-#   candidats/<city>/latest.json  ->  <dst_prefix>/<city>/latest.json   (SAME bucket radar-immobilier-docs-pocs)
-# hash-verified + fail-closed, via tools/grounding/publish-verify-graph.sh (guard-relax authored by
-# extraction in #609, extrait ici comme ACTE-1 mergeable). MANUAL only (workflow_dispatch).
-#
-# ── WHY A GH-RUNNER, NOT A K8S JOB (ruling i-arch) ──
-# Both SRC and DST are SCW docs-pocs (external S3), NOT the in-cluster MinIO. So the publish needs
-# NO cluster access at all: it runs entirely on the GitHub Actions runner with s5cmd + SCW creds.
-# ⇒ ZERO prod-cluster exposure (no kubeconfig, no kubectl, no prod namespace touched). This is the
-# safest execution-location and is the CHOSEN mechanism. EXEC-LOCATION is flagged to i-arch below.
-#   Alternative (NOT used): a k8s Job in ns radar-immobilier mirroring 41-grounding-citation-job.yaml,
-#   DST=docs-pocs graph/, creds from an in-cluster secret (graph-copy-creds / radar-scrape-s3-credentials).
-#   Tradeoff: it would run inside the PROD namespace (blast radius) for no benefit, since the publish is
-#   pure SCW-to-SCW S3. i-arch to rule if a cluster-side execution is ever preferred.
-#
-# ── FLAG i-arch/owner — REQUIRED SCW ACTIONS SECRETS (not provisioned yet) ──
-# The runner needs an S3 access-key-id + secret-key pair SCOPED to radar-immobilier-docs-pocs
-# (READ candidats/ + WRITE <dst_prefix>/). The repo currently exposes NO such pair to Actions:
-#   - secrets.SCW_SECRET_KEY is the SCW *registry* password (nologin) — NOT an S3 access-key-id pair ;
-#   - secrets.BACKUP_S3_ACCESS_KEY/SECRET_KEY are scoped to the DB-backup bucket — MUST NOT be assumed
-#     to reach docs-pocs.
-# ⇒ Owner/i-arch action (do NOT invent): create an SCW Object Storage scoped access key on
-#   radar-immobilier-docs-pocs and add it as repo secrets SCW_DOCS_POCS_ACCESS_KEY /
-#   SCW_DOCS_POCS_SECRET_KEY. This workflow FAILS-CLOSED (below) if either is empty.
-#
-# ── ARMING (owner) ──
-# Prod-side, owner-gated + DISARMED by default (mirrors BACKUP_BEFORE_RELEASE_PROD_ENABLED): stays
-# SKIPPED until the repo VARIABLE GROUNDING_PUBLISH_PROD_ENABLED == 'true'. Arming is a deliberate,
-# separate owner step — never a side effect of merging this PR.
+# Permanently disarmed during the OVH cutover. The retired workflow is deleted
+# in the following atomic commit.
 
 on:
   workflow_dispatch:
@@ -61,8 +34,7 @@ env:
 jobs:
   publish:
     name: Publish ${{ inputs.city }} -> ${{ inputs.dst_prefix }}/ (prod docs-pocs)
-    # DISARMED by default — owner arms via repo variable (see header).
-    if: vars.GROUNDING_PUBLISH_PROD_ENABLED == 'true'
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
