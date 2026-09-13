@@ -12,7 +12,7 @@ OWNER_SCOPE := cli:antoinefa-ROG-Flow-Z13-GZ302EA-GZ302EA
 T1_COMMIT := f9b311da536bda2e1442d154a05599c35b482518
 KEYRING_SOURCE := /home/antoinefa/.sentropic/llm-mesh-keyring
 
-.PHONY: test runtime-text prepare-prompts run-case quota
+.PHONY: test runtime-text prepare-prompts run-case quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -83,3 +83,14 @@ quota:
 	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_MODEL=gpt-5.6-sol \
 	  -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec node tools/refresh-benchmark/codex-preflight.mjs'
+
+inspect-validation:
+	test "$(ENV)" = "test-refresh-benchmark"
+	test -n "$(OUTPUT)"
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  --mount type=volume,source=$(ROOT_MODULES),target=$(T1_ROOT)/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=$(T1_ROOT) \
+	  -e BENCHMARK_OUTPUT=$(OUTPUT) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  /workspace/node_modules/.bin/tsx tools/refresh-benchmark/inspect-validation.mjs

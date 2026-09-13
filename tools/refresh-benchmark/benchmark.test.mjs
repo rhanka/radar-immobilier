@@ -50,3 +50,10 @@ test("controls keep their regulatory meaning", () => {
   assert.match(agenda.selectionRationale, /future agenda/);
   assert.match(agenda.selectionRationale, /no completed adoption/);
 });
+
+test("the live runner binds the wall timeout to the actual fetch", async () => {
+  const runner = await readFile(resolve(root, "tools/refresh-benchmark/run-case.mjs"), "utf8");
+  assert.match(runner, /AbortSignal\.any\(\[init\.signal, controller\.signal\]\)/);
+  assert.match(runner, /fetch\(url, \{ \.\.\.init, signal \}\)/);
+  assert.match(runner, /transportTimeoutMs: 480_000/);
+});
