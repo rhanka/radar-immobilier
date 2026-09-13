@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 // These are the resources whose identity must survive the infrastructure-to-PV zoom.
-const requiredShared = ['PP-DB', 'PP-MINIO', 'PP-RAW', 'PP-DOCS', 'PP-GROUND',
-  'PP-GRAPH', 'LEGACY-POC', 'GEO-S3', 'PP-GEO-S3', 'PP-API', 'PP-UI', 'PP-GEO',
-  'PP-SCRAPE', 'PP-PROJECT', 'PP-PUBLISH', 'WS-IMMO'];
+const requiredShared = ['PP-DB', 'PP-MINIO', 'PP-RAW', 'PP-DOCS',
+  'PP-GRAPH', 'GEO-S3', 'PP-GEO-S3', 'PP-API', 'PP-UI', 'PP-GEO',
+  'PP-SCRAPE', 'PP-PROJECT', 'WS-IMMO'];
 
 function resources(source) {
   const result = new Map();
@@ -41,6 +41,9 @@ for (const id of requiredShared) {
 }
 compare(overview, immo);
 compare(overview, geo);
+for (const id of ['PP-PUBLISH', 'PP-GROUND', 'LEGACY-POC', 'PR-MINIO', 'PR-REFRESH']) {
+  assert(!overview.has(id) && !immo.has(id), `Unobserved legacy resource ${id} presented as operational`);
+}
 for (const id of ['PP-DB', 'PP-MINIO', 'PP-RAW', 'PP-DOCS', 'PP-GROUND',
   'PP-GRAPH', 'LEGACY-POC', 'GEO-S3', 'PP-GEO-S3']) {
   assert(markdown.includes(`| \`${id}\` |`), `Resource register entry ${id} missing`);

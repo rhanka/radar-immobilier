@@ -58,6 +58,7 @@
   - [x] Re-fetch main, check migration PRs and re-audit whitelisted live preprod bindings; #670 remains draft, MinIO still configured for API.
   - [ ] Obtain OVH production read-only evidence; never substitute the legacy SCW cluster.
   - [ ] Exclude unobserved legacy paths from operational diagrams and regenerate Focus.
+  - [x] Remove unobserved SCW/grounding templates and unverified production storage from diagrams 1–2; keep live MinIO API bindings.
 
 ## Merge / Close
 - [ ] Local documentation handoff; no production action or branch merge requested.

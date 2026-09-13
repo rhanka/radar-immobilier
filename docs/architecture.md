@@ -1,10 +1,21 @@
 # Immo, Geo and Kubernetes architecture
 
-Snapshot: **2026-09-13**, with read-only cluster checks at **11:38 UTC**. This describes the current system, including transitional wiring. The workstation is still required to produce/enrich LLM-derived graphs. A nightly scrape followed by a projection does not by itself create new LLM-derived signals.
+Snapshot: **2026-09-13**, refreshed against remote **main `09703678`** and read-only preprod Kubernetes checks at **12:33–12:37 UTC**. This describes observed configuration, not an assertion that every configured path succeeds. The workstation is still required for LLM-derived graphs.
 
 Evidence labels: **LIVE** = observed during this inspection; **DECLARED** = repository configuration, not proof of deployment; **PLANNED** = documented evolution. Links and source revisions are collected at the end.
 
-**Reading the diagrams:** bracketed IDs identify the **same resource in every view**. `PP-` = preproduction, `PR-` = production; `GEO-S3` and `LEGACY-POC` are shared/reference buckets, not environment-isolated copies. Diagram 1 locates resources, diagram 2 zooms into **preprod Immo** using those exact IDs, and diagram 3 follows Geo products. An arrow labelled READ is a reader dependency, not a write or replication. Dashed edges are declared/conditional paths, not verified transfers. The resource register in §3 is the cross-view key.
+**Reading the diagrams:** bracketed IDs identify the **same resource in every view**. `PP-` = preproduction, `PR-` = production; `GEO-S3` is a shared corpus. Diagram 1 locates resources, diagram 2 zooms into **preprod Immo** using those exact IDs, and diagram 3 follows Geo products. READ arrows point from consumer to store, not in the direction of byte transfer. Dashed edges are conditional/unverified. Unobserved legacy publication templates are listed in §3, **not drawn as active workloads**. Production storage is explicitly unknown until an OVH inventory is available.
+
+**Storage migration is partial, not complete** ([dated audit and migration PRs](architecture/storage-audit.md)):
+
+| Effective path | Preproduction | Production |
+| --- | --- | --- |
+| API default object store | **MinIO still deployed and configured**, bucket `radar-immobilier-raw` | OVH runtime not audited; main still declares MinIO |
+| Scrape + canonical projection | **OVH S3**, same `radar-immobilier-graph-preprod` bucket | OVH runtime not audited; main retains SCW refresh bindings |
+| Mapped PV document reader | **OVH `sentropic-geo/raw/pv-index/cas/`** | Repoint activation not audited |
+| Eradication work | #677 migrated preprod CronJobs, not API; #674 retains/pins MinIO | #670 is **OPEN DRAFT**, not merged; registry migration #671/#672 is not storage migration |
+
+Do not read the old SCW cluster's retained workloads as today's production. The public production application is reachable, but the available OVH credential cannot inventory its namespace. No SCW S3 path is asserted as live here solely because a main manifest names it.
 
 ## 1. User access and environment boundaries
 
@@ -35,12 +46,10 @@ flowchart TB
       PP_DB[("[PP-DB] radar-postgres<br/>radar-immobilier-preprod · PG/PostGIS")]
       subgraph ppminio["[PP-MINIO] radar-minio · PVC"]
         PP_RAW[("[PP-RAW] radar-immobilier-raw<br/>MinIO · API state / legacy objects")]
-        PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · API scrape-store default")]
-        PP_GROUND[("[PP-GROUND] radar-immobilier-docs-preprod<br/>MinIO · Job 41 target, DECLARED")]
+        PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · derived reader default; writer unverified")]
       end
-      PP_SCRAPE["[PP-SCRAPE] radar-refresh-scrape<br/>Stages 1 + 2 · daily 03:17 UTC"]
+      PP_SCRAPE["[PP-SCRAPE] radar-refresh-scrape<br/>1 collect + 2 parse/exploit · 03:17 UTC"]
       PP_PROJECT["[PP-PROJECT] radar-refresh-projection<br/>Stage 4 · daily 04:30 UTC"]
-      PP_PUBLISH["[PP-PUBLISH] Job 41<br/>Publish-only · DECLARED"]
       pidp["sentropic-preprod · auth-idp<br/>preprod.auth.sent-tech.ca"]
       pidb[("[PP-SSO-DB] SSO PostgreSQL<br/>Not PP-DB · platform record")]
       PP_GEO["[PP-GEO] geo-api · geo-preprod<br/>api.preprod.geo.sent-tech.ca"]
@@ -50,7 +59,6 @@ flowchart TB
       PP_API -->|"Legacy document READ"| PP_DOCS
       PP_SCRAPE -->|"Direct additive WRITE"| PP_DB
       PP_PROJECT -->|"Atomic WRITE"| PP_DB
-      PP_PUBLISH -.->|"WRITE graph/"| PP_GROUND
       PP_UI -->|"/api/geo/collections*"| PP_GEO
       PP_API -->|"READ OGC"| PP_GEO
       PP_API <-->|"OIDC token exchange / JWKS"| pidp
@@ -59,17 +67,13 @@ flowchart TB
     subgraph prod["PRODUCTION · namespaces"]
       PR_UI["[PR-UI] radar-ui<br/>radar-immobilier"]
       PR_API["[PR-API] radar-api<br/>radar-immobilier"]
-      PR_DB[("[PR-DB] radar-postgres<br/>radar-immobilier · PG/PostGIS · DECLARED")]
-      PR_MINIO[("[PR-MINIO] radar-minio / PVC<br/>API stores · DECLARED; overrides unverified")]
-      PR_REFRESH["[PR-REFRESH] refresh CronJobs<br/>DECLARED · activation not audited"]
+      prodgap["Production DB / S3 / refresh<br/>OVH inventory unavailable<br/>No provider inferred from main"]
       idp["sentropic · auth-idp<br/>auth.sent-tech.ca"]
       idb[("[PR-SSO-DB] SSO PostgreSQL<br/>Not PR-DB · platform record")]
       GEO_API["[GEO-API] geo-api · geo<br/>api.geo.sent-tech.ca"]
       GEO_DB[("[GEO-DB] geo/postgis<br/>LIVE · no OGC DB dependency demonstrated")]
       PR_UI -->|"/api/*"| PR_API
-      PR_API -->|"SQL read/write"| PR_DB
-      PR_API -.->|"Base S3 configuration"| PR_MINIO
-      PR_REFRESH -.->|"WRITE"| PR_DB
+      PR_API -.->|"Evidence gap"| prodgap
       PR_UI -->|"/api/geo/collections*"| GEO_API
       PR_API -->|"READ OGC"| GEO_API
       PR_API <-->|"OIDC token exchange / JWKS"| idp
@@ -89,19 +93,13 @@ flowchart TB
   PP_GRAPH[("[PP-GRAPH] radar-immobilier-graph-preprod<br/>OVH S3 · corpus AND canonical graph")]
   PP_GEO_S3[("[PP-GEO-S3] sentropic-geo-preprod<br/>OVH S3 · normalized/ serving copy")]
   GEO_S3[("[GEO-S3] sentropic-geo<br/>OVH S3 · raw corpus + normalized/ products")]
-  LEGACY_POC[("[LEGACY-POC] radar-immobilier-docs-pocs<br/>Scaleway S3 · candidats/ + graph/ · DECLARED")]
   WS_IMMO["[WS-IMMO] Immo Graphify / grounding<br/>Operator workstation · LLM stage 3"]
   WS_IMMO -.->|"Run-selected corpus READ / validated graph WRITE"| PP_GRAPH
-  WS_IMMO -.->|"Declared staging WRITE candidats/"| LEGACY_POC
-  PP_BACKUP[("[PP-BACKUP] radar-preprod-snapshot<br/>OVH S3 · restore source, not the PV corpus")]
-  restore["Snapshot-restore Job<br/>Completed; separate from refresh"] -->|"READ"| PP_BACKUP
   PP_SCRAPE -->|"WRITE raw/ parsed/ ontology/ runs/"| PP_GRAPH
   PP_PROJECT -->|"READ graph/"| PP_GRAPH
-  PP_PUBLISH -.->|"READ candidats/"| LEGACY_POC
-  PR_REFRESH -.->|"Declared graph READ; scrape target secret-backed"| LEGACY_POC
   PP_GEO -->|"READ normalized/"| PP_GEO_S3
   GEO_API -->|"READ normalized/"| GEO_S3
-  PP_API -->|"READ PV PDFs · LIVE repoint<br/>shared corpus, NOT PP-GEO-S3"| GEO_S3
+  PP_API -->|"READ raw/pv-index/cas/<br/>Shared PV corpus · LIVE repoint"| GEO_S3
 ```
 
 **Isolation is not absolute:** preprod has its own application DB and OGC serving copy, but `PP-API` currently reads mapped PV documents from `GEO-S3` (`sentropic-geo`), not from `PP-GEO-S3`. This read-only corpus dependency is separate from map/OGC traffic. Production Immo overrides and its document-repoint activation have not been inventoried live; do not infer them by symmetry.
@@ -122,53 +120,41 @@ flowchart TB
   provider["LLM provider<br/>Inference may be remote; orchestration is local"]
   subgraph immo["IMMO · preprod PV chain"]
   subgraph deterministic["Kubernetes · Immo preprod"]
-    PP_SCRAPE["[PP-SCRAPE] radar-refresh-scrape<br/>Stages 1 + 2 · daily 03:17 UTC"]
-    parse["2 · Inside PP-SCRAPE<br/>pdftotext → deterministic detection<br/>projectStateToGraph"]
+    PP_SCRAPE["[PP-SCRAPE] radar-refresh-scrape<br/>1 collect + 2 parse/exploit · 03:17 UTC"]
     PP_PROJECT["[PP-PROJECT] radar-refresh-projection<br/>Stage 4 · daily 04:30 UTC"]
-    PP_PUBLISH["[PP-PUBLISH] Job 41<br/>Publish-only · DECLARED"]
-    geoimport["IMMO reference resolver<br/>zone_versions / lot_versions<br/>Job absent from live preprod inventory"]
     PP_DB[("[PP-DB] radar-postgres<br/>radar-immobilier-preprod · PG/PostGIS")]
     PP_API["[PP-API] radar-api<br/>radar-immobilier-preprod"]
     PP_UI["[PP-UI] radar-ui<br/>radar-immobilier-preprod"]
     subgraph ppminio["[PP-MINIO] radar-minio · PVC"]
       PP_RAW[("[PP-RAW] radar-immobilier-raw<br/>MinIO · API state / legacy objects")]
-      PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · API scrape-store default")]
-      PP_GROUND[("[PP-GROUND] radar-immobilier-docs-preprod<br/>MinIO · Job 41 target, DECLARED")]
+      PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · derived reader default; writer unverified")]
     end
   end
   WS_IMMO["[WS-IMMO] Immo Graphify / grounding<br/>Operator workstation · LLM stage 3"]
   PP_GRAPH[("[PP-GRAPH] radar-immobilier-graph-preprod<br/>OVH S3 · corpus AND canonical graph")]
-  LEGACY_POC[("[LEGACY-POC] radar-immobilier-docs-pocs<br/>Scaleway S3 · candidats/ + graph/ · DECLARED")]
   end
   PP_GEO["[PP-GEO] geo-api · geo-preprod<br/>api.preprod.geo.sent-tech.ca"]
   PP_GEO_S3[("[PP-GEO-S3] sentropic-geo-preprod<br/>OVH S3 · normalized/ serving copy")]
   GEO_S3[("[GEO-S3] sentropic-geo<br/>OVH S3 · raw corpus + normalized/ products")]
   websites -->|"1 · discover / fetch / CAS"| PP_SCRAPE
-  PP_SCRAPE -->|"WRITE raw/ + metadata + runs/"| PP_GRAPH
-  PP_SCRAPE -->|"Same worker"| parse
-  parse -->|"READ raw/; WRITE parsed/ + ontology/"| PP_GRAPH
-  parse -->|"Direct additive WRITE · upsertGraph"| PP_DB
+  PP_SCRAPE -->|"WRITE raw/ parsed/ ontology/ runs/"| PP_GRAPH
+  PP_SCRAPE -->|"Direct additive WRITE · upsertGraph"| PP_DB
   WS_IMMO -.->|"Run-selected corpus READ / validated graph WRITE"| PP_GRAPH
   WS_IMMO <-->|"Model calls; evidence / schema gates"| provider
-  WS_IMMO -.->|"Declared staging WRITE candidats/"| LEGACY_POC
-  PP_PUBLISH -.->|"READ candidats/"| LEGACY_POC
-  PP_PUBLISH -.->|"WRITE graph/"| PP_GROUND
   PP_PROJECT -->|"READ graph/"| PP_GRAPH
   PP_PROJECT -->|"Atomic WRITE · upsertGraphAtomic"| PP_DB
   PP_API -->|"SQL read/write · signals / evidence"| PP_DB
   PP_UI -->|"/api/* · signals and PDF viewer"| PP_API
   PP_API -->|"READ/WRITE API store"| PP_RAW
   PP_API -->|"Legacy document READ"| PP_DOCS
-  PP_API -->|"READ mapped PV PDFs · no Immo fallback"| GEO_S3
+  PP_API -->|"READ raw/pv-index/cas/<br/>Mapped PVs · no Immo fallback"| GEO_S3
   PP_API -->|"READ OGC features"| PP_GEO
   PP_GEO -->|"READ normalized/"| PP_GEO_S3
-  geoimport -.->|"READ OGC"| PP_GEO
-  geoimport -.->|"WRITE resolved geographic references"| PP_DB
   classDef local fill:#fff0d7,stroke:#ad6a00,color:#332000;
   class WS_IMMO local;
 ```
 
-**Exact zoom:** `PP-DB` is the same database as in diagram 1, not a new Graphify database. `PP-GRAPH` is **one physical bucket**: `raw/`, `parsed/`, `ontology/`, `runs/` and `graph/` are prefixes, not five S3 services. `PP-RAW`, `PP-DOCS` and `PP-GROUND` are different configured buckets behind the same `PP-MINIO` service; their content/existence was not inventoried. No bridge from `PP-GROUND` to `PP-GRAPH` was demonstrated, so none is drawn. The workstation arrows show configurable run contracts, not a verified recent publication into preprod. Production bindings are recorded separately in §3; do not reuse `PP-` resources for production.
+**Exact zoom:** `PP-DB` is the same database as in diagram 1, not a new Graphify database. `PP-GRAPH` is **one physical bucket**: `raw/`, `parsed/`, `ontology/`, `runs/` and `graph/` are prefixes, not five S3 services. `PP-RAW` and `PP-DOCS` are different API bindings behind the same `PP-MINIO`; their content/existence was not inventoried. Stages 1 and 2 run in **one scrape worker**, not separate services. Workstation arrows are configurable run contracts, **not proof of a recent publication into PP-GRAPH**. No active stage-3 publisher was established by this inventory. Legacy Job 41 is excluded, not assumed to bridge the gap.
 
 | Stage | Actual implementation | Output / boundary | Execution today |
 | --- | --- | --- | --- |
