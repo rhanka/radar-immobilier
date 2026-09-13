@@ -329,55 +329,75 @@ retry_get_version() {
   rm -f "$body"; return 1
 }
 
+manifest_one() {
+  local side="$1" bucket="$2" item="$3" index="$4" result="$5"
+  local key size class head tags body getout sha operation=""
+  key="$(jq -r '.key' <<<"$item")"; size="$(jq -r '.size' <<<"$item")"
+  class="$(classify_key "$key")"
+  head="$WORK_DIR/$side-head-$index.json"; tags="$WORK_DIR/$side-tags-$index.json"
+  body="$WORK_DIR/$side-body-$index"; getout="$WORK_DIR/$side-get-$index.json"
+  if [ "$size" -gt "$MAX_OBJECT_BYTES" ]; then
+    operation=max-object-bytes
+  elif ! retry_json "$head" "$side" head-object --bucket "$bucket" --key "$key"; then
+    operation=head-object
+  elif ! retry_get_object "$getout" "$body" "$side" "$bucket" "$key"; then
+    operation=get-object
+  elif ! retry_json "$tags" "$side" get-object-tagging --bucket "$bucket" --key "$key"; then
+    operation=get-object-tagging
+  elif [ "$(jq -r '.ContentLength' "$head")" != "$size" ]; then
+    operation=unstable-size
+  fi
+  if [ -n "$operation" ]; then
+    rm -f "$body"
+    jq -cn --arg key "$key" --arg operation "$operation" \
+      '{status:"failed",key:$key,operation:$operation}' >"$result"
+    return 1
+  fi
+  sha="$(sha256sum "$body" | awk '{print $1}')"; rm -f "$body"
+  jq -cn --argjson listed "$item" --slurpfile head "$head" --slurpfile tags "$tags" \
+    --arg sha "$sha" --arg classification "$class" '
+    {status:"ok",object:{key:$listed.key,size:$head[0].ContentLength,sha256:$sha,
+     contentType:($head[0].ContentType // null),contentEncoding:($head[0].ContentEncoding // null),
+     cacheControl:($head[0].CacheControl // null),
+     contentDisposition:($head[0].ContentDisposition // null),
+     metadata:($head[0].Metadata // {}),tags:(($tags[0].TagSet // []) | sort_by(.Key)),
+     etag:($head[0].ETag // $listed.etag // ""),versionId:($head[0].VersionId // null),
+     classification:$classification}}' >"$result"
+}
+
+consume_manifest_batch() {
+  local side="$1" scratch="$2" result
+  shift 2
+  for result in "$@"; do
+    if [ "$(jq -r '.status' "$result")" = ok ]; then
+      jq -c '.object' "$result" >>"$scratch"
+    else
+      record_failure "$side" "$(jq -r '.key' "$result")" "$(jq -r '.operation' "$result")"
+    fi
+  done
+}
+
 build_manifest() {
-  local side="$1" listing="$2" output="$3" bucket item key size class index=0
-  local head tags body getout sha scratch="$WORK_DIR/$side-manifest.unsorted.jsonl"
+  local side="$1" listing="$2" output="$3" bucket item index=0 parallelism="$CONCURRENCY"
+  local scratch="$WORK_DIR/$side-manifest.unsorted.jsonl" result
+  local -a pids=() results=()
   if $CHECKPOINT_REQUESTED && [ "${CHECKPOINT_BUILDING_PAGE:-false}" != true ]; then
     build_manifest_checkpoint "$side" "$output"; return
   fi
+  [ "$parallelism" -le "$MAX_FAILURES" ] || parallelism="$MAX_FAILURES"
   bucket="$(bucket_for "$side")"; : >"$scratch"
   while IFS= read -r item; do
-    index=$((index + 1)); key="$(jq -r '.key' <<<"$item")"
-    size="$(jq -r '.size' <<<"$item")"; class="$(classify_key "$key")"
-    if [ "$size" -gt "$MAX_OBJECT_BYTES" ]; then
-      record_failure "$side" "$key" max-object-bytes
-      failure_cap_reached && break
-      continue
+    index=$((index + 1)); result="$WORK_DIR/$side-manifest-result-$index.json"
+    manifest_one "$side" "$bucket" "$item" "$index" "$result" &
+    pids+=("$!"); results+=("$result")
+    if [ "${#pids[@]}" -ge "$parallelism" ]; then
+      for pid in "${pids[@]}"; do wait "$pid" || true; done
+      consume_manifest_batch "$side" "$scratch" "${results[@]}"
+      pids=(); results=(); failure_cap_reached && break
     fi
-    head="$WORK_DIR/$side-head-$index.json"; tags="$WORK_DIR/$side-tags-$index.json"
-    body="$WORK_DIR/$side-body-$index"; getout="$WORK_DIR/$side-get-$index.json"
-    if ! retry_json "$head" "$side" head-object --bucket "$bucket" --key "$key"; then
-      record_failure "$side" "$key" head-object
-      failure_cap_reached && break
-      continue
-    fi
-    if ! retry_get_object "$getout" "$body" "$side" "$bucket" "$key"; then
-      record_failure "$side" "$key" get-object
-      failure_cap_reached && break
-      continue
-    fi
-    if ! retry_json "$tags" "$side" get-object-tagging --bucket "$bucket" --key "$key"; then
-      record_failure "$side" "$key" get-object-tagging
-      rm -f "$body"; failure_cap_reached && break
-      continue
-    fi
-    if [ "$(jq -r '.ContentLength' "$head")" != "$size" ]; then
-      record_failure "$side" "$key" unstable-size
-      rm -f "$body"; failure_cap_reached && break
-      continue
-    fi
-    sha="$(sha256sum "$body" | awk '{print $1}')"; rm -f "$body"
-    jq -cn --argjson listed "$item" --slurpfile head "$head" --slurpfile tags "$tags" \
-      --arg sha "$sha" --arg classification "$class" '
-      {key:$listed.key,size:$head[0].ContentLength,sha256:$sha,
-       contentType:($head[0].ContentType // null),
-       contentEncoding:($head[0].ContentEncoding // null),
-       cacheControl:($head[0].CacheControl // null),
-       contentDisposition:($head[0].ContentDisposition // null),
-       metadata:($head[0].Metadata // {}),tags:(($tags[0].TagSet // []) | sort_by(.Key)),
-       etag:($head[0].ETag // $listed.etag // ""),versionId:($head[0].VersionId // null),
-       classification:$classification}' >>"$scratch" || return 1
   done <"$listing"
+  for pid in "${pids[@]}"; do wait "$pid" || true; done
+  consume_manifest_batch "$side" "$scratch" "${results[@]}"
   jq -cs 'sort_by(.key)[]' "$scratch" >"$output" || return 1
   ! failure_cap_reached
 }
