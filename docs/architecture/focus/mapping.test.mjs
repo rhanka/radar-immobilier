@@ -56,12 +56,14 @@ test('unsupported syntax and dangling references fail closed', () => {
   assert.throws(() => parseMermaid('flowchart LR\na --> b --> c', 'bad', 'bad'), /unsupported/);
 });
 
-test('dossier remains a presentation with eight sections and the fixed TEM exception', () => {
+test('dossier presents the engaged D4 plan and only the unresolved billing question', () => {
   assert.equal(presentation.length, 8);
   assert.match(presentation.join('\n'), /TEM reste/);
-  assert.match(presentation[7], /Pas de demande d’approbation/);
+  assert.match(presentation[0], /T1.*T2.*T3/s);
+  assert.match(presentation.join('\n'), /méthode.*allocation LLM/i);
+  assert.doesNotMatch(presentation.join('\n'), /exécution différée|sans démarrer les travaux|ordre des travaux.*A.*B.*C/s);
   assert.equal(docs['decision-dossier'].match(/^## /gm).length, 8);
-  assert.match(docs['decision-dossier'], /INCOMPLETE/);
+  assert.match(docs['decision-dossier'], /Revision \*\*D4/);
   assert.match(docs['decision-dossier'], /retain SCW TEM/);
-  assert.match(docs['decision-dossier'], /does not request approval/);
+  assert.match(docs.transitions, /refresh first,\nMinIO second, one-node Kubernetes third/);
 });

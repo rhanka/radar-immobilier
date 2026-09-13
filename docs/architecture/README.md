@@ -36,15 +36,16 @@ it works offline and does not require a Claude session, server or external CDN.
   unresolved ownership. These are generic symbols, not cloud-vendor logos.
 - Every node/edge/subgraph is covered by tests; dashed and bidirectional semantics
   are preserved. Full-diagram fitting uses explicit absolute nested bounds.
-- Section 4 uses the example's DS **Tile + Radio** pattern: A/B/C selection,
-  comment, local persistence, **copy JSON** and download. The response includes
-  all three options, selected ID, comment, general remarks and source hashes.
-  Choices start empty and remain **drafts**, never approval/Track/deployment actions.
+- Section 4 uses the example's DS **Tile + Radio** pattern for the remaining
+  LLM-allocation question: DIRECT, USAGE or CAPACITY, comment, local persistence,
+  **copy JSON** and download. The response includes all three methods, fixed
+  T1/T2/T3 and billing decisions, selected ID, remarks and source hashes.
+  Choices start empty and remain **drafts**; no final amount is inferred.
   Clipboard denial is explicit; the JSON remains keyboard-selectable/downloadable.
 - Sources open in an accessible dialog; external evidence links require a click.
-- The dossier remains **INCOMPLETE**: production inventory/recovery criteria and
-  the independent Opus pass are missing. Codex findings and Opus quota failure
-  are disclosed individually; Gemini's older review is not reused as D2 approval.
+- The D4 dossier accompanies the engaged T1→T2→T3 execution and remains
+  **INCOMPLETE** for monetary audit, production inventory/recovery criteria and
+  post-build independent review. Earlier reviews are not reused as D4 approval.
 
 ## Build and verification
 
@@ -64,7 +65,7 @@ make -f docs/architecture/focus/Makefile clipboard ENV=test-architecture
 
 `browser` verifies five complete diagrams at 18 viewport positions, visible nested
 bounds, every icon/repo label, card/header overflow, exact SvelteFlow/Mermaid texts,
-shared-DB navigation, full-screen/Escape, choices,
+shared-DB navigation, full-screen/Escape, the LLM-allocation choice,
 comments, persistence, source dialogs, clipboard failure, responsive and offline use.
 `clipboard` checks actual clipboard read-back in a fresh browser context, then
 restores its previous contents and disposes only that test context.

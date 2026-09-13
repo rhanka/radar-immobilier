@@ -27,6 +27,7 @@ console.log(await evaluate(`(async () => {
   const settle = () => new Promise(resolve => setTimeout(resolve, 180));
   const choose = (label, value) => { const e = document.querySelector('select[aria-label="' + label + '"]'); e.value = value; e.dispatchEvent(new Event('change', { bubbles: true })); };
   if (document.querySelectorAll('.steps button').length !== 8) throw Error('Eight dossier sections missing');
+  if (!document.querySelector('.masthead').textContent.includes('EXÉCUTION ENGAGÉE')) throw Error('D4 execution state missing');
   const views = [...document.querySelector('select[aria-label="Vue architecture"]').options].map(o => o.value);
   let checked = 0;
   for (const view of views) {
@@ -78,21 +79,23 @@ console.log(await evaluate(`(async () => {
   window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); await settle();
   if (document.querySelector('.expanded')) throw Error('Escape failed');
   document.querySelectorAll('.steps button')[3].click(); await settle();
+  if (!document.querySelector('.choices').textContent.includes('Quelle méthode auditable doit allouer la dépense LLM')) throw Error('LLM allocation question missing');
   if (document.querySelectorAll('input[type="radio"]:checked').length) throw Error('Unexpected default owner choice');
-  for (const option of ['A', 'B', 'C']) {
+  for (const option of ['DIRECT', 'USAGE', 'CAPACITY']) {
     document.querySelector('input[type="radio"][value="' + option + '"]').click(); await settle();
     if (document.querySelectorAll('input[type="radio"]:checked').length !== 1 || document.querySelector('input[type="radio"]:checked').value !== option) throw Error('Choice failed: ' + option);
   }
   const comment = document.querySelector('.choices textarea'); comment.value = 'Vérifier la reprise avant bascule.'; comment.dispatchEvent(new Event('input', { bubbles: true })); await settle();
   const preview = JSON.parse(document.querySelector('.choice-json textarea').value);
-  if (preview.decision.option !== 'C' || preview.decision.note !== comment.value || preview.options.length !== 3 || preview.status !== 'draft-not-ratified') throw Error('JSON response pack lost choice/comment');
+  if (preview.decision.option !== 'CAPACITY' || preview.decision.key !== 'llm-allocation-method' || preview.decision.note !== comment.value || preview.options.length !== 3 || preview.status !== 'draft-not-ratified') throw Error('JSON response pack lost choice/comment');
+  if (preview.fixedDecisions.executionOrder[0] !== 'T1-refresh-graphify-0.18.0' || preview.fixedDecisions.infrastructureBilling.projectedNodeCad !== 59.04 || preview.fixedDecisions.monetaryProposalAudit !== 'incomplete' || 'finalBillableCad' in preview) throw Error('JSON response pack lost fixed decisions or invented a bill');
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.testCopiedChoice = text; } } });
-  [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier les choix en JSON').click(); await settle();
+  [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier la réponse en JSON').click(); await settle();
   if (JSON.parse(window.testCopiedChoice).decision.note !== comment.value || !document.querySelector('.choices').textContent.includes('copiés en JSON')) throw Error('Copy action failed');
   document.querySelectorAll('.steps button')[2].click(); await settle(); document.querySelectorAll('.steps button')[3].click(); await settle();
-  if (document.querySelector('input[type="radio"]:checked')?.value !== 'C' || document.querySelector('.choices textarea').value !== preview.decision.note) throw Error('Draft persistence failed');
+  if (document.querySelector('input[type="radio"]:checked')?.value !== 'CAPACITY' || document.querySelector('.choices textarea').value !== preview.decision.note) throw Error('Draft persistence failed');
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw Error('Denied'); } } });
-  [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier les choix en JSON').click(); await settle();
+  [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier la réponse en JSON').click(); await settle();
   if (!document.querySelector('.choice-json').open || !document.querySelector('.choices').textContent.includes('Copie refusée')) throw Error('Denied clipboard not explained');
   [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Retirer le choix').click();
   const clear = document.querySelector('.choices textarea'); clear.value = ''; clear.dispatchEvent(new Event('input', { bubbles: true })); await settle();
@@ -105,6 +108,9 @@ console.log(await evaluate(`(async () => {
   if (!document.querySelector('dialog[open]')?.textContent.includes('weekly')) throw Error('Embedded review evidence missing');
   document.querySelector('dialog').close(); await settle();
   if (document.querySelector('dialog')) throw Error('Dialog close failed');
+  [...document.querySelectorAll('.source-links button')].find(b => b.textContent === 'transitions').click(); await settle();
+  if (!document.querySelector('dialog[open]')?.textContent.includes('T1 — autonomous PV → Signal cron')) throw Error('Transition evidence missing');
+  document.querySelector('dialog').close(); await settle();
   [...document.querySelectorAll('.source-links button')].find(b => b.textContent === 'architecture').click(); await settle();
   if (document.querySelectorAll('dialog .source-mermaid svg').length !== 4) throw Error('Mermaid in the source document is not rendered');
   [...document.querySelectorAll('dialog .source-mermaid svg')].forEach((svg, index) => {
@@ -114,7 +120,7 @@ console.log(await evaluate(`(async () => {
   document.querySelector('dialog').close(); await settle();
   if (document.documentElement.scrollWidth > innerWidth) throw Error('Desktop overflow');
   document.querySelector('.explorer').scrollIntoView({ behavior: 'instant' });
-  return { status: 'pass', completeNestedViews: views.length, viewportChecks: checked, mermaidRendered: 5, resourceCrossLink: true, fullscreen: true, choices: 'A/B/C + comment + JSON + persistence', clipboard: 'action and denial simulated', evidence: 'embedded and rendered' };
+  return { status: 'pass', completeNestedViews: views.length, viewportChecks: checked, mermaidRendered: 5, resourceCrossLink: true, fullscreen: true, choices: 'LLM allocation + comment + JSON + persistence', clipboard: 'action and denial simulated', evidence: 'transitions embedded and diagrams rendered' };
 })()`));
 await writeFile('/out/flow-preview.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
 await evaluate('window.scrollTo(0, 0)');
