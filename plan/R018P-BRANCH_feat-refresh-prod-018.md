@@ -9,7 +9,7 @@
 - [x] Test environment `test-refresh-prod-018`; API_PORT=8884 UI_PORT=5384 MAILDEV_UI_PORT=1184.
 - [x] Use only image `ghcr.io/rhanka/radar-api@sha256:d4a46b5615a7510fd5bf3384f65dea8b881cb75ae3226a3dc3751a7f9271119e`.
 - [x] Never print or commit credentials, tokens, keyring material, Secret data, prompts, or model output.
-- [x] Do not activate production before the T2 OVH DOCS/RAW bindings are merged and proved live; retain SCW TEM only.
+- [x] Do not activate production before T2's OVH canonical DOCS binding is merged and proved live; retain SCW TEM only.
 
 ## Branch Scope Boundaries (MANDATORY)
 - [x] Allowed Paths:
@@ -22,7 +22,7 @@
 - [x] Rollback: suspend `radar-refresh-pv`, keep both legacy refresh CronJobs suspended, and retain canonical OVH objects plus Postgres state.
 
 ## Feedback Loop
-- [x] T2 must rebase on current `origin/main`, preserve `radar-refresh-pv`, and merge complete provider-neutral OVH bindings before production activation.
+- [x] T2 must merge current `origin/main` without rebasing, preserve `radar-refresh-pv`, and merge complete provider-neutral OVH bindings before production activation.
 - [ ] Record any hard live prerequisite as a blocker; never bypass it.
 
 ## Orchestration Mode (AI-selected)
@@ -44,7 +44,7 @@
   - [x] Require explicit production confirmation and exact immutable image on every mutating target.
   - [x] Fail closed unless OVH DOCS coordinates, dedicated scrape credentials, keyring/runtime resources, MinIO absence, and zero active storage migration Jobs are proved.
 - [ ] **Lot 2 — Production activation and acceptance**
-  - [ ] Rebase onto the merged T2 transition and rerun offline gates.
+  - [ ] Merge the admitted T2 transition without rebasing and rerun offline gates.
   - [ ] Seed the already-enrolled account route without per-token API keys.
   - [ ] Server dry-run, apply, observe one controller-created bounded execution, and record redacted evidence.
   - [ ] Confirm `radar-refresh-pv` active at `17 5 * * *`; legacy scrape/projection suspended.
