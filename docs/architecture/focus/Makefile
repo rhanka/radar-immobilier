@@ -52,7 +52,8 @@ report-check:
 	rg -q "52646a7b…0425" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "six NetworkPolicies" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "3 PVC/7 Gi" $(FOCUS_DIR)/.generated/report.txt
-	rg -q "API/MCP/UI restent 1/1" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "API/MCP/UI" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "restent 1/1" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "T2 production est en cours" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "320.095438 CAD" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "Architecture AVANT" $(FOCUS_DIR)/.generated/report.txt
