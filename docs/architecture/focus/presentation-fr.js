@@ -1,4 +1,4 @@
-// French owner-facing D7 presentation; English repository sources remain embedded.
+// French owner-facing D8 presentation; English repository sources remain embedded.
 export const presentation = [
 `[ARCHITECTURE AVANT] Le premier schéma complet conserve la capture du 13
 septembre : accès prod/préprod et SSO, Immo, Geo, cluster Kubernetes, PostgreSQL,
@@ -17,9 +17,10 @@ contraintes de placement et l’étape deux nœuds ne sont pas acceptés.
 [Source APRÈS](transitions-target.md).`,
 `[DELTA FACTUEL · PAS UN TROISIÈME GRAPHE] Graphify **0.18.0** est intégré et
 **Luna high** sélectionné. Le premier run Kubernetes a échoué avant l’appel LLM
-car l’entrée choisie était au format HTML, pas PDF. RAW préprod a passé parité et son
-API est rebound sur OVH. DOCS OVH/Secret et le tooling existent, mais copie,
-parité/reprise et rebind restent ouverts; l’issue production n’est pas établie.
+car l’entrée choisie était au format HTML, pas PDF. En préprod, RAW et DOCS sont
+actifs sur OVH. DOCS a une parité exacte de **59 017 objets / 12 534 514 457
+octets**, manifeste **52646a7b…0425**, **failed=0**. MinIO et son PVC data 40 Gi sont
+retirés; le PVC de migration/checkpoint reste. La production T2 est en cours.
 
 Ces faits expliquent l’écart AVANT/APRÈS sans créer une troisième architecture.`,
 `[GATES ET RETOUR ARRIÈRE] T1 : PDF valide → provider → Signal/PDF → rejeu →
@@ -27,8 +28,8 @@ schedule. T2 : inventaire → copie conditionnelle → parité → restauration 
 fence → rebind, préproduction avant production. T3 : T2 complet → rightsizing →
 contraintes → deux nœuds vérifiés → essai un nœud.
 
-Une transition partielle n’autorise aucune suppression de MinIO, révocation de
-credentials ou réduction du pool.`,
+La suppression préprod est acceptée. La production doit franchir ses propres
+gates avant sa suppression MinIO; aucune réduction du pool n’est autorisée.`,
 `[DÉCISIONS DÉJÀ RATIFIÉES] L’ordre reste refresh T1 → objets T2 → un nœud T3.
 Le corpus DOCS canonique reste l’ensemble production SCW exact de **59 017
 keys+hashes**; le surplus préprod n’est pas migré. Le rollout reste préproduction
@@ -43,8 +44,9 @@ groupe doit avoir icône, rôle et provenance repo, avec échec fermé si un map
 manque. Les relations, libellés, zooms, rendu hors ligne et presse-papiers sont
 vérifiés.
 
-Limites : T1 n’a pas atteint le provider, DOCS n’est pas rebound et la cible un
-nœud n’a pas commencé. Les réponses Focus restent locales et non ratifiées.`,
+Limites : T1 n’a pas atteint le provider, T2 production reste en cours et T3 est
+gated. Préprod conserve le PVC de migration/checkpoint; API/MCP/UI restent 1/1.
+Les réponses Focus restent locales et non ratifiées.`,
 `[FACTURATION · EN DERNIER] La fenêtre jointe est **10 août → 13 septembre
 inclus**, 35 jours / 840 heures. La projection infrastructure ratifiée porte sur
 un b3-8 : 840 × 0,082 = **68,88 CAD**.

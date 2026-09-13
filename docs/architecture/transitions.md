@@ -28,8 +28,8 @@ execution; it is not a request to vote again on those three objectives.
 | Transition | Existing work retained | Remaining acceptance | Current status |
 | --- | --- | --- | --- |
 | T1 — autonomous PV → Signal cron | Graphify 0.18.0 integrated; Luna high selected; K8s validation launched | Re-run with an actual PDF; prove provider completion, typed Signal + exact PDF, idempotent replay and unattended schedule | **IN VALIDATION**: first K8s run failed before the LLM because the supplied object was `.html`, not PDF; no T1 acceptance yet |
-| T2 — remove MinIO and remaining SCW dependencies | `PP-RAW-OVH` parity + API rebind verified; DOCS bucket/Secret provisioned; inventories show PP 144,193/28.34 GB vs canonical PR 59,017/12,534,514,457 B; guarded copy tooling through `be362561` | Diff manifests; use exact PR 59,017 keys+hashes as canonical set; selectively copy to OVH prod/preprod; prove equality/recovery; then remove all MinIO; TEM excluded | **PARTIAL / IN PROGRESS**: RAW complete; DOCS copy/parity/rebind not complete; production migration outcome unknown |
-| T3 — one OVH b3-8 | Three b3-8; service plan; 16 PVC/15 Cinder RWO inventory | Finish T2; rightsize; reconcile required affinity/PVC constraints; prove controlled two-node operation; only then test one-node preprod before production | **NO-GO today**: requests and required anti-affinity do not fit one node |
+| T2 — remove MinIO and remaining SCW dependencies | Preprod RAW rebind plus canonical DOCS parity accepted: 59,017 objects / 12,534,514,457 B, manifest `52646a7b…0425`, failed 0; MinIO workload/service/data PVC and six NetworkPolicies removed; checkpoint PVC retained | Complete the independently gated production copy, parity/recovery, rebind and MinIO removal; TEM excluded | **PREPROD ACCEPTED / PRODUCTION IN PROGRESS** |
+| T3 — one OVH b3-8 | Preprod cleanup reduced storage quota use from 4 PVC/47 Gi to 3 PVC/7 Gi; API/MCP/UI remain 1/1 | Finish production T2; remeasure requests and placement; prove controlled two-node operation; only then test one-node preprod before production | **GATED**: no node reduction before T2 production acceptance and a fresh capacity proof |
 
 [FACT] Graphify producer confirms **0.18.0 published**, tag `v0.18.0`, merge
 `1a723695d8a23ffe5e13f1988c52ded056f85c96`; exact-version installation and ESM/CJS
@@ -66,25 +66,28 @@ remains cross-repository work throughout these transitions. Retain **SCW TEM**
 until its replacement is validated. Do not delete shared MatchID SCW resources
 or historical audit evidence as part of Immo/Geo cleanup.
 
-[FACT] Preproduction RAW has completed parity and the API is rebound to
-`PP-RAW-OVH`; the old identity is fenced/recovery-only. DOCS inventories show
-preprod MinIO at 144,193 objects / 28.34 GB and production SCW `docs-pocs` at
-59,017 / 12,534,514,457 B. The OVH bucket and Secret are provisioned; guarded copy
-tooling is committed on `chore/scw-final-sweep` through `be362561`.
+[FACT] Preproduction RAW remains rebound to `PP-RAW-OVH`. The canonical DOCS
+copy into OVH now passes exact parity at **59,017 objects / 12,534,514,457
+bytes**, canonical manifest SHA-256 `52646a7b…0425`, with `failed=0`. This is the
+owner-selected production-reference set; the former 144,193-object preprod
+population and its surplus were not promoted as canonical.
 
 [FACT · owner decision] The current production source is the exact initial
 canonical reference. Both OVH prod and preprod must converge to the same 59,017
 keys and hashes. The preprod surplus is non-canonical and must not be migrated.
-Sequence: manifest diff → canonical set → selective copy → exact parity → recovery
-proof → recoverable removal of all MinIO. Copy/parity/rebind are not complete;
-the launched production migration has no reported outcome. TEM remains retained.
+Sequence: manifest diff → canonical set → selective copy → exact parity →
+recovery proof → recoverable removal of MinIO. Preproduction completed this
+gate: StatefulSet, Pod, Service, 40 Gi data PVC and six MinIO NetworkPolicies
+were removed. The checkpoint/migration PVC remains; quota usage moved from four
+PVCs / 47 Gi to three PVCs / 7 Gi; API, MCP and UI remain 1/1. Production is
+still executing its separately gated T2 transition. TEM remains retained.
 
-[FACT] The current platform audit measured three b3-8 nodes. One node exposes
-1,840m CPU / 5,907.82 Mi allocatable; workload requests total 4,095m / 8,442 Mi,
-while current pod memory is 5,273 Mi. Required CoreDNS, konnectivity and Traefik
-anti-affinity cannot be satisfied on one node. Sixteen PVCs include 15 Cinder RWO.
-T3 is **NO-GO today**: first complete T2, rightsize, reconcile constraints, then
-prove a controlled two-node state before attempting one-node preprod acceptance.
+[FACT] The pre-T2 platform audit measured three b3-8 nodes. One node exposes
+1,840m CPU / 5,907.82 Mi allocatable versus 4,095m / 8,442 Mi requested before
+the preprod MinIO removal; required CoreDNS, konnectivity and Traefik
+anti-affinity were also incompatible with one node. T3 remains **GATED**: finish
+production T2, remeasure the post-cleanup workload/PVC baseline, reconcile
+constraints, then prove a controlled two-node state before one-node preprod.
 
 ## Requested report period and billing-last direction
 

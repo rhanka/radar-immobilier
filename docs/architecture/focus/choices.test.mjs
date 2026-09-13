@@ -2,14 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { questions, responsePack } from './choices.js';
 
-test('D7 exports explicit open questions, selections and comments without reopening fixed decisions', () => {
+test('D8 exports explicit open questions, selections and comments without reopening fixed decisions', () => {
   assert.deepEqual(questions.map(({ key }) => key), ['preprod-address', 'automation-scope', 'llm-billing']);
   assert.ok(questions.every(question => question.question.endsWith('?')));
   assert.equal(questions.find(question => question.key === 'llm-billing').criticality, 'non-critical');
   const selections = { 'preprod-address': 'KEEP_VERIFIED', 'automation-scope': 'IMMO_ONLY', 'llm-billing': null };
   const comments = { 'preprod-address': 'Conserver le lien observé.', 'automation-scope': '', 'llm-billing': 'À rapprocher.' };
   const result = responsePack({ dossierHash: 'd', artifactInputHash: 'a' }, selections, comments, 'Notes', '2026-09-13T23:00:00Z');
-  assert.equal(result.revision, 'D7');
+  assert.equal(result.revision, 'D8');
   assert.equal(result.buildOnly, true);
   assert.equal(result.status, 'draft-not-ratified');
   assert.equal(result.responses[0].selection, 'KEEP_VERIFIED');
@@ -28,9 +28,15 @@ test('D7 exports explicit open questions, selections and comments without reopen
   assert.equal(result.fixedInstructions.transitionEvidence.t2.docsInventory.productionScwDocsPocs.objects, 59017);
   assert.match(result.fixedInstructions.transitionEvidence.t2.canonicalReference, /exact 59,017 keys\+hashes/);
   assert.equal(result.fixedInstructions.transitionEvidence.t2.preprodSurplusMigrated, false);
-  assert.equal(result.fixedInstructions.transitionEvidence.t2.docsCopy, false);
-  assert.match(result.fixedInstructions.transitionEvidence.t2.productionAuditMigration, /outcome unknown/);
-  assert.equal(result.fixedInstructions.transitionEvidence.t3.status, 'not-started');
+  const preprod = result.fixedInstructions.transitionEvidence.t2.preproduction;
+  assert.deepEqual([preprod.objects, preprod.bytes, preprod.failed], [59017, 12534514457, 0]);
+  assert.equal(preprod.canonicalManifestSha256, '52646a7b…0425');
+  assert.deepEqual(preprod.quotaBefore, { pvcs: 4, storageGi: 47 });
+  assert.deepEqual(preprod.quotaAfter, { pvcs: 3, storageGi: 7 });
+  assert.equal(preprod.removed.length, 5);
+  assert.deepEqual(preprod.workloadsReady, { api: '1/1', mcp: '1/1', ui: '1/1' });
+  assert.equal(result.fixedInstructions.transitionEvidence.t2.production.status, 'in-progress');
+  assert.equal(result.fixedInstructions.transitionEvidence.t3.status, 'gated');
   assert.equal(result.fixedInstructions.reporting.startInclusive, '2026-08-10T00:00:00-04:00');
   assert.equal(result.fixedInstructions.reporting.days, 35);
   assert.equal(result.fixedInstructions.reporting.hours, 840);
