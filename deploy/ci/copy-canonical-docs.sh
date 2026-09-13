@@ -50,17 +50,21 @@ copy_one() {
     >"$work/dest-$index.json" 2>"$work/dest-$index.err"; then
     if [ "$(wc -c <"$observed")" -eq "$size" ] &&
       [ "$(sha256sum "$observed" | awk '{print $1}')" = "$hash" ]; then
-      rm -f "$observed"; jq -cn --arg key "$key" '{status:"matching",key:$key}' >"$result"; return
+      rm -f "$observed"; jq -cn --arg key "$key" --argjson size "$size" \
+        '{status:"matching",key:$key,size:$size}' >"$result"; return
     fi
-    rm -f "$observed"; jq -cn --arg key "$key" '{status:"failed",reason:"destination-conflict",key:$key}' >"$result"; return
+    rm -f "$observed"; jq -cn --arg key "$key" --argjson size "$size" \
+      '{status:"failed",reason:"destination-conflict",key:$key,size:$size}' >"$result"; return
   fi
   grep -Eq '404|NoSuchKey|Not Found' "$work/dest-$index.err" || {
-    jq -cn --arg key "$key" '{status:"failed",reason:"destination-read",key:$key}' >"$result"; return; }
+    jq -cn --arg key "$key" --argjson size "$size" \
+      '{status:"failed",reason:"destination-read",key:$key,size:$size}' >"$result"; return; }
   if ! source_aws get-object --bucket "$SOURCE_BUCKET" --key "$key" "$body" \
     >"$work/source-$index.json" 2>"$work/source-$index.err" ||
     [ "$(wc -c <"$body" 2>/dev/null || echo -1)" -ne "$size" ] ||
     [ "$(sha256sum "$body" 2>/dev/null | awk '{print $1}')" != "$hash" ]; then
-    rm -f "$body"; jq -cn --arg key "$key" '{status:"failed",reason:"canonical-source",key:$key}' >"$result"; return
+    rm -f "$body"; jq -cn --arg key "$key" --argjson size "$size" \
+      '{status:"failed",reason:"canonical-source",key:$key,size:$size}' >"$result"; return
   fi
   args=(put-object --bucket "$DESTINATION_BUCKET" --key "$key" --body "$body" --if-none-match '*')
   for pair in 'contentType:content-type' 'contentEncoding:content-encoding' \
@@ -72,17 +76,20 @@ copy_one() {
   tagging="$(jq -r '[.tags[]? | ((.Key|@uri) + "=" + (.Value|@uri))] | join("&")' <<<"$item")"
   [ -z "$tagging" ] || args+=(--tagging "$tagging")
   if ! destination_aws "${args[@]}" >"$work/put-$index.json" 2>"$work/put-$index.err"; then
-    rm -f "$body"; jq -cn --arg key "$key" '{status:"failed",reason:"conditional-put",key:$key}' >"$result"; return
+    rm -f "$body"; jq -cn --arg key "$key" --argjson size "$size" \
+      '{status:"failed",reason:"conditional-put",key:$key,size:$size}' >"$result"; return
   fi
   rm -f "$body"
   if ! destination_aws get-object --bucket "$DESTINATION_BUCKET" --key "$key" "$observed" \
     >"$work/verify-$index.json" 2>"$work/verify-$index.err" ||
     [ "$(wc -c <"$observed" 2>/dev/null || echo -1)" -ne "$size" ] ||
     [ "$(sha256sum "$observed" 2>/dev/null | awk '{print $1}')" != "$hash" ]; then
-    rm -f "$observed"; jq -cn --arg key "$key" '{status:"failed",reason:"post-copy-read",key:$key}' >"$result"; return
+    rm -f "$observed"; jq -cn --arg key "$key" --argjson size "$size" \
+      '{status:"failed",reason:"post-copy-read",key:$key,size:$size}' >"$result"; return
   fi
   rm -f "$observed"; etag="$(jq -r '.ETag // empty' "$work/verify-$index.json")"
-  jq -cn --arg key "$key" --arg etag "$etag" '{status:"copied",key:$key,etag:$etag}' >"$result"
+  jq -cn --arg key "$key" --arg etag "$etag" --argjson size "$size" \
+    '{status:"copied",key:$key,size:$size,etag:$etag}' >"$result"
 }
 
 index=0; failures=0; batch=0; pids=(); results=()
