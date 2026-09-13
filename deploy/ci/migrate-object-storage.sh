@@ -345,7 +345,7 @@ EXPECTED_OBJECTS="$REPORT_DIR/expected-objects.jsonl"
 : >"$EXPECTED_OBJECTS"
 validate_expected_manifest() {
   [ -r "$EXPECTED_MANIFEST" ] && [ -s "$EXPECTED_MANIFEST" ] || return 1
-  jq -e '
+  jq -e '. as $root |
     .schemaVersion == 1 and (.sources | type == "array" and length > 0) and
     (.objects | type == "array") and
     ([.objects[].key] | length == (unique | length)) and
@@ -359,7 +359,10 @@ validate_expected_manifest() {
       (.size | type == "number" and . >= 0) and
       (.sha256 | test("^[0-9a-f]{64}$")) and
       (.metadata | type == "object") and (.tags | type == "array") and
-      (.sources | type == "array" and length > 0))
+      (.sources | type == "array" and length > 0) and
+      all(.sources[]; . as $provenance | any($root.sources[];
+        .endpoint == $provenance.endpoint and .region == $provenance.region and
+        .bucket == $provenance.bucket and .pathStyle == $provenance.pathStyle)))
   ' "$EXPECTED_MANIFEST" >/dev/null || return 1
   local source_count
   source_count="$(jq '.sources | length' "$EXPECTED_MANIFEST")"
@@ -375,8 +378,8 @@ validate_expected_manifest() {
     any(.sources[]; .endpoint == $endpoint and .region == $region and
       .bucket == $bucket and .pathStyle == $pathStyle)' \
     "$EXPECTED_MANIFEST" >/dev/null || return 1
-  jq -cs --argfile expected "$EXPECTED_MANIFEST" '
-    $expected.objects | sort_by(.key)[] |
+  jq -cs --slurpfile expected "$EXPECTED_MANIFEST" '
+    $expected[0].objects | sort_by(.key)[] |
     . + {contentType:(.contentType // null),contentEncoding:(.contentEncoding // null),
       cacheControl:(.cacheControl // null),contentDisposition:(.contentDisposition // null),
       metadata:(.metadata // {}),tags:((.tags // []) | sort_by(.Key))}' \
@@ -396,7 +399,7 @@ EXPECTED_SOURCE_CONFLICTS="$REPORT_DIR/expected-source-conflicts.jsonl"
 if [ "$EXPECTED_MANIFEST_DIGEST" != null ]; then
   TARGET_MANIFEST="$EXPECTED_OBJECTS"
   jq -cn --slurpfile observed "$REPORT_DIR/source-included-manifest.jsonl" \
-    --slurpfile expected "$EXPECTED_OBJECTS" --argfile contract "$EXPECTED_MANIFEST" \
+    --slurpfile expected "$EXPECTED_OBJECTS" \
     --arg endpoint "$SOURCE_ENDPOINT" --arg region "$SOURCE_REGION" \
     --arg bucket "$SOURCE_BUCKET" --argjson pathStyle "$SOURCE_PATH_STYLE" '
     def core: del(.etag,.versionId,.classification,.sources);
@@ -407,6 +410,18 @@ if [ "$EXPECTED_MANIFEST_DIGEST" != null ]; then
         .bucket == $bucket and .pathStyle == $pathStyle)] | length != 1)) |
     {key:$item.key,reason:"source object or provenance differs from approved union"}' \
     >"$EXPECTED_SOURCE_CONFLICTS"
+  jq -cn --slurpfile observed "$REPORT_DIR/source-included-manifest.jsonl" \
+    --slurpfile expected "$EXPECTED_OBJECTS" --arg endpoint "$SOURCE_ENDPOINT" \
+    --arg region "$SOURCE_REGION" --arg bucket "$SOURCE_BUCKET" \
+    --argjson pathStyle "$SOURCE_PATH_STYLE" '
+    def core: del(.etag,.versionId,.classification,.sources);
+    $expected[] as $approved |
+    select(any($approved.sources[]?; .endpoint == $endpoint and .region == $region and
+      .bucket == $bucket and .pathStyle == $pathStyle)) |
+    ($observed | map(select(.key == $approved.key)) | first) as $item |
+    select($item == null or (($approved|core) != ($item|core))) |
+    {key:$approved.key,reason:"approved current-source object is absent or differs"}' \
+    >>"$EXPECTED_SOURCE_CONFLICTS"
   [ ! -s "$EXPECTED_SOURCE_CONFLICTS" ] || \
     add_missing_proof 'current source disagrees with the approved union'
 fi
@@ -588,10 +603,10 @@ reconcile_owned_objects() {
     add_missing_proof 'owned reconciliation requires an observed conflict'; return 1; }
   jq -cn --slurpfile source "$REPORT_DIR/source-included-manifest.jsonl" \
     --slurpfile target "$TARGET_MANIFEST" --slurpfile destination "$DESTINATION_MANIFEST" \
-    --slurpfile ledger "$LEDGER" --argfile parity "$PARITY" \
+    --slurpfile ledger "$LEDGER" --slurpfile parity "$PARITY" \
     --arg expected "$EXPECTED_MANIFEST_DIGEST" '
     def core: del(.etag,.versionId,.classification,.sources);
-    $parity.conflicting[] as $key |
+    $parity[0].conflicting[] as $key |
     ($source | map(select(.key == $key)) | first) as $sourceObject |
     ($target | map(select(.key == $key)) | first) as $targetObject |
     ($destination | map(select(.key == $key)) | first) as $current |
@@ -611,7 +626,7 @@ reconcile_owned_objects() {
     add_missing_proof 'post-reconciliation destination evidence is incomplete'; return 1; }
   compute_parity
   jq -cn --slurpfile results "$output" --slurpfile destination "$DESTINATION_MANIFEST" \
-    --argfile first "$LEDGER" --arg ledgerDigest "$original_digest" \
+    --slurpfile first "$LEDGER" --arg ledgerDigest "$original_digest" \
     --arg fenceDigest "$FENCE_EVIDENCE_DIGEST" '
     $results[] as $result |
     ($destination | map(select(.key == $result.key)) | first) as $object |
