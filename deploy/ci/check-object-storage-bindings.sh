@@ -12,6 +12,16 @@ GRAPH_FILES=(
 )
 SCRAPE_FILES=(deploy/k8s/33-scrape-job.yaml deploy/k8s/33b-scrape-cities-job.yaml)
 FILES=("${GRAPH_FILES[@]}" "${SCRAPE_FILES[@]}" deploy/k8s/36-db-migrate-job.yaml)
+PENDING_CLIENTS=(
+  deploy/k8s/30-api.yaml
+  deploy/k8s/32b-reproject-etape-job.yaml
+  deploy/k8s/34-refresh-cronjob.yaml
+  deploy/k8s/refresh-diag/diag-refresh-job.yaml
+  deploy/k8s/refresh-cronjobs-prod/kustomization.yaml
+  .github/workflows/grounding-preprod.yml
+  .github/workflows/grounding-publish-prod.yml
+  .github/workflows/run-job.yaml
+)
 FAIL=0
 fail() { echo "FAIL: $*" >&2; FAIL=$((FAIL + 1)); }
 
@@ -46,6 +56,8 @@ for rel in "${SCRAPE_FILES[@]}"; do
   for suffix in ACCESS_KEY SECRET_KEY; do
     binding "$rel" "SCRAPE_S3_$suffix" secretKeyRef radar-scrape-s3-credentials "SCRAPE_S3_$suffix"
   done
+  grep -Eiq 'radar-graph-s3-credentials|sentropic-geo|GEO_[A-Z0-9_]*S3' "$ROOT/$rel" &&
+    fail "$rel reuses a GRAPH or Geo identity for DOCS"
 done
 
 for rel in "${FILES[@]}"; do
@@ -55,6 +67,9 @@ done
 
 for rel in scripts/mount-scw.sh scripts/umount-scw.sh; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
+done
+for rel in "${PENDING_CLIENTS[@]}"; do
+  [ -f "$ROOT/$rel" ] || fail "$rel is missing from the explicit pending-client ledger"
 done
 for expected in \
   'S3_ENDPOINT=http://minio:9000' \
@@ -73,3 +88,4 @@ if [ "$FAIL" -ne 0 ]; then
   exit 1
 fi
 echo "object-storage binding check: ok (${#FILES[@]} released manifests)"
+echo "object-storage pending-client ledger: ${#PENDING_CLIENTS[@]} gated surfaces"

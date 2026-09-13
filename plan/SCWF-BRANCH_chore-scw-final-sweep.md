@@ -68,6 +68,7 @@
     - [x] Cover dry-run, validation, pagination, copy, metadata, ETag, conflicts and exclusions.
     - [x] Cover retries, the failure cap and complete multi-source union provenance.
     - [x] Cover exact owned reconciliation, versioning refusal, foreign change and fenced delta.
+    - [x] Extend the binding gate and retain the explicit pending-client ledger.
 - [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
 - [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
