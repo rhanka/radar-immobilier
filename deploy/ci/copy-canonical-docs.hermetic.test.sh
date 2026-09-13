@@ -34,6 +34,7 @@ grep -F 'canonical PROD corpus contract differs' "$test_tmp/stderr" >/dev/null
   exit 1
 }
 grep -F -- "--if-none-match '*'" "$subject" >/dev/null
+grep -F -- '--argjson size "$size"' "$subject" >/dev/null
 ! grep -Eq 'delete-object|delete-bucket|rm-object' "$subject"
 grep -F '"$batch" -eq 32' "$subject" >/dev/null
 echo 'canonical docs copy hermetic test: PASS'
