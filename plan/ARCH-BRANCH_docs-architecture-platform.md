@@ -49,7 +49,8 @@
   - [ ] Obtain the owner-requested independent Gemini 3.8 High review.
   - [x] Add environment-qualified store identities and the live Geo PDF reader to the infrastructure overview.
   - [x] Map each Immo DB and object-store role to environment-qualified shared identifiers in both diagrams.
-  - [ ] Verify reader/writer arrows against source and whitelisted deployment configuration.
+  - [x] Verify reader/writer arrows against source and whitelisted deployment configuration.
+  - [x] Reuse Geo bucket/API identities in diagram 3; distinguish shared PDF reads from preprod normalized products.
   - [ ] Reconcile reviewer findings, regenerate Focus and check the final browser rendering.
 
 ## Merge / Close

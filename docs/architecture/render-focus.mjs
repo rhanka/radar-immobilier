@@ -6,7 +6,7 @@ const markdown = readFileSync('/docs/architecture.md', 'utf8');
 const cursor = createHash('sha256').update(markdown).digest('hex');
 const title = markdown.split('\n')[0].replace(/^# /, '');
 const sections = [];
-const diagramTitles = ['01 · User access and tenant boundaries', '02 · Immo: the four processing stages', '03 · Geo: sources, joins and serving', '04 · Releases and data refresh'];
+const diagramTitles = ['01 · Infrastructure, access and resource IDs', '02 · Preprod Immo: the same resources in the PV pipeline', '03 · Geo: sources, joins and shared corpus', '04 · Releases and data refresh'];
 let last = markdown.indexOf('\n') + 1;
 const addProse = (text) => {
   if (text.trim()) sections.push({ kind: 'prose', id: `prose-${sections.length}`, targetRef: 'docs/architecture.md', markdown: text });
