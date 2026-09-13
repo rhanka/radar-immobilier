@@ -16,6 +16,7 @@ Documentation worktree: `docs/architecture-preprod-transition`.
 | Clipboard | PASS | D8 JSON read back; exact fixed facts, draft options and amounts |
 | Report PDF | PASS | 14 pages: 4 A4 + 10 A3 landscape native diagram pages |
 | Report HTML | PASS | Monthly narrative plus complete BEFORE/AFTER native captures |
+| Independent review | INCOMPLETE | Two Claude-hosted launches were policy-rejected before execution; no consensus verdict claimed |
 | Diff | PASS | `git diff --check` |
 
 Replay:
