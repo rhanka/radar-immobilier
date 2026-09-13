@@ -56,6 +56,7 @@
 - [x] C10b: persist immutable candidate hashes and redacted per-city stage receipts in S3.
 - [x] C10c: retain and hash-check durable per-chunk extraction artifacts for partial-run resume.
 - [x] C10d: retain the first run timestamp so resumed candidates remain deterministic.
+- [x] C10e: discover same-input state only while its published bytes remain canonical.
 - [x] C11: cover same-input no-call resume, conservative interruptions, baseline changes and failed-write receipts.
 - [x] C12a: adapt one successful existing acquisition recap into a strict immutable PDF manifest.
 - [x] C12b: compose resumable profile extraction, v2.3/3.4, guarded publish and atomic projection.
