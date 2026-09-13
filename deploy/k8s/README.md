@@ -1,14 +1,14 @@
 # radar-immobilier on Kubernetes — deployed as a *sentropic app*
 
 This directory holds the **tenant-owned** manifests that deploy
-`radar-immobilier` on the shared Scaleway **poc-k8s** cluster *as a sentropic
-app*: a tenant/workspace under the sentropic platform, with **human auth
+`radar-immobilier` on the shared OVH MKS cluster managed by **poc-k8s** *as a
+sentropic app*: a tenant/workspace under the sentropic platform, with **human auth
 delegated to the shared sentropic Identity Provider** and the **code managed in
 a named sentropic workspace**.
 
-> **PREPARED, NOT APPLIED.** Everything here is authored and validated offline.
-> Nothing in this branch touches a live cluster. Applying to a real cluster is a
-> deliberate human action with cluster credentials — see
+> **SOURCE CHANGES DO NOT DEPLOY THEMSELVES.** These manifests describe active
+> environments, but editing or validating them does not mutate a cluster.
+> Applying a change is a deliberate human or controlled CI action — see
 > [Manual deploy (human, with cluster creds)](#manual-deploy-human-with-cluster-creds).
 
 The pattern mirrors the **sentropic** tenant layout
@@ -179,6 +179,25 @@ make k8s-validate K8S_VALIDATE_WITH_CLUSTER=1 KUBECONFIG=<path> ENV=<env>
 > uses the always-present `kubectl kustomize` render + the structural check. If
 > `kubeconform` lands later, wire `kustomize build deploy/k8s | kubeconform`
 > into `k8s-validate` for full schema validation.
+
+## Manual Job object-storage prerequisites
+
+The manual graph and scrape Jobs require complete provider-neutral bindings;
+they do not contain endpoint, region, bucket, path-style, or credential values.
+
+| Store | Required `radar-api` ConfigMap keys | Required Secret |
+| --- | --- | --- |
+| Graph | `GRAPH_S3_ENDPOINT`, `GRAPH_S3_REGION`, `GRAPH_S3_BUCKET`, `GRAPH_S3_FORCE_PATH_STYLE` | `radar-graph-s3-credentials`: `GRAPH_S3_ACCESS_KEY`, `GRAPH_S3_SECRET_KEY` |
+| Scrape | `SCRAPE_S3_ENDPOINT`, `SCRAPE_S3_REGION`, `SCRAPE_S3_BUCKET`, `SCRAPE_S3_FORCE_PATH_STYLE` | `radar-scrape-s3-credentials`: `SCRAPE_S3_ACCESS_KEY`, `SCRAPE_S3_SECRET_KEY` |
+
+These references are non-optional so an incomplete binding fails before the
+container starts instead of falling back to the main store. They are
+prerequisites, not a deployment claim: the fresh preproduction `radar-api`
+ConfigMap does not yet contain either key family, the scrape Secret was absent,
+and production remains unverified. Do not dispatch these Jobs until the target
+namespace has been inventoried and all referenced keys have been validated.
+The armed refresh diagnostic remains on its existing binding pending that later
+cutover; this first slice deliberately does not edit or deploy it.
 
 ## Production refresh CronJobs
 
