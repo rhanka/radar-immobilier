@@ -1,0 +1,73 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: radar-object-storage-proof-docs-prod-
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: object-storage-inventory
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: object-storage-inventory
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: proof
+          image: amazon/aws-cli:2.34.53@sha256:cf53765c0de54ad3a8ea21818f1c4c845a8cf7ca87831c078a00fef244031493
+          command: ["/bin/bash", "-ceu", "--"]
+          args:
+            - |
+              umask 077
+              test -s /evidence/docs-prod-canonical/summary.json
+              PROOF_FILE=/evidence/docs-prod-conditional-write-proof.json \
+                SOURCE_ENDPOINT=https://s3.fr-par.scw.cloud SOURCE_REGION=fr-par \
+                SOURCE_BUCKET=radar-immobilier-docs-pocs SOURCE_PATH_STYLE=false \
+                /bin/bash /tool/prove-docs-conditional-writes.sh
+          env:
+            - name: MIGRATION_SOURCE_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: MIGRATION_SOURCE_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            - name: MIGRATION_DESTINATION_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
+            - name: MIGRATION_DESTINATION_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
+            - name: DESTINATION_ENDPOINT
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ENDPOINT } }
+            - name: DESTINATION_REGION
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_REGION } }
+            - name: DESTINATION_BUCKET
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_BUCKET } }
+          resources:
+            requests: { cpu: 25m, memory: 128Mi, ephemeral-storage: 128Mi }
+            limits: { cpu: 100m, memory: 256Mi, ephemeral-storage: 6Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: tool, mountPath: /tool, readOnly: true }
+            - { name: evidence, mountPath: /evidence }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: tool
+          configMap: { name: radar-object-storage-docs-prod-tool, defaultMode: 365 }
+        - name: evidence
+          persistentVolumeClaim: { claimName: radar-object-storage-docs-prod-checkpoint }
+        - name: tmp
+          emptyDir: { sizeLimit: 6Gi }

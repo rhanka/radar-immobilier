@@ -8,6 +8,12 @@ export LC_ALL=C AWS_EC2_METADATA_DISABLED=true
 : "${MIGRATION_DESTINATION_SECRET_ACCESS_KEY:?}"
 : "${DESTINATION_ENDPOINT:?}" "${DESTINATION_REGION:?}" "${DESTINATION_BUCKET:?}"
 : "${PROOF_FILE:?}"
+SOURCE_ENDPOINT="${SOURCE_ENDPOINT:-http://radar-minio:9000}"
+SOURCE_REGION="${SOURCE_REGION:-fr-par}"
+SOURCE_BUCKET="${SOURCE_BUCKET:-radar-immobilier-docs-preprod}"
+SOURCE_PATH_STYLE="${SOURCE_PATH_STYLE:-true}"
+case "$SOURCE_PATH_STYLE" in true) source_style=path ;; false) source_style=virtual ;;
+  *) echo 'ERROR: invalid source path style' >&2; exit 2 ;; esac
 [ ! -e "$PROOF_FILE" ] || {
   echo 'ERROR: conditional-write proof already exists' >&2; exit 2; }
 if compgen -G '/evidence/docs-checkpoint*/provisional/destination/index-receipt-*.json' \
@@ -18,7 +24,8 @@ fi
 
 work="$(mktemp -d /tmp/docs-proof.XXXXXX)"
 trap 'rm -rf "$work"' EXIT
-printf '[default]\nregion = fr-par\ns3 =\n  addressing_style = path\n' >"$work/source-config"
+printf '[default]\nregion = %s\ns3 =\n  addressing_style = %s\n' \
+  "$SOURCE_REGION" "$source_style" >"$work/source-config"
 printf '[default]\nregion = %s\ns3 =\n  addressing_style = virtual\n' \
   "$DESTINATION_REGION" >"$work/destination-config"
 
@@ -26,7 +33,7 @@ source_aws() {
   AWS_ACCESS_KEY_ID="$MIGRATION_SOURCE_ACCESS_KEY_ID" \
   AWS_SECRET_ACCESS_KEY="$MIGRATION_SOURCE_SECRET_ACCESS_KEY" \
   AWS_CONFIG_FILE="$work/source-config" aws --no-cli-pager --output json \
-    --endpoint-url http://radar-minio:9000 --region fr-par s3api "$@"
+    --endpoint-url "$SOURCE_ENDPOINT" --region "$SOURCE_REGION" s3api "$@"
 }
 destination_aws() {
   AWS_ACCESS_KEY_ID="$MIGRATION_DESTINATION_ACCESS_KEY_ID" \
@@ -35,15 +42,15 @@ destination_aws() {
     --endpoint-url "$DESTINATION_ENDPOINT" --region "$DESTINATION_REGION" s3api "$@"
 }
 
-source_aws list-objects-v2 --bucket radar-immobilier-docs-preprod --max-keys 1 \
+source_aws list-objects-v2 --bucket "$SOURCE_BUCKET" --max-keys 1 \
   >"$work/list.json" 2>"$work/source-error"
 key="$(jq -r '.Contents[0].Key // empty' "$work/list.json")"
 [ -n "$key" ] || { echo 'ERROR: DOCS source has no proof candidate' >&2; exit 2; }
-source_aws head-object --bucket radar-immobilier-docs-preprod --key "$key" \
+source_aws head-object --bucket "$SOURCE_BUCKET" --key "$key" \
   >"$work/source-head.json" 2>"$work/source-error"
-source_aws get-object-tagging --bucket radar-immobilier-docs-preprod --key "$key" \
+source_aws get-object-tagging --bucket "$SOURCE_BUCKET" --key "$key" \
   >"$work/source-tags.json" 2>"$work/source-error"
-source_aws get-object --bucket radar-immobilier-docs-preprod --key "$key" \
+source_aws get-object --bucket "$SOURCE_BUCKET" --key "$key" \
   "$work/body" >"$work/source-get.json" 2>"$work/source-error"
 
 args=(put-object --bucket "$DESTINATION_BUCKET" --key "$key" --body "$work/body")
