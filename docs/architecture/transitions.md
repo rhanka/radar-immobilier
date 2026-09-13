@@ -28,7 +28,7 @@ execution; it is not a request to vote again on those three objectives.
 | Transition | Existing work retained | Remaining acceptance | Current status |
 | --- | --- | --- | --- |
 | T1 — autonomous PV → Signal cron | Immo CAS #678; four-stage pipeline; canonical writer; projection; 3.4 EMIT/APPLY; i-cond's in-pod Graphify study; existing scrape/projection CronJobs | Resolve nested `UND_ERR_SOCKET`; prove a real-provider Signal using `immo-pv-extraction-v3`; durable unattended identity; run the CronJob's Job template, then observe scheduled execution | HEAD `ac3a7150`: exact Graphify 0.18.0; targeted 8/8 + 7/7, full typecheck and scope/branch PASS; no real-provider Signal or K8s acceptance |
-| T2 — remove MinIO and remaining SCW dependencies | #677 OVH refresh bindings, #671/#672 GHCR migrations; #670 retirement branch; existing role map PP-RAW/PP-DOCS/PP-GRAPH/GEO-S3 | Inventory all readers/writers and objects; provision exact OVH bindings; copy + integrity + final-write reconciliation; repoint and test; stop MinIO after no clients remain; close executable SCW references in images, Jobs, CI and backups; purge source PVC only after recovery acceptance | MinIO still effective in the dated preprod snapshot; production inventory and cross-repo residue closure required |
+| T2 — remove MinIO and remaining SCW dependencies | #677 OVH refresh bindings; live API `PP-RAW`; empty `PP-DOCS`; useful `PP-DOCS-LEGACY`; #671/#672 GHCR work | Complete the `25ec9e04` fail-before-write suite and conditional-write capability; copy + integrity + recovery; fence/repoint/test; retain legacy until complete parity/recovery; close SCW except TEM | **MIGRATE+RETAIN** decided; remediation underway, not accepted; no copy, cutover or deletion |
 | T3 — one OVH b3-8 | poc-k8s `cluster-rightsizing-plan.md`, `rightsizing-status-2026-09-13.md`, `b3-8-service-plan.md` | Include Immo prod and the new refresh Job in full capacity budget; verify PDB/affinity/PVC placement, batch and wake peaks; preserve data and active services; controlled consolidation then pool min=max=desired=1 | Owner-fixed target; not yet a demonstrated safe placement |
 
 [FACT] Graphify producer confirms **0.18.0 published**, tag `v0.18.0`, merge
@@ -56,6 +56,14 @@ of every source adapter, S3 binding, Job/CronJob, CI path or backup. SCW closure
 remains cross-repository work throughout these transitions. Retain **SCW TEM**
 until its replacement is validated. Do not delete shared MatchID SCW resources
 or historical audit evidence as part of Immo/Geo cleanup.
+
+[FACT] The live API uses MinIO `PP-RAW`; its derived `PP-DOCS` bucket is empty.
+The distinct `PP-DOCS-LEGACY` bucket has baseline 1/2,821,583 B, graph 4/639,226 B,
+ontology 530/34,257,805 B, parsed ≥4,884/≥272,554,144 B, raw unknown and runs ≥445.
+Fable's postbuild review keeps fail-before-write and conditional-write capability
+remediation blocking. Commit `25ec9e04` starts fail-before-write; its suite and the
+conditional-write capability remain in progress. **MIGRATE+RETAIN** applies until
+complete parity and recovery; no copy, cutover or deletion has started, and TEM remains retained.
 
 [FACT] The platform measured 3 b3-8 nodes, 9,454 Mi instantaneous node memory and
 5,907.82 Mi allocatable per node at 13:20–13:24 UTC. The sample excludes detailed

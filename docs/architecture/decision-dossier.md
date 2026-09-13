@@ -28,8 +28,9 @@ is verified.
 
 ## 2. Existing state and evidence boundary
 
-[FACT] The September 13 current-state snapshot verifies preproduction storage at
-12:33–12:37 UTC: API `PP-RAW` / `PP-DOCS` remain physical MinIO roles;
+[FACT] The September 13 current-state snapshot verifies preproduction storage:
+the API uses MinIO `PP-RAW`; its `PP-DOCS` fallback is empty; distinct
+`PP-DOCS-LEGACY` contains useful replay/history. These remain physical MinIO roles;
 scrape/projection use the same existing OVH `PP-GRAPH`; PG remains `PP-DB`.
 Mapped PDF evidence reads `GEO-S3/raw/pv-index/cas/`. Production application
 access is observed, but private Immo DB/object/refresh bindings are **UNVERIFIED**.
@@ -74,9 +75,15 @@ nonempty graph cannot substitute for a fresh typed Signal and its exact PDF.
 ## 4. T2 — object cutover and final SCW sweep
 
 [JUDGMENT] Create new target bindings `PP-RAW-OVH` / `PP-DOCS-OVH`; never reuse
-the physical MinIO IDs `PP-RAW` / `PP-DOCS`. Migrate every reader/writer with
+the physical MinIO IDs. The decision is **MIGRATE+RETAIN**: migrate every reader/writer with
 key/size/hash and application decode parity, fence old writers, repoint real
-clients, rehearse recovery and retain the old store read-only until deletion gate.
+clients, rehearse recovery and retain `PP-DOCS-LEGACY` until complete parity and recovery.
+
+[FACT] The partial legacy inventory is baseline 1/2,821,583 B; graph 4/639,226 B;
+ontology 530/34,257,805 B; parsed ≥4,884/≥272,554,144 B; raw unknown; runs ≥445.
+Fable's postbuild review requires fail-before-write and conditional-write capability
+remediation before migration execution. Commit `25ec9e04` starts fail-before-write;
+its suite and conditional-write work remain in progress. No copy, cutover or deletion has occurred.
 
 [FACT] Preproduction goes first, then separately inventoried production. Production
 private bindings are still TBD/UNVERIFIED. Retire MinIO only at zero consumers.

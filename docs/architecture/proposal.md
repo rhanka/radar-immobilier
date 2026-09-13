@@ -39,7 +39,8 @@ flowchart LR
   PP_MCP["[PP-MCP] same OAuth remote MCP"]
   subgraph ppminio["[PP-MINIO] existing API store · retained until T2"]
     PP_RAW[("[PP-RAW] existing MinIO raw role")]
-    PP_DOCS[("[PP-DOCS] existing MinIO documents role")]
+    PP_DOCS[("[PP-DOCS] empty MinIO fallback")]
+    PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] useful replay/history<br/>retained for T2 parity + recovery")]
   end
   GEO_S3[("[GEO-S3] Geo-owned corpus<br/>mapped raw/pv-index/cas/ evidence")]
   PP_GEO["[PP-GEO] Geo geographic API<br/>input contract; Geo owns geographic data"]
