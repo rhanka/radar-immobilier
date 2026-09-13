@@ -16,7 +16,7 @@ Documentation-only worktree: `docs/architecture-platform`.
 | Stable resource navigation | PASS | `PP-DOCS-LEGACY` is distinct from the empty fallback; new OVH roles never reuse old MinIO IDs |
 | Geometry | PASS node separation, parent bounds, orthogonality and unrelated-node clearance | Edge/label/arrow overlap is **not** globally certified |
 | Full-screen / Escape | PASS | Documentation canvas only |
-| Fixed instructions / JSON | PASS | T1 GO_WITH_GATES/NO-GO, T2 MIGRATE+RETAIN and T3 NO-GO survive export; period start and amounts remain null |
+| Fixed instructions / JSON | PASS | T1 BLOCKED, benchmark scores `null`, T2 MIGRATE+RETAIN/no-copy and T3 NO-GO survive export; period start and amounts remain null |
 | Actual clipboard | PASS in isolated context; previous clipboard restored | Read-back verifies D5, exact comment, prior null and current amount `null`; denial handling is also tested |
 | Desktop / mobile | PASS at 1440×1100 and 390×844 | No page horizontal overflow; diagrams retain pan/zoom |
 | Offline and served HTML | PASS | Latest dossier served at `http://127.0.0.1:5188/`; dated HTML renders offline; zero external requests/runtime exceptions |
@@ -29,6 +29,8 @@ presentation. Its first browser pass then caught a fourth Mermaid label segment
 that the three-field Focus card joined with a visible separator. The minimal fixes
 removed the syntax hazard and kept transition cards to three source segments;
 the same fail-closed syntax, exact-text, completeness and overflow gates now pass.
+The post-82b3b7c5 sync also caught one assertion whose expected Fable BLOCK/commit
+order differed from the presentation; correcting that exact order restored 9/9.
 
 The requested period ends at `2026-09-14T00:00:00-04:00`, but its real preceding
 invoice/report start and unified September 13 data-capture cutoff remain unverified.
@@ -41,7 +43,9 @@ parsed and the previous actual invoice identity/tariffs remain evidence to obtai
 No Kubernetes mutation, object migration, database write, application implementation,
 stack start, production action, root-checkout edit, Track write, agent launch, merge
 or remote publication was performed. T1, T2 and T3 are architecture proposals, not
-deployment claims. T1 still lacks published llm-mesh 0.19.1, a real-provider Signal
-and K8s acceptance. T2 still lacks conditional-write completion, copy, parity,
-recovery, cutover and deletion. T3 remains NO-GO until T2, rightsizing, constraint
-reconciliation and a verified two-node step precede any one-node test.
+deployment claims. T1 remains blocked pending Fable re-review, the five-PDF
+non-simulated benchmark, published llm-mesh 0.19.1, a real-provider Signal and K8s
+acceptance; no model, Cloud Code enrollment or benchmark score exists. T2 checkpoint
+work remains under construction and still lacks object copy, parity, recovery,
+cutover and deletion. T3 remains NO-GO until T2, rightsizing, constraint reconciliation
+and a verified two-node step precede any one-node test.
