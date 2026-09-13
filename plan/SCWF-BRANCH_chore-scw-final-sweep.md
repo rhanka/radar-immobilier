@@ -58,10 +58,10 @@
     - [x] Stream each body hash and capture preserved headers, metadata, tags and diagnostic ETags.
     - [x] Wire classified receipts and failure evidence into the operation result.
   - [x] Compare single-source or approved-union parity and proof inputs.
-  - [ ] Copy missing objects and reconcile only exact migration-owned versions.
+  - [x] Copy missing objects and reconcile only exact migration-owned versions.
     - [x] Add bounded conditional copy workers preserving all contracted object attributes.
     - [x] Re-inventory copied keys and write the immutable ownership ledger.
-    - [ ] Gate reconciliation on an exact ledger, fence, versioning and prior VersionId.
+    - [x] Gate reconciliation on an exact ledger, fence, versioning and prior VersionId.
       - [x] Reuse bounded workers with atomic missing-versus-owned write preconditions.
   - [ ] Enforce hermetic failure paths, binding checks and the CI gate.
 - [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.

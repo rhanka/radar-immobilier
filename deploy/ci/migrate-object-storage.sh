@@ -528,13 +528,14 @@ write_copy_ledger() {
     --arg se "$SOURCE_ENDPOINT" --arg sr "$SOURCE_REGION" --arg sb "$SOURCE_BUCKET" \
     --argjson sp "$SOURCE_PATH_STYLE" --arg de "$DESTINATION_ENDPOINT" \
     --arg dr "$DESTINATION_REGION" --arg db "$DESTINATION_BUCKET" \
-    --argjson dp "$DESTINATION_PATH_STYLE" --arg expected "$EXPECTED_MANIFEST_DIGEST" '
+    --argjson dp "$DESTINATION_PATH_STYLE" --arg expected "$EXPECTED_MANIFEST_DIGEST" \
+    --arg environment "$ENVIRONMENT" --arg plane "$PLANE" '
     def core: del(.etag,.versionId,.classification,.sources);
     $copied[] as $copy |
     ($source | map(select(.key == $copy.key)) | first) as $sourceObject |
     ($destination | map(select(.key == $copy.key)) | first) as $object |
     select($object != null and (($object|core) == ($sourceObject|core))) |
-    {schemaVersion:1,migrationId:$runId,
+    {schemaVersion:1,migrationId:$runId,environment:$environment,plane:$plane,
      source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp},
      destination:{endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp},
      key:$copy.key,sourceObject:$sourceObject,object:$object,
@@ -557,6 +558,76 @@ if [ "$OPERATION" = copy ] && $EXECUTE_COPY && ! $RECONCILE_OWNED; then
   fi
 fi
 
+reconcile_owned_objects() {
+  local versioning="$WORK_DIR/destination-versioning.json" tasks="$WORK_DIR/reconcile-tasks.jsonl"
+  local original_digest conflict_count eligible_count output="$REPORT_DIR/reconciliation-results.jsonl"
+  [ -r "$LEDGER" ] && [ -s "$LEDGER" ] || {
+    add_missing_proof 'original ownership ledger is unreadable or empty'; return 1; }
+  original_digest="$(sha256sum "$LEDGER" | awk '{print $1}')"
+  jq -se --arg environment "$ENVIRONMENT" --arg plane "$PLANE" \
+    --arg se "$SOURCE_ENDPOINT" --arg sr "$SOURCE_REGION" --arg sb "$SOURCE_BUCKET" \
+    --argjson sp "$SOURCE_PATH_STYLE" --arg de "$DESTINATION_ENDPOINT" \
+    --arg dr "$DESTINATION_REGION" --arg db "$DESTINATION_BUCKET" \
+    --argjson dp "$DESTINATION_PATH_STYLE" '
+    length > 0 and ([.[].key] | length == (unique | length)) and
+    ([.[].migrationId] | unique | length == 1) and all(.[];
+      .schemaVersion == 1 and .environment == $environment and .plane == $plane and
+      .source == {endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp} and
+      .destination == {endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp} and
+      .key == .object.key and .key == .sourceObject.key)' "$LEDGER" >/dev/null || {
+    add_missing_proof 'ownership ledger schema, coordinates or keys do not match'; return 1; }
+  retry_json "$versioning" destination get-bucket-versioning \
+    --bucket "$DESTINATION_BUCKET" || {
+    add_missing_proof 'destination versioning state is unavailable'; return 1; }
+  [ "$(jq -r '.Status // empty' "$versioning")" = Enabled ] || {
+    add_missing_proof 'destination versioning is not enabled'; return 1; }
+  [ "$(jq '.missing | length + (.extra | length)' "$PARITY")" -eq 0 ] || {
+    add_missing_proof 'owned reconciliation refuses missing or extra keys'; return 1; }
+  conflict_count="$(jq '.conflicting | length' "$PARITY")"
+  [ "$conflict_count" -gt 0 ] || {
+    add_missing_proof 'owned reconciliation requires an observed conflict'; return 1; }
+  jq -cn --slurpfile source "$REPORT_DIR/source-included-manifest.jsonl" \
+    --slurpfile target "$TARGET_MANIFEST" --slurpfile destination "$DESTINATION_MANIFEST" \
+    --slurpfile ledger "$LEDGER" --argfile parity "$PARITY" \
+    --arg expected "$EXPECTED_MANIFEST_DIGEST" '
+    def core: del(.etag,.versionId,.classification,.sources);
+    $parity.conflicting[] as $key |
+    ($source | map(select(.key == $key)) | first) as $sourceObject |
+    ($target | map(select(.key == $key)) | first) as $targetObject |
+    ($destination | map(select(.key == $key)) | first) as $current |
+    ($ledger | map(select(.key == $key)) | first) as $owned |
+    select($owned != null and $current != null and $sourceObject != null and
+      ($sourceObject|core) == ($targetObject|core) and $owned.object == $current and
+      $owned.putVersionId != null and $current.versionId == $owned.putVersionId and
+      $owned.expectedManifestDigest == (if $expected == "null" then null else $expected end)) |
+    $sourceObject + {_priorEtag:$current.etag,_priorVersionId:$current.versionId,
+      _priorHash:$current.sha256}' >"$tasks"
+  eligible_count="$(jq -s length "$tasks")"
+  [ "$eligible_count" -eq "$conflict_count" ] || {
+    add_missing_proof 'foreign or independently modified conflicts cannot be reconciled'; return 1; }
+  run_copy_tasks "$tasks" "$WORK_DIR/reconciliation-results" reconcile "$output"
+  list_objects destination "$DESTINATION_LISTING" &&
+    build_manifest destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST" || {
+    add_missing_proof 'post-reconciliation destination evidence is incomplete'; return 1; }
+  compute_parity
+  jq -cn --slurpfile results "$output" --slurpfile destination "$DESTINATION_MANIFEST" \
+    --argfile first "$LEDGER" --arg ledgerDigest "$original_digest" \
+    --arg fenceDigest "$FENCE_EVIDENCE_DIGEST" '
+    $results[] as $result |
+    ($destination | map(select(.key == $result.key)) | first) as $object |
+    select($object != null and $result.putVersionId != null and
+      $object.versionId == $result.putVersionId and
+      $object.versionId != $result.priorVersionId and $object.sha256 != $result.priorHash) |
+    {schemaVersion:1,migrationId:$first[0].migrationId,key:$result.key,
+     originalLedgerDigest:$ledgerDigest,fenceEvidenceDigest:$fenceDigest,fenceValidated:false,
+     prior:{versionId:$result.priorVersionId,sha256:$result.priorHash},
+     new:{versionId:$object.versionId,sha256:$object.sha256},object:$object}' \
+    >"$REPORT_DIR/reconciliation-ledger.jsonl"
+  [ "$(jq -s length "$REPORT_DIR/reconciliation-ledger.jsonl")" -eq "$eligible_count" ] || {
+    record_failure destination '' reconciliation-proof
+    add_missing_proof 'reconciliation lacks recoverable prior/new version proof'; return 1; }
+}
+
 FENCE_EVIDENCE_DIGEST=null
 if [ -n "$FENCE_RECORD" ]; then
   if [ -r "$FENCE_RECORD" ] && [ -s "$FENCE_RECORD" ]; then
@@ -564,6 +635,9 @@ if [ -n "$FENCE_RECORD" ]; then
   else
     add_missing_proof 'fence record is unreadable or empty'
   fi
+fi
+if [ "$OPERATION" = copy ] && $EXECUTE_COPY && $RECONCILE_OWNED; then
+  reconcile_owned_objects || true
 fi
 
 array_json() { printf '%s\n' "$@" | jq -Rsc 'split("\n") | map(select(length > 0))'; }
