@@ -65,7 +65,7 @@ make --no-print-directory --eval '.PHONY: test-scw-storage-gate' \
 ```
 
 Result before post-review remediation: binding checker `PASS=11 FAIL=0`;
-migration hermetic suite `PASS=36 FAIL=0`. The post-review suite now has 48
+migration hermetic suite `PASS=36 FAIL=0`. The post-review suite now has 54
 checks. It uses a filesystem-backed AWS CLI shim and makes no
 network calls. `make k8s-validate API_PORT=8882 UI_PORT=5382
 MAILDEV_UI_PORT=1182 ENV=test-scw-final` also passed its offline render and
@@ -74,7 +74,7 @@ no shellcheck result is claimed.
 
 CI adds exactly one quality-job invocation:
 `bash deploy/ci/check-object-storage-bindings.test.sh`; that entrypoint runs both
-the 11 binding regressions and the 36 migration regressions.
+the 11 binding regressions and the current 54 migration regressions.
 
 ## Review and remaining gates
 
