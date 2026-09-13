@@ -128,6 +128,7 @@
   - [x] Make target architecture and sequential transitions the primary Focus reading path; keep billing last.
     - [x] Open on the complete target and place the Existant → T1 → T2 → T3 path before prose.
     - [x] Move billing to the final section.
+  - [x] Rewrite D5 dossier sections 1–4 around the complete target, existing evidence, T1 and T2.
   - [ ] Publish a current report-through-September-13 companion and supersede the older window without rewriting its sources.
   - [ ] Regenerate the current/dated portable HTML and evidence manifest with D5 hashes.
   - [ ] Pass static, build, browser, clipboard, scope and diff gates; record limitations without deployment claims.

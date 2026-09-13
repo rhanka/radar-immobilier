@@ -1,80 +1,75 @@
-# Decision dossier — Immo refresh and storage retirement
+# Architecture dossier — complete target and sequential transitions
 
-Revision **D4**, 2026-09-13. **Execution direction confirmed; acceptance incomplete**.
-The owner authorized continuation in the order below. Production inventory,
-credential operations and review gaps remain acceptance requirements, not a renewed
-presentation-only hold. Opening this page itself performs no action.
-Author: Codex / gpt-6-astra / xhigh. This is not an owner signature or Track decision.
+Revision **D5**, 2026-09-13. **Target architecture proposed; no deployment
+claimed.** The complete final target and T1→T2→T3 states are the primary reading
+surface. Production inventory and every transition's acceptance remain open.
+Opening this page performs no action and creates no Track event.
+Author: Codex documentation build. This is not an owner signature or invoice.
 
-## 1. Decision asked
+## 1. Complete target and fixed path
 
-[FACT · owner] The sequence is decided: **T1 autonomous PV/Signal refresh in
-Kubernetes → T2 MinIO and remaining SCW retirement → T3 one b3-8 node**. Execute
-the existing plan and update this reference at every transition; include dated
-renderings in the monthly report. [Transition register](transitions.md).
+[FACT · owner] Present and execute the existing direction in order:
+**Existant → T1 autonomous PV/Signal refresh → T2 OVH object cutover plus final
+SCW sweep → T3 one existing b3-8**. Preproduction precedes a separately gated
+production promotion. [Selectable target states](transitions-target.md) and
+[transition register](transitions.md) are the sources of truth for this dossier.
 
-[JUDGMENT] The remaining commercial question is: **which auditable method should
-allocate LLM expense to Immo/Geo for August 12–September 10?** Focus choices are
-drafts pending the token re-audit, not another vote on architecture order.
-One-node infrastructure billing is fixed; extra node capacity is not passed through.
+[JUDGMENT] The complete target has one OVH b3-8 housing the Immo and Geo tenants,
+subject to shared capacity and safety acceptance. It retains prod/preprod URLs
+and SSO; Immo UI/API/MCP/PG/refresh and object roles; Geo API, uncertain database
+dependency, corpus/products, official sources and in-process joins. No MinIO or
+other Scaleway service is active in the final target; **TEM is the sole retained
+exception** until replacement is validated. MatchID is excluded.
 
-[FACT] Already fixed by the owner: all PV-to-Signal stages remain Immo-owned;
-resume i-cond work, preserve Graphify's extraction effort, eradicate MinIO and SCW
-storage/image dependencies, **retain SCW TEM until a replacement is validated**;
-use this dossier to accompany execution. Do not re-ask those decisions.
+[FACT · owner correction] Billing is the final annex, not a critical-path choice.
+No DIRECT/USAGE/CAPACITY selection is requested. Later token accounting uses the
+same unit tariffs as the preceding month's **actual** invoice once that invoice
+is verified.
 
-## 2. Context: facts, assumptions and unknowns
+## 2. Existing state and evidence boundary
 
-[FACT] [Architecture](../architecture.md) and [runtime audit](storage-audit.md):
-preprod API → `PP-RAW` / derived `PP-DOCS` on **PP-MINIO**; scrape and projection
-→ one **PP-GRAPH** OVH bucket. PG is **PP-DB** in every view. Prefixes are not stores.
-Mapped PDFs use **GEO-S3** `raw/pv-index/cas/`, not the preprod normalized Geo copy.
-MinIO is still ready/configured; its content and every writer were not inventoried.
+[FACT] The September 13 current-state snapshot verifies preproduction at
+12:33–12:37 UTC: API `PP-RAW` / `PP-DOCS` remain physical MinIO roles;
+scrape/projection use the same existing OVH `PP-GRAPH`; PG remains `PP-DB`.
+Mapped PDF evidence reads `GEO-S3/raw/pv-index/cas/`. Production application
+access is observed, but private Immo DB/object/refresh bindings are **UNVERIFIED**.
 
-[FACT] Verified access: `immo.sent-tech.ca` / `preprod.immo.sent-tech.ca`;
-SSO `auth.sent-tech.ca` / `preprod.auth.sent-tech.ca`. `preprod.sent-tech.ca` was
-NXDOMAIN. OVH production Immo inventory is RBAC-denied; old SCW resources are excluded.
+[FACT] `immo.sent-tech.ca`, `preprod.immo.sent-tech.ca`, `auth.sent-tech.ca` and
+`preprod.auth.sent-tech.ca` are the observed access/SSO surfaces. The existing
+platform observation has three b3-8 nodes. Its instantaneous ~9,454 Mi exceeds
+one node's 5,907.82 Mi allocatable; MinIO accounts for only ~347 Mi.
 
-[FACT] [Continuation audit](continuation-audit.md): #678 is an open CAS draft,
-reporting a successful candidate-only dry run, not live publication. Graphify #330
-is merged and **0.18.0 is published**, with mesh 0.19 and an ESM-only mesh subpath.
-Producer installation passed; Immo acceptance is pending ([evidence](transitions.md)).
-The latest i-cond study proposes **in-process
-mesh in the pod**, not a mandatory network service. Immo chat need not share it.
+[FACT] Graphify 0.18.0 is published. That closes a producer dependency, not the
+Immo consumer, scheduled refresh or typed Signal/PDF acceptance. Every target
+production role may be named as a contract, but its physical binding remains
+TBD rather than inferred from source defaults or the old SCW cluster.
 
-[FACT] Direct scraping writes lowercase graph types; routes serve exact `Signal`
-and `DesignationEvent`. Fresh scrape ≠ fresh served Signal. 3.4 EMIT/APPLY is a
-separate post-projection stage; APPLY recalculates from PG, not EMIT files.
+## 3. T1 — autonomous Immo refresh
 
-[JUDGMENT] Working assumption: preserve existing logical store roles during the
-first migration. Exact OVH targets, IAM, object volume, write owners, credential
-refresh ownership, recovery window and price are **unknown**, not filled by analogy.
+[FACT · design] The causal chain is acquisition/parse → profile extraction and
+grounding → preserved fresh candidate → deterministic 3.4 enrichment on that
+fresh candidate **before** canonical publication → guarded full-graph write →
+atomic PG projection → typed Signal plus exact PDF. [Detailed T1 flow](proposal.md).
 
-## 3. Stakes
+[FACT] Immo owns every step; Geo owns geographic inputs. T1 keeps the existing
+API MinIO roles until T2. Graphify 0.18.0 is published, while mesh 0.19 host
+planning, keyring operation and consumer integration remain pending.
 
-[JUDGMENT] The failure modes are silent staleness, unavailable PDF evidence,
-partial object migration, concurrent canonical writers and lost OAuth refresh.
-Changing providers without testing these boundaries can preserve green Jobs but
-break the user-visible result. The production blast radius warrants a separate gate.
+[JUDGMENT] Acceptance requires the actual installed contract, durable credentials,
+one lock shared by scheduled/manual execution, failure/resume and a CronJob-created
+Job surviving pod replacement and credential refresh. A bump, manual Job green or
+nonempty graph cannot substitute for a fresh typed Signal and its exact PDF.
 
-[FACT] Immo owns acquisition→interpretation→publication→SQL→serving; Geo owns
-geographic sources, joins and OGC/document products; Graphify owns its reusable
-library; poc-k8s owns shared ingress, tenancy, storage and credential operations.
-These are cross-owner contracts, not just image/tag substitutions.
+## 4. T2 — object cutover and final SCW sweep
 
-## 4. Historical alternatives and the engaged plan
+[JUDGMENT] Create new target bindings `PP-RAW-OVH` / `PP-DOCS-OVH`; never reuse
+the physical MinIO IDs `PP-RAW` / `PP-DOCS`. Migrate every reader/writer with
+key/size/hash and application decode parity, fence old writers, repoint real
+clients, rehearse recovery and retain the old store read-only until deletion gate.
 
-The following architecture alternatives are **historical, not open choices**.
-The owner selected refresh first; storage-first and a complete new DAG before the
-first refresh do not match that direction. Preserve E4/E5 exclusive-writer and
-retry invariants in the in-pod continuation. See [T1–T3](transitions.md) for the
-existing work retained and remaining acceptance. Assessments are [JUDGMENT].
-
-| ID | Choice | Strongest case FOR | Strongest case AGAINST | Cost | Reversibility | Wins if |
-| --- | --- | --- | --- | --- | --- | --- |
-| A | Checkpointed in-pod Graphify refresh, then storage cutover | Reuses current CAS/library work; proves fresh user-visible output early | A sequential runner may need rework for the eventual DAG and must not become another canonical writer | Medium integration + migration; unpriced | Good before writes; rollback needs data checkpoints after publication | Existing gate/writer contracts can be reused without bypassing E4/E5 safety |
-| B | Complete layered S3-DAG E1–E5 before cutover | Establishes sole merge/projection ownership immediately; gives durable recomputation boundaries | Broadest change before first acceptance; adds contracts and orchestration to the storage release | Highest initial engineering scope; unpriced | Reverting contracts and mixed-version outputs is harder | Parallelism, resumability or multi-writer risks make a sequential slice unsafe |
-| C | Migrate storage first; retain workstation LLM temporarily | Isolates provider retirement from extraction change; exercises all existing reader/writer paths | Does not deliver autonomous fresh Signals and migrates publishers that may soon change | Smaller initial code change; additional migration coordination; unpriced | Easier code rollback, not automatic data rollback | An urgent storage risk outweighs the cost of temporary workstation dependence |
+[FACT] Preproduction goes first, then separately inventoried production. Production
+private bindings are still TBD/UNVERIFIED. Retire MinIO only at zero consumers.
+The final Immo sweep covers images, old digests, Jobs, manual/CI/backup/bootstrap and executable/secret references. TEM remains the sole exception.
 
 ## 5. Execution basis and counter-case
 
