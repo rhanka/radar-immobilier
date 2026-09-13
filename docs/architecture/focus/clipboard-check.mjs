@@ -22,14 +22,13 @@ try {
     const settle = () => new Promise(resolve => setTimeout(resolve, 120));
     const previousClipboard = await navigator.clipboard.readText();
     try {
-      document.querySelectorAll('.steps button')[3].click(); await settle();
-      document.querySelector('input[type="radio"][value="USAGE"]').click(); await settle();
-      const note = document.querySelector('.choices textarea'); note.value = 'Usage — sous réserve de la déduplication.'; note.dispatchEvent(new Event('input', { bubbles: true })); await settle();
-      [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier la réponse en JSON').click(); await settle();
+      document.querySelectorAll('.steps button')[7].click(); await settle();
+      const note = document.querySelector('.choices textarea'); note.value = 'Frontière précédente et cutoff à vérifier.'; note.dispatchEvent(new Event('input', { bubbles: true })); await settle();
+      [...document.querySelectorAll('.choices button')].find(b => b.textContent === 'Copier les instructions en JSON').click(); await settle();
       const pack = JSON.parse(await navigator.clipboard.readText());
-      if (pack.decision.option !== 'USAGE' || pack.decision.key !== 'llm-allocation-method' || pack.decision.note !== note.value || pack.options.length !== 3 || pack.status !== 'draft-not-ratified') throw Error('Real clipboard content mismatch');
+      if (pack.revision !== 'D5' || pack.ownerCorrection.option !== null || pack.note !== note.value || pack.fixedInstructions.reporting.start !== null || pack.fixedInstructions.billing.node.projectedAmountCad !== null || 'decision' in pack || 'options' in pack) throw Error('Real clipboard content mismatch');
       document.querySelector('.choices').scrollIntoView({ behavior: 'instant' });
-      return { actualClipboard: 'pass', choice: pack.decision.option, comment: 'exact', allOptions: pack.options.length, status: pack.status };
+      return { actualClipboard: 'pass', revision: pack.revision, priorOption: pack.ownerCorrection.option, comment: 'exact', currentAmount: pack.fixedInstructions.billing.node.projectedAmountCad, status: pack.status };
     } finally { await navigator.clipboard.writeText(previousClipboard); }
   })()`));
   await writeFile('/out/choices-preview.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' }, sessionId)).data, 'base64'));
