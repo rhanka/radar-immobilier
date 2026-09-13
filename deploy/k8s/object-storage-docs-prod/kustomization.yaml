@@ -15,3 +15,4 @@ configMapGenerator:
     files:
       - migrate-object-storage.sh=../../ci/migrate-object-storage.sh
       - object-storage-checkpoint.sh=../../ci/object-storage-checkpoint.sh
+      - inventory-docs-prod-fast.mjs=../../ci/inventory-docs-prod-fast.mjs

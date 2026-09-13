@@ -23,10 +23,38 @@ OBJECT_STORAGE_DOCS_PROD_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 .PHONY: object-storage-docs-prod-validate
 object-storage-docs-prod-validate: ## Validate the PROD DOCS support and inventory Job offline
 	@bash -n deploy/ci/migrate-object-storage.sh deploy/ci/object-storage-checkpoint.sh
+	@node --check deploy/ci/inventory-docs-prod-fast.mjs
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	  $(OBJECT_STORAGE_DOCS_PROD_DIR) >/dev/null
 	@$(KUBECTL) create --dry-run=client --validate=false \
 	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/inventory-job.yaml -o name >/dev/null
+	@$(KUBECTL) create --dry-run=client --validate=false \
+	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/fast-inventory-job.yaml -o name >/dev/null
+
+.PHONY: object-storage-docs-prod-fast-start
+object-storage-docs-prod-fast-start: ## Start the low-memory 32-stream canonical PROD inventory
+	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
+	  [ "$(OBJECT_STORAGE_DOCS_PROD_FAST_CONFIRM)" != 1 ]; then \
+	  echo '[object-storage-docs-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
+	fi
+	@$(MAKE) object-storage-docs-prod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
+	  [ "$$server" = "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ] || \
+	    { echo '[object-storage-docs-prod] refused non-OVH context'; exit 1; }; \
+	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
+	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
+	    $(OBJECT_STORAGE_DOCS_PROD_DIR) >"$$render"; \
+	  $(KUBECTL) apply -f "$$render" >/dev/null; \
+	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/fast-inventory-job.yaml -o name
+
+.PHONY: object-storage-docs-prod-fast-progress
+object-storage-docs-prod-fast-progress: ## Read aggregate canonical hash progress without keys
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  pod="$$( $(KUBECTL) -n "$$namespace" get pods \
+	    -l "job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- \
+	    /bin/bash -ceu 'if [ -s /evidence/docs-prod-canonical/summary.json ]; then cat /evidence/docs-prod-canonical/summary.json; elif [ -s /evidence/docs-prod-canonical/progress.json ]; then cat /evidence/docs-prod-canonical/progress.json; else echo '\''{"hashedObjects":0,"hashedBytes":0}'\''; fi'
 
 .PHONY: object-storage-docs-prod-expand-pvc-quota
 object-storage-docs-prod-expand-pvc-quota: ## Guardedly expand only the PROD PVC count quota from 2 to 3
