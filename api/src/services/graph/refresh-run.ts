@@ -157,7 +157,8 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
     manifestKey: selected.manifestKey, reader: options.store, extractPdf: options.extractPdf });
   const read = await readCanonicalCityGraph(options.store, options.citySlug, now);
   if (!read) throw new Error(`Missing canonical baseline for ${options.citySlug}`);
-  const baseline = graphifyGraphSchema.parse(JSON.parse(new TextDecoder().decode(read.body)));
+  const baselineJson: unknown = JSON.parse(new TextDecoder().decode(read.body));
+  const baseline = graphifyGraphSchema.parse(baselineJson);
   const baselineHash = canonicalHash(baseline);
   const scope = {
     citySlug: options.citySlug, inputHash: `sha256:${corpus.inputHash}`,
@@ -170,7 +171,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
       candidateHash: baselineHash, stateKey: prior.key };
   }
   if (prior) {
-    const resumed = baseline as Graphify34Snapshot;
+    const resumed = baselineJson as Graphify34Snapshot;
     if (canonicalHash(resumed) !== baselineHash) throw new Error("Published refresh state no longer matches canonical bytes");
     return { ...await publishSnapshot(options, prior, resumed, read.anchor, now), inputHash: corpus.inputHash };
   }
