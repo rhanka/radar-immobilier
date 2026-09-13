@@ -94,6 +94,6 @@
   - [x] Diagnose the mismatch: sceneFor collapses each child group; Mermaid is shown as plain source only.
   - [x] Regression reproduced: infrastructure showed 8 native nodes instead of all 29 leaves and boxes; replace collapsed representation with complete recursive layout.
   - [x] Render every node/edge simultaneously with native nested parentId boxes; navigation only changes the viewport.
-  - [ ] Render the exact Mermaid sources visually, keeping offline use and sanitization.
+  - [x] Add strict, sanitized Mermaid prerendering with source hashes and node/group parity; embed the visual and exact code offline.
   - [ ] Add DS Tile/Radio options, comment, local persistence and copyable JSON response pack.
   - [ ] Verify simultaneous completeness, nested bounds, Mermaid rendering and A/B/C comment/export behavior.
