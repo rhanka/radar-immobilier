@@ -27,14 +27,15 @@ if (attemptNumber === 2 && !retryReason) throw new Error("Attempt 2 requires BEN
 const variant = variants[variantName];
 if (!variant) throw new Error(`Unsupported live variant: ${variantName}`);
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
+const campaign = process.env.BENCHMARK_CAMPAIGN;
 const t1Root = required("BENCHMARK_T1_ROOT");
 const t1Commit = required("BENCHMARK_T1_COMMIT");
 const ownerScopeRef = required("BENCHMARK_OWNER_SCOPE");
 const outputDir = required("BENCHMARK_OUTPUT_DIR");
 const manifest = JSON.parse(await readFile(resolve(repositoryRoot,
-  "docs/reviews/refresh-benchmark/manifest.json"), "utf8"));
+  `docs/reviews/refresh-benchmark/${campaign ? `${campaign}/` : ""}manifest.json`), "utf8"));
 const frozen = JSON.parse(await readFile(resolve(repositoryRoot,
-  "docs/reviews/refresh-benchmark/prompt-freeze.json"), "utf8"));
+  `docs/reviews/refresh-benchmark/${campaign ? `${campaign}/` : ""}prompt-freeze.json`), "utf8"));
 const document = manifest.documents.find(({ id }) => id === caseDocument);
 if (!document) throw new Error(`Unknown frozen document: ${caseDocument}`);
 if (frozen.t1Commit !== t1Commit) throw new Error("T1 prompt commit differs from frozen contract");
@@ -141,7 +142,7 @@ try {
 } finally { clearTimeout(timeout); }
 const completed = Date.now();
 if (generated?.text) await writeFile(outputPath, JSON.stringify(JSON.parse(generated.text)), "utf8");
-const receipt = { schemaVersion: 1, caseId, status, t1Commit, profileModuleSha256,
+const receipt = { schemaVersion: 1, campaign: campaign ?? "v1", caseId, status, t1Commit, profileModuleSha256,
   documentId: document.id, input: { pdfSha256: document.sha256, textSha256: document.textSha256 },
   requested: { providerId: "openai", modelId: variant.model, effort: variant.effort,
     maxOutputTokens: frozen.maxOutputTokens, transportTimeoutMs: 480_000 }, accountPseudonym, wire,

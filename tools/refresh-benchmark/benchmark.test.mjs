@@ -6,11 +6,13 @@ import test from "node:test";
 
 const root = process.env.BENCHMARK_REPOSITORY_ROOT;
 if (!root) throw new Error("BENCHMARK_REPOSITORY_ROOT is required");
+const campaign = process.env.BENCHMARK_CAMPAIGN;
+const campaignRoot = `docs/reviews/refresh-benchmark/${campaign ? `${campaign}/` : ""}`;
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const manifest = JSON.parse(await readFile(resolve(root,
-  "docs/reviews/refresh-benchmark/manifest.json"), "utf8"));
+  `${campaignRoot}manifest.json`), "utf8"));
 const prompts = JSON.parse(await readFile(resolve(root,
-  "docs/reviews/refresh-benchmark/prompt-freeze.json"), "utf8"));
+  `${campaignRoot}prompt-freeze.json`), "utf8"));
 
 test("the five immutable PDFs and page texts match the manifest", async () => {
   assert.equal(manifest.documents.length, 5);
@@ -31,7 +33,8 @@ test("the five immutable PDFs and page texts match the manifest", async () => {
 test("prompt contract covers each input once and is tied to corrected T1", async () => {
   assert.equal(prompts.graphifyVersion, "0.18.0");
   assert.equal(prompts.meshVersion, "0.19.0");
-  assert.equal(prompts.t1Commit, "f9b311da536bda2e1442d154a05599c35b482518");
+  assert.equal(prompts.t1Commit,
+    process.env.BENCHMARK_T1_COMMIT ?? "f9b311da536bda2e1442d154a05599c35b482518");
   assert.equal(sha256(prompts.systemPrompt), prompts.systemPromptSha256);
   assert.deepEqual(prompts.documents.map(({ id }) => id).sort(),
     manifest.documents.map(({ id }) => id).sort());
@@ -44,6 +47,11 @@ test("prompt contract covers each input once and is tied to corrected T1", async
 });
 
 test("controls keep their regulatory meaning", () => {
+  if (campaign === "v3") {
+    assert.equal(manifest.documents.some(({ selectionRationale }) =>
+      /agenda/.test(selectionRationale) && /not adoption/.test(selectionRationale)), true);
+    return;
+  }
   const negative = manifest.documents.find(({ id }) => id.endsWith("negative"));
   const agenda = manifest.documents.find(({ id }) => id.startsWith("wickham"));
   assert.match(negative.selectionRationale, /Observed no-finding control/);

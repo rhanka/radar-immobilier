@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { writeFile } from "node:fs/promises";
 import { createLlmMeshFacade } from "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/service/facade.js";
 import { EncryptedFileKeyring } from "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/node/index.js";
 
@@ -11,8 +12,9 @@ const facade = createLlmMeshFacade({
   keyring: new EncryptedFileKeyring("/run/benchmark-keyring"),
 });
 const accounts = await facade.listAccounts({ ownerScope });
-const codex = accounts.find((account) => account.providerId === "codex");
-if (!codex) throw new Error("No owner-scoped Codex enrollment is available");
+const eligible = accounts.filter((account) => account.providerId === "codex");
+if (eligible.length !== 1) throw new Error(`Expected one owner-scoped Codex enrollment, found ${eligible.length}`);
+const codex = eligible[0];
 
 const acquisition = await facade.acquire({
   accountId: codex.accountId,
@@ -59,12 +61,25 @@ try {
     request("https://chatgpt.com/backend-api/wham/usage"),
     request("https://chatgpt.com/backend-api/codex/models?client_version=0.154.0"),
   ]);
-  console.log(JSON.stringify({
+  const usedPercent = usage.payload?.rate_limit?.primary_window?.used_percent;
+  if (usage.payload?.plan_type !== "pro") throw new Error("Codex account is not the qualified subscription plan");
+  if (usage.payload?.rate_limit?.limit_reached || typeof usedPercent !== "number" || usedPercent > 70) {
+    throw new Error("Insufficient or ambiguous Codex subscription quota");
+  }
+  const result = {
     capturedAt: new Date().toISOString(),
     accountPseudonym: `acct-${createHash("sha256").update(codex.accountId).digest("hex").slice(0, 10)}`,
+    eligibleAccountCount: eligible.length,
     quota: { status: usage.status, ok: usage.ok, values: selectQuota(usage.payload) },
     catalog: { status: models.status, ok: models.ok, modelIds: collectModels(models.payload) },
-  }, null, 2));
+  };
+  if (!result.catalog.modelIds.includes(process.env.BENCHMARK_MODEL ?? "gpt-5.6-sol")) {
+    throw new Error("Requested model is absent from the live subscription catalog");
+  }
+  if (process.env.BENCHMARK_PREFLIGHT_OUTPUT) {
+    await writeFile(process.env.BENCHMARK_PREFLIGHT_OUTPUT, JSON.stringify(result), { flag: "wx" });
+  }
+  console.log(JSON.stringify(result));
 } finally {
   await facade.release(acquisition);
 }
