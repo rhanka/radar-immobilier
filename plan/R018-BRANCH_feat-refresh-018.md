@@ -39,6 +39,7 @@
 - [x] Lot 2: Fable independent design review GO_WITH_CHANGES and conductor reconciliation; evidence `docs/reviews/refresh-018/fable-design.md` at target ca7d9acf. One reviewer, no two-peer consensus claim.
 - [x] Persist the completed independent Fable review and its unchanged findings in version control.
 - [x] Preserve the review's detailed verification appendix and the original-PDF page-3 oracle, with immutable source hashes.
+- [x] Record the failed Gemini leg, authorized Fable replacement and refreshed Immo preprod read-only evidence; no deployment inferred.
 - [ ] Lot 3: Sol builds the released scope with isolated tests and atomic commits.
 - [x] C02: compose the public owner-scoped Graphify mesh with explicit refresh adapters, model and run abort signal.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
