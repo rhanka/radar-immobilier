@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-09-13T23:36:25Z",
+  "environment": "prod",
+  "cluster": {
+    "server": "https://hlhedx.c1.bhs5.k8s.ovh.net",
+    "namespace": "radar-immobilier"
+  },
+  "parityJob": {
+    "name": "radar-object-storage-copy-docs-prod-b92vl",
+    "uid": "7f5ef0a4-9367-482d-bc1e-745fa3401eb0",
+    "createdAt": "2026-09-13T22:00:00Z",
+    "completedAt": "2026-09-13T22:38:31Z",
+    "succeeded": 1,
+    "failed": 0
+  },
+  "canonical": {
+    "objects": 59017,
+    "bytes": 12534514457,
+    "manifestSha256": "52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425"
+  },
+  "copySummary": {
+    "status": "complete",
+    "processed": 59017,
+    "matching": 19435,
+    "copied": 39582,
+    "failed": 0,
+    "logicalBytes": 12534514457,
+    "prunedExtra": 0,
+    "reportedExactParity": true,
+    "reportedComplete": true
+  },
+  "parityQualification": {
+    "destinationBodySha256AndSize": true,
+    "destinationExactKeyAndSizeSet": true,
+    "destinationHeadersMetadataAndTags": false,
+    "finalSourceRescanRecorded": false,
+    "acceptedForFinalParity": false,
+    "reason": "The completed Job predates destination header, metadata and tag comparison and its summary contains no final source rescan fields. A fresh read-only full scan with the strengthened checker is required."
+  },
+  "runtime": {
+    "apiDeploymentRolledOut": true,
+    "apiS3Environment": [
+      "S3_ENDPOINT",
+      "S3_REGION",
+      "S3_BUCKET",
+      "S3_FORCE_PATH_STYLE",
+      "S3_ACCESS_KEY",
+      "S3_SECRET_KEY"
+    ],
+    "apiSecretReference": "radar-docs-s3-credentials",
+    "apiUsesLiteralS3Values": false,
+    "graph": {
+      "endpoint": "https://s3.bhs.io.cloud.ovh.net",
+      "region": "bhs",
+      "bucket": "radar-immobilier-docs",
+      "pathStyle": false,
+      "secretReference": "radar-graph-s3-credentials"
+    },
+    "scrape": {
+      "endpoint": "https://s3.bhs.io.cloud.ovh.net",
+      "region": "bhs",
+      "bucket": "radar-immobilier-docs",
+      "pathStyle": false,
+      "secretReference": "radar-scrape-s3-credentials"
+    },
+    "tem": {
+      "apiBase": "https://api.scaleway.com",
+      "secretReference": "radar-tem-credentials",
+      "preserved": true
+    },
+    "minioResources": [],
+    "checkpoint": {
+      "name": "radar-object-storage-docs-prod-checkpoint",
+      "uid": "a9d73a8e-ff8d-45a5-9d3e-44561e56edb4",
+      "phase": "Bound",
+      "capacity": "1Gi"
+    }
+  },
+  "finalStatus": {
+    "target": "object-storage-docs-prod-final-status",
+    "passed": false,
+    "checksCompletedBeforeBlocker": [
+      "expected OVH API server",
+      "MinIO StatefulSet absent",
+      "MinIO Service absent",
+      "MinIO data PVC absent",
+      "MinIO ingress NetworkPolicy absent",
+      "checkpoint PVC bound at 1Gi"
+    ],
+    "blocker": {
+      "principal": "system:serviceaccount:radar-immobilier:ci-deployer",
+      "verb": "get",
+      "resource": "resourcequotas",
+      "name": "tenant-quota",
+      "result": "Forbidden"
+    }
+  },
+  "secretValuesCaptured": false,
+  "objectKeysCaptured": false
+}
