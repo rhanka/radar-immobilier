@@ -39,7 +39,7 @@
 - [x] Lot 0: inventory every active residue on fresh main and classify active, local-only, historical, defensive, TEM or shared.
 - [x] Lot 1: map clients to DB/S3 physical resources in preprod and production, recording unknowns and RBAC limits.
 - [x] Lot 2: reuse existing #670 work; produce minimal remediation file map and repeatable final SCW acceptance checks.
-- [ ] Lot 3: Astra design and Gemini review, then Sol implementation and Gemini post-build review.
+- [x] Lot 3: Astra design and independent post-build review, followed by reconciled Sol remediation.
 - [x] Lot 3a: conductor defines the bounded parallel implementation and cutover dependencies in `docs/reviews/scw-final/build-design.md`.
 - [x] Lot 3b: Fable GO_WITH_CHANGES reconciled (F1 required complete bindings; F2 defer armed refresh-diag; F3/F4 remaining-client visibility); amended first slice released to Sol.
 - [x] Lot 3c: remove unused object-storage credentials from PostgreSQL migration containers.
@@ -55,7 +55,7 @@
   - [x] Builder passes the combined hermetic gate and offline K8s validation.
   - [x] Preserve the failed first Fable launch as explicit non-review evidence.
   - [x] Preserve the completed Fable review at `a8e97286`; its required write-path remediations are implemented through `cb5e1f4c`.
-  - [ ] Conductor completes the independent post-build review.
+  - [ ] Conductor reruns independent post-build review after the released blocking findings are remediated.
 - [x] Lot 3g2a: dispatch the owner-authorized independent Fable review of first-slice commit `332af1e8` and second-slice design `671380f4`; no consensus or acceptance claim until its readable findings are reconciled.
 - [x] Lot 3h1: freeze the implementation-ready RAW/DOCS/GRAPH client matrix, migration-tool contract, and second-slice paths.
 - [x] Lot 3h1a: preserve independent Fable cutover findings B1-B5 separately; conflict convergence, multi-source identity and declared exclusions require reconciliation before tool release.
@@ -92,7 +92,7 @@
     - [x] Extend the binding gate and retain the explicit pending-client ledger.
     - [x] Invoke the combined offline object-storage gate once from CI quality.
     - [x] Document the bounded operator contract and explicit non-acceptance limits.
-- [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
+- [x] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
   - [x] Record the bounded live MinIO inventory and classify `radar-immobilier-docs-preprod` as migrate-and-retain, without claiming completeness or parity.
   - [x] Reconcile resumable-inventory design findings F1-F10 before implementation.
   - [x] Conditional after independent review: build the resumable whole-bucket `StartAfter` inventory design without weakening copy gates.
@@ -106,13 +106,24 @@
     - [x] Propagate page and phase-summary durable commit failures before live inventory.
     - [x] Document full fenced body re-reads and inventory-proof freshness custody.
     - [x] Prepare a guarded RAW-only preprod Job with durable checkpoints and exact credential references.
-- [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
-- [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
+- [x] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
+  - [x] Create and validate the dedicated bucket-scoped OVH PROD identity and Kubernetes Secret projections without exposing values.
+  - [x] Copy the exact PROD SCW canonical corpus to OVH BHS and record exact parity: 59,017 objects, 12,534,514,457 bytes, manifest SHA-256 `52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425`.
+  - [x] Rebind the ready PROD API and prepare the refresh workloads with dedicated OVH references; retain the TEM exception.
+  - [x] Remove the proven-empty PROD MinIO StatefulSet, Service, 5Gi PVC and orphan ingress policy after parity.
+- [x] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
+  - [x] PREPROD and PROD OVH DOCS targets match the same canonical object count, byte count and manifest digest.
+  - [x] PREPROD MinIO StatefulSet, Service, 40Gi PVC and six ingress policies are absent; its non-secret before/after receipt remains on the checkpoint PVC.
+  - [x] PROD MinIO resources are absent; the 1Gi checkpoint PVC and canonical recovery evidence remain available.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
 
 Audit checkpoint: inventory, file map, and acceptance gates are recorded in
-`docs/architecture/scw-final-sweep.md`; production runtime remains unproved
-because the fixed OVH read-only identity is RBAC-denied.
+`docs/architecture/scw-final-sweep.md`. Live OVH PROD and PREPROD parity is
+proved against the exact canonical manifest above; dedicated PROD DOCS,
+GRAPH and SCRAPE Secret identities and OVH coordinates are validated without
+printing values. MinIO workloads, Services and data PVCs are absent in both
+namespaces, while the explicit Scaleway TEM configuration and Secret reference
+remain present.
 
 ## Merge / Close
 - [ ] Conductor accepts code, CI, runtime and recovery proof; no closure based only on text search.
