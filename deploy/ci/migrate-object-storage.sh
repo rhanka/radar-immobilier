@@ -346,6 +346,18 @@ if [ -n "$CONDITIONAL_WRITE_PROOF" ]; then
 elif $EXECUTE_COPY; then
   add_missing_proof 'conditional-write capability proof is absent'
 fi
+
+FENCE_EVIDENCE_DIGEST=null
+if [ "$OPERATION" = delta ] && [ -z "$FENCE_RECORD" ]; then
+  add_missing_proof 'delta fence record is absent'
+fi
+if [ -n "$FENCE_RECORD" ]; then
+  if [ -r "$FENCE_RECORD" ] && [ -s "$FENCE_RECORD" ]; then
+    FENCE_EVIDENCE_DIGEST="$(sha256sum "$FENCE_RECORD" | awk '{print $1}')"
+  else
+    add_missing_proof 'fence record is unreadable or empty'
+  fi
+fi
 SOURCE_LISTING="$WORK_DIR/source-listing.jsonl"
 DESTINATION_LISTING="$WORK_DIR/destination-listing.jsonl"
 SOURCE_MANIFEST="$REPORT_DIR/source-manifest.jsonl"
@@ -721,17 +733,6 @@ prove_recoverable_priors() {
   done <"$tasks"
 }
 
-FENCE_EVIDENCE_DIGEST=null
-if [ "$OPERATION" = delta ] && [ -z "$FENCE_RECORD" ]; then
-  add_missing_proof 'delta fence record is absent'
-fi
-if [ -n "$FENCE_RECORD" ]; then
-  if [ -r "$FENCE_RECORD" ] && [ -s "$FENCE_RECORD" ]; then
-    FENCE_EVIDENCE_DIGEST="$(sha256sum "$FENCE_RECORD" | awk '{print $1}')"
-  else
-    add_missing_proof 'fence record is unreadable or empty'
-  fi
-fi
 if [ "$OPERATION" = copy ] && $EXECUTE_COPY && $RECONCILE_OWNED &&
   proof_is_complete; then
   reconcile_owned_objects || true
