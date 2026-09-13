@@ -13,6 +13,7 @@
 ## Branch Scope Boundaries (MANDATORY)
 - [x] Allowed: `plan/R018-BRANCH_feat-refresh-018.md`, `docs/spec/SPEC_EVOL_REFRESH_018.md`, `docs/reviews/refresh-018/**`.
 - [x] R018-EX1 — owner-requested build released after Fable GO_WITH_CHANGES; exact C01–C14 paths below. Impact: isolated application/dependency/tests only; rollback: revert branch commits; no deployed state changes.
+- [x] R018-EX2 — owner-approved single 2,157-line generated dependency-pair exception for Graphify 0.18.0 plus the refresh mesh 0.19.0 alias, preserving chat mesh 0.1.2; rollback: revert `api/package.json` and `package-lock.json` together.
 - [x] Allowed C01–C14: `api/package.json`, `package-lock.json`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state,run}.ts`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state}.test.ts`; `api/tests/fixtures/refresh-018/oracle.json`; `api/tests/integration/refresh-018.spec.ts`; `api/src/scripts/refresh-pv.ts`. Braces enumerate exact filenames, not open globs.
 - [x] Forbidden: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent entrypoints, `.track/**`, other branch plans, other repositories.
 - [x] Conditional: C15–C25 remain unreleased until slice tests/reconciliation; Kubernetes operations remain conductor-only. Existing canonical writer, graph store and enrichment are read-only reuse unless a precise amendment is recorded.
