@@ -125,3 +125,39 @@ export async function completeRefreshChunk(
     completedChunks: { ...handle.state.completedChunks, [chunkId]: outputHash },
   });
 }
+
+export async function writeRefreshCandidate(
+  store: ObjectStore,
+  handle: RefreshStateHandle,
+  candidate: unknown,
+): Promise<RefreshStateHandle> {
+  const body = canonicalJson(candidate);
+  const hash = canonicalHash(candidate);
+  if (handle.state.candidate && handle.state.candidate.hash !== hash) {
+    throw new Error("Non-deterministic candidate for immutable refresh identity");
+  }
+  if (handle.state.candidate) return handle;
+  const key = handle.key.replace(/state\.json$/, `candidate-${hash.slice(7)}.json`);
+  await store.put(key, body, "application/json");
+  return persist(store, handle.key, { ...handle.state, candidate: { key, hash } });
+}
+
+export async function writeRefreshStageReceipt(
+  store: ObjectStore,
+  handle: RefreshStateHandle,
+  receipt: RefreshStageReceipt,
+): Promise<RefreshStateHandle> {
+  if (receipt.reason !== undefined && !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(receipt.reason)) {
+    throw new Error("Refresh receipt reason must be a redacted reason code");
+  }
+  if (receipt.artifactHash !== undefined && !/^sha256:[0-9a-f]{64}$/.test(receipt.artifactHash)) {
+    throw new Error("Refresh receipt artifact hash is invalid");
+  }
+  if (!Number.isFinite(Date.parse(receipt.recordedAt))) throw new Error("Refresh receipt timestamp is invalid");
+  const key = handle.key.replace(/state\.json$/, `receipts/${receipt.stage}.json`);
+  await store.put(key, canonicalJson(receipt), "application/json");
+  return persist(store, handle.key, {
+    ...handle.state,
+    receipts: { ...handle.state.receipts, [receipt.stage]: receipt },
+  });
+}
