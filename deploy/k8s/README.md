@@ -25,7 +25,7 @@ and extended with the sentropic-app integration.
 | Aspect | How radar does it | Source mirrored |
 | --- | --- | --- |
 | **Tenant / workspace** | dedicated `radar-immobilier` Namespace; every resource carries `app.kubernetes.io/part-of: sentropic` and `sentropic.dev/workspace: radar-immobilier` | sentropic per-tenant namespace + `app.kubernetes.io/*` labels (`10-rbac.yaml`, `30-api.yaml`) |
-| **Registry pull** | public `ghcr.io/rhanka/radar-{api,ui,grounding}` packages need no pull secret; `radar-obscura` runs the **upstream public Docker Hub image** `docker.io/h4ckf0r0day/obscura` (tag + digest pinned — no GHCR package, no pull secret either); the shared `radar-app` ServiceAccount still carries the legacy SCW `radar-registry-pull` secret only while the live prod/preprod Deployments run SCW-tagged images — its retirement is a separate PR after the GHCR promotion | `10-rbac.yaml` |
+| **Registry pull** | public `ghcr.io/rhanka/radar-{api,ui}` packages need no pull secret; `radar-obscura` runs the **upstream public Docker Hub image** `docker.io/h4ckf0r0day/obscura` (tag + digest pinned — no GHCR package, no pull secret either); the shared `radar-app` ServiceAccount has no image pull secret | `10-rbac.yaml` |
 | **Auth** | OIDC **relying party** to the shared sentropic IdP (`auth.sent-tech.ca`) | sentropic `35-auth-idp.yaml`, `60-ingress.yaml`, and the RP recipe `apps/auth-idp/RP_SESSION_GLUE.md` |
 | **Public ingress / TLS** | Traefik Ingress on `immo.sent-tech.ca`, cert-manager `letsencrypt-prod` (DNS-01) | sentropic `60-ingress.yaml` |
 | **UI delivery** | nginx-served Svelte SPA that proxies `/api` → api (same-origin) | sentropic `40-ui.yaml` (nginx fans out `/api`) |
@@ -35,7 +35,7 @@ and extended with the sentropic-app integration.
 | File | Purpose |
 | --- | --- |
 | `00-namespace.yaml` | tenant Namespace + workspace/part-of labels (operator owns the live copy + RQ/LimitRange/NetPol) |
-| `10-rbac.yaml` | `radar-app` ServiceAccount + legacy SCW pull secret (transitional: no manifest in this directory needs it any more — api/ui/grounding are public GHCR, obscura is the public upstream Docker Hub image — it stays until the live prod/preprod Deployments are promoted to GHCR images; retired in a follow-up PR) |
+| `10-rbac.yaml` | `radar-app` ServiceAccount; public GHCR and Docker Hub images require no pull secret |
 | `20-postgres-postgis.yaml` | Postgres 16 + PostGIS StatefulSet + headless Service + 5Gi PVC |
 | `25-minio.yaml` | in-cluster MinIO (S3) StatefulSet + Service for raw-document storage |
 | `30-api.yaml` | radar API (Hono) Deployment + Service + non-secret ConfigMap (incl. OIDC RP env) |
