@@ -39,19 +39,20 @@ object-storage-docs-prod-expand-pvc-quota: ## Guardedly expand only the PROD PVC
 	  [ "$$server" = "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ] || \
 	    { echo '[object-storage-docs-prod] refused non-OVH context'; exit 1; }; \
 	  quota="$$( $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json )"; \
-	  jq -e '.status.hard["requests.storage"] == "10Gi" and \
-	    .spec.hard["requests.storage"] == "10Gi" and \
-	    .status.used.persistentvolumeclaims == "2" and \
-	    (.status.hard.persistentvolumeclaims == "2" or \
-	      .status.hard.persistentvolumeclaims == "3")' <<<"$$quota" >/dev/null; \
+	  jq -e '(.status.hard | has("requests.storage") | not) and (.spec.hard | has("requests.storage") | not) and .status.used.persistentvolumeclaims == "2" and (.status.hard.persistentvolumeclaims == "2" or .status.hard.persistentvolumeclaims == "3")' <<<"$$quota" >/dev/null; \
 	  if [ "$$(jq -r '.status.hard.persistentvolumeclaims' <<<"$$quota")" = 2 ]; then \
 	    $(KUBECTL) -n "$$namespace" patch resourcequota/tenant-quota --type=merge \
 	      -p '{"spec":{"hard":{"persistentvolumeclaims":"3"}}}' >/dev/null; \
 	  fi; \
 	  $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json | \
-	    jq -e '.status.hard.persistentvolumeclaims == "3" and \
-	      .status.hard["requests.storage"] == "10Gi"' >/dev/null; \
-	  echo '[object-storage-docs-prod] PVC quota hard=3, storage hard=10Gi unchanged'
+	    jq -e '.status.hard.persistentvolumeclaims == "3" and (.status.hard | has("requests.storage") | not)' >/dev/null; \
+	  echo '[object-storage-docs-prod] PVC quota hard=3; absent storage quota unchanged'
+
+.PHONY: object-storage-docs-prod-quota-status
+object-storage-docs-prod-quota-status: ## Read safe PROD quota coordinates only
+	@$(KUBECTL) -n $(OBJECT_STORAGE_DOCS_PROD_NAMESPACE) \
+	  get resourcequota/tenant-quota -o json | \
+	  jq '{hard:.status.hard,used:.status.used}'
 
 .PHONY: object-storage-docs-prod-start
 object-storage-docs-prod-start: ## Create the resumable PROD DOCS inventory Job
@@ -70,13 +71,19 @@ object-storage-docs-prod-start: ## Create the resumable PROD DOCS inventory Job
 	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	    $(OBJECT_STORAGE_DOCS_PROD_DIR) >"$$render"; \
 	  $(KUBECTL) apply -f "$$render" >/dev/null; \
+	  phase="$$( $(KUBECTL) -n "$$namespace" get \
+	    pvc/radar-object-storage-docs-prod-checkpoint -o jsonpath='{.status.phase}' )"; \
+	  [[ "$$phase" =~ ^(Pending|Bound)$$ ]] || \
+	    { echo '[object-storage-docs-prod] checkpoint PVC has an invalid phase'; exit 1; }; \
+	  $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json | \
+	    jq -e '.status.hard.persistentvolumeclaims == "3" and .status.used.persistentvolumeclaims == "3" and (.status.hard | has("requests.storage") | not)' >/dev/null; \
+	  job_ref="$$( $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/inventory-job.yaml -o name )"; \
+	  job="$${job_ref#job.batch/}"; \
+	  $(KUBECTL) -n "$$namespace" wait --for=condition=PodScheduled \
+	    pod -l "job-name=$$job" --timeout=120s >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" wait --for=jsonpath='{.status.phase}'=Bound \
 	    pvc/radar-object-storage-docs-prod-checkpoint --timeout=120s >/dev/null; \
-	  $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json | \
-	    jq -e '.status.hard.persistentvolumeclaims == "3" and \
-	      .status.used.persistentvolumeclaims == "3" and \
-	      .status.hard["requests.storage"] == "10Gi"' >/dev/null; \
-	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/inventory-job.yaml -o name
+	  echo "$$job_ref"
 
 .PHONY: object-storage-docs-prod-progress
 object-storage-docs-prod-progress: ## Report aggregate PROD DOCS checkpoint progress without keys
