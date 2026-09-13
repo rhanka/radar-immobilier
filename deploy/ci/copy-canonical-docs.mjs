@@ -5,7 +5,8 @@ import { closeSync, createReadStream, createWriteStream, fsyncSync, openSync,
 import { createRequire } from "node:module";
 
 const require = createRequire("/workspace/package.json");
-const { GetObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+const { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } =
+  require("@aws-sdk/client-s3");
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const manifestPath = required("CANONICAL_MANIFEST");
 const manifestDigest = required("CANONICAL_DIGEST");
@@ -43,6 +44,7 @@ const client = (coordinate, credentials) => new S3Client({ endpoint: coordinate.
   region: coordinate.region, forcePathStyle: false, credentials, maxAttempts: 4 });
 const sourceClient = client(source, sourceCredentials);
 const destinationClient = client(destination, destinationCredentials);
+const allowSingleProofPrune = process.env.PRUNE_SINGLE_EXTRA_CONFIRM === "1";
 const started = Date.now();
 const results = [];
 const atomicJson = (path, value) => {
@@ -71,6 +73,24 @@ const getDigest = async (clientInstance, bucket, key, outputPath) => {
 const missing = (error) => error?.name === "NoSuchKey" || error?.$metadata?.httpStatusCode === 404;
 const tagging = (tags) => tags.map(({ Key, Value }) =>
   `${encodeURIComponent(Key)}=${encodeURIComponent(Value)}`).join("&");
+const listDestination = async () => {
+  const listed = []; let continuationToken;
+  do {
+    const page = await destinationClient.send(new ListObjectsV2Command({ Bucket: destination.bucket,
+      MaxKeys: 1000, ContinuationToken: continuationToken }));
+    for (const item of page.Contents ?? []) listed.push({ key: item.Key, size: item.Size, etag: item.ETag ?? "" });
+    continuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
+    if (page.IsTruncated && !continuationToken) throw new Error("truncated destination listing lacks a token");
+  } while (continuationToken);
+  return listed.sort((a, b) => Buffer.from(a.key).compare(Buffer.from(b.key)));
+};
+const targetDiff = (listed) => {
+  const expected = new Map(objects.map((item) => [item.key, item.size]));
+  const observed = new Map(listed.map((item) => [item.key, item.size]));
+  return { missing: objects.filter((item) => !observed.has(item.key)).map(({ key, size }) => ({ key, size })),
+    extra: listed.filter((item) => !expected.has(item.key)),
+    sizeConflicts: listed.filter((item) => expected.has(item.key) && expected.get(item.key) !== item.size) };
+};
 const progress = () => {
   const elapsedSeconds = Math.max(1, (Date.now() - started) / 1000);
   const processed = results.length; const logicalBytes = results.reduce((sum, item) => sum + item.size, 0);
@@ -117,7 +137,18 @@ results.sort((a, b) => Buffer.from(a.key).compare(Buffer.from(b.key)));
 atomicJson(`${reportDir}/copy-ledger.json`, results);
 const summary = JSON.parse(readFileSync(`${reportDir}/progress.json`, "utf8"));
 summary.schemaVersion = 1; summary.canonicalDigest = manifestDigest;
-summary.complete = summary.processed === 59017 && summary.failed === 0;
+let listed = await listDestination(); let diff = targetDiff(listed); summary.prunedExtra = 0;
+atomicJson(`${reportDir}/target-diff-before-prune.json`, diff);
+if (summary.processed === 59017 && summary.failed === 0 && diff.missing.length === 0 &&
+  diff.sizeConflicts.length === 0 && diff.extra.length === 1 && allowSingleProofPrune) {
+  const extra = diff.extra[0];
+  if (!extra.etag) throw new Error("single proof extra lacks an ETag");
+  await destinationClient.send(new DeleteObjectCommand({ Bucket: destination.bucket, Key: extra.key, IfMatch: extra.etag }));
+  summary.prunedExtra = 1; listed = await listDestination(); diff = targetDiff(listed);
+}
+atomicJson(`${reportDir}/target-diff.json`, diff);
+summary.exactParity = diff.missing.length === 0 && diff.extra.length === 0 && diff.sizeConflicts.length === 0;
+summary.complete = summary.processed === 59017 && summary.failed === 0 && summary.exactParity;
 atomicJson(`${reportDir}/summary.json`, summary);
 if (!summary.complete) throw new Error("canonical copy did not reach exact parity");
 console.log(JSON.stringify({ status: "complete", ...summary }));
