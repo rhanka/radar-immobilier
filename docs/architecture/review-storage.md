@@ -19,12 +19,13 @@ store identities, infrastructure placement and processing paths are not shared.
 The coordinator audits source/deployment wiring while the independent reviewer
 audits the committed baseline, blind to the proposed correction.
 
-External review: [Gemini leg](review-storage-gemini.md). No consensus verdict.
+External review: [first launch failure](review-storage-gemini.md), [second run failure](gemini-review/review.md), [completed inline leg and reconciliation](gemini-review/review-inline.md). No consensus verdict.
 
 ## Reconciliation
 
-External review remains blocked. The following are **coordinator findings**, not
-Gemini findings or a consensus. Corrected architecture target: `56a2dd19`.
+The following are **historical coordinator findings** at `56a2dd19`, not Gemini
+findings or a consensus. The later main/runtime audit supersedes live-execution
+inferences about absent legacy Jobs; see the completed inline reconciliation.
 
 | Finding | Evidence | Disposition |
 | --- | --- | --- |
@@ -45,6 +46,8 @@ Gemini findings or a consensus. Corrected architecture target: `56a2dd19`.
   overflow at desktop 1440px or mobile 390px. The diagrams themselves are scrollable.
 - No application, deployment, object contents or Secret values changed/read.
 
-Remaining acceptance: the requested external review requires owner approval of the
-bounded non-sensitive payload and a fresh successful launch. No external verdict
-is implied by the local checks above.
+The requested single Gemini review has now completed: NEEDS CHANGES at `2ab8da2b`.
+Its findings were reconciled against source and live configuration. The current
+diagrams share 13 Immo and 7 Geo resources; unobserved legacy templates are excluded.
+Formal harness consensus remains selection-failed, not silently converted to GO.
+Remaining runtime evidence: production OVH namespace inventory, requested from k8s.
