@@ -21,6 +21,7 @@ serve:
 
 verify:
 	test -s $(DOC_DIR)/architecture.html
+	docker run --rm --network none -v $(DOC_DIR)/..:/docs:ro $(NODE_IMAGE) node /docs/architecture/verify-resources.mjs
 	docker run --rm --network none -v $(DOC_DIR):/src:ro $(NODE_IMAGE) node --check /src/viewer.js
 	docker run --rm --network none -v $(DOC_DIR):/src:ro $(NODE_IMAGE) node --check /src/render-focus.mjs
 	git diff --check

@@ -21,3 +21,9 @@ make -f docs/architecture/Makefile verify ENV=test-architecture
 ```
 
 Validation also exercised the generated page in a headless browser: all four Mermaid diagrams rendered successfully. The local server remains active while the `serve` command runs; interrupt that command to stop it. No deployment, secret or data change is part of this preview.
+
+`verify` also checks the cross-diagram resource contract: 16 shared Immo resources
+must occur with identical Mermaid IDs and labels in the overview and preprod zoom;
+Geo's shared resources must match too, and storage IDs must have register entries.
+Negative fixtures reject missing resources, conflicting labels and duplicate IDs.
+This is a documentation consistency check, not a live infrastructure certification.
