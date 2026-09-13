@@ -1,13 +1,10 @@
-# refresh-cronjobs-prod — deploys the two production refresh CronJobs, pins
-# them to the promoted release image, and un-suspends them. This is the
-# production twin of refresh-cronjobs; it deliberately carries no MinIO patch.
+# refresh-cronjobs-prod — deploys one causal production PV-to-Signal CronJob,
+# pins it to the accepted release image, and keeps both legacy schedules
+# suspended. This is the production twin of refresh-cronjobs.
 #
-# The schedules are inherited unchanged from 34-refresh-cronjob.yaml: scrape at
-# 03:17 UTC, then projection at 04:30 UTC. Keep both outside the release window:
-# neither refresh workload may overlap the release backup.
-#
-# TODO(#670): remove the inherited SCW endpoint, bucket, and credential
-# references only as part of the tracked SCW S3 eradication.
+# Production storage coordinates come from the radar-api ConfigMap after T2;
+# credentials use the dedicated OVH DOCS Secret. The base is provider-neutral
+# after T2 and this overlay never adds a MinIO or SCW fallback.
 #
 # Applied only by the gated promote-prod "Deploy refresh CronJobs (prod)" step.
 # The fail-loud image placeholder must be replaced by `kustomize edit set image`
@@ -19,6 +16,7 @@ namespace: radar-immobilier
 
 resources:
   - ../34-refresh-cronjob.yaml
+  - ../34-refresh-keyring-pvc.yaml
 
 images:
   - name: ghcr.io/rhanka/radar-api
@@ -27,15 +25,29 @@ images:
 patches:
   - target:
       kind: CronJob
-      name: radar-refresh-scrape
+      name: radar-refresh-pv
     patch: |
       - op: replace
         path: /spec/suspend
         value: false
+
   - target:
       kind: CronJob
-      name: radar-refresh-projection
+      name: radar-refresh-pv
     patch: |
-      - op: replace
-        path: /spec/suspend
-        value: false
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: radar-refresh-pv
+      spec:
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: refresh-pv
+                    env:
+                      - name: SCRAPE_S3_ACCESS_KEY
+                        valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY } }
+                      - name: SCRAPE_S3_SECRET_KEY
+                        valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
