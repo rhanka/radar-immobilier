@@ -1,3 +1,5 @@
+/* global process, fetch, WebSocket, setTimeout, console */
+
 const oauthUrl = process.env.OAUTH_URL;
 if (!oauthUrl?.startsWith("https://accounts.google.com/")) {
   throw new Error("OAUTH_URL must be a Google authorization URL");

@@ -1,3 +1,5 @@
+/* global process, console */
+
 import { createLlmMeshFacade } from "@sentropic/llm-mesh-refresh/facade";
 import { EncryptedFileKeyring } from "@sentropic/llm-mesh-refresh/node";
 
