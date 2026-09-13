@@ -97,6 +97,7 @@
     - [x] Finalize stable provisional and resumable fenced chains without validation overclaim.
     - [x] Require executed copies to consume the final proof without monolithic relisting.
     - [x] Cover empty truncated pages, uncommitted tails, byte order and oversized blockers.
+    - [x] Bound each checkpoint-mode storage call by the declared time budget.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
 - [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
