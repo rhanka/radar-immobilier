@@ -51,8 +51,8 @@ run_bad "$CASE_ROOT" 'rejects DOCS reuse of the GRAPH identity'; rm -rf "$CASE_R
 fixture; sed -i '0,/radar-scrape-s3-credentials/{s/radar-scrape-s3-credentials/sentropic-geo-s3-credentials/}' "$CASE_ROOT/deploy/k8s/33b-scrape-cities-job.yaml"
 run_bad "$CASE_ROOT" 'rejects DOCS reuse of a Geo identity'; rm -rf "$CASE_ROOT"
 
-fixture; sed -i '0,/RAW_S3_BUCKET/{s/RAW_S3_BUCKET/S3_BUCKET/}' "$CASE_ROOT/deploy/k8s/30-api.yaml"
-run_bad "$CASE_ROOT" 'rejects a generic PROD RAW credential binding'; rm -rf "$CASE_ROOT"
+fixture; sed -i '0,/DOCS_S3_BUCKET/{s/DOCS_S3_BUCKET/S3_BUCKET/}' "$CASE_ROOT/deploy/k8s/30-api.yaml"
+run_bad "$CASE_ROOT" 'rejects a generic PROD canonical credential binding'; rm -rf "$CASE_ROOT"
 
 fixture; rm -f "$CASE_ROOT/deploy/k8s/32b-reproject-etape-job.yaml"
 run_bad "$CASE_ROOT" 'keeps every gated client explicit'; rm -rf "$CASE_ROOT"

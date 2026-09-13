@@ -149,20 +149,20 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
-            # Complete OVH RAW binding. Coordinates and credentials come from
+            # Complete OVH canonical DOCS binding. Coordinates and credentials come from
             # one bucket-scoped Secret; no ConfigMap or generic-key fallback.
             - name: S3_ENDPOINT
-              valueFrom: { secretKeyRef: { name: radar-raw-s3-credentials, key: RAW_S3_ENDPOINT } }
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ENDPOINT } }
             - name: S3_REGION
-              valueFrom: { secretKeyRef: { name: radar-raw-s3-credentials, key: RAW_S3_REGION } }
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_REGION } }
             - name: S3_BUCKET
-              valueFrom: { secretKeyRef: { name: radar-raw-s3-credentials, key: RAW_S3_BUCKET } }
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_BUCKET } }
             - name: S3_FORCE_PATH_STYLE
-              valueFrom: { secretKeyRef: { name: radar-raw-s3-credentials, key: RAW_S3_FORCE_PATH_STYLE } }
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_FORCE_PATH_STYLE } }
             - name: S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-raw-s3-credentials, key: RAW_S3_ACCESS_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
             - name: S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-raw-s3-credentials, key: RAW_S3_SECRET_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
             # OIDC RP client secret for the sentropic IdP token exchange
             # (confidential client). Seeded with the client row at the IdP.
             - name: SENTROPIC_OAUTH_CLIENT_SECRET
