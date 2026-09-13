@@ -371,6 +371,15 @@ put_fixture source src raw/from-source.txt changed
 TEST_NAME='rejects overlapping source provenance with different bytes'
 expect_bad run_tool verify "$TEST_TMP/reports/overlap-bytes" \
   --expected-manifest "$TEST_TMP/expected-union.json"
+rm -f "$TEST_TMP/store/destination/dst/objects/raw/from-source.txt" \
+  "$TEST_TMP/store/destination/dst/meta/raw/from-source.txt.json"
+: >"$AWS_LOG"
+TEST_NAME='approved-union disagreement exits one before copy'
+expect_status 1 run_tool copy "$TEST_TMP/reports/overlap-copy" --execute-copy \
+  --expected-manifest "$TEST_TMP/expected-union.json"
+TEST_NAME='approved-union disagreement leaves the destination untouched'
+if [ ! -e "$TEST_TMP/store/destination/dst/objects/raw/from-source.txt" ] &&
+  ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 reset_store
 put_fixture source src raw/from-source.txt alpha
 put_fixture destination dst raw/from-source.txt alpha
