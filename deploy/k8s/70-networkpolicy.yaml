@@ -95,7 +95,7 @@ spec:
 #
 # Projection jobs (31/32/32b) run with `component: graph-projection`, not
 # `component: api`. The operator baseline `allow-api-to-runtime-dependencies`
-# only allows api -> postgres, so graph projection pods can list SCW objects but
+# only allows api -> postgres, so graph projection pods can list objects but
 # then hang on the first DB upsert. Keep this tenant-owned exception narrowly
 # scoped to graph-projection -> postgres:5432.
 apiVersion: networking.k8s.io/v1

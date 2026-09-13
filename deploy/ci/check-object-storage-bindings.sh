@@ -22,6 +22,16 @@ PUBLIC_IMAGE_FILES=(
 FAIL=0
 fail() { echo "FAIL: $*" >&2; FAIL=$((FAIL + 1)); }
 
+while IFS= read -r path; do
+  rel="${path#"$ROOT/"}"
+  grep -Ev '^[[:space:]]*(#|$)' "$path" |
+    grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|rg\.fr-par\.scw\.cloud|radar-registry-pull|graph-copy-creds|key:[[:space:]]*SCW_(AK|SK)' &&
+    fail "$rel contains an active legacy SCW/MinIO reference"
+done < <(find "$ROOT/.github/workflows" "$ROOT/deploy/k8s" -type f \
+  \( -name '*.yaml' -o -name '*.yml' \) \
+  ! -path "$ROOT/deploy/k8s/object-storage-docs-prod/*" \
+  ! -path "$ROOT/deploy/k8s/object-storage-inventory-preprod/*" | sort)
+
 binding() {
   local rel="$1" var="$2" ref_kind="$3" resource="$4" key="$5" block
   block="$(awk -v var="$var" '
@@ -75,6 +85,8 @@ for rel in "${PUBLIC_IMAGE_FILES[@]}"; do
   grep -Eiq 'radar-registry-pull|rg\.fr-par\.scw\.cloud' "$ROOT/$rel" &&
     fail "$rel retains a legacy SCW registry reference"
 done
+grep -Eiq 'radar-registry-pull|SCW[[:space:]]+(Container[[:space:]]+)?registry' \
+  "$ROOT/deploy/k8s/README.md" && fail 'deploy/k8s/README.md retains legacy registry guidance'
 grep -Eiq 'refresh-diag|REFRESH_DIAG_ENABLED|radar-refresh-diag' \
   "$ROOT/.github/workflows/build-push-images.yml" &&
   fail '.github/workflows/build-push-images.yml retains the legacy refresh diagnostic'
