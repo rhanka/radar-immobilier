@@ -98,9 +98,15 @@ describe("refresh profile extraction", () => {
     }
     const schema = JSON.parse(seen[0]!.schema);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
+    expect(schema.graph_contract).toEqual({
+      node_file_type: ["code", "concept", "document", "image", "paper", "rationale"],
+      edge_confidence: ["AMBIGUOUS", "EXTRACTED", "INFERRED"],
+    });
     expect(schema.evidence).toMatchObject({ docSha: oracle.docSha, allowedPages: [3] });
     expect(seen[0]).toMatchObject({ maxOutputTokens: 512 });
     expect(seen[0]!.prompt).toContain(`[PDF PAGE 3]\n${oracle.excerpt}`);
+    expect(seen[0]!.prompt).toContain('Every node file_type must be "document"');
+    expect(seen[0]!.prompt).toContain("never emit a numeric confidence");
   });
 
   it("should reject the page-3 quotation when the model attributes it to page 1", async () => {

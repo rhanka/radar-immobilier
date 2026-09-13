@@ -73,6 +73,10 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
     required: ["nodes", "edges", "input_tokens", "output_tokens"],
     ontology: { profile_id: context.profile.id, profile_version: context.profile.version,
       allowed_node_types: [...allowed], node_properties: properties },
+    graph_contract: {
+      node_file_type: ["code", "concept", "document", "image", "paper", "rationale"],
+      edge_confidence: ["AMBIGUOUS", "EXTRACTED", "INFERRED"],
+    },
     evidence: { modality: "pdf", docSha: chunk.docSha, rawRef: chunk.originalKey,
       sourceUrl: chunk.sourceUrl, allowedPages: chunk.pages, excerpt: "verbatim text from the cited page" },
     constraints: ["Omit facts absent from the chunk, including in-force status and residential unit counts."],
@@ -144,7 +148,9 @@ export async function extractRefreshProfile(
       const outputPath = join(outputDir, `${chunk.id}.json`);
       const generation = await options.textClient.generateJson({
         schema: schemaFor(chunk, options.context),
-        prompt: `Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.\n\n${buildProfileChunkPrompt(options.context, {
+        prompt: `Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
+Every node file_type must be "document" for this PDF. Edge confidence, when present, must be
+"AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.\n\n${buildProfileChunkPrompt(options.context, {
           filePath: chunk.originalKey, fileType: "document", text: chunk.text,
         })}`,
         outputPath, maxOutputTokens: options.maxOutputTokens,
