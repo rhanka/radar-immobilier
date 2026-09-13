@@ -40,7 +40,7 @@
 - [x] Lot 3d2: require complete graph bindings in graphify and export Jobs.
 - [x] Lot 3d3: require complete scrape bindings in manual Jobs.
 - [x] Lot 3e1: retire uncalled SCW mount executables.
-- [ ] Lot 3e2: correct active object-storage deployment guidance.
+- [x] Lot 3e2: correct active object-storage deployment guidance.
 - [ ] Lot 3f: add and pass scoped offline storage-binding regression checks.
 - [ ] Lot 3g: record remaining clients, run final offline gates, and complete independent post-build review.
 - [ ] Lot 4: after T1, conductor verifies copy/parity/fencing/recovery and preprod then production cutovers.
