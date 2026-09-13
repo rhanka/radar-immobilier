@@ -58,6 +58,7 @@
 - [x] C10d: retain the first run timestamp so resumed candidates remain deterministic.
 - [x] C11: cover same-input no-call resume, conservative interruptions, baseline changes and failed-write receipts.
 - [x] C12a: adapt one successful existing acquisition recap into a strict immutable PDF manifest.
+- [x] C12b: compose resumable profile extraction, v2.3/3.4, guarded publish and atomic projection.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
