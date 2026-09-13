@@ -12,7 +12,10 @@ import {
 import { beforeAll, describe, expect, it } from "vitest";
 
 import type { RefreshCorpusChunk } from "./refresh-corpus.js";
-import { extractRefreshProfile, loadRefreshProfileContext, type RefreshProfileContext } from "./refresh-profile.js";
+import {
+  extractRefreshProfile, loadRefreshProfileContext, REFRESH_PROFILE_CONTRACT_VERSION,
+  type RefreshProfileContext,
+} from "./refresh-profile.js";
 
 const oraclePath = new URL("../../../tests/fixtures/refresh-018/oracle.json", import.meta.url);
 const profilePath = fileURLToPath(new URL("../../../../radar/ontology/ontology-profile.yaml", import.meta.url));
@@ -96,24 +99,41 @@ describe("refresh profile extraction", () => {
     for (const forbidden of oracle.forbiddenProperties) {
       expect(results[0]?.extraction.nodes[0]).not.toHaveProperty(forbidden);
     }
+    expect(results[1]).toMatchObject({ chunk: { originalKey: oracle.originalKey },
+      extraction: { nodes: [], edges: [] } });
     const schema = JSON.parse(seen[0]!.schema);
+    expect(schema.contract_version).toBe(REFRESH_PROFILE_CONTRACT_VERSION);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
-    expect(schema.graph_contract).toEqual({
+    expect(schema.ontology.relation_signatures.supports).toMatchObject({
+      source_node_types: ["Source"], requires_evidence_refs: true,
+    });
+    expect(schema.ontology.relation_signatures.references).toMatchObject({
+      source_node_types: ["Source"], target_node_types: ["Bylaw", "DesignationEvent"],
+    });
+    expect(schema.graph_contract).toMatchObject({
       node_file_type: ["code", "concept", "document", "image", "paper", "rationale"],
       edge_confidence: ["AMBIGUOUS", "EXTRACTED", "INFERRED"],
     });
-    expect(schema.evidence).toMatchObject({ docSha: oracle.docSha, allowedPages: [3] });
+    expect(schema.graph_contract.evidence_refs).toMatchObject({
+      type: "array", items: { type: "string", references: "evidence[].id" }, minItems: 1,
+    });
+    expect(schema.evidence.pdf_identity).toMatchObject({ docSha: oracle.docSha, rawRef: oracle.originalKey });
+    expect(schema.evidence.citation.required).toContain("source_file");
+    expect(schema.evidence.citation.properties.source_file).toEqual({ const: oracle.originalKey });
+    expect(schema.evidence.citation.properties.modality).toEqual({ const: "pdf" });
+    expect(schema.evidence.allowedPages).toEqual([3]);
     expect(seen[0]).toMatchObject({ maxOutputTokens: 512 });
     expect(seen[0]!.prompt).toContain(`[PDF PAGE 3]\n${oracle.excerpt}`);
     expect(seen[0]!.prompt).toContain('Every node file_type must be "document"');
     expect(seen[0]!.prompt).toContain("never emit a numeric confidence");
+    expect(seen[0]!.prompt).toContain("arrays of string IDs from evidence[].id");
   });
 
   it("should reject the page-3 quotation when the model attributes it to page 1", async () => {
     const seen: TextJsonGenerationInput[] = [];
     await expect(extractRefreshProfile([chunk()], {
       context, textClient: client([{ text: JSON.stringify(extraction(1)) }], seen), maxOutputTokens: 512,
-    })).rejects.toThrow("Invalid original PDF page");
+    })).rejects.toThrow("invalid original PDF page");
     expect(seen).toHaveLength(1);
   });
 
@@ -123,8 +143,16 @@ describe("refresh profile extraction", () => {
       context, textClient: client([
         { text: JSON.stringify(extraction()) }, { text: JSON.stringify(extraction(1)) },
       ], seen), maxOutputTokens: 512,
-    })).rejects.toThrow("Invalid original PDF page");
+    })).rejects.toThrow("invalid original PDF page");
     expect(seen).toHaveLength(2);
+  });
+
+  it("should identify a wrong PDF identity as model output without rejecting zero findings", async () => {
+    const invalid = extraction();
+    invalid.nodes[0]!.citations![0]!.rawRef = "raw/wrong.pdf";
+    await expect(extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("Model output has invalid original PDF identity");
   });
 
   it("should reject non-completed output and unsupported empty scanned chunks", async () => {
