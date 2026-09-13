@@ -80,6 +80,7 @@
       - [x] Require conditional-write capability evidence before every executed copy.
       - [x] Reconcile the independent write-path and conditional-PUT findings.
       - [x] Move fence-record validation before every executed copy write path.
+      - [x] Bound capability-proof age and validity to 48 hours and cover rejection dimensions.
       - [x] Document capability-proof custody and the current-version-only boundary.
       - [x] Regress source-versus-approved-union disagreement before copy.
     - [x] Extend the binding gate and retain the explicit pending-client ledger.

@@ -143,7 +143,7 @@ reset_store() {
   jq -n --arg fingerprint "$fingerprint" '{schemaVersion:1,provider:"fake-s3",providerVersion:"1",
     destination:{endpoint:"https://destination.test",region:"bhs",bucket:"dst",pathStyle:false},
     identityFingerprint:$fingerprint,
-    observedAt:"2026-09-13T12:00:00Z",expiresAt:"2099-01-01T00:00:00Z",
+    observedAt:((now - 3600) | todateiso8601),expiresAt:((now + 82800) | todateiso8601),
     transcriptSha256:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     capabilities:{ifNoneMatchCreate:true,ifMatchUpdate:true}}' >"$TEST_TMP/conditional-write-proof.json"
   unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_ATTEMPTS FAKE_VERSIONING
@@ -266,6 +266,19 @@ expect_status 1 run_tool copy "$TEST_TMP/reports/mismatched-capability" --execut
 TEST_NAME='mismatched capability evidence prevents every destination write'
 if [ ! -e "$TEST_TMP/store/destination/dst/objects/raw/mismatched-capability.txt" ] &&
   ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+for mutation in long-lived expired wrong-identity wrong-capabilities; do
+  case "$mutation" in
+    long-lived) filter='.expiresAt = ((.observedAt | fromdateiso8601) + 172801 | todateiso8601)' ;;
+    expired) filter='.observedAt = ((now - 7200) | todateiso8601) | .expiresAt = ((now - 3600) | todateiso8601)' ;;
+    wrong-identity) filter='.identityFingerprint = ("b" * 64)' ;;
+    wrong-capabilities) filter='.capabilities.ifMatchUpdate = false' ;;
+  esac
+  jq "$filter" "$TEST_TMP/conditional-write-proof.json" >"$TEST_TMP/$mutation-proof.json"
+  TEST_NAME="rejects $mutation conditional-write evidence"
+  expect_status 1 run_tool copy "$TEST_TMP/reports/$mutation-proof" --execute-copy \
+    --conditional-write-proof "$TEST_TMP/$mutation-proof.json"
+done
 
 reset_store
 put_fixture source src raw/empty-fence.txt payload

@@ -331,7 +331,10 @@ validate_conditional_write_proof() {
     (.providerVersion | type == "string" and length > 0) and
     .destination == {endpoint:$endpoint,region:$region,bucket:$bucket,pathStyle:$pathStyle} and
     .identityFingerprint == $identity and
-    (.observedAt | fromdateiso8601) <= now and (.expiresAt | fromdateiso8601) > now and
+    ((.observedAt | fromdateiso8601) as $observed |
+      (.expiresAt | fromdateiso8601) as $expires |
+      $observed <= now and (now - $observed) <= 172800 and $expires > now and
+      ($expires - $observed) <= 172800) and
     (.transcriptSha256 | test("^[0-9a-f]{64}$")) and
     .capabilities == {ifNoneMatchCreate:true,ifMatchUpdate:true}
   ' "$CONDITIONAL_WRITE_PROOF" >/dev/null
