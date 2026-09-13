@@ -97,6 +97,8 @@ for rel in deploy/k8s/71-networkpolicy-graph-projection-minio-preprod.yaml \
   deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml deploy/grounding/Dockerfile; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
 done
+[ ! -e "$ROOT/deploy/k8s/41-grounding-worklist-configmap.yaml" ] ||
+  fail 'deploy/k8s/41-grounding-worklist-configmap.yaml must be retired'
 for rel in deploy/k8s/refresh-diag/diag-refresh-job.yaml deploy/k8s/refresh-diag/kustomization.yaml; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
 done
