@@ -1,4 +1,6 @@
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import { missingMermaidLabels } from './mermaid-labels.mjs';
+const { graphs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
 const base = 'http://127.0.0.1:9238';
 const page = await (await fetch(`${base}/json/new?http://127.0.0.1:5188/`, { method: 'PUT' })).json();
 const ws = new WebSocket(page.webSocketDebuggerUrl);
@@ -20,6 +22,7 @@ const timeout = setTimeout(() => { console.error('Browser verification timed out
 await call('Runtime.enable'); await call('Network.enable');
 await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
 await evaluate(`new Promise((resolve, reject) => { const until = Date.now() + 2000; const check = () => document.querySelector('.svelte-flow__node') ? resolve(true) : Date.now() > until ? reject(Error('Native flow missing')) : requestAnimationFrame(check); check(); })`);
+await evaluate(`window.checkMermaidLabels = ${missingMermaidLabels.toString()}; window.expectedGraphs = ${JSON.stringify(graphs)}; true`);
 console.log(await evaluate(`(async () => {
   const settle = () => new Promise(resolve => setTimeout(resolve, 180));
   const choose = (label, value) => { const e = document.querySelector('select[aria-label="' + label + '"]'); e.value = value; e.dispatchEvent(new Event('change', { bubbles: true })); };
@@ -40,6 +43,8 @@ console.log(await evaluate(`(async () => {
     const svg = document.querySelector('.mermaid-render svg');
     if (!svg || svg.querySelectorAll('g.node').length !== expected[0] || svg.querySelectorAll('g.cluster').length !== expected[1]) throw Error('Mermaid rendering incomplete: ' + view);
     if (svg.querySelector('script,foreignObject,[onclick],[onload],[onerror]')) throw Error('Unsafe Mermaid');
+    const missing = window.checkMermaidLabels(svg, window.expectedGraphs.find(g => g.id === view));
+    if (missing.length) throw Error('Lost rendered labels ' + view + ': ' + JSON.stringify(missing));
     document.querySelector('.mermaid-panel').open = false;
   }
   choose('Vue architecture', 'asis-1'); await settle(); choose('Retrouver un composant', 'PP_DB'); await settle();
@@ -92,6 +97,10 @@ console.log(await evaluate(`(async () => {
   if (document.querySelector('dialog')) throw Error('Dialog close failed');
   [...document.querySelectorAll('.source-links button')].find(b => b.textContent === 'architecture').click(); await settle();
   if (document.querySelectorAll('dialog .source-mermaid svg').length !== 4) throw Error('Mermaid in the source document is not rendered');
+  [...document.querySelectorAll('dialog .source-mermaid svg')].forEach((svg, index) => {
+    const missing = window.checkMermaidLabels(svg, window.expectedGraphs[index]);
+    if (missing.length) throw Error('Lost source-document labels: ' + JSON.stringify(missing));
+  });
   document.querySelector('dialog').close(); await settle();
   if (document.documentElement.scrollWidth > innerWidth) throw Error('Desktop overflow');
   document.querySelector('.explorer').scrollIntoView({ behavior: 'instant' });

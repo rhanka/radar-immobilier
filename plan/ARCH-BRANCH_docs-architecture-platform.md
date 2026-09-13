@@ -102,3 +102,7 @@
   - [x] Fit the full diagram from explicit absolute nested bounds; verify every box and component stays inside the initial viewport.
   - [x] Add real clipboard read-back in a fresh isolated browser context, preserving the previous clipboard content.
   - [x] Verify simultaneous completeness, nested bounds, Mermaid rendering and A/B/C comment/export behavior; real clipboard read-back passes.
+- [ ] **Lot 10 — Service icons, repository attribution and complete Mermaid text.**
+  - [x] Reproduce missing labels: Mermaid 11 nodes used foreignObject despite the flowchart-only flag; global htmlLabels:false preserves SVG text without relaxing sanitization. Build and browser assertions now check every label, not just box counts.
+  - [ ] Add service pictograms and explicit repository/configuration ownership to every native node and subflow.
+  - [ ] Verify text, nested geometry, provenance parity and offline rendering in Chromium.
