@@ -25,4 +25,5 @@ configMapGenerator:
       - build-docs-expected-manifest.sh=../../ci/build-docs-expected-manifest.sh
       - copy-canonical-docs.sh=../../ci/copy-canonical-docs.sh
       - copy-canonical-docs.mjs=../../ci/copy-canonical-docs.mjs
+      - copy-canonical-docs-parity.mjs=../../ci/copy-canonical-docs-parity.mjs
       - copy-canonical-docs-progress.sh=../../ci/copy-canonical-docs-progress.sh
