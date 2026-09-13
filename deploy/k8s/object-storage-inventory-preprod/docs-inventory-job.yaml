@@ -102,8 +102,8 @@ spec:
             - name: DESTINATION_PATH_STYLE
               valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_FORCE_PATH_STYLE } }
           resources:
-            requests: { cpu: 250m, memory: 512Mi, ephemeral-storage: 128Mi }
-            limits: { cpu: 2, memory: 2Gi, ephemeral-storage: 6Gi }
+            requests: { cpu: 100m, memory: 512Mi, ephemeral-storage: 128Mi }
+            limits: { cpu: 500m, memory: 2Gi, ephemeral-storage: 6Gi }
           readinessProbe:
             exec:
               command: ["/bin/bash", "-c", "test -f /evidence/export-ready/${MIGRATION_RUN_ID}"]

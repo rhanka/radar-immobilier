@@ -472,6 +472,23 @@ object-storage-docs-preprod-start: ## Apply support and create one resumable ful
 	  $(KUBECTL) apply -f "$$render" >/dev/null; \
 	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_INVENTORY_JOB) -o name
 
+.PHONY: object-storage-docs-preprod-retry-never-started
+object-storage-docs-preprod-retry-never-started: ## Replace only one quota-blocked DOCS Job that never created a Pod
+	@if [ "$(OBJECT_STORAGE_DOCS_RETRY_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ] || [[ "$(OBJECT_STORAGE_DOCS_RETRY_JOB)" != radar-object-storage-inventory-docs-* ]]; then \
+	  echo "[object-storage-docs] refused: require KUBECONFIG, exact DOCS retry Job, confirmation, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  job="$(OBJECT_STORAGE_DOCS_RETRY_JOB)"; \
+	  $(KUBECTL) -n "$$namespace" get "job/$$job" -o json | \
+	    jq -e '.metadata.labels["app.kubernetes.io/component"] == "object-storage-inventory" and (.status.active // 0) == 0 and (.status.succeeded // 0) == 0' >/dev/null; \
+	  pods="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o json )"; \
+	  jq -e '.items | length == 0' <<<"$$pods" >/dev/null || \
+	    { echo "[object-storage-docs] refused: retry Job has an associated Pod"; exit 1; }; \
+	  $(KUBECTL) -n "$$namespace" delete "job/$$job" --wait=true >/dev/null; \
+	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_INVENTORY_JOB) -o name
+
 .PHONY: object-storage-raw-preprod-rebind
 object-storage-raw-preprod-rebind: ## Roll radar-api RAW bindings to OVH without changing the shared ConfigMap
 	@if [ "$(OBJECT_STORAGE_REBIND_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
