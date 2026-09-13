@@ -14,7 +14,7 @@ guard-preprod:
 	@test -n "$(KUBECONFIG)" -a -f "$(KUBECONFIG)" || { echo "KUBECONFIG file is required" >&2; exit 1; }
 	@server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"; \
 	  case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected API server" >&2; exit 1;; esac
-	@$(K) get namespace $(NAMESPACE) -o name >/dev/null
+	@$(K) get serviceaccount radar-app -o name >/dev/null
 
 .PHONY: inspect-preprod
 inspect-preprod: guard-preprod
@@ -24,9 +24,13 @@ inspect-preprod: guard-preprod
 	done
 	@$(K) get cronjob radar-refresh-scrape radar-refresh-projection radar-refresh-pv --ignore-not-found \
 	  -o custom-columns=NAME:.metadata.name,SUSPEND:.spec.suspend,SCHEDULE:.spec.schedule,IMAGE:.spec.jobTemplate.spec.template.spec.containers[0].image
-	@$(K) get secret radar-refresh-keyring-bootstrap radar-refresh-runtime --ignore-not-found -o name
-	@$(K) get pvc radar-refresh-keyring --ignore-not-found \
-	  -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,CLASS:.spec.storageClassName,ACCESS:.spec.accessModes[*]
+	@if [ "$$($(K) auth can-i get secrets)" = yes ]; then \
+	  $(K) get secret radar-refresh-keyring-bootstrap radar-refresh-runtime --ignore-not-found -o name; \
+	else echo 'secret inventory: unavailable to this identity'; fi
+	@if [ "$$($(K) auth can-i get persistentvolumeclaims)" = yes ]; then \
+	  $(K) get pvc radar-refresh-keyring --ignore-not-found \
+	    -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,CLASS:.spec.storageClassName,ACCESS:.spec.accessModes[*]; \
+	else echo 'PVC inventory: unavailable to this identity'; fi
 
 .PHONY: keyring-summary
 keyring-summary:
