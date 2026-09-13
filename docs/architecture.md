@@ -120,49 +120,55 @@ This is the **as-is** view, not the full-auto target. The older refresh study ex
 flowchart TB
   websites["Municipal websites<br/>PV PDFs / HTML / public notices"]
   provider["LLM provider<br/>Inference may be remote; orchestration is local"]
-  subgraph immo["IMMO · PV to signals"]
-  subgraph deterministic["Kubernetes · Immo tenants"]
-    scrape["1 · COLLECT<br/>worker-live → adapters → recueil<br/>URL discovery, HTTP fetch, SHA-256 / CAS"]
-    parse["2 · PARSE + EXPLOIT<br/>pdftotext / deterministic detection<br/>extracts + project-state"]
-    project["4 · PROJECT CANONICAL GRAPH<br/>project-graph-from-s3 → upsertGraphAtomic<br/>Guarded, atomic projection per city"]
-    pub["Grounding publication Job<br/>PUBLISH-ONLY · verify hash / backup / publish<br/>No LLM inside this pod"]
-    geoimport["IMMO adapter / reference resolution<br/>zone_versions + lot_versions<br/>geo_resolutions + geo_unresolved"]
-    pg[("PostgreSQL / PostGIS<br/>graph_nodes, graph_edges, application state")]
-    api["radar-api<br/>Signal filtering / scoring / evidence / collaboration"]
-    ui["radar-ui<br/>Signals, opportunities, sources, map, PDF citations"]
+  subgraph immo["IMMO · preprod PV chain"]
+  subgraph deterministic["Kubernetes · Immo preprod"]
+    PP_SCRAPE["[PP-SCRAPE] radar-refresh-scrape<br/>Stages 1 + 2 · daily 03:17 UTC"]
+    parse["2 · Inside PP-SCRAPE<br/>pdftotext → deterministic detection<br/>projectStateToGraph"]
+    PP_PROJECT["[PP-PROJECT] radar-refresh-projection<br/>Stage 4 · daily 04:30 UTC"]
+    PP_PUBLISH["[PP-PUBLISH] Job 41<br/>Publish-only · DECLARED"]
+    geoimport["IMMO reference resolver<br/>zone_versions / lot_versions<br/>Job absent from live preprod inventory"]
+    PP_DB[("[PP-DB] radar-postgres<br/>radar-immobilier-preprod · PG/PostGIS")]
+    PP_API["[PP-API] radar-api<br/>radar-immobilier-preprod"]
+    PP_UI["[PP-UI] radar-ui<br/>radar-immobilier-preprod"]
+    subgraph ppminio["[PP-MINIO] radar-minio · PVC"]
+      PP_RAW[("[PP-RAW] radar-immobilier-raw<br/>MinIO · API state / legacy objects")]
+      PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · API scrape-store default")]
+      PP_GROUND[("[PP-GROUND] radar-immobilier-docs-preprod<br/>MinIO · Job 41 target, DECLARED")]
+    end
   end
-  subgraph workstation["Workstation · Immo tools"]
-    llm["3 · GRAPHIFY + GROUND CITATIONS<br/>Agent / CLI + LLM access or llm-mesh<br/>Nodes, edges, stage, references, verbatim citations"]
-    gate["Schema / provenance / non-regression gates<br/>Missing citation remains missing"]
-    llm --> gate
+  WS_IMMO["[WS-IMMO] Immo Graphify / grounding<br/>Operator workstation · LLM stage 3"]
+  PP_GRAPH[("[PP-GRAPH] radar-immobilier-graph-preprod<br/>OVH S3 · corpus AND canonical graph")]
+  LEGACY_POC[("[LEGACY-POC] radar-immobilier-docs-pocs<br/>Scaleway S3 · candidats/ + graph/ · DECLARED")]
   end
-  corpus[("IMMO corpus store<br/>raw/ + metadata, parsed/, runs/, ontology/")]
-  candidate[("IMMO staged candidates<br/>candidats/CITY/latest.json + SHA-256")]
-  graphstore[("IMMO canonical graph store<br/>graph/CITY/latest.json + history/")]
-  end
-  geosvc["Geo OGC API<br/>Zones / lots / regulations / constraints"]
-  websites --> scrape
-  scrape --> corpus
-  scrape --> parse
-  corpus --> parse
-  parse --> corpus
-  parse -->|"Current direct deterministic feed<br/>projectStateToGraph → upsertGraph<br/>when DB credentials are wired"| pg
-  corpus --> llm
-  llm <-->|"Model calls"| provider
-  gate -->|"Direct validated graph publication path"| graphstore
-  gate -->|"Grounding candidate path"| candidate
-  candidate --> pub
-  pub -.->|"Destination alignment still required; see below"| graphstore
-  graphstore --> project
-  project --> pg
-  geosvc --> geoimport
-  geoimport --> pg
-  pg --> api
-  geosvc --> api
-  api --> ui
+  PP_GEO["[PP-GEO] geo-api · geo-preprod<br/>api.preprod.geo.sent-tech.ca"]
+  PP_GEO_S3[("[PP-GEO-S3] sentropic-geo-preprod<br/>OVH S3 · normalized/ serving copy")]
+  GEO_S3[("[GEO-S3] sentropic-geo<br/>OVH S3 · raw corpus + normalized/ products")]
+  websites -->|"1 · discover / fetch / CAS"| PP_SCRAPE
+  PP_SCRAPE -->|"WRITE raw/ + metadata + runs/"| PP_GRAPH
+  PP_SCRAPE -->|"Same worker"| parse
+  parse -->|"READ raw/; WRITE parsed/ + ontology/"| PP_GRAPH
+  parse -->|"Direct additive WRITE · upsertGraph"| PP_DB
+  WS_IMMO -.->|"Run-selected corpus READ / validated graph WRITE"| PP_GRAPH
+  WS_IMMO <-->|"Model calls; evidence / schema gates"| provider
+  WS_IMMO -.->|"Declared staging WRITE candidats/"| LEGACY_POC
+  PP_PUBLISH -.->|"READ candidats/"| LEGACY_POC
+  PP_PUBLISH -.->|"WRITE graph/"| PP_GROUND
+  PP_PROJECT -->|"READ graph/"| PP_GRAPH
+  PP_PROJECT -->|"Atomic WRITE · upsertGraphAtomic"| PP_DB
+  PP_API -->|"SQL read/write · signals / evidence"| PP_DB
+  PP_UI -->|"/api/* · signals and PDF viewer"| PP_API
+  PP_API -->|"READ/WRITE API store"| PP_RAW
+  PP_API -->|"Legacy document READ"| PP_DOCS
+  PP_API -->|"READ mapped PV PDFs · no Immo fallback"| GEO_S3
+  PP_API -->|"READ OGC features"| PP_GEO
+  PP_GEO -->|"READ normalized/"| PP_GEO_S3
+  geoimport -.->|"READ OGC"| PP_GEO
+  geoimport -.->|"WRITE resolved geographic references"| PP_DB
   classDef local fill:#fff0d7,stroke:#ad6a00,color:#332000;
-  class llm,gate local;
+  class WS_IMMO local;
 ```
+
+**Exact zoom:** `PP-DB` is the same database as in diagram 1, not a new Graphify database. `PP-GRAPH` is **one physical bucket**: `raw/`, `parsed/`, `ontology/`, `runs/` and `graph/` are prefixes, not five S3 services. `PP-RAW`, `PP-DOCS` and `PP-GROUND` are different configured buckets behind the same `PP-MINIO` service; their content/existence was not inventoried. No bridge from `PP-GROUND` to `PP-GRAPH` was demonstrated, so none is drawn. The workstation arrows show configurable run contracts, not a verified recent publication into preprod. Production bindings are recorded separately in §3; do not reuse `PP-` resources for production.
 
 | Stage | Actual implementation | Output / boundary | Execution today |
 | --- | --- | --- | --- |
@@ -188,9 +194,11 @@ Graphify extraction, evidence and grounding work remains relevant. **Its publica
 
 Grounding is an enrichment of stage 3, not a replacement for graph generation. Its publish-only Kubernetes Job verifies the staged content hash, preserves history and publishes one city. The committed grounding README names Sonnet; newer job commentary names a Codex/llm-mesh run. A single current model cannot be inferred from those conflicting records, so the diagram identifies the runtime boundary rather than asserting one provider/model.
 
-**Current preprod split, measured:** the scrape and projection CronJobs use OVH S3 `radar-immobilier-graph-preprod`; the API ConfigMap still points at `http://radar-minio:9000`, bucket `radar-immobilier-raw`. MinIO is running. The committed grounding publish Job still targets MinIO `radar-immobilier-docs-preprod`, whereas projection now reads OVH. This is a documented configuration mismatch, not a proven successful end-to-end publication path. No recent grounding Job survived in the live Job inventory to prove a runtime override.
+**Current preprod split, measured:** scrape and projection bind to `PP-GRAPH`. The API's default `S3_*` store binds to `PP-RAW`; with no API `SCRAPE_S3_*` override, the code derives a **different** MinIO bucket `PP-DOCS` (the bucket fallback is the literal `radar-immobilier-docs`, not `S3_BUCKET`). Neither API binding is the refresh bucket. The committed `PP-PUBLISH` Job reads `LEGACY-POC/candidats/` and writes `PP-GROUND/graph/`, not `PP-GRAPH/graph/`. No recent grounding Job survived in the inventory to prove a runtime override or an aligned end-to-end publication.
 
-The diagram's two publication arrows represent the general graph-publication contract and the grounding-specific staged path. They do not assert both destinations are currently aligned. A newly collected PV can remain without a new graph until stage 3 runs; a successful projection can therefore re-read an unchanged graph.
+**PDF delivery is another path:** `PP-API` has live `GEO_DOCUMENTS_REPOINT=1` and `GEO_DOCUMENTS_S3_BUCKET=sentropic-geo`. For PV references that map to Geo keys, `/api/documents/raw` reads **only `GEO-S3`**, with no fallback to Immo if those candidates are missing. Non-mapped references retain the legacy `PP-DOCS` then `PP-RAW` lookup. This shares captured documents with Geo; it does not transfer Immo's detection/graphification/SQL projection to Geo. `PP-GEO-S3/normalized/` serves geographic features, not these PDF reads.
+
+A fresh PV can enter `PP-GRAPH/raw/` and the deterministic PG feed without a new canonical graph or a PDF resolvable through the separate Geo document reader. A successful projection can re-read an unchanged canonical graph. These are distinct freshness, graph-publication and evidence-serving boundaries, not proof that any individual document is missing.
 
 ## 3. Storage and scheduled processing
 
