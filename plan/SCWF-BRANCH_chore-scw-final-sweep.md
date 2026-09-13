@@ -38,7 +38,7 @@
 - [x] Lot 3c: remove unused object-storage credentials from PostgreSQL migration containers.
 - [x] Lot 3d1: require complete graph bindings in projection Jobs.
 - [x] Lot 3d2: require complete graph bindings in graphify and export Jobs.
-- [ ] Lot 3d3: require complete scrape bindings in manual Jobs.
+- [x] Lot 3d3: require complete scrape bindings in manual Jobs.
 - [ ] Lot 3e: retire uncalled SCW mount executables and correct deployment guidance.
 - [ ] Lot 3f: add and pass scoped offline storage-binding regression checks.
 - [ ] Lot 3g: record remaining clients, run final offline gates, and complete independent post-build review.
