@@ -616,6 +616,28 @@ object-storage-inventory-preprod-status: ## Read one inventory Job and Pod statu
 	@$(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pods \
 	  -l "job-name=$(OBJECT_STORAGE_INVENTORY_JOB)" -o wide
 
+.PHONY: object-storage-docs-preprod-stop-secondary-inventory
+object-storage-docs-preprod-stop-secondary-inventory: ## Stop only the superseded v2 DOCS inventory Job; preserve its PVC
+	@if [ "$(OBJECT_STORAGE_DOCS_STOP_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ] || [[ "$(OBJECT_STORAGE_DOCS_STOP_JOB)" != radar-object-storage-inventory-docs-* ]]; then \
+	  echo '[object-storage-docs] refused: require exact DOCS Job, confirmation, KUBECONFIG, ENV=preprod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  job="$(OBJECT_STORAGE_DOCS_STOP_JOB)"; \
+	  $(KUBECTL) -n "$$namespace" get "job/$$job" -o json | \
+	    jq -e '.metadata.labels["app.kubernetes.io/component"] == "object-storage-inventory" and \
+	      (.status.active // 0) == 1 and (.status.succeeded // 0) == 0 and \
+	      (.status.failed // 0) == 0 and .spec.template.spec.containers == \
+	      [(.spec.template.spec.containers[0] | select(.name == "inventory" and \
+	        (.args[0] | contains("/evidence/docs-checkpoint-v2"))))] and \
+	      any(.spec.template.spec.volumes[]?; .persistentVolumeClaim.claimName == \
+	        "radar-object-storage-inventory-checkpoint")' >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" delete "job/$$job" --cascade=foreground --wait=true >/dev/null; \
+	  [ "$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o json | jq '.items|length' )" = 0 ]; \
+	  [ "$$( $(KUBECTL) -n "$$namespace" get pvc/radar-object-storage-inventory-checkpoint \
+	    -o jsonpath='{.status.phase}' )" = Bound ]; \
+	  echo '[object-storage-docs] secondary inventory stopped; checkpoint PVC preserved'
+
 .PHONY: object-storage-docs-preprod-progress
 object-storage-docs-preprod-progress: ## Aggregate DOCS checkpoint pages without printing object keys
 	@if [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_INVENTORY_JOB)" ]; then \
