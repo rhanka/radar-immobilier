@@ -412,7 +412,7 @@ if [ "$EXPECTED_MANIFEST_DIGEST" != null ]; then
 fi
 
 copy_one() {
-  local item="$1" result="$2" index="$3" key body getout putout sha
+  local item="$1" result="$2" index="$3" mode="${4:-missing}" key body getout putout sha
   local content_type content_encoding cache_control disposition metadata tagging
   local args
   key="$(jq -r '.key' <<<"$item")"; body="$WORK_DIR/copy-body-$index"
@@ -427,7 +427,12 @@ copy_one() {
     jq -cn --arg key "$key" '{status:"failed",key:$key,operation:"source-changed"}' >"$result"
     return 1
   fi
-  args=(put-object --bucket "$DESTINATION_BUCKET" --key "$key" --body "$body" --if-none-match '*')
+  args=(put-object --bucket "$DESTINATION_BUCKET" --key "$key" --body "$body")
+  if [ "$mode" = missing ]; then
+    args+=(--if-none-match '*')
+  else
+    args+=(--if-match "$(jq -r '._priorEtag' <<<"$item")")
+  fi
   content_type="$(jq -r '.contentType // empty' <<<"$item")"
   content_encoding="$(jq -r '.contentEncoding // empty' <<<"$item")"
   cache_control="$(jq -r '.cacheControl // empty' <<<"$item")"
@@ -446,21 +451,24 @@ copy_one() {
     return 1
   fi
   rm -f "$body"
-  jq -cn --arg key "$key" --arg versionId "$(jq -r '.VersionId // empty' "$putout")" \
-    '{status:"copied",key:$key,putVersionId:(if $versionId == "" then null else $versionId end)}' \
+  jq -cn --arg key "$key" --arg mode "$mode" \
+    --arg versionId "$(jq -r '.VersionId // empty' "$putout")" \
+    --arg priorVersionId "$(jq -r '._priorVersionId // empty' <<<"$item")" \
+    --arg priorHash "$(jq -r '._priorHash // empty' <<<"$item")" '
+    {status:(if $mode == "missing" then "copied" else "reconciled" end),key:$key,
+     putVersionId:(if $versionId == "" then null else $versionId end),
+     priorVersionId:(if $priorVersionId == "" then null else $priorVersionId end),
+     priorHash:(if $priorHash == "" then null else $priorHash end)}' \
     >"$result"
 }
 
-copy_missing_objects() {
-  local tasks="$WORK_DIR/copy-tasks.jsonl" index=0 item result failed
+run_copy_tasks() {
+  local tasks="$1" result_dir="$2" mode="$3" output="$4" index=0 item result failed
   local -a pids=() results=()
-  mkdir -p "$WORK_DIR/copy-results"
-  jq -c --slurpfile source "$REPORT_DIR/source-included-manifest.jsonl" '
-    .missing[] as $key | ($source | map(select(.key == $key)) | first) |
-    select(. != null)' "$PARITY" >"$tasks"
+  mkdir -p "$result_dir"
   while IFS= read -r item; do
-    index=$((index + 1)); result="$WORK_DIR/copy-results/$index.json"
-    copy_one "$item" "$result" "$index" & pids+=("$!"); results+=("$result")
+    index=$((index + 1)); result="$result_dir/$index.json"
+    copy_one "$item" "$result" "$index" "$mode" & pids+=("$!"); results+=("$result")
     if [ "${#pids[@]}" -ge "$CONCURRENCY" ]; then
       for pid in "${pids[@]}"; do wait "$pid" || true; done
       failed=false
@@ -481,9 +489,20 @@ copy_missing_objects() {
       record_failure destination "$(jq -r '.key' "$result")" "$(jq -r '.operation' "$result")"
     fi
   done
-  jq -cs 'map(select(.status == "copied")) | sort_by(.key)[]' \
-    "$WORK_DIR"/copy-results/*.json >"$REPORT_DIR/copy-results.jsonl" 2>/dev/null ||
-    : >"$REPORT_DIR/copy-results.jsonl"
+  local -a files=("$result_dir"/*.json)
+  if [ -e "${files[0]}" ]; then
+    jq -cs 'map(select(.status != "failed")) | sort_by(.key)[]' "${files[@]}" >"$output"
+  else
+    : >"$output"
+  fi
+}
+
+copy_missing_objects() {
+  local tasks="$WORK_DIR/copy-tasks.jsonl"
+  jq -c --slurpfile source "$REPORT_DIR/source-included-manifest.jsonl" '
+    .missing[] as $key | ($source | map(select(.key == $key)) | first) |
+    select(. != null)' "$PARITY" >"$tasks"
+  run_copy_tasks "$tasks" "$WORK_DIR/copy-results" missing "$REPORT_DIR/copy-results.jsonl"
 }
 
 PARITY="$REPORT_DIR/parity.json"
