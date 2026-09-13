@@ -24,7 +24,7 @@ to another store. Use Kubernetes ConfigMap keys for non-secret coordinates and
 Secret references for credentials. Preserve the GRAPH_S3_* priority and current
 conditional canonical writer. A changed endpoint alone is not migration.
 
-D4. First slice: neutralize manual graph/scrape/diagnostic manifests, remove
+D4. First slice: neutralize manual graph/scrape manifests, remove
 unused S3 permissions from DB migration, remove obsolete mount executables,
 correct active deployment examples, and add offline regression checks. Keep
 local Compose/test MinIO and rejection fixtures. No application runtime changes
@@ -58,7 +58,6 @@ TEM, Geo, MatchID, shared infrastructure and local developer volumes are exempt.
 - `deploy/k8s/38-graphify34-emit-candidates-job.yaml`
 - `deploy/k8s/39-export-graph-nodes-job.yaml`
 - `deploy/k8s/40-export-gt-designation-events-job.yaml`
-- `deploy/k8s/refresh-diag/diag-refresh-job.yaml`
 - `deploy/ci/check-object-storage-bindings.sh`
 - `deploy/ci/check-object-storage-bindings.test.sh`
 - `scripts/mount-scw.sh`, `scripts/umount-scw.sh` (retire; check callers first)
@@ -95,3 +94,24 @@ the old audit's claim of complete preprod access loss.
 Independent Fable review of this immutable design precedes first-slice edits.
 Reconcile blocking findings, then build; post-build review precedes integration.
 Neither a review receipt nor offline green tests imply migration/decommission.
+
+## Reconciled Fable review: first slice released
+
+F1 accepted: pin every storage family actually consumed by each command through
+non-optional ConfigMap/Secret key references; deleting literals is insufficient.
+Assert the complete consumed fallback chain, including S3_* where used, so neither
+envFrom nor application defaults can silently select MinIO/SCW. Required graph
+coordinates use radar-api GRAPH_S3_* keys and radar-graph-s3-credentials; scrape
+coordinates use radar-api SCRAPE_S3_* and radar-scrape-s3-credentials. Explicitly
+list missing/unverified bindings; no merge or dispatch before their validation.
+If a command also consumes the main raw store, resolve that complete family too,
+or report the exact missing scope/binding before claiming the job is migrated.
+
+F2 accepted: MOVE refresh-diag to the later bound slice; do not edit it now or
+toggle its armed CI variable. This prevents the first slice breaking main CD.
+DB migration S3 privilege removal remains safe and in scope.
+F3 accepted: record remaining manual/duplicate run-job routes; no workflow edit.
+F4 accepted: keep the armed production grounding publisher at the top of the
+remaining-client list; T1 replacement gates its retirement, not this build slice.
+Conductor releases the amended first-slice implementation immediately. Independent
+post-build review and later runtime/data gates remain mandatory.
