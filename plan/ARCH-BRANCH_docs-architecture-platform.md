@@ -4,7 +4,7 @@
 - [x] Document immo, geo and poc-k8s components, access and current processing boundaries.
 
 ## Scope / Guardrails
-- [x] September 13 owner gate: present a decision dossier BEFORE any refresh refactoring, migration or deployment.
+- [x] September 13 owner update: dossier accompanies execution; refresh first, MinIO second, one b3-8 third. Implementation stays in scoped implementation branches.
 - [x] Documentation only; no deployment, data mutation or application changes.
 - [x] Worktree: `tmp/architecture-platform`, branch `docs/architecture-platform`.
 - [x] Commands through Make; environment argument last; no application stack started.
@@ -14,6 +14,7 @@
 - **Allowed Paths (implementation scope)**:
   - `docs/architecture.md`
   - `docs/architecture/**`
+  - `docs/reports/architecture-monthly/**`
   - `plan/ARCH-BRANCH_docs-architecture-platform.md`
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`, `docker-compose*.yml`, `rules/**`
@@ -21,6 +22,7 @@
   - Other branch plans; application, infrastructure and other repositories.
 - **Conditional Paths**:
   - None.
+- [x] ARCH-EX1 — owner-requested monthly architecture/cost companion under docs/reports/architecture-monthly; root report sources read-only, no root-checkout or original-report overwrite; rollback by reverting companion changes.
 
 ## Feedback Loop
 - [x] Use current remote immo/geo references and newer poc-k8s local HEAD; record provenance.
@@ -106,3 +108,8 @@
   - [x] Reproduce missing labels: Mermaid 11 nodes used foreignObject despite the flowchart-only flag; global htmlLabels:false preserves SVG text without relaxing sanitization. Build and browser assertions now check every label, not just box counts.
   - [x] Add 19 original SVG pictograms, service labels and repo/role attribution to every native node and subflow. Preserve the Focus port contract and orthogonal router; expand bounds for complete labels.
   - [x] Verify all node/group/edge texts, 100 icon/repo occurrences, native nesting, card/header overflow, source dialogs, offline use and actual clipboard. 8/8 tests pass; PostgreSQL/MinIO/Mermaid screenshots visually inspected. No independent reapproval or implementation authority inferred.
+- [ ] **Lot 11 — Accompany the engaged transitions and monthly report.**
+  - [x] Record the owner-fixed order, published Graphify 0.18.0, existing-plan mapping, diagram update contract and one-node-only billing basis.
+  - [ ] Replace obsolete unasked sequence options with explicit remaining questions and the engaged plan.
+  - [ ] Reconcile monthly token usage and cost-calculation alternatives from dated evidence.
+  - [ ] Embed the dated Mermaid/SvelteFlow rendering into the monthly companion; retain post-period separation.
