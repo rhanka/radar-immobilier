@@ -28,12 +28,12 @@
     <Button variant="secondary" size="sm" onclick={() => expanded = !expanded}>{expanded ? 'Réduire' : 'Plein écran'}</Button>
   </Flex>
   <nav class="breadcrumbs" aria-label="Sous-flows">
-    <button onclick={() => open(null)}>Vue d’ensemble</button>
+    <button onclick={() => open(null)}>Schéma intégral</button>
     {#each trail as item}<span aria-hidden="true">/</span><button onclick={() => open(item.id)}>{item.label.split('·')[0]}</button>{/each}
   </nav>
   <div class="explorer-tools">
-    <label>Ouvrir un sous-flow <select aria-label="Ouvrir un sous-flow" value={scope ?? ''} onchange={event => open(event.currentTarget.value || null)}>
-      <option value="">Vue d’ensemble</option>
+    <label>Zoomer sur une boîte <select aria-label="Zoomer sur un sous-flow" value={scope ?? ''} onchange={event => open(event.currentTarget.value || null)}>
+      <option value="">Schéma intégral · toutes les boîtes ouvertes</option>
       {#each graph.groups as item}<option value={item.id}>{item.label}</option>{/each}
     </select></label>
     <label>Retrouver le même composant <select aria-label="Retrouver un composant" value="" onchange={event => locate(event.currentTarget.value)}>
@@ -57,7 +57,7 @@
       {#if related.length}<h4>Relations exactes</h4><ul>{#each related as edge}<li><code>{edge.source} {edge.both ? '↔' : '→'} {edge.target}</code><br>{edge.label || 'Sans étiquette'}{edge.dashed ? ' · conditionnel / non vérifié' : ''}</li>{/each}</ul>{/if}
     </aside>{/if}
   </div>
-  <p class="caption">Cliquer sur un sous-flow pour l’ouvrir ; glisser pour déplacer la vue. Les liens externes conservent leurs identités.
+  <p class="caption">Tous les sous-flows sont emboîtés et affichés dans le même schéma. Cliquer sur une boîte zoome dessus sans masquer les autres composants ni leurs liens.
     {graph.nodes.length} composants · {graph.edges.length} relations · {graph.groups.length} sous-flows. Flèches READ : consommateur → store.</p>
   <details><summary>Source Mermaid exacte · mapping intégral</summary><pre>{graph.source}</pre></details>
 </section>
