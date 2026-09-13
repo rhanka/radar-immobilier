@@ -48,6 +48,12 @@ report-check:
 	rg -q "10 août" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "septembre 2026" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "59,017 keys et hashes" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "12,534,514,457 octets" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "52646a7b…0425" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "six NetworkPolicies" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "3 PVC/7 Gi" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "API/MCP/UI restent 1/1" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "T2 production est en cours" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "320.095438 CAD" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "Architecture AVANT" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "Architecture APRÈS" $(FOCUS_DIR)/.generated/report.txt
