@@ -7,6 +7,7 @@
   import Explorer from './Explorer.svelte';
   import { presentation } from './presentation-fr.js';
   import Choices from './Choices.svelte';
+  import MonthlySummary from './MonthlySummary.svelte';
   import mermaid from './.generated/mermaid.json';
   import data from './.generated/data.json';
   const titles = ['Architecture AVANT', 'Architecture APRÈS', 'Delta factuel', 'Gates & retour arrière', 'Décisions ratifiées', 'Questions ouvertes', 'Preuves & limites', 'Annexe facturation'];
@@ -59,6 +60,7 @@
         <Button variant="ghost" size="sm" onclick={() => source = 'decision-dossier'}>Dossier source complet · références et qualification des faits</Button>
         {#if step === 6}<Button variant="secondary" onclick={() => source = 'decision-reviews'}>Lire les avis réels des reviewers</Button>{/if}
       </section>
+      <MonthlySummary />
       <section class="notes"><h2>Vos remarques · brouillon local</h2>
         <p>Cette page ne signe rien, ne crée aucune décision Track et ne lance aucun traitement. Les notes restent dans ce navigateur.</p>
         <Textarea label="Remarques sur les décisions et critères manquants" value={note} oninput={event => save(event.currentTarget.value)} rows={4} />
