@@ -150,9 +150,9 @@
   - [x] Record the real three-node capacity/placement NO-GO and the required T2 → rightsizing → constraints → two-node → one-node ladder.
   - [x] Align the Focus presentation/export and current monthly companion without changing the unresolved reporting start or inventing billing values.
   - [x] Regenerate and verify the portable Mermaid/SvelteFlow dossier and dated evidence.
-- [ ] **Lot 14 — Reconcile post-82b3b7c5 transition evidence.**
+- [x] **Lot 14 — Reconcile post-82b3b7c5 transition evidence.**
   - [x] Record the Fable BLOCK at `ac3a7150`, corrective commits and their qualified test envelope.
   - [x] Add the five-PDF non-simulated benchmark before real extraction without inventing a model or scores.
   - [x] Record the latest T2 remediation/checkpoint construction without claiming an object copy.
   - [x] Align the Focus presentation/export, transition cards and monthly companion without changing billing.
-  - [ ] Regenerate and verify Mermaid, nested SvelteFlow and the separate dated artifact.
+  - [x] Regenerate and verify Mermaid, nested SvelteFlow and the separate dated artifact.
