@@ -19,6 +19,6 @@ for (const accountId of accountIds) {
   });
 }
 const candidates = listModelProfiles()
-  .filter(({ label, modelId }) => /Sonnet 4\.6|GPT-5\.3.*Spark|GPT-5\.6 Luna/i.test(`${label} ${modelId}`))
+  .filter(({ label, modelId }) => /Sonnet 4\.6|Gemini 3\.8|GPT-5\.6 Luna/i.test(`${label} ${modelId}`))
   .map(({ providerId, modelId, label }) => ({ providerId, modelId, label }));
 console.log(JSON.stringify({ accounts, candidates }, null, 2));

@@ -359,6 +359,9 @@ spec:
             - name: keyring
               persistentVolumeClaim: { claimName: radar-refresh-keyring }
             - name: keyring-bootstrap
-              secret: { secretName: radar-refresh-keyring-bootstrap, defaultMode: 0400 }
+              # Secret volumes are projected root:fsGroup. Group-read is needed
+              # by the non-root bootstrap initContainer; the copied keyring is
+              # immediately tightened to 0600 on the private PVC.
+              secret: { secretName: radar-refresh-keyring-bootstrap, defaultMode: 0440 }
             - name: scratch
               emptyDir: { sizeLimit: 512Mi }
