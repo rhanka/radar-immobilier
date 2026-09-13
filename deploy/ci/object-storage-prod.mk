@@ -19,6 +19,7 @@ object-storage-docs-prod-provision: ## Verify or provision the dedicated PROD DO
 OBJECT_STORAGE_DOCS_PROD_DIR := deploy/k8s/object-storage-docs-prod
 OBJECT_STORAGE_DOCS_PROD_NAMESPACE := radar-immobilier
 OBJECT_STORAGE_DOCS_PROD_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
+override OBJECT_STORAGE_DOCS_PROD_OFFICIAL_DIGEST := 52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425
 
 .PHONY: object-storage-docs-prod-context
 object-storage-docs-prod-context: ## Read the non-secret PROD context coordinates
@@ -35,7 +36,9 @@ object-storage-docs-prod-api-status: ## Read only API storage references and rol
 .PHONY: object-storage-docs-prod-validate
 object-storage-docs-prod-validate: ## Validate the PROD DOCS support and inventory Job offline
 	@bash -n deploy/ci/migrate-object-storage.sh deploy/ci/object-storage-checkpoint.sh
+	@bash -n deploy/ci/docs-api-rebind-patch.hermetic.test.sh
 	@bash deploy/ci/docs-prod-runtime-secrets.hermetic.test.sh
+	@bash deploy/ci/docs-api-rebind-patch.hermetic.test.sh
 	@set -o pipefail; $(MAKE) --no-print-directory -n object-storage-minio-prod-finalize \
 	  OBJECT_STORAGE_MINIO_PROD_FINALIZE_CONFIRM=1 \
 	  OBJECT_STORAGE_DOCS_PROD_PARITY_JOB=radar-object-storage-copy-docs-prod-hermetic \
@@ -56,6 +59,17 @@ object-storage-docs-prod-validate: ## Validate the PROD DOCS support and invento
 	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/api-rebind-patch.yaml -o name >/dev/null
 	@! grep -Eq '(^|[[:space:]])jq([[:space:]]|$$)' \
 	  $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml
+	@! grep -Rqs 'radar-registry-pull' $(OBJECT_STORAGE_DOCS_PROD_DIR)
+	@! grep -Eq '^object-storage-minio-prod-(scale-zero|remove):' deploy/ci/object-storage-prod.mk
+	@for target in object-storage-docs-prod-bind object-storage-docs-prod-api-rebind \
+	  object-storage-minio-prod-finalize; do \
+	  ! $(MAKE) --no-print-directory "$$target" KUBECONFIG=/nonsecret/hermetic.kubeconfig \
+	    OBJECT_STORAGE_DOCS_PROD_BIND_CONFIRM=1 OBJECT_STORAGE_DOCS_PROD_API_REBIND_CONFIRM=1 \
+	    OBJECT_STORAGE_MINIO_PROD_FINALIZE_CONFIRM=1 \
+	    OBJECT_STORAGE_DOCS_PROD_PARITY_JOB=radar-object-storage-copy-docs-prod-hermetic \
+	    OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST=0000000000000000000000000000000000000000000000000000000000000000 \
+	    ENV=prod >/dev/null 2>&1; \
+	done
 
 .PHONY: object-storage-docs-prod-fast-start
 object-storage-docs-prod-fast-start: ## Start the low-memory canonical PROD inventory
@@ -114,8 +128,9 @@ object-storage-docs-prod-fetch-canonical: ## Fetch the canonical manifests witho
 	  done; \
 	  [ "$$(jq -s 'length' "$$destination/source-manifest.jsonl")" = 59017 ]; \
 	  [ "$$(jq -s 'map(.size)|add' "$$destination/source-manifest.jsonl")" = 12534514457 ]; \
-	  [ "$$(sha256sum "$$destination/source-manifest.jsonl" | awk '{print $$1}')" = \
-	    "$$(jq -r '.manifestSha256' "$$destination/summary.json")" ]; \
+	  manifest_digest="$$(sha256sum "$$destination/source-manifest.jsonl" | awk '{print $$1}')"; \
+	  [ "$$manifest_digest" = "$(OBJECT_STORAGE_DOCS_PROD_OFFICIAL_DIGEST)" ]; \
+	  [ "$$manifest_digest" = "$$(jq -r '.manifestSha256' "$$destination/summary.json")" ]; \
 	  jq '{objects,bytes,manifestSha256,canonicalSha256}' "$$destination/summary.json"
 
 .PHONY: object-storage-docs-prod-proof
@@ -179,7 +194,7 @@ object-storage-docs-prod-bind: ## Bind future PROD DOCS workers after exact cano
 	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
 	  [ "$(OBJECT_STORAGE_DOCS_PROD_BIND_CONFIRM)" != 1 ] || \
 	  [[ "$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB)" != radar-object-storage-copy-docs-prod-* ]] || \
-	  ! [[ "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" =~ ^[0-9a-f]{64}$$ ]]; then \
+	  [ "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" != "$(OBJECT_STORAGE_DOCS_PROD_OFFICIAL_DIGEST)" ]; then \
 	  echo '[object-storage-docs-prod] require exact Job, digest, confirmation, KUBECONFIG, ENV=prod'; exit 1; \
 	fi
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
@@ -192,7 +207,7 @@ object-storage-docs-prod-bind: ## Bind future PROD DOCS workers after exact cano
 	  summary="$$( $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
 	    'cat /evidence/reports/$${MIGRATION_RUN_ID}/summary.json' )"; \
 	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
-	    '.processed == 59017 and .failed == 0 and .canonicalDigest == $$digest and .exactParity == true and .complete == true' \
+	    '.processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .sourceVerifiedObjects == 59017 and .sourceVerifiedBytes == 12534514457 and .sourceManifestDigest == $$digest and .sourceExact == true and .exactParity == true and .complete == true' \
 	    <<<"$$summary" >/dev/null; \
 	  quota="$$( $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json )"; \
 	  jq -e '.status.hard.secrets == "15" and (.status.used.secrets == "13" or .status.used.secrets == "15")' \
@@ -206,12 +221,12 @@ object-storage-docs-prod-bind: ## Bind future PROD DOCS workers after exact cano
 	    jq -f deploy/ci/docs-prod-runtime-secrets.jq <<<"$$source" | \
 	      $(KUBECTL) apply -f - >/dev/null; \
 	  fi; \
-	  $(KUBECTL) -n "$$namespace" patch configmap/radar-api --type=merge \
-	    -p '{"data":{"GRAPH_S3_ENDPOINT":"https://s3.bhs.io.cloud.ovh.net","GRAPH_S3_REGION":"bhs","GRAPH_S3_BUCKET":"radar-immobilier-docs","GRAPH_S3_FORCE_PATH_STYLE":"false","SCRAPE_S3_ENDPOINT":"https://s3.bhs.io.cloud.ovh.net","SCRAPE_S3_REGION":"bhs","SCRAPE_S3_BUCKET":"radar-immobilier-docs","SCRAPE_S3_FORCE_PATH_STYLE":"false"}}' >/dev/null; \
 	  runtime="$$( $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials \
 	    secret/radar-graph-s3-credentials secret/radar-scrape-s3-credentials -o json )"; \
 	  jq -e 'INDEX(.items[];.metadata.name) as $$s | ($$s["radar-docs-s3-credentials"].data) as $$d | ($$s["radar-graph-s3-credentials"].data == {GRAPH_S3_ACCESS_KEY:$$d.DOCS_S3_ACCESS_KEY,GRAPH_S3_SECRET_KEY:$$d.DOCS_S3_SECRET_KEY}) and ($$s["radar-scrape-s3-credentials"].data == {SCRAPE_S3_ACCESS_KEY:$$d.DOCS_S3_ACCESS_KEY,SCRAPE_S3_SECRET_KEY:$$d.DOCS_S3_SECRET_KEY})' \
 	    <<<"$$runtime" >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" patch configmap/radar-api --type=merge \
+	    -p '{"data":{"GRAPH_S3_ENDPOINT":"https://s3.bhs.io.cloud.ovh.net","GRAPH_S3_REGION":"bhs","GRAPH_S3_BUCKET":"radar-immobilier-docs","GRAPH_S3_FORCE_PATH_STYLE":"false","SCRAPE_S3_ENDPOINT":"https://s3.bhs.io.cloud.ovh.net","SCRAPE_S3_REGION":"bhs","SCRAPE_S3_BUCKET":"radar-immobilier-docs","SCRAPE_S3_FORCE_PATH_STYLE":"false"}}' >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get configmap/radar-api -o json | jq -e \
 	    '.data.GRAPH_S3_ENDPOINT == "https://s3.bhs.io.cloud.ovh.net" and .data.GRAPH_S3_REGION == "bhs" and .data.GRAPH_S3_BUCKET == "radar-immobilier-docs" and .data.GRAPH_S3_FORCE_PATH_STYLE == "false" and .data.SCRAPE_S3_ENDPOINT == "https://s3.bhs.io.cloud.ovh.net" and .data.SCRAPE_S3_REGION == "bhs" and .data.SCRAPE_S3_BUCKET == "radar-immobilier-docs" and .data.SCRAPE_S3_FORCE_PATH_STYLE == "false"' >/dev/null; \
 	  for _ in $$(seq 1 30); do \
@@ -226,7 +241,7 @@ object-storage-docs-prod-api-rebind: ## Roll PROD API from SCW to canonical OVH 
 	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
 	  [ "$(OBJECT_STORAGE_DOCS_PROD_API_REBIND_CONFIRM)" != 1 ] || \
 	  [[ "$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB)" != radar-object-storage-copy-docs-prod-* ]] || \
-	  ! [[ "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" =~ ^[0-9a-f]{64}$$ ]]; then \
+	  [ "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" != "$(OBJECT_STORAGE_DOCS_PROD_OFFICIAL_DIGEST)" ]; then \
 	  echo '[object-storage-docs-prod] require exact parity Job/digest, confirmation, KUBECONFIG, ENV=prod'; exit 1; \
 	fi
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
@@ -235,10 +250,11 @@ object-storage-docs-prod-api-rebind: ## Roll PROD API from SCW to canonical OVH 
 	  summary="$$( $(KUBECTL) -n "$$namespace" logs \
 	    job/$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB) --all-containers=true | tail -n 1 )"; \
 	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
-	    '.status == "complete" and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .exactParity == true and .complete == true' \
+	    '.status == "complete" and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .sourceVerifiedObjects == 59017 and .sourceVerifiedBytes == 12534514457 and .sourceManifestDigest == $$digest and .sourceExact == true and .exactParity == true and .complete == true' \
 	    <<<"$$summary" >/dev/null; \
-	  $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials -o json | \
-	    jq -e -f deploy/ci/validate-docs-secret.jq >/dev/null; \
+	  source="$$( $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials -o json )"; \
+	  jq -e -f deploy/ci/validate-docs-secret.jq <<<"$$source" >/dev/null; \
+	  jq -e '(.data.DOCS_S3_ENDPOINT | @base64d) == "https://s3.bhs.io.cloud.ovh.net" and (.data.DOCS_S3_REGION | @base64d) == "bhs" and (.data.DOCS_S3_BUCKET | @base64d) == "radar-immobilier-docs" and (.data.DOCS_S3_FORCE_PATH_STYLE | @base64d) == "false"' <<<"$$source" >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" patch deployment/radar-api --type=strategic --dry-run=server \
 	    --patch-file $(OBJECT_STORAGE_DOCS_PROD_DIR)/api-rebind-patch.yaml >/dev/null; \
 	  echo '[object-storage-docs-prod] API rebind server dry-run passed'; \
@@ -293,6 +309,10 @@ object-storage-docs-prod-final-status: ## Prove PROD DOCS binding and MinIO abse
 	    jq -e '.status.phase == "Bound" and .status.capacity.storage == "1Gi"' >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json | \
 	    jq -e '.status.hard.secrets == "15" and .status.used.secrets == "15" and .status.hard.persistentvolumeclaims == "3" and .status.used.persistentvolumeclaims == "2"' >/dev/null; \
+	  runtime="$$( $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials \
+	    secret/radar-graph-s3-credentials secret/radar-scrape-s3-credentials -o json )"; \
+	  jq -e 'INDEX(.items[];.metadata.name) as $$s | ($$s["radar-docs-s3-credentials"].data) as $$d | ((($$d.DOCS_S3_ENDPOINT | @base64d) == "https://s3.bhs.io.cloud.ovh.net") and (($$d.DOCS_S3_REGION | @base64d) == "bhs") and (($$d.DOCS_S3_BUCKET | @base64d) == "radar-immobilier-docs") and (($$d.DOCS_S3_FORCE_PATH_STYLE | @base64d) == "false")) and ($$s["radar-graph-s3-credentials"].data == {GRAPH_S3_ACCESS_KEY:$$d.DOCS_S3_ACCESS_KEY,GRAPH_S3_SECRET_KEY:$$d.DOCS_S3_SECRET_KEY}) and ($$s["radar-scrape-s3-credentials"].data == {SCRAPE_S3_ACCESS_KEY:$$d.DOCS_S3_ACCESS_KEY,SCRAPE_S3_SECRET_KEY:$$d.DOCS_S3_SECRET_KEY})' \
+	    <<<"$$runtime" >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get configmap/radar-api -o json | jq -e \
 	    '.data.GRAPH_S3_BUCKET == "radar-immobilier-docs" and .data.SCRAPE_S3_BUCKET == "radar-immobilier-docs" and .data.SCW_TEM_API_BASE_URL == "https://api.scaleway.com"' >/dev/null; \
 	  deployment="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json )"; \
@@ -365,62 +385,12 @@ object-storage-docs-prod-runtime: ## Read aggregate PROD Job runtime health with
 	    '{phase:.status.phase,podIP:.status.podIP,startedAt:.status.startTime,conditions:[.status.conditions[]|{type,status,reason}],containers:[.status.containerStatuses[]|{name,ready,restartCount,started:.state.running.startedAt,waiting:.state.waiting.reason,terminated:.state.terminated.reason}]}' ; \
 	  $(KUBECTL) -n "$$namespace" top pod "$$pod"
 
-.PHONY: object-storage-minio-prod-scale-zero
-object-storage-minio-prod-scale-zero: ## Scale only the proven-empty, unconsumed PROD MinIO to zero
-	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
-	  [ "$(OBJECT_STORAGE_MINIO_PROD_SCALE_CONFIRM)" != 1 ]; then \
-	  echo '[object-storage-minio-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
-	fi
-	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
-	  server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
-	  [ "$$server" = "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ] || \
-	    { echo '[object-storage-minio-prod] refused non-OVH context'; exit 1; }; \
-	  replicas="$$( $(KUBECTL) -n "$$namespace" get statefulset/radar-minio \
-	    -o jsonpath='{.spec.replicas}' )"; \
-	  if [ "$$replicas" = 1 ]; then \
-	    buckets="$$( $(KUBECTL) -n "$$namespace" exec radar-minio-0 -- /bin/sh -ceu \
-	      'mc alias set local http://127.0.0.1:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" >/dev/null; mc ls --json local' )"; \
-	    [ -z "$$buckets" ] || { echo '[object-storage-minio-prod] MinIO is not empty'; exit 1; }; \
-	    $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | \
-	      jq -e 'any(.spec.template.spec.containers[].env[]?; .name == "S3_ENDPOINT" and .value == "https://s3.fr-par.scw.cloud")' >/dev/null; \
-	    [ "$$( $(KUBECTL) -n "$$namespace" get cronjobs -o json | jq '.items|length' )" = 0 ]; \
-	    $(KUBECTL) -n "$$namespace" scale statefulset/radar-minio --replicas=0 >/dev/null; \
-	    $(KUBECTL) -n "$$namespace" wait --for=delete pod/radar-minio-0 \
-	      --timeout=120s >/dev/null; \
-	  else [ "$$replicas" = 0 ]; fi; \
-	  echo '[object-storage-minio-prod] empty unconsumed MinIO replicas=0'
-
-.PHONY: object-storage-minio-prod-remove
-object-storage-minio-prod-remove: ## Remove the proven-empty, unconsumed PROD MinIO resources
-	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
-	  [ "$(OBJECT_STORAGE_MINIO_PROD_REMOVE_CONFIRM)" != 1 ]; then \
-	  echo '[object-storage-minio-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
-	fi
-	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
-	  server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
-	  [ "$$server" = "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ] || \
-	    { echo '[object-storage-minio-prod] refused non-OVH context'; exit 1; }; \
-	  buckets="$$( $(KUBECTL) -n "$$namespace" exec radar-minio-0 -- /bin/sh -ceu \
-	    'mc alias set local http://127.0.0.1:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" >/dev/null; mc ls --json local' )"; \
-	  [ -z "$$buckets" ] || { echo '[object-storage-minio-prod] MinIO is not empty'; exit 1; }; \
-	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | \
-	    jq -e 'any(.spec.template.spec.containers[].env[]?; .name == "S3_ENDPOINT" and .value == "https://s3.fr-par.scw.cloud")' >/dev/null; \
-	  [ "$$( $(KUBECTL) -n "$$namespace" get cronjobs -o json | jq '.items|length' )" = 0 ]; \
-	  claim=minio-data-radar-minio-0; \
-	  [ "$$( $(KUBECTL) -n "$$namespace" get pvc/$$claim -o jsonpath='{.status.capacity.storage}' )" = 5Gi ]; \
-	  $(KUBECTL) -n "$$namespace" delete statefulset/radar-minio service/radar-minio \
-	    --wait=true >/dev/null; \
-	  $(KUBECTL) -n "$$namespace" delete pvc/$$claim --wait=true >/dev/null; \
-	  ! $(KUBECTL) -n "$$namespace" get statefulset/radar-minio service/radar-minio \
-	    pvc/$$claim >/dev/null 2>&1; \
-	  echo '[object-storage-minio-prod] removed empty StatefulSet, Service and 5Gi PVC'
-
 .PHONY: object-storage-minio-prod-finalize
-object-storage-minio-prod-finalize: ## Remove the orphan PROD MinIO policy after canonical parity
+object-storage-minio-prod-finalize: ## Idempotently finalize PROD MinIO absence after canonical parity
 	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
 	  [ "$(OBJECT_STORAGE_MINIO_PROD_FINALIZE_CONFIRM)" != 1 ] || \
 	  [[ "$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB)" != radar-object-storage-copy-docs-prod-* ]] || \
-	  ! [[ "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" =~ ^[0-9a-f]{64}$$ ]]; then \
+	  [ "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" != "$(OBJECT_STORAGE_DOCS_PROD_OFFICIAL_DIGEST)" ]; then \
 	  echo '[object-storage-minio-prod] require exact parity Job/digest, confirmation, KUBECONFIG, ENV=prod'; exit 1; \
 	fi
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
@@ -429,14 +399,17 @@ object-storage-minio-prod-finalize: ## Remove the orphan PROD MinIO policy after
 	  summary="$$( $(KUBECTL) -n "$$namespace" logs \
 	    job/$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB) --all-containers=true | tail -n 1 )"; \
 	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
-	    '.status == "complete" and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .exactParity == true and .complete == true' \
+	    '.status == "complete" and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .sourceVerifiedObjects == 59017 and .sourceVerifiedBytes == 12534514457 and .sourceManifestDigest == $$digest and .sourceExact == true and .exactParity == true and .complete == true' \
 	    <<<"$$summary" >/dev/null; \
 	  ! $(KUBECTL) -n "$$namespace" get statefulset/radar-minio >/dev/null 2>&1; \
 	  ! $(KUBECTL) -n "$$namespace" get service/radar-minio >/dev/null 2>&1; \
 	  ! $(KUBECTL) -n "$$namespace" get pvc/minio-data-radar-minio-0 >/dev/null 2>&1; \
-	  $(KUBECTL) -n "$$namespace" get networkpolicy/allow-api-to-minio -o json | \
-	    jq -e '.spec.podSelector.matchLabels["app.kubernetes.io/component"] == "minio"' >/dev/null; \
-	  $(KUBECTL) -n "$$namespace" delete networkpolicy/allow-api-to-minio --wait=true >/dev/null; \
+	  policy="$$( $(KUBECTL) -n "$$namespace" get networkpolicy/allow-api-to-minio \
+	    --ignore-not-found -o json )"; \
+	  if [ -n "$$policy" ]; then \
+	    jq -e '.spec.podSelector.matchLabels["app.kubernetes.io/component"] == "minio"' <<<"$$policy" >/dev/null; \
+	    $(KUBECTL) -n "$$namespace" delete networkpolicy/allow-api-to-minio --wait=true >/dev/null; \
+	  fi; \
 	  ! $(KUBECTL) -n "$$namespace" get networkpolicy/allow-api-to-minio >/dev/null 2>&1; \
 	  $(KUBECTL) -n "$$namespace" get configmap/radar-api -o json | \
 	    jq -e '.data.SCW_TEM_API_BASE_URL == "https://api.scaleway.com"' >/dev/null; \
