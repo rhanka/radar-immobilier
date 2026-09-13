@@ -41,5 +41,8 @@ grep -F '"$batch" -eq 32' "$subject" >/dev/null
 grep -F 'IfNoneMatch: "*"' "$node_subject" >/dev/null
 grep -F 'concurrency > 128' "$node_subject" >/dev/null
 grep -F 'destination-conflict' "$node_subject" >/dev/null
-! grep -Eq 'DeleteObject|DeleteBucket' "$node_subject"
+grep -F 'diff.extra.length === 1 && allowSingleProofPrune' "$node_subject" >/dev/null
+grep -F 'new DeleteObjectCommand' "$node_subject" >/dev/null
+grep -F 'IfMatch: extra.etag' "$node_subject" >/dev/null
+! grep -F 'DeleteBucket' "$node_subject"
 echo 'canonical docs copy hermetic test: PASS'
