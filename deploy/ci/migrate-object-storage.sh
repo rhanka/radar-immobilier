@@ -244,6 +244,7 @@ validate_target() {
 
 list_objects() {
   local side="$1" output="$2" bucket token="" page=0 response next truncated
+  if $CHECKPOINT_REQUESTED; then list_objects_checkpoint "$side" "$output"; return; fi
   bucket="$(bucket_for "$side")"; : >"$output"
   while :; do
     page=$((page + 1)); response="$WORK_DIR/$side-page-$page.json"
@@ -406,6 +407,15 @@ if [ -n "$FENCE_RECORD" ]; then
     add_missing_proof 'fence record is unreadable or empty'
   fi
 fi
+CHECKPOINT_RESUME_REQUIRED=false
+if $CHECKPOINT_REQUESTED; then
+  source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/object-storage-checkpoint.sh"
+  CHECKPOINT_RUN_STARTED_EPOCH="$(date +%s)"
+  if $RESUME; then
+    checkpoint_load_index source "$WORK_DIR/source-checkpoint-preflight.jsonl"
+    checkpoint_load_index destination "$WORK_DIR/destination-checkpoint-preflight.jsonl"
+  fi
+fi
 SOURCE_LISTING="$WORK_DIR/source-listing.jsonl"
 DESTINATION_LISTING="$WORK_DIR/destination-listing.jsonl"
 SOURCE_MANIFEST="$REPORT_DIR/source-manifest.jsonl"
@@ -414,14 +424,19 @@ DESTINATION_MANIFEST="$REPORT_DIR/destination-manifest.jsonl"
 inventory_side() {
   local side="$1" listing="$2" manifest="$3"
   : >"$listing"; : >"$manifest"
+  if $CHECKPOINT_REQUESTED && $CHECKPOINT_RESUME_REQUIRED; then return 1; fi
   if ! validate_target "$side"; then
     record_failure "$side" '' head-bucket
     add_missing_proof "$side target identity or bucket access is unproved"
     return 1
   fi
   if ! list_objects "$side" "$listing"; then
-    record_failure "$side" '' list-objects-v2
-    add_missing_proof "$side complete listing is unavailable"
+    if $CHECKPOINT_REQUESTED && $CHECKPOINT_RESUME_REQUIRED; then
+      add_missing_proof "$side inventory time budget exhausted; resume is required"
+    else
+      record_failure "$side" '' list-objects-v2
+      add_missing_proof "$side complete listing is unavailable"
+    fi
     return 1
   fi
   if ! build_manifest "$side" "$listing" "$manifest"; then
@@ -430,8 +445,13 @@ inventory_side() {
   fi
 }
 
-inventory_side source "$SOURCE_LISTING" "$SOURCE_MANIFEST" || true
-inventory_side destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST" || true
+SOURCE_INVENTORY_COMPLETE=false DESTINATION_INVENTORY_COMPLETE=false
+inventory_side source "$SOURCE_LISTING" "$SOURCE_MANIFEST" && SOURCE_INVENTORY_COMPLETE=true
+inventory_side destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST" && \
+  DESTINATION_INVENTORY_COMPLETE=true
+if $CHECKPOINT_REQUESTED && $SOURCE_INVENTORY_COMPLETE && $DESTINATION_INVENTORY_COMPLETE; then
+  checkpoint_write_progress destination false true
+fi
 jq -c 'select(.classification == "included")' "$SOURCE_MANIFEST" \
   >"$REPORT_DIR/source-included-manifest.jsonl"
 jq -c 'select(.classification == "excluded")' "$SOURCE_MANIFEST" \
@@ -820,12 +840,14 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
   --argjson conditionalAccepted "$CONDITIONAL_WRITE_PROOF_ACCEPTED" \
   --argjson concurrency "$CONCURRENCY" --argjson retries "$RETRIES" \
   --argjson maxFailures "$MAX_FAILURES" --argjson maxObjectBytes "$MAX_OBJECT_BYTES" \
+  --argjson resumeRequired "$CHECKPOINT_RESUME_REQUIRED" \
   --argjson sourceCount "$SOURCE_COUNT" --argjson destinationCount "$DESTINATION_COUNT" \
   --argjson sourceBytes "$(sum_bytes "$SOURCE_MANIFEST")" \
   --argjson destinationBytes "$(sum_bytes "$DESTINATION_MANIFEST")" \
   --argjson failures "$FAILURE_COUNT" --argjson expectedSourceConflicts "$EXPECTED_SOURCE_CONFLICT_COUNT" \
   --argjson parity "$(cat "$PARITY")" --argjson cutoverReady "$CUTOVER_READY" '
   {operation:$operation,environment:$environment,plane:$plane,executeCopy:$executeCopy,
+   resumeRequired:$resumeRequired,
    reconcileOwned:$reconcileOwned,
    source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,identityFingerprint:$sf},
    destination:{endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp,identityFingerprint:$df},
