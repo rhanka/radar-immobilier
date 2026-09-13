@@ -125,13 +125,27 @@ expect_ok() {
   if "$@" >"$log" 2>&1; then ok "$TEST_NAME"; else bad "$TEST_NAME"; cat "$log" >&2; fi
 }
 expect_bad() { "$@" >/dev/null 2>&1 && bad "$TEST_NAME" || ok "$TEST_NAME"; }
+expect_status() {
+  local expected="$1" actual log="$TEST_TMP/last-command.log"
+  shift
+  "$@" >"$log" 2>&1; actual=$?
+  if [ "$actual" -eq "$expected" ]; then ok "$TEST_NAME"; else bad "$TEST_NAME"; cat "$log" >&2; fi
+}
 
 reset_store() {
+  local fingerprint
   rm -rf "$TEST_TMP/store" "$TEST_TMP/reports"
   mkdir -p "$TEST_TMP/store/source/src/objects" "$TEST_TMP/store/source/src/meta" \
     "$TEST_TMP/store/destination/dst/objects" "$TEST_TMP/store/destination/dst/meta" \
     "$TEST_TMP/reports"
   : >"$AWS_LOG"; rm -f "$TEST_TMP/version" "$TEST_TMP/failure-counter"
+  fingerprint="$(printf DST_KEY | sha256sum | awk '{print $1}')"
+  jq -n --arg fingerprint "$fingerprint" '{schemaVersion:1,provider:"fake-s3",providerVersion:"1",
+    destination:{endpoint:"https://destination.test",region:"bhs",bucket:"dst",pathStyle:false},
+    identityFingerprint:$fingerprint,
+    observedAt:"2026-09-13T12:00:00Z",expiresAt:"2099-01-01T00:00:00Z",
+    transcriptSha256:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    capabilities:{ifNoneMatchCreate:true,ifMatchUpdate:true}}' >"$TEST_TMP/conditional-write-proof.json"
   unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_ATTEMPTS FAKE_VERSIONING
 }
 put_fixture() {
@@ -153,6 +167,9 @@ BASE_ARGS=(--environment preprod --plane RAW
   --prefix raw/)
 run_tool() {
   local operation="$1" report="$2" status; shift 2
+  local -a conditional_args=()
+  [ "${OMIT_CONDITIONAL_WRITE_PROOF:-false}" = true ] || \
+    conditional_args=(--conditional-write-proof "$TEST_TMP/conditional-write-proof.json")
   env PATH="$TEST_TMP/bin:$PATH" FAKE_S3_ROOT="$TEST_TMP/store" \
     FAKE_S3_TMP="$TEST_TMP" FAKE_AWS_LOG="$AWS_LOG" \
     FAKE_PAGE_SIZE="${FAKE_PAGE_SIZE:-1000}" FAKE_VERSIONING="${FAKE_VERSIONING:-Enabled}" \
@@ -162,7 +179,8 @@ run_tool() {
     MIGRATION_SOURCE_SECRET_ACCESS_KEY=SRC_SECRET \
     MIGRATION_DESTINATION_ACCESS_KEY_ID=DST_KEY \
     MIGRATION_DESTINATION_SECRET_ACCESS_KEY=DST_SECRET \
-    "$TOOL" "$operation" "${BASE_ARGS[@]}" --report-dir "$report" "$@"
+    "$TOOL" "$operation" "${BASE_ARGS[@]}" --report-dir "$report" \
+    "${conditional_args[@]}" "$@"
   status=$?
   [ "$status" -eq 0 ] || {
     [ ! -f "$report/summary.json" ] || jq . "$report/summary.json" >&2
@@ -170,6 +188,7 @@ run_tool() {
   }
   return "$status"
 }
+run_tool_without_capability() { OMIT_CONDITIONAL_WRITE_PROOF=true run_tool "$@"; }
 
 make_expected_union() {
   local evidence="$1" output="$2" proof
@@ -226,6 +245,29 @@ TEST_NAME='fails when the credential cannot prove the exact destination target'
 expect_bad run_tool inventory "$TEST_TMP/reports/target-identity" --retries 1
 
 reset_store
+put_fixture source src raw/capability.txt capability
+TEST_NAME='execute-copy exits one without conditional-write capability evidence'
+expect_status 1 run_tool_without_capability copy "$TEST_TMP/reports/no-capability" --execute-copy
+TEST_NAME='missing capability evidence prevents destination writes and is receipted'
+if [ ! -e "$TEST_TMP/store/destination/dst/objects/raw/capability.txt" ] &&
+  ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG" &&
+  jq -e '.conditionalWriteCapability.required == true and
+    .conditionalWriteCapability.proofAccepted == false and
+    (.missingProof | index("conditional-write capability proof is absent"))' \
+    "$TEST_TMP/reports/no-capability/summary.json" >/dev/null; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/mismatched-capability.txt capability
+jq '.destination.bucket = "other"' "$TEST_TMP/conditional-write-proof.json" \
+  >"$TEST_TMP/mismatched-capability.json"
+TEST_NAME='execute-copy exits one with mismatched conditional-write evidence'
+expect_status 1 run_tool copy "$TEST_TMP/reports/mismatched-capability" --execute-copy \
+  --conditional-write-proof "$TEST_TMP/mismatched-capability.json"
+TEST_NAME='mismatched capability evidence prevents every destination write'
+if [ ! -e "$TEST_TMP/store/destination/dst/objects/raw/mismatched-capability.txt" ] &&
+  ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
 put_fixture source src raw/a.txt alpha; put_fixture source src raw/b.txt beta
 put_fixture destination dst raw/a.txt alpha; put_fixture destination dst raw/b.txt beta
 FAKE_PAGE_SIZE=1
@@ -252,6 +294,12 @@ if cmp -s "$TEST_TMP/store/source/src/objects/raw/meta.txt" \
     "$TEST_TMP/reports/copy/copy-ledger.jsonl" >/dev/null; then
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
+TEST_NAME='receipts bind accepted conditional-write evidence without validating it'
+if jq -e '.conditionalWriteCapability.required == true and
+  .conditionalWriteCapability.proofAccepted == true and
+  .conditionalWriteCapability.proofDigest != null and
+  .conditionalWriteCapability.providerEnforcementValidated == false' \
+  "$TEST_TMP/reports/copy/summary.json" >/dev/null; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 
 reset_store
 put_fixture source src raw/multipart.bin same '{"ETag":"\"source-2\""}'
