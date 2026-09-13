@@ -34,7 +34,7 @@
 - [x] Lot 2: reuse existing #670 work; produce minimal remediation file map and repeatable final SCW acceptance checks.
 - [ ] Lot 3: Astra design and Gemini review, then Sol implementation and Gemini post-build review.
 - [x] Lot 3a: conductor defines the bounded parallel implementation and cutover dependencies in `docs/reviews/scw-final/build-design.md`.
-- [ ] Lot 3b: reconcile the independent review, then release the exact build slice to Sol.
+- [x] Lot 3b: Fable GO_WITH_CHANGES reconciled (F1 required complete bindings; F2 defer armed refresh-diag; F3/F4 remaining-client visibility); amended first slice released to Sol.
 - [ ] Lot 4: after T1, conductor verifies copy/parity/fencing/recovery and preprod then production cutovers.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
 
