@@ -13,6 +13,7 @@ Usage: migrate-object-storage.sh <inventory|copy|verify|delta> [options]
   [--exclude-prefix PREFIX/ ...] [--expected-manifest FILE]
   [--execute-copy] [--fence-record FILE]
   [--reconcile-owned --ledger FILE]
+  [--conditional-write-proof FILE]
   [--concurrency N] [--retries N] [--max-failures N]
   [--max-object-bytes N]
 EOF
@@ -28,6 +29,7 @@ ENVIRONMENT="" PLANE="" REPORT_DIR="" EXECUTE_COPY=false RECONCILE_OWNED=false
 SOURCE_ENDPOINT="" SOURCE_REGION="" SOURCE_BUCKET="" SOURCE_PATH_STYLE=""
 DESTINATION_ENDPOINT="" DESTINATION_REGION="" DESTINATION_BUCKET=""
 DESTINATION_PATH_STYLE="" EXPECTED_MANIFEST="" FENCE_RECORD="" LEDGER=""
+CONDITIONAL_WRITE_PROOF=""
 CONCURRENCY=4 RETRIES=3 MAX_FAILURES=20 MAX_OBJECT_BYTES=5000000000
 PREFIXES=() EXCLUDE_PREFIXES=()
 
@@ -49,6 +51,7 @@ while [ "$#" -gt 0 ]; do
     --expected-manifest) need_value "$@"; EXPECTED_MANIFEST="$2"; shift 2 ;;
     --fence-record) need_value "$@"; FENCE_RECORD="$2"; shift 2 ;;
     --ledger) need_value "$@"; LEDGER="$2"; shift 2 ;;
+    --conditional-write-proof) need_value "$@"; CONDITIONAL_WRITE_PROOF="$2"; shift 2 ;;
     --execute-copy) EXECUTE_COPY=true; shift ;;
     --reconcile-owned) RECONCILE_OWNED=true; shift ;;
     --concurrency) need_value "$@"; CONCURRENCY="$2"; shift 2 ;;
@@ -316,6 +319,33 @@ build_manifest() {
 MISSING_PROOF=()
 add_missing_proof() { MISSING_PROOF+=("$1"); }
 proof_is_complete() { [ "${#MISSING_PROOF[@]}" -eq 0 ]; }
+CONDITIONAL_WRITE_PROOF_DIGEST=null
+CONDITIONAL_WRITE_PROOF_ACCEPTED=false
+validate_conditional_write_proof() {
+  [ -r "$CONDITIONAL_WRITE_PROOF" ] && [ -s "$CONDITIONAL_WRITE_PROOF" ] || return 1
+  jq -e --arg endpoint "$DESTINATION_ENDPOINT" --arg region "$DESTINATION_REGION" \
+    --arg bucket "$DESTINATION_BUCKET" --argjson pathStyle "$DESTINATION_PATH_STYLE" \
+    --arg identity "$DESTINATION_IDENTITY_FINGERPRINT" '
+    .schemaVersion == 1 and
+    (.provider | type == "string" and length > 0) and
+    (.providerVersion | type == "string" and length > 0) and
+    .destination == {endpoint:$endpoint,region:$region,bucket:$bucket,pathStyle:$pathStyle} and
+    .identityFingerprint == $identity and
+    (.observedAt | fromdateiso8601) <= now and (.expiresAt | fromdateiso8601) > now and
+    (.transcriptSha256 | test("^[0-9a-f]{64}$")) and
+    .capabilities == {ifNoneMatchCreate:true,ifMatchUpdate:true}
+  ' "$CONDITIONAL_WRITE_PROOF" >/dev/null
+}
+if [ -n "$CONDITIONAL_WRITE_PROOF" ]; then
+  if validate_conditional_write_proof; then
+    CONDITIONAL_WRITE_PROOF_DIGEST="$(sha256sum "$CONDITIONAL_WRITE_PROOF" | awk '{print $1}')"
+    CONDITIONAL_WRITE_PROOF_ACCEPTED=true
+  else
+    add_missing_proof 'conditional-write capability proof is invalid, expired or mismatched'
+  fi
+elif $EXECUTE_COPY; then
+  add_missing_proof 'conditional-write capability proof is absent'
+fi
 SOURCE_LISTING="$WORK_DIR/source-listing.jsonl"
 DESTINATION_LISTING="$WORK_DIR/destination-listing.jsonl"
 SOURCE_MANIFEST="$REPORT_DIR/source-manifest.jsonl"
@@ -649,7 +679,9 @@ reconcile_owned_objects() {
       $object.versionId != $result.priorVersionId and $object.sha256 != $result.priorHash) |
     {schemaVersion:1,migrationId:$first[0].migrationId,key:$result.key,
      expectedManifestDigest:$first[0].expectedManifestDigest,
-     originalLedgerDigest:$ledgerDigest,fenceEvidenceDigest:$fenceDigest,fenceValidated:false,
+     originalLedgerDigest:$ledgerDigest,
+     fenceEvidenceDigest:(if $fenceDigest == "null" then null else $fenceDigest end),
+     fenceValidated:false,
      prior:{versionId:$result.priorVersionId,sha256:$result.priorHash},
      new:{versionId:$object.versionId,sha256:$object.sha256},object:$object}' \
     >"$REPORT_DIR/reconciliation-ledger.jsonl"
@@ -681,7 +713,8 @@ prove_recoverable_priors() {
        contentDisposition:($head[0].ContentDisposition // null),metadata:($head[0].Metadata // {}),
        tags:(($tags[0].TagSet // []) | sort_by(.Key))}')"; rm -f "$body"
     expected="$(jq -c '._priorObject | del(.etag,.versionId,.classification,.sources)' <<<"$item")"
-    if [ "$actual" != "$expected" ]; then
+    if ! jq -en --argjson actual "$actual" --argjson expected "$expected" \
+      '$actual == $expected' >/dev/null; then
       record_failure destination "$key" prior-version-mismatch
       add_missing_proof 'a prior destination VersionId differs from the ownership ledger'; return 1
     fi
@@ -734,6 +767,8 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
   --argjson exclusions "$EXCLUDE_PREFIX_JSON" --argjson missingProof "$MISSING_PROOF_JSON" \
   --arg expectedDigest "$EXPECTED_MANIFEST_DIGEST" --arg fenceDigest "$FENCE_EVIDENCE_DIGEST" \
   --argjson executeCopy "$EXECUTE_COPY" --argjson reconcileOwned "$RECONCILE_OWNED" \
+  --arg conditionalDigest "$CONDITIONAL_WRITE_PROOF_DIGEST" \
+  --argjson conditionalAccepted "$CONDITIONAL_WRITE_PROOF_ACCEPTED" \
   --argjson concurrency "$CONCURRENCY" --argjson retries "$RETRIES" \
   --argjson maxFailures "$MAX_FAILURES" --argjson maxObjectBytes "$MAX_OBJECT_BYTES" \
   --argjson sourceCount "$SOURCE_COUNT" --argjson destinationCount "$DESTINATION_COUNT" \
@@ -746,6 +781,9 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
    source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,identityFingerprint:$sf},
    destination:{endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp,identityFingerprint:$df},
    prefixes:$prefixes,excludePrefixes:$exclusions,
+   conditionalWriteCapability:{required:$executeCopy,proofAccepted:$conditionalAccepted,
+     proofDigest:(if $conditionalDigest == "null" then null else $conditionalDigest end),
+     providerEnforcementValidated:false},
    limits:{concurrency:$concurrency,retries:$retries,maxFailures:$maxFailures,
      maxObjectBytes:$maxObjectBytes},
    counts:{source:$sourceCount,destination:$destinationCount,missing:($parity.missing|length),
