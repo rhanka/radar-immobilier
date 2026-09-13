@@ -88,4 +88,5 @@
   - [x] Use the DS full-width container, French decision reading surface and automatic zoom on a selected shared resource.
   - [x] Reuse the Focus orthogonal router to prevent edges crossing unrelated components; keep unverified edge/label crossings explicit.
   - [x] Document build/replay instructions and hash-scope local notes to the complete embedded input set.
+  - [x] Embed replay instructions and verification evidence too; leave unresolved execution decisions and production inventory open.
 - [ ] Local documentation handoff; no production action or branch merge requested.
