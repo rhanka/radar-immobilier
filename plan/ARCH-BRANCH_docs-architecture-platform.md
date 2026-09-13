@@ -47,6 +47,7 @@
   - [x] Regenerate Focus HTML; Chromium renders four diagrams with zoom/full-screen/Escape and no desktop/mobile page overflow.
 - [ ] **Lot 5 — Reconcile infrastructure and processing resource identities.**
   - [ ] Obtain the owner-requested independent Gemini 3.8 High review.
+  - [x] Add environment-qualified store identities and the live Geo PDF reader to the infrastructure overview.
   - [ ] Map each Immo DB and object-store role to environment-qualified shared identifiers in both diagrams.
   - [ ] Verify reader/writer arrows against source and whitelisted deployment configuration.
   - [ ] Reconcile reviewer findings, regenerate Focus and check the final browser rendering.
