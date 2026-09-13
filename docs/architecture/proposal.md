@@ -2,10 +2,11 @@
 
 [FACT] This is the current T1 design from the September 13 refresh handoff, not
 the former Option A and not an observed deployment. It keeps the existing
-preproduction MinIO API roles until T2. Graphify 0.18.0 is published. At the
-15:39 UTC progress capture, Immo had pinned the refresh dependencies in
-`d0595d9f`, passed typecheck and started scoped tests; consumer completion,
-operated keyring, durable lock and scheduled acceptance remain open.
+preproduction MinIO API roles until T2. Graphify stays exactly 0.18.0; the PDF
+contract name `immo-pv-extraction-v3` is not a 0.18.3 dependency version. At
+Immo HEAD `ac3a7150`, targeted suites pass 8/8 + 7/7 and the full typecheck plus
+scope/branch checks pass. Real-provider Signal, nested `UND_ERR_SOCKET` analysis,
+operated keyring, durable lock and Kubernetes acceptance remain open.
 
 ```mermaid
 flowchart LR
@@ -23,7 +24,7 @@ flowchart LR
     post["4 Deterministic 3.4 on FRESH candidate<br/>before canonical publication"]
     publish["5 Guarded full-graph publish<br/>one canonical writer · archive + expected ETag"]
     project["6 Atomic PG projection<br/>same validated canonical bytes · resumable callback"]
-    served["7 Typed Signal + exact PDF proof<br/>API/UI acceptance · idempotent rerun"]
+    served["7 Typed Signal + exact PDF proof<br/>immo-pv-extraction-v3 · API/UI acceptance · idempotent rerun"]
     acquire --> materialize
     evidence --> candidate
     candidate --> post
