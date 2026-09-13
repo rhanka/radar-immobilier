@@ -20,6 +20,7 @@ while [ "$#" -gt 0 ] && [ "$1" != s3api ]; do shift; done
 [ "${1:-}" = s3api ] || exit 90
 shift; op="$1"; shift
 printf '%s\t%s\t%s\n' "$side" "$op" "$*" >>"$log"
+trap 'status=$?; [ "$status" -eq 0 ] || printf "shim-error\t%s\t%s\t%s\n" "$op" "$status" "$LINENO" >>"$log"' EXIT
 if [ "${FAKE_FAIL_SIDE:-}" = "$side" ] && [ "${FAKE_FAIL_OPERATION:-}" = "$op" ]; then
   counter="$FAKE_S3_TMP/failure-counter"; seen="$(cat "$counter" 2>/dev/null || printf 0)"
   if [ "$seen" -lt "${FAKE_FAIL_ATTEMPTS:-0}" ]; then
@@ -33,6 +34,7 @@ arg() {
     [ "$previous" = "$wanted" ] && { printf '%s' "$value"; return; }
     previous="$value"
   done
+  return 0
 }
 bucket="$(arg --bucket "$@")"; key="$(arg --key "$@")"
 objects="$root/$bucket/objects"; meta="$root/$bucket/meta"
@@ -95,8 +97,9 @@ case "$op" in
     cache="$(arg --cache-control "$@")"; disposition="$(arg --content-disposition "$@")"
     user_meta="$(arg --metadata "$@")"; [ -n "$user_meta" ] || user_meta='{}'
     tagging="$(arg --tagging "$@")"
-    tags="$(printf '%s' "$tagging" | jq -R 'if length == 0 then [] else
-      split("&") | map(split("=") | {Key:.[0],Value:.[1]}) end')"
+    tags='[]'
+    [ -z "$tagging" ] || tags="$(printf '%s' "$tagging" | jq -R '
+      split("&") | map(split("=") | {Key:.[0],Value:.[1]})')"
     etag="\"$(sha256sum "$body" | awk '{print substr($1,1,16)}')\""
     jq -n --arg ct "$content_type" --arg ce "$encoding" --arg cc "$cache" --arg cd "$disposition" \
       --argjson metadata "$user_meta" --argjson tags "$tags" --arg etag "$etag" \
@@ -300,6 +303,56 @@ jq 'del(.sources[1].fenceSha256)' "$TEST_TMP/expected-union.json" >"$TEST_TMP/in
 TEST_NAME='rejects incomplete per-source fenced observation provenance'
 expect_bad run_tool verify "$TEST_TMP/reports/incomplete-union" \
   --expected-manifest "$TEST_TMP/incomplete-union.json"
+
+reset_store
+put_fixture source src raw/owned.txt original
+TEST_NAME='creates the exact ledger used by owned reconciliation'
+expect_ok run_tool copy "$TEST_TMP/reports/owned-first" --execute-copy
+put_fixture source src raw/owned.txt corrected
+printf 'source and destination writers fenced\n' >"$TEST_TMP/fence.txt"
+TEST_NAME='reconciles only the unchanged migration-owned version'
+expect_ok run_tool copy "$TEST_TMP/reports/owned-reconcile" --execute-copy --reconcile-owned \
+  --ledger "$TEST_TMP/reports/owned-first/copy-ledger.jsonl" --fence-record "$TEST_TMP/fence.txt"
+TEST_NAME='records recoverable prior and distinct new versions and hashes'
+if [ "$(cat "$TEST_TMP/store/destination/dst/objects/raw/owned.txt")" = corrected ] &&
+  jq -e '.prior.versionId == "v1" and .new.versionId == "v2" and
+    .prior.sha256 != .new.sha256 and .fenceValidated == false' \
+    "$TEST_TMP/reports/owned-reconcile/reconciliation-ledger.jsonl" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/owned.txt original
+run_tool copy "$TEST_TMP/reports/no-version-first" --execute-copy >/dev/null
+put_fixture source src raw/owned.txt corrected
+printf 'fenced\n' >"$TEST_TMP/fence.txt"; : >"$AWS_LOG"; FAKE_VERSIONING=Suspended
+TEST_NAME='refuses owned reconciliation without destination versioning'
+expect_bad run_tool copy "$TEST_TMP/reports/no-version-reconcile" --execute-copy --reconcile-owned \
+  --ledger "$TEST_TMP/reports/no-version-first/copy-ledger.jsonl" --fence-record "$TEST_TMP/fence.txt"
+TEST_NAME='does not write after absent-versioning refusal'
+if ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/owned.txt original
+run_tool copy "$TEST_TMP/reports/foreign-first" --execute-copy >/dev/null
+put_fixture source src raw/owned.txt corrected
+put_fixture destination dst raw/owned.txt independently-modified
+printf 'fenced\n' >"$TEST_TMP/fence.txt"; : >"$AWS_LOG"
+TEST_NAME='refuses an independently changed object despite a prior ledger'
+expect_bad run_tool copy "$TEST_TMP/reports/foreign-reconcile" --execute-copy --reconcile-owned \
+  --ledger "$TEST_TMP/reports/foreign-first/copy-ledger.jsonl" --fence-record "$TEST_TMP/fence.txt"
+TEST_NAME='keeps independently modified destination bytes untouched'
+if [ "$(cat "$TEST_TMP/store/destination/dst/objects/raw/owned.txt")" = independently-modified ] &&
+  ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG"; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/delta.txt identical; put_fixture destination dst raw/delta.txt identical
+printf 'fenced\n' >"$TEST_TMP/fence.txt"
+TEST_NAME='marks only an identical fenced delta as tool-ready'
+expect_ok run_tool delta "$TEST_TMP/reports/delta" --fence-record "$TEST_TMP/fence.txt"
+TEST_NAME='records fence digest without claiming fence validation'
+if jq -e '.cutoverReady == true and .fenceEvidenceDigest != null and .fenceValidated == false' \
+  "$TEST_TMP/reports/delta/summary.json" >/dev/null; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]

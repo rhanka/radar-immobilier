@@ -596,7 +596,7 @@ reconcile_owned_objects() {
     add_missing_proof 'destination versioning state is unavailable'; return 1; }
   [ "$(jq -r '.Status // empty' "$versioning")" = Enabled ] || {
     add_missing_proof 'destination versioning is not enabled'; return 1; }
-  [ "$(jq '.missing | length + (.extra | length)' "$PARITY")" -eq 0 ] || {
+  [ "$(jq '(.missing | length) + (.extra | length)' "$PARITY")" -eq 0 ] || {
     add_missing_proof 'owned reconciliation refuses missing or extra keys'; return 1; }
   conflict_count="$(jq '.conflicting | length' "$PARITY")"
   [ "$conflict_count" -gt 0 ] || {
