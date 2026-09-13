@@ -13,6 +13,7 @@ API_IMAGE := ghcr.io/rhanka/radar-api
 APPROVED_IMAGE := ghcr.io/rhanka/radar-api@sha256:d4a46b5615a7510fd5bf3384f65dea8b881cb75ae3226a3dc3751a7f9271119e
 OVH_S3_ENDPOINT := https://s3.bhs.io.cloud.ovh.net
 OVH_DOCS_BUCKET := radar-immobilier-docs
+OVH_RAW_BUCKET := radar-immobilier-raw
 
 .PHONY: guard-preprod
 guard-preprod:
@@ -57,7 +58,7 @@ inspect-prod: guard-prod
 	@$(KP) get configmap radar-api --ignore-not-found \
 	  -o custom-columns=NAME:.metadata.name,GRAPH_ENDPOINT:.data.GRAPH_S3_ENDPOINT,GRAPH_REGION:.data.GRAPH_S3_REGION,GRAPH_BUCKET:.data.GRAPH_S3_BUCKET,SCRAPE_ENDPOINT:.data.SCRAPE_S3_ENDPOINT,SCRAPE_REGION:.data.SCRAPE_S3_REGION,SCRAPE_BUCKET:.data.SCRAPE_S3_BUCKET
 	@if [ "$$($(KP) auth can-i get secrets)" = yes ]; then \
-	  $(KP) get secret radar-graph-s3-credentials radar-scrape-s3-credentials radar-refresh-keyring-bootstrap radar-refresh-runtime --ignore-not-found -o name; \
+	  $(KP) get secret radar-raw-s3-credentials radar-graph-s3-credentials radar-scrape-s3-credentials radar-refresh-keyring-bootstrap radar-refresh-runtime --ignore-not-found -o name; \
 	else echo 'secret inventory: unavailable to this identity'; fi
 	@if [ "$$($(KP) auth can-i get persistentvolumeclaims)" = yes ]; then \
 	  $(KP) get pvc radar-refresh-keyring --ignore-not-found \
@@ -157,6 +158,55 @@ verify-render-prod:
 	      if (length(suspend) != 3) exit 1; \
 	    }' "$$tmp" \
 	    || { echo "production render must activate only radar-refresh-pv" >&2; exit 1; }
+
+.PHONY: storage-ready-prod
+storage-ready-prod: guard-prod verify-render-prod
+	@set -e; \
+	  graph="$$( $(KP) get configmap radar-api -o jsonpath='{.data.GRAPH_S3_ENDPOINT}|{.data.GRAPH_S3_REGION}|{.data.GRAPH_S3_BUCKET}|{.data.GRAPH_S3_FORCE_PATH_STYLE}' )"; \
+	  scrape="$$( $(KP) get configmap radar-api -o jsonpath='{.data.SCRAPE_S3_ENDPOINT}|{.data.SCRAPE_S3_REGION}|{.data.SCRAPE_S3_BUCKET}|{.data.SCRAPE_S3_FORCE_PATH_STYLE}' )"; \
+	  test "$$graph" = "$(OVH_S3_ENDPOINT)|bhs|$(OVH_DOCS_BUCKET)|false" \
+	    || { echo "live GRAPH binding is not the approved OVH DOCS store" >&2; exit 1; }; \
+	  test "$$scrape" = "$(OVH_S3_ENDPOINT)|bhs|$(OVH_DOCS_BUCKET)|false" \
+	    || { echo "live SCRAPE binding is not the approved OVH DOCS store" >&2; exit 1; }; \
+	  require_key() { \
+	    test -n "$$( $(KP) get secret "$$1" -o "jsonpath={.data.$$2}" )" \
+	      || { echo "missing required key $$1/$$2" >&2; exit 1; }; \
+	  }; \
+	  for item in \
+	    radar-raw-s3-credentials/RAW_S3_ENDPOINT \
+	    radar-raw-s3-credentials/RAW_S3_REGION \
+	    radar-raw-s3-credentials/RAW_S3_BUCKET \
+	    radar-raw-s3-credentials/RAW_S3_FORCE_PATH_STYLE \
+	    radar-raw-s3-credentials/RAW_S3_ACCESS_KEY \
+	    radar-raw-s3-credentials/RAW_S3_SECRET_KEY \
+	    radar-graph-s3-credentials/GRAPH_S3_ACCESS_KEY \
+	    radar-graph-s3-credentials/GRAPH_S3_SECRET_KEY \
+	    radar-scrape-s3-credentials/SCRAPE_S3_ACCESS_KEY \
+	    radar-scrape-s3-credentials/SCRAPE_S3_SECRET_KEY; do \
+	      require_key "$${item%/*}" "$${item#*/}"; \
+	  done; \
+	  expected_endpoint="$$(printf %s '$(OVH_S3_ENDPOINT)' | base64 | tr -d '\n')"; \
+	  expected_region="$$(printf %s bhs | base64 | tr -d '\n')"; \
+	  expected_bucket="$$(printf %s '$(OVH_RAW_BUCKET)' | base64 | tr -d '\n')"; \
+	  expected_style="$$(printf %s false | base64 | tr -d '\n')"; \
+	  test "$$( $(KP) get secret radar-raw-s3-credentials -o jsonpath='{.data.RAW_S3_ENDPOINT}' )" = "$$expected_endpoint"; \
+	  test "$$( $(KP) get secret radar-raw-s3-credentials -o jsonpath='{.data.RAW_S3_REGION}' )" = "$$expected_region"; \
+	  test "$$( $(KP) get secret radar-raw-s3-credentials -o jsonpath='{.data.RAW_S3_BUCKET}' )" = "$$expected_bucket"; \
+	  test "$$( $(KP) get secret radar-raw-s3-credentials -o jsonpath='{.data.RAW_S3_FORCE_PATH_STYLE}' )" = "$$expected_style" \
+	    || { echo "live RAW binding is not the approved OVH RAW store" >&2; exit 1; }; \
+	  test -z "$$( $(KP) get statefulset radar-minio --ignore-not-found -o name )"; \
+	  test -z "$$( $(KP) get service radar-minio --ignore-not-found -o name )"; \
+	  test -z "$$( $(KP) get pvc minio-data-radar-minio-0 --ignore-not-found -o name )" \
+	    || { echo "production MinIO resources still exist" >&2; exit 1; }; \
+	  active="$$( $(KP) get jobs -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.active}{"\n"}{end}' \
+	    | awk '$$1 ~ /(object-storage|docs|copy|inventory|proof)/ && $$2 + 0 > 0 { print $$1 }' )"; \
+	  test -z "$$active" || { echo "active storage migration Job blocks promotion" >&2; exit 1; }
+
+.PHONY: validate-prod
+validate-prod: storage-ready-prod
+	@set -e; tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp" ENV=test-refresh-prod-018; \
+	  $(KP) apply --dry-run=server -f "$$tmp" >/dev/null
 
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
