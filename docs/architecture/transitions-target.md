@@ -17,7 +17,7 @@ unobservable production bindings. The detailed causal pipeline is in
 flowchart TB
   subgraph T1_CARD["T1 · PROPOSED / NOT DEPLOYED · stage card"]
     T1_CHANGE["CHANGES<br/>In-pod Immo refresh: fresh candidate → deterministic 3.4 → guarded graph → atomic PG"]
-    T1_KEEP["KEPT<br/>PP-DB, PP-GRAPH, API/UI/MCP, Geo evidence and MinIO API roles"]
+    T1_KEEP["KEPT<br/>PP-DB, PP-GRAPH, API/UI/MCP, Geo evidence, MinIO API roles + legacy history"]
     T1_REMOVE["REMOVED<br/>Routine workstation LLM and parallel legacy canonical publishers"]
     T1_GATES["GATES<br/>Installed contract + durable identity/lock + preprod E2E THEN production"]
     T1_EVIDENCE["EVIDENCE<br/>Graphify exactly 0.18.0; PDF contract immo-pv-extraction-v3<br/>HEAD ac3a7150; targeted 8/8 + 7/7; typecheck + scope/branch PASS<br/>no real-provider Signal or K8s acceptance; nested UND_ERR_SOCKET analysis pending"]
@@ -38,7 +38,8 @@ flowchart TB
         PP_REFRESH["[PP-REFRESH] proposed autonomous CronJob<br/>fresh typed Signal + exact PDF acceptance"]
         subgraph ppminio["[PP-MINIO] existing in-cluster MinIO · retained through T1"]
           PP_RAW[("[PP-RAW] existing API raw role")]
-          PP_DOCS[("[PP-DOCS] existing API documents role")]
+          PP_DOCS[("[PP-DOCS] empty API documents fallback")]
+          PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] useful replay/history<br/>partial inventory · retained for T2")]
         end
       end
       subgraph immo_pr["PRODUCTION · promote only after preprod"]
@@ -98,20 +99,19 @@ flowchart TB
 
 ## T2 — OVH object roles active, old writers fenced
 
-T2 migrates the API raw/document roles to new OVH logical bindings. `PP-RAW`
-and `PP-DOCS` remain the physical MinIO identities; they are never reused for
-the new buckets. The old store is recovery-only after reader/writer parity and
-stays present until the deletion gate. Production bindings remain target roles
+T2 applies **MIGRATE+RETAIN** to the API raw/document roles and useful legacy
+history. The old physical MinIO identities are never reused for new buckets.
+`PP-DOCS-LEGACY` stays recovery-only until complete parity and recovery. Production bindings remain target roles
 until the separately authorized inventory and promotion prove them.
 
 ```mermaid
 flowchart TB
   subgraph T2_CARD["T2 · PROPOSED / NOT DEPLOYED · stage card"]
     T2_CHANGE["CHANGES<br/>New PP/PR OVH API raw + documents roles; readers/writers repointed and verified"]
-    T2_KEEP["KEPT<br/>PP-DB, PP-GRAPH, refresh, Geo corpus, recovery copy and TEM exception"]
+    T2_KEEP["KEPT<br/>PP-DB, PP-GRAPH, refresh, Geo corpus, PP-DOCS-LEGACY recovery and TEM"]
     T2_REMOVE["REMOVED AFTER GATE<br/>MinIO consumers + workload/PVC; SCW images/digests/jobs/manual/CI/backup/bootstrap/secret refs"]
-    T2_GATES["GATES<br/>Parity + recovery + writer fence + zero consumers in preprod THEN production"]
-    T2_EVIDENCE["EVIDENCE<br/>#677 OVH refresh landed; API MinIO and production inventory remain open today"]
+    T2_GATES["GATES<br/>Fail before write + conditional-write capability<br/>parity + recovery + writer fence + zero consumers; preprod THEN production"]
+    T2_EVIDENCE["EVIDENCE<br/>LIVE API RAW; docs fallback empty; legacy baseline 1 / graph 4 / ontology 530<br/>parsed at least 4884; raw unknown; runs at least 445<br/>fail-before-write 25ec9e04; suite + conditional-write open; no copy/cutover/deletion"]
   end
   user["User / browser"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
@@ -129,7 +129,8 @@ flowchart TB
         PP_REFRESH["[PP-REFRESH] autonomous refresh retained"]
         subgraph ppminio["[PP-MINIO] old MinIO · fenced recovery only · deletion gate open"]
           PP_RAW[("[PP-RAW] old physical MinIO raw identity")]
-          PP_DOCS[("[PP-DOCS] old physical MinIO documents identity")]
+          PP_DOCS[("[PP-DOCS] empty fallback bucket")]
+          PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] retained replay/history<br/>until complete parity + recovery")]
         end
       end
       subgraph immo_pr["PRODUCTION · inventory and promotion after preprod"]

@@ -41,7 +41,7 @@ test('complete native scenes preserve exact identities and route around absolute
 });
 
 test('preprod stores and DB retain exact identities across infrastructure and PV views', () => {
-  for (const id of ['PP-DB', 'PP-RAW', 'PP-DOCS', 'PP-GRAPH', 'GEO-S3', 'PP-GEO-S3']) {
+  for (const id of ['PP-DB', 'PP-RAW', 'PP-DOCS', 'PP-DOCS-LEGACY', 'PP-GRAPH', 'GEO-S3', 'PP-GEO-S3']) {
     assert.ok(graphs[0].nodes.some(n => n.resource === id));
     assert.ok(graphs[1].nodes.some(n => n.resource === id));
   }
@@ -84,9 +84,9 @@ test('transition states preserve physical IDs and final-target exclusions', () =
   const [t1, t2, t3, detail] = ['target-1', 'target-2', 'target-3', 'detail-1'].map(id => graphs.find(graph => graph.id === id));
   for (const graph of [t1, t2, t3]) for (const id of ['PP_UI', 'PP_API', 'PP_MCP', 'PP_DB', 'PP_REFRESH', 'PR_UI', 'PR_API', 'PR_MCP', 'PR_DB', 'PR_REFRESH', 'GEO_API', 'GEO_DB', 'GEO_S3']) assert.ok(graph.nodes.some(node => node.id === id), `${graph.id}/${id}`);
   for (const id of ['T1_CHANGE', 'T1_KEEP', 'T1_REMOVE', 'T1_GATES', 'T1_EVIDENCE']) assert.ok(t1.nodes.some(node => node.id === id));
-  for (const id of ['PP_RAW', 'PP_DOCS', 'PP_RAW_OVH', 'PP_DOCS_OVH']) assert.ok(t2.nodes.some(node => node.id === id));
+  for (const id of ['PP_RAW', 'PP_DOCS', 'PP_DOCS_LEGACY', 'PP_RAW_OVH', 'PP_DOCS_OVH']) assert.ok(t2.nodes.some(node => node.id === id));
   for (const id of ['PP_RAW_OVH', 'PP_DOCS_OVH', 'PR_RAW_OVH', 'PR_DOCS_OVH', 'TEM', 'PV_SRC', 'ZONES_SRC', 'REGULATIONS_SRC', 'LOTS_SRC', 'ENV_SRC']) assert.ok(t3.nodes.some(node => node.id === id));
-  for (const removed of ['PP_RAW', 'PP_DOCS', 'SCW_RESIDUE']) assert.ok(!t3.nodes.some(node => node.id === removed));
+  for (const removed of ['PP_RAW', 'PP_DOCS', 'PP_DOCS_LEGACY', 'SCW_RESIDUE']) assert.ok(!t3.nodes.some(node => node.id === removed));
   assert.ok(!t3.groups.some(group => group.id === 'ppminio'));
   for (const graph of [t1, t2, t3]) for (const source of ['PP_API', 'PR_API']) {
     const email = graph.edges.find(edge => edge.source === source && edge.target === 'TEM');

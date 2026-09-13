@@ -16,7 +16,7 @@ neither an icon nor a repo label is a new claim of runtime activation.
 
 | Effective path | Preproduction | Production |
 | --- | --- | --- |
-| API default object store | **MinIO still deployed and configured**, bucket `radar-immobilier-raw` | OVH runtime not audited; main still declares MinIO |
+| API default object store | **MinIO still deployed and configured**: live `radar-immobilier-raw`; empty derived fallback `radar-immobilier-docs`; separate retained `radar-immobilier-docs-preprod` history | OVH runtime not audited; main still declares MinIO |
 | Scrape + canonical projection | **OVH S3**, same `radar-immobilier-graph-preprod` bucket | OVH runtime not audited; main retains SCW refresh bindings |
 | Mapped PV document reader | **OVH `sentropic-geo/raw/pv-index/cas/`** | Repoint activation not audited |
 | Eradication work | #677 migrated preprod CronJobs, not API; #674 retains/pins MinIO | #670 is **OPEN DRAFT**, not merged; registry migration #671/#672 is not storage migration |
@@ -52,7 +52,8 @@ flowchart TB
       PP_DB[("[PP-DB] radar-postgres<br/>radar-immobilier-preprod · PG/PostGIS")]
       subgraph ppminio["[PP-MINIO] radar-minio · PVC"]
         PP_RAW[("[PP-RAW] radar-immobilier-raw<br/>MinIO · API state / legacy objects")]
-        PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · derived reader default; writer unverified")]
+        PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · empty derived reader fallback")]
+        PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] radar-immobilier-docs-preprod<br/>MinIO · useful replay/history · inventory partial")]
       end
       PP_SCRAPE["[PP-SCRAPE] radar-refresh-scrape<br/>1 collect + 2 parse/exploit · 03:17 UTC"]
       PP_PROJECT["[PP-PROJECT] radar-refresh-projection<br/>Stage 4 · daily 04:30 UTC"]
@@ -133,7 +134,8 @@ flowchart LR
     PP_UI["[PP-UI] radar-ui<br/>radar-immobilier-preprod"]
     subgraph ppminio["[PP-MINIO] radar-minio · PVC"]
       PP_RAW[("[PP-RAW] radar-immobilier-raw<br/>MinIO · API state / legacy objects")]
-      PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · derived reader default; writer unverified")]
+      PP_DOCS[("[PP-DOCS] radar-immobilier-docs<br/>MinIO · empty derived reader fallback")]
+      PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] radar-immobilier-docs-preprod<br/>MinIO · useful replay/history · inventory partial")]
     end
   end
   WS_IMMO["[WS-IMMO] Immo Graphify / grounding<br/>Operator workstation · LLM stage 3"]
@@ -160,7 +162,7 @@ flowchart LR
   class WS_IMMO local;
 ```
 
-**Exact zoom:** `PP-DB` is the same database as in diagram 1, not a new Graphify database. `PP-GRAPH` is **one physical bucket**: `raw/`, `parsed/`, `ontology/`, `runs/` and `graph/` are prefixes, not five S3 services. `PP-RAW` and `PP-DOCS` are different API bindings behind the same `PP-MINIO`; their content/existence was not inventoried. Stages 1 and 2 run in **one scrape worker**, not separate services. Workstation arrows are configurable run contracts, **not proof of a recent publication into PP-GRAPH**. No active stage-3 publisher was established by this inventory. Legacy Job 41 is excluded, not assumed to bridge the gap.
+**Exact zoom:** `PP-DB` is the same database as in diagram 1, not a new Graphify database. `PP-GRAPH` is **one physical bucket**: `raw/`, `parsed/`, `ontology/`, `runs/` and `graph/` are prefixes, not five S3 services. `PP-RAW` is the live API store; `PP-DOCS` is the empty derived fallback. The distinct `PP-DOCS-LEGACY` bucket contains useful replay/history but is not a live API binding. Stages 1 and 2 run in **one scrape worker**, not separate services. Workstation arrows are configurable run contracts, **not proof of a recent publication into PP-GRAPH**. No active stage-3 publisher was established by this inventory. Legacy Job 41 is excluded, not assumed to bridge the gap.
 
 | Stage | Actual implementation | Output / boundary | Execution today |
 | --- | --- | --- | --- |
@@ -188,7 +190,7 @@ Graphify extraction, evidence and grounding work remains relevant. **Its publica
 
 Grounding is an enrichment of stage 3, not a replacement for graph generation. Its publish-only Kubernetes Job verifies the staged content hash, preserves history and publishes one city. The committed grounding README names Sonnet; newer job commentary names a Codex/llm-mesh run. A single current model cannot be inferred from those conflicting records, so the diagram identifies the runtime boundary rather than asserting one provider/model.
 
-**Current preprod split, measured:** scrape and projection bind to `PP-GRAPH`. The API's default `S3_*` store binds to `PP-RAW`; with no API `SCRAPE_S3_*` override, the code derives a **different** MinIO bucket `PP-DOCS` (the bucket fallback is the literal `radar-immobilier-docs`, not `S3_BUCKET`). Neither API binding is the refresh bucket. The legacy Job 41 template reads SCW candidates and writes MinIO, but it was absent from the live inventory. That template mismatch is **not evidence of a currently running broken pipeline**. Current stage-3 publication into the refresh bucket remains unverified.
+**Current preprod split, measured:** scrape and projection bind to `PP-GRAPH`. The API's live default `S3_*` store is `PP-RAW`; with no API `SCRAPE_S3_*` override, its derived `PP-DOCS` fallback is the literal `radar-immobilier-docs` and is empty. A distinct MinIO bucket, `PP-DOCS-LEGACY` (`radar-immobilier-docs-preprod`), holds useful replay/history. Its partial inventory is exact where listed: `baseline/` 1 object / 2,821,583 B; `graph/` 4 / 639,226 B; `ontology/` 530 / 34,257,805 B; `parsed/` at least 4,884 / at least 272,554,144 B; `raw/` unknown; `runs/` at least 445. None is the refresh bucket. No copy, cutover or deletion has started.
 
 **PDF delivery is another path:** `PP-API` has live `GEO_DOCUMENTS_REPOINT=1` and `GEO_DOCUMENTS_S3_BUCKET=sentropic-geo`. The primary rewrite maps Immo `raw/proces-verbaux-<city>/cas/<sha>.<ext>` to Geo **`raw/pv-index/cas/<sha>.<ext>`**; an optional frozen URL index can add a candidate. `/api/documents/raw` reads **only `GEO-S3`** for mapped candidates, with no Immo fallback on miss. Non-mapped references retain `PP-DOCS` then `PP-RAW`. This shares captured documents, not ownership of Immo's detection/graphification/SQL projection. `PP-GEO-S3/normalized/` serves geographic features, not these PDFs.
 
@@ -199,9 +201,10 @@ A fresh PV can enter `PP-GRAPH/raw/` and the lowercase PG feed **without any fre
 | Shared ID | Physical resource / binding | Readers and writers | Evidence / cross-view meaning |
 | --- | --- | --- | --- |
 | `PP-DB` | `radar-postgres`, namespace `radar-immobilier-preprod`, PG/PostGIS + PVC | `PP-API` SQL; direct additive `PP-SCRAPE` and atomic `PP-PROJECT` writes | LIVE workload/wiring; **one Immo DB in diagrams 1 and 2** |
-| `PP-MINIO` | `http://radar-minio:9000`, same namespace, PVC-backed service | API bindings `PP-RAW` and `PP-DOCS` | LIVE, ready replicas 1; bucket contents not enumerated |
+| `PP-MINIO` | `http://radar-minio:9000`, same namespace, PVC-backed service | Live API `PP-RAW`, empty fallback `PP-DOCS`, retained history `PP-DOCS-LEGACY` | LIVE, ready replicas 1; partial object inventory below |
 | `PP-RAW` | MinIO bucket `radar-immobilier-raw` | `PP-API` default `S3_*` store; state/metadata and legacy document path | LIVE ConfigMap; not `PP-GRAPH` |
-| `PP-DOCS` | MinIO bucket `radar-immobilier-docs` | `PP-API` legacy scrape-document reader, ahead of `PP-RAW` | **Derived** from live absence of API `SCRAPE_S3_*` overrides + `resolveScrapeS3Config`; access/content not tested |
+| `PP-DOCS` | MinIO bucket `radar-immobilier-docs` | `PP-API` derived scrape-document fallback, ahead of `PP-RAW` | LIVE inventory: empty |
+| `PP-DOCS-LEGACY` | MinIO bucket `radar-immobilier-docs-preprod` | No live API binding established; replay/history candidate | LIVE partial inventory: baseline 1/2,821,583 B; graph 4/639,226 B; ontology 530/34,257,805 B; parsed ≥4,884/≥272,554,144 B; raw unknown; runs ≥445 |
 | `PP-GRAPH` | OVH S3 bucket `radar-immobilier-graph-preprod` | `PP-SCRAPE` writes corpus/derived state; `PP-PROJECT` reads canonical `graph/` | LIVE CronJob bindings. **Corpus and graph roles share this bucket**, not separate stores |
 | `PP-GEO-S3` | OVH S3 `sentropic-geo-preprod`, serving prefix `normalized/` | Controlled Geo sync writes; `PP-GEO` reads geographic products | DECLARED overlay / LIVE OGC endpoint; **not the PDF source selected by PP-API** |
 | `GEO-S3` | OVH S3 `sentropic-geo`: raw corpus, registries and `normalized/` products | Geo acquisition writes; `GEO-API` reads products; **`PP-API` reads mapped PV PDFs directly** | LIVE Geo serving URI and Immo reader binding; one bucket in diagrams 1–3, distinct prefixes |
@@ -217,7 +220,7 @@ OVH S3 endpoint: `https://s3.bhs.io.cloud.ovh.net`. An S3 bucket is external to 
 
 | Reference ID | Main declaration | Runtime qualification |
 | --- | --- | --- |
-| `PP-GROUND` | Job 41 destination: MinIO `radar-immobilier-docs-preprod/graph/` | Job absent live; no active writer/reader or bridge to `PP-GRAPH` established |
+| `PP-GROUND` | Job 41 destination: `PP-DOCS-LEGACY/graph/` | Job absent live; retained bucket content does not establish an active writer/reader or bridge to `PP-GRAPH` |
 | `LEGACY-POC` | SCW `radar-immobilier-docs-pocs`, prefixes `candidats/` and `graph/` | Job 41 source, prod grounding workflow and prod projection declaration; **no current execution asserted** |
 | `PR-DB`, `PR-MINIO` | Base `radar-postgres` / `radar-minio` in `radar-immobilier` | Unknown OVH runtime; #670's September 11 retention note is historical, not today's inventory |
 
@@ -304,7 +307,7 @@ Environmental source adapters exist for BDZI, GRHQ and CPTAQ. Data presence and 
 | --- | --- | --- |
 | `radar-immo-mcp` | OAuth-protected remote MCP access to Immo tools, through `/mcp` | Deployment LIVE in preprod; an additional user/agent entry point |
 | Obscura | Browser automation for sources needing a browser | DECLARED and configured in Immo; no Obscura Deployment in the inspected preprod inventory |
-| MinIO | In-cluster object store backed by PVC | LIVE in preprod; still the API-configured store despite refresh migration to OVH |
+| MinIO | In-cluster object store backed by PVC | LIVE in preprod: API uses `PP-RAW`, fallback `PP-DOCS` is empty, and separate `PP-DOCS-LEGACY` retains useful replay/history |
 | Mail delivery | Invitations/enrolment via Scaleway TEM HTTP API | DECLARED; Maildev is a development/optional scaffold, not evidence of production email delivery |
 | Maps / satellite | Geo basemap endpoint and browser-side map/tile requests; MapLibre rendering | Google basemap config exists in Geo overlays; current key activation is not established by the code flag alone |
 | Chat / LLM access | User-facing assistant capability, distinct from scheduled document processing | Does not demonstrate autonomous graphify or grounding inside Kubernetes |
@@ -335,7 +338,7 @@ The September full-auto design selects `@sentropic/s3-dag` reconciliation with d
 ## 6. Questions for the architecture walkthrough
 
 1. **Address:** should `preprod.sent-tech.ca` become an alias/portal, or was it shorthand for the observed `preprod.immo.sent-tech.ca`? This document retains the verified URLs until clarified.
-2. **Storage transition:** complete the refresh integration first, then definitive preprod MinIO/SCW removal and production cutover. Verify every client and preserve objects/recovery before retirement; production bindings and Immo acceptance of the published Graphify contract remain open. The separate Geo PDF-reader freshness contract remains to be reconciled.
+2. **Storage transition:** the recorded decision is **MIGRATE+RETAIN**: after T1, remediate fail-before-write and conditional-write capability gates, then migrate preprod before production while retaining `PP-DOCS-LEGACY` until complete parity and recovery. Commit `25ec9e04` starts fail-before-write remediation; its suite and conditional-write work remain in progress. No copy, cutover or deletion has begun. TEM remains retained.
 3. **Automation scope:** should the future worker own only Immo graphify/grounding, or also Geo's remaining assisted regulation/grid extraction? Both dependencies are relevant, but no new architecture decision is assumed here.
 
 ## 7. Evidence and reproducibility
@@ -350,6 +353,7 @@ The September full-auto design selects `@sentropic/s3-dag` reconciliation with d
 | Immo full-auto design | `6296396fed804cf9a3d4a6e031c452af57313357` (`origin/design/fullauto-pipeline-consolidated`, September 5) | Follow-up ownership/transition audit: E1–E5, geographic seam, interim feed and future sole writer; design, not deployed state |
 | Immo Graphify CAS work | `73172214a369ebfba0aab530dadde873341baa4a` (`feat/graphify-v23-cas-ingest`, September 11) | Follow-up branch inspection against its pre-change parent `8e18f01b`; changes remain in Immo tools and plan; qualification not inferred |
 | Immo refresh continuation | `ac3a7150` (`feat/refresh-018`) plus the earlier `docs/reviews/refresh-018/preprod-readiness.md` runtime read | Exact Graphify 0.18.0, internal PDF contract `immo-pv-extraction-v3`, targeted 8/8 + 7/7, full typecheck and scope/branch PASS; no real-provider Signal or K8s acceptance; nested `UND_ERR_SOCKET` upstream analysis pending |
+| T2 storage follow-up | September 13 live MinIO inventory; Fable postbuild review; remediation commit `25ec9e04` | Separates the empty API fallback from useful legacy history; fail-before-write work started, while its suite and conditional-write capability remain open before MIGRATE+RETAIN execution |
 
 Primary Immo references: [refresh study](study/industrialisation-refresh-suivi.md), [four-stage pipeline study](spec/brainstorm-industrialisation-refresh-data.md), [worker](../api/src/scripts/worker-live.ts), [graph projection](../api/src/scripts/project-graph-from-s3.ts), [grounding tools](../tools/grounding/README.md), [publish-only Job](../deploy/k8s/41-grounding-citation-job.yaml), [OVH preprod refresh overlay](../deploy/k8s/refresh-cronjobs/kustomization.yaml), [prod refresh overlay](../deploy/k8s/refresh-cronjobs-prod/kustomization.yaml), [nginx preprod](../deploy/overlays/preprod/nginx/default.conf), [release workflow](../.github/workflows/build-push-images.yml), [Geo mapper](../api/src/services/geo/run-geo-mapper.ts). Resource-reconciliation evidence: [API store construction](../api/src/index.ts), [store resolvers](../api/src/config.ts), [PDF routing and no-fallback rule](../api/src/routes/documents.ts), [production publication workflow](../.github/workflows/grounding-publish-prod.yml).
 
