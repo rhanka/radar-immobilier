@@ -24,6 +24,7 @@ FILES=(
   deploy/k8s/10-rbac.yaml deploy/k8s/11-ci-deployer-preprod-rbac.yaml
   deploy/k8s/object-storage-docs-prod/copy-job.yaml
   deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml deploy/k8s/secrets.example.yaml
+  deploy/k8s/README.md
   .github/workflows/run-job.yaml
 )
 fixture() {
@@ -57,6 +58,9 @@ run_bad "$CASE_ROOT" 'rejects DOCS reuse of a Geo identity'; rm -rf "$CASE_ROOT"
 fixture; sed -i '0,/DOCS_S3_BUCKET/{s/DOCS_S3_BUCKET/S3_BUCKET/}' "$CASE_ROOT/deploy/k8s/30-api.yaml"
 run_bad "$CASE_ROOT" 'rejects a generic PROD canonical credential binding'; rm -rf "$CASE_ROOT"
 
+fixture; echo '  LEGACY_STORAGE: https://s3.fr-par.scw.cloud' >>"$CASE_ROOT/deploy/k8s/30-api.yaml"
+run_bad "$CASE_ROOT" 'rejects legacy storage in any active runtime manifest'; rm -rf "$CASE_ROOT"
+
 fixture; sed -i '0,/radar-scrape-s3-credentials/{s/radar-scrape-s3-credentials/radar-s3-credentials/}' "$CASE_ROOT/deploy/k8s/34-refresh-cronjob.yaml"
 run_bad "$CASE_ROOT" 'rejects a generic refresh credential binding'; rm -rf "$CASE_ROOT"
 
@@ -65,6 +69,9 @@ run_bad "$CASE_ROOT" 'preserves the new radar-refresh-pv CronJob'; rm -rf "$CASE
 
 fixture; sed -i '/automountServiceAccountToken/i\imagePullSecrets: [{ name: radar-registry-pull }]' "$CASE_ROOT/deploy/k8s/10-rbac.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored SCW image pull secret'; rm -rf "$CASE_ROOT"
+
+fixture; echo 'radar-registry-pull' >>"$CASE_ROOT/deploy/k8s/README.md"
+run_bad "$CASE_ROOT" 'rejects restored legacy registry guidance'; rm -rf "$CASE_ROOT"
 
 fixture; echo 'REFRESH_DIAG_ENABLED' >>"$CASE_ROOT/.github/workflows/build-push-images.yml"
 run_bad "$CASE_ROOT" 'rejects a restored MinIO refresh diagnostic'; rm -rf "$CASE_ROOT"

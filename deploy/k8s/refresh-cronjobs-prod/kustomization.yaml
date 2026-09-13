@@ -1,6 +1,6 @@
 # refresh-cronjobs-prod — deploys the three production refresh CronJobs, pins
 # them to the promoted release image, and un-suspends them. This is the
-# production twin of refresh-cronjobs; it deliberately carries no MinIO patch.
+# production twin of refresh-cronjobs; it carries no legacy in-cluster patch.
 #
 # The schedules are inherited unchanged from 34-refresh-cronjob.yaml: scrape at
 # 03:17 UTC, then projection at 04:30 UTC. Keep both outside the release window:
