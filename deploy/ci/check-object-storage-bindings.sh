@@ -21,7 +21,6 @@ PUBLIC_IMAGE_FILES=(
 )
 PENDING_CLIENTS=(
   deploy/k8s/32b-reproject-etape-job.yaml
-  deploy/k8s/refresh-diag/diag-refresh-job.yaml
   .github/workflows/grounding-preprod.yml
   .github/workflows/grounding-publish-prod.yml
   .github/workflows/run-job.yaml
@@ -85,6 +84,9 @@ done
 grep -Eiq 'refresh-diag|REFRESH_DIAG_ENABLED|radar-refresh-diag' \
   "$ROOT/.github/workflows/build-push-images.yml" &&
   fail '.github/workflows/build-push-images.yml retains the legacy refresh diagnostic'
+for rel in deploy/k8s/refresh-diag/diag-refresh-job.yaml deploy/k8s/refresh-diag/kustomization.yaml; do
+  [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
+done
 
 for rel in scripts/mount-scw.sh scripts/umount-scw.sh; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
@@ -105,7 +107,6 @@ for expected in \
   'S3_SECRET_KEY=minioadmin'; do
   grep -Fqx "$expected" "$ROOT/.env.example" || fail ".env.example local setting changed: $expected"
 done
-grep -Fq 'value: "http://radar-minio:9000"' "$ROOT/deploy/k8s/refresh-diag/diag-refresh-job.yaml" || fail 'refresh diagnostic binding changed'
 grep -Fq 'SCW_TEM_API_BASE_URL: "https://api.scaleway.com"' "$ROOT/deploy/k8s/30-api.yaml" || fail 'TEM configuration changed'
 grep -Fq 'name: radar-tem-credentials' "$ROOT/deploy/k8s/30-api.yaml" || fail 'TEM Secret reference changed'
 
