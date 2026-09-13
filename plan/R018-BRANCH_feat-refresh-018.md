@@ -24,6 +24,7 @@
 - [x] Fable F1–F4 accepted: public prep composition instead of unexported runConfiguredDataprep; cross-instance mesh probe; published schema-forwarding probe; explicit projection abort/refusal propagation. No new architecture or producer wait.
 - [x] Native Sol developer `/root/t1_build` replaces failed h2a developer launch (missing runtime package); Fable review remains a distinct Claude-hosted leg. Do not stage reviewer files from the build worker.
 - [x] Disjoint secondary Sol owns C06–C07 profile source/test/oracle only, with no Git, plan or shared-service operations; `/root/t1_build` retains integration and index ownership.
+- [x] Owner decision: accept mesh 0.19.0 fail-closed abrupt-stream behavior and resume durable state on the next cycle; no mesh 0.19.1 or Graphify patch gates T1. Retry evolution is deferred to `s-conductor` and would require both integrations.
 - [x] Report to `codex:radar-immobilier:98cef8dfc274`, loop `loop:immo-transitions-2026-09-13`; do not mark the overall loop done.
 
 ## Orchestration Mode (AI-selected)
@@ -81,7 +82,7 @@
 - [x] C14d: distinguish completed generation from failure instead of treating cleanup as a provider response.
 - [x] C14e: retain only allow-listed name/code/status/request and internal stack-origin diagnostics for model failures.
 - [x] C14f: compose the run AbortSignal into the public Codex transport fetch and prove streamed cancellation with redacted diagnostics.
-- [x] C14g: hand off nested abrupt-SSE error classification as an explicit llm-mesh upstream blocker.
+- [x] C14g: retain nested abrupt-SSE evidence as an accepted limitation; fail closed and resume on the next cycle, with no T1 upstream patch gate.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.

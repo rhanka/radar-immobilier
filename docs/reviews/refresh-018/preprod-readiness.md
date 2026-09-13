@@ -28,6 +28,14 @@ or cluster storage classes. Production access was not inferred from these reads.
 These are the existing workloads, not the new Graphify 0.18 implementation.
 Their success timestamps do not establish fresh typed-Signal/PDF delivery.
 
+## Accepted non-blocking limitation
+
+The installed refresh mesh remains 0.19.0. If its provider stream terminates abruptly, the refresh
+fails closed with no accepted extraction or publication; the next bounded invocation or scheduled
+cycle resumes from hash-checked durable state. In-process retry normalization, mesh 0.19.1 and a
+Graphify patch are explicitly outside T1 and are not preproduction activation gates. Graphify stays
+at 0.18.0. The retained incident evidence is in `upstream-llm-mesh-blocker.md`.
+
 ## Still required before activation
 
 - Complete the reviewed consumer code and isolated tests, then image qualification.
