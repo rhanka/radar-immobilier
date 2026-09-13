@@ -80,4 +80,5 @@
   - [x] Implement native SvelteFlow subflows with parentId groups and the unchanged Sentropic Focus ArchitectureNode component.
   - [x] Add Focus dossier navigation, shared-resource cross-links, embedded evidence and local-only notes without approval controls.
   - [ ] Verify the offline HTML, mapping coverage, navigation and local-only owner notes.
+  - [x] Add a Docker-only build reusing the Sentropic kit read-only; portable HTML embeds JS, CSS and evidence.
 - [ ] Local documentation handoff; no production action or branch merge requested.

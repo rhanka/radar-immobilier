@@ -1,3 +1,8 @@
 architecture.html
 vendor/
 preview.png
+decision-focus.html
+focus/.generated/
+focus/dist/
+focus/node_modules/
+focus/*-preview.png
