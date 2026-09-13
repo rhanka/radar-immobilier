@@ -50,6 +50,9 @@ or typed Signal/PDF acceptance. Every target
 production role may be named as a contract, but its physical binding remains
 TBD rather than inferred from source defaults or the old SCW cluster.
 
+[FACT] The 15:38 runtime read and 15:39 implementation progress are distinct
+evidence cutoffs. No unified delivery, token or billing cutoff is frozen.
+
 ## 3. T1 — autonomous Immo refresh
 
 [FACT · design] The causal chain is acquisition/parse → profile extraction and

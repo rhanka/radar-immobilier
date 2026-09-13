@@ -14,7 +14,8 @@ export const fixedInstructions = {
     timezone: 'America/Toronto', start: null,
     startDefinition: 'real preceding invoice/report boundary', startVerified: false,
     requestedEndExclusive: '2026-09-14T00:00:00-04:00',
-    dataCaptureCutoff: null, dataCaptureCutoffStatus: 'must be recorded when evidence collection is frozen',
+    captureCutoffs: { architectureRuntime: '2026-09-13T15:38:00Z', transitionImplementation: '2026-09-13T15:39:00Z', unifiedDeliveryTokenBilling: null },
+    captureCutoffStatus: 'September 13 incomplete; unified delivery/token/billing cutoff not frozen',
     september13Transitions: 'inside requested period; classify observed versus planned',
   },
   billing: {
@@ -32,7 +33,7 @@ export function responsePack(manifest, note, remarks, capturedAt) {
     authority: 'instructions captured; no deployment, invoice or Track decision emitted',
     ownerCorrection, fixedInstructions, unresolvedEvidence: [
       'preceding actual invoice/report boundary and corresponding period start',
-      'September 13 data capture cutoff', 'previous month actual invoice identity and unit tariffs',
+      'unified September 13 delivery/token/billing data capture cutoff', 'previous month actual invoice identity and unit tariffs',
       'current-period node hours and projected amount', 'current-period token counts using the verified prior tariffs',
       'production private bindings and T1/T2/T3 acceptance evidence',
     ], note, remarks };

@@ -45,7 +45,8 @@ The same build emits the dated monthly companion HTML and D5 evidence manifest u
 - Section 8 uses DS Tiles for fixed billing instructions, unresolved evidence,
   comment, local persistence, **copy JSON** and download. There are no allocation
   radios. The JSON preserves D4 `option:null` as no vote, the exact owner-response
-  hashes/time, unknown period start/cutoff/hours/amount and the prior-invoice tariff rule.
+  hashes/time, distinct 15:38/15:39 evidence cutoffs, unknown unified cutoff,
+  period start/hours/amount and the prior-invoice tariff rule.
   Clipboard denial is explicit; the JSON remains keyboard-selectable/downloadable.
 - Sources open in an accessible dialog; external evidence links require a click.
 - The D5 dossier remains **INCOMPLETE** for runtime acceptance, production

@@ -75,7 +75,8 @@ test('D5 leads with complete sequential architecture and keeps fixed billing ins
   assert.match(docs['decision-dossier'], /option` is `null`: no method was selected/);
   assert.match(docs['decision-dossier'], /15:38 UTC.*d0595d9f/s);
   assert.match(docs.transitions, /inside the requested period/);
-  assert.match(currentReport, /Architecture capture cutoff:.*2026-09-13T15:38:00Z/);
+  assert.match(currentReport, /Runtime architecture cutoff:.*2026-09-13T15:38:00Z/);
+  assert.match(currentReport, /Transition implementation cutoff:.*2026-09-13T15:39:00Z/);
   assert.equal((docs['transitions-target'].match(/```mermaid/g) ?? []).length, 3);
 });
 
