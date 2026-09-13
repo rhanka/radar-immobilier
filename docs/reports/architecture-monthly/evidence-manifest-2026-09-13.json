@@ -1,7 +1,7 @@
 {
   "schema": "immo-architecture-monthly-evidence/v5",
   "revision": "D8",
-  "generatedAt": "2026-09-13T22:41:28.271Z",
+  "generatedAt": "2026-09-13T22:46:11.477Z",
   "period": {
     "timezone": "America/Toronto",
     "startInclusive": "2026-08-10T00:00:00-04:00",
@@ -167,8 +167,8 @@
     "html": "report-through-2026-09-13.html",
     "pdf": "report-through-2026-09-13.pdf",
     "markdownSha256": "a79bab5d8123a041b45eb6ed59989f69bb3be2d43af9e6345c2e3f03fd1c962b",
-    "htmlSha256": "9a33ab5a73269b30eb1b1c8de3b5023df0fd9b268bc702dc38f4dacc2ec64272",
-    "pdfSha256": "134ab310c2304e28db32c0531d8b18ce4f4ad1e8402c76fe9bd3da2b2ecf5038",
+    "htmlSha256": "76b0a524f3fb7f77f761f793151ef64e854414bca40946b106e4f22640ae8617",
+    "pdfSha256": "d68fe2f8df6396251717ef01f219263bb97f3fb1ac1264e9020df2e7c7d5f355",
     "staticDiagrams": [
       "asis-1",
       "target-3"
