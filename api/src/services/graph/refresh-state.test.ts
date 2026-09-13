@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
 import {
   completeRefreshChunk,
+  findPublishedRefreshState,
   openRefreshState,
   readCompletedRefreshChunk,
   reserveRefreshChunk,
@@ -29,6 +30,10 @@ class MemoryStore implements ObjectStore {
 
   async head(key: string): Promise<ObjectInfo | null> {
     return this.objects.has(key) ? { key } : null;
+  }
+
+  async list(prefix: string): Promise<string[]> {
+    return [...this.objects.keys()].filter((key) => key.startsWith(prefix));
   }
 }
 
@@ -132,5 +137,18 @@ describe("refresh durable state", () => {
     expect(next.state.receipts.projected).toBeUndefined();
     await expect(writeRefreshStageReceipt(store, next, { ...receipt, reason: "api key leaked" }))
       .rejects.toThrow("redacted reason code");
+  });
+
+  it("should find only a prior run whose published bytes are still canonical", async () => {
+    const store = new MemoryStore();
+    let handle = await openRefreshState(store, identity(), 2);
+    handle = await writeRefreshStageReceipt(store, handle, { stage: "published",
+      status: "completed", artifactHash: "sha256:" + "9".repeat(64),
+      recordedAt: "2026-09-13T00:00:00.000Z" });
+    const { baselineHash: _baselineHash, ...scope } = identity();
+    expect((await findPublishedRefreshState(store, { ...scope,
+      publishedHash: "sha256:" + "9".repeat(64) }))?.key).toBe(handle.key);
+    expect(await findPublishedRefreshState(store, { ...scope,
+      publishedHash: "sha256:" + "8".repeat(64) })).toBeNull();
   });
 });

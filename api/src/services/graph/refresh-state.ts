@@ -46,6 +46,10 @@ export interface RefreshStateHandle {
   readonly state: RefreshState;
 }
 
+export type RefreshPublishedSelector = Omit<RefreshRunIdentity, "baselineHash"> & {
+  readonly publishedHash: string;
+};
+
 function stateKey(identity: RefreshRunIdentity): string {
   const digest = canonicalHash({ ...identity, exclusions: [...identity.exclusions].sort() }).slice(7);
   return `refresh/018/${identity.citySlug}/runs/${digest}/state.json`;
@@ -91,6 +95,33 @@ export async function openRefreshState(
     completedChunks: {},
     receipts: {},
   });
+}
+
+/** Find a prior run whose own published bytes are still canonical for this input/config. */
+export async function findPublishedRefreshState(
+  store: ObjectStore,
+  selector: RefreshPublishedSelector,
+): Promise<RefreshStateHandle | null> {
+  if (!store.list) return null;
+  const keys = (await store.list(`refresh/018/${selector.citySlug}/runs/`))
+    .filter((key) => key.endsWith("/state.json"));
+  const expectedScope = canonicalHash({ ...selector, publishedHash: undefined,
+    exclusions: [...selector.exclusions].sort() });
+  const matches: RefreshStateHandle[] = [];
+  for (const key of keys) {
+    const state = JSON.parse(new TextDecoder().decode(await store.get(key))) as RefreshState;
+    const { baselineHash: _baselineHash, ...scope } = state.identity;
+    const validIdentity = state.schemaVersion === 1 && state.identityHash === canonicalHash({
+      ...state.identity, exclusions: [...state.identity.exclusions].sort(),
+    });
+    if (validIdentity && canonicalHash(scope) === expectedScope
+      && state.receipts.published?.status === "completed"
+      && state.receipts.published.artifactHash === selector.publishedHash) {
+      matches.push({ key, state });
+    }
+  }
+  if (matches.length > 1) throw new Error("Ambiguous published refresh state");
+  return matches[0] ?? null;
 }
 
 export async function reserveRefreshChunk(
