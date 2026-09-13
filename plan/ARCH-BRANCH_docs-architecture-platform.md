@@ -157,3 +157,14 @@
   - [x] Align the Focus presentation/export, transition cards and monthly companion without changing billing.
   - [x] Regenerate and verify Mermaid, nested SvelteFlow and the separate dated artifact.
   - [x] Remove llm-mesh 0.19.1 from the critical path and record the retained 0.19.0 failure policy.
+- [x] **Lot 15 — D6 effective transition, canonical DOCS convergence and exact monthly join.**
+  - [x] Preserve the before capture and add a distinct September 13 effective transition between it and the after targets.
+  - [x] Record Graphify 0.18.0, Luna high and the first K8s pre-LLM `.html`/PDF failure without claiming acceptance.
+  - [x] Record RAW parity/rebind, DOCS provisioning/tooling, open copy/parity/rebind and unknown production completion.
+  - [x] Encode the owner-fixed production SCW manifest as the exact 59,017-key/hash canonical reference for OVH prod and preprod.
+  - [x] Exclude the 144,193-object preprod surplus and gate recoverable full MinIO removal after exact parity/recovery.
+  - [x] Fix the report join to August 10 through September 13 inclusive (35 days / 840 hours).
+  - [x] Re-audit deduplicated Claude/Codex sessions with the preceding report formula and publish the evidence JSON.
+  - [x] Restrict infrastructure billing to one b3-8 at 0.082 CAD/h; exclude two/three-node platform pass-through costs.
+  - [x] Generate and verify the dated Focus HTML, standalone report HTML/PDF and SHA-256 evidence manifest.
+  - [x] Pass mapping, nested SvelteFlow, rendered Mermaid, browser, offline, clipboard and PDF text/layout gates.
