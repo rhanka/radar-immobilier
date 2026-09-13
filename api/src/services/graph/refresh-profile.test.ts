@@ -72,9 +72,11 @@ describe("refresh profile extraction", () => {
     expect(pvContext.registries).toEqual({});
     const invalid = extraction();
     invalid.nodes[0]!.node_type = "Municipality";
+    const seen: TextJsonGenerationInput[] = [];
     await expect(extractRefreshProfile([chunk()], {
-      context: pvContext, textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+      context: pvContext, textClient: client([{ text: JSON.stringify(invalid) }], seen), maxOutputTokens: 512,
     })).rejects.toThrow("requires loaded registry municipalities");
+    expect(JSON.parse(seen[0]!.schema).ontology.allowed_node_types).not.toContain("Municipality");
   });
 
   it("should return every validated extraction in chunk order with typed PDF evidence", async () => {

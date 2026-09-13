@@ -52,6 +52,7 @@
 - [x] C06: compose public profile/config/registry exports and require strict validated completion for every chunk.
 - [x] C07: freeze the Waterloo page-3 oracle and cover typed evidence, wrong-page, partial and scanned-input refusal.
 - [x] C07b: support unregistered PV types without weakening registry-backed node validation.
+- [x] C07c: constrain schema and prompt to the node types supported by loaded registries.
 - [x] C08: port baseline-first v2.3 mapping with exclusions and exact original-PDF references on nodes and edges.
 - [x] C09: cover stable IDs, baseline/exclusion/source preservation, wrong-page refusal and 3.4 field derivation.
 - [x] C10a: persist canonical run identity and conservative maximum-attempt chunk reservations in S3.

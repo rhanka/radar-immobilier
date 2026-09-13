@@ -57,13 +57,22 @@ export function loadRefreshProfileContext(options: LoadRefreshProfileContextOpti
   return { profile, projectConfig, registries,
     registryExtraction: registryRecordsToExtraction(registries, profile) };
 }
-function schemaFor(chunk: RefreshCorpusChunk, profile: NormalizedOntologyProfile): string {
-  const properties = Object.fromEntries(Object.entries(profile.node_types).map(([type, spec]) =>
-    [type, (spec as unknown as Record<string, unknown>).properties ?? {}]));
+function allowedNodeTypes(context: RefreshProfileContext): string[] {
+  return Object.entries(context.profile.node_types).filter(([, spec]) => {
+    const registry = (spec as unknown as { registry?: string }).registry;
+    return !registry || registry in context.registries;
+  }).map(([type]) => type);
+}
+function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): string {
+  const allowed = new Set(allowedNodeTypes(context));
+  const properties = Object.fromEntries(Object.entries(context.profile.node_types)
+    .filter(([type]) => allowed.has(type)).map(([type, spec]) =>
+      [type, (spec as unknown as Record<string, unknown>).properties ?? {}]));
   return JSON.stringify({
     type: "Graphify Extraction",
     required: ["nodes", "edges", "input_tokens", "output_tokens"],
-    ontology: { profile_id: profile.id, profile_version: profile.version, node_properties: properties },
+    ontology: { profile_id: context.profile.id, profile_version: context.profile.version,
+      allowed_node_types: [...allowed], node_properties: properties },
     evidence: { modality: "pdf", docSha: chunk.docSha, rawRef: chunk.originalKey,
       sourceUrl: chunk.sourceUrl, allowedPages: chunk.pages, excerpt: "verbatim text from the cited page" },
     constraints: ["Omit facts absent from the chunk, including in-force status and residential unit counts."],
@@ -134,10 +143,10 @@ export async function extractRefreshProfile(
       let accepted: Extraction | undefined;
       const outputPath = join(outputDir, `${chunk.id}.json`);
       const generation = await options.textClient.generateJson({
-        schema: schemaFor(chunk, options.context.profile),
-        prompt: buildProfileChunkPrompt(options.context, {
+        schema: schemaFor(chunk, options.context),
+        prompt: `Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.\n\n${buildProfileChunkPrompt(options.context, {
           filePath: chunk.originalKey, fileType: "document", text: chunk.text,
-        }),
+        })}`,
         outputPath, maxOutputTokens: options.maxOutputTokens,
         validateResponse(text) { accepted = validatedExtraction(text, chunk, options.context); },
       });
