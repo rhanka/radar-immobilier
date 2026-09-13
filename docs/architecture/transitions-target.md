@@ -1,0 +1,96 @@
+# Sequential target architecture — T1 → T2 → T3
+
+Revision D5, 2026-09-13. These are **proposed, not deployed** states. The
+unchanged IDs identify the same logical or physical resource between views. A
+production role marked `binding TBD` is a target contract, not observed runtime.
+The transition order is fixed; each stage still requires preproduction evidence
+before a separately gated production promotion.
+
+## T1 — autonomous refresh, existing storage retained
+
+T1 removes routine workstation execution from the PV-to-Signal path. It keeps
+the verified preproduction MinIO API bindings until T2 and does not infer the
+unobservable production bindings. The detailed causal pipeline is in
+[`proposal.md`](proposal.md).
+
+```mermaid
+flowchart TB
+  subgraph T1_CARD["T1 · PROPOSED / NOT DEPLOYED · stage card"]
+    T1_CHANGE["CHANGES<br/>In-pod Immo refresh: fresh candidate → deterministic 3.4 → guarded graph → atomic PG"]
+    T1_KEEP["KEPT<br/>PP-DB, PP-GRAPH, API/UI/MCP, Geo evidence and MinIO API roles"]
+    T1_REMOVE["REMOVED<br/>Routine workstation LLM and parallel legacy canonical publishers"]
+    T1_GATES["GATES<br/>Installed contract + durable identity/lock + preprod E2E THEN production"]
+    T1_EVIDENCE["EVIDENCE<br/>Graphify 0.18.0 published; Immo implementation/schedule acceptance open"]
+  end
+  user["User / browser"]
+  ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
+  prurl["immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
+  user --> ppurl
+  user --> prurl
+  subgraph OVH_CLUSTER["[OVH-CLUSTER] OVH BHS shared Kubernetes · observed 3 b3-8 nodes · NOT T3"]
+    edge["Traefik / TLS / tenant isolation<br/>shared capacity and safety constraints"]
+    subgraph immo_tenant["Immo tenant · application ownership"]
+      subgraph immo_pp["PREPRODUCTION · first acceptance"]
+        PP_UI["[PP-UI] Immo frontend"]
+        PP_API["[PP-API] Immo API"]
+        PP_MCP["[PP-MCP] OAuth remote MCP"]
+        PP_DB[("[PP-DB] same PostgreSQL/PostGIS")]
+        PP_REFRESH["[PP-REFRESH] proposed autonomous CronJob<br/>fresh typed Signal + exact PDF acceptance"]
+        subgraph ppminio["[PP-MINIO] existing in-cluster MinIO · retained through T1"]
+          PP_RAW[("[PP-RAW] existing API raw role")]
+          PP_DOCS[("[PP-DOCS] existing API documents role")]
+        end
+      end
+      subgraph immo_pr["PRODUCTION · promote only after preprod"]
+        PR_UI["[PR-UI] Immo frontend"]
+        PR_API["[PR-API] Immo API"]
+        PR_MCP["[PR-MCP] OAuth remote MCP · target role"]
+        PR_DB[("[PR-DB] target database role<br/>physical binding TBD / UNVERIFIED today")]
+        PR_REFRESH["[PR-REFRESH] target autonomous CronJob<br/>physical binding TBD / UNVERIFIED today"]
+        PR_OBJECT_GAP["Production object bindings<br/>UNVERIFIED today · no provider inferred"]
+      end
+    end
+    subgraph geo_tenant["Geo tenant · geographic inputs and products"]
+      PP_GEO["[PP-GEO] Geo API preprod"]
+      GEO_API["[GEO-API] Geo API production"]
+      GEO_DB[("[GEO-DB] geographic DB role<br/>API dependency UNVERIFIED")]
+      GEO_PROCESS["In-process capture / normalize / joins<br/>no invented SQL spatial join"]
+    end
+    pidp["preprod.auth.sent-tech.ca<br/>SSO / OIDC"]
+    idp["auth.sent-tech.ca<br/>SSO / OIDC"]
+  end
+  PP_GRAPH[("[PP-GRAPH] same existing OVH graph + corpus bucket")]
+  PR_GRAPH[("[PR-GRAPH] target graph + corpus role<br/>physical binding TBD / UNVERIFIED today")]
+  PP_GEO_S3[("[PP-GEO-S3] OVH normalized serving copy")]
+  GEO_S3[("[GEO-S3] OVH corpus + normalized products")]
+  WS_ADMIN["[WS-ADMIN] optional enrollment / administration only<br/>no routine LLM runtime after T1"]
+  providers["LLM providers<br/>operated from the refresh workload"]
+  TEM["[SCW-TEM] retained email exception<br/>until replacement validated"]
+  ppurl --> edge
+  prurl --> edge
+  edge --> PP_UI
+  edge --> PR_UI
+  PP_UI --> PP_API
+  PP_UI --> PP_MCP
+  PP_API <--> pidp
+  PR_UI --> PR_API
+  PR_UI --> PR_MCP
+  PR_API <--> idp
+  PP_API --> PP_DB
+  PP_API --> PP_RAW
+  PP_API --> PP_DOCS
+  PP_REFRESH --> PP_GRAPH
+  PP_REFRESH --> PP_DB
+  PP_REFRESH --> providers
+  PP_API --> GEO_S3
+  PP_API --> PP_GEO
+  PR_REFRESH -.-> PR_GRAPH
+  PR_REFRESH -.-> PR_DB
+  PR_API --> GEO_API
+  PP_GEO --> PP_GEO_S3
+  GEO_API --> GEO_S3
+  GEO_API -.-> GEO_DB
+  GEO_PROCESS --> GEO_S3
+  WS_ADMIN -.-> PP_REFRESH
+```
+
