@@ -47,7 +47,7 @@ spec:
               mkdir -p "$report"
               set +e
               CANONICAL_MANIFEST="$canonical" CANONICAL_DIGEST="$digest" \
-                CONDITIONAL_WRITE_PROOF="$proof" REPORT_DIR="$report" CONCURRENCY=128 \
+                CONDITIONAL_WRITE_PROOF="$proof" REPORT_DIR="$report" CONCURRENCY=64 \
                 SOURCE_ENDPOINT=https://s3.fr-par.scw.cloud SOURCE_REGION=fr-par \
                 SOURCE_BUCKET=radar-immobilier-docs-pocs \
                 node /tool/copy-canonical-docs.mjs
