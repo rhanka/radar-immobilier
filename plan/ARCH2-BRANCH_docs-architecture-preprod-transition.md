@@ -25,6 +25,7 @@
 - [x] Treat the supplied runtime evidence as authoritative for this dated transition update.
 - [x] Keep production T2 in progress, T3 gated and SCW TEM retained.
 - [x] Keep exactly two primary Focus graphs: immutable BEFORE and complete AFTER.
+- [x] Independent review incomplete: both eligible Claude-hosted h2a launches were policy-rejected before execution; no verdict claimed.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single documentation branch; no additional delegated implementation.
@@ -46,5 +47,5 @@
   - [x] Update the monthly Markdown and regenerate portable HTML, report HTML/PDF and evidence hashes.
   - [x] Pass Focus tests, browser/clipboard checks and PDF report gates.
 - [ ] **Lot 4 — Review and handoff.**
-  - [ ] Verify scope and atomic commit limits.
+  - [x] Verify scope and atomic commit limits.
   - [ ] Push the branch and open a PR; report exact commits and gates.
