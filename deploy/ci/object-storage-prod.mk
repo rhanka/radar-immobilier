@@ -37,8 +37,10 @@ object-storage-docs-prod-api-status: ## Read only API storage references and rol
 object-storage-docs-prod-validate: ## Validate the PROD DOCS support and inventory Job offline
 	@bash -n deploy/ci/migrate-object-storage.sh deploy/ci/object-storage-checkpoint.sh
 	@bash -n deploy/ci/docs-api-rebind-patch.hermetic.test.sh
+	@bash -n deploy/ci/docs-prod-parity-receipt.hermetic.test.sh
 	@bash deploy/ci/docs-prod-runtime-secrets.hermetic.test.sh
 	@bash deploy/ci/docs-api-rebind-patch.hermetic.test.sh
+	@bash deploy/ci/docs-prod-parity-receipt.hermetic.test.sh
 	@set -o pipefail; $(MAKE) --no-print-directory -n object-storage-minio-prod-finalize \
 	  OBJECT_STORAGE_MINIO_PROD_FINALIZE_CONFIRM=1 \
 	  OBJECT_STORAGE_DOCS_PROD_PARITY_JOB=radar-object-storage-copy-docs-prod-hermetic \
@@ -207,7 +209,7 @@ object-storage-docs-prod-bind: ## Bind future PROD DOCS workers after exact cano
 	  summary="$$( $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
 	    'cat /evidence/reports/$${MIGRATION_RUN_ID}/summary.json' )"; \
 	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
-	    '.processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .sourceVerifiedObjects == 59017 and .sourceVerifiedBytes == 12534514457 and .sourceManifestDigest == $$digest and .sourceExact == true and .exactParity == true and .complete == true' \
+	    -f deploy/ci/docs-parity-receipt.jq \
 	    <<<"$$summary" >/dev/null; \
 	  quota="$$( $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json )"; \
 	  jq -e '.status.hard.secrets == "15" and (.status.used.secrets == "13" or .status.used.secrets == "15")' \
@@ -250,7 +252,7 @@ object-storage-docs-prod-api-rebind: ## Roll PROD API from SCW to canonical OVH 
 	  summary="$$( $(KUBECTL) -n "$$namespace" logs \
 	    job/$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB) --all-containers=true | tail -n 1 )"; \
 	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
-	    '.status == "complete" and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .sourceVerifiedObjects == 59017 and .sourceVerifiedBytes == 12534514457 and .sourceManifestDigest == $$digest and .sourceExact == true and .exactParity == true and .complete == true' \
+	    -f deploy/ci/docs-parity-receipt.jq \
 	    <<<"$$summary" >/dev/null; \
 	  source="$$( $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials -o json )"; \
 	  jq -e -f deploy/ci/validate-docs-secret.jq <<<"$$source" >/dev/null; \
@@ -399,7 +401,7 @@ object-storage-minio-prod-finalize: ## Idempotently finalize PROD MinIO absence 
 	  summary="$$( $(KUBECTL) -n "$$namespace" logs \
 	    job/$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB) --all-containers=true | tail -n 1 )"; \
 	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
-	    '.status == "complete" and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest and .sourceVerifiedObjects == 59017 and .sourceVerifiedBytes == 12534514457 and .sourceManifestDigest == $$digest and .sourceExact == true and .exactParity == true and .complete == true' \
+	    -f deploy/ci/docs-parity-receipt.jq \
 	    <<<"$$summary" >/dev/null; \
 	  ! $(KUBECTL) -n "$$namespace" get statefulset/radar-minio >/dev/null 2>&1; \
 	  ! $(KUBECTL) -n "$$namespace" get service/radar-minio >/dev/null 2>&1; \
