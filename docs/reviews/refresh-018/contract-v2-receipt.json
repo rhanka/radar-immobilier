@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "refresh-pv-018.2",
+  "contractCommit": "99dbb89e",
+  "providerCalls": 0,
+  "input": {
+    "citySlug": "waterloo",
+    "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+    "pdfSha256": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+    "pdfBytes": 207275,
+    "popplerTextSha256": "f7bb76280313a9955eddfba89a01d7bf7c02f2f54c13eab6da80081c4107effd",
+    "popplerTextBytes": 45333,
+    "pageCount": 22,
+    "corpusInputHash": "4d80b2ba029a9e58dcfdde731d754eb510043086fdc36c2af1ac937d8d28f9f5"
+  },
+  "context": {
+    "profileHash": "e6f82ef94c23524f0117ed8759fce6e8aa0d13128f94af23227f20697e674026",
+    "registryHash": "sha256:47134be51f64c2b62d2a7c1824c89af2d8f22478a43b419783a8879c50ded3de"
+  },
+  "chunk": {
+    "id": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.1",
+    "pages": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
+    "textSha256": "ec788e289b5fd268ca27f18d408452603458b2a9aa16aff46644206de8ba0722",
+    "textBytes": 45652,
+    "schemaSha256": "edad17f766952f763a083acd48fee8faf46507f028eb2b11f297a07759847b10",
+    "promptSha256": "b0fa2fc820f1f58468a39e1d9a6cc3c0a32d80ab7915ba000e5c3ff21649d2a7"
+  }
+}

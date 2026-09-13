@@ -1,0 +1,101 @@
+# Feature: Complete the existing Graphify 0.18 Kubernetes refresh
+
+## Objective
+- [ ] Deliver autonomous PV-to-typed-Signal refresh with exact PDF evidence, reusing i-cond's existing work.
+
+## Scope / Guardrails
+- [x] Worktree `tmp/refresh-018`, branch `feat/refresh-018`, base `097036783006226afea53a6b49383bf70890774f`.
+- [x] Make-only, Docker-first; preserve root UAT and all existing lanes.
+- [x] Test environment `test-refresh-018`; API_PORT=8881 UI_PORT=5381 MAILDEV_UI_PORT=1181. Check port ownership before starting services; no root dev services.
+- [x] No credentials in reports, prompts, logs or Git; no production writes by delegates.
+- [x] Graphify 0.18.0 is published; direct Immo chat mesh migration and a new network mesh service are out of scope.
+
+## Branch Scope Boundaries (MANDATORY)
+- [x] Allowed: `plan/R018-BRANCH_feat-refresh-018.md`, `docs/spec/SPEC_EVOL_REFRESH_018.md`, `docs/reviews/refresh-018/**`.
+- [x] R018-EX1 — owner-requested build released after Fable GO_WITH_CHANGES; exact C01–C14 paths below. Impact: isolated application/dependency/tests only; rollback: revert branch commits; no deployed state changes.
+- [x] R018-EX2 — owner-approved single 2,157-line generated dependency-pair exception for Graphify 0.18.0 plus the refresh mesh 0.19.0 alias, preserving chat mesh 0.1.2; rollback: revert `api/package.json` and `package-lock.json` together.
+- [x] Allowed C01–C14: `api/package.json`, `package-lock.json`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state,run}.ts`; `api/src/services/graph/refresh-{mesh,corpus,profile,v23,state,run}.test.ts`; `api/tests/fixtures/refresh-018/oracle.json`; `api/tests/integration/refresh-018.spec.ts`; `api/src/scripts/refresh-pv.ts`. Braces enumerate exact filenames, not open globs.
+- [x] Forbidden: root `Makefile`, `docker-compose*.yml`, `rules/**`, agent entrypoints, `.track/**`, other branch plans, other repositories.
+- [x] R018-EX3 — owner-authorized urgent preprod completion releases C15–C19 and C25 plus `deploy/k8s/refresh-cronjobs/{refresh-018.mk,keyring-summary.mjs,enroll-cloud-code.mjs,oauth-consent.mjs}` for make-only enrollment/consent/inspect/apply/trigger/observe. Impact: one isolated Graphify refresh CronJob, durable keyring PVC/bootstrap references and one controlled preprod Job; rollback: suspend/delete only `radar-refresh-pv` and retain the last complete S3/PG graph. Production, sentropic, geo and poc-k8s remain untouched.
+- [x] R018-EX4 — owner-authorized refresh completion releases `api/src/services/sources/{recueil,live-scrape}.ts` and `api/src/services/sources/recueil.test.ts` to filter the emitted HTML index before the one-document limit and apply the mandatory two-second source pacing. Impact: the optional hooks are used only by the Graphify refresh; rollback: remove the hooks and retain the prior fail-closed acquisition.
+- [x] R018-EX5 — final review remediation releases `api/src/services/exploitation/{reconcile.ts,reconcile.test.ts}`, `api/src/services/graph/{refresh-run.ts,refresh-run.test.ts}`, `deploy/k8s/refresh-cronjobs-prod/kustomization.yaml` and the offline `render-prod` target in `deploy/k8s/refresh-cronjobs/refresh-018.mk`. Impact: preserve Radar's exact reconciliation contract, source pacing jitter and production-dormant `radar-refresh-pv`; rollback: revert these adapter/overlay changes without touching preprod state.
+- [x] Released C15–C19/C25 paths: `api/Dockerfile`; `deploy/k8s/34-refresh-keyring-pvc.yaml`; `deploy/k8s/34-refresh-cronjob.yaml`; `deploy/k8s/refresh-cronjobs/kustomization.yaml`; `deploy/k8s/refresh-cronjobs/refresh-018.mk`; `deploy/k8s/refresh-cronjobs/keyring-summary.mjs`; `deploy/k8s/refresh-cronjobs/enroll-cloud-code.mjs`; `deploy/k8s/refresh-cronjobs/oauth-consent.mjs`; `docs/reviews/refresh-018/acceptance.md`.
+- [x] Conditional: C20–C24 remain unreleased. Existing canonical writer, graph store and enrichment are read-only reuse unless a precise amendment is recorded.
+
+## Feedback Loop
+- [x] Owner routing: Astra design, Gemini 3.8 High pre-build review via h2a run agy, Sol xhigh build, Gemini 3.8 High post-build review. This is the requested review circuit, not a claim of the skill's two-host consensus.
+- [x] September 13 owner amendment: keep independent review; Fable 5 may replace unavailable Gemini. Delegate development to Sol immediately after reconciliation; the owner did not waive review.
+- [x] Fable F1–F4 accepted: public prep composition instead of unexported runConfiguredDataprep; cross-instance mesh probe; published schema-forwarding probe; explicit projection abort/refusal propagation. No new architecture or producer wait.
+- [x] Native Sol developer `/root/t1_build` replaces failed h2a developer launch (missing runtime package); Fable review remains a distinct Claude-hosted leg. Do not stage reviewer files from the build worker.
+- [x] Disjoint secondary Sol owns C06–C07 profile source/test/oracle only, with no Git, plan or shared-service operations; `/root/t1_build` retains integration and index ownership.
+- [x] Owner decision: accept mesh 0.19.0 fail-closed abrupt-stream behavior and resume durable state on the next cycle; no mesh 0.19.1 or Graphify patch gates T1. Retry evolution is deferred to `s-conductor` and would require both integrations.
+- [x] Report to `codex:radar-immobilier:98cef8dfc274`, loop `loop:immo-transitions-2026-09-13`; do not mark the overall loop done.
+
+## Orchestration Mode (AI-selected)
+- [x] One writer at a time; design, review and build are separate bounded mandates.
+
+## UAT Management
+- [x] No root checkout switch or root UAT mutation by delegates.
+
+## Plan / Todo (lot-based)
+- [x] Lot 0: identify exact existing consumer/runner/canonical writer/projection/3.4 contracts and reusable CAS work; evidence and decisions in `docs/spec/SPEC_EVOL_REFRESH_018.md`.
+- [x] Lot 1: deliver numbered continuation decisions, proposed exact build paths/commit caps and acceptance gates in `docs/spec/SPEC_EVOL_REFRESH_018.md` and `docs/reviews/refresh-018/build-handoff.md`; static design only.
+- [x] Lot 1 gate: report first design handoff through h2a for independent Gemini review; package, typed Signal/PDF and scheduled-run acceptance remain unexecuted.
+- [x] Scope release: conductor reconciled Fable findings and released exact C01–C14 with the corrections in `docs/reviews/refresh-018/build-handoff.md`; no further owner vote required for this code scope.
+- [x] Lot 2: Fable independent design review GO_WITH_CHANGES and conductor reconciliation; evidence `docs/reviews/refresh-018/fable-design.md` at target ca7d9acf. One reviewer, no two-peer consensus claim.
+- [x] Persist the completed independent Fable review and its unchanged findings in version control.
+- [x] Preserve the review's detailed verification appendix and the original-PDF page-3 oracle, with immutable source hashes.
+- [x] Record the failed Gemini leg, authorized Fable replacement and refreshed Immo preprod read-only evidence; no deployment inferred.
+- [x] Lot 3: Sol builds the released scope with isolated tests and atomic commits.
+- [x] C02: compose the public owner-scoped Graphify mesh with explicit refresh adapters, model and run abort signal.
+- [x] C03: prove schema/token forwarding, three-copy mesh interop, owner isolation, classified failure, abort propagation and log silence.
+- [x] C03b: forward runtime-configured reasoning effort through the public mesh request.
+- [x] C04a: define strict immutable-manifest, original-page and bounded UTF-8 corpus chunk contracts.
+- [x] C04b: materialize selected PDF bytes and metadata with checksum, page-text and input-hash validation.
+- [x] C04c: retain explicit physical-page markers inside bounded profile prompt chunks.
+- [x] C05: cover checksum/path/duplicate refusal, physical pages, changed input identity and bounded UTF-8 chunks.
+- [x] C06: compose public profile/config/registry exports and require strict validated completion for every chunk.
+- [x] C07: freeze the Waterloo page-3 oracle and cover typed evidence, wrong-page, partial and scanned-input refusal.
+- [x] C07b: support unregistered PV types without weakening registry-backed node validation.
+- [x] C07c: constrain schema and prompt to the node types supported by loaded registries.
+- [x] C08: port baseline-first v2.3 mapping with exclusions and exact original-PDF references on nodes and edges.
+- [x] C09: cover stable IDs, baseline/exclusion/source preservation, wrong-page refusal and 3.4 field derivation.
+- [x] C10a: persist canonical run identity and conservative maximum-attempt chunk reservations in S3.
+- [x] C10b: persist immutable candidate hashes and redacted per-city stage receipts in S3.
+- [x] C10c: retain and hash-check durable per-chunk extraction artifacts for partial-run resume.
+- [x] C10d: retain the first run timestamp so resumed candidates remain deterministic.
+- [x] C10e: discover same-input state only while its published bytes remain canonical.
+- [x] C11: cover same-input no-call resume, conservative interruptions, baseline changes and failed-write receipts.
+- [x] C12a: adapt one successful existing acquisition recap into a strict immutable PDF manifest.
+- [x] C12b: compose resumable profile extraction, v2.3/3.4, guarded publish and atomic projection.
+- [x] C12c: resume post-publication projection without repeating same-input extraction.
+- [x] C12d: preserve the exact published JSON object on post-publication projection resume.
+- [x] C12e: retain the validated raw canonical object so resume reproduces identical bytes.
+- [x] C12f: select the first exact PDF from a bounded mixed-representation acquisition after the first preprod run returned HTML before PDF.
+- [x] C13a: prove real S3 publication and real PG resume without repeating model extraction.
+- [x] C13b: prove guarded conflict, PG provenance regression and selected-city failure.
+- [x] C14: add a bounded, redacted refresh command with deterministic saved-PDF smoke input.
+- [x] C07d: state the public Graphify node file-type and edge-confidence enums after the first live response exposed an under-specified contract.
+- [x] C07e: version the strict PDF identity, nested citation, evidence-ref and relation-signature contract while preserving linked empty findings.
+- [x] C07f: freeze the provider-free Waterloo v2 contract receipt without relabeling benchmark v1 outputs.
+- [x] C07g: name the strict internal contract `immo-pv-extraction-v3` and enforce exact physical-page marker boundaries; Graphify remains 0.18.0.
+- [x] C07h: freeze the provider-free Waterloo `immo-pv-extraction-v3` receipt with exact source, schema and prompt hashes; preserve v1/v2 evidence unchanged.
+- [x] C07i: keep the strict legacy-excerpt-alias regression type-safe without weakening runtime rejection.
+- [x] C07j: freeze the five-PDF manual baseline and version-comparison protocol before any further model call.
+- [x] C14b: emit a redacted model-call count and latency receipt without prompts, outputs or account material.
+- [x] C14c: identify the exact live schema and prompt by digest in the redacted model-call receipt.
+- [x] C14d: distinguish completed generation from failure instead of treating cleanup as a provider response.
+- [x] C14e: retain only allow-listed name/code/status/request and internal stack-origin diagnostics for model failures.
+- [x] C14f: compose the run AbortSignal into the public Codex transport fetch and prove streamed cancellation with redacted diagnostics.
+- [x] C14g: retain nested abrupt-SSE evidence as an accepted limitation; fail closed and resume on the next cycle, with no T1 upstream patch gate.
+- [x] C18a: run the preprod pilot against the frozen Waterloo oracle after the provisional Lac-des-Seize-Îles input proved scanned.
+- [x] C18b: seed the encrypted keyring into a non-root-owned PVC subdirectory so llm-mesh can enforce its required directory mode.
+- [x] C18c: return the live pilot to one acquired document after Waterloo proved the exact-PDF path, avoiding an unpaced positional search window.
+- [x] C18d: filter the source index before the one-document limit and pace the selected PDF fetch by two seconds.
+- [x] Lot 4: Fable independent post-build review and post-fix PASS; verified findings fixed.
+- [x] Lot 5a: conductor-controlled preprod end-to-end and Kubernetes-controller scheduled refresh acceptance on the exact immutable image.
+- [ ] Lot 5b: gated production promotion after OVH S3/PVC/runtime binding; the base remains deliberately dormant.
+- [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
+
+## Merge / Close
+- [x] CI and preprod live acceptance evidenced; conductor integrates by merge commit only, preserving branch history.
