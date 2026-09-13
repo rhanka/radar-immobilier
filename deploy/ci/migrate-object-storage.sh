@@ -181,6 +181,10 @@ write_aws_config "$SOURCE_CONFIG" "$SOURCE_REGION" "$SOURCE_PATH_STYLE"
 write_aws_config "$DESTINATION_CONFIG" "$DESTINATION_REGION" "$DESTINATION_PATH_STYLE"
 
 credential_fingerprint() { printf '%s' "$1" | sha256sum | awk '{print $1}'; }
+files_equal() {
+  [ -r "$1" ] && [ -r "$2" ] &&
+    [ "$(sha256sum "$1" | awk '{print $1}')" = "$(sha256sum "$2" | awk '{print $1}')" ]
+}
 SOURCE_IDENTITY_FINGERPRINT="$(credential_fingerprint "$MIGRATION_SOURCE_ACCESS_KEY_ID")"
 DESTINATION_IDENTITY_FINGERPRINT="$(credential_fingerprint "$MIGRATION_DESTINATION_ACCESS_KEY_ID")"
 
@@ -207,7 +211,7 @@ initialize_checkpoint() {
   digest="$(sha256sum "$core" | awk '{print $1}')"
   jq --arg digest "$digest" '. + {configDigest:$digest}' "$core" >"$candidate"
   if $RESUME; then
-    cmp -s "$candidate" "$target" || die 'checkpoint configuration mismatch'
+    files_equal "$candidate" "$target" || die 'checkpoint configuration mismatch'
   else
     [ ! -e "$target" ] || die 'checkpoint is already initialized; use --resume'
     mkdir -p "$CHECKPOINT_DIR" || die 'cannot create checkpoint directory'

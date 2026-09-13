@@ -108,5 +108,12 @@ if FAKE_KUBECTL_LOG="$TEST_TMP/kubectl.log" make --no-print-directory -C "$ROOT"
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
 
+TEST_NAME='evidence fetch is independent of tar and restricts remote paths'
+if ! grep -Fq '] cp ' "$ROOT/Makefile" &&
+  grep -Fq 'raw-checkpoint/*|reports/*|export-ready/*' "$ROOT/Makefile" &&
+  grep -Fq 'find /evidence -type f -print' "$ROOT/Makefile"; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]

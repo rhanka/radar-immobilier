@@ -71,7 +71,8 @@ Job. A non-zero bounded attempt keeps its checkpoint on the PVC; repeat the
 same start command to resume automatically. Inspect status without logs and
 fetch receipts into a fresh ignored/local directory without printing their
 contents. Fetch while the Pod is Ready during its five-minute collection
-window; a completed Pod can no longer serve `kubectl cp`:
+window; completed Pods cannot serve exec-based collection. The target streams
+only allowlisted evidence paths and does not require `tar` in the image:
 
 ```text
 KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-status \

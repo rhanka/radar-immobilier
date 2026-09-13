@@ -325,9 +325,9 @@ checkpoint_finalize() {
     checkpoint_phase_summary destination provisional "$pd" &&
     checkpoint_phase_summary source fenced "$fs" &&
     checkpoint_phase_summary destination fenced "$fd" || return 1
-  cmp -s "$CHECKPOINT_DIR/provisional/source/manifest.jsonl" \
+  files_equal "$CHECKPOINT_DIR/provisional/source/manifest.jsonl" \
     "$CHECKPOINT_DIR/fenced/source/manifest.jsonl" || return 1
-  cmp -s "$CHECKPOINT_DIR/provisional/destination/manifest.jsonl" \
+  files_equal "$CHECKPOINT_DIR/provisional/destination/manifest.jsonl" \
     "$CHECKPOINT_DIR/fenced/destination/manifest.jsonl" || return 1
   jq -se 'all(.[]; .classification != "unclassified")' \
     "$CHECKPOINT_DIR/fenced/source/manifest.jsonl" >/dev/null || return 1
@@ -383,8 +383,8 @@ consume_inventory_proof() {
     checkpoint_phase_summary destination provisional "$WORK_DIR/proof-pd.json"
     checkpoint_phase_summary source fenced "$WORK_DIR/proof-fs.json"
     checkpoint_phase_summary destination fenced "$WORK_DIR/proof-fd.json"); then return 1; fi
-  cmp -s "$provisional_source" "$fenced_source" &&
-    cmp -s "$provisional_destination" "$fenced_destination" || return 1
+  files_equal "$provisional_source" "$fenced_source" &&
+    files_equal "$provisional_destination" "$fenced_destination" || return 1
   jq -e --arg config "$expected_config_digest" --arg fence "$FENCE_EVIDENCE_DIGEST" \
     --arg ps "$(sha256sum "$provisional_source" | awk '{print $1}')" \
     --arg pd "$(sha256sum "$provisional_destination" | awk '{print $1}')" \
