@@ -2,9 +2,8 @@
 # pins it to the accepted release image, and keeps both legacy schedules
 # suspended. This is the production twin of refresh-cronjobs.
 #
-# Production storage coordinates come from the radar-api ConfigMap after T2;
-# credentials use the dedicated OVH DOCS Secret. The base is provider-neutral
-# after T2 and this overlay never adds a MinIO or SCW fallback.
+# Production storage coordinates and dedicated credentials are owned by T2's
+# provider-neutral base. This overlay never overrides them or adds a fallback.
 #
 # Applied only by the gated promote-prod "Deploy refresh CronJobs (prod)" step.
 # The fail-loud image placeholder must be replaced by `kustomize edit set image`
@@ -30,24 +29,3 @@ patches:
       - op: replace
         path: /spec/suspend
         value: false
-
-  - target:
-      kind: CronJob
-      name: radar-refresh-pv
-    patch: |
-      apiVersion: batch/v1
-      kind: CronJob
-      metadata:
-        name: radar-refresh-pv
-      spec:
-        jobTemplate:
-          spec:
-            template:
-              spec:
-                containers:
-                  - name: refresh-pv
-                    env:
-                      - name: SCRAPE_S3_ACCESS_KEY
-                        valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY } }
-                      - name: SCRAPE_S3_SECRET_KEY
-                        valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
