@@ -196,17 +196,18 @@ flowchart TB
 This is the complete end-state requested for orientation. It is **PROPOSED / NOT
 DEPLOYED**. One existing OVH b3-8 houses the Immo and Geo tenants only after the
 shared full peak, requests, anti-affinity, PDB and PVC placement prove it safe.
+The current audit is NO-GO; a verified two-node step must precede any one-node test.
 MatchID is outside this dossier. No MinIO or other active Scaleway component is
 part of this target; SCW TEM is the sole explicit exception.
 
 ```mermaid
 flowchart TB
   subgraph T3_CARD["T3 · PROPOSED / NOT DEPLOYED · stage card"]
-    T3_CHANGE["CHANGES<br/>Consolidate Immo + Geo tenants onto one existing b3-8 after measured safety proof"]
+    T3_CHANGE["CHANGES<br/>After T2: rightsize + reconcile constraints<br/>verify two nodes before testing one existing b3-8"]
     T3_KEEP["KEPT<br/>Prod/preprod URLs + SSO, Immo/Geo roles, OVH stores, backups/recovery and TEM"]
     T3_REMOVE["REMOVED<br/>Extra active cluster nodes only after drain acceptance; no MinIO / other SCW target"]
-    T3_GATES["GATES<br/>Full shared peak + requests + anti-affinity/PDB/PVC + preprod THEN production health"]
-    T3_EVIDENCE["EVIDENCE<br/>Observed 3 nodes; 9454 Mi instant > 5907.82 Mi single allocatable; MinIO ~347 Mi insufficient"]
+    T3_GATES["GATES<br/>T2 complete → rightsizing → affinity/PVC constraints<br/>verified 2-node step → 1-node preprod THEN production"]
+    T3_EVIDENCE["EVIDENCE · NO-GO TODAY<br/>3 b3-8; one allocatable 1840m / 5907.82 Mi<br/>requests 4095m / 8442 Mi; pods 5273 Mi; 16 PVC / 15 Cinder RWO<br/>required CoreDNS/konnectivity/Traefik anti-affinity incompatible"]
   end
   user["User / browser / approved MCP client"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]

@@ -1,6 +1,6 @@
 # Immo, Geo and Kubernetes architecture
 
-Snapshot: **2026-09-13**, refreshed against remote **main `09703678`**, read-only preprod storage checks at **12:33–12:37 UTC** and a workload/CronJob recheck at **15:38 UTC**. This describes observed configuration, not an assertion that every configured path succeeds. The workstation is still required for the deployed LLM-derived graph path.
+Snapshot: **2026-09-13**, refreshed against remote **main `09703678`**, read-only preprod storage checks at **12:33–12:37 UTC**, a workload/CronJob recheck at **15:38 UTC** and later dated transition audits whose exact UTC cutoff was not supplied. This describes observed configuration, not an assertion that every configured path succeeds. The workstation is still required for the deployed LLM-derived graph path.
 
 Evidence labels: **LIVE** = observed during this inspection; **DECLARED** = repository configuration, not proof of deployment; **PLANNED** = documented evolution. Links and source revisions are collected at the end.
 
@@ -335,6 +335,13 @@ The September full-auto design selects `@sentropic/s3-dag` reconciliation with d
 
 **Latest continuation boundary:** the current design uses **Graphify with in-process mesh inside the Immo pod**, superseding the earlier hybrid/network-service assumption. Immo retains corpus/checkpoints/gates/canonical publication; Graphify supplies its library/provider lifecycle. Graphify remains pinned to exactly **0.18.0** and fail-closes correctly; `immo-pv-extraction-v3` is the internal PDF contract name, not a Graphify `0.18.3` version. At Immo HEAD `ac3a7150`, the two targeted suites pass **8/8 + 7/7**, and the full typecheck plus scope/branch checks pass. The nested `UND_ERR_SOCKET` is confirmed in the llm-mesh 0.19.0 normalizer, not Graphify; a delegated 0.19.1 patch is not yet published. T1 is **GO_WITH_GATES** for the preprod success path and **NO-GO** for unattended/retry/production before 0.19.1. No real-provider Signal or Kubernetes acceptance exists. The [D5 target dossier](architecture/decision-dossier.md) and [sequential states](architecture/transitions-target.md) place architecture before billing. **SCW TEM remains until its replacement is validated.**
 
+**Latest platform boundary:** the audited cluster still has three b3-8 nodes. One
+node offers 1,840m CPU / 5,907.82 Mi allocatable, while audited requests total
+4,095m / 8,442 Mi and current pod memory totals 5,273 Mi. Required anti-affinity
+for CoreDNS, konnectivity and Traefik is incompatible with one node; 16 PVCs include
+15 Cinder RWO volumes. T3 is therefore **NO-GO today**. Complete T2, rightsize,
+reconcile placement constraints, prove a two-node step, and only then test one node.
+
 ## 6. Questions for the architecture walkthrough
 
 1. **Address:** should `preprod.sent-tech.ca` become an alias/portal, or was it shorthand for the observed `preprod.immo.sent-tech.ca`? This document retains the verified URLs until clarified.
@@ -354,6 +361,7 @@ The September full-auto design selects `@sentropic/s3-dag` reconciliation with d
 | Immo Graphify CAS work | `73172214a369ebfba0aab530dadde873341baa4a` (`feat/graphify-v23-cas-ingest`, September 11) | Follow-up branch inspection against its pre-change parent `8e18f01b`; changes remain in Immo tools and plan; qualification not inferred |
 | Immo refresh continuation | `ac3a7150` (`feat/refresh-018`) plus the earlier `docs/reviews/refresh-018/preprod-readiness.md` runtime read | Exact Graphify 0.18.0 fail-closes; internal PDF contract `immo-pv-extraction-v3`; targeted 8/8 + 7/7, full typecheck and scope/branch PASS; llm-mesh 0.19.0 owns nested `UND_ERR_SOCKET`, 0.19.1 unpublished; preprod success GO_WITH_GATES, unattended/retry/prod NO-GO |
 | T2 storage follow-up | September 13 live MinIO inventory; Fable postbuild review; remediation commit `25ec9e04` | Separates the empty API fallback from useful legacy history; fail-before-write work started, while its suite and conditional-write capability remain open before MIGRATE+RETAIN execution |
+| Kubernetes capacity follow-up | September 13 live workload/request/PVC/affinity audit | Three b3-8; 1,840m/5,907.82 Mi allocatable on one; requests 4,095m/8,442 Mi; pods 5,273 Mi; 16 PVC/15 Cinder RWO; required anti-affinity makes T3 NO-GO today |
 
 Primary Immo references: [refresh study](study/industrialisation-refresh-suivi.md), [four-stage pipeline study](spec/brainstorm-industrialisation-refresh-data.md), [worker](../api/src/scripts/worker-live.ts), [graph projection](../api/src/scripts/project-graph-from-s3.ts), [grounding tools](../tools/grounding/README.md), [publish-only Job](../deploy/k8s/41-grounding-citation-job.yaml), [OVH preprod refresh overlay](../deploy/k8s/refresh-cronjobs/kustomization.yaml), [prod refresh overlay](../deploy/k8s/refresh-cronjobs-prod/kustomization.yaml), [nginx preprod](../deploy/overlays/preprod/nginx/default.conf), [release workflow](../.github/workflows/build-push-images.yml), [Geo mapper](../api/src/services/geo/run-geo-mapper.ts). Resource-reconciliation evidence: [API store construction](../api/src/index.ts), [store resolvers](../api/src/config.ts), [PDF routing and no-fallback rule](../api/src/routes/documents.ts), [production publication workflow](../.github/workflows/grounding-publish-prod.yml).
 

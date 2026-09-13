@@ -29,7 +29,7 @@ execution; it is not a request to vote again on those three objectives.
 | --- | --- | --- | --- |
 | T1 — autonomous PV → Signal cron | Immo CAS #678; four-stage pipeline; canonical writer; projection; 3.4 EMIT/APPLY; existing CronJobs | Publish/adopt llm-mesh 0.19.1; prove a real-provider Signal via `immo-pv-extraction-v3`; durable identity; CronJob-created Job and schedule | **GO_WITH_GATES** preprod success; **NO-GO** unattended/retry/prod before 0.19.1; no provider/K8s acceptance |
 | T2 — remove MinIO and remaining SCW dependencies | #677 OVH refresh bindings; live API `PP-RAW`; empty `PP-DOCS`; useful `PP-DOCS-LEGACY`; #671/#672 GHCR work | Complete the `25ec9e04` fail-before-write suite and conditional-write capability; copy + integrity + recovery; fence/repoint/test; retain legacy until complete parity/recovery; close SCW except TEM | **MIGRATE+RETAIN** decided; remediation underway, not accepted; no copy, cutover or deletion |
-| T3 — one OVH b3-8 | poc-k8s `cluster-rightsizing-plan.md`, `rightsizing-status-2026-09-13.md`, `b3-8-service-plan.md` | Include Immo prod and the new refresh Job in full capacity budget; verify PDB/affinity/PVC placement, batch and wake peaks; preserve data and active services; controlled consolidation then pool min=max=desired=1 | Owner-fixed target; not yet a demonstrated safe placement |
+| T3 — one OVH b3-8 | Three b3-8; service plan; 16 PVC/15 Cinder RWO inventory | Finish T2; rightsize; reconcile required affinity/PVC constraints; prove controlled two-node operation; only then test one-node preprod before production | **NO-GO today**: requests and required anti-affinity do not fit one node |
 
 [FACT] Graphify producer confirms **0.18.0 published**, tag `v0.18.0`, merge
 `1a723695d8a23ffe5e13f1988c52ded056f85c96`; exact-version installation and ESM/CJS
@@ -67,11 +67,12 @@ remediation blocking. Commit `25ec9e04` starts fail-before-write; its suite and 
 conditional-write capability remain in progress. **MIGRATE+RETAIN** applies until
 complete parity and recovery; no copy, cutover or deletion has started, and TEM remains retained.
 
-[FACT] The platform measured 3 b3-8 nodes, 9,454 Mi instantaneous node memory and
-5,907.82 Mi allocatable per node at 13:20–13:24 UTC. The sample excludes detailed
-Immo prod certification and is not a peak. MinIO preprod retirement frees about
-347 Mi in its later sample, not the full 904 Mi namespace. T3 must use the existing
-service-by-service plan; do not assume deleting MinIO alone makes a drain safe.
+[FACT] The current platform audit measured three b3-8 nodes. One node exposes
+1,840m CPU / 5,907.82 Mi allocatable; workload requests total 4,095m / 8,442 Mi,
+while current pod memory is 5,273 Mi. Required CoreDNS, konnectivity and Traefik
+anti-affinity cannot be satisfied on one node. Sixteen PVCs include 15 Cinder RWO.
+T3 is **NO-GO today**: first complete T2, rightsize, reconcile constraints, then
+prove a controlled two-node state before attempting one-node preprod acceptance.
 
 ## Requested report period and billing-last direction
 

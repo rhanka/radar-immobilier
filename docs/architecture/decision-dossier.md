@@ -40,9 +40,9 @@ and MCP replica plus the existing scrape/projection CronJobs. It did not observe
 the proposed Graphify 0.18 refresh, PVC/storage class or production internals.
 
 [FACT] `immo.sent-tech.ca`, `preprod.immo.sent-tech.ca`, `auth.sent-tech.ca` and
-`preprod.auth.sent-tech.ca` are the observed access/SSO surfaces. The existing
-platform observation has three b3-8 nodes. Its instantaneous ~9,454 Mi exceeds
-one node's 5,907.82 Mi allocatable; MinIO accounts for only ~347 Mi.
+`preprod.auth.sent-tech.ca` are the observed access/SSO surfaces. The current
+platform audit has three b3-8 nodes; requests exceed one node's allocatable CPU
+and memory, and required anti-affinity is incompatible with one node (§5).
 
 [FACT] Graphify remains exactly 0.18.0. At Immo HEAD `ac3a7150`, targeted suites
 pass 8/8 + 7/7, and the full typecheck plus scope/branch checks pass. The internal
@@ -55,8 +55,9 @@ Every target
 production role may be named as a contract, but its physical binding remains
 TBD rather than inferred from source defaults or the old SCW cluster.
 
-[FACT] The 15:38 runtime read and 15:39 implementation progress are distinct
-evidence cutoffs. No unified delivery, token or billing cutoff is frozen.
+[FACT] The 15:38 runtime read and 15:39 implementation progress are earlier
+timestamped cutoffs. Later September 13 transition audits have no supplied exact
+UTC cutoff. No unified delivery, token or billing cutoff is frozen.
 
 ## 3. T1 — autonomous Immo refresh
 
@@ -93,9 +94,10 @@ The final Immo sweep covers images, old digests, Jobs, manual/CI/backup/bootstra
 
 ## 5. T3 — one existing b3-8
 
-[FACT] The current observation is three b3-8 nodes and ~9,454 Mi instantaneous
-memory against 5,907.82 Mi allocatable on one node. MinIO accounts for only ~347
-Mi and its removal is insufficient to make a one-node drain safe.
+[FACT] The current audit has three b3-8 nodes. One node has 1,840m CPU / 5,907.82
+Mi allocatable; requests total 4,095m / 8,442 Mi and current pod memory is 5,273
+Mi. Required CoreDNS, konnectivity and Traefik anti-affinity is incompatible with
+one node. There are 16 PVCs, including 15 Cinder RWO volumes. Verdict: **NO-GO today**.
 
 [JUDGMENT] T3 consolidates both Immo and Geo tenants on one **existing** b3-8 only
 after a complete shared peak including Immo production and the new refresh. It
@@ -104,8 +106,9 @@ PVC placement/attachment, batch overlap, health probes and recovery on one failu
 domain. No second per-tenant node is part of the target or billing projection.
 
 [JUDGMENT] The counter-case is explicit: the workload may not fit safely. Until
-measurement and controlled drain evidence exist, the target remains proposed and
-no capacity reduction is claimed.
+T2 completes, requests are rightsized, placement constraints are reconciled and a
+controlled two-node state is verified, the one-node target cannot be attempted.
+It remains proposed and no capacity reduction is claimed.
 
 ## 6. Gates, promotion and recovery
 
@@ -114,8 +117,9 @@ tests → real preprod Signal/PDF and idempotent resume → unattended scheduled
 after pod and credential refresh. **T2 gates:** complete client/IAM/object inventory
 → new destination controls → full and final-delta parity → fence → repoint → real
 client tests → scheduled observation → isolated recovery → zero consumers → later
-deletion. **T3 gates:** full peak/requests/placement proof → controlled preprod
-drain/health → separately authorized production consolidation.
+deletion. **T3 gates:** T2 complete → rightsizing → affinity/PVC constraints →
+verified two-node operation → controlled one-node preprod health → separately
+authorized production consolidation.
 
 [JUDGMENT] Every stage is preprod first and production second. Shared resources
 require all consumers' acceptance. Suspended/manual paths are still executable and

@@ -65,7 +65,7 @@ test('D5 leads with complete sequential architecture and keeps fixed billing ins
   assert.match(presentation[2], /candidat frais.*3\.4.*publication.*projection PG.*Signal typé.*PDF exact/s);
   assert.match(presentation[2], /0\.18\.0.*immo-pv-extraction-v3.*ac3a7150.*8\/8 \+ 7\/7.*llm-mesh.*0\.19\.0.*0\.19\.1.*GO_WITH_GATES.*NO-GO/s);
   assert.match(presentation[3], /PP-RAW-OVH.*PP-DOCS-OVH.*préprod avant prod/s);
-  assert.match(presentation[4], /9 454 Mi.*5 907,82 Mi.*347 Mi/s);
+  assert.match(presentation[4], /NO-GO.*1 840m.*5 907,82 Mi.*4 095m.*8 442 Mi.*5 273 Mi.*16 PVC.*15 Cinder RWO.*deux nœuds/s);
   assert.match(presentation[7], /ANNEXE FACTURATION · EN DERNIER/);
   assert.match(presentation[7], /vraie frontière.*non vérifiée.*2026-09-14T00:00:00-04:00/s);
   assert.match(presentation[7], /mêmes tarifs unitaires.*facture réelle du mois précédent/s);
