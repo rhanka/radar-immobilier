@@ -153,6 +153,6 @@
 - [ ] **Lot 14 — Reconcile post-82b3b7c5 transition evidence.**
   - [x] Record the Fable BLOCK at `ac3a7150`, corrective commits and their qualified test envelope.
   - [x] Add the five-PDF non-simulated benchmark before real extraction without inventing a model or scores.
-  - [ ] Record the latest T2 remediation/checkpoint construction without claiming an object copy.
+  - [x] Record the latest T2 remediation/checkpoint construction without claiming an object copy.
   - [ ] Align the Focus presentation/export, transition cards and monthly companion without changing billing.
   - [ ] Regenerate and verify Mermaid, nested SvelteFlow and the separate dated artifact.

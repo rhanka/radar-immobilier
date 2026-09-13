@@ -90,9 +90,10 @@ clients, rehearse recovery and retain `PP-DOCS-LEGACY` until complete parity and
 
 [FACT] The partial legacy inventory is baseline 1/2,821,583 B; graph 4/639,226 B;
 ontology 530/34,257,805 B; parsed ≥4,884/≥272,554,144 B; raw unknown; runs ≥445.
-Fable's postbuild review requires fail-before-write and conditional-write capability
-remediation before migration execution. Commit `25ec9e04` starts fail-before-write;
-its suite and conditional-write work remain in progress. No copy, cutover or deletion has occurred.
+Remediation has advanced through `ee84ae29`, `f2ac3825`, `c30467ca` and
+`cef6d7ed`. The checkpoint mechanism at `aaf0cbf7` / `91242223` remains under
+construction. These commits are implementation progress, not migration acceptance;
+no object copy has occurred.
 
 [FACT] Preproduction goes first, then separately inventoried production. Production
 private bindings are still TBD/UNVERIFIED. Retire MinIO only at zero consumers.
