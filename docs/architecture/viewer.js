@@ -9,6 +9,7 @@ async function enhanceArchitecture() {
     const sourceBase = 'https://github.com/rhanka/radar-immobilier/blob/097036783006226afea53a6b49383bf70890774f/docs/architecture.md';
     for (const link of document.querySelectorAll('.markdown-rendered a')) {
       const href = link.getAttribute('href');
+      if (href?.startsWith('architecture/')) { link.href = `/${href}`; continue; }
       if (href && !href.startsWith('#') && !/^[a-z]+:/i.test(href)) link.href = new URL(href, sourceBase).href;
     }
     for (const table of document.querySelectorAll('table')) {
@@ -36,23 +37,38 @@ async function enhanceArchitecture() {
       const drawing = canvas.querySelector('svg'); drawing.style.maxWidth = 'none';
       const size = () => Number.parseFloat(drawing.style.width) || canvas.clientWidth;
       const fit = () => { const vb = drawing.viewBox.baseVal; drawing.style.width = `${Math.min(canvas.clientWidth - 24, (canvas.clientHeight - 24) * vb.width / vb.height)}px`; };
-      const readable = () => { drawing.style.width = `${Math.max(canvas.clientWidth - 24, drawing.viewBox.baseVal.width * 0.85)}px`; };
       const controls = [
         ['Zoom +', () => { drawing.style.width = `${size() * 1.3}px`; }],
         ['Zoom −', () => { drawing.style.width = `${Math.max(180, size() / 1.3)}px`; }],
         ['Ajuster', fit],
-        ['Plein écran', (button) => { const expanded = figure.classList.toggle('expanded'); button.textContent = expanded ? 'Fermer' : 'Plein écran'; button.setAttribute('aria-expanded', String(expanded)); document.body.classList.toggle('diagram-open', expanded); readable(); }],
+        ['Plein écran', (button) => { const expanded = figure.classList.toggle('expanded'); button.textContent = expanded ? 'Fermer' : 'Plein écran'; button.setAttribute('aria-expanded', String(expanded)); document.body.classList.toggle('diagram-open', expanded); fit(); }],
       ];
       for (const [label, action] of controls) {
         const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
         button.addEventListener('click', () => action(button)); toolbar.append(button);
       }
+      const locate = document.createElement('select'); locate.setAttribute('aria-label', 'Repérer un composant');
+      locate.add(new Option('Repérer un composant…', ''));
+      const targets = new Map();
+      for (const node of drawing.querySelectorAll('g.node, g.cluster')) {
+        const label = node.querySelector('.label, .cluster-label')?.textContent.trim();
+        const match = label?.match(/^\[([A-Z0-9-]+)\]/);
+        if (match && !targets.has(match[1])) { targets.set(match[1], node); locate.add(new Option(match[1], match[1])); }
+      }
+      locate.addEventListener('change', () => {
+        const target = targets.get(locate.value); if (!target) return;
+        drawing.style.width = `${Math.max(canvas.clientWidth - 24, drawing.viewBox.baseVal.width)}px`;
+        const rect = target.getBoundingClientRect(), viewport = canvas.getBoundingClientRect();
+        canvas.scrollLeft += rect.left - viewport.left - (canvas.clientWidth - rect.width) / 2;
+        canvas.scrollTop += rect.top - viewport.top - (canvas.clientHeight - rect.height) / 2;
+      });
+      if (targets.size) toolbar.append(locate);
       const details = document.createElement('details'); const summary = document.createElement('summary'); summary.textContent = 'Code Mermaid';
       pre.before(toolbar, canvas, details); details.append(summary, pre);
-      readable(); rendered++;
+      fit(); rendered++;
     }
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') document.querySelector('.expanded .diagram-toolbar button:last-child')?.click();
+      if (event.key === 'Escape') document.querySelector('.expanded .diagram-toolbar button:last-of-type')?.click();
     });
     status.textContent = `${rendered} diagrammes Mermaid · source vérifiable · lecture seule`;
     status.dataset.state = 'ready';

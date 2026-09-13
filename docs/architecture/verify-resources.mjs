@@ -41,6 +41,12 @@ for (const id of requiredShared) {
 }
 compare(overview, immo);
 compare(overview, geo);
+for (const index of [0, 1, 2]) {
+  assert(diagrams[index].includes('raw/pv-index/cas/'), `View ${index + 1} omits Geo PV object prefix`);
+}
+for (const index of [0, 1, 3]) {
+  assert(diagrams[index].includes('NOT served'), `View ${index + 1} conflates lowercase feed with served Signals`);
+}
 for (const id of ['PP-PUBLISH', 'PP-GROUND', 'LEGACY-POC', 'PR-MINIO', 'PR-REFRESH']) {
   assert(!overview.has(id) && !immo.has(id), `Unobserved legacy resource ${id} presented as operational`);
 }
