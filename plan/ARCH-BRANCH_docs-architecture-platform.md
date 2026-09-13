@@ -156,3 +156,4 @@
   - [x] Record the latest T2 remediation/checkpoint construction without claiming an object copy.
   - [x] Align the Focus presentation/export, transition cards and monthly companion without changing billing.
   - [x] Regenerate and verify Mermaid, nested SvelteFlow and the separate dated artifact.
+  - [x] Remove llm-mesh 0.19.1 from the critical path and record the retained 0.19.0 failure policy.

@@ -20,7 +20,7 @@ flowchart TB
     T1_KEEP["KEPT<br/>PP-DB, PP-GRAPH, API/UI/MCP, Geo evidence, MinIO API roles + legacy history"]
     T1_REMOVE["REMOVED<br/>Routine workstation LLM and parallel legacy canonical publishers"]
     T1_GATES["GATES · BLOCKED<br/>Fable re-review → five-PDF real benchmark: historical/manual vs v1/v2/v3<br/>then provider Signal + K8s; model TBD; Cloud Code not enrolled"]
-    T1_EVIDENCE["EVIDENCE<br/>Fable BLOCK ac3a7150; fixes 537b9e0c + 3d9ed43c<br/>scoped 34/34 + integration 4/4 + typecheck; no score/provider/K8s"]
+    T1_EVIDENCE["EVIDENCE<br/>Fable BLOCK ac3a7150; fixes pass 34/34 + 4/4 + typecheck<br/>keep mesh 0.19.0; fail Job → durable next-cycle resume; no score/provider/K8s"]
   end
   user["User / browser"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
