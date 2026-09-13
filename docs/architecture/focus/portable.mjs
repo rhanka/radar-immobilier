@@ -1,0 +1,15 @@
+import { readFile, writeFile } from 'node:fs/promises';
+let html = await readFile('dist/index.html', 'utf8');
+const script = html.match(/<script\b[^>]*src="([^"]+)"[^>]*><\/script>/)?.[0];
+const css = html.match(/<link\b[^>]*rel="stylesheet"[^>]*>/)?.[0];
+if (!script || !css) throw Error('Expected one bundled JS and CSS asset');
+const asset = tag => `dist/${tag.match(/(?:src|href)="([^"]+)"/)[1].replace(/^\.\//, '')}`;
+html = html.replace(script, () => `<script type="module">${''}</script>`);
+const code = (await readFile(asset(script), 'utf8')).replaceAll('</script', '<\\/script');
+html = html.replace('<script type="module"></script>', () => `<script type="module">${code}</script>`);
+html = html.replace(css, () => `<style>${''}</style>`);
+const style = (await readFile(asset(css), 'utf8')).replaceAll('</style', '<\\/style');
+html = html.replace('<style></style>', () => `<style>${style}</style>`);
+if (/<(?:script|link|img)\b[^>]+(?:src|href)=/i.test(html)) throw Error('External asset remains');
+await writeFile('../decision-focus.html', html);
+console.log(`Portable native Focus dossier: ${Buffer.byteLength(html)} bytes`);
