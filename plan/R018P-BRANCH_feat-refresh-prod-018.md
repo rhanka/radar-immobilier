@@ -39,6 +39,7 @@
   - [x] Add an exact-image render gate that rejects every SCW, MinIO, generic credential, duplicate schedule, or missing keyring reference.
 - [ ] **Lot 1 — Make-only production controls**
   - [ ] Add namespace/API-server guards, read-only inspection, server dry-run, seed, apply, scheduled observation, status, logs, and rollback targets.
+  - [x] Gate render and server dry-run on exact OVH RAW/DOCS coordinates, dedicated credentials, MinIO absence, and zero active storage migration Jobs.
   - [ ] Require explicit production confirmation and exact immutable image on every mutating target.
   - [ ] Fail closed unless OVH DOCS coordinates, dedicated scrape credentials, keyring/runtime resources, MinIO absence, and zero active storage migration Jobs are proved.
 - [ ] **Lot 2 — Production activation and acceptance**
