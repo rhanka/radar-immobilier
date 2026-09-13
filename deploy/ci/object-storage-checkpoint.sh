@@ -349,6 +349,7 @@ consume_inventory_proof() {
   prefixes="$(jq -cn --args '$ARGS.positional | sort' -- "${PREFIXES[@]}")"
   exclusions="$(jq -cn --args '$ARGS.positional | sort' -- "${EXCLUDE_PREFIXES[@]}")"
   jq -e --arg se "$SOURCE_ENDPOINT" --arg sr "$SOURCE_REGION" --arg sb "$SOURCE_BUCKET" \
+    --arg environment "$ENVIRONMENT" --arg plane "$PLANE" \
     --argjson sp "$SOURCE_PATH_STYLE" --arg sf "$SOURCE_IDENTITY_FINGERPRINT" \
     --arg de "$DESTINATION_ENDPOINT" --arg dr "$DESTINATION_REGION" \
     --arg db "$DESTINATION_BUCKET" --argjson dp "$DESTINATION_PATH_STYLE" \
@@ -356,26 +357,37 @@ consume_inventory_proof() {
     --argjson exclusions "$exclusions" --argjson retries "$RETRIES" \
     --argjson concurrency "$CONCURRENCY" --argjson failures "$MAX_FAILURES" \
     --argjson bytes "$MAX_OBJECT_BYTES" '
-    .schemaVersion == 1 and
+    .schemaVersion == 1 and .environment == $environment and .plane == $plane and
     .source == {endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,identityFingerprint:$sf} and
     .destination == {endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp,identityFingerprint:$df} and
     .classification == {prefixes:$prefixes,excludePrefixes:$exclusions} and
     .limits.retries == $retries and .limits.concurrency == $concurrency and
     .limits.maxFailures == $failures and .limits.maxObjectBytes == $bytes' "$config" >/dev/null ||
     return 1
+  if ! (CHECKPOINT_DIR="$root"
+    checkpoint_validate_phase provisional null
+    checkpoint_validate_phase fenced "$FENCE_EVIDENCE_DIGEST"
+    checkpoint_phase_summary source provisional "$WORK_DIR/proof-ps.json"
+    checkpoint_phase_summary destination provisional "$WORK_DIR/proof-pd.json"
+    checkpoint_phase_summary source fenced "$WORK_DIR/proof-fs.json"
+    checkpoint_phase_summary destination fenced "$WORK_DIR/proof-fd.json"); then return 1; fi
   cmp -s "$provisional_source" "$fenced_source" &&
     cmp -s "$provisional_destination" "$fenced_destination" || return 1
   jq -e --arg config "$expected_config_digest" --arg fence "$FENCE_EVIDENCE_DIGEST" \
     --arg ps "$(sha256sum "$provisional_source" | awk '{print $1}')" \
     --arg pd "$(sha256sum "$provisional_destination" | awk '{print $1}')" \
     --arg fs "$(sha256sum "$fenced_source" | awk '{print $1}')" \
-    --arg fd "$(sha256sum "$fenced_destination" | awk '{print $1}')" '
+    --arg fd "$(sha256sum "$fenced_destination" | awk '{print $1}')" \
+    --slurpfile psr "$WORK_DIR/proof-ps.json" --slurpfile pdr "$WORK_DIR/proof-pd.json" \
+    --slurpfile fsr "$WORK_DIR/proof-fs.json" --slurpfile fdr "$WORK_DIR/proof-fd.json" '
     .schemaVersion == 1 and .configDigest == $config and .fenceEvidenceDigest == $fence and
     .toolComplete == true and .fenceValidated == false and
     .providerEnforcementValidated == false and
     .source.provisional.manifestSha256 == $ps and .source.fenced.manifestSha256 == $fs and
     .destination.provisional.manifestSha256 == $pd and
-    .destination.fenced.manifestSha256 == $fd' "$proof" >/dev/null || return 1
+    .destination.fenced.manifestSha256 == $fd and
+    .source == {provisional:$psr[0],fenced:$fsr[0]} and
+    .destination == {provisional:$pdr[0],fenced:$fdr[0]}' "$proof" >/dev/null || return 1
   jq -se 'all(.[]; .classification != "unclassified")' "$fenced_source" >/dev/null || return 1
   cp "$fenced_source" "$SOURCE_MANIFEST"
   cp "$fenced_destination" "$DESTINATION_MANIFEST"
