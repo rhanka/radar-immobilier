@@ -46,6 +46,7 @@
 - [x] C03: prove schema/token forwarding, three-copy mesh interop, owner isolation, classified failure, abort propagation and log silence.
 - [x] C04a: define strict immutable-manifest, original-page and bounded UTF-8 corpus chunk contracts.
 - [x] C04b: materialize selected PDF bytes and metadata with checksum, page-text and input-hash validation.
+- [x] C04c: retain explicit physical-page markers inside bounded profile prompt chunks.
 - [x] C05: cover checksum/path/duplicate refusal, physical pages, changed input identity and bounded UTF-8 chunks.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.

@@ -57,6 +57,7 @@ describe("refresh corpus", () => {
       id: `${input.digest}.1`,
       pages: [1, 2],
     });
+    expect(corpus.chunks[0]?.text).toContain("[PDF PAGE 2]\npage two");
   });
 
   it("should reject bytes that do not match the immutable manifest checksum", async () => {
