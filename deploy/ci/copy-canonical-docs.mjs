@@ -74,6 +74,9 @@ const getDigest = async (clientInstance, bucket, key, outputPath) => {
   return { ...digest, contentLength: Number(response.ContentLength) };
 };
 const missing = (error) => error?.name === "NoSuchKey" || error?.$metadata?.httpStatusCode === 404;
+const failed = (stage, error, item) => ({ status: "failed", reason: stage,
+  errorName: String(error?.name ?? "Error"), httpStatus: error?.$metadata?.httpStatusCode ?? null,
+  key: item.key, size: item.size });
 const tagging = (tags) => tags.map(({ Key, Value }) =>
   `${encodeURIComponent(Key)}=${encodeURIComponent(Value)}`).join("&");
 const listDestination = async () => {
@@ -110,25 +113,28 @@ const copyOne = async (item, index) => {
     return observed.bytes === item.size && observed.contentLength === item.size && observed.sha256 === item.sha256
       ? { status: "matching", key: item.key, size: item.size }
       : { status: "failed", reason: "destination-conflict", key: item.key, size: item.size };
-  } catch (error) { if (!missing(error)) return { status: "failed", reason: "destination-read", key: item.key, size: item.size }; }
+  } catch (error) { if (!missing(error)) return failed("destination-read", error, item); }
   const bodyPath = `/tmp/canonical-docs-${index}`;
+  let stage = "source-get";
   try {
     const sourceDigest = await getDigest(sourceClient, source.bucket, item.key, bodyPath);
     if (sourceDigest.bytes !== item.size || sourceDigest.contentLength !== item.size || sourceDigest.sha256 !== item.sha256) {
       return { status: "failed", reason: "canonical-source", key: item.key, size: item.size };
     }
+    stage = "conditional-put";
     const response = await destinationClient.send(new PutObjectCommand({ Bucket: destination.bucket, Key: item.key,
       Body: createReadStream(bodyPath), ContentLength: item.size, IfNoneMatch: "*", ContentType: item.contentType ?? undefined,
       ContentEncoding: item.contentEncoding ?? undefined, CacheControl: item.cacheControl ?? undefined,
       ContentDisposition: item.contentDisposition ?? undefined, Metadata: item.metadata,
       Tagging: item.tags.length ? tagging(item.tags) : undefined }));
+    stage = "post-copy-read";
     const observed = await getDigest(destinationClient, destination.bucket, item.key);
     if (observed.bytes !== item.size || observed.sha256 !== item.sha256) {
       return { status: "failed", reason: "post-copy-read", key: item.key, size: item.size };
     }
     return { status: "copied", key: item.key, size: item.size, etag: response.ETag ?? "" };
   } catch (error) {
-    return { status: "failed", reason: "conditional-copy", key: item.key, size: item.size };
+    return failed(stage, error, item);
   } finally { try { unlinkSync(bodyPath); } catch {} }
 };
 for (let offset = 0; offset < objects.length; offset += concurrency) {

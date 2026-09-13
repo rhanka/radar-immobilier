@@ -146,6 +146,14 @@ object-storage-docs-prod-logs: ## Read one PROD object-storage Job log
 	@$(KUBECTL) -n $(OBJECT_STORAGE_DOCS_PROD_NAMESPACE) \
 	  logs job/$(OBJECT_STORAGE_DOCS_PROD_JOB) --all-containers=true
 
+.PHONY: object-storage-docs-prod-copy-failures
+object-storage-docs-prod-copy-failures: ## Aggregate PROD copy failures without printing keys
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  pod="$$( $(KUBECTL) -n "$$namespace" get pods \
+	    -l "job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
+	    'report=/evidence/reports/$${MIGRATION_RUN_ID}/copy-ledger.json; node -e '\''const fs=require("node:fs"),items=JSON.parse(fs.readFileSync(process.argv[1],"utf8")),counts={};for(const item of items)if(item.status==="failed")counts[item.reason]=(counts[item.reason]||0)+1;console.log(JSON.stringify(counts))'\'' "$$report"'
+
 .PHONY: object-storage-docs-prod-expand-pvc-quota
 object-storage-docs-prod-expand-pvc-quota: ## Guardedly expand only the PROD PVC count quota from 2 to 3
 	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
