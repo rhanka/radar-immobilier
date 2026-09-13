@@ -20,6 +20,12 @@ while [ "$#" -gt 0 ] && [ "$1" != s3api ]; do shift; done
 [ "${1:-}" = s3api ] || exit 90
 shift; op="$1"; shift
 printf '%s\t%s\t%s\n' "$side" "$op" "$*" >>"$log"
+if [ "${FAKE_FAIL_SIDE:-}" = "$side" ] && [ "${FAKE_FAIL_OPERATION:-}" = "$op" ]; then
+  counter="$FAKE_S3_TMP/failure-counter"; seen="$(cat "$counter" 2>/dev/null || printf 0)"
+  if [ "$seen" -lt "${FAKE_FAIL_ATTEMPTS:-0}" ]; then
+    printf '%s' "$((seen + 1))" >"$counter"; exit 71
+  fi
+fi
 arg() {
   local wanted="$1" previous="" value
   shift
@@ -123,6 +129,7 @@ reset_store() {
     "$TEST_TMP/store/destination/dst/objects" "$TEST_TMP/store/destination/dst/meta" \
     "$TEST_TMP/reports"
   : >"$AWS_LOG"; rm -f "$TEST_TMP/version"
+  unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_ATTEMPTS FAKE_VERSIONING
 }
 put_fixture() {
   local side="$1" bucket="$2" key="$3" content="$4" extra="${5:-}"
@@ -146,6 +153,8 @@ run_tool() {
   env PATH="$TEST_TMP/bin:$PATH" FAKE_S3_ROOT="$TEST_TMP/store" \
     FAKE_S3_TMP="$TEST_TMP" FAKE_AWS_LOG="$AWS_LOG" \
     FAKE_PAGE_SIZE="${FAKE_PAGE_SIZE:-1000}" FAKE_VERSIONING="${FAKE_VERSIONING:-Enabled}" \
+    FAKE_FAIL_SIDE="${FAKE_FAIL_SIDE:-}" FAKE_FAIL_OPERATION="${FAKE_FAIL_OPERATION:-}" \
+    FAKE_FAIL_ATTEMPTS="${FAKE_FAIL_ATTEMPTS:-0}" \
     MIGRATION_RUN_ID=test-run MIGRATION_SOURCE_ACCESS_KEY_ID=SRC_KEY \
     MIGRATION_SOURCE_SECRET_ACCESS_KEY=SRC_SECRET \
     MIGRATION_DESTINATION_ACCESS_KEY_ID=DST_KEY \
@@ -157,6 +166,26 @@ run_tool() {
     cat "$AWS_LOG" >&2
   }
   return "$status"
+}
+
+make_expected_union() {
+  local evidence="$1" output="$2" proof
+  proof="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  jq -n --slurpfile source "$evidence/source-included-manifest.jsonl" \
+    --slurpfile destination "$evidence/destination-manifest.jsonl" --arg proof "$proof" '
+    def core: del(.etag,.versionId,.classification,.sources);
+    {schemaVersion:1,
+     sources:[
+       {endpoint:"http://source.test",region:"local",bucket:"src",pathStyle:true,
+        observedAt:"2026-09-13T12:00:00Z",manifestSha256:$proof,fenceSha256:$proof},
+       {endpoint:"https://other.test",region:"bhs",bucket:"other",pathStyle:false,
+        observedAt:"2026-09-13T12:00:00Z",manifestSha256:$proof,fenceSha256:$proof}],
+     objects:[
+       ($source[] | core + {sources:[{endpoint:"http://source.test",region:"local",
+         bucket:"src",pathStyle:true}]}),
+       ($destination[] | select(.key == "raw/from-other.txt") | core +
+         {sources:[{endpoint:"https://other.test",region:"bhs",bucket:"other",pathStyle:false}]})]}' \
+    >"$output"
 }
 
 reset_store; put_fixture source src raw/a.txt alpha
@@ -237,6 +266,40 @@ if [ "$(jq -s length "$TEST_TMP/reports/excluded/excluded-source-manifest.jsonl"
 else bad "$TEST_NAME"; fi
 TEST_NAME='blocks genuinely unclassified source keys'
 expect_bad run_tool inventory "$TEST_TMP/reports/unclassified"
+
+reset_store
+put_fixture source src raw/retry.txt retry; put_fixture destination dst raw/retry.txt retry
+FAKE_FAIL_SIDE=source FAKE_FAIL_OPERATION=head-object FAKE_FAIL_ATTEMPTS=2
+TEST_NAME='retries a failed object operation up to the configured bound'
+expect_ok run_tool verify "$TEST_TMP/reports/retry" --retries 3
+reset_store
+put_fixture source src raw/a.txt a; put_fixture source src raw/b.txt b
+FAKE_FAIL_SIDE=source FAKE_FAIL_OPERATION=head-object FAKE_FAIL_ATTEMPTS=99
+TEST_NAME='aborts object evidence at the configured failure cap'
+expect_bad run_tool inventory "$TEST_TMP/reports/cap" --retries 1 --max-failures 1
+TEST_NAME='does not inspect a second object after reaching the cap'
+if [ "$(grep -c $'^source\thead-object\t' "$AWS_LOG")" = 1 ]; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/from-source.txt alpha
+put_fixture destination dst raw/from-source.txt alpha
+put_fixture destination dst raw/from-other.txt beta
+run_tool inventory "$TEST_TMP/reports/union-evidence" >/dev/null 2>&1 || true
+make_expected_union "$TEST_TMP/reports/union-evidence" "$TEST_TMP/expected-union.json"
+TEST_NAME='accepts only union-approved destination extras'
+expect_ok run_tool verify "$TEST_TMP/reports/union" --expected-manifest "$TEST_TMP/expected-union.json"
+put_fixture source src raw/from-source.txt changed
+TEST_NAME='rejects overlapping source provenance with different bytes'
+expect_bad run_tool verify "$TEST_TMP/reports/overlap-bytes" \
+  --expected-manifest "$TEST_TMP/expected-union.json"
+reset_store
+put_fixture source src raw/from-source.txt alpha
+put_fixture destination dst raw/from-source.txt alpha
+put_fixture destination dst raw/from-other.txt beta
+jq 'del(.sources[1].fenceSha256)' "$TEST_TMP/expected-union.json" >"$TEST_TMP/incomplete-union.json"
+TEST_NAME='rejects incomplete per-source fenced observation provenance'
+expect_bad run_tool verify "$TEST_TMP/reports/incomplete-union" \
+  --expected-manifest "$TEST_TMP/incomplete-union.json"
 
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]
