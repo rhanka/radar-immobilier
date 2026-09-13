@@ -72,6 +72,7 @@
 - [x] C07d: state the public Graphify node file-type and edge-confidence enums after the first live response exposed an under-specified contract.
 - [x] C07e: version the strict PDF identity, nested citation, evidence-ref and relation-signature contract while preserving linked empty findings.
 - [x] C07f: freeze the provider-free Waterloo v2 contract receipt without relabeling benchmark v1 outputs.
+- [x] C07g: name the strict internal contract `immo-pv-extraction-v3` and enforce exact physical-page marker boundaries; Graphify remains 0.18.0.
 - [x] C14b: emit a redacted model-call count and latency receipt without prompts, outputs or account material.
 - [x] C14c: identify the exact live schema and prompt by digest in the redacted model-call receipt.
 - [x] C14d: distinguish completed generation from failure instead of treating cleanup as a provider response.
