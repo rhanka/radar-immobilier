@@ -83,4 +83,5 @@
   - [x] Add a Docker-only build reusing the Sentropic kit read-only; portable HTML embeds JS, CSS and evidence.
   - [x] Add mapping completeness, native parent bounds, resource identity and rejected-syntax regression tests.
   - [x] Preserve Codex's six actual findings; disclose Opus weekly-limit failure and keep the dossier incomplete.
+  - [x] Reconcile all six findings in D2: shared-consumer inventory, credential continuity, recovery consistency and explicit SCW retirement gates.
 - [ ] Local documentation handoff; no production action or branch merge requested.

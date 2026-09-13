@@ -8,8 +8,8 @@ const graphs = [...extractDiagrams(architecture, ['Accès & composants', 'PV →
   ...extractDiagrams(proposal, ['Option A · cible proposée, non déployée'], 'target')];
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 const docs = {};
-for (const name of ['decision-dossier', 'continuation-audit', 'storage-audit', 'decision-reviews']) {
-  docs[name] = await readFile(`../${name}.md`, 'utf8');
+for (const name of ['decision-dossier', 'continuation-audit', 'storage-audit', 'decision-reviews', 'decision-review-codex', 'gemini-review/response-findings', 'gemini-review/review-inline', 'gemini-review/response-mapping']) {
+  docs[name.split('/').at(-1)] = await readFile(`../${name}.md`, 'utf8');
 }
 docs.architecture = architecture; docs.proposal = proposal;
 const kitNode = await readFile('/kit/src/ArchitectureNode.svelte', 'utf8');
