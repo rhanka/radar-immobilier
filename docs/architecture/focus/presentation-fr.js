@@ -1,62 +1,41 @@
-// French presentation of D4; the complete English repository dossier remains embedded.
+// French owner-facing D5 presentation; English repository sources remain embedded.
 export const presentation = [
-`[FAIT · décision du propriétaire] L’exécution suit l’ordre engagé : **T1 refresh autonome avec Graphify 0.18.0 → T2 retrait de MinIO et sweep final des dépendances SCW → T3 consolidation sur un b3-8**. Le dossier accompagne ces transitions ; il ne remet pas leur ordre au vote. [Registre daté et critères](transitions.md).
+`[CIBLE · PROPOSED / NOT DEPLOYED] Le schéma affiché par défaut est l’architecture finale complète. **Un seul b3-8 OVH existant** héberge les tenants Immo et Geo après preuve de capacité/sécurité; il ne s’agit ni d’un nœud par tenant ni d’un état observé aujourd’hui.
 
-[FAIT] Toute la chaîne PV → Signal reste Immo ; la préprod précède la production ; **TEM reste jusqu’au remplacement validé**. Graphify 0.18.0 est publié, mais l’intégration et la preuve Immo de bout en bout restent à obtenir.
+Immo conserve, en préproduction puis en production, **front, API, MCP OAuth, PostgreSQL et CronJob refresh**. Ses rôles objets sont le graphe/corpus OVH ainsi que les nouveaux rôles raw/documents OVH. Les IDs `PP-RAW-OVH` / `PP-DOCS-OVH` ne réutilisent jamais les identités physiques `PP-RAW` / `PP-DOCS` de MinIO. Les bindings privés de production restent **TBD / UNVERIFIED today**.
 
-La seule décision présentée en cartes est la **méthode d’allocation LLM** pour le 12 août–10 septembre. Aucun choix ni montant final n’est présélectionné. L’audit monétaire, l’inventaire prod, les credentials et la reprise restent incomplets.`,
-`[FAIT · audits embarqués] En **préprod**, \`PP-API\` utilise encore \`PP-RAW\` et le lecteur dérivé \`PP-DOCS\` derrière **PP-MINIO**. Les CronJobs scrape/projection utilisent **un seul bucket OVH, PP-GRAPH** : corpus et graphe sont des préfixes, pas deux S3. **PP-DB est la même base** dans toutes les vues.
+Geo conserve son API, son rôle de base géographique à dépendance API incertaine, son corpus/normalized OVH, les sources PV/zonage/règlements/lots/environnement et les jointures **en processus**. Aucun lien SQL spatial n’est inventé. Les URL Immo et les deux issuers SSO sont visibles. Après T1 le poste sert seulement à l’enrollment/administration optionnels. Dans la cible finale, **TEM est le seul service Scaleway retenu**; MinIO et les autres dépendances SCW n’y sont pas actifs. MatchID est hors périmètre. [Source cible](transitions-target.md).`,
+`[CHEMIN FIXE] Utilisez la barre **Existant → T1 refresh → T2 objets OVH → T3 cible 1 nœud**. Chaque vue est un graphe plateforme complet en SvelteFlow natif et en Mermaid rendu; les quatre zooms as-is restent disponibles dans le sélecteur détaillé.
 
-[FAIT] Le lecteur de PV mappés lit **GEO-S3 / raw/pv-index/cas/**, pas la copie Geo normalisée de préprod. La présence et l’exhaustivité des objets n’ont pas été testées. Scraper un nouveau PV ne prouve donc ni un Signal visible ni un PDF consultable.
+**Existant** est qualifié par les vérifications du 13 septembre, principalement préprod à 12:33–12:37 UTC : API sur MinIO, refresh sur `PP-GRAPH`, même `PP-DB`, corpus PDF Geo séparé. L’accès prod est observé mais ses internals privés ne sont pas inventoriés.
 
-[FAIT] Accès : **immo.sent-tech.ca / preprod.immo.sent-tech.ca** ; SSO : **auth.sent-tech.ca / preprod.auth.sent-tech.ca**. \`preprod.sent-tech.ca\` ne résolvait pas. L’inventaire Immo **prod sur OVH est refusé par RBAC** ; l’ancien cluster SCW n’est pas utilisé pour combler ce manque.
+Chaque transition expose cinq cartes : changements, éléments conservés, retraits, gates et preuves. T1, T2 et T3 sont **proposés / non déployés** jusqu’à leurs preuves propres; une flèche de séquence ne vaut ni promotion ni suppression. [État courant](architecture.md) · [registre](transitions.md).`,
+`[T1 · REFRESH AUTONOME] Immo possède toute la chaîne : acquisition/parse → extraction profilée + grounding → **candidat frais préservé** → enrichissement déterministe 3.4 **sur ce candidat frais** → publication gardée du graphe complet → projection PG atomique → Signal typé + PDF exact.
 
-[FAIT · reprise i-cond] #678 fournit des candidats CAS, pas une publication. La cible récente est **Graphify bibliothèque + mesh en processus dans le pod Immo** ; un service mesh réseau séparé n’est pas requis. Graphify **0.18.0 est publié** ; son installation exacte et son acceptation de bout en bout par Immo restent à établir. [Sources et révisions](continuation-audit.md).`,
-`[JUGEMENT] Le risque principal n’est pas seulement une panne visible : des Jobs peuvent être verts alors que les nouveaux PV ne produisent aucun Signal servi, ou que les preuves pointent vers un autre corpus.
+Graphify **0.18.0 est publié**. La composition hôte mesh 0.19, l’authentification keyring, le lock durable et l’intégration Immo restent à implémenter et qualifier. T1 garde les rôles API MinIO existants jusqu’à T2; Geo fournit les données/preuves géographiques sans posséder le traitement PV Immo.
 
-[FAIT · architecture] **Immo** possède acquisition, interprétation, grounding, publication, projection SQL et service des Signaux. **Geo** possède les sources géographiques, les jointures et les produits OGC/documentaires. **Graphify** fournit sa bibliothèque réutilisable ; **poc-k8s** porte cluster, ingress, isolation et opérations d’infrastructure.
+Acceptation : package installé, tests consumer/intégration, un vrai Signal/PDF et rejeu idempotent, puis Job créé par le CronJob après remplacement de pod et vrai refresh de credentials. Un bump, un Job manuel vert ou un graphe non vide ne remplace pas ces preuves. Les runs manuels et planifiés partagent le même lock exclusif. [Pipeline causal](proposal.md).`,
+`[T2 · STOCKAGE OBJET] Créer les nouveaux rôles logiques OVH `PP-RAW-OVH` / `PP-DOCS-OVH`, migrer lecteurs et writers, comparer clés/tailles/hashes et décodages, clôturer les anciens writers, puis basculer **préprod avant prod**. Les rôles prod sont spécifiés mais leurs bindings physiques restent TBD jusqu’à inventaire autorisé.
 
-[JUGEMENT] Les contrats à protéger sont les identités des objets, les types \`Signal/DesignationEvent\`, l’unicité des writers, le renouvellement des credentials et un point de reprise cohérent graphe/SQL/PDF. Geo ne devient pas propriétaire du traitement PV Immo parce qu’il sert certaines preuves.`,
-`[JUGEMENT] **Question : quelle méthode auditable doit allouer la dépense LLM à Immo/Geo pour le 12 août–10 septembre ?** Les trois méthodes sont des alternatives commerciales, pas des séquences d’architecture.
+`PP-RAW` / `PP-DOCS` restent les identités physiques de l’ancien MinIO; elles ne sont jamais renommées en nouvelles ressources. Après cutover, l’ancien store reste en reprise lecture seule jusqu’à répétition de restauration, fenêtre de rétention et gate de suppression. MinIO ne part qu’à zéro consommateur.
 
-| ID | Méthode | Meilleur argument POUR | Meilleur argument CONTRE | Conséquence monétaire actuelle | Réversibilité |
-| --- | --- | --- | --- | --- | --- |
-| DIRECT | Dépense fournisseur attribuable | Plus proche de la dépense réelle | Les sièges ne donnent pas toujours une ligne par produit | Inconnue avant rapprochement | Rejouable ; le non-attribué reste séparé |
-| USAGE | Usage audité pondéré | Reflète les appels de la fenêtre | Exige déduplication et ventilation input/cache/output exactes | Inconnue avant audit | Recalculable avec journal et formule versionnés |
-| CAPACITY | Capacité historique de pointe | Continuité avec le calcul existant | Allocation de capacité, pas facture provider | **214,743159 CAD** historique Immo+Geo, non final | Remplaçable après audit |
+Le sweep Immo final couvre images, anciens digests, Jobs/CronJobs suspendus ou manuels, CI, backup/rollback/bootstrap, références exécutables et références de secrets. **TEM est l’unique exception.** Le retrait du StatefulSet/PVC n’efface ni les fixtures locales ni l’historique. [Audit sweep](storage-audit.md).`,
+`[T3 · UN NŒUD] La cible consolide les deux tenants Immo/Geo sur **un b3-8 existant**, mais aucune faisabilité n’est revendiquée avant mesures. L’observation courante est trois nœuds; la mémoire instantanée totale est d’environ **9 454 Mi**, supérieure aux **5 907,82 Mi** allouables d’un nœud. MinIO ne représente qu’environ **347 Mi** : sa suppression ne rend pas seule le drain possible.
 
-L’infrastructure est déjà fixée à **un b3-8 BHS5 : 0,082 CAD/h × 720 h = 59,04 CAD**, avant allocation par produit et coûts non-nœud. Ce montant ne vient pas d’un total historique divisé par trois.`,
-`[FAIT] T1, T2 et T3 sont engagés dans cet ordre. Les anciennes alternatives A/B/C restent historiques dans le dossier source ; elles ne sont plus proposées dans l’interface.
+Le gate exige le pic complet partagé incluant Immo prod et le nouveau refresh, des requests réalistes, les choix de veille/hibernation, l’anti-affinity, les PDB, le placement/rattachement PVC, le batch/wake peak et les probes de santé. Le service plan est testé en préprod puis promu séparément. La cible assume un domaine de panne unique et doit préserver reprise et capacité de maintenance.`,
+`[GATES] T1 : contrat installé → consumer tests → vrai Signal/PDF → schedule autonome. T2 : matrice clients → destinations → copie/parité → fence writers → repoint réel → schedule observé → restauration isolée → révocation/suppression. T3 : budget de pic complet → contraintes de placement → drain contrôlé → santé préprod puis prod.
 
-**Contre-arguments commerciaux :** DIRECT peut laisser trop de coûts partagés non attribués ; USAGE peut donner une fausse précision si cache et sessions sont mal réconciliés ; CAPACITY peut facturer une capacité historique sans correspondre à une dépense fournisseur de la période. Aucun ne gagne par défaut.
+**Retour arrière T2 :** arrêter/fencer les writers, restaurer l’ensemble apparié graphe + checkpoint/version SQL + objets de preuve + input-set; journaliser/rejouer les écritures intervenues selon le RPO accepté. Aucune transaction S3/SQL implicite et aucun double writer. Le store ancien reste récupération, pas chemin live.
 
-**Pré-mortem :** dans six mois, les Jobs sont verts mais les nouveaux PV n’arrivent toujours pas dans les Signaux, leurs PDF sont ailleurs et le renouvellement OAuth a été perdu au redémarrage. Nous avons accepté l’infrastructure au lieu de la preuve document → utilisateur.
+**Promotion :** chaque transition est acceptée en préproduction avant une autorisation production séparée. Les internals prod non vérifiés, le RPO/RTO, la rétention, le débit de restauration et les bindings IAM empêchent toute déclaration de déploiement ou suppression dans ce dossier.`,
+`[PREUVES ET LIMITES] Les sources Mermaid commitées produisent les mêmes nœuds, sous-flows `parentId` et relations dans SvelteFlow et dans les SVG Mermaid hors ligne. Chaque leaf et boîte parent porte une icône, un service, un repo/rôle et une référence; l’absence de mapping échoue fermé. Les IDs de stores restent stables entre vues.
 
-**Intérêt du présentateur :** une formule rejouable est plus facile à expliquer ; ce n’est pas une justification de montant. **Ton intérêt :** rattacher toute somme à une dépense, une fenêtre, une règle et une preuve contrôlables.
+La provenance D4 est conservée telle quelle : commentaire capturé **2026-09-13T15:10:18.423Z**, dossier `b001ce…`, input `92b872…`, option `null`. Ce `null` signifie **aucun vote de méthode**, pas une ratification silencieuse. D5 applique la correction directe du propriétaire.
 
-[FAIT · revues] Codex a rendu **six findings**, repris dans D2 puis conservés dans D4. **Opus n’a produit aucun avis : limite hebdomadaire.** La revue Gemini antérieure concerne l’ancien schéma ; elle ne vaut pas revue post-build D4. [Avis réels et traitement individuel](decision-reviews.md).`,
-`[JUGEMENT] **G0** — Inventorier contrats, ressources et **tous** les consommateurs ; inclure la prod dès qu’une ressource est partagée. Fixer les critères de reprise avant toute suppression.
+Les limites restent : production privée non inventoriée, T1/T2/T3 non déployés, cutoff des données du 13 non gelé et facturation non calculée. Les avis antérieurs ne sont pas présentés comme revalidation D5; aucun agent supplémentaire n’a été lancé pour ce build.`,
+`[ANNEXE FACTURATION · EN DERNIER] La période commence à la vraie frontière de la facture/du rapport précédent, **encore non vérifiée**, et se termine le 13 septembre inclus, soit `2026-09-14T00:00:00-04:00` exclusif. Le cutoff réel de collecte doit être enregistré séparément car le 13 est incomplet. Les transitions du 13 sont dans la période demandée, avec statut observé ou planifié.
 
-**G1** — Un document / une ville / un chunk, candidats seulement, sans PG. **G1b** — Credentials opérés : propriétaire, stockage durable, writer unique, tests renouvellement/redémarrage/reprise. Le succès avec une copie éphémère ne qualifie pas l’autonomie.
+Infrastructure : une projection b3-8 BHS5 au tarif **0,082 CAD/h**; heures et montant de la période restent inconnus jusqu’au début vérifié. **720 h / 59,04 CAD** est seulement l’ancienne illustration de 30 jours, jamais le montant courant.
 
-**G2** — Préprod de bout en bout : publication gardée → projection → 3.4 → API → Signal visible + PDF exact ; rejeu/idempotence et échecs. **G3** — Parité des objets, clôture des writers, puis repoint des clients préprod. **G4** — Répétition de restauration et fenêtre de rétention. **G5** — Retrait des ressources **prouvées exclusives à la préprod**, seulement sans consommateur restant.
-
-**G6** — Autorisation prod séparée, inventaire/backup/promotion et répétition des mêmes gates avant tout retrait prod. Les ressources partagées nécessitent l’acceptation de tous leurs consommateurs. **Stockage SCW et images exécutables/rollback** sont aussi inventoriés/remplacés/vérifiés ; supprimer MinIO ne suffit pas. **TEM est exclu.**
-
-**Retour arrière :** clôturer les writers ; restaurer un ensemble cohérent hash du graphe + version/checkpoint SQL + objets de preuve + input-set du run. Empêcher ou journaliser/rejouer les écritures intervenues selon le RPO accepté. Aucun double writer ; aucune transaction S3/SQL magique. Volume, débit de restauration, downtime, RPO/RTO et rétention restent à fixer avant chiffrage.`,
-`| Attendu | Origine | Preuve prévue ou obtenue | Manque |
-| --- | --- | --- | --- |
-| Effectif, pas legacy supposé | Ta demande | Audits main + K8s préprod | Inventaire OVH prod |
-| Même DB/S3, chaîne Immo | Ta demande | Mapping Mermaid, groupes natifs et navigation croisée testés | Pas une certification de disponibilité des données |
-| Nouveau PV → Signal frais + PDF exact | Refresh + contrat API | G1/G2 : hash document, type servi, rejeu et preuve lisible | Tests métier non exécutés dans cette branche documentaire |
-| Upgrade Graphify sans perdre l’extraction | Ta demande + i-cond | Graphify 0.18.0 publié ; import ESM, tests routes/validation/annulation à reprendre côté Immo | Installation exacte et acceptation Immo |
-| Credentials sans poste opérateur | Étude i-cond + revue | G1b : refresh, restart, récupération | Contrat d’exploitation |
-| Retrait sans perte ni writers concurrents | Ta demande + règles | G3/G4 : parité, IAM/writers, restauration | Inventaire, volume, RPO/RTO |
-| Préprod puis prod, TEM conservé | Ta décision | G0–G6 et exclusion explicite TEM | Aucune autorisation de release |
-| Vrai dossier Focus, avis réels | Ta demande | SvelteFlow, sous-flows, sources embarquées, avis Codex/Gemini distincts | Opus indisponible ; pas de consensus |`,
-`[JUGEMENT] La question restante est : **quelle méthode d’allocation LLM faut-il retenir ?** Vous pouvez sélectionner DIRECT, USAGE ou CAPACITY, commenter et copier le tout en JSON. Ce brouillon ne ratifie aucun montant et ne déclenche aucun travail.
-
-L’audit doit encore borner exactement la fenêtre locale, dédupliquer appels et sessions repris, ventiler input/cache write/cache read/output, rattacher modèles et providers, puis séparer dépense réelle, allocation, marge et somme proposée. Le **214,743159 CAD** historique est une allocation de capacité de pointe, pas une facture provider.
-
-L’inventaire prod OVH autorisé, les critères RPO/RTO et le second avis indépendant restent aussi à obtenir. **T1→T2→T3, TEM, la propriété Immo et la base un-nœud sont déjà actés.** Les transitions du 13 septembre sont postérieures à la période mensuelle.`
+LLM : compter plus tard les tokens avec les **mêmes tarifs unitaires que la facture réelle du mois précédent**. Il faut d’abord identifier cette facture et ses tarifs; la note Wave 250804-028 et les anciens rapports ne prouvent pas qu’ils sont les derniers. Aucun choix DIRECT/USAGE/CAPACITY, aucun parsing des tokens et aucun montant ne sont créés ici.`
 ];
