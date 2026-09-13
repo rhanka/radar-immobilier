@@ -38,7 +38,10 @@ run that exhausts its time budget exits non-zero with `progress.json` and
 ## Root index and StartAfter chain
 
 Each successful page is validated and then committed atomically as a sorted
-JSONL page plus a hash-chained receipt. Within one process, the opaque
+JSONL page plus a hash-chained receipt. Serialization and comparisons use
+UTF-8 byte order with `LC_ALL=C`; locale-dependent ordering is forbidden. An
+empty truncated page is retried and never committed. An empty terminal page is
+the anchored proof for an empty bucket. Within one process, the opaque
 continuation token may fetch the next page. Durable resume uses the last
 committed key as `StartAfter`; continuation tokens are not persisted.
 
@@ -58,6 +61,7 @@ committed key as `StartAfter`; continuation tokens are not persisted.
   "pageManifestSha256": "...",
   "previousReceiptSha256": "...",
   "fenceEvidenceDigest": null,
+  "configDigest": "sha256-of-canonical-run-configuration",
   "observedAt": "2026-09-13T18:00:00Z"
 }
 ```
@@ -67,6 +71,13 @@ receipt must use the preceding `lastKey` as its exclusive boundary. The final
 receipt must have `isTruncated:false`. This start anchor, adjacency rule,
 strictly increasing key order, hash chain, and terminal receipt prove that the
 index covers the whole bucket rather than selected prefixes.
+
+`configDigest` binds canonical source and destination coordinates, both
+identity fingerprints, normalized include/exclude classifications, page size,
+retries, concurrency, maximum failures, and maximum object bytes. Every index
+and body receipt carries it. Resume rejects a mismatch before any storage call.
+The time budget is a run-only stop condition and may change between resumes; it
+does not alter evidence semantics.
 
 ## Body evidence shards
 
@@ -81,17 +92,46 @@ Finalization requires a body receipt for every index receipt and exact equality
 between indexed keys and body-manifest keys. Current object versions only are in
 scope; source version history and delete markers remain explicitly unsupported.
 
+An oversized object is a permanent blocker for that configuration, not a
+retryable shard failure. Raising the object limit requires a new checkpoint
+because it changes `configDigest`.
+
 ## Fence and final rescan
 
 Multi-page S3 listing is not a point-in-time snapshot while writers remain
-active. Initial resumable inventory may produce provisional evidence, but final
-`complete:true` requires an externally validated writer fence and a fresh root
-rescan under that fence. The rescan must reproduce the complete ordered key,
-size, ETag-diagnostic, and version-id index before final manifests are accepted.
+active. Checkpoints therefore contain two distinct chains per side:
 
-Every page and body receipt binds the same fence artifact digest and still says
-`fenceValidated:false`; the conductor validates the fence. Any inserted,
-removed, reordered, or changed object invalidates finalization.
+- `provisional/` binds `fenceEvidenceDigest:null` and can never finalize;
+- `fenced/` requires the same non-null fence digest in every receipt and uses
+  the same resumable, hash-chained `StartAfter` mechanism. A validated fence
+  makes its multi-request traversal snapshot-consistent.
+
+Both chains use the same page size and deterministic serialization. The fenced
+chain must reproduce the complete ordered key, size, diagnostic ETag, and
+VersionId index. A provisional body SHA-256 may be reused only when a non-null
+VersionId is exactly equal in both chains. With a null or changed VersionId,
+the full body, headers, metadata, and tags are re-read under the fence; ETag
+equality alone never re-binds body evidence. Insertions, deletions, reordering,
+tail additions, or changes invalidate finalization.
+
+The final artifact binds both chain roots, both manifests, `configDigest`, and
+the fence digest. It may say `toolComplete:true` only after every fenced page
+and required fenced body shard is complete, but always says
+`fenceValidated:false`; external fence validation remains the conductor's
+responsibility and is never inferred from the artifact.
+
+## Copy consumption contract
+
+A later executed `copy` must consume the immutable final inventory artifact
+through a dedicated proof argument; it must not repeat the old monolithic
+listing. The tool validates the artifact against the invocation's exact
+coordinates, identities, classifications, limits, manifests, chain roots, and
+fence digest. It refuses every PUT unless both sides are `toolComplete:true`,
+all existing expected-union, conditional-write, no-conflict, and recovery gates
+pass, and the supplied fence record matches the artifact. `copy_one` still
+re-hashes the source body immediately before its conditional PUT. Receipts
+continue to report `fenceValidated:false` and
+`providerEnforcementValidated:false`.
 
 ## Fail-closed invariants
 
@@ -107,6 +147,12 @@ removed, reordered, or changed object invalidates finalization.
   an operator responsibility because object keys are recorded.
 - Existing no-delete, conditional-write, expected-union, and recovery gates
   remain unchanged.
+- The checkpoint directory is the sole cross-run state. Every bounded attempt
+  uses a fresh report directory and emits `summary.json` with
+  `resumeRequired:true`, `cutoverReady:false` when its time budget expires.
+- Page/body data and receipts are written to same-directory temporary files,
+  flushed, and atomically renamed. Resume may discard only a temp/uncommitted
+  tail; missing or corrupt committed chain members fail closed.
 
 ## Required hermetic tests before build acceptance
 
@@ -124,10 +170,19 @@ removed, reordered, or changed object invalidates finalization.
 9. Progress and final receipts contain no credential values or opaque tokens.
 10. No copy or reconciliation PUT is possible until both whole-bucket sides are
     complete and all existing write gates pass.
+11. Truncated empty pages retry without advancing; UTF-8 byte-order edge keys
+    preserve strict ordering across page boundaries.
+12. Resume accepts a different time budget but rejects every `configDigest`
+    input change before a storage call; each run requires a fresh report dir.
+13. Null-VersionId provisional objects are re-hashed under the fence, while an
+    exact non-null VersionId permits deterministic body-shard reuse.
+14. Executed copy consumes the finalized proof, never monolithic inventory, and
+    still re-hashes each source body before any conditional PUT.
 
 ## Future implementation lots
 
-After independent design review only: (1) root index/checkpoint and resume,
-(2) body shards and independent resume, then (3) fenced rescan/finalizer plus
-operator documentation. Each commit must stay at or below 145 changed lines.
+After independent design review only: (1) provisional root index/checkpoint and
+resume, (2) body shards and independent resume, (3) resumable fenced chains and
+finalizer, then (4) immutable proof consumption by copy plus operator
+documentation. Each commit must stay at or below 145 changed lines.
 This document authorizes none of those changes or any live operation.
