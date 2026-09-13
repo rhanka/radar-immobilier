@@ -349,6 +349,65 @@ if jq -e '.firstKey == null and .lastKey == null and .isTruncated == false' \
 else bad "$TEST_NAME"; fi
 
 reset_store
+put_fixture source src raw/stable.txt alpha '{"VersionId":null}'
+put_fixture destination dst raw/stable.txt alpha '{"VersionId":null}'
+run_tool inventory "$TEST_TMP/reports/final-provisional" \
+  --checkpoint-dir "$TEST_TMP/final-checkpoint" --page-size 1 --time-budget-seconds 30 >/dev/null
+printf 'writers fenced\n' >"$TEST_TMP/final-fence.txt"; : >"$AWS_LOG"
+TEST_NAME='fenced inventory finalizes distinct stable whole-bucket chains'
+expect_ok run_tool inventory "$TEST_TMP/reports/final-fenced" \
+  --checkpoint-dir "$TEST_TMP/final-checkpoint" --page-size 1 --time-budget-seconds 30 \
+  --fence-record "$TEST_TMP/final-fence.txt" --resume
+if jq -e '.toolComplete == true and .fenceValidated == false and
+    .providerEnforcementValidated == false and .fenceEvidenceDigest != null' \
+    "$TEST_TMP/final-checkpoint/final-inventory.json" >/dev/null &&
+  jq -e '.fenceEvidenceDigest == null' \
+    "$TEST_TMP/final-checkpoint/provisional/source/index-receipt-000001.json" >/dev/null &&
+  jq -e '.fenceEvidenceDigest != null' \
+    "$TEST_TMP/final-checkpoint/fenced/source/index-receipt-000001.json" >/dev/null &&
+  grep -Eq $'^source\tget-object\t.*--key raw/stable.txt' "$AWS_LOG"; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/drift.txt alpha; put_fixture destination dst raw/drift.txt alpha
+run_tool inventory "$TEST_TMP/reports/drift-provisional" \
+  --checkpoint-dir "$TEST_TMP/drift-checkpoint" --page-size 1 --time-budget-seconds 30 >/dev/null
+put_fixture source src raw/drift.txt bravo; put_fixture destination dst raw/drift.txt bravo
+printf 'writers fenced\n' >"$TEST_TMP/drift-fence.txt"
+TEST_NAME='fenced finalization rejects body drift hidden by stable size and ETag'
+expect_status 1 run_tool inventory "$TEST_TMP/reports/drift-fenced" \
+  --checkpoint-dir "$TEST_TMP/drift-checkpoint" --page-size 1 --time-budget-seconds 30 \
+  --fence-record "$TEST_TMP/drift-fence.txt" --resume
+if [ ! -e "$TEST_TMP/drift-checkpoint/final-inventory.json" ] &&
+  jq -e '.inventoryCheckpoint.toolComplete == false and
+    (.missingProof | index("fenced checkpoint differs from provisional whole-bucket evidence"))' \
+    "$TEST_TMP/reports/drift-fenced/summary.json" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/a.txt alpha; put_fixture source src raw/b.txt beta
+put_fixture destination dst raw/a.txt alpha; put_fixture destination dst raw/b.txt beta
+run_tool inventory "$TEST_TMP/reports/fenced-resume-provisional" \
+  --checkpoint-dir "$TEST_TMP/fenced-resume" --page-size 1 --time-budget-seconds 30 >/dev/null
+printf 'writers fenced\n' >"$TEST_TMP/fenced-resume-fence.txt"; FAKE_CLOCK_STEP=2
+TEST_NAME='fenced rescan is itself bounded and resumable'
+expect_status 1 run_tool inventory "$TEST_TMP/reports/fenced-resume-first" \
+  --checkpoint-dir "$TEST_TMP/fenced-resume" --page-size 1 --time-budget-seconds 1 \
+  --fence-record "$TEST_TMP/fenced-resume-fence.txt" --resume
+if jq -e '.phase == "fenced" and .resumeRequired == true' \
+    "$TEST_TMP/fenced-resume/progress.json" >/dev/null; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+unset FAKE_CLOCK_STEP; : >"$AWS_LOG"
+TEST_NAME='fenced resume restarts after its last committed key'
+expect_ok run_tool inventory "$TEST_TMP/reports/fenced-resume-second" \
+  --checkpoint-dir "$TEST_TMP/fenced-resume" --page-size 1 --time-budget-seconds 30 \
+  --fence-record "$TEST_TMP/fenced-resume-fence.txt" --resume
+if grep -Eq $'^source\tlist-objects-v2\t.*--start-after raw/a.txt' "$AWS_LOG" &&
+  jq -e '.toolComplete == true and .fenceValidated == false' \
+    "$TEST_TMP/fenced-resume/final-inventory.json" >/dev/null; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
+
+reset_store
 FAKE_FAIL_SIDE=destination FAKE_FAIL_OPERATION=head-bucket FAKE_FAIL_ATTEMPTS=99
 TEST_NAME='fails when the credential cannot prove the exact destination target'
 expect_bad run_tool inventory "$TEST_TMP/reports/target-identity" --retries 1
