@@ -186,3 +186,120 @@ flowchart TB
   SCW_RESIDUE -.-> TEM
 ```
 
+## T3 — complete target on one existing b3-8
+
+This is the complete end-state requested for orientation. It is **PROPOSED / NOT
+DEPLOYED**. One existing OVH b3-8 houses the Immo and Geo tenants only after the
+shared full peak, requests, anti-affinity, PDB and PVC placement prove it safe.
+MatchID is outside this dossier. No MinIO or other active Scaleway component is
+part of this target; SCW TEM is the sole explicit exception.
+
+```mermaid
+flowchart TB
+  subgraph T3_CARD["T3 · PROPOSED / NOT DEPLOYED · stage card"]
+    T3_CHANGE["CHANGES<br/>Consolidate Immo + Geo tenants onto one existing b3-8 after measured safety proof"]
+    T3_KEEP["KEPT<br/>Prod/preprod URLs + SSO, Immo/Geo roles, OVH stores, backups/recovery and TEM"]
+    T3_REMOVE["REMOVED<br/>Extra active cluster nodes only after drain acceptance; no MinIO / other SCW target"]
+    T3_GATES["GATES<br/>Full shared peak + requests + anti-affinity/PDB/PVC + preprod THEN production health"]
+    T3_EVIDENCE["EVIDENCE<br/>Observed 3 nodes; 9454 Mi instant > 5907.82 Mi single allocatable; MinIO ~347 Mi insufficient"]
+  end
+  user["User / browser / approved MCP client"]
+  ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
+  prurl["immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
+  user --> ppurl
+  user --> prurl
+  subgraph OVH_CLUSTER["[OVH-CLUSTER] TARGET · one EXISTING b3-8 · both Immo and Geo tenants · shared safety/capacity caveat"]
+    edge["Traefik / TLS / namespace isolation<br/>shared platform on one failure domain"]
+    subgraph immo_tenant["Immo tenant · full product chain"]
+      subgraph immo_pp["PREPRODUCTION · acceptance before production"]
+        PP_UI["[PP-UI] Immo frontend"]
+        PP_API["[PP-API] Immo API"]
+        PP_MCP["[PP-MCP] OAuth remote MCP"]
+        PP_DB[("[PP-DB] same PostgreSQL/PostGIS")]
+        PP_REFRESH["[PP-REFRESH] autonomous Immo CronJob<br/>acquire → profile → 3.4 → graph → PG"]
+      end
+      subgraph immo_pr["PRODUCTION · target roles; private bindings UNVERIFIED today"]
+        PR_UI["[PR-UI] Immo frontend"]
+        PR_API["[PR-API] Immo API"]
+        PR_MCP["[PR-MCP] OAuth remote MCP · target role"]
+        PR_DB[("[PR-DB] target database role<br/>physical binding TBD / UNVERIFIED today")]
+        PR_REFRESH["[PR-REFRESH] target autonomous CronJob<br/>physical binding TBD / UNVERIFIED today"]
+      end
+    end
+    subgraph geo_tenant["Geo tenant · geographic services and bounded processing"]
+      PP_GEO["[PP-GEO] Geo API preprod"]
+      GEO_API["[GEO-API] Geo API production"]
+      GEO_DB[("[GEO-DB] geographic database role<br/>API dependency uncertain / UNVERIFIED")]
+      GEO_CAPTURE["Geo capture<br/>bytes + URL + time + SHA-256"]
+      GEO_NORMALIZE["Geo normalize / provenance"]
+      GEO_JOIN["In-process spatial join<br/>parcel ∩ zoning · not SQL"]
+      GEO_FOLD["In-process semantic joins<br/>zones + regulations + lots"]
+      GEO_CONSTRAINTS["In-process environment constraints<br/>explicit missing-data status"]
+    end
+    subgraph identity_platform["Shared SSO platform · separate environment issuers"]
+      pidp["preprod.auth.sent-tech.ca<br/>SSO / OIDC"]
+      idp["auth.sent-tech.ca<br/>SSO / OIDC"]
+    end
+  end
+  subgraph OVH_OBJECTS["OVH object storage · external to the node"]
+    PP_GRAPH[("[PP-GRAPH] same OVH graph + corpus bucket")]
+    PR_GRAPH[("[PR-GRAPH] target graph + corpus role<br/>physical binding TBD / UNVERIFIED today")]
+    PP_RAW_OVH[("[PP-RAW-OVH] new API raw target role<br/>logical binding TBD")]
+    PP_DOCS_OVH[("[PP-DOCS-OVH] new API documents target role<br/>logical binding TBD")]
+    PR_RAW_OVH[("[PR-RAW-OVH] production API raw target role<br/>physical binding TBD / UNVERIFIED today")]
+    PR_DOCS_OVH[("[PR-DOCS-OVH] production API documents target role<br/>physical binding TBD / UNVERIFIED today")]
+    PP_GEO_S3[("[PP-GEO-S3] OVH normalized serving copy")]
+    GEO_S3[("[GEO-S3] OVH raw corpus + normalized products")]
+  end
+  subgraph geo_sources["Authoritative geographic and municipal inputs"]
+    PV_SRC["PV / notices"]
+    ZONES_SRC["Zoning polygons"]
+    REGULATIONS_SRC["Regulations / grids"]
+    LOTS_SRC["Cadastral lots / assessment"]
+    ENV_SRC["Flood / hydrography / CPTAQ"]
+  end
+  providers["LLM providers<br/>called by operated Immo refresh"]
+  WS_ADMIN["[WS-ADMIN] optional enrollment / administration only<br/>no routine LLM runtime"]
+  TEM["[SCW-TEM] sole retained Scaleway service<br/>until replacement validated"]
+  ppurl --> edge
+  prurl --> edge
+  edge --> PP_UI
+  edge --> PR_UI
+  PP_UI --> PP_API
+  PP_UI --> PP_MCP
+  PP_API <--> pidp
+  PR_UI --> PR_API
+  PR_UI --> PR_MCP
+  PR_API <--> idp
+  PP_API --> PP_DB
+  PP_API --> PP_RAW_OVH
+  PP_API --> PP_DOCS_OVH
+  PP_REFRESH --> PP_GRAPH
+  PP_REFRESH --> PP_DB
+  PP_REFRESH --> providers
+  PP_API --> GEO_S3
+  PP_API --> PP_GEO
+  PR_API -.-> PR_RAW_OVH
+  PR_API -.-> PR_DOCS_OVH
+  PR_REFRESH -.-> PR_GRAPH
+  PR_REFRESH -.-> PR_DB
+  PR_REFRESH -.-> providers
+  PR_API --> GEO_API
+  PP_GEO --> PP_GEO_S3
+  GEO_API --> GEO_S3
+  GEO_API -.-> GEO_DB
+  PV_SRC --> GEO_CAPTURE
+  ZONES_SRC --> GEO_CAPTURE
+  REGULATIONS_SRC --> GEO_CAPTURE
+  LOTS_SRC --> GEO_CAPTURE
+  ENV_SRC --> GEO_CAPTURE
+  GEO_CAPTURE --> GEO_NORMALIZE
+  GEO_NORMALIZE --> GEO_JOIN
+  GEO_NORMALIZE --> GEO_FOLD
+  GEO_JOIN --> GEO_FOLD
+  GEO_NORMALIZE --> GEO_CONSTRAINTS
+  GEO_NORMALIZE --> GEO_S3
+  GEO_FOLD --> GEO_S3
+  GEO_CONSTRAINTS --> GEO_S3
+  WS_ADMIN -.-> PP_REFRESH
+```

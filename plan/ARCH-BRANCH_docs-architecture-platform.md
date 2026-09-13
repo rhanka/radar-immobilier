@@ -118,10 +118,10 @@
   - [x] Embed the dated Mermaid/SvelteFlow rendering into the monthly companion; retain post-period separation.
   - [x] Pin the dated rendering, architecture inputs and read-only monthly evidence in a reproducible SHA-256 manifest.
 - [ ] **Lot 12 — D5 owner correction: architecture-first Focus dossier.**
-  - [ ] Add committed full-platform T1, T2 and T3 Mermaid states with stable resource identities and explicit stage cards.
+  - [x] Add committed full-platform T1, T2 and T3 Mermaid states with stable resource identities and explicit stage cards.
     - [x] T1 full-platform source.
     - [x] T2 full-platform source.
-    - [ ] T3 full-platform source.
+    - [x] T3 full-platform source.
   - [ ] Replace Option A with the actual T1 refresh sequence and preserve its acceptance boundaries.
   - [ ] Render every transition as complete native nested SvelteFlow and sanitized Mermaid; open on the final target.
   - [ ] Replace the allocation referendum with fixed invoice-tariff instructions, unresolved period evidence and D4 provenance.
