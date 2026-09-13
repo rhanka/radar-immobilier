@@ -249,3 +249,125 @@ spec:
               resources:
                 requests: { cpu: 50m, memory: 96Mi }
                 limits: { cpu: 150m, memory: 256Mi }
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: radar-refresh-pv
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: graph-projection
+spec:
+  # Production-dormant base. Only the preprod overlay activates this workload.
+  suspend: true
+  schedule: "17 5 * * *"
+  timeZone: "Etc/UTC"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # A later cycle resumes durable, hash-checked state; do not duplicate a
+      # provider call automatically inside the same scheduled execution.
+      backoffLimit: 0
+      activeDeadlineSeconds: 1200
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: radar-immobilier
+            app.kubernetes.io/part-of: sentropic
+            app.kubernetes.io/component: graph-projection
+        spec:
+          restartPolicy: Never
+          serviceAccountName: radar-app
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            fsGroup: 1001
+            seccompProfile: { type: RuntimeDefault }
+          initContainers:
+            - name: seed-keyring-once
+              image: ghcr.io/rhanka/radar-api:latest
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }
+              command:
+                - /bin/sh
+                - -ceu
+                - |
+                  mkdir -p /keyring/runtime
+                  flock -x /keyring/runtime/.bootstrap.lock -c '
+                    if [ ! -f /keyring/runtime/.key ]; then
+                      cp -a /bootstrap/. /keyring/runtime/
+                      chmod 0700 /keyring/runtime
+                      chmod 0600 /keyring/runtime/.key /keyring/runtime/*.json
+                    fi
+                  '
+              resources:
+                requests: { cpu: 5m, memory: 16Mi }
+                limits: { cpu: 50m, memory: 64Mi }
+              volumeMounts:
+                - { name: keyring, mountPath: /keyring }
+                - { name: keyring-bootstrap, mountPath: /bootstrap, readOnly: true }
+          containers:
+            - name: refresh-pv
+              image: ghcr.io/rhanka/radar-api:latest
+              imagePullPolicy: IfNotPresent
+              workingDir: /workspace/api
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }
+              command: ["/usr/bin/flock", "-n", "/keyring/runtime/.refresh.lock", "node", "dist/scripts/refresh-pv.js", "waterloo"]
+              envFrom:
+                - configMapRef: { name: radar-api }
+              env:
+                - { name: NODE_OPTIONS, value: "--max-old-space-size=1024 --dns-result-order=ipv4first" }
+                - { name: REFRESH_PROVIDER, value: "openai" }
+                - { name: REFRESH_MODEL, value: "gpt-5.6-luna" }
+                - { name: REFRESH_REASONING_EFFORT, value: "high" }
+                - { name: REFRESH_MAXIMUM_ATTEMPTS, value: "1" }
+                - { name: REFRESH_TIMEOUT_MS, value: "900000" }
+                - { name: REFRESH_BUDGET_LIMIT, value: "20000" }
+                - { name: REFRESH_MAX_OUTPUT_TOKENS, value: "4096" }
+                - { name: REFRESH_ACQUISITION_LIMIT, value: "1" }
+                - { name: SENTROPIC_LLM_MESH_KEYRING_DIR, value: "/keyring/runtime" }
+                - name: REFRESH_PRINCIPAL_REF
+                  valueFrom: { secretKeyRef: { name: radar-refresh-runtime, key: REFRESH_PRINCIPAL_REF } }
+                - name: REFRESH_OWNER_SCOPE_REF
+                  valueFrom: { secretKeyRef: { name: radar-refresh-runtime, key: REFRESH_OWNER_SCOPE_REF } }
+                - name: POSTGRES_USER
+                  valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+                - name: POSTGRES_PASSWORD
+                  valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+                - name: POSTGRES_DB
+                  valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+                - name: SCRAPE_S3_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+                - name: SCRAPE_S3_SECRET_KEY
+                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+              resources:
+                # Keep this network-bound pilot within the live preprod quota;
+                # 1Gi of Node heap retains 512Mi for native/runtime overhead.
+                requests: { cpu: 50m, memory: 512Mi }
+                limits: { cpu: 150m, memory: 1536Mi }
+              volumeMounts:
+                - { name: keyring, mountPath: /keyring }
+                - { name: scratch, mountPath: /tmp }
+          volumes:
+            - name: keyring
+              persistentVolumeClaim: { claimName: radar-refresh-keyring }
+            - name: keyring-bootstrap
+              # Secret volumes are projected root:fsGroup. Group-read is needed
+              # by the non-root bootstrap initContainer; the copied keyring is
+              # immediately tightened to 0600 on the private PVC.
+              secret: { secretName: radar-refresh-keyring-bootstrap, defaultMode: 0440 }
+            - name: scratch
+              emptyDir: { sizeLimit: 512Mi }
