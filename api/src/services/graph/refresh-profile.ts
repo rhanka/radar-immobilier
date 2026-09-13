@@ -42,6 +42,7 @@ export interface RefreshProfileChunk {
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
 }
+export const REFRESH_PROFILE_CONTRACT_VERSION = "refresh-pv-018.2";
 export function loadRefreshProfileContext(options: LoadRefreshProfileContextOptions): RefreshProfileContext {
   if (options.unregisteredOnly) {
     if (!options.profilePath) throw new Error("Unregistered-only refresh requires an explicit profile path");
@@ -68,22 +69,63 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
   const properties = Object.fromEntries(Object.entries(context.profile.node_types)
     .filter(([type]) => allowed.has(type)).map(([type, spec]) =>
       [type, (spec as unknown as Record<string, unknown>).properties ?? {}]));
+  const evidenceRelations = new Set(context.profile.evidence_policy.relation_types);
+  const relations = Object.fromEntries(Object.entries(context.profile.relation_types).flatMap(([type, spec]) => {
+    const sourceNodeTypes = spec.source_types.filter((nodeType) => allowed.has(nodeType));
+    const targetNodeTypes = spec.target_types.filter((nodeType) => allowed.has(nodeType));
+    return sourceNodeTypes.length && targetNodeTypes.length ? [[type, {
+      source_node_types: sourceNodeTypes, target_node_types: targetNodeTypes,
+      requires_evidence_refs: spec.requires_evidence || evidenceRelations.has(type),
+    }]] : [];
+  }));
+  const pdfIdentity = { source_file: chunk.originalKey, rawRef: chunk.originalKey,
+    docSha: chunk.docSha, sourceUrl: chunk.sourceUrl, modality: "pdf" };
+  const pdfIdentityProperties = Object.fromEntries(Object.entries(pdfIdentity)
+    .map(([key, value]) => [key, { const: value }]));
   return JSON.stringify({
+    contract_version: REFRESH_PROFILE_CONTRACT_VERSION,
     type: "Graphify Extraction",
     required: ["nodes", "edges", "input_tokens", "output_tokens"],
     ontology: { profile_id: context.profile.id, profile_version: context.profile.version,
-      allowed_node_types: [...allowed], node_properties: properties },
+      allowed_node_types: [...allowed], node_properties: properties, relation_signatures: relations },
     graph_contract: {
       node_file_type: ["code", "concept", "document", "image", "paper", "rationale"],
       edge_confidence: ["AMBIGUOUS", "EXTRACTED", "INFERRED"],
+      entity_source_file: { const: chunk.originalKey },
+      evidence_refs: { type: "array", items: { type: "string", references: "evidence[].id" },
+        minItems: context.profile.evidence_policy.min_refs,
+        required_for_node_types: context.profile.evidence_policy.node_types,
+        required_for_relation_types: context.profile.evidence_policy.relation_types },
     },
-    evidence: { modality: "pdf", docSha: chunk.docSha, rawRef: chunk.originalKey,
-      sourceUrl: chunk.sourceUrl, allowedPages: chunk.pages, excerpt: "verbatim text from the cited page" },
-    constraints: ["Omit facts absent from the chunk, including in-force status and residential unit counts."],
+    evidence: { pdf_identity: pdfIdentity, allowedPages: chunk.pages,
+      citation: { type: "object", required: ["source_file", "rawRef", "docSha", "sourceUrl", "page", "excerpt"],
+        properties: { ...pdfIdentityProperties, page: { enum: chunk.pages },
+          excerpt: { type: "string", description: "verbatim text from the cited page" } } },
+      evidence_item: { type: "object", required: ["id", "source_file", "rawRef", "docSha", "sourceUrl", "page", "excerpt"],
+        properties: { id: { type: "string", minLength: 1 }, ...pdfIdentityProperties,
+          page: { enum: chunk.pages },
+          excerpt: { type: "string", description: "verbatim text from the cited page" } } } },
+    constraints: ["Omit facts absent from the chunk, including in-force status and residential unit counts.",
+      "An empty nodes/edges/evidence extraction is valid; the enclosing chunk retains the verified PDF identity."],
   });
 }
 function normalized(value: string): string {
   return value.replace(/\s+/g, " ").trim();
+}
+function validatePdfRecord(value: Record<string, unknown>, chunk: RefreshCorpusChunk): void {
+  if (value["source_file"] !== chunk.originalKey || value["rawRef"] !== chunk.originalKey
+    || value["docSha"] !== chunk.docSha || value["sourceUrl"] !== chunk.sourceUrl
+    || value["modality"] !== "pdf") {
+    throw new Error(`Model output has invalid original PDF identity for chunk ${chunk.id}`);
+  }
+  const page = value["page"];
+  if (!Number.isInteger(page) || !chunk.pages.includes(page as number)) {
+    throw new Error(`Model output has invalid original PDF page for chunk ${chunk.id}`);
+  }
+  const excerpt = value["excerpt"] ?? value["quote"] ?? value["text"];
+  if (typeof excerpt !== "string" || !normalized(chunk.text).includes(normalized(excerpt))) {
+    throw new Error(`Model output has ungrounded PDF excerpt for chunk ${chunk.id}`);
+  }
 }
 function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk): void {
   const entities = [...extraction.nodes, ...extraction.edges];
@@ -93,20 +135,11 @@ function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk): 
   }
   for (const entity of entities) {
     for (const citation of entity.citations ?? []) {
-      const page = citation.page;
-      const sourceUrl = citation.sourceUrl ?? citation.source_url;
-      const excerpt = citation.excerpt ?? citation.quote;
-      if (citation.source_file !== chunk.originalKey || citation.rawRef !== chunk.originalKey
-        || citation.docSha !== chunk.docSha || sourceUrl !== chunk.sourceUrl) {
-        throw new Error(`Invalid original PDF identity for chunk ${chunk.id}`);
-      }
-      if (!Number.isInteger(page) || !chunk.pages.includes(page as number)) {
-        throw new Error(`Invalid original PDF page for chunk ${chunk.id}`);
-      }
-      if (!excerpt || !normalized(chunk.text).includes(normalized(excerpt))) {
-        throw new Error(`Ungrounded PDF excerpt for chunk ${chunk.id}`);
-      }
+      validatePdfRecord(citation as unknown as Record<string, unknown>, chunk);
     }
+  }
+  for (const evidence of extraction.evidence ?? []) {
+    validatePdfRecord(evidence as unknown as Record<string, unknown>, chunk);
   }
 }
 
@@ -148,9 +181,12 @@ export async function extractRefreshProfile(
       const outputPath = join(outputDir, `${chunk.id}.json`);
       const generation = await options.textClient.generateJson({
         schema: schemaFor(chunk, options.context),
-        prompt: `Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
+        prompt: `Contract ${REFRESH_PROFILE_CONTRACT_VERSION}. Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
 Every node file_type must be "document" for this PDF. Edge confidence, when present, must be
-"AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.\n\n${buildProfileChunkPrompt(options.context, {
+"AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.
+Every entity and nested citation must use the exact PDF identity in the schema. Evidence refs are
+non-empty arrays of string IDs from evidence[].id, never embedded objects. Follow the relation source/target
+signatures exactly. If no supported fact is grounded in the PDF, return empty nodes, edges, and evidence.\n\n${buildProfileChunkPrompt(options.context, {
           filePath: chunk.originalKey, fileType: "document", text: chunk.text,
         })}`,
         outputPath, maxOutputTokens: options.maxOutputTokens,

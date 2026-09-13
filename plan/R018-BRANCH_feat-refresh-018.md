@@ -70,6 +70,7 @@
 - [x] C13b: prove guarded conflict, PG provenance regression and selected-city failure.
 - [x] C14: add a bounded, redacted refresh command with deterministic saved-PDF smoke input.
 - [x] C07d: state the public Graphify node file-type and edge-confidence enums after the first live response exposed an under-specified contract.
+- [x] C07e: version the strict PDF identity, nested citation, evidence-ref and relation-signature contract while preserving linked empty findings.
 - [x] C14b: emit a redacted model-call count and latency receipt without prompts, outputs or account material.
 - [x] C14c: identify the exact live schema and prompt by digest in the redacted model-call receipt.
 - [x] C14d: distinguish completed generation from failure instead of treating cleanup as a provider response.
