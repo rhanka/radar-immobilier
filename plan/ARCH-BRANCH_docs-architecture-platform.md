@@ -168,7 +168,7 @@
   - [x] Restrict infrastructure billing to one b3-8 at 0.082 CAD/h; exclude two/three-node platform pass-through costs.
   - [x] Generate and verify the dated Focus HTML, standalone report HTML/PDF and SHA-256 evidence manifest.
   - [x] Pass mapping, nested SvelteFlow, rendered Mermaid, browser, offline, clipboard and PDF text/layout gates.
-- [ ] **Lot 16 — D7 owner correction: BEFORE / AFTER dossier and readable report.**
+- [x] **Lot 16 — D7 owner correction: BEFORE / AFTER dossier and readable report.**
   - [x] Model explicit owner questions, selectable options and non-blocking LLM ratification without reopening fixed decisions.
   - [x] Render every question before its Focus options, with one comment per question and JSON actions.
   - [x] Publish a committed offline D7 before/after HTML companion.
@@ -176,4 +176,4 @@
   - [x] Restrict the primary Focus architecture to the complete BEFORE and AFTER graphs.
   - [x] Verify native icons, repository provenance, nested subflows, comments and actual JSON clipboard capture.
   - [x] Embed both complete native diagrams legibly in the monthly PDF and keep the August 10–September 13 window.
-  - [ ] Regenerate dated evidence and pass scope/diff/report gates.
+  - [x] Regenerate dated evidence and pass scope/diff/report gates.
