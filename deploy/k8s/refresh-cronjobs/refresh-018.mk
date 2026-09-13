@@ -52,6 +52,16 @@ enroll-cloud-code:
 	  -v "$(OVERLAY)/enroll-cloud-code.mjs:/workspace/enroll-cloud-code.mjs:ro" "$(LOCAL_IMAGE)" \
 	  node /workspace/enroll-cloud-code.mjs
 
+.PHONY: consent-cloud-code
+consent-cloud-code:
+	@test "$(ENV)" = "test-refresh-018" || { echo "ENV=test-refresh-018 is required" >&2; exit 1; }
+	@[[ "$(OAUTH_URL)" == https://accounts.google.com/* ]] \
+	  || { echo "OAUTH_URL must be the active Google authorization URL" >&2; exit 1; }
+	@docker run --rm --network host --tmpfs /workspace \
+	  -e OAUTH_URL="$(OAUTH_URL)" \
+	  -v "$(OVERLAY)/oauth-consent.mjs:/workspace/oauth-consent.mjs:ro" \
+	  -w /workspace node:22-bookworm-slim node oauth-consent.mjs
+
 .PHONY: push-immutable
 push-immutable:
 	@test "$(ENV)" = "preprod" || { echo "ENV=preprod is required" >&2; exit 1; }
