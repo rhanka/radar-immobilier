@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -8,10 +8,11 @@ const required = (name) => process.env[name] || (() => { throw new Error(`${name
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
 const t1Root = required("BENCHMARK_T1_ROOT");
 const t1Commit = required("BENCHMARK_T1_COMMIT");
+const campaign = process.env.BENCHMARK_CAMPAIGN;
 const maxOutputTokens = 16_384;
 const systemPrompt = "You are Graphify's JSON extraction backend. Return only valid JSON matching the requested schema. Do not include Markdown prose outside the JSON object.";
 const manifest = JSON.parse(await readFile(resolve(repositoryRoot,
-  "docs/reviews/refresh-benchmark/manifest.json"), "utf8"));
+  `docs/reviews/refresh-benchmark/${campaign ? `${campaign}/` : ""}manifest.json`), "utf8"));
 const profileModulePath = resolve(t1Root, "api/src/services/graph/refresh-profile.ts");
 const corpusModulePath = resolve(t1Root, "api/src/services/graph/refresh-corpus.ts");
 const profileModuleSha256 = sha256(await readFile(profileModulePath));
@@ -57,7 +58,11 @@ for (const document of manifest.documents) {
     promptSha256: sha256(captured.prompt), schemaBytes: Buffer.byteLength(captured.schema),
     promptBytes: Buffer.byteLength(captured.prompt) });
 }
-console.log(JSON.stringify({ schemaVersion: 1, frozenAt: new Date().toISOString(),
+const result = { schemaVersion: 1, frozenAt: new Date().toISOString(), campaign: campaign ?? "v1",
   t1Commit, profileModuleSha256, corpusModuleSha256, graphifyVersion: "0.18.0",
   meshVersion: "0.19.0", maxOutputTokens, systemPrompt,
-  systemPromptSha256: sha256(systemPrompt), documents }, null, 2));
+  systemPromptSha256: sha256(systemPrompt), documents };
+if (process.env.BENCHMARK_FREEZE_OUTPUT) {
+  await writeFile(process.env.BENCHMARK_FREEZE_OUTPUT, JSON.stringify(result), { flag: "wx" });
+}
+console.log(JSON.stringify(result));
