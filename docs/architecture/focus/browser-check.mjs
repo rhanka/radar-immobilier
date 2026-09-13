@@ -1,0 +1,83 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { missingMermaidLabels } from './mermaid-labels.mjs';
+const { graphs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
+const base = 'http://127.0.0.1:9238';
+const focusPort = process.env.FOCUS_PORT ?? '5188';
+const focusOrigin = `http://127.0.0.1:${focusPort}`;
+const page = await (await fetch(`${base}/json/new?${focusOrigin}/`, { method: 'PUT' })).json();
+const ws = new WebSocket(page.webSocketDebuggerUrl);
+await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = reject; });
+let id = 0; const pending = new Map(), errors = [], external = [];
+ws.onmessage = event => {
+  const data = JSON.parse(event.data);
+  if (data.method === 'Runtime.exceptionThrown') errors.push(data.params.exceptionDetails);
+  if (data.method === 'Network.requestWillBeSent' && /^https?:/.test(data.params.request.url) && !data.params.request.url.startsWith(focusOrigin)) external.push(data.params.request.url);
+  const item = pending.get(data.id); if (item) { pending.delete(data.id); data.error ? item.reject(data.error) : item.resolve(data.result); }
+};
+const call = (method, params = {}) => new Promise((resolve, reject) => { pending.set(++id, { resolve, reject }); ws.send(JSON.stringify({ id, method, params })); });
+const evaluate = async expression => { const result = await call('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }); if (result.exceptionDetails) throw Error(JSON.stringify(result.exceptionDetails)); return result.result.value; };
+const waitUntil = async (expression, failure) => { const until = Date.now() + 3000; do { try { if (await evaluate(expression)) return; } catch (error) { if (error?.code !== -32000) throw error; } await new Promise(resolve => setTimeout(resolve, 50)); } while (Date.now() < until); throw Error(failure); };
+const timeout = setTimeout(() => { console.error('Browser verification timed out'); process.exit(1); }, 45000);
+await call('Runtime.enable'); await call('Network.enable');
+await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
+await waitUntil(`Boolean(document.querySelector('.svelte-flow__node'))`, 'Native flow missing');
+await evaluate(`window.checkMermaidLabels=${missingMermaidLabels.toString()};window.expectedGraphs=${JSON.stringify(graphs)};true`);
+console.log(await evaluate(`(async () => {
+  const settle = () => new Promise(resolve => setTimeout(resolve, 180));
+  const choose = (label, value) => { const element = document.querySelector('select[aria-label="' + label + '"]'); element.value = value; element.dispatchEvent(new Event('change', { bubbles: true })); };
+  if (document.querySelectorAll('.steps button').length !== 8) throw Error('Eight dossier sections missing');
+  if (!document.querySelector('.masthead').textContent.includes('ARCHITECTURE AVANT · ARCHITECTURE APRÈS') || document.querySelector('.masthead').textContent.includes('TRANSITION EFFECTIVE')) throw Error('Before/after masthead mismatch');
+  if (document.querySelector('.flow').dataset.graph !== 'asis-1') throw Error('BEFORE is not the default');
+  const path = [...document.querySelectorAll('.journey button')].map(button => button.textContent.trim());
+  if (path.join('|') !== '0Architecture AVANT|1Architecture APRÈS') throw Error('Exactly two architecture states required: ' + path);
+  const views = [...document.querySelector('select[aria-label="Vue architecture"]').options].map(option => option.value);
+  if (views.join('|') !== 'asis-1|target-3') throw Error('Only BEFORE and AFTER may be primary views: ' + views);
+  let viewportChecks = 0;
+  for (const view of views) {
+    choose('Vue architecture', view); await settle(); const source = window.expectedGraphs.find(graph => graph.id === view);
+    const expected = [source.nodes.length, source.groups.length, source.edges.length];
+    const actual = ['.svelte-flow__node-architecture', '.svelte-flow__node-subflow', '.svelte-flow__edge'].map(selector => document.querySelectorAll(selector).length);
+    if (actual.some((value, index) => value !== expected[index])) throw Error('Incomplete diagram ' + view + ': ' + actual);
+    const canvas = document.querySelector('.flow').getBoundingClientRect();
+    for (const item of [...source.nodes, ...source.groups]) {
+      const box = document.querySelector('.svelte-flow__node[data-id="' + item.id + '"]'), rect = box.getBoundingClientRect();
+      if (rect.left < canvas.left - 1 || rect.top < canvas.top - 1 || rect.right > canvas.right + 1 || rect.bottom > canvas.bottom + 1) throw Error('Initial graph clipped: ' + view + '/' + item.id);
+      if (box.querySelector('.repo-label')?.textContent !== item.provenance.repoLabel || box.querySelector('[data-service-icon]')?.dataset.serviceIcon !== item.provenance.icon) throw Error('Missing icon/repo: ' + view + '/' + item.id);
+    }
+    document.querySelector('.mermaid-panel').open = true; await settle(); const svg = document.querySelector('.mermaid-render svg');
+    if (!svg || svg.querySelectorAll('g.node').length !== expected[0] || svg.querySelectorAll('g.cluster').length !== expected[1]) throw Error('Mermaid incomplete: ' + view);
+    const missing = window.checkMermaidLabels(svg, source); if (missing.length) throw Error('Lost labels: ' + JSON.stringify(missing));
+    document.querySelector('.mermaid-panel').open = false; viewportChecks++;
+  }
+  document.querySelectorAll('.steps button')[5].click(); await settle();
+  const questions = [...document.querySelectorAll('[id^="question-"]')];
+  if (questions.length !== 3 || questions.some(question => !question.textContent.trim().endsWith('?'))) throw Error('Explicit questions must precede options: ' + JSON.stringify({ count: questions.length, labels: questions.map(node => node.textContent), content: document.querySelector('.decision-content').textContent.slice(0, 500) }));
+  if (document.querySelectorAll('.question-block input[type="radio"]').length !== 9) throw Error('Selectable Focus options missing');
+  if (!questions[2].closest('.question-block').textContent.includes('Non critique')) throw Error('LLM choice must be non-critical');
+  const radios = document.querySelectorAll('.question-block input[type="radio"]'); radios[0].click(); radios[3].click();
+  const comment = document.querySelector('.question-block textarea'); comment.value = 'Conserver la preuve observée.'; comment.dispatchEvent(new Event('input', { bubbles: true })); await settle();
+  const preview = JSON.parse(document.querySelector('.choice-json textarea').value);
+  if (preview.revision !== 'D7' || preview.responses[0].selection !== 'KEEP_VERIFIED' || preview.responses[0].comment !== comment.value || preview.responses[2].decisionStatus !== 'open-non-blocking') throw Error('Response JSON mismatch');
+  if (preview.fixedInstructions.transitionEvidence.t2.decision !== 'MIGRATE+RETAIN' || !preview.fixedInstructions.retainScwTemUntilValidatedReplacement) throw Error('Fixed owner decisions changed');
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.copiedJson = text; } } });
+  [...document.querySelectorAll('.choices button')].find(button => button.textContent === 'Copier les réponses en JSON').click(); await settle();
+  if (JSON.parse(window.copiedJson).responses[0].comment !== comment.value || !document.querySelector('.choices').textContent.includes('réellement copiés')) throw Error('Actual JSON copy action failed');
+  const summary = document.querySelector('.monthly-summary');
+  if (!summary || !summary.textContent.includes('Résumé du rapport mensuel') || !summary.textContent.includes('10 août → 13 septembre 2026 inclus') || !summary.textContent.includes('68,88 CAD') || !summary.textContent.includes('251,215438 CAD') || !summary.textContent.includes('non ratifié') || !summary.textContent.includes('320,095438 CAD')) throw Error('Monthly summary facts missing');
+  if (summary.querySelectorAll('[data-transition]').length !== 3 || !summary.textContent.includes('T1 · validation') || !summary.textContent.includes('T2 · partiel') || !summary.textContent.includes('T3 · NO-GO')) throw Error('Three transition states missing');
+  const reportLinks = [...summary.querySelectorAll('a[download]')];
+  if (reportLinks.length !== 2 || !reportLinks.some(link => link.href.endsWith('report-through-2026-09-13.html')) || !reportLinks.some(link => link.href.endsWith('report-through-2026-09-13.pdf'))) throw Error('Report download links missing');
+  if (document.documentElement.scrollWidth > innerWidth) throw Error('Desktop overflow');
+  return { status: 'pass', architectureViews: views, completeGraphs: 2, viewportChecks, explicitQuestions: 3, selectableOptions: 9, actualJsonCopy: true, monthlySummary: true };
+})()`));
+await writeFile('/out/dossier-preview.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
+await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+if (await evaluate('document.documentElement.scrollWidth > innerWidth')) throw Error('Mobile overflow');
+await call('Network.setBlockedURLs', { urls: ['http://*', 'https://*'] });
+await call('Page.navigate', { url: 'file:///home/antoinefa/src/radar-immobilier/tmp/architecture-platform/docs/architecture/decision-focus.html' });
+await waitUntil(`document.querySelector('.flow')?.dataset.graph === 'asis-1'`, 'Offline BEFORE view missing');
+await call('Page.navigate', { url: 'file:///home/antoinefa/src/radar-immobilier/tmp/architecture-platform/docs/reports/architecture-monthly/architecture-before-after-2026-09-13.html' });
+await waitUntil(`document.querySelector('.flow')?.dataset.graph === 'asis-1'`, 'Dated before/after rendering missing');
+if (errors.length || external.length) throw Error(JSON.stringify({ errors, external }));
+console.log(JSON.stringify({ mobile: true, offline: true, dated: true, externalRequests: external.length, runtimeErrors: errors.length }));
+clearTimeout(timeout); ws.close(); await fetch(`${base}/json/close/${page.id}`);
