@@ -108,26 +108,45 @@ then prove the recovered Signals and exact PDFs. Prevent or journal/replay inter
 writes within the accepted RPO. Do not assume a cross-S3/SQL transaction or discard
 newer writes. RPO/RTO, retention, volume and restore throughput remain unresolved.
 
-## 7. Attendus
+## 7. Evidence, provenance and limitations
 
-| Criterion | Source | Covered by | Gap |
-| --- | --- | --- | --- |
-| Effective main + Kubernetes, not legacy guesses | Owner | Runtime/continuation audits | OVH production inventory |
-| Same DB/S3 identities across diagrams; all PV stages Immo | Owner | Mermaid → Focus mapping and subflows | Mapping tests pass; browser verification recorded separately |
-| New PV → visible typed Signal + resolvable evidence | Owner refresh request + route contract | G1/G2 document-hash-to-UI trace, second-run idempotence, failure/retry tests | Not executed; outside this dossier branch |
-| Graphify upgrade preserves extraction and public contracts | Owner + i-cond | Published 0.18.0 producer proof; ESM consumer smoke required | Immo B2 acceptance |
-| Durable unattended credentials | Latest i-cond study + independent review | G1b unique refresh writer, persistence, restart/recovery tests | Operated identity contract |
-| No data loss or competing writers during retirement | Repo rules + owner | G3/G4 parity manifests, IAM/writer matrix, restore rehearsal | Inventory/volume/recovery criteria |
-| Preprod first, gated production release, TEM retained | Owner | G0–G6; explicit TEM exclusion | Production acceptance evidence |
-| Honest decision surface, alternatives and actual reviews | Owner + Focus contract | This dossier, source links, local notes, individual review records | Codex completed; Opus unavailable (weekly limit) |
+| Surface | D5 representation | Evidence still required |
+| --- | --- | --- |
+| Current state | Four existing detailed diagrams; verified preprod as-of timestamp | Authorized production private inventory |
+| T1 / T2 / T3 | Three complete platform states plus detailed T1, each native SvelteFlow and Mermaid | Deployment and per-stage runtime acceptance |
+| Identity | Stable old MinIO, new OVH, PG, graph and Geo IDs; explicit repo/service on every leaf/group | Final OVH target bindings and IAM |
+| Safety | Preprod→prod gates, single writer, paired recovery, one-node counter-evidence | RPO/RTO, parity, peak and drain results |
 
-## 8. What is needed next
+[FACT · owner-response provenance] The D4 response was captured at
+`2026-09-13T15:10:18.423Z` with dossier hash
+`b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451`
+and artifact-input hash
+`92b87297fbc8ed0f2670fa4fd07e1dde6d061d04533d3695275c1f386b3b032e`.
+Its allocation `option` is `null`: no method was selected. D5 preserves the
+owner's correction as instructions; it does not turn that null into ratification.
 
-[FACT] No renewed sequence, one-node, Immo ownership or TEM decision is requested.
-[JUDGMENT] Gather runtime, credential and recovery evidence during implementation;
-ask only for an unresolved cutover criterion before an irreversible action.
-The **billing re-audit remains incomplete**. Local Focus choices are drafts only,
-not a final invoice or an implicitly selected commercial method. Separate the
-monthly delivery totals from September 13 post-period transitions. Geo SCW closure
-remains open until active code, Jobs, CI, storage and backups are checked, not just
-the registry rollout. Preserve historical evidence and shared MatchID resources.
+[FACT] This docs build launches no implementation or reviewer agent and writes no
+Track event. Earlier D4/Gemini/Codex reviews remain historical evidence, not D5
+approval. Production bindings, T1/T2/T3 deployments and monetary closure are not
+claimed by rendered completeness.
+
+## 8. Billing annex — evidence incomplete
+
+[FACT · owner] The requested report starts at the real preceding invoice/report
+boundary, which is **not yet verified**. It ends September 13 inclusive in
+America/Toronto (`2026-09-14T00:00:00-04:00` exclusive). Record the actual data
+capture cutoff separately because September 13 is incomplete. September 13
+transitions are **inside** the requested period and must be labelled observed or
+planned, never moved to a post-period appendix.
+
+[FACT · owner] Infrastructure uses one b3-8 BHS5 projection at `0.082 CAD/h`.
+Period hours and projected amount are unknown until the start is verified.
+`720 h × 0.082 = 59.04 CAD` is an old 30-day illustration only, never the current
+period amount.
+
+[FACT · owner] LLM accounting comes last. Later, count tokens using the **same
+unit tariffs as the previous month's actual invoice**; do not open a new allocation
+method choice. The strongest local earlier cost report ends nominally August 9 and
+was generated that day with partial data; it does not prove the invoice boundary.
+The Wave 250804-028 method note covers June 8–July 5 and does not prove the latest
+invoice or tariff. D5 does not parse tokens or infer a price.
