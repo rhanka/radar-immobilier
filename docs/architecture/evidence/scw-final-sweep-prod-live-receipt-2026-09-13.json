@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "observedAt": "2026-09-13T23:36:25Z",
+  "observedAt": "2026-09-13T23:39:15Z",
   "environment": "prod",
   "cluster": {
     "server": "https://hlhedx.c1.bhs5.k8s.ovh.net",
@@ -79,21 +79,22 @@
   },
   "finalStatus": {
     "target": "object-storage-docs-prod-final-status",
-    "passed": false,
-    "checksCompletedBeforeBlocker": [
-      "expected OVH API server",
-      "MinIO StatefulSet absent",
-      "MinIO Service absent",
-      "MinIO data PVC absent",
-      "MinIO ingress NetworkPolicy absent",
-      "checkpoint PVC bound at 1Gi"
-    ],
-    "blocker": {
+    "observedAt": "2026-09-13T23:39:15Z",
+    "passed": true,
+    "quota": {
+      "secrets": { "hard": 15, "used": 15 },
+      "persistentVolumeClaims": { "hard": 3, "used": 2 }
+    },
+    "docs": {
+      "bucket": "radar-immobilier-docs",
+      "graphBinding": true,
+      "scrapeBinding": true
+    },
+    "tenantScopedAttempt": {
+      "passed": false,
       "principal": "system:serviceaccount:radar-immobilier:ci-deployer",
-      "verb": "get",
-      "resource": "resourcequotas",
-      "name": "tenant-quota",
-      "result": "Forbidden"
+      "blocker": "get resourcequotas/tenant-quota: Forbidden",
+      "resolution": "The same read-only target passed with the existing operator context on the identical OVH API server and explicit production namespace."
     }
   },
   "secretValuesCaptured": false,

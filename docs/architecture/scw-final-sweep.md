@@ -32,11 +32,13 @@ version did not compare destination Content-Type/Encoding/Cache-Control/
 Disposition, user metadata or tags, and its summary did not record the later
 final-source rescan fields. A fresh read-only full scan with the strengthened
 checker must pass before `exactParity` is accepted again. The repository
-`object-storage-docs-prod-final-status` target also stopped at the quota check:
-the production `ci-deployer` may not `get resourcequotas`. All preceding
-absence/checkpoint checks passed, but the target as a whole is not claimed
-green. The linked receipt records both limitations without object keys or
-Secret values.
+`object-storage-docs-prod-final-status` target first stopped at the quota check
+because the production `ci-deployer` may not `get resourcequotas`. Re-running
+that same read-only target with the existing operator context on the identical
+OVH API server and explicit production namespace passed fully: MinIO absence,
+checkpoint, quota, dedicated DOCS/GRAPH/SCRAPE bindings, API rollout and TEM
+preservation. The linked receipt records both the restricted-principal denial
+and the successful final status without object keys or Secret values.
 
 The branch plan records the earlier preproduction transition separately. This
 freshness pass did not re-observe preproduction and therefore makes no newer
