@@ -13,7 +13,6 @@ GRAPH_FILES=(
 SCRAPE_FILES=(deploy/k8s/33-scrape-job.yaml deploy/k8s/33b-scrape-cities-job.yaml)
 FILES=("${GRAPH_FILES[@]}" "${SCRAPE_FILES[@]}" deploy/k8s/36-db-migrate-job.yaml)
 PENDING_CLIENTS=(
-  deploy/k8s/30-api.yaml
   deploy/k8s/32b-reproject-etape-job.yaml
   deploy/k8s/34-refresh-cronjob.yaml
   deploy/k8s/refresh-diag/diag-refresh-job.yaml
@@ -64,6 +63,12 @@ for rel in "${FILES[@]}"; do
   grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|sentropic-geo|GEO_DOCUMENTS_S3' "$ROOT/$rel" && fail "$rel contains a forbidden storage literal"
   grep -Eq 'optional:[[:space:]]*true|radar-s3-credentials' "$ROOT/$rel" && fail "$rel retains an optional or generic credential fallback"
 done
+for suffix in ENDPOINT BUCKET REGION FORCE_PATH_STYLE ACCESS_KEY SECRET_KEY; do
+  binding deploy/k8s/30-api.yaml "S3_$suffix" secretKeyRef \
+    radar-raw-s3-credentials "RAW_S3_$suffix"
+done
+grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs' \
+  "$ROOT/deploy/k8s/30-api.yaml" && fail 'deploy/k8s/30-api.yaml retains a legacy storage binding'
 
 for rel in scripts/mount-scw.sh scripts/umount-scw.sh; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
