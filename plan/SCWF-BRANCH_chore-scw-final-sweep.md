@@ -48,6 +48,7 @@
 - [ ] Lot 3g2: run final offline gates and complete independent post-build review.
 - [x] Lot 3g2a: dispatch the owner-authorized independent Fable review of first-slice commit `332af1e8` and second-slice design `671380f4`; no consensus or acceptance claim until its readable findings are reconciled.
 - [x] Lot 3h1: freeze the implementation-ready RAW/DOCS/GRAPH client matrix, migration-tool contract, and second-slice paths.
+- [x] Lot 3h1a: preserve independent Fable cutover findings B1-B5 separately; conflict convergence, multi-source identity and declared exclusions require reconciliation before tool release.
 - [ ] Lot 3h2: conductor reconciles the design, obtains independent review, and explicitly releases source edits.
 - [ ] Lot 3h3: build and hermetically test the dry-run-default, non-destructive migration/proof tool.
 - [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
