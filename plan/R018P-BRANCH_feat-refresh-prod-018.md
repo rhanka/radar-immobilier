@@ -1,7 +1,7 @@
 # Feature: Promote Graphify 0.18 refresh to production
 
 ## Objective
-- [ ] Promote the accepted Graphify 0.18 PV-to-Signal CronJob to OVH production with one causal schedule, immutable image, enrolled-account runtime, and no MinIO or SCW storage dependency.
+- [ ] Promote the accepted Graphify 0.18 PV-to-Signal CronJob to OVH production with one causal schedule, immutable image, enrolled-account runtime, and the effective canonical DOCS binding without MinIO or SCW storage dependency.
 
 ## Scope / Guardrails
 - [x] Worktree `tmp/refresh-prod-018`, branch `feat/refresh-prod-018`, base `74c63afbeb49b6b97ab71c87b82326089d878841`.
@@ -39,7 +39,7 @@
   - [x] Add an exact-image render gate that rejects every SCW, MinIO, generic credential, duplicate schedule, or missing keyring reference.
 - [ ] **Lot 1 — Make-only production controls**
   - [x] Add namespace/API-server guards, read-only inspection, server dry-run, seed, apply, scheduled observation, status, logs, and rollback targets.
-  - [x] Gate render and server dry-run on exact OVH RAW/DOCS coordinates, dedicated credentials, MinIO absence, and zero active storage migration Jobs.
+  - [x] Gate render and server dry-run on the effective OVH canonical DOCS coordinates, dedicated credentials, MinIO absence, and zero active storage migration Jobs.
   - [x] Add explicit-confirmation seed/apply/rollback controls that copy the accepted preproduction encrypted account route internally without exposing Secret data.
   - [x] Require explicit production confirmation and exact immutable image on every mutating target.
   - [x] Fail closed unless OVH DOCS coordinates, dedicated scrape credentials, keyring/runtime resources, MinIO absence, and zero active storage migration Jobs are proved.
