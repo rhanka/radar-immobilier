@@ -55,6 +55,7 @@
 - [x] C10a: persist canonical run identity and conservative maximum-attempt chunk reservations in S3.
 - [x] C10b: persist immutable candidate hashes and redacted per-city stage receipts in S3.
 - [x] C10c: retain and hash-check durable per-chunk extraction artifacts for partial-run resume.
+- [x] C10d: retain the first run timestamp so resumed candidates remain deterministic.
 - [x] C11: cover same-input no-call resume, conservative interruptions, baseline changes and failed-write receipts.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.

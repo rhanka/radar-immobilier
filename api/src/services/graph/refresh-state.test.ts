@@ -93,6 +93,16 @@ describe("refresh durable state", () => {
     expect(second.state.reservedCalls).toBe(0);
   });
 
+  it("should retain the first run timestamp across resume", async () => {
+    const store = new MemoryStore();
+    const first = await openRefreshState(store, identity(), 2,
+      () => new Date("2026-09-13T01:00:00.000Z"));
+    const resumed = await openRefreshState(store, identity(), 2,
+      () => new Date("2026-09-13T02:00:00.000Z"));
+    expect(first.state.createdAt).toBe("2026-09-13T01:00:00.000Z");
+    expect(resumed.state.createdAt).toBe(first.state.createdAt);
+  });
+
   it("should bind one deterministic immutable candidate to the run", async () => {
     const store = new MemoryStore();
     const opened = await openRefreshState(store, identity(), 2);

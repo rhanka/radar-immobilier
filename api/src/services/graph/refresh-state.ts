@@ -30,6 +30,7 @@ export interface RefreshStageReceipt {
 
 export interface RefreshState {
   readonly schemaVersion: 1;
+  readonly createdAt: string;
   readonly identity: RefreshRunIdentity;
   readonly identityHash: string;
   readonly budgetLimit: number;
@@ -68,6 +69,7 @@ export async function openRefreshState(
   store: ObjectStore,
   identity: RefreshRunIdentity,
   budgetLimit: number,
+  now: () => Date = () => new Date(),
 ): Promise<RefreshStateHandle> {
   if (!Number.isInteger(budgetLimit) || budgetLimit < 1) throw new Error("Refresh budget must be positive");
   const normalized = { ...identity, exclusions: [...identity.exclusions].sort() };
@@ -80,6 +82,7 @@ export async function openRefreshState(
   }
   return persist(store, key, {
     schemaVersion: 1,
+    createdAt: now().toISOString(),
     identity: normalized,
     identityHash,
     budgetLimit,
