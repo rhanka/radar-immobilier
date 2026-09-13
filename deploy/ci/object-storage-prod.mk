@@ -30,9 +30,13 @@ object-storage-docs-prod-validate: ## Validate the PROD DOCS support and invento
 	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/inventory-job.yaml -o name >/dev/null
 	@$(KUBECTL) create --dry-run=client --validate=false \
 	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/fast-inventory-job.yaml -o name >/dev/null
+	@$(KUBECTL) create --dry-run=client --validate=false \
+	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/conditional-proof-job.yaml -o name >/dev/null
+	@$(KUBECTL) create --dry-run=client --validate=false \
+	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml -o name >/dev/null
 
 .PHONY: object-storage-docs-prod-fast-start
-object-storage-docs-prod-fast-start: ## Start the low-memory 32-stream canonical PROD inventory
+object-storage-docs-prod-fast-start: ## Start the low-memory canonical PROD inventory
 	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
 	  [ "$(OBJECT_STORAGE_DOCS_PROD_FAST_CONFIRM)" != 1 ]; then \
 	  echo '[object-storage-docs-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
@@ -69,6 +73,62 @@ object-storage-docs-prod-fast-stop-readonly: ## Stop one exact source-only PROD 
 	  $(KUBECTL) -n "$$namespace" delete job/$(OBJECT_STORAGE_DOCS_PROD_JOB) \
 	    --wait=true >/dev/null; \
 	  echo '[object-storage-docs-prod] source-only inventory Job stopped'
+
+.PHONY: object-storage-docs-prod-fetch-canonical
+object-storage-docs-prod-fetch-canonical: ## Fetch the canonical manifests without printing keys
+	@if [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_DOCS_PROD_JOB)" ] || \
+	  [ -z "$(OBJECT_STORAGE_DOCS_PROD_EVIDENCE_DIR)" ]; then \
+	  echo '[object-storage-docs-prod] require KUBECONFIG, Job and evidence directory'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  destination="$(OBJECT_STORAGE_DOCS_PROD_EVIDENCE_DIR)"; \
+	  [ ! -e "$$destination/source-manifest.jsonl" ]; \
+	  pod="$$( $(KUBECTL) -n "$$namespace" get pods \
+	    -l "job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  mkdir -p "$$destination"; \
+	  for file in source-manifest.jsonl canonical-manifest.json summary.json; do \
+	    $(KUBECTL) -n "$$namespace" cp \
+	      "$$pod:/evidence/docs-prod-canonical/$$file" "$$destination/$$file" >/dev/null; \
+	  done; \
+	  [ "$$(jq -s 'length' "$$destination/source-manifest.jsonl")" = 59017 ]; \
+	  [ "$$(jq -s 'map(.size)|add' "$$destination/source-manifest.jsonl")" = 12534514457 ]; \
+	  [ "$$(sha256sum "$$destination/source-manifest.jsonl" | awk '{print $$1}')" = \
+	    "$$(jq -r '.manifestSha256' "$$destination/summary.json")" ]; \
+	  jq '{objects,bytes,manifestSha256,canonicalSha256}' "$$destination/summary.json"
+
+.PHONY: object-storage-docs-prod-proof
+object-storage-docs-prod-proof: ## Prove conditional OVH writes for the canonical PROD target
+	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
+	  [ "$(OBJECT_STORAGE_DOCS_PROD_PROOF_CONFIRM)" != 1 ]; then \
+	  echo '[object-storage-docs-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
+	fi
+	@$(MAKE) object-storage-docs-prod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
+	    "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]; \
+	  job_ref="$$( $(KUBECTL) create \
+	    -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/conditional-proof-job.yaml -o name )"; \
+	  $(KUBECTL) -n "$$namespace" wait --for=condition=complete "$$job_ref" \
+	    --timeout=900s >/dev/null; echo "$$job_ref"
+
+.PHONY: object-storage-docs-prod-copy
+object-storage-docs-prod-copy: ## Start the exact canonical copy to OVH PROD
+	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
+	  [ "$(OBJECT_STORAGE_DOCS_PROD_COPY_CONFIRM)" != 1 ]; then \
+	  echo '[object-storage-docs-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
+	fi
+	@$(MAKE) object-storage-docs-prod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
+	@[ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
+	  "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]
+	@$(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml -o name
+
+.PHONY: object-storage-docs-prod-copy-progress
+object-storage-docs-prod-copy-progress: ## Read copy/parity progress without printing keys
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  pod="$$( $(KUBECTL) -n "$$namespace" get pods \
+	    -l "job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
+	    'report=/evidence/reports/$${MIGRATION_RUN_ID}; if [ -s "$$report/summary.json" ]; then cat "$$report/summary.json"; elif [ -s "$$report/progress.json" ]; then cat "$$report/progress.json"; else echo '\''{"processed":0,"logicalBytes":0}'\''; fi'
 
 .PHONY: object-storage-docs-prod-expand-pvc-quota
 object-storage-docs-prod-expand-pvc-quota: ## Guardedly expand only the PROD PVC count quota from 2 to 3
