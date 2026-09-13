@@ -218,6 +218,7 @@ invoke_tool() {
     FAKE_CLOCK_STEP="${FAKE_CLOCK_STEP:-}" FAKE_CLOCK_FILE="$TEST_TMP/clock" \
     FAKE_FAIL_SIDE="${FAKE_FAIL_SIDE:-}" FAKE_FAIL_OPERATION="${FAKE_FAIL_OPERATION:-}" \
     FAKE_FAIL_ATTEMPTS="${FAKE_FAIL_ATTEMPTS:-0}" FAKE_FAIL_KEY="${FAKE_FAIL_KEY:-}" \
+    MIGRATION_PROCESS_CONCURRENCY="${MIGRATION_PROCESS_CONCURRENCY:-}" \
     FAKE_EMPTY_TRUNCATED_SIDE="${FAKE_EMPTY_TRUNCATED_SIDE:-}" \
     FAKE_EMPTY_TRUNCATED_ATTEMPTS="${FAKE_EMPTY_TRUNCATED_ATTEMPTS:-0}" \
     FAKE_SYNC_FAIL_PATTERN="${FAKE_SYNC_FAIL_PATTERN:-}" \
@@ -686,6 +687,10 @@ if jq -e 'select(.key == "root.json" and .classification == "included")' \
 else bad "$TEST_NAME"; fi
 TEST_NAME='rejects root-object inclusion outside the DOCS plane'
 expect_bad run_tool inventory "$TEST_TMP/reports/raw-root" --include-root-objects
+MIGRATION_PROCESS_CONCURRENCY=5
+TEST_NAME='rejects process concurrency above the configured evidence bound'
+expect_bad run_tool inventory "$TEST_TMP/reports/process-bound" --concurrency 4
+unset MIGRATION_PROCESS_CONCURRENCY
 
 reset_store
 put_fixture source src raw/retry.txt retry; put_fixture destination dst raw/retry.txt retry

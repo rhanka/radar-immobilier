@@ -94,5 +94,15 @@ object-storage-docs-prod-progress: ## Report aggregate PROD DOCS checkpoint prog
 	  pod="$$( $(KUBECTL) -n "$$namespace" get pods \
 	    -l "job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
 	  [ -n "$$pod" ] || { echo '[object-storage-docs-prod] Job Pod is absent'; exit 1; }; \
+	  started="$$( $(KUBECTL) -n "$$namespace" get job/$(OBJECT_STORAGE_DOCS_PROD_JOB) \
+	    -o jsonpath='{.metadata.creationTimestamp}' )"; \
+	  elapsed="$$(( $$(date +%s) - $$(date -d "$$started" +%s) ))"; \
 	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
-	    'shopt -s nullglob; files=(/evidence/docs-prod-checkpoint/provisional/source/body-receipt-*.json); if [ "$${#files[@]}" -eq 0 ]; then jq -n '\''{phase:"provisional",side:"source",objects:0,bytes:0}'\''; else jq -s '\''{phase:"provisional",side:"source",shards:length,objects:(map(.objects)|add//0),bytes:(map(.bytes)|add//0)}'\'' "$${files[@]}"; fi'
+	    'shopt -s nullglob; index=(/evidence/docs-prod-checkpoint/provisional/source/index-receipt-*.json); body=(/evidence/docs-prod-checkpoint/provisional/source/body-receipt-*.json); jq -n --argjson elapsed '"$$elapsed"' --slurpfile index <(cat "$${index[@]}" 2>/dev/null || true) --slurpfile body <(cat "$${body[@]}" 2>/dev/null || true) '\''def metric($$items): {shards:($$items|length),objects:($$items|map(.objects)|add//0),bytes:($$items|map(.bytes)|add//0)}; {phase:"provisional",side:"source",elapsedSeconds:$$elapsed,index:metric($$index),body:metric($$body)} | . + {hashOpsPerSecond:(.body.objects / ($$elapsed|if .>0 then . else 1 end)),hashMiBPerSecond:(.body.bytes / 1048576 / ($$elapsed|if .>0 then . else 1 end))}'\'''
+
+.PHONY: object-storage-docs-prod-status
+object-storage-docs-prod-status: ## Read the PROD DOCS inventory Job and Pod status
+	@$(KUBECTL) -n $(OBJECT_STORAGE_DOCS_PROD_NAMESPACE) get \
+	  job/$(OBJECT_STORAGE_DOCS_PROD_JOB) -o wide
+	@$(KUBECTL) -n $(OBJECT_STORAGE_DOCS_PROD_NAMESPACE) get pods \
+	  -l 'job-name=$(OBJECT_STORAGE_DOCS_PROD_JOB)' -o wide
