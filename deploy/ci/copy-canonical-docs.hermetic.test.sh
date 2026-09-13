@@ -59,6 +59,8 @@ grep -F 'IfMatch: extra.etag' "$node_subject" >/dev/null
 grep -F 'proof.object?.keySha256 !== keySha256' "$node_subject" >/dev/null
 grep -F 'proof.object?.bodySha256 !== observed.sha256' "$node_subject" >/dev/null
 grep -F 'sourceManifestDigest = manifestDigest' "$node_subject" >/dev/null
+grep -F 'target-final-diff.json' "$node_subject" >/dev/null
+grep -F 'summary.targetExactParity = targetStructuralExact &&' "$node_subject" >/dev/null
 grep -F 'summary.exactParity = summary.targetExactParity && summary.sourceExact' "$node_subject" >/dev/null
 ! grep -F 'DeleteBucket' "$node_subject"
 echo 'canonical docs copy hermetic test: PASS'
