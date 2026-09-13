@@ -27,8 +27,8 @@
   "deploymentClaim": "none; T1, T2 and T3 are explicitly proposed/not deployed",
   "focus": {
     "html": "architecture-transition-2026-09-13.html",
-    "htmlSha256": "fa1d29ea38795712027ed30df3811c4f2001419576deb4cc32d74f448b3bfdbd",
-    "artifactInputHash": "67ebcb54916cb46503fdb516131a93f08bd88a33620b8cb3ba9313f20d740a15",
+    "htmlSha256": "7e8c6061aa11453397c0b40dd6debd3ed354a8eba96478f933f5e67fa71eb7ac",
+    "artifactInputHash": "f7ac22f66546dae70d2861623c1a1d80609d5fda928bb73e5e1a2f642fd3d2d6",
     "architectureHash": "fc7e26ff9462fbba5fb8cd3328133b218dff4883007355775887181392f78b67",
     "transitionTargetsHash": "ec4d7d14cffa065b08f335d8fc1257703e998e6c5db5ff0051f83c095ce93fab",
     "dossierHash": "d82c61ad6b9566d0c87eb8b4daa034c873974f91762aed65146bf070ea3cff21",
