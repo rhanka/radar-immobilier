@@ -324,7 +324,7 @@ spec:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: true
                 capabilities: { drop: ["ALL"] }
-              command: ["/usr/bin/flock", "-n", "/keyring/.refresh.lock", "node", "dist/scripts/refresh-pv.js", "lac-des-seize-iles"]
+              command: ["/usr/bin/flock", "-n", "/keyring/.refresh.lock", "node", "dist/scripts/refresh-pv.js", "waterloo"]
               envFrom:
                 - configMapRef: { name: radar-api }
               env:
