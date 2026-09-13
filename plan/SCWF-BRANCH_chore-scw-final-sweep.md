@@ -47,11 +47,13 @@
 - [x] Lot 3f2: guard retained local-development, diagnostic, and TEM bindings.
 - [x] Lot 3g1: record the first-slice checkpoint and explicit remaining-client list.
 - [ ] Lot 3g2: run final offline gates and complete independent post-build review.
+  - [x] Builder passes the combined hermetic gate and offline K8s validation.
+  - [ ] Conductor completes the independent post-build review.
 - [x] Lot 3g2a: dispatch the owner-authorized independent Fable review of first-slice commit `332af1e8` and second-slice design `671380f4`; no consensus or acceptance claim until its readable findings are reconciled.
 - [x] Lot 3h1: freeze the implementation-ready RAW/DOCS/GRAPH client matrix, migration-tool contract, and second-slice paths.
 - [x] Lot 3h1a: preserve independent Fable cutover findings B1-B5 separately; conflict convergence, multi-source identity and declared exclusions require reconciliation before tool release.
 - [x] Lot 3h2: conductor reconciles independent findings A1-A3/B1-B5 and releases only the tool, tests and CI gate; runtime bindings remain gated separately.
-- [ ] Lot 3h3: build and hermetically test the dry-run-default, non-destructive migration/proof tool.
+- [x] Lot 3h3: build and hermetically test the dry-run-default, non-destructive migration/proof tool.
   - [x] Freeze the fail-closed CLI, coordinate, credential, prefix and resource-limit guards.
   - [x] Inventory every page/body and emit complete classified manifests.
     - [x] Isolate path-style clients and exhaust paginated bucket listings with bounded retries.
@@ -64,7 +66,7 @@
     - [x] Gate reconciliation on an exact ledger, fence, versioning and prior VersionId.
       - [x] Reuse bounded workers with atomic missing-versus-owned write preconditions.
       - [x] Re-read the ledger-owned prior VersionId body and metadata before overwrite.
-  - [ ] Enforce hermetic failure paths, binding checks and the CI gate.
+  - [x] Enforce hermetic failure paths, binding checks and the CI gate.
     - [x] Build a filesystem-backed AWS CLI shim with version and metadata semantics.
     - [x] Cover dry-run, validation, pagination, copy, metadata, ETag, conflicts and exclusions.
     - [x] Cover retries, the failure cap and complete multi-source union provenance.
