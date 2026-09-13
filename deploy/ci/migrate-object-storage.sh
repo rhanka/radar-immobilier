@@ -299,3 +299,91 @@ build_manifest() {
   jq -cs 'sort_by(.key)[]' "$scratch" >"$output" || return 1
   ! failure_cap_reached
 }
+
+MISSING_PROOF=()
+add_missing_proof() { MISSING_PROOF+=("$1"); }
+SOURCE_LISTING="$WORK_DIR/source-listing.jsonl"
+DESTINATION_LISTING="$WORK_DIR/destination-listing.jsonl"
+SOURCE_MANIFEST="$REPORT_DIR/source-manifest.jsonl"
+DESTINATION_MANIFEST="$REPORT_DIR/destination-manifest.jsonl"
+
+inventory_side() {
+  local side="$1" listing="$2" manifest="$3"
+  : >"$listing"; : >"$manifest"
+  if ! validate_target "$side"; then
+    record_failure "$side" '' head-bucket
+    add_missing_proof "$side target identity or bucket access is unproved"
+    return 1
+  fi
+  if ! list_objects "$side" "$listing"; then
+    record_failure "$side" '' list-objects-v2
+    add_missing_proof "$side complete listing is unavailable"
+    return 1
+  fi
+  if ! build_manifest "$side" "$listing" "$manifest"; then
+    add_missing_proof "$side object evidence is incomplete"
+    return 1
+  fi
+}
+
+inventory_side source "$SOURCE_LISTING" "$SOURCE_MANIFEST" || true
+inventory_side destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST" || true
+jq -c 'select(.classification == "included")' "$SOURCE_MANIFEST" \
+  >"$REPORT_DIR/source-included-manifest.jsonl"
+jq -c 'select(.classification == "excluded")' "$SOURCE_MANIFEST" \
+  >"$REPORT_DIR/excluded-source-manifest.jsonl"
+jq -c 'select(.classification == "unclassified")' "$SOURCE_MANIFEST" \
+  >"$REPORT_DIR/unclassified-source-manifest.jsonl"
+if [ -s "$REPORT_DIR/unclassified-source-manifest.jsonl" ]; then
+  add_missing_proof 'source contains unclassified keys'
+fi
+
+EXPECTED_MANIFEST_DIGEST=null
+EXPECTED_OBJECTS="$REPORT_DIR/expected-objects.jsonl"
+: >"$EXPECTED_OBJECTS"
+validate_expected_manifest() {
+  [ -r "$EXPECTED_MANIFEST" ] && [ -s "$EXPECTED_MANIFEST" ] || return 1
+  jq -e '
+    .schemaVersion == 1 and (.sources | type == "array" and length > 0) and
+    (.objects | type == "array") and
+    ([.objects[].key] | length == (unique | length)) and
+    all(.sources[];
+      (.endpoint | type == "string" and length > 0) and
+      (.region | type == "string" and length > 0) and
+      (.bucket | type == "string" and length > 0) and
+      (.pathStyle == true or .pathStyle == false)) and
+    all(.objects[];
+      (.key | type == "string" and length > 0) and
+      (.size | type == "number" and . >= 0) and
+      (.sha256 | test("^[0-9a-f]{64}$")) and
+      (.metadata | type == "object") and (.tags | type == "array") and
+      (.sources | type == "array" and length > 0))
+  ' "$EXPECTED_MANIFEST" >/dev/null || return 1
+  local source_count
+  source_count="$(jq '.sources | length' "$EXPECTED_MANIFEST")"
+  if [ "$source_count" -gt 1 ]; then
+    jq -e 'all(.sources[];
+      (.observedAt | type == "string" and length > 0) and
+      (.manifestSha256 | test("^[0-9a-f]{64}$")) and
+      (.fenceSha256 | test("^[0-9a-f]{64}$")))' \
+      "$EXPECTED_MANIFEST" >/dev/null || return 1
+  fi
+  jq -e --arg endpoint "$SOURCE_ENDPOINT" --arg region "$SOURCE_REGION" \
+    --arg bucket "$SOURCE_BUCKET" --argjson pathStyle "$SOURCE_PATH_STYLE" '
+    any(.sources[]; .endpoint == $endpoint and .region == $region and
+      .bucket == $bucket and .pathStyle == $pathStyle)' \
+    "$EXPECTED_MANIFEST" >/dev/null || return 1
+  jq -cs --argfile expected "$EXPECTED_MANIFEST" '
+    $expected.objects | sort_by(.key)[] |
+    . + {contentType:(.contentType // null),contentEncoding:(.contentEncoding // null),
+      cacheControl:(.cacheControl // null),contentDisposition:(.contentDisposition // null),
+      metadata:(.metadata // {}),tags:((.tags // []) | sort_by(.Key))}' \
+    </dev/null >"$EXPECTED_OBJECTS" || return 1
+}
+if [ -n "$EXPECTED_MANIFEST" ]; then
+  if validate_expected_manifest; then
+    EXPECTED_MANIFEST_DIGEST="$(sha256sum "$EXPECTED_MANIFEST" | awk '{print $1}')"
+  else
+    add_missing_proof 'expected manifest is invalid or lacks complete source provenance'
+  fi
+fi
