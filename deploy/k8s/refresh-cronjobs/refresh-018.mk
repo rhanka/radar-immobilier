@@ -107,6 +107,12 @@ apply-preprod: guard-preprod
 	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-preprod IMAGE_REF="$(IMAGE_REF)" RENDER_OUT="$$tmp" ENV=preprod; \
 	  $(K) apply -f "$$tmp"
 
+.PHONY: validate-preprod
+validate-preprod: guard-preprod
+	@tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-preprod IMAGE_REF="$(IMAGE_REF)" RENDER_OUT="$$tmp" ENV=preprod; \
+	  $(K) apply --dry-run=server -f "$$tmp" >/dev/null
+
 .PHONY: trigger-preprod
 trigger-preprod: guard-preprod
 	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }
@@ -125,3 +131,12 @@ status-preprod: guard-preprod
 logs-preprod: guard-preprod
 	@test -n "$(RUN_ID)" || { echo "RUN_ID is required" >&2; exit 1; }
 	@$(K) logs "job/radar-refresh-pv-$(RUN_ID)" --all-containers=true
+
+.PHONY: diagnose-preprod
+diagnose-preprod: guard-preprod
+	@test -n "$(RUN_ID)" || { echo "RUN_ID is required" >&2; exit 1; }
+	@$(K) get job "radar-refresh-pv-$(RUN_ID)" \
+	  -o jsonpath='{range .status.conditions[*]}{.type}{"="}{.status}{" reason="}{.reason}{" message="}{.message}{"\n"}{end}'
+	@$(K) get events --field-selector "involvedObject.name=radar-refresh-pv-$(RUN_ID)" \
+	  -o custom-columns=TIME:.lastTimestamp,TYPE:.type,REASON:.reason,MESSAGE:.message
+	@$(K) get resourcequota preprod-cap -o jsonpath='requests.cpu={.status.used.requests\.cpu}/{.status.hard.requests\.cpu}{"\n"}limits.cpu={.status.used.limits\.cpu}/{.status.hard.limits\.cpu}{"\n"}requests.memory={.status.used.requests\.memory}/{.status.hard.requests\.memory}{"\n"}limits.memory={.status.used.limits\.memory}/{.status.hard.limits\.memory}{"\n"}'
