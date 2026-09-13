@@ -8,6 +8,12 @@ Status: Fable 5 independent review GO_WITH_CHANGES reconciled on 2026-09-13; C01
 
 2. **Install the published contract, isolate the chat dependency.** Pin `@sentropic/graphify` to `0.18.0` (producer merge `1a723695d8a23ffe5e13f1988c52ded056f85c96`). Keep Immo chat's resolved mesh `0.1.2`. Released Graphify requires host-supplied planner/adapters. Add the npm alias `@sentropic/llm-mesh-refresh: npm:@sentropic/llm-mesh@0.19.0`; use only public exports. Verify the lock records nested Graphify mesh 0.19.0 too, without assuming alias and nested packages share one module instance. Prove cross-instance adapter/planner generation, abort and failure classification with mocked transports. No mesh objects cross into chat; no network mesh service, private runtime imports, compatibility casts or chat migration. Before provider calls, verify the installed Graphify artifact actually forwards the schema string to the prompt.
 
+   The observed abrupt-SSE `UND_ERR_SOCKET` misclassification in mesh 0.19.0 is an accepted,
+   non-blocking limitation. It remains fail-closed: the Job fails without accepting or publishing
+   output, and a later invocation resumes hash-checked durable state. T1 does not require an
+   in-process retry, mesh 0.19.1, Graphify patch, or Graphify version other than 0.18.0. Any future
+   retry evolution requires separately prioritized integration in both llm-mesh and Graphify.
+
 3. **Use public preparation + profile/client composition.** `runConfiguredDataprep` is NOT exported by published 0.18.0 and must not be imported. Compose `discoverProjectConfig`/`loadProjectConfig`, `loadOntologyProfile`, `loadProfileRegistries`, `registryRecordsToExtraction` and `prepareSemanticDetection` from the public root as needed. Explicit checked S3 manifests replace private configured input discovery; retain their exclusions. Materialize stable original-document/page mappings in an ephemeral run directory. Reuse `radar/ontology/ontology-profile.yaml` and versioned registry data, with no workstation-relative paths. This prepares inputs, not extraction; continue with:
 
    - `createLlmMeshFacade({mode: 'cli', configResolver, keyring?})` from the alias `/facade`; stable workload `routingSubject {principalRef, ownerScopeRef}` supplied by Immo configuration, never inferred from credentials.
