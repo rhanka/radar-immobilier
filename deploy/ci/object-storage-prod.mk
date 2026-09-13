@@ -159,3 +159,28 @@ object-storage-minio-prod-scale-zero: ## Scale only the proven-empty, unconsumed
 	      --timeout=120s >/dev/null; \
 	  else [ "$$replicas" = 0 ]; fi; \
 	  echo '[object-storage-minio-prod] empty unconsumed MinIO replicas=0'
+
+.PHONY: object-storage-minio-prod-remove
+object-storage-minio-prod-remove: ## Remove the proven-empty, unconsumed PROD MinIO resources
+	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
+	  [ "$(OBJECT_STORAGE_MINIO_PROD_REMOVE_CONFIRM)" != 1 ]; then \
+	  echo '[object-storage-minio-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
+	  [ "$$server" = "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ] || \
+	    { echo '[object-storage-minio-prod] refused non-OVH context'; exit 1; }; \
+	  buckets="$$( $(KUBECTL) -n "$$namespace" exec radar-minio-0 -- /bin/sh -ceu \
+	    'mc alias set local http://127.0.0.1:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" >/dev/null; mc ls --json local' )"; \
+	  [ -z "$$buckets" ] || { echo '[object-storage-minio-prod] MinIO is not empty'; exit 1; }; \
+	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | \
+	    jq -e 'any(.spec.template.spec.containers[].env[]?; .name == "S3_ENDPOINT" and .value == "https://s3.fr-par.scw.cloud")' >/dev/null; \
+	  [ "$$( $(KUBECTL) -n "$$namespace" get cronjobs -o json | jq '.items|length' )" = 0 ]; \
+	  claim=minio-data-radar-minio-0; \
+	  [ "$$( $(KUBECTL) -n "$$namespace" get pvc/$$claim -o jsonpath='{.status.capacity.storage}' )" = 5Gi ]; \
+	  $(KUBECTL) -n "$$namespace" delete statefulset/radar-minio service/radar-minio \
+	    --wait=true >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" delete pvc/$$claim --wait=true >/dev/null; \
+	  ! $(KUBECTL) -n "$$namespace" get statefulset/radar-minio service/radar-minio \
+	    pvc/$$claim >/dev/null 2>&1; \
+	  echo '[object-storage-minio-prod] removed empty StatefulSet, Service and 5Gi PVC'
