@@ -100,4 +100,5 @@
   - [x] Extend browser regression checks to simultaneous counts, visual nesting, Mermaid SVG parity, radio choices, comments, persistence and clipboard failure reporting.
   - [x] Keep clipboard-denied JSON keyboard-selectable, hash option definitions and suppress raw source HTML while rendering the controlled Mermaid SVGs.
   - [x] Fit the full diagram from explicit absolute nested bounds; verify every box and component stays inside the initial viewport.
+  - [x] Add real clipboard read-back in a fresh isolated browser context, preserving the previous clipboard content.
   - [ ] Verify simultaneous completeness, nested bounds, Mermaid rendering and A/B/C comment/export behavior.
