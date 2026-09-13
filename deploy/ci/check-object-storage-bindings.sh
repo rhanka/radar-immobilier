@@ -19,10 +19,6 @@ PUBLIC_IMAGE_FILES=(
   deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml
   deploy/k8s/secrets.example.yaml
 )
-PENDING_CLIENTS=(
-  deploy/k8s/32b-reproject-etape-job.yaml
-  .github/workflows/run-job.yaml
-)
 FAIL=0
 fail() { echo "FAIL: $*" >&2; FAIL=$((FAIL + 1)); }
 
@@ -111,9 +107,8 @@ for rel in deploy/k8s/kustomization.yaml deploy/k8s/70-networkpolicy.yaml; do
   grep -Eiq 'radar-minio|component:[[:space:]]*minio|25-minio\.yaml' "$ROOT/$rel" &&
     fail "$rel retains a PROD MinIO resource"
 done
-for rel in "${PENDING_CLIENTS[@]}"; do
-  [ -f "$ROOT/$rel" ] || fail "$rel is missing from the explicit pending-client ledger"
-done
+[ ! -e "$ROOT/deploy/k8s/32b-reproject-etape-job.yaml" ] ||
+  fail 'deploy/k8s/32b-reproject-etape-job.yaml must be retired'
 for expected in \
   'S3_ENDPOINT=http://minio:9000' \
   'S3_REGION=fr-par' \
@@ -130,4 +125,4 @@ if [ "$FAIL" -ne 0 ]; then
   exit 1
 fi
 echo "object-storage binding check: ok (${#FILES[@]} released manifests)"
-echo "object-storage pending-client ledger: ${#PENDING_CLIENTS[@]} gated surfaces"
+echo "object-storage legacy client ledger: empty"
