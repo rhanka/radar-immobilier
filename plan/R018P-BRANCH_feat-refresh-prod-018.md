@@ -34,7 +34,7 @@
 ## Plan / Todo (lot-based)
 - [ ] **Lot 0 — Production audit and fail-closed contract**
   - [x] Read project rules and create the isolated worktree.
-  - [ ] Inventory live production CronJobs, S3 binding names, MinIO absence, keyring PVC, and runtime/bootstrap Secret presence without reading Secret values.
+  - [x] Add a read-only inventory for live production CronJobs, S3 binding names, MinIO absence, keyring PVC, runtime/bootstrap Secret presence, and storage Jobs without reading Secret values.
   - [ ] Render the production overlay and prove one active causal CronJob, two suspended legacy CronJobs, immutable image, and OVH-only storage references.
 - [ ] **Lot 1 — Make-only production controls**
   - [ ] Add namespace/API-server guards, read-only inspection, server dry-run, seed, apply, scheduled observation, status, logs, and rollback targets.
