@@ -439,6 +439,10 @@ object-storage-docs-preprod-validate: ## Render support and validate the DOCS bu
 	@jq -n -f deploy/ci/validate-docs-secret.jq >/dev/null
 	@jq -n '{items:[]}' | jq -f deploy/ci/docs-zero-writer-bindings.jq >/dev/null
 	@jq -n -f deploy/ci/docs-prod-source-secret.jq >/dev/null
+	@jq -n '{items:[]}' | jq -f deploy/ci/minio-removal-resources.jq >/dev/null
+	@jq -n '{items:[]}' | jq -f deploy/ci/minio-removal-pods.jq >/dev/null
+	@jq -n '{items:[]}' | jq --arg observedAt 2026-09-13T00:00:00Z \
+	  -f deploy/ci/minio-removal-receipt.jq >/dev/null
 	@bash -n deploy/ci/prove-docs-conditional-writes.sh \
 	  deploy/ci/build-docs-expected-manifest.sh deploy/ci/copy-canonical-docs.sh \
 	  deploy/ci/copy-canonical-docs.hermetic.test.sh deploy/ci/copy-canonical-docs-progress.sh
@@ -621,6 +625,64 @@ object-storage-docs-preprod-copy-progress: ## Report canonical copy progress wit
 	  [ -n "$$pod" ] || { echo '[object-storage-docs] canonical copy Pod is absent'; exit 1; }; \
 	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- env REPORT_DIR="/evidence/reports/$$uid" \
 	    ELAPSED_SECONDS="$$elapsed" /bin/bash /tool/copy-canonical-docs-progress.sh
+
+.PHONY: object-storage-minio-preprod-remove
+object-storage-minio-preprod-remove: ## Irreversibly remove exact preprod MinIO resources after canonical parity
+	@if [ "$(OBJECT_STORAGE_MINIO_REMOVE_CONFIRM)" != "DESTROY_NONCANONICAL_PREPROD_MINIO" ] || \
+	  [ "$(ENV)" != "preprod" ] || [ -z "$$KUBECONFIG" ] || \
+	  [[ "$(OBJECT_STORAGE_DOCS_PARITY_JOB)" != radar-object-storage-copy-canonical-docs-* ]] || \
+	  ! [[ "$(OBJECT_STORAGE_DOCS_CANONICAL_DIGEST)" =~ ^[0-9a-f]{64}$$ ]]; then \
+	  echo '[object-storage-minio] refused: require exact parity Job/digest, destruction phrase, KUBECONFIG, ENV=preprod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  job="$(OBJECT_STORAGE_DOCS_PARITY_JOB)"; expected_digest="$(OBJECT_STORAGE_DOCS_CANONICAL_DIGEST)"; \
+	  server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
+	  context_namespace="$$( $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )"; \
+	  [ "$$server" = "$(OBJECT_STORAGE_OVH_SERVER)" ] && [ "$$context_namespace" = "$$namespace" ] || \
+	    { echo '[object-storage-minio] refused: exact OVH preprod context is unproved'; exit 1; }; \
+	  work="$$(mktemp -d)"; trap 'rm -rf "$$work"' EXIT; \
+	  uid="$$( $(KUBECTL) -n "$$namespace" get "job/$$job" -o jsonpath='{.metadata.uid}' )"; \
+	  pod="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  [ -n "$$pod" ] || { echo '[object-storage-minio] parity evidence Pod is absent'; exit 1; }; \
+	  parity_digest="$$( $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
+	    'summary="/evidence/reports/$$1/summary.json"; jq -e --arg digest "$$2" '\''.complete == true and .exactParity == true and .expected == 59017 and .processed == 59017 and .logicalBytes == 12534514457 and .failed == 0 and .canonicalDigest == $$digest'\'' "$$summary" >/dev/null; sha256sum "$$summary" | awk '\''{print $$1}'\''' \
+	    -- "$$uid" "$$expected_digest" )"; \
+	  [[ "$$parity_digest" =~ ^[0-9a-f]{64}$$ ]] || { echo '[object-storage-minio] parity receipt is invalid'; exit 1; }; \
+	  $(KUBECTL) -n "$$namespace" get statefulset/radar-minio service/radar-minio \
+	    pvc/minio-data-radar-minio-0 networkpolicy/allow-api-to-minio \
+	    networkpolicy/allow-graph-projection-to-minio networkpolicy/allow-grounding-to-minio \
+	    networkpolicy/allow-object-storage-inventory-to-minio networkpolicy/allow-scrape-to-minio \
+	    networkpolicy/allow-snapshot-dump-to-minio -o json >"$$work/resources.json"; \
+	  jq -e -f deploy/ci/minio-removal-resources.jq "$$work/resources.json" >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get pods -o json >"$$work/pods.json"; \
+	  jq -e -f deploy/ci/minio-removal-pods.jq "$$work/pods.json" >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | \
+	    jq -e -f deploy/ci/raw-api-ovh-binding.jq >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get cronjobs/radar-refresh-scrape cronjobs/radar-refresh-projection -o json | \
+	    jq -e -f deploy/ci/docs-zero-writer-bindings.jq >/dev/null; \
+	  observed="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
+	  jq --arg observedAt "$$observed" -f deploy/ci/minio-removal-receipt.jq \
+	    "$$work/resources.json" >"$$work/before.json"; \
+	  before_digest="$$(sha256sum "$$work/before.json" | awk '{print $$1}')"; \
+	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-minio-removal \
+	    --from-file=receipt.json="$$work/before.json" --dry-run=client -o yaml | $(KUBECTL) apply -f - >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" delete statefulset/radar-minio --cascade=foreground --wait=true >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" wait --for=delete pod/radar-minio-0 --timeout=180s >/dev/null 2>&1; \
+	  $(KUBECTL) -n "$$namespace" delete service/radar-minio \
+	    networkpolicy/allow-api-to-minio networkpolicy/allow-graph-projection-to-minio \
+	    networkpolicy/allow-grounding-to-minio networkpolicy/allow-object-storage-inventory-to-minio \
+	    networkpolicy/allow-scrape-to-minio networkpolicy/allow-snapshot-dump-to-minio --wait=true >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" delete pvc/minio-data-radar-minio-0 --wait=true >/dev/null; \
+	  remaining="$$( $(KUBECTL) -n "$$namespace" get statefulset/radar-minio service/radar-minio \
+	    pvc/minio-data-radar-minio-0 networkpolicy/allow-api-to-minio \
+	    networkpolicy/allow-graph-projection-to-minio networkpolicy/allow-grounding-to-minio \
+	    networkpolicy/allow-object-storage-inventory-to-minio networkpolicy/allow-scrape-to-minio \
+	    networkpolicy/allow-snapshot-dump-to-minio --ignore-not-found -o name )"; [ -z "$$remaining" ]; \
+	  removed="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
+	  jq -n --slurpfile before "$$work/before.json" --arg removedAt "$$removed" --arg beforeDigest "$$before_digest" --arg parityDigest "$$parity_digest" '\''$$before[0] + {removed:true,removedAt:$$removedAt,beforeDigest:$$beforeDigest,parityReceiptDigest:$$parityDigest,nonRecoverablePvcData:true}'\'' >"$$work/after.json"; \
+	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-minio-removal \
+	    --from-file=receipt.json="$$work/after.json" --dry-run=client -o yaml | $(KUBECTL) apply -f - >/dev/null; \
+	  echo "[object-storage-minio] removed StatefulSet/radar-minio Service/radar-minio PVC/minio-data-radar-minio-0 and six ingress policies; receipt=$$(sha256sum "$$work/after.json" | awk '{print $$1}')"
 
 .PHONY: object-storage-raw-preprod-rebind
 object-storage-raw-preprod-rebind: ## Roll radar-api RAW bindings to OVH without changing the shared ConfigMap
