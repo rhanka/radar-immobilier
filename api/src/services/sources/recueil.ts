@@ -3,6 +3,7 @@ import {
   rawMetaKey,
   SourceFetchError,
   type RawDocumentRecord,
+  type RawDocumentRef,
   type SourceAdapter,
   type SourceErrorKind,
 } from "@radar/sources";
@@ -24,6 +25,10 @@ import {
 
 export interface RecueilOptions {
   readonly limit?: number;
+  /** Skip listed representations before they count toward `limit` or get fetched. */
+  readonly acceptRef?: (ref: RawDocumentRef) => boolean;
+  /** Optional source-specific pacing hook, invoked immediately before each fetch. */
+  readonly beforeFetch?: (ref: RawDocumentRef) => Promise<void>;
   /**
    * CIBLAGE plan id propagated into provenance, when collection was scheduled.
    * References a `CiblagePlan.id` (pipeline stage 1, `@radar/domain`): the
@@ -96,7 +101,10 @@ export async function runRecueil(
     for await (const ref of adapter.list(listOpts)) {
       if (processed >= limit) break;
       if (options.signal?.aborted) break;
+      if (options.acceptRef && !options.acceptRef(ref)) continue;
 
+      await options.beforeFetch?.(ref);
+      if (options.signal?.aborted) break;
       const raw = await adapter.fetch(ref);
 
       const record = buildRawDocumentRecord({

@@ -27,6 +27,14 @@ images:
 patches:
   - target:
       kind: CronJob
+      name: radar-refresh-scrape
+    patch: |
+      - op: replace
+        path: /spec/suspend
+        value: false
+  - target:
+      kind: CronJob
+      name: radar-refresh-projection
     patch: |
       - op: replace
         path: /spec/suspend

@@ -84,6 +84,42 @@ function fakeAdapter(
 }
 
 describe("runRecueil — raw bytes + sidecar meta.json", () => {
+  it("filters index representations before the limit and paces the selected fetch", async () => {
+    const store = new MemoryStore();
+    const indexRef: RawDocumentRef = {
+      sourceKind: "pv", city: "testville", url: "https://testville.qc.ca/pv",
+      discoveredAt: "2026-06-08T00:00:00.000Z", contentType: "text/html",
+    };
+    const pdfRef: RawDocumentRef = {
+      sourceKind: "pv", city: "testville", url: "https://testville.qc.ca/pv.pdf",
+      discoveredAt: "2026-06-08T00:00:00.000Z", contentType: "application/pdf",
+    };
+    const fetched: string[] = [];
+    const paced: string[] = [];
+    const adapter: SourceAdapter = {
+      kind: "pv", city: "testville", version: "1.0.0",
+      async *list() { yield indexRef; yield pdfRef; },
+      async fetch(ref) {
+        fetched.push(ref.url);
+        return { ref, sourceKind: "pv", city: "testville", url: ref.url,
+          fetchedAt: "2026-06-08T09:30:00.000Z", contentType: ref.contentType ?? "text/html",
+          body: new TextEncoder().encode(ref.url),
+          provenance: { adapterVersion: "1.0.0", fetchedViaObscura: false } };
+      },
+      hash() { return "unused"; },
+    };
+
+    const out = await runRecueil("proces-verbaux-testville", adapter, store, {
+      limit: 1,
+      acceptRef: (ref) => ref.contentType === "application/pdf",
+      beforeFetch: async (ref) => { paced.push(ref.url); },
+    });
+
+    expect(out.ok && out.count).toBe(1);
+    expect(fetched).toEqual([pdfRef.url]);
+    expect(paced).toEqual([pdfRef.url]);
+  });
+
   it("writes the CAS raw object and a parseable .meta.json record", async () => {
     const store = new MemoryStore();
     const out = await runRecueil(
