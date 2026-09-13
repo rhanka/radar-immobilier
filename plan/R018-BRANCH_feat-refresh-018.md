@@ -67,6 +67,7 @@
 - [x] C12e: retain the validated raw canonical object so resume reproduces identical bytes.
 - [x] C13a: prove real S3 publication and real PG resume without repeating model extraction.
 - [x] C13b: prove guarded conflict, PG provenance regression and selected-city failure.
+- [x] C14: add a bounded, redacted refresh command with deterministic saved-PDF smoke input.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
