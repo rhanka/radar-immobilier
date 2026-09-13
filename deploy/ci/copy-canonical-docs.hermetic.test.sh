@@ -40,6 +40,7 @@ grep -F -- '--argjson size "$size"' "$subject" >/dev/null
 grep -F '"$batch" -eq 32' "$subject" >/dev/null
 grep -F 'IfNoneMatch: "*"' "$node_subject" >/dev/null
 grep -F 'concurrency > 128' "$node_subject" >/dev/null
+grep -F 'officialManifestDigest = "52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425"' "$node_subject" >/dev/null
 grep -F 'maxSockets: concurrency' "$node_subject" >/dev/null
 grep -F 'destination-conflict' "$node_subject" >/dev/null
 grep -F 'failed("conditional-put", error, item)' "$node_subject" >/dev/null || \
@@ -48,5 +49,9 @@ grep -F 'httpStatus: error?.$metadata?.httpStatusCode ?? null' "$node_subject" >
 grep -F 'diff.extra.length === 1 && allowSingleProofPrune' "$node_subject" >/dev/null
 grep -F 'new DeleteObjectCommand' "$node_subject" >/dev/null
 grep -F 'IfMatch: extra.etag' "$node_subject" >/dev/null
+grep -F 'proof.object?.keySha256 !== keySha256' "$node_subject" >/dev/null
+grep -F 'proof.object?.bodySha256 !== observed.sha256' "$node_subject" >/dev/null
+grep -F 'sourceManifestDigest = manifestDigest' "$node_subject" >/dev/null
+grep -F 'summary.exactParity = summary.targetExactParity && summary.sourceExact' "$node_subject" >/dev/null
 ! grep -F 'DeleteBucket' "$node_subject"
 echo 'canonical docs copy hermetic test: PASS'
