@@ -132,6 +132,7 @@
   - [x] Rewrite D5 dossier sections 5–6 around T3 feasibility, staged gates and recovery.
   - [x] Rewrite D5 dossier sections 7–8 around provenance, limitations and billing-last evidence.
   - [x] Align the transition register and architecture overview with D5 timing, published Graphify and graph coverage.
+  - [x] Update D5 replay, attribution and local-preview documentation.
   - [x] Publish a current report-through-September-13 companion and supersede the older window without rewriting its sources.
   - [ ] Regenerate the current/dated portable HTML and evidence manifest with D5 hashes (D5 generator ready; build pending).
   - [ ] Pass static, build, browser, clipboard, scope and diff gates; record limitations without deployment claims.
