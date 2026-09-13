@@ -21,7 +21,6 @@ PUBLIC_IMAGE_FILES=(
 )
 PENDING_CLIENTS=(
   deploy/k8s/32b-reproject-etape-job.yaml
-  .github/workflows/grounding-preprod.yml
   .github/workflows/run-job.yaml
 )
 FAIL=0
@@ -85,8 +84,8 @@ grep -Eiq 'refresh-diag|REFRESH_DIAG_ENABLED|radar-refresh-diag' \
   fail '.github/workflows/build-push-images.yml retains the legacy refresh diagnostic'
 grep -Eiq 'radar-grounding|deploy/grounding' "$ROOT/.github/workflows/build-push-images.yml" &&
   fail '.github/workflows/build-push-images.yml still builds the retired grounding image'
-grep -Fq 'if: ${{ false }}' "$ROOT/.github/workflows/grounding-preprod.yml" ||
-  fail '.github/workflows/grounding-preprod.yml is not fail-closed'
+[ ! -e "$ROOT/.github/workflows/grounding-preprod.yml" ] ||
+  fail '.github/workflows/grounding-preprod.yml must be retired'
 [ ! -e "$ROOT/.github/workflows/grounding-publish-prod.yml" ] ||
   fail '.github/workflows/grounding-publish-prod.yml must be retired'
 for rel in deploy/k8s/refresh-diag/diag-refresh-job.yaml deploy/k8s/refresh-diag/kustomization.yaml; do

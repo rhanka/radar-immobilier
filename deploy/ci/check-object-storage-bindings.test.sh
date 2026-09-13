@@ -24,7 +24,6 @@ FILES=(
   deploy/k8s/10-rbac.yaml deploy/k8s/11-ci-deployer-preprod-rbac.yaml
   deploy/k8s/object-storage-docs-prod/copy-job.yaml
   deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml deploy/k8s/secrets.example.yaml
-  .github/workflows/grounding-preprod.yml
   .github/workflows/run-job.yaml
 )
 fixture() {
@@ -72,6 +71,9 @@ run_bad "$CASE_ROOT" 'rejects a restored MinIO refresh diagnostic'; rm -rf "$CAS
 
 fixture; echo 'image: radar-grounding' >>"$CASE_ROOT/.github/workflows/build-push-images.yml"
 run_bad "$CASE_ROOT" 'rejects a restored grounding image build'; rm -rf "$CASE_ROOT"
+
+fixture; touch "$CASE_ROOT/.github/workflows/grounding-preprod.yml"
+run_bad "$CASE_ROOT" 'rejects a restored MinIO grounding workflow'; rm -rf "$CASE_ROOT"
 
 fixture; mkdir -p "$CASE_ROOT/deploy/k8s/refresh-diag"; touch "$CASE_ROOT/deploy/k8s/refresh-diag/diag-refresh-job.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored refresh diagnostic manifest'; rm -rf "$CASE_ROOT"
