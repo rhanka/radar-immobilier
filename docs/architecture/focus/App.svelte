@@ -23,6 +23,7 @@
     if (data.docs[name]) { event.preventDefault(); source = name; }
     else if (/^https:\/\//.test(a.href)) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
   }
+  function modal(node) { node.showModal(); return { destroy() { node.close(); } }; }
 </script>
 
 <ThemeProvider theme={entropicTheme}>
@@ -57,6 +58,6 @@
         <p>Composant de nœud Focus réutilisé sans modification ; SvelteFlow natif, groupes parentId et sous-flows navigables. Mapping complet des Mermaid ; absence de croisements d’arêtes non certifiée.</p>
       </footer>
     </main>
-    {#if source}<div class="source-overlay"><section class="source-sheet" role="dialog" aria-modal="true" aria-label={`Source ${source}`} tabindex="-1"><Button variant="secondary" onclick={() => source = null}>Fermer la source</Button><div class="prose" onclick={link} role="presentation">{@html html(data.docs[source])}</div></section></div>{/if}
+    {#if source}<dialog class="source-overlay" use:modal onclose={() => source = null} aria-label={`Source ${source}`}><section class="source-sheet"><Button variant="secondary" onclick={() => source = null}>Fermer la source</Button><div class="prose" onclick={link} role="presentation">{@html html(data.docs[source])}</div></section></dialog>{/if}
   </Container></AppShell>
 </ThemeProvider>
