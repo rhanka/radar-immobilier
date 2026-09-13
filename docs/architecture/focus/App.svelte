@@ -5,9 +5,9 @@
   import { AppShell, ThemeProvider, Container, Badge, Button, Flex, ProgressBar, Textarea } from '@sentropic/design-system-svelte';
   import { entropicTheme } from '@sentropic/design-system-themes';
   import Explorer from './Explorer.svelte';
+  import { presentation } from './presentation-fr.js';
   import data from './.generated/data.json';
   const titles = ['Décision & périmètre', 'Existant & incertitudes', 'Enjeux & responsabilités', 'Trois options', 'Avis & contre-arguments', 'Bascule & retour arrière', 'Critères de réussite', 'Points à compléter'];
-  const sections = data.docs['decision-dossier'].split(/^## /m).slice(1);
   let step = $state(0), note = $state(''), saved = $state(false), storageError = $state(false), source = $state(null);
   const key = `immo-focus-decision:${data.manifest.dossierHash}:draft`;
   const html = text => DOMPurify.sanitize(marked.parse(text), { FORBID_TAGS: ['script', 'iframe', 'style', 'form'] });
@@ -27,7 +27,7 @@
 </script>
 
 <ThemeProvider theme={entropicTheme}>
-  <AppShell><Container maxWidth="full" padding={0}>
+  <AppShell><Container size="full" padding={false}>
     <main class="dossier">
       <header class="masthead">
         <Flex justify="between" align="center" wrap gap={2}>
@@ -44,8 +44,9 @@
       <ProgressBar value={step + 1} max={8} label={`Section ${step + 1} sur 8`} size="sm" />
       <section class="decision-content">
         <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D2 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
-        <!-- Sanitized Markdown is the authoritative eight-section dossier. -->
-        <div class="prose" onclick={link} role="presentation">{@html html(`## ${sections[step]}`)}</div>
+        <!-- The French reading surface links to the complete repository dossier. -->
+        <div class="prose" onclick={link} role="presentation">{@html html(presentation[step])}</div>
+        <Button variant="ghost" size="sm" onclick={() => source = 'decision-dossier'}>Dossier source complet · références et qualification des faits</Button>
         {#if step === 4}<Button variant="secondary" onclick={() => source = 'decision-reviews'}>Lire les avis réels des reviewers</Button>{/if}
       </section>
       <Explorer graphs={data.graphs} />
