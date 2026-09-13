@@ -21,8 +21,8 @@ SVG rendu et SvelteFlow natif complet avec sous-flows `parentId`. Chaque
 nœud/boîte affiche une icône de service et sa provenance
 `radar-immobilier`, `geo`, `poc-k8s` ou externe; URL utilisateurs et SSO sont
 inclus. La [version PDF](report-through-2026-09-13.pdf) copie les deux graphes
-natifs complets sur pages A3 paysage et ajoute des partitions lisibles par
-sous-flow, avec les mêmes icônes et labels `repo:`.
+natifs complets sur pages A3 paysage; quatre zones recouvrantes par graphe
+reprennent les mêmes sous-flows, icônes et labels `repo:` à taille lisible.
 
 | Vue | État au 13 septembre | Lecture |
 | --- | --- | --- |
