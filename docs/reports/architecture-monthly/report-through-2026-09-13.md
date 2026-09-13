@@ -1,6 +1,6 @@
 # Rapport architecture et livraison — 10 août → 13 septembre 2026
 
-Statut : rapport D6, **pas une facture fournisseur ni une preuve de déploiement
+Statut : rapport D7, **pas une facture fournisseur ni une preuve de déploiement
 des cibles**. Fenêtre America/Toronto : `2026-08-10T00:00:00-04:00` inclus à
 `2026-09-14T00:00:00-04:00` exclus, soit **35 jours / 840 heures**.
 
@@ -12,23 +12,26 @@ rapport commence donc le **10 août**, sans trou ni recouvrement. Un brouillon
 hors main n’est pas utilisé comme précédent. Aucune facture externe plus récente n’est présente
 dans le dépôt; cette réserve n’empêche pas d’établir la jointure des rapports Git.
 
-## 2. Architecture — avant / transition effective / après
+## 2. Architecture — AVANT / APRÈS
 
-Le [Focus HTML daté](architecture-transition-2026-09-13.html) ouvre sur la
-**transition effective** et permet de comparer **Avant → Transition effective →
-Après T2 → Après cible**. Les huit graphes sont produits à partir des Mermaid
-commités sous deux formes : SVG rendu et SvelteFlow natif complet avec sous-flows
-`parentId`. Chaque nœud/boîte affiche une icône de service et sa provenance
+Le [Focus HTML daté](architecture-before-after-2026-09-13.html) compare
+exactement deux vues principales : **Architecture AVANT → Architecture APRÈS**.
+Les deux graphes sont produits à partir des Mermaid commités sous deux formes :
+SVG rendu et SvelteFlow natif complet avec sous-flows `parentId`. Chaque
+nœud/boîte affiche une icône de service et sa provenance
 `radar-immobilier`, `geo`, `poc-k8s` ou externe; URL utilisateurs et SSO sont
-inclus. Une [version PDF du présent rapport](report-through-2026-09-13.pdf) est
-également livrée.
+inclus. La [version PDF](report-through-2026-09-13.pdf) copie les deux graphes
+natifs complets sur pages A3 paysage et ajoute des partitions lisibles par
+sous-flow, avec les mêmes icônes et labels `repo:`.
 
-| Niveau | État au 13 septembre | Lecture |
+| Vue | État au 13 septembre | Lecture |
 | --- | --- | --- |
-| Avant | API raw MinIO, documents MinIO, graphe OVH, LLM depuis poste | Capture de référence pré-transition |
-| Transition effective | RAW OVH actif; T1 a atteint K8s mais pas le LLM; DOCS inventorié/provisionné | Réalisé et en cours, sans confondre les gates |
-| Après T2 | RAW/DOCS OVH prod+préprod, MinIO retiré après parité/reprise | Cible non déployée |
-| Après T3 | Immo+Geo sur un b3-8 existant | Cible non commencée, NO-GO actuel |
+| Architecture AVANT | API raw/documents MinIO, graphe OVH, LLM depuis poste | Capture de référence |
+| Architecture APRÈS | RAW/DOCS OVH, refresh autonome, Immo+Geo sur un b3-8 existant | Cible non déployée; NO-GO actuel |
+
+Les faits de transition (RAW OVH actif, T1 arrêté avant le LLM, DOCS
+inventorié/provisionné) expliquent le delta dans le texte. Ils ne constituent
+pas un troisième graphe d’architecture.
 
 ## 3. Travaux réalisés et vérifiés dans la fenêtre
 
@@ -100,7 +103,7 @@ global glissant de sept jours par fournisseur; deux sièges Claude et un ChatGPT
 Pro à 200 USD/mois; USD→CAD 1.37; marge LLM ×1.15. La plateforme n’entre pas dans
 les numérateurs immo/geo.
 
-| Produit | Claude | Codex | Allocation CAD | Facturable ×1.15 |
+| Produit | Claude | Codex | Allocation CAD | Allocation avec marge ×1.15 |
 | --- | ---: | ---: | ---: | ---: |
 | immo | 14,009,998,961 | 1,426,882,082 | 121.163246 | **139.337732** |
 | geo | 11,194,704,885 | 1,376,664,354 | 97.284961 | **111.877705** |
@@ -116,12 +119,16 @@ le taux journalier passe de 7.1581 à **7.1776 CAD/j**, soit +0.27 %. L’écart
 absolu vient principalement des cinq jours réintégrés. Forcer une baisse serait
 contraire aux journaux mesurés.
 
-### Synthèse indicative
+La ratification de cette allocation LLM reste **ouverte et non critique**. Sans
+réponse propriétaire, le montant demeure indicatif et ne bloque ni le dossier
+d’architecture ni les gates T1–T3.
+
+### Synthèse indicative non ratifiée pour le LLM
 
 | Poste | Montant |
 | --- | ---: |
 | Projection infra, un b3-8 | **68.880000 CAD** |
-| Allocation LLM immo+geo | **251.215438 CAD** |
+| Allocation LLM immo+geo, non ratifiée | **251.215438 CAD** |
 | **Somme indicative** | **320.095438 CAD** |
 
 ## 7. Sources, incertitudes et rejeu
