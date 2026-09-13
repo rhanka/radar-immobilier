@@ -43,6 +43,7 @@
 - [ ] Lot 3: Sol builds the released scope with isolated tests and atomic commits.
 - [x] C02: compose the public owner-scoped Graphify mesh with explicit refresh adapters, model and run abort signal.
 - [x] C03: prove schema/token forwarding, three-copy mesh interop, owner isolation, classified failure, abort propagation and log silence.
+- [x] C04a: define strict immutable-manifest, original-page and bounded UTF-8 corpus chunk contracts.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
