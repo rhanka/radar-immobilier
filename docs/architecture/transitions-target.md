@@ -20,7 +20,7 @@ flowchart TB
     T1_KEEP["KEPT<br/>PP-DB, PP-GRAPH, API/UI/MCP, Geo evidence, MinIO API roles + legacy history"]
     T1_REMOVE["REMOVED<br/>Routine workstation LLM and parallel legacy canonical publishers"]
     T1_GATES["GATES<br/>GO_WITH_GATES: preprod success path<br/>NO-GO unattended/retry/prod before llm-mesh 0.19.1 + K8s acceptance"]
-    T1_EVIDENCE["EVIDENCE<br/>Graphify exactly 0.18.0 fail-closes; PDF contract immo-pv-extraction-v3<br/>HEAD ac3a7150; targeted 8/8 + 7/7; typecheck + scope/branch PASS<br/>UND_ERR_SOCKET is llm-mesh 0.19.0; 0.19.1 unpublished; no real-provider Signal"]
+    T1_EVIDENCE["EVIDENCE<br/>0.18.0 fail-closed; immo-pv-extraction-v3; ac3a7150; 8/8 + 7/7; gates PASS<br/>llm-mesh 0.19.0 socket fault; 0.19.1 unpublished; no provider Signal"]
   end
   user["User / browser"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
@@ -111,7 +111,7 @@ flowchart TB
     T2_KEEP["KEPT<br/>PP-DB, PP-GRAPH, refresh, Geo corpus, PP-DOCS-LEGACY recovery and TEM"]
     T2_REMOVE["REMOVED AFTER GATE<br/>MinIO consumers + workload/PVC; SCW images/digests/jobs/manual/CI/backup/bootstrap/secret refs"]
     T2_GATES["GATES<br/>Fail before write + conditional-write capability<br/>parity + recovery + writer fence + zero consumers; preprod THEN production"]
-    T2_EVIDENCE["EVIDENCE<br/>LIVE API RAW; docs fallback empty; legacy baseline 1 / graph 4 / ontology 530<br/>parsed at least 4884; raw unknown; runs at least 445<br/>fail-before-write 25ec9e04; suite + conditional-write open; no copy/cutover/deletion"]
+    T2_EVIDENCE["EVIDENCE<br/>RAW live; docs empty; legacy baseline 1 / graph 4 / ontology 530 / parsed at least 4884 / runs at least 445<br/>25ec9e04 first fix; suite + conditional-write open; no copy/cutover/deletion"]
   end
   user["User / browser"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
@@ -207,7 +207,7 @@ flowchart TB
     T3_KEEP["KEPT<br/>Prod/preprod URLs + SSO, Immo/Geo roles, OVH stores, backups/recovery and TEM"]
     T3_REMOVE["REMOVED<br/>Extra active cluster nodes only after drain acceptance; no MinIO / other SCW target"]
     T3_GATES["GATES<br/>T2 complete → rightsizing → affinity/PVC constraints<br/>verified 2-node step → 1-node preprod THEN production"]
-    T3_EVIDENCE["EVIDENCE · NO-GO TODAY<br/>3 b3-8; one allocatable 1840m / 5907.82 Mi<br/>requests 4095m / 8442 Mi; pods 5273 Mi; 16 PVC / 15 Cinder RWO<br/>required CoreDNS/konnectivity/Traefik anti-affinity incompatible"]
+    T3_EVIDENCE["EVIDENCE · NO-GO TODAY<br/>3 b3-8; allocatable 1840m / 5907.82 Mi; requests 4095m / 8442 Mi; pods 5273 Mi<br/>16 PVC / 15 Cinder RWO; required CoreDNS/konnectivity/Traefik anti-affinity incompatible"]
   end
   user["User / browser / approved MCP client"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
