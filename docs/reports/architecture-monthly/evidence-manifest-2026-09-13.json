@@ -1,0 +1,90 @@
+{
+  "schema": "immo-architecture-monthly-evidence/v1",
+  "period": {
+    "timezone": "America/Toronto",
+    "from": "2026-08-12T00:00:00-04:00",
+    "to": "2026-09-10T23:59:59-04:00"
+  },
+  "snapshotAt": "2026-09-13",
+  "transitionRelation": "post-period",
+  "monetaryProposalAudit": "incomplete",
+  "deploymentClaim": "none; the target view is explicitly nondeployed",
+  "focus": {
+    "html": "architecture-transition-2026-09-13.html",
+    "htmlSha256": "359e42404337f8b40755c58899e326de4cff445812b8417f298537cc9f79a67e",
+    "artifactInputHash": "92b87297fbc8ed0f2670fa4fd07e1dde6d061d04533d3695275c1f386b3b032e",
+    "architectureHash": "592a415acc6113ea006cb5434f85c0d742dfdb580c0665509bea3e1bff758e49",
+    "dossierHash": "b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451",
+    "presentationHash": "410fd3f626769203e1629174a98befce7a231f98f172b4254197a00fb751d9e7",
+    "choicesHash": "71301edf2610fd2362147430637d1dfefbc705327b70730917ecd22adedcfa38",
+    "referenceFocusNodeHash": "e3065f43b9c5c38d7eda25f8f9efa080cceca7c4fb413474367d98def71a781c",
+    "nativeFocusRouterHash": "98fa601349246bbdcfaa0f5200c3b4e4c4e9d1573ec193d8b8d5200b39abc7d4"
+  },
+  "verifiedCostBoundaries": {
+    "b3_8Bhs5HourlyCad": 0.082,
+    "projectedHours": 720,
+    "oneNodeProjectionCad": 59.04,
+    "historicalLlmCapacityAllocationCad": 214.743159,
+    "extraNodePassThrough": false,
+    "nonNodeAndProductAllocation": "audit-incomplete"
+  },
+  "sourceFiles": [
+    {
+      "path": "docs/architecture.md",
+      "role": "current-state",
+      "sha256": "592a415acc6113ea006cb5434f85c0d742dfdb580c0665509bea3e1bff758e49"
+    },
+    {
+      "path": "docs/architecture/proposal.md",
+      "role": "target-nondeployed",
+      "sha256": "1f55c4bfab50b81cab7bcc7ce2c8602b99e452301ca96ade1b40dd766f5ffe79"
+    },
+    {
+      "path": "docs/architecture/transitions.md",
+      "role": "post-period-register",
+      "sha256": "6d09764545ab4dd2e145f890be650643d294658d9a91d8615edde8e6ec86a456"
+    },
+    {
+      "path": "docs/architecture/decision-dossier.md",
+      "role": "D4",
+      "sha256": "b001cefd850820d684fe701f5788463c28ac9f48a04c6be339c812d0c94f6451"
+    },
+    {
+      "path": "docs/reports/architecture-monthly/2026-08-12_2026-09-10-companion.md",
+      "role": "monthly-companion",
+      "sha256": "6a62978fc56a6a5140b0e3617c7050aaca243038754a09cfb5bce9a7dd026d6d"
+    }
+  ],
+  "externalReadOnlyEvidence": [
+    {
+      "path": ".lanes/conductor/docs/reports/rapport-mois-2026-08-12_2026-09-10.md",
+      "sha256": "9feec9b82cabba0df368ab8c8d3d33a4b887756beab2ca595b8920c16ac3ea14"
+    },
+    {
+      "path": ".lanes/conductor/docs/reports/couts-2026-08-12_2026-09-10.md",
+      "sha256": "05be0279be73eea7c9ae788b04dcbcd647c23e1b1f0f2de096efcff3a33f171d"
+    },
+    {
+      "path": ".lanes/conductor/.remote/month-evidence/billing-RUN2_202608.json",
+      "sha256": "de951460b768ac448e223419db5cae0f8c13669aeaf7754514a5a6039835f744"
+    },
+    {
+      "path": ".lanes/conductor/.remote/month-evidence/billing-RUN2_202609.json",
+      "sha256": "545d4e0b3e353a0d0555d35b0d58f85e15d1c394b92682259b199612e3e5c3f9"
+    },
+    {
+      "path": ".lanes/conductor/.remote/month-evidence/claude-dedup-audit.json",
+      "sha256": "276dcc4ba1e4d359ac30afd7fd002271b179ae25990123b85b2580cc004d56fd"
+    },
+    {
+      "path": ".lanes/conductor/.remote/month-evidence/codex-exact-dedup-audit.json",
+      "sha256": "e79adfbd9bc55cebf1159fce2144d893712d6c2857b4e3d97fdd739039d00701"
+    },
+    {
+      "path": ".lanes/conductor/.remote/month-evidence/token-audit-scope.txt",
+      "sha256": "6b2159c666531d123fe01b66b68c65a68d1d51c0226728e7160f2b34ac73af47"
+    }
+  ],
+  "replay": "make -f docs/architecture/focus/Makefile test build browser clipboard ENV=test-architecture",
+  "portability": "Requires the read-only Sentropic decision kit path configured by KIT_ROOT; it is not vendored."
+}

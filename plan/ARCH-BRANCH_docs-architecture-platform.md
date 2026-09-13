@@ -116,3 +116,4 @@
   - [x] Reconcile available monthly evidence, neutral LLM-allocation alternatives and explicit audit gaps without a final amount.
   - [x] Extend the Docker-only portable build and browser gate to the dated monthly rendering and hash manifest.
   - [x] Embed the dated Mermaid/SvelteFlow rendering into the monthly companion; retain post-period separation.
+  - [x] Pin the dated rendering, architecture inputs and read-only monthly evidence in a reproducible SHA-256 manifest.
