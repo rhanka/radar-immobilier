@@ -46,7 +46,7 @@ Kubernetes acceptance exists, and T1 remains blocked rather than accepted.
 
 [FACT · owner correction] Keep llm-mesh 0.19.0. A rare nested `UND_ERR_SOCKET`
 fails the Job closed; durable state is resumed at the next cycle. No corruption or
-in-process retry is claimed. The 0.19.1 need is not established or prioritized:
+in-process retry is claimed. The 0.19.1 need is judged probably false and not prioritized:
 cross-repository implementation is unauthorized, PR #585 is closed and its branches
 are removed. Diagnosis is deferred to `s-conductor`, with no implementation request.
 
