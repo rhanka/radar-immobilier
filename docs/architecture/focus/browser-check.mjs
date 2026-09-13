@@ -46,7 +46,7 @@ console.log(await evaluate(`(async () => {
       if (box.querySelector('.repo-label')?.textContent !== item.provenance.repoLabel || box.querySelector('[data-service-icon]')?.dataset.serviceIcon !== item.provenance.icon) throw Error('Missing icon/repository: ' + view + '/' + item.id);
       const card = box.querySelector('.service-node'), header = box.querySelector('.subflow-box header');
       if (card && (card.scrollHeight > card.clientHeight + 1 || card.scrollWidth > card.clientWidth + 1)) throw Error('Component text overflow: ' + view + '/' + item.id);
-      if (header && (header.scrollHeight > header.clientHeight + 1 || header.scrollWidth > header.clientWidth + 1)) throw Error('Subflow header overflow: ' + view + '/' + item.id);
+      if (header && (header.scrollHeight > header.clientHeight + 1 || header.scrollWidth > header.clientWidth + 1)) throw Error('Subflow header overflow: ' + view + '/' + item.id + ' ' + JSON.stringify({ clientWidth: header.clientWidth, scrollWidth: header.scrollWidth, clientHeight: header.clientHeight, scrollHeight: header.scrollHeight }));
       if (card && card.querySelector('.node-description').textContent.replace(/\\s+/g, '') !== item.label.replace(/\\s+/g, '')) throw Error('Lost SvelteFlow source text: ' + item.id);
     }
     for (const scope of scopes) {
