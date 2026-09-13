@@ -17,6 +17,8 @@ make -f docs/architecture/Makefile serve ENV=docs-architecture
 Open **http://127.0.0.1:5188/** or the generated **decision-focus.html** directly.
 The HTML embeds JS, CSS, French presentation and complete source/review documents;
 it works offline and does not require a Claude session, server or external CDN.
+The same build emits the dated monthly companion HTML and evidence manifest under
+`docs/reports/architecture-monthly/`; the browser gate opens that copy offline too.
 
 ## Navigation and authority
 
@@ -52,7 +54,8 @@ it works offline and does not require a Claude session, server or external CDN.
 Builds run in Docker, without host Node or installs. `KIT_ROOT` defaults to
 `/home/antoinefa/src/sentropic/.tmp/focus-cluster-mesh-decision-kit`, mounted
 **read-only** with its existing dependencies. Override it with that kit on another
-workstation. The generated manifest records source hashes and component provenance.
+workstation. This absolute kit dependency is a disclosed portability gap. The
+generated manifests record source hashes and component provenance.
 This is a standalone Focus-format host, not the live Track dashboard or its transport.
 Mermaid prerendering needs the isolated local Chromium debugger on port 9238 and
 the existing pinned bundles in `vendor/` (available through the older `assets`
