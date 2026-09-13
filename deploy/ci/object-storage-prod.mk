@@ -209,7 +209,7 @@ object-storage-docs-prod-bind: ## Bind future PROD DOCS workers after exact cano
 	  summary="$$( $(KUBECTL) -n "$$namespace" exec "$$pod" -- /bin/bash -ceu \
 	    'cat /evidence/reports/$${MIGRATION_RUN_ID}/summary.json' )"; \
 	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
-	    -f deploy/ci/docs-prod-parity-receipt.jq \
+	    -f deploy/ci/docs-parity-receipt.jq \
 	    <<<"$$summary" >/dev/null; \
 	  quota="$$( $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json )"; \
 	  jq -e '.status.hard.secrets == "15" and (.status.used.secrets == "13" or .status.used.secrets == "15")' \
@@ -252,7 +252,7 @@ object-storage-docs-prod-api-rebind: ## Roll PROD API from SCW to canonical OVH 
 	  summary="$$( $(KUBECTL) -n "$$namespace" logs \
 	    job/$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB) --all-containers=true | tail -n 1 )"; \
 	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
-	    -f deploy/ci/docs-prod-parity-receipt.jq \
+	    -f deploy/ci/docs-parity-receipt.jq \
 	    <<<"$$summary" >/dev/null; \
 	  source="$$( $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials -o json )"; \
 	  jq -e -f deploy/ci/validate-docs-secret.jq <<<"$$source" >/dev/null; \
@@ -401,7 +401,7 @@ object-storage-minio-prod-finalize: ## Idempotently finalize PROD MinIO absence 
 	  summary="$$( $(KUBECTL) -n "$$namespace" logs \
 	    job/$(OBJECT_STORAGE_DOCS_PROD_PARITY_JOB) --all-containers=true | tail -n 1 )"; \
 	  jq -e --arg digest "$(OBJECT_STORAGE_DOCS_PROD_CANONICAL_DIGEST)" \
-	    -f deploy/ci/docs-prod-parity-receipt.jq \
+	    -f deploy/ci/docs-parity-receipt.jq \
 	    <<<"$$summary" >/dev/null; \
 	  ! $(KUBECTL) -n "$$namespace" get statefulset/radar-minio >/dev/null 2>&1; \
 	  ! $(KUBECTL) -n "$$namespace" get service/radar-minio >/dev/null 2>&1; \
