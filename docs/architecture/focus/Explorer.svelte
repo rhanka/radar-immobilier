@@ -3,8 +3,8 @@
   import Flow from './Flow.svelte';
   import Mermaid from './Mermaid.svelte';
   let { graphs } = $props();
-  const journey = [{ id: 'asis-1', label: 'Avant' }, { id: 'target-1', label: 'Transition effective' }, { id: 'target-2', label: 'Après T2' }, { id: 'target-3', label: 'Après cible' }];
-  let graphId = $state('target-1'), scope = $state(null), selected = $state(null), expanded = $state(false);
+  const journey = [{ id: 'asis-1', label: 'Architecture AVANT' }, { id: 'target-3', label: 'Architecture APRÈS' }];
+  let graphId = $state('asis-1'), scope = $state(null), selected = $state(null), expanded = $state(false);
   let graph = $derived(graphs.find(g => g.id === graphId));
   let trail = $derived.by(() => {
     const result = []; let current = graph.groups.find(g => g.id === scope);
@@ -22,14 +22,14 @@
 
 <svelte:window onkeydown={event => { if (event.key === 'Escape') expanded = false; }} />
 <section class:expanded class="explorer" aria-label="Architecture interactive">
-  <nav class="journey" aria-label="Transition architecture Existant vers T3">
+  <nav class="journey" aria-label="Comparaison architecture avant et après">
     {#each journey as item, index}<button class:active={graphId === item.id} aria-current={graphId === item.id ? 'step' : undefined} onclick={() => change(item.id)}><span>{index}</span>{item.label}</button>{#if index < journey.length - 1}<b aria-hidden="true">→</b>{/if}{/each}
   </nav>
   <Flex justify="between" align="center" wrap gap={2}>
     <label>Vue <select aria-label="Vue architecture" value={graphId} onchange={event => change(event.currentTarget.value)}>
       {#each graphs as item}<option value={item.id}>{item.title}</option>{/each}
     </select></label>
-    <Badge tone={graphId === 'target-1' ? 'success' : graphId.startsWith('target') || graphId.startsWith('detail') ? 'warning' : 'neutral'}>{graphId === 'target-1' ? 'TRANSITION EFFECTIVE · 2026-09-13' : graphId.startsWith('target') || graphId.startsWith('detail') ? 'APRÈS CIBLE · NON DÉPLOYÉ' : 'AVANT · CAPTURE DU 2026-09-13'}</Badge>
+    <Badge tone={graphId === 'target-3' ? 'warning' : 'neutral'}>{graphId === 'target-3' ? 'APRÈS · CIBLE NON DÉPLOYÉE' : 'AVANT · CAPTURE DU 2026-09-13'}</Badge>
     <Button variant="secondary" size="sm" onclick={() => expanded = !expanded}>{expanded ? 'Réduire' : 'Plein écran'}</Button>
   </Flex>
   <nav class="breadcrumbs" aria-label="Sous-flows">

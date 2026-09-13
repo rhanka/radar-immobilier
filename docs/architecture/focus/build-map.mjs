@@ -6,9 +6,9 @@ import { provenanceFor } from './service-provenance.js';
 const architecture = await readFile('../../architecture.md', 'utf8');
 const proposal = await readFile('../proposal.md', 'utf8');
 const transitionTargets = await readFile('../transitions-target.md', 'utf8');
-const graphs = [...extractDiagrams(architecture, ['Accès & composants', 'PV → Signaux · Immo', 'Geo · sources & jointures', 'Livraison ≠ refresh'], 'asis'),
-  ...extractDiagrams(transitionTargets, ['Transition effective · 2026-09-13', 'Après T2 · migration objet complète', 'Après T3 · cible complète à un nœud'], 'target'),
-  ...extractDiagrams(proposal, ['T1 · pipeline causal détaillé'], 'detail')];
+const [before] = extractDiagrams(architecture, ['Architecture AVANT', 'PV', 'Geo', 'Livraison'], 'asis');
+const [, , after] = extractDiagrams(transitionTargets, ['Transition effective', 'Après T2', 'Architecture APRÈS'], 'target');
+const graphs = [before, after];
 for (const graph of graphs) for (const item of [...graph.nodes, ...graph.groups]) item.provenance = provenanceFor(graph.id, item.id);
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 const docs = {};
