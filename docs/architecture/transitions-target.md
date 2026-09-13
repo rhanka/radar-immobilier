@@ -1,36 +1,35 @@
 # Sequential target architecture — T1 → T2 → T3
 
-Revision D6, 2026-09-13. The three diagrams are deliberately different kinds of
+Revision D8, 2026-09-13. The three diagrams are deliberately different kinds of
 state: the first is the **effective transition snapshot** on September 13; the
-second and third are **after targets, not deployed**. The unchanged IDs identify
-the same logical or physical resource between views. A production role marked
-`binding TBD` is a target contract, not observed runtime. Preproduction evidence
-still precedes any separately gated production promotion.
+second is the remaining **production T2 target** and the third is the complete
+**AFTER target, not deployed**. The unchanged IDs identify the same logical or
+physical resource between views. A production role marked `binding TBD` is a
+target contract, not observed runtime. Preproduction evidence still precedes
+any separately gated production promotion.
 
-## Effective transition — T1 validation + partial T2 storage migration
+## Effective transition — T1 validation + preproduction T2 accepted
 
 Graphify 0.18.0 is integrated and Luna high is selected. The first Kubernetes
 run reached the workload but stopped **before any LLM call**: the selected input
 was HTML, while the extraction contract requires a PDF. This is useful runtime
-evidence, not T1 acceptance. In parallel, `PP-RAW-OVH` has passed parity and is
-the active API raw binding. `PP-DOCS-OVH` and its Secret are provisioned and the
-inventory is running; copy tooling is committed, but document copy, parity,
-recovery and rebind remain open. The inventory snapshot finds 144,193 / 28.34 GB
-in preprod versus 59,017 / 12,534,514,457 B in production `docs-pocs`. By owner decision,
-production is the exact initial canonical reference: the target is those same
-59,017 keys and hashes in OVH prod and OVH preprod. The preprod surplus is
-non-canonical and must not be copied. Production audit/migration has
-started without a completed outcome. The detailed causal pipeline is in
-[`proposal.md`](proposal.md).
+evidence, not T1 acceptance. In parallel, preproduction T2 is accepted:
+`PP-RAW-OVH` remains the active API raw binding and `PP-DOCS-OVH` has exact
+parity with the canonical production reference at **59,017 objects /
+12,534,514,457 bytes**, manifest SHA-256 `52646a7b…0425`, `failed=0`. The MinIO
+StatefulSet, Pod, Service, 40 Gi data PVC and six NetworkPolicies are removed;
+the checkpoint/migration PVC remains. Namespace storage moved from four PVCs /
+47 Gi to three PVCs / 7 Gi, and API/MCP/UI remain 1/1. Production T2 is still
+in progress. The detailed causal pipeline is in [`proposal.md`](proposal.md).
 
 ```mermaid
 flowchart TB
-  subgraph T1_CARD["TRANSITION EFFECTIVE · 2026-09-13 · partial, not accepted"]
-    T1_CHANGE["DONE / VERIFIED<br/>Graphify 0.18.0 integrated; Luna high selected<br/>PP-RAW parity + OVH rebind"]
-    T1_KEEP["KEPT<br/>PP-DB, PP-GRAPH, API/UI/MCP, Geo evidence<br/>MinIO documents/history + SCW TEM"]
-    T1_REMOVE["NOT REMOVED<br/>Workstation/admin path and MinIO retained until their gates pass"]
-    T1_GATES["OPEN GATES<br/>Retry T1 with a real PDF → typed Signal + exact PDF → schedule<br/>DOCS diff → PROD canonical 59,017 → selective copy → exact keys+hashes → recoverable MinIO removal"]
-    T1_EVIDENCE["OBSERVED<br/>First K8s run failed before LLM: .html input, PDF required<br/>DOCS PP 144,193/28.34 GB vs canonical PR 59,017/12,534,514,457 B"]
+  subgraph T1_CARD["TRANSITION EFFECTIVE · 2026-09-13 · PREPROD T2 ACCEPTED"]
+    T1_CHANGE["DONE / VERIFIED<br/>PP RAW + DOCS active on OVH<br/>API / MCP / UI remain 1/1"]
+    T1_KEEP["KEPT<br/>PP-DB, PP-GRAPH, Geo evidence<br/>migration/checkpoint PVC + SCW TEM"]
+    T1_REMOVE["REMOVED IN PREPROD<br/>MinIO StatefulSet, Pod, Service, 40 Gi data PVC<br/>six MinIO NetworkPolicies"]
+    T1_GATES["OPEN GATES<br/>T1 provider/Signal/schedule acceptance<br/>production T2 parity/recovery/rebind/removal → T3 remeasurement"]
+    T1_EVIDENCE["PREPROD DOCS PARITY<br/>59,017 objects / 12,534,514,457 bytes · failed 0<br/>manifest SHA-256 52646a7b…0425 · quota 4 PVC/47 Gi → 3 PVC/7 Gi"]
   end
   user["User / browser"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
@@ -46,11 +45,7 @@ flowchart TB
         PP_MCP["[PP-MCP] OAuth remote MCP"]
         PP_DB[("[PP-DB] same PostgreSQL/PostGIS")]
         PP_REFRESH["[PP-REFRESH] K8s validation workload<br/>first run stopped pre-LLM on .html input"]
-        subgraph ppminio["[PP-MINIO] retained for documents/history until T2 gates"]
-          PP_RAW[("[PP-RAW] old raw identity<br/>fenced/recovery after OVH rebind")]
-          PP_DOCS[("[PP-DOCS] empty API documents fallback")]
-          PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] useful replay/history<br/>partial inventory · retained for T2")]
-        end
+        PP_MIGRATION_PVC[("Migration/checkpoint PVC retained<br/>recovery evidence · 3 PVC / 7 Gi quota use")]
       end
       subgraph immo_pr["PRODUCTION · promote only after preprod"]
         PR_UI["[PR-UI] Immo frontend"]
@@ -58,7 +53,7 @@ flowchart TB
         PR_MCP["[PR-MCP] OAuth remote MCP · target role"]
         PR_DB[("[PR-DB] target database role<br/>physical binding TBD / UNVERIFIED today")]
         PR_REFRESH["[PR-REFRESH] target autonomous CronJob<br/>physical binding TBD / UNVERIFIED today"]
-        PR_OBJECT_GAP["Production object audit/migration<br/>launched in parallel · outcome UNKNOWN"]
+        PR_OBJECT_GAP["Production T2 object migration<br/>IN PROGRESS · independently gated"]
       end
     end
     subgraph geo_tenant["Geo tenant · geographic inputs and products"]
@@ -73,15 +68,15 @@ flowchart TB
   PP_GRAPH[("[PP-GRAPH] same existing OVH graph + corpus bucket")]
   PR_GRAPH[("[PR-GRAPH] target graph + corpus role<br/>physical binding TBD / UNVERIFIED today")]
   PP_RAW_OVH[("[PP-RAW-OVH] active API raw role<br/>parity passed + rebind verified")]
-  PP_DOCS_OVH[("[PP-DOCS-OVH] bucket + Secret provisioned<br/>selective copy/rebind NOT DONE")]
+  PP_DOCS_OVH[("[PP-DOCS-OVH] active canonical documents<br/>59,017 objects / 12,534,514,457 bytes<br/>manifest 52646a7b…0425 · failed 0")]
   PR_DOCS_SCW[("[PR-DOCS-SCW] exact canonical docs-pocs<br/>59,017 objects / 12,534,514,457 B")]
-  PR_DOCS_OVH[("[PR-DOCS-OVH] production target<br/>audit/migration launched · outcome UNKNOWN")]
-  subgraph docs_migration["DOCS convergence gate · no bulk copy / no premature delete"]
-    DOCS_DIFF["1 Diff manifests<br/>PP 144,193 vs PR 59,017"]
-    DOCS_CANONICAL["2 Canonical set = PROD SCW<br/>exactly 59,017 keys + hashes"]
-    DOCS_COPY["3 Selective copy<br/>guarded tooling committed"]
-    DOCS_PARITY["4 Exact OVH prod = preprod<br/>59,017 keys + hashes + recovery proof"]
-    DOCS_PRUNE["5 Remove all MinIO<br/>only after parity · recoverable"]
+  PR_DOCS_OVH[("[PR-DOCS-OVH] production target<br/>T2 copy/parity IN PROGRESS")]
+  subgraph docs_migration["DOCS convergence · preprod accepted · production open"]
+    DOCS_DIFF["1 Canonical manifest<br/>PROD SCW reference · 59,017"]
+    DOCS_CANONICAL["2 PREPROD ACCEPTED<br/>exact keys + hashes · failed 0"]
+    DOCS_COPY["3 PRODUCTION IN PROGRESS<br/>selective conditional copy"]
+    DOCS_PARITY["4 Production gate<br/>exact keys + hashes + recovery proof"]
+    DOCS_PRUNE["5 Production MinIO removal<br/>only after its independent gate"]
     DOCS_DIFF --> DOCS_CANONICAL
     DOCS_CANONICAL --> DOCS_COPY
     DOCS_COPY --> DOCS_PARITY
@@ -104,11 +99,8 @@ flowchart TB
   PR_API <--> idp
   PP_API --> PP_DB
   PP_API --> PP_RAW_OVH
-  PP_API --> PP_DOCS
-  PP_DOCS_OVH -.->|"Inventory/copy target · not rebound"| PP_DOCS
-  PP_DOCS_LEGACY --> DOCS_DIFF
+  PP_API --> PP_DOCS_OVH
   PR_DOCS_SCW --> DOCS_DIFF
-  DOCS_COPY -.-> PP_DOCS_OVH
   DOCS_COPY -.-> PR_DOCS_OVH
   PP_REFRESH --> PP_GRAPH
   PP_REFRESH --> PP_DB
@@ -127,21 +119,21 @@ flowchart TB
   WS_ADMIN -.->|"Retained during validation"| PP_REFRESH
 ```
 
-## After T2 target — all OVH object roles active, old writers fenced
+## Remaining T2 target — production OVH roles active, old writers fenced
 
-T2 applies **MIGRATE+RETAIN** to the API raw/document roles and useful legacy
-history. The old physical MinIO identities are never reused for new buckets.
-`PP-DOCS-LEGACY` stays recovery-only until complete parity and recovery. Production bindings remain target roles
-until the separately authorized inventory and promotion prove them.
+Preproduction has completed its **MIGRATE+RETAIN** cutover and MinIO removal.
+Production still applies the same exact-canonical-set, recovery, writer-fence,
+rebind and removal gates. Old physical MinIO identities are never reused for
+new buckets; production bindings remain target roles until separately proved.
 
 ```mermaid
 flowchart TB
-  subgraph T2_CARD["T2 · PROPOSED / NOT DEPLOYED · stage card"]
-    T2_CHANGE["CHANGES<br/>New PP/PR OVH API raw + documents roles; readers/writers repointed and verified"]
-    T2_KEEP["KEPT<br/>PP-DB, PP-GRAPH, refresh, Geo corpus, PP-DOCS-LEGACY recovery and TEM"]
-    T2_REMOVE["REMOVED AFTER GATE<br/>MinIO consumers + workload/PVC; SCW images/digests/jobs/manual/CI/backup/bootstrap/secret refs"]
-    T2_GATES["GATES<br/>Fail before write + conditional-write capability<br/>parity + recovery + writer fence + zero consumers; preprod THEN production"]
-    T2_EVIDENCE["STARTING POINT · 2026-09-13<br/>RAW parity/rebind done; DOCS PP 144,193 vs PR 59,017<br/>surplus PP non-canonical; selective copy/parity/rebind still open"]
+  subgraph T2_CARD["T2 · PREPROD ACCEPTED / PRODUCTION IN PROGRESS"]
+    T2_CHANGE["PREPROD VERIFIED<br/>OVH RAW + DOCS active; API/MCP/UI 1/1"]
+    T2_KEEP["KEPT<br/>PP-DB, PP-GRAPH, refresh, Geo corpus<br/>migration/checkpoint PVC and TEM"]
+    T2_REMOVE["PREPROD REMOVED<br/>MinIO StatefulSet/Pod/Service + 40 Gi PVC<br/>six NetworkPolicies"]
+    T2_GATES["PRODUCTION GATES<br/>conditional copy → exact parity/recovery → writer fence/rebind<br/>zero consumers → MinIO removal"]
+    T2_EVIDENCE["PREPROD EVIDENCE<br/>59,017 objects / 12,534,514,457 bytes · failed 0<br/>manifest 52646a7b…0425 · 4 PVC/47 Gi → 3 PVC/7 Gi"]
   end
   user["User / browser"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]
@@ -157,11 +149,7 @@ flowchart TB
         PP_MCP["[PP-MCP] OAuth remote MCP"]
         PP_DB[("[PP-DB] same PostgreSQL/PostGIS")]
         PP_REFRESH["[PP-REFRESH] autonomous refresh retained"]
-        subgraph ppminio["[PP-MINIO] old MinIO · fenced recovery only · deletion gate open"]
-          PP_RAW[("[PP-RAW] old physical MinIO raw identity")]
-          PP_DOCS[("[PP-DOCS] empty fallback bucket")]
-          PP_DOCS_LEGACY[("[PP-DOCS-LEGACY] retained replay/history<br/>until complete parity + recovery")]
-        end
+        PP_MIGRATION_PVC[("Migration/checkpoint PVC retained<br/>recovery evidence")]
       end
       subgraph immo_pr["PRODUCTION · inventory and promotion after preprod"]
         PR_UI["[PR-UI] Immo frontend"]
@@ -183,7 +171,7 @@ flowchart TB
   PP_GRAPH[("[PP-GRAPH] same existing OVH graph + corpus bucket")]
   PR_GRAPH[("[PR-GRAPH] target graph + corpus role<br/>physical binding TBD / UNVERIFIED today")]
   PP_RAW_OVH[("[PP-RAW-OVH] active API raw role<br/>parity + rebind inherited from transition")]
-  PP_DOCS_OVH[("[PP-DOCS-OVH] active API documents role<br/>only after copy/parity/recovery/rebind gate")]
+  PP_DOCS_OVH[("[PP-DOCS-OVH] active canonical documents<br/>59,017 objects / 12,534,514,457 bytes")]
   PR_DOCS_SCW[("[PR-DOCS-SCW] exact canonical docs-pocs<br/>59,017 objects / 12,534,514,457 B")]
   PR_RAW_OVH[("[PR-RAW-OVH] production API raw target role<br/>physical binding TBD / UNVERIFIED today")]
   PR_DOCS_OVH[("[PR-DOCS-OVH] target canonical DOCS<br/>same 59,017 keys + hashes as preprod")]
@@ -215,9 +203,7 @@ flowchart TB
   PP_API --> PP_DB
   PP_API --> PP_RAW_OVH
   PP_API --> PP_DOCS_OVH
-  PP_DOCS_LEGACY --> DOCS_DIFF
   PR_DOCS_SCW --> DOCS_DIFF
-  DOCS_COPY --> PP_DOCS_OVH
   DOCS_COPY --> PR_DOCS_OVH
   PP_REFRESH --> PP_GRAPH
   PP_REFRESH --> PP_DB
@@ -242,19 +228,19 @@ flowchart TB
 This is the complete after-state requested for orientation. It is **PROPOSED /
 NOT DEPLOYED**. One existing OVH b3-8 houses the Immo and Geo tenants only after
 the shared full peak, requests, anti-affinity, PDB and PVC placement prove it
-safe. T3 has not started; the current audit is NO-GO and a verified two-node step
-must precede any one-node test.
+safe. T3 remains gated while production T2 is in progress; a fresh post-cleanup
+capacity audit and a verified two-node step must precede any one-node test.
 MatchID is outside this dossier. No MinIO or other active Scaleway component is
 part of this target; SCW TEM is the sole explicit exception.
 
 ```mermaid
 flowchart TB
   subgraph T3_CARD["T3 · PROPOSED / NOT DEPLOYED · stage card"]
-    T3_CHANGE["CHANGES<br/>After T2: rightsize + reconcile constraints<br/>verify two nodes before testing one existing b3-8"]
+    T3_CHANGE["CHANGES<br/>After production T2: remeasure + rightsize + reconcile constraints<br/>verify two nodes before testing one existing b3-8"]
     T3_KEEP["KEPT<br/>Prod/preprod URLs + SSO, Immo/Geo roles, OVH stores, backups/recovery and TEM"]
     T3_REMOVE["REMOVED<br/>Extra active cluster nodes only after drain acceptance; no MinIO / other SCW target"]
-    T3_GATES["GATES<br/>T2 complete → rightsizing → affinity/PVC constraints<br/>verified 2-node step → 1-node preprod THEN production"]
-    T3_EVIDENCE["EVIDENCE · NO-GO TODAY<br/>3 b3-8; allocatable 1840m / 5907.82 Mi; requests 4095m / 8442 Mi; pods 5273 Mi<br/>16 PVC / 15 Cinder RWO; required CoreDNS/konnectivity/Traefik anti-affinity incompatible"]
+    T3_GATES["GATED<br/>production T2 complete → post-cleanup capacity proof<br/>affinity/PVC constraints → verified 2-node step → 1-node preprod THEN production"]
+    T3_EVIDENCE["EVIDENCE<br/>Pre-T2: 3 b3-8; 1840m / 5907.82 Mi one-node allocatable vs 4095m / 8442 Mi requests<br/>Preprod storage now 3 PVC / 7 Gi; full-cluster remeasurement required"]
   end
   user["User / browser / approved MCP client"]
   ppurl["preprod.immo.sent-tech.ca<br/>verified access as-of 2026-09-13"]

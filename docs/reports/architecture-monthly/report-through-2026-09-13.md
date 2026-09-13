@@ -1,6 +1,6 @@
 # Rapport architecture et livraison — 10 août → 13 septembre 2026
 
-Statut : rapport D7, **pas une facture fournisseur ni une preuve de déploiement
+Statut : rapport D8, **pas une facture fournisseur ni une preuve de déploiement
 des cibles**. Fenêtre America/Toronto : `2026-08-10T00:00:00-04:00` inclus à
 `2026-09-14T00:00:00-04:00` exclus, soit **35 jours / 840 heures**.
 
@@ -29,9 +29,9 @@ reprennent les mêmes sous-flows, icônes et labels `repo:` à taille lisible.
 | Architecture AVANT | API raw/documents MinIO, graphe OVH, LLM depuis poste | Capture de référence |
 | Architecture APRÈS | RAW/DOCS OVH, refresh autonome, Immo+Geo sur un b3-8 existant | Cible non déployée; NO-GO actuel |
 
-Les faits de transition (RAW OVH actif, T1 arrêté avant le LLM, DOCS
-inventorié/provisionné) expliquent le delta dans le texte. Ils ne constituent
-pas un troisième graphe d’architecture.
+Les faits de transition (RAW OVH actif, T1 arrêté avant le LLM, T2 préprod
+accepté et T2 production en cours) expliquent le delta dans le texte. Ils ne
+constituent pas un troisième graphe d’architecture.
 
 ## 3. Travaux réalisés et vérifiés dans la fenêtre
 
@@ -42,11 +42,14 @@ pas un troisième graphe d’architecture.
   Cela prouve le fail-closed d’entrée, pas un Signal ni T1 accepté.
 - Le rôle RAW préprod a passé la parité et l’API a été rebound vers
   `PP-RAW-OVH`; l’ancienne identité raw est fenced/recovery-only.
-- Le bucket et le Secret DOCS OVH préprod sont provisionnés. Le tooling de copie
-  gardé est commité sur `chore/scw-final-sweep` jusqu’à `be362561`, mais **pas
-  encore sur `origin/main`** dans ce snapshot.
-- Les inventaires DOCS observent **144,193 objets / 28.34 GB** en MinIO préprod
-  et **59,017 / 12,534,514,457 B** dans la source canonique production SCW `docs-pocs`.
+- T2 préprod est accepté : DOCS OVH contient exactement **59,017 objets /
+  12,534,514,457 octets**, manifeste canonique SHA-256 `52646a7b…0425`, avec
+  **failed=0**. Le surplus MinIO préprod n’a pas été promu comme canonique.
+- Le StatefulSet, Pod et Service MinIO, le PVC data de 40 Gi et six
+  NetworkPolicies ont été retirés. Le PVC de migration/checkpoint reste; la
+  consommation quota passe de 4 PVC/47 Gi à 3 PVC/7 Gi. API/MCP/UI restent 1/1.
+- L’implémentation est poussée sur `chore/scw-final-sweep` à `2ccabfc8`, mais
+  n’est pas encore sur `origin/main` dans ce snapshot.
 - Les URL Immo prod/préprod, leurs issuers SSO et les responsabilités des trois
   repos sont conservés dans les vues de référence.
 
@@ -54,26 +57,23 @@ pas un troisième graphe d’architecture.
 
 - T1 : corriger la sélection vers un PDF réel, atteindre Luna high, puis prouver
   Signal typé + PDF exact, rejeu idempotent et schedule autonome.
-- T2 DOCS : la production SCW actuelle est, par décision owner, la **référence
-  initiale exacte**. OVH prod et OVH préprod doivent converger vers les mêmes
-  **59,017 keys et hashes**. Les 85,176 objets de surplus préprod sont
-  non-canoniques et ne doivent pas être migrés.
-- Séquence DOCS obligatoire : diff des manifests → ensemble canonique production
-  → copie sélective → égalité des comptes/keys/hashes → preuve de reprise →
-  retrait récupérable de tout MinIO.
-- Copie, parité/reprise et rebind DOCS ne sont pas terminés. L’audit/migration
-  production est lancé en parallèle, sans résultat final inventé.
+- T2 production est en cours. La source SCW actuelle reste la **référence
+  initiale exacte** et OVH production doit atteindre les mêmes **59,017 keys et hashes**
+  déjà acceptés en préprod. Les 85,176 objets de surplus préprod sont non-canoniques
+  et n’ont pas été migrés.
+- La gate production reste indépendante : copie conditionnelle → égalité des
+  comptes/keys/hashes → preuve de reprise → fence/rebind → retrait MinIO.
 - SCW TEM reste en place jusqu’à validation de son remplacement.
 
 ## 5. Projection d’aboutissement
 
-Après T2, les deux environnements portent exactement le corpus canonique DOCS
-production dans leurs rôles OVH; les identités, objets, consommateurs, workload
-et PVC MinIO sont retirés seulement après parité et reprise. Après T1, le refresh
-est autonome en K8s. T3 vise ensuite un b3-8 existant, mais n’a pas commencé :
-4,095m/8,442 Mi de requests ne tiennent pas dans 1,840m/5,907.82 Mi allouables,
-avec anti-affinity et 16 PVC/15 Cinder RWO. Une étape deux nœuds vérifiée précède
-obligatoirement tout essai un nœud.
+Préprod a atteint sa tranche T2. Après la gate production, les deux
+environnements porteront le corpus canonique DOCS dans OVH et aucun MinIO ne
+restera actif. Après T1, le refresh est autonome en K8s. T3 reste gated : les
+4,095m/8,442 Mi de requests mesurés avant cleanup ne tenaient pas dans
+1,840m/5,907.82 Mi allouables. La nouvelle base, dont préprod est maintenant à
+3 PVC/7 Gi, doit être re-mesurée; une étape deux nœuds vérifiée précède tout
+essai un nœud.
 
 ## 6. Coûts — méthode conservée, résultat non forcé
 
