@@ -20,7 +20,8 @@ import { InMemoryKeyring } from "@sentropic/llm-mesh-refresh/node";
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  bindRefreshAbortSignal, bindRefreshFetchSignal, createRefreshMesh, refreshErrorDiagnostic,
+  bindRefreshAbortSignal, bindRefreshFetchSignal, createRefreshMesh,
+  createRefreshRoutePolicyProfiles, refreshErrorDiagnostic,
 } from "./refresh-mesh.js";
 
 const response = {
@@ -104,6 +105,13 @@ function runtimeHarness(generate: (request: GenerateRequest) => Promise<Generate
 }
 
 describe("refresh mesh", () => {
+  it("should fence planner retries to the job attempt budget", () => {
+    expect(createRefreshRoutePolicyProfiles(2).active()?.policy.maxAttempts).toBe(2);
+    expect(() => createRefreshRoutePolicyProfiles(9)).toThrow(
+      "maxAttempts must be an integer between 1 and 8",
+    );
+  });
+
   it("should reject a missing owner scope before constructing the planner", () => {
     expect(() => createRefreshMesh({
       routingSubject: { principalRef: "principal:test", ownerScopeRef: "" },
@@ -111,6 +119,7 @@ describe("refresh mesh", () => {
       keyring: new InMemoryKeyring(),
       provider: "gemini",
       model: "gemini-3.8-flash",
+      maximumAttempts: 2,
       signal: new AbortController().signal,
     })).toThrow("explicit principal and owner scope");
   });
@@ -122,6 +131,7 @@ describe("refresh mesh", () => {
       keyring: new InMemoryKeyring(),
       provider: "gemini",
       model: "gemini-3.8-flash",
+      maximumAttempts: 2,
       signal: new AbortController().signal,
     });
     expect(bundle.mesh.listProviders().map((item) => item.providerId)).toContain("gemini");

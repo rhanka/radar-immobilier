@@ -7,7 +7,9 @@ import {
 import {
   CloudCodeRuntimeClient,
   CodexRuntimeClient,
+  DEFAULT_ROUTE_POLICY,
   GeminiAdapter,
+  InMemoryRoutePolicyProfiles,
   OpenAIAdapter,
   type GenerateRequest,
   type GeminiAdapterClient,
@@ -28,6 +30,7 @@ export interface RefreshMeshOptions {
   readonly keyring?: KeyringAdapter;
   readonly provider: RefreshProvider;
   readonly model: string;
+  readonly maximumAttempts: number;
   readonly reasoning?: GenerateRequest["reasoning"];
   readonly signal: AbortSignal;
   readonly geminiClient?: GeminiAdapterClient;
@@ -38,6 +41,18 @@ export interface RefreshMeshOptions {
 export interface RefreshMeshBundle {
   readonly mesh: GraphifyMesh;
   readonly textClient: TextJsonGenerationClient;
+}
+
+export function createRefreshRoutePolicyProfiles(
+  maximumAttempts: number,
+): InMemoryRoutePolicyProfiles {
+  const profiles = new InMemoryRoutePolicyProfiles([{
+    name: "refresh-run-budget",
+    revision: "1",
+    policy: { ...DEFAULT_ROUTE_POLICY, maxAttempts: maximumAttempts },
+  }]);
+  profiles.activate("refresh-run-budget");
+  return profiles;
 }
 
 export function bindRefreshFetchSignal(
@@ -106,7 +121,9 @@ export function createRefreshMesh(options: RefreshMeshOptions): RefreshMeshBundl
         }),
       }),
     },
-    createRoutePlanner: (runtime) => facade.createRoutePlanner(runtime),
+    createRoutePlanner: (runtime) => facade.createRoutePlanner(runtime, {
+      profiles: createRefreshRoutePolicyProfiles(options.maximumAttempts),
+    }),
   });
   const abortable = bindRefreshAbortSignal(mesh, options.signal, options.reasoning);
   return {

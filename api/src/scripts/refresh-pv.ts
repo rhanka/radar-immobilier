@@ -73,6 +73,7 @@ async function main(): Promise<void> {
   const selectedProvider = provider();
   const model = required("REFRESH_MODEL");
   const effort = required("REFRESH_REASONING_EFFORT");
+  const maximumAttempts = positive("REFRESH_MAXIMUM_ATTEMPTS", 2, 8);
   if (!["minimal", "low", "medium", "high", "xhigh"].includes(effort)) {
     throw new Error("REFRESH_REASONING_EFFORT is invalid");
   }
@@ -84,7 +85,8 @@ async function main(): Promise<void> {
       ownerScopeRef: required("REFRESH_OWNER_SCOPE_REF") },
     configResolver: { async resolveConfig() { return {}; } },
     keyring: new EncryptedFileKeyring(required("SENTROPIC_LLM_MESH_KEYRING_DIR")),
-    provider: selectedProvider, model, reasoning: { effort: effort as "medium" }, signal: controller.signal,
+    provider: selectedProvider, model, maximumAttempts,
+    reasoning: { effort: effort as "medium" }, signal: controller.signal,
   });
   let modelCalls = 0;
   const measuredTextClient = { ...bundle.textClient,
@@ -105,7 +107,8 @@ async function main(): Promise<void> {
         throw error;
       }
     } };
-  logger.info({ city, provider: selectedProvider, model, effort, timeoutMs }, "refresh-pv: starting");
+  logger.info({ city, provider: selectedProvider, model, effort, maximumAttempts, timeoutMs },
+    "refresh-pv: starting");
   try {
     const result = await runPvRefresh({ citySlug: city, store, db, profileContext,
       textClient: measuredTextClient, extractPdf: async (bytes, url) => pdfToTextViaPoppler(url)(bytes, 30_000),
@@ -113,7 +116,7 @@ async function main(): Promise<void> {
       registryHash: canonicalHash(profileContext.registryExtraction), packageVersion: "0.18.0",
       modelPolicy: `${selectedProvider}/${model}/${effort}`,
       budgetLimit: positive("REFRESH_BUDGET_LIMIT", 20_000, 1_000_000),
-      maximumAttempts: positive("REFRESH_MAXIMUM_ATTEMPTS", 2, 10),
+      maximumAttempts,
       maxOutputTokens: positive("REFRESH_MAX_OUTPUT_TOKENS", 4_096, 65_536),
       acquisitionLimit: positive("REFRESH_ACQUISITION_LIMIT", 1, 100), signal: controller.signal,
       ...(acquire ? { acquire } : {}) });
