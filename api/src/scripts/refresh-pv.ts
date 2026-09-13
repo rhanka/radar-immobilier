@@ -84,10 +84,21 @@ async function main(): Promise<void> {
     keyring: new EncryptedFileKeyring(required("SENTROPIC_LLM_MESH_KEYRING_DIR")),
     provider: selectedProvider, model, reasoning: { effort: effort as "medium" }, signal: controller.signal,
   });
+  let modelCalls = 0;
+  const measuredTextClient = { ...bundle.textClient,
+    async generateJson(input: Parameters<typeof bundle.textClient.generateJson>[0]) {
+      modelCalls += 1;
+      const startedAt = Date.now();
+      try { return await bundle.textClient.generateJson(input); }
+      finally {
+        logger.info({ modelCalls, latencyMs: Date.now() - startedAt, provider: selectedProvider,
+          model, effort }, "refresh-pv: model call finished");
+      }
+    } };
   logger.info({ city, provider: selectedProvider, model, effort, timeoutMs }, "refresh-pv: starting");
   try {
     const result = await runPvRefresh({ citySlug: city, store, db, profileContext,
-      textClient: bundle.textClient, extractPdf: async (bytes, url) => pdfToTextViaPoppler(url)(bytes, 30_000),
+      textClient: measuredTextClient, extractPdf: async (bytes, url) => pdfToTextViaPoppler(url)(bytes, 30_000),
       profileHash: profileContext.profile.profile_hash,
       registryHash: canonicalHash(profileContext.registryExtraction), packageVersion: "0.18.0",
       modelPolicy: `${selectedProvider}/${model}/${effort}`,
@@ -96,7 +107,7 @@ async function main(): Promise<void> {
       maxOutputTokens: positive("REFRESH_MAX_OUTPUT_TOKENS", 4_096, 65_536),
       acquisitionLimit: positive("REFRESH_ACQUISITION_LIMIT", 1, 100), signal: controller.signal,
       ...(acquire ? { acquire } : {}) });
-    logger.info(result, "refresh-pv: completed");
+    logger.info({ ...result, modelCalls }, "refresh-pv: completed");
   } finally {
     clearTimeout(timeout);
     await pool.end();
