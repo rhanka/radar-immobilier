@@ -14,6 +14,7 @@ Usage: migrate-object-storage.sh <inventory|copy|verify|delta> [options]
   [--execute-copy] [--fence-record FILE]
   [--reconcile-owned --ledger FILE]
   [--conditional-write-proof FILE]
+  [--checkpoint-dir DIR] [--page-size N] [--time-budget-seconds N] [--resume]
   [--concurrency N] [--retries N] [--max-failures N]
   [--max-object-bytes N]
 EOF
@@ -29,7 +30,8 @@ ENVIRONMENT="" PLANE="" REPORT_DIR="" EXECUTE_COPY=false RECONCILE_OWNED=false
 SOURCE_ENDPOINT="" SOURCE_REGION="" SOURCE_BUCKET="" SOURCE_PATH_STYLE=""
 DESTINATION_ENDPOINT="" DESTINATION_REGION="" DESTINATION_BUCKET=""
 DESTINATION_PATH_STYLE="" EXPECTED_MANIFEST="" FENCE_RECORD="" LEDGER=""
-CONDITIONAL_WRITE_PROOF=""
+CONDITIONAL_WRITE_PROOF="" CHECKPOINT_DIR="" RESUME=false CHECKPOINT_REQUESTED=false
+PAGE_SIZE=100 TIME_BUDGET_SECONDS=300
 CONCURRENCY=4 RETRIES=3 MAX_FAILURES=20 MAX_OBJECT_BYTES=5000000000
 PREFIXES=() EXCLUDE_PREFIXES=()
 
@@ -52,6 +54,10 @@ while [ "$#" -gt 0 ]; do
     --fence-record) need_value "$@"; FENCE_RECORD="$2"; shift 2 ;;
     --ledger) need_value "$@"; LEDGER="$2"; shift 2 ;;
     --conditional-write-proof) need_value "$@"; CONDITIONAL_WRITE_PROOF="$2"; shift 2 ;;
+    --checkpoint-dir) need_value "$@"; CHECKPOINT_DIR="$2"; CHECKPOINT_REQUESTED=true; shift 2 ;;
+    --page-size) need_value "$@"; PAGE_SIZE="$2"; CHECKPOINT_REQUESTED=true; shift 2 ;;
+    --time-budget-seconds) need_value "$@"; TIME_BUDGET_SECONDS="$2"; CHECKPOINT_REQUESTED=true; shift 2 ;;
+    --resume) RESUME=true; CHECKPOINT_REQUESTED=true; shift ;;
     --execute-copy) EXECUTE_COPY=true; shift ;;
     --reconcile-owned) RECONCILE_OWNED=true; shift ;;
     --concurrency) need_value "$@"; CONCURRENCY="$2"; shift 2 ;;
@@ -70,6 +76,12 @@ case "$PLANE" in RAW|DOCS) ;; *) die 'invalid plane' ;; esac
   die 'DOCS copy, verify, and delta require --expected-manifest'
 [ "$OPERATION" = copy ] || { ! $EXECUTE_COPY && ! $RECONCILE_OWNED; } || \
   die 'copy flags are valid only with the copy operation'
+$CHECKPOINT_REQUESTED && [ "$OPERATION" = inventory ] || ! $CHECKPOINT_REQUESTED || \
+  die 'checkpoint controls are valid only with the inventory operation'
+$CHECKPOINT_REQUESTED && [ -n "$CHECKPOINT_DIR" ] || ! $CHECKPOINT_REQUESTED || \
+  die 'checkpoint controls require --checkpoint-dir'
+$RESUME && [ -r "$CHECKPOINT_DIR/config.json" ] || ! $RESUME || \
+  die '--resume requires an initialized checkpoint'
 $RECONCILE_OWNED && $EXECUTE_COPY || ! $RECONCILE_OWNED || \
   die '--reconcile-owned requires --execute-copy'
 $RECONCILE_OWNED && [ -n "$LEDGER" ] || ! $RECONCILE_OWNED || \
@@ -108,6 +120,8 @@ validate_path_style --destination-path-style "$DESTINATION_PATH_STYLE"
 validate_limit --concurrency "$CONCURRENCY" 32; validate_limit --retries "$RETRIES" 10
 validate_limit --max-failures "$MAX_FAILURES" 100
 validate_limit --max-object-bytes "$MAX_OBJECT_BYTES" 5000000000
+validate_limit --page-size "$PAGE_SIZE" 1000
+validate_limit --time-budget-seconds "$TIME_BUDGET_SECONDS" 86400
 [ "${#PREFIXES[@]}" -gt 0 ] || die 'at least one --prefix is required'
 for prefix in "${PREFIXES[@]}"; do validate_prefix --prefix "$prefix"; done
 for prefix in "${EXCLUDE_PREFIXES[@]}"; do validate_prefix --exclude-prefix "$prefix"; done
@@ -160,6 +174,37 @@ write_aws_config "$DESTINATION_CONFIG" "$DESTINATION_REGION" "$DESTINATION_PATH_
 credential_fingerprint() { printf '%s' "$1" | sha256sum | awk '{print $1}'; }
 SOURCE_IDENTITY_FINGERPRINT="$(credential_fingerprint "$MIGRATION_SOURCE_ACCESS_KEY_ID")"
 DESTINATION_IDENTITY_FINGERPRINT="$(credential_fingerprint "$MIGRATION_DESTINATION_ACCESS_KEY_ID")"
+
+initialize_checkpoint() {
+  local prefixes exclusions core candidate digest target="$CHECKPOINT_DIR/config.json"
+  prefixes="$(jq -cn --args '$ARGS.positional | sort' -- "${PREFIXES[@]}")"
+  exclusions="$(jq -cn --args '$ARGS.positional | sort' -- "${EXCLUDE_PREFIXES[@]}")"
+  core="$WORK_DIR/checkpoint-config-core.json"; candidate="$WORK_DIR/checkpoint-config.json"
+  jq -n --argjson prefixes "$prefixes" --argjson exclusions "$exclusions" \
+    --arg se "$SOURCE_ENDPOINT" --arg sr "$SOURCE_REGION" --arg sb "$SOURCE_BUCKET" \
+    --argjson sp "$SOURCE_PATH_STYLE" --arg sf "$SOURCE_IDENTITY_FINGERPRINT" \
+    --arg de "$DESTINATION_ENDPOINT" --arg dr "$DESTINATION_REGION" \
+    --arg db "$DESTINATION_BUCKET" --argjson dp "$DESTINATION_PATH_STYLE" \
+    --arg df "$DESTINATION_IDENTITY_FINGERPRINT" --argjson page "$PAGE_SIZE" \
+    --argjson retries "$RETRIES" --argjson concurrency "$CONCURRENCY" \
+    --argjson failures "$MAX_FAILURES" --argjson bytes "$MAX_OBJECT_BYTES" '
+    {schemaVersion:1,source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,
+      identityFingerprint:$sf},destination:{endpoint:$de,region:$dr,bucket:$db,
+      pathStyle:$dp,identityFingerprint:$df},classification:{prefixes:$prefixes,
+      excludePrefixes:$exclusions},limits:{pageSize:$page,retries:$retries,
+      concurrency:$concurrency,maxFailures:$failures,maxObjectBytes:$bytes}}' >"$core"
+  digest="$(sha256sum "$core" | awk '{print $1}')"
+  jq --arg digest "$digest" '. + {configDigest:$digest}' "$core" >"$candidate"
+  if $RESUME; then
+    cmp -s "$candidate" "$target" || die 'checkpoint configuration mismatch'
+  else
+    [ ! -e "$target" ] || die 'checkpoint is already initialized; use --resume'
+    mkdir -p "$CHECKPOINT_DIR" || die 'cannot create checkpoint directory'
+    cp "$candidate" "$target.tmp" && mv "$target.tmp" "$target" || \
+      die 'cannot commit checkpoint configuration'
+  fi
+}
+$CHECKPOINT_REQUESTED && initialize_checkpoint
 AWS_COMMON=(--no-cli-pager --no-paginate --output json)
 aws_side() {
   local side="$1" endpoint region access secret config
