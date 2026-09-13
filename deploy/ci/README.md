@@ -137,6 +137,43 @@ debugging, but this is **best-effort and voie-dependent**:
 | `kfilter.py` | Manifest filter used by the reconcile step. |
 | `*.test.sh` | Shell tests for the runners above. |
 
+## Object-storage conditional-write gate
+
+`migrate-object-storage.sh copy --execute-copy` requires
+`--conditional-write-proof FILE`. The operator creates this JSON evidence from
+a disposable-key probe against the exact destination, using the same migration
+identity. The probe must prove both that a duplicate `If-None-Match: *` create
+is rejected and that an update with a stale `If-Match` ETag is rejected:
+
+```json
+{
+  "schemaVersion": 1,
+  "provider": "provider implementation",
+  "providerVersion": "observed version or release",
+  "destination": {
+    "endpoint": "https://s3.example.net",
+    "region": "region",
+    "bucket": "destination-bucket",
+    "pathStyle": false
+  },
+  "identityFingerprint": "sha256-of-access-key-id",
+  "observedAt": "2026-09-13T12:00:00Z",
+  "expiresAt": "2026-09-14T12:00:00Z",
+  "transcriptSha256": "64-lowercase-hex-characters",
+  "capabilities": {"ifNoneMatchCreate": true, "ifMatchUpdate": true}
+}
+```
+
+The tool validates the schema, expiry, exact destination tuple and identity
+fingerprint before any destination write. It records the proof digest and
+`providerEnforcementValidated:false`: custody and validation of the probe
+transcript remain conductor responsibilities. Missing, expired or mismatched
+evidence is a `missingProof` and prevents every PUT.
+
+The inventory covers current objects returned by `ListObjectsV2`. It does not
+migrate source version history or delete markers; that boundary requires owner
+acceptance before a real copy.
+
 ## Rollback
 
 `rollback-release.sh` rolls the **image** back. A migration that must also be

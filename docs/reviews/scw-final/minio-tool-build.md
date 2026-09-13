@@ -47,6 +47,9 @@ untouched.
   independently changed objects are refused without a PUT.
 - Only identical, error-free `delta` evidence with a fence digest can set
   `cutoverReady: true`; every receipt says `fenceValidated: false`.
+- Every executed copy additionally requires fresh external evidence that the
+  exact destination and migration identity enforce conditional creates and
+  updates. Missing proof of any kind prevents both copy write phases.
 
 ## Offline verification evidence
 
@@ -61,8 +64,9 @@ make --no-print-directory --eval '.PHONY: test-scw-storage-gate' \
   ENV=test-scw-final
 ```
 
-Result: binding checker `PASS=11 FAIL=0`; migration hermetic suite
-`PASS=36 FAIL=0`. The suite uses a filesystem-backed AWS CLI shim and makes no
+Result before post-review remediation: binding checker `PASS=11 FAIL=0`;
+migration hermetic suite `PASS=36 FAIL=0`. The post-review suite now has 46
+checks. It uses a filesystem-backed AWS CLI shim and makes no
 network calls. `make k8s-validate API_PORT=8882 UI_PORT=5382
 MAILDEV_UI_PORT=1182 ENV=test-scw-final` also passed its offline render and
 structural checks. Bash syntax checks passed. `shellcheck` was not installed, so
@@ -74,18 +78,14 @@ the 11 binding regressions and the 36 migration regressions.
 
 ## Review and remaining gates
 
-```yaml
-review-author:
-  host: codex
-  model: gpt-5.6-sol
-  effort: xhigh
-target-ref: 2fdb7db47089bb7b6e1c6d28643092d677cbdadd..87c9801a
-review-status: not-dispatched-owner-gated
-observed-failure: owner instruction forbids agent spawns; no consensus review is claimed
-```
+Independent Fable reviews `fable-tool-postbuild-retry.md` and
+`fable-tool-postbuild-redeem2.md` found that accumulated missing proof did not
+prevent destination writes and that live conditional-write enforcement was
+unproved. The follow-up makes both write phases require empty `missingProof`,
+adds a fresh destination-bound capability artifact, compares prior-version JSON
+structurally, and fixes the hermetic retry counter. No consensus is claimed.
 
-The conductor must obtain the already-planned independent post-build review.
-That review, live inventory completion, destination/IAM provisioning, immutable
+Live inventory completion, destination/IAM provisioning, immutable
 expected-union approval, real copy, writer fencing validation, final delta,
 binding/deploy checks, real application reads/writes, paired DB/object recovery,
 preproduction acceptance, and later production acceptance all remain outside

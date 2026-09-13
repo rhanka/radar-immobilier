@@ -77,6 +77,7 @@
       - [x] Reset and assert the exact retry counter bound in the hermetic shim.
       - [x] Require conditional-write capability evidence before every executed copy.
       - [x] Reconcile the independent write-path and conditional-PUT findings.
+      - [x] Document capability-proof custody and the current-version-only boundary.
     - [x] Extend the binding gate and retain the explicit pending-client ledger.
     - [x] Invoke the combined offline object-storage gate once from CI quality.
     - [x] Document the bounded operator contract and explicit non-acceptance limits.
