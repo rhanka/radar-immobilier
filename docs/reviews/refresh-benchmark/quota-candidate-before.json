@@ -1,0 +1,35 @@
+{
+  "receiptId": "candidate-before-20260913T163147Z",
+  "capturedAt": "2026-09-13T16:31:47.084Z",
+  "source": "chatgpt.com/backend-api/wham/usage through llm-mesh acquired Codex enrollment",
+  "accountPseudonym": "acct-c015cb459d",
+  "plan": "chatgpt-pro",
+  "primary": {
+    "usedPercent": 83,
+    "limitWindowSeconds": 604800,
+    "resetAfterSeconds": 499371,
+    "resetAt": 1789816477,
+    "limitReached": false
+  },
+  "secondary": null,
+  "credits": {
+    "hasCredits": false,
+    "unlimited": false,
+    "overageAllowed": false
+  },
+  "catalog": {
+    "source": "chatgpt.com/backend-api/codex/models?client_version=0.154.0",
+    "httpStatus": 200,
+    "modelIds": [
+      "gpt-5.3-codex-spark",
+      "gpt-5.5",
+      "gpt-5.6-luna",
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-6-astra",
+      "gpt-daybreak-blue-latest",
+      "gpt-reserve"
+    ]
+  },
+  "attributionWarning": "Other concurrent work uses this subscription; global quota change is not attributable to this benchmark."
+}
