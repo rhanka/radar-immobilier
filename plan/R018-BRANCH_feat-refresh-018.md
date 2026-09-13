@@ -72,6 +72,7 @@
 - [x] C07d: state the public Graphify node file-type and edge-confidence enums after the first live response exposed an under-specified contract.
 - [x] C14b: emit a redacted model-call count and latency receipt without prompts, outputs or account material.
 - [x] C14c: identify the exact live schema and prompt by digest in the redacted model-call receipt.
+- [x] C14d: distinguish completed generation from failure instead of treating cleanup as a provider response.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
