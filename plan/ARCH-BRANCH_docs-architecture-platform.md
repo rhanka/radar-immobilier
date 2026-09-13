@@ -82,4 +82,5 @@
   - [ ] Verify the offline HTML, mapping coverage, navigation and local-only owner notes.
   - [x] Add a Docker-only build reusing the Sentropic kit read-only; portable HTML embeds JS, CSS and evidence.
   - [x] Add mapping completeness, native parent bounds, resource identity and rejected-syntax regression tests.
+  - [x] Preserve Codex's six actual findings; disclose Opus weekly-limit failure and keep the dossier incomplete.
 - [ ] Local documentation handoff; no production action or branch merge requested.
