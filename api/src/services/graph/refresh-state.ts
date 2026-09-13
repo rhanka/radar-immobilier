@@ -35,7 +35,7 @@ export interface RefreshState {
   readonly budgetLimit: number;
   readonly reservedCalls: number;
   readonly reservations: Readonly<Record<string, number>>;
-  readonly completedChunks: Readonly<Record<string, string>>;
+  readonly completedChunks: Readonly<Record<string, { readonly key: string; readonly hash: string }>>;
   readonly receipts: Readonly<Partial<Record<RefreshStage, RefreshStageReceipt>>>;
   readonly candidate?: { readonly key: string; readonly hash: string };
 }
@@ -117,13 +117,29 @@ export async function completeRefreshChunk(
   store: ObjectStore,
   handle: RefreshStateHandle,
   chunkId: string,
-  outputHash: string,
+  output: unknown,
 ): Promise<RefreshStateHandle> {
   if (!handle.state.reservations[chunkId]) throw new Error(`Chunk ${chunkId} was not reserved`);
+  if (!/^[a-zA-Z0-9._-]+$/.test(chunkId)) throw new Error("Invalid refresh chunk identifier");
+  const hash = canonicalHash(output);
+  const key = handle.key.replace(/state\.json$/, `chunks/${chunkId}-${hash.slice(7)}.json`);
+  await store.put(key, canonicalJson(output), "application/json");
   return persist(store, handle.key, {
     ...handle.state,
-    completedChunks: { ...handle.state.completedChunks, [chunkId]: outputHash },
+    completedChunks: { ...handle.state.completedChunks, [chunkId]: { key, hash } },
   });
+}
+
+export async function readCompletedRefreshChunk<T>(
+  store: ObjectStore,
+  handle: RefreshStateHandle,
+  chunkId: string,
+): Promise<T> {
+  const completed = handle.state.completedChunks[chunkId];
+  if (!completed) throw new Error(`Chunk ${chunkId} is not complete`);
+  const output = JSON.parse(new TextDecoder().decode(await store.get(completed.key))) as T;
+  if (canonicalHash(output) !== completed.hash) throw new Error(`Completed chunk ${chunkId} hash mismatch`);
+  return output;
 }
 
 export async function writeRefreshCandidate(
