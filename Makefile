@@ -431,6 +431,7 @@ object-storage-inventory-preprod-start: ## Apply support and create one RAW read
 object-storage-docs-preprod-validate: ## Render support and validate the DOCS bucket/inventory Jobs offline
 	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[object-storage-docs] kubectl not found"; exit 1; }
 	@jq -n -f deploy/ci/docs-secret-from-raw.jq >/dev/null
+	@jq -n -f deploy/ci/validate-docs-secret.jq >/dev/null
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
 	@$(KUBECTL) create --dry-run=client --validate=false \
@@ -464,10 +465,7 @@ object-storage-docs-preprod-start: ## Apply support and create one resumable ful
 	@$(MAKE) object-storage-docs-preprod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
 	  $(KUBECTL) -n "$$namespace" get secret radar-docs-s3-credentials -o json | \
-	    jq -e '. as $$secret | \
-	      ["DOCS_S3_ACCESS_KEY","DOCS_S3_SECRET_KEY","DOCS_S3_ENDPOINT","DOCS_S3_REGION","DOCS_S3_BUCKET","DOCS_S3_FORCE_PATH_STYLE"] \
-	      as $$required | ($$secret.data | keys | sort) == ($$required | sort) and \
-	      all($$required[] as $$key; ($$secret.data[$$key] | type == "string" and length > 0))' >/dev/null; \
+	    jq -e -f deploy/ci/validate-docs-secret.jq >/dev/null; \
 	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
 	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	    $(OBJECT_STORAGE_INVENTORY_DIR) >"$$render"; \
