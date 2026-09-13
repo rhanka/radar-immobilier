@@ -177,7 +177,11 @@ migrate-object-storage.sh copy <same coordinates and classifications> \
 The copy consumes the frozen manifests instead of relisting either bucket and
 re-hashes each source body immediately before its conditional PUT. Source
 versions and delete markers outside the current `ListObjectsV2` view remain out
-of scope.
+of scope. The final inventory proof has no tool-enforced maximum age. Its
+freshness therefore remains under conductor custody: retain the exact matching
+fence evidence, independently confirm that the fence is still continuously
+valid, and regenerate both inventory phases if custody or fence continuity is
+uncertain. A structurally valid old proof is not fresh evidence by itself.
 
 ## Object-storage conditional-write gate
 

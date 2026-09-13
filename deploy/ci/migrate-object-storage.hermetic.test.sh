@@ -143,6 +143,20 @@ fi
 DATE
 chmod +x "$TEST_TMP/bin/date"
 
+REAL_SYNC="$(command -v sync)"
+export REAL_SYNC
+cat >"$TEST_TMP/bin/sync" <<'SYNC'
+#!/usr/bin/env bash
+set -euo pipefail
+for file in "$@"; do
+  if [ -n "${FAKE_SYNC_FAIL_PATTERN:-}" ] && [[ "$file" == *"$FAKE_SYNC_FAIL_PATTERN"* ]]; then
+    exit 74
+  fi
+done
+exec "$REAL_SYNC" "$@"
+SYNC
+chmod +x "$TEST_TMP/bin/sync"
+
 PASS=0 FAIL=0
 ok() { PASS=$((PASS + 1)); echo "ok: $1"; }
 bad() { FAIL=$((FAIL + 1)); echo "FAIL: $1" >&2; }
@@ -175,7 +189,7 @@ reset_store() {
     capabilities:{ifNoneMatchCreate:true,ifMatchUpdate:true}}' >"$TEST_TMP/conditional-write-proof.json"
   unset FAKE_FAIL_SIDE FAKE_FAIL_OPERATION FAKE_FAIL_ATTEMPTS FAKE_FAIL_KEY
   unset FAKE_VERSIONING FAKE_CLOCK_STEP FAKE_EMPTY_TRUNCATED_SIDE
-  unset FAKE_EMPTY_TRUNCATED_ATTEMPTS
+  unset FAKE_EMPTY_TRUNCATED_ATTEMPTS FAKE_SYNC_FAIL_PATTERN
 }
 put_fixture() {
   local side="$1" bucket="$2" key="$3" content="$4" extra="${5:-}"
@@ -203,6 +217,7 @@ invoke_tool() {
     FAKE_FAIL_ATTEMPTS="${FAKE_FAIL_ATTEMPTS:-0}" FAKE_FAIL_KEY="${FAKE_FAIL_KEY:-}" \
     FAKE_EMPTY_TRUNCATED_SIDE="${FAKE_EMPTY_TRUNCATED_SIDE:-}" \
     FAKE_EMPTY_TRUNCATED_ATTEMPTS="${FAKE_EMPTY_TRUNCATED_ATTEMPTS:-0}" \
+    FAKE_SYNC_FAIL_PATTERN="${FAKE_SYNC_FAIL_PATTERN:-}" \
     MIGRATION_RUN_ID=test-run MIGRATION_SOURCE_ACCESS_KEY_ID=SRC_KEY \
     MIGRATION_SOURCE_SECRET_ACCESS_KEY=SRC_SECRET \
     MIGRATION_DESTINATION_ACCESS_KEY_ID=DST_KEY \
@@ -324,6 +339,22 @@ expect_bad run_tool inventory "$TEST_TMP/reports/checkpoint-mismatch" \
 if [ ! -s "$AWS_LOG" ]; then ok "$TEST_NAME"; else bad "$TEST_NAME"; fi
 
 reset_store
+put_fixture source src raw/a.txt alpha; put_fixture destination dst raw/a.txt alpha
+FAKE_SYNC_FAIL_PATTERN=index-page-000001.jsonl.tmp
+TEST_NAME='page sync failure aborts checkpoint inventory'
+expect_status 1 run_tool inventory "$TEST_TMP/reports/page-sync-failure" \
+  --checkpoint-dir "$TEST_TMP/page-sync-failure" --page-size 1 \
+  --time-budget-seconds 30 --retries 1
+TEST_NAME='failed page sync leaves no committed page or receipt'
+if [ ! -e "$TEST_TMP/page-sync-failure/provisional/source/index-page-000001.jsonl" ] &&
+  [ ! -e "$TEST_TMP/page-sync-failure/provisional/source/index-receipt-000001.json" ] &&
+  jq -e '.inventoryCheckpoint.toolComplete == false and
+    (.missingProof | index("source complete listing is unavailable"))' \
+    "$TEST_TMP/reports/page-sync-failure/summary.json" >/dev/null; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+reset_store
 put_fixture source src raw/a.txt alpha; put_fixture source src raw/b.txt beta
 put_fixture destination dst raw/a.txt alpha; put_fixture destination dst raw/b.txt beta
 FAKE_CLOCK_STEP=2
@@ -434,6 +465,24 @@ if jq -e '.toolComplete == true and .fenceValidated == false and
   jq -e '.fenceEvidenceDigest != null' \
     "$TEST_TMP/final-checkpoint/fenced/source/index-receipt-000001.json" >/dev/null &&
   grep -Eq $'^source\tget-object\t.*--key raw/stable.txt' "$AWS_LOG"; then
+  ok "$TEST_NAME"
+else bad "$TEST_NAME"; fi
+
+reset_store
+put_fixture source src raw/stale-summary.txt alpha
+make_inventory_proof '' RAW
+manual_proof="$GENERATED_INVENTORY_PROOF"; manual_fence="$GENERATED_FENCE"
+FAKE_SYNC_FAIL_PATTERN=manifest.jsonl.tmp; : >"$AWS_LOG"
+TEST_NAME='phase summary sync failure rejects finalized inventory evidence'
+expect_status 1 invoke_tool copy "${BASE_ARGS[@]}" \
+  --report-dir "$TEST_TMP/reports/phase-sync-failure" --execute-copy \
+  --conditional-write-proof "$TEST_TMP/conditional-write-proof.json" \
+  --inventory-proof "$manual_proof" --fence-record "$manual_fence"
+TEST_NAME='failed phase summary sync prevents every destination write'
+if ! grep -Eq $'^destination\tput-object\t' "$AWS_LOG" &&
+  jq -e '.inventoryProof.accepted == false and
+    (.missingProof | index("finalized inventory proof is invalid or mismatched"))' \
+    "$TEST_TMP/reports/phase-sync-failure/summary.json" >/dev/null; then
   ok "$TEST_NAME"
 else bad "$TEST_NAME"; fi
 
