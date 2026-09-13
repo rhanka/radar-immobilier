@@ -171,6 +171,7 @@
 - [ ] **Lot 16 — D7 owner correction: BEFORE / AFTER dossier and readable report.**
   - [x] Model explicit owner questions, selectable options and non-blocking LLM ratification without reopening fixed decisions.
   - [x] Render every question before its Focus options, with one comment per question and JSON actions.
+  - [x] Publish a committed offline D7 before/after HTML companion.
   - [x] Restrict the primary Focus architecture to the complete BEFORE and AFTER graphs.
   - [x] Verify native icons, repository provenance, nested subflows, comments and actual JSON clipboard capture.
   - [ ] Embed both complete native diagrams legibly in the monthly PDF and keep the August 10–September 13 window.
