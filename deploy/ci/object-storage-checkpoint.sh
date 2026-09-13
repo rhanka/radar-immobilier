@@ -330,3 +330,54 @@ checkpoint_finalize() {
   sync -f "$tmp" && mv "$tmp" "$target"
   CHECKPOINT_FINAL_DIGEST="$(sha256sum "$target" | awk '{print $1}')"
 }
+
+consume_inventory_proof() {
+  local proof="$1" root config expected_config_digest actual_config_digest
+  local provisional_source provisional_destination fenced_source fenced_destination
+  local prefixes exclusions
+  [ -r "$proof" ] && [ -s "$proof" ] || return 1
+  root="$(cd "$(dirname "$proof")" && pwd)"; config="$root/config.json"
+  provisional_source="$root/provisional/source/manifest.jsonl"
+  provisional_destination="$root/provisional/destination/manifest.jsonl"
+  fenced_source="$root/fenced/source/manifest.jsonl"
+  fenced_destination="$root/fenced/destination/manifest.jsonl"
+  for file in "$config" "$provisional_source" "$provisional_destination" \
+    "$fenced_source" "$fenced_destination"; do [ -r "$file" ] || return 1; done
+  expected_config_digest="$(jq -r '.configDigest // empty' "$config")"
+  actual_config_digest="$(jq 'del(.configDigest)' "$config" | sha256sum | awk '{print $1}')"
+  [ "$expected_config_digest" = "$actual_config_digest" ] || return 1
+  prefixes="$(jq -cn --args '$ARGS.positional | sort' -- "${PREFIXES[@]}")"
+  exclusions="$(jq -cn --args '$ARGS.positional | sort' -- "${EXCLUDE_PREFIXES[@]}")"
+  jq -e --arg se "$SOURCE_ENDPOINT" --arg sr "$SOURCE_REGION" --arg sb "$SOURCE_BUCKET" \
+    --argjson sp "$SOURCE_PATH_STYLE" --arg sf "$SOURCE_IDENTITY_FINGERPRINT" \
+    --arg de "$DESTINATION_ENDPOINT" --arg dr "$DESTINATION_REGION" \
+    --arg db "$DESTINATION_BUCKET" --argjson dp "$DESTINATION_PATH_STYLE" \
+    --arg df "$DESTINATION_IDENTITY_FINGERPRINT" --argjson prefixes "$prefixes" \
+    --argjson exclusions "$exclusions" --argjson retries "$RETRIES" \
+    --argjson concurrency "$CONCURRENCY" --argjson failures "$MAX_FAILURES" \
+    --argjson bytes "$MAX_OBJECT_BYTES" '
+    .schemaVersion == 1 and
+    .source == {endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,identityFingerprint:$sf} and
+    .destination == {endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp,identityFingerprint:$df} and
+    .classification == {prefixes:$prefixes,excludePrefixes:$exclusions} and
+    .limits.retries == $retries and .limits.concurrency == $concurrency and
+    .limits.maxFailures == $failures and .limits.maxObjectBytes == $bytes' "$config" >/dev/null ||
+    return 1
+  cmp -s "$provisional_source" "$fenced_source" &&
+    cmp -s "$provisional_destination" "$fenced_destination" || return 1
+  jq -e --arg config "$expected_config_digest" --arg fence "$FENCE_EVIDENCE_DIGEST" \
+    --arg ps "$(sha256sum "$provisional_source" | awk '{print $1}')" \
+    --arg pd "$(sha256sum "$provisional_destination" | awk '{print $1}')" \
+    --arg fs "$(sha256sum "$fenced_source" | awk '{print $1}')" \
+    --arg fd "$(sha256sum "$fenced_destination" | awk '{print $1}')" '
+    .schemaVersion == 1 and .configDigest == $config and .fenceEvidenceDigest == $fence and
+    .toolComplete == true and .fenceValidated == false and
+    .providerEnforcementValidated == false and
+    .source.provisional.manifestSha256 == $ps and .source.fenced.manifestSha256 == $fs and
+    .destination.provisional.manifestSha256 == $pd and
+    .destination.fenced.manifestSha256 == $fd' "$proof" >/dev/null || return 1
+  jq -se 'all(.[]; .classification != "unclassified")' "$fenced_source" >/dev/null || return 1
+  cp "$fenced_source" "$SOURCE_MANIFEST"
+  cp "$fenced_destination" "$DESTINATION_MANIFEST"
+  INVENTORY_PROOF_DIGEST="$(sha256sum "$proof" | awk '{print $1}')"
+}
