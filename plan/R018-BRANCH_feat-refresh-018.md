@@ -70,6 +70,7 @@
 - [x] C13b: prove guarded conflict, PG provenance regression and selected-city failure.
 - [x] C14: add a bounded, redacted refresh command with deterministic saved-PDF smoke input.
 - [x] C07d: state the public Graphify node file-type and edge-confidence enums after the first live response exposed an under-specified contract.
+- [x] C14b: emit a redacted model-call count and latency receipt without prompts, outputs or account material.
 - [ ] Lot 4: Gemini independent post-build review; fix verified findings.
 - [ ] Lot 5: conductor-controlled preprod end-to-end and scheduled refresh acceptance, then gated production promotion.
 - [ ] Lot 6: synchronize architecture reference and monthly evidence with actual transition state.
