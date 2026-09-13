@@ -239,6 +239,9 @@ object-storage-docs-prod-api-rebind: ## Roll PROD API from SCW to canonical OVH 
 	    <<<"$$summary" >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials -o json | \
 	    jq -e -f deploy/ci/validate-docs-secret.jq >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" patch deployment/radar-api --type=strategic --dry-run=server \
+	    --patch-file $(OBJECT_STORAGE_DOCS_PROD_DIR)/api-rebind-patch.yaml >/dev/null; \
+	  echo '[object-storage-docs-prod] API rebind server dry-run passed'; \
 	  $(KUBECTL) -n "$$namespace" patch deployment/radar-api --type=strategic \
 	    --patch-file $(OBJECT_STORAGE_DOCS_PROD_DIR)/api-rebind-patch.yaml >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" rollout status deployment/radar-api --timeout=180s >/dev/null; \
