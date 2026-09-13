@@ -439,6 +439,7 @@ object-storage-docs-preprod-validate: ## Render support and validate the DOCS bu
 	@jq -n -f deploy/ci/validate-docs-secret.jq >/dev/null
 	@jq -n '{items:[]}' | jq -f deploy/ci/docs-zero-writer-bindings.jq >/dev/null
 	@jq -n -f deploy/ci/docs-prod-source-secret.jq >/dev/null
+	@jq -n '[]' | jq -f deploy/ci/docs-canonical-manifest.jq >/dev/null
 	@jq -n '{items:[]}' | jq -f deploy/ci/minio-removal-resources.jq >/dev/null
 	@jq -n '{items:[]}' | jq -f deploy/ci/minio-removal-pods.jq >/dev/null
 	@jq -n '{items:[]}' | jq --arg observedAt 2026-09-13T00:00:00Z \
@@ -586,9 +587,8 @@ object-storage-docs-preprod-copy-canonical: ## Import the PROD manifest and copy
 	    { echo '[object-storage-docs] refused: exact OVH namespaces are unproved'; exit 1; }; \
 	  [ "$$(sha256sum "$$manifest" | awk '{print $$1}')" = "$$digest" ] || \
 	    { echo '[object-storage-docs] canonical digest differs'; exit 1; }; \
-	  jq -es 'length == 59017 and (map(.size)|add) == 12534514457 and \
-	    ([.[].key]|length == (unique|length)) and all(.[].sha256; test("^[0-9a-f]{64}$$"))' \
-	    "$$manifest" >/dev/null || { echo '[object-storage-docs] canonical corpus contract differs'; exit 1; }; \
+	  jq -es -f deploy/ci/docs-canonical-manifest.jq "$$manifest" >/dev/null || \
+	    { echo '[object-storage-docs] canonical corpus contract differs'; exit 1; }; \
 	  KUBECONFIG="$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" $(KUBECTL) -n radar-immobilier \
 	    get secret radar-s3-credentials -o json | jq -e -f deploy/ci/docs-prod-source-secret.jq | \
 	    $(KUBECTL) apply -f - >/dev/null; \
