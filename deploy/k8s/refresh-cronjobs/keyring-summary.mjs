@@ -1,3 +1,5 @@
+/* global console */
+
 import { listModelProfiles } from "@sentropic/llm-mesh-refresh";
 import { EncryptedFileKeyring } from "@sentropic/llm-mesh-refresh/node";
 
