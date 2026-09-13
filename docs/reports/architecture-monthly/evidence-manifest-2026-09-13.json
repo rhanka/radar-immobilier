@@ -1,0 +1,198 @@
+{
+  "schema": "immo-architecture-monthly-evidence/v4",
+  "revision": "D7",
+  "generatedAt": "2026-09-13T22:05:39.145Z",
+  "period": {
+    "timezone": "America/Toronto",
+    "startInclusive": "2026-08-10T00:00:00-04:00",
+    "endExclusive": "2026-09-14T00:00:00-04:00",
+    "days": 35,
+    "hours": 840,
+    "joinEvidence": "last cost report merged on origin/main ends 2026-08-09",
+    "externalInvoiceIdentityVerified": false,
+    "tokenCaptureCutoff": "2026-09-13T21:09:35.483Z",
+    "september13TokensAfterCutoffIncluded": false
+  },
+  "transitionState": {
+    "t1": {
+      "graphify": "0.18.0",
+      "model": "Luna high",
+      "firstKubernetesRun": "failed before LLM because input was .html, PDF required",
+      "accepted": false
+    },
+    "t2": {
+      "rawParityAndOvhRebind": true,
+      "docsPreprod": {
+        "objects": 144193,
+        "gigabytes": 28.34
+      },
+      "docsProductionScwReference": {
+        "bucket": "docs-pocs",
+        "objects": 59017,
+        "bytes": 12534514457
+      },
+      "ownerDecision": "production source is exact initial canonical set; OVH prod and preprod converge to same 59,017 keys+hashes; preprod surplus not migrated",
+      "toolingCommit": {
+        "branch": "chore/scw-final-sweep",
+        "head": "be362561",
+        "onOriginMain": false
+      },
+      "docsCopyParityRebind": false,
+      "productionMigration": "launched; completed outcome unknown",
+      "minioRemoval": "only after exact parity and recoverability"
+    },
+    "t3": {
+      "status": "not-started",
+      "verdict": "NO-GO today"
+    },
+    "scwTem": "retained until replacement validated"
+  },
+  "focus": {
+    "html": "architecture-before-after-2026-09-13.html",
+    "htmlSha256": "d1d01f8759b40ff37ac05d3480946521b31b6c7abf77447daa6b0bf85308079f",
+    "artifactInputHash": "7488579b9993465d5bddd92174bff3dc870a676b342946a65951361c6f1e0af0",
+    "architectureHash": "85759954afba141dace08405ed3382833350b472889e3ea786bdb32cb841b4fd",
+    "transitionTargetsHash": "e16aa248ed81c75d00f8e2b6552eb20aba04de387d13faa55b760cce4cfea89e",
+    "dossierHash": "a45540c0be47a4756eea0871558517e48215f90b0ead5a5dac9e66e0fe102aef",
+    "presentationHash": "ae47040fedd2a768689faf617221a59c6adc6f25dcdf76a3a46477698f919ae3",
+    "choicesHash": "647306ea89b0ea1dbfd6b4f5eac180b3a91347b7cd476b206f81461c72c982c0",
+    "nativeNestedSvelteFlow": true,
+    "renderedMermaidCount": 2,
+    "primaryArchitectureViews": [
+      "asis-1",
+      "target-3"
+    ],
+    "serviceIconsAndRepoProvenance": "required for every node and group"
+  },
+  "billing": {
+    "infrastructureProjection": {
+      "quantity": 1,
+      "sku": "b3-8",
+      "hourlyRateCad": 0.082,
+      "hours": 840,
+      "amountCad": 68.88,
+      "excluded": "observed two/three-node platform pass-through/internal costs"
+    },
+    "llmAllocation": {
+      "immoCad": 139.33773242975033,
+      "geoCad": 111.87770524666708,
+      "totalCad": 251.21543767641742,
+      "method": "previous-report subscription capacity allocation and unit basis; refreshed deduplicated local sessions"
+    },
+    "indicativeTotalCad": 320.0954376764174
+  },
+  "claims": {
+    "deployment": "partial effective transition only; AFTER is not deployed",
+    "invoice": "none",
+    "decisionOptions": "three explicit open questions; local drafts only; fixed owner decisions unchanged",
+    "llmRatification": "open-non-blocking"
+  },
+  "sourceFiles": [
+    {
+      "path": "docs/architecture.md",
+      "role": "before-state",
+      "sha256": "85759954afba141dace08405ed3382833350b472889e3ea786bdb32cb841b4fd"
+    },
+    {
+      "path": "docs/architecture/transitions-target.md",
+      "role": "effective-transition-and-after-targets",
+      "sha256": "e16aa248ed81c75d00f8e2b6552eb20aba04de387d13faa55b760cce4cfea89e"
+    },
+    {
+      "path": "docs/architecture/proposal.md",
+      "role": "T1-causal-detail",
+      "sha256": "2c7d37d760317d7c3495f61f9fc8af270572b9e95add77f7001903ed2489aa23"
+    },
+    {
+      "path": "docs/architecture/transitions.md",
+      "role": "transition-register",
+      "sha256": "56a2ae5a41ebac30dfbea11469ca43b16e9b0fcfaa0d2ccbdb7bb8630bceb0a8"
+    },
+    {
+      "path": "docs/architecture/decision-dossier.md",
+      "role": "D6-dossier",
+      "sha256": "a45540c0be47a4756eea0871558517e48215f90b0ead5a5dac9e66e0fe102aef"
+    },
+    {
+      "path": "docs/reports/architecture-monthly/report-through-2026-09-13.md",
+      "role": "monthly-report",
+      "sha256": "1f62ad356faa3deb6b2022047db7e8308c471805e946899d144820f530422bc5"
+    },
+    {
+      "path": "docs/reports/architecture-monthly/token-audit-2026-08-10_2026-09-13.json",
+      "role": "token-audit",
+      "sha256": "1a6e47c6cba0c22eff6198461668ce2957064cf9ffcd475b366067c0cf1f0cba"
+    },
+    {
+      "path": "docs/reports/couts-2026-07-13_2026-08-09.md",
+      "role": "preceding-merged-report",
+      "sha256": "93b34620760c78dafa76cda071cc67d40d4e52a554827c8a5042a4d3b334f64b"
+    }
+  ],
+  "replay": "make -f docs/architecture/focus/Makefile tokens test build browser clipboard ENV=test-architecture",
+  "report": {
+    "markdown": "report-through-2026-09-13.md",
+    "html": "report-through-2026-09-13.html",
+    "pdf": "report-through-2026-09-13.pdf",
+    "markdownSha256": "1f62ad356faa3deb6b2022047db7e8308c471805e946899d144820f530422bc5",
+    "htmlSha256": "d0257080d96bdc47fb631690948b3353d79c1603af25debcab9dcf4f66ed7449",
+    "pdfSha256": "57cc495d99ef5b5abec42e1eebfa56c591add78383d19b78b5039d09b0df6694",
+    "staticDiagrams": [
+      "asis-1",
+      "target-3"
+    ],
+    "nativeDiagramPages": [
+      {
+        "title": "Architecture AVANT · schéma complet",
+        "graph": "asis-1",
+        "partition": null
+      },
+      {
+        "title": "Architecture AVANT · partition · haut gauche",
+        "graph": "asis-1",
+        "partition": "haut gauche"
+      },
+      {
+        "title": "Architecture AVANT · partition · haut droite",
+        "graph": "asis-1",
+        "partition": "haut droite"
+      },
+      {
+        "title": "Architecture AVANT · partition · bas gauche",
+        "graph": "asis-1",
+        "partition": "bas gauche"
+      },
+      {
+        "title": "Architecture AVANT · partition · bas droite",
+        "graph": "asis-1",
+        "partition": "bas droite"
+      },
+      {
+        "title": "Architecture APRÈS · schéma complet",
+        "graph": "target-3",
+        "partition": null
+      },
+      {
+        "title": "Architecture APRÈS · partition · haut gauche",
+        "graph": "target-3",
+        "partition": "haut gauche"
+      },
+      {
+        "title": "Architecture APRÈS · partition · haut droite",
+        "graph": "target-3",
+        "partition": "haut droite"
+      },
+      {
+        "title": "Architecture APRÈS · partition · bas gauche",
+        "graph": "target-3",
+        "partition": "bas gauche"
+      },
+      {
+        "title": "Architecture APRÈS · partition · bas droite",
+        "graph": "target-3",
+        "partition": "bas droite"
+      }
+    ],
+    "diagramPage": "A3 landscape"
+  }
+}
