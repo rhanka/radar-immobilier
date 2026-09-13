@@ -20,14 +20,21 @@ it works offline and does not require a Claude session, server or external CDN.
 ## Navigation and authority
 
 - Eight decision sections; five graph views, including a separately labelled proposal.
-- Click a subflow or use its selector. Breadcrumbs return to its parent. Open scopes
-  are actual SvelteFlow `parentId` groups, not raster/SVG zoom simulations.
+- All components, edges and nested boxes are shown **simultaneously**. Every
+  Mermaid subgraph maps to a native SvelteFlow `parentId` box with its original ID.
+  Click a box or use its selector to zoom; no content is collapsed or replaced.
 - Select `PP-DB`, `PP-GRAPH`, etc. to zoom to it and cross-link to the same identity
   in another diagram. External relationships retain original source/target IDs.
-- Mermaid source is retained, with every node/edge/subgraph covered by tests.
-  Dashed edges and bidirectional arrows keep their semantics.
-- Notes are local, hash-scoped **drafts**, exportable as JSON. No signing, Track,
-  approval, deployment or other application mutation is exposed.
+- Mermaid source is **rendered visually**, both beneath the SvelteFlow and in
+  embedded source documents; exact code remains available. Five strict, sanitized
+  SVGs are generated locally and embedded offline, with node/group parity checks.
+- Every node/edge/subgraph is covered by tests; dashed and bidirectional semantics
+  are preserved. Full-diagram fitting uses explicit absolute nested bounds.
+- Section 4 uses the example's DS **Tile + Radio** pattern: A/B/C selection,
+  comment, local persistence, **copy JSON** and download. The response includes
+  all three options, selected ID, comment, general remarks and source hashes.
+  Choices start empty and remain **drafts**, never approval/Track/deployment actions.
+  Clipboard denial is explicit; the JSON remains keyboard-selectable/downloadable.
 - Sources open in an accessible dialog; external evidence links require a click.
 - The dossier remains **INCOMPLETE**: production inventory/recovery criteria and
   the independent Opus pass are missing. Codex findings and Opus quota failure
@@ -40,14 +47,20 @@ Builds run in Docker, without host Node or installs. `KIT_ROOT` defaults to
 **read-only** with its existing dependencies. Override it with that kit on another
 workstation. The generated manifest records source hashes and component provenance.
 This is a standalone Focus-format host, not the live Track dashboard or its transport.
+Mermaid prerendering needs the isolated local Chromium debugger on port 9238 and
+the existing pinned bundles in `vendor/` (available through the older `assets`
+target). The browser renderer blocks HTTP(S); no remote rendering service is used.
 
 ```sh
 make -f docs/architecture/focus/Makefile browser ENV=test-architecture
+make -f docs/architecture/focus/Makefile clipboard ENV=test-architecture
 ```
 
-`browser` requires the isolated Chromium debugger on loopback port 9238. It visits
-all 18 scenes, tests shared-DB navigation, full-screen/Escape, local notes, source
-dialogs, desktop/mobile overflow and file-based offline use with network blocked.
+`browser` verifies five complete diagrams at 18 viewport positions, visible nested
+bounds, rendered Mermaid parity, shared-DB navigation, full-screen/Escape, choices,
+comments, persistence, source dialogs, clipboard failure, responsive and offline use.
+`clipboard` checks actual clipboard read-back in a fresh browser context, then
+restores its previous contents and disposes only that test context.
 No API/UI/DB application stack or data volume is started or modified.
 
 Geometry checks prevent node overlap, out-of-parent bounds and routes through

@@ -90,7 +90,7 @@
   - [x] Document build/replay instructions and hash-scope local notes to the complete embedded input set.
   - [x] Embed replay instructions and verification evidence too; leave unresolved execution decisions and production inventory open.
 - [ ] Local documentation handoff; no production action or branch merge requested.
-- [ ] **Lot 9 — Owner correction: complete nested diagrams and Focus choices.**
+- [x] **Lot 9 — Owner correction: complete nested diagrams and Focus choices.**
   - [x] Diagnose the mismatch: sceneFor collapses each child group; Mermaid is shown as plain source only.
   - [x] Regression reproduced: infrastructure showed 8 native nodes instead of all 29 leaves and boxes; replace collapsed representation with complete recursive layout.
   - [x] Render every node/edge simultaneously with native nested parentId boxes; navigation only changes the viewport.
@@ -101,4 +101,4 @@
   - [x] Keep clipboard-denied JSON keyboard-selectable, hash option definitions and suppress raw source HTML while rendering the controlled Mermaid SVGs.
   - [x] Fit the full diagram from explicit absolute nested bounds; verify every box and component stays inside the initial viewport.
   - [x] Add real clipboard read-back in a fresh isolated browser context, preserving the previous clipboard content.
-  - [ ] Verify simultaneous completeness, nested bounds, Mermaid rendering and A/B/C comment/export behavior.
+  - [x] Verify simultaneous completeness, nested bounds, Mermaid rendering and A/B/C comment/export behavior; real clipboard read-back passes.
