@@ -11,8 +11,8 @@ const manifestPath = required("CANONICAL_MANIFEST");
 const manifestDigest = required("CANONICAL_DIGEST");
 const reportDir = required("REPORT_DIR");
 const proofPath = required("CONDITIONAL_WRITE_PROOF");
-const concurrency = Number(process.env.CONCURRENCY ?? "32");
-if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 32) throw new Error("invalid concurrency");
+const concurrency = Number(process.env.CONCURRENCY ?? "128");
+if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 128) throw new Error("invalid concurrency");
 const source = { endpoint: required("SOURCE_ENDPOINT"), region: required("SOURCE_REGION"),
   bucket: required("SOURCE_BUCKET"), pathStyle: false };
 const destination = { endpoint: required("DESTINATION_ENDPOINT"), region: required("DESTINATION_REGION"),
