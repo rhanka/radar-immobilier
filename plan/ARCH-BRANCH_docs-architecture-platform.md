@@ -59,6 +59,10 @@
   - [ ] Obtain OVH production read-only evidence; never substitute the legacy SCW cluster.
   - [ ] Exclude unobserved legacy paths from operational diagrams and regenerate Focus.
   - [x] Remove unobserved SCW/grounding templates and unverified production storage from diagrams 1–2; keep live MinIO API bindings.
+  - [x] Separate main-only templates in the register; record runtime success timestamps and Geo CAS prefix/environment boundaries.
+- [ ] **Lot 7 — Prepare the owner-requested implementation continuation.**
+  - [x] Request existing i-cond, i-infra and Graphify conductor handoffs through h2a; no overlapping implementation dispatched.
+  - [ ] Establish the exact current plan, upgrade contract, scope and deployment gates before opening implementation work.
 
 ## Merge / Close
 - [ ] Local documentation handoff; no production action or branch merge requested.
