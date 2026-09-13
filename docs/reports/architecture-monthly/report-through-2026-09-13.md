@@ -1,88 +1,141 @@
-# Architecture and reporting companion — through September 13, 2026
+# Rapport architecture et livraison — 10 août → 13 septembre 2026
 
-Status: D5 evidence companion, **not** an invoice, final delivery total, owner
-signature, deployment record or replacement for preserved source reports.
+Statut : rapport D6, **pas une facture fournisseur ni une preuve de déploiement
+des cibles**. Fenêtre America/Toronto : `2026-08-10T00:00:00-04:00` inclus à
+`2026-09-14T00:00:00-04:00` exclus, soit **35 jours / 840 heures**.
 
-## 1. Requested period and capture cutoffs
+## 1. Jointure avec la période précédente
 
-- Timezone: America/Toronto.
-- Requested start: the real preceding invoice/report boundary, **unverified**.
-- Requested end: September 13 inclusive (`2026-09-14T00:00:00-04:00` exclusive).
-- Prior timestamped runtime check: `2026-09-13T15:38:00Z`.
-- Prior timestamped T1 implementation progress: `2026-09-13T15:39:00Z`.
-- Follow-up T1/T2/T3 state: dated September 13; exact UTC cutoff **not supplied**.
-- Unified delivery/token/billing cutoff: **not frozen or verified**; September 13
-  is incomplete in the available evidence.
-- Owner correction captured `2026-09-13T15:10:18.423Z`; this is provenance of
-  the instruction, not the data capture cutoff.
+Le dernier rapport de coûts fusionné sur `origin/main`,
+`docs/reports/couts-2026-07-13_2026-08-09.md`, finit le **9 août**. Le présent
+rapport commence donc le **10 août**, sans trou ni recouvrement. Un brouillon
+hors main n’est pas utilisé comme précédent. Aucune facture externe plus récente n’est présente
+dans le dépôt; cette réserve n’empêche pas d’établir la jointure des rapports Git.
 
-The September 13 transitions are inside the requested period. They are classified
-below as observed evidence versus planned target work; neither classification
-changes the still-unverified start or invents a full-day total.
+## 2. Architecture — avant / transition effective / après
 
-## 2. Architecture first
+Le [Focus HTML daté](architecture-transition-2026-09-13.html) ouvre sur la
+**transition effective** et permet de comparer **Avant → Transition effective →
+Après T2 → Après cible**. Les huit graphes sont produits à partir des Mermaid
+commités sous deux formes : SVG rendu et SvelteFlow natif complet avec sous-flows
+`parentId`. Chaque nœud/boîte affiche une icône de service et sa provenance
+`radar-immobilier`, `geo`, `poc-k8s` ou externe; URL utilisateurs et SSO sont
+inclus. Une [version PDF du présent rapport](report-through-2026-09-13.pdf) est
+également livrée.
 
-The dated [portable Focus rendering](architecture-transition-2026-09-13.html)
-opens on the **complete final target** and exposes the selectable path
-**Existant → T1 refresh → T2 objets OVH → T3 cible 1 nœud**. Every transition is
-rendered from committed Mermaid into both a complete nested native SvelteFlow and
-a sanitized Mermaid SVG. All four existing detailed views remain accessible.
-
-Canonical sources: [current state](../../architecture.md), [three target
-states](../../architecture/transitions-target.md), [T1 causal detail](../../architecture/proposal.md),
-[transition register](../../architecture/transitions.md) and [D5 dossier](../../architecture/decision-dossier.md).
-
-## 3. September 13 transitions — observed versus planned
-
-| State | Observed in available September 13 evidence | Planned / not deployed |
+| Niveau | État au 13 septembre | Lecture |
 | --- | --- | --- |
-| Existant | API uses MinIO `PP-RAW`; `PP-DOCS` fallback is empty; distinct `PP-DOCS-LEGACY` has useful replay/history. Refresh uses OVH `PP-GRAPH`; prod private bindings remain unavailable. | No production symmetry inferred. |
-| T1 | Fable BLOCK at `ac3a7150`; fixes `537b9e0c` + `3d9ed43c`; scoped 34/34, integration 4/4 and typecheck pass. Retain llm-mesh 0.19.0: rare socket failure fails closed and resumes durable state next cycle. | **BLOCKED** while Fable re-review runs. Before real extraction, benchmark historical/manual and v1/v2/v3 on five PDFs with non-simulated runs. Model unselected, Cloud Code not enrolled, no scores, provider Signal or K8s acceptance. No 0.19.1 implementation requested. |
-| T2 | Legacy inventory unchanged; remediation reaches `ee84ae29` / `f2ac3825` / `c30467ca` / `cef6d7ed`; checkpoint work at `aaf0cbf7` / `91242223`. | **MIGRATE+RETAIN**; checkpoint mechanism under construction. No object copy; parity, recovery and cutover remain open; TEM retained. |
-| T3 | Three b3-8; one allocatable 1,840m/5,907.82 Mi; requests 4,095m/8,442 Mi; pods 5,273 Mi; 16 PVC/15 Cinder RWO; required anti-affinity incompatible. | **NO-GO today**. Complete T2, rightsize, reconcile constraints, verify two nodes, then test one. |
+| Avant | API raw MinIO, documents MinIO, graphe OVH, LLM depuis poste | Capture de référence pré-transition |
+| Transition effective | RAW OVH actif; T1 a atteint K8s mais pas le LLM; DOCS inventorié/provisionné | Réalisé et en cours, sans confondre les gates |
+| Après T2 | RAW/DOCS OVH prod+préprod, MinIO retiré après parité/reprise | Cible non déployée |
+| Après T3 | Immo+Geo sur un b3-8 existant | Cible non commencée, NO-GO actuel |
 
-## 4. Complete final target
+## 3. Travaux réalisés et vérifiés dans la fenêtre
 
-The proposed end state contains prod/preprod Immo URLs and SSO, Immo UI/API/MCP,
-PG, autonomous refresh, OVH graph/corpus and distinct OVH API raw/document roles.
-It contains Geo APIs, the geographic DB role with uncertain API dependency, OVH
-raw/normalized products, PV/zoning/regulation/lot/environment sources and
-in-process joins. The workstation is optional enrollment/admin only. MinIO and
-all active Scaleway dependencies are absent except retained SCW TEM. Production
-private bindings are target roles marked TBD/UNVERIFIED, not observed facts.
+- Graphify **0.18.0** a été intégré dans le refresh Immo; **Luna high** est le
+  modèle sélectionné.
+- Une première validation Kubernetes a été exécutée. Elle a échoué **avant tout
+  appel LLM** : l’objet d’entrée était `.html`, alors que le profil exige un PDF.
+  Cela prouve le fail-closed d’entrée, pas un Signal ni T1 accepté.
+- Le rôle RAW préprod a passé la parité et l’API a été rebound vers
+  `PP-RAW-OVH`; l’ancienne identité raw est fenced/recovery-only.
+- Le bucket et le Secret DOCS OVH préprod sont provisionnés. Le tooling de copie
+  gardé est commité sur `chore/scw-final-sweep` jusqu’à `be362561`, mais **pas
+  encore sur `origin/main`** dans ce snapshot.
+- Les inventaires DOCS observent **144,193 objets / 28.34 GB** en MinIO préprod
+  et **59,017 / 12,534,514,457 B** dans la source canonique production SCW `docs-pocs`.
+- Les URL Immo prod/préprod, leurs issuers SSO et les responsabilités des trois
+  repos sont conservés dans les vues de référence.
 
-## 5. Transition gates and limits
+## 4. Travaux en cours — aucune anticipation comptée comme acquise
 
-Preproduction precedes production for every transition. T1 requires Fable re-review,
-the neutral five-PDF non-simulated benchmark, a real fresh typed Signal with exact
-PDF and K8s retry/schedule acceptance. T2 requires completed checkpoint/writer safety, full parity,
-paired recovery and retention. T3 requires T2, rightsizing, reconciled placement,
-a verified two-node step, then one-node preprod safety before production.
+- T1 : corriger la sélection vers un PDF réel, atteindre Luna high, puis prouver
+  Signal typé + PDF exact, rejeu idempotent et schedule autonome.
+- T2 DOCS : la production SCW actuelle est, par décision owner, la **référence
+  initiale exacte**. OVH prod et OVH préprod doivent converger vers les mêmes
+  **59,017 keys et hashes**. Les 85,176 objets de surplus préprod sont
+  non-canoniques et ne doivent pas être migrés.
+- Séquence DOCS obligatoire : diff des manifests → ensemble canonique production
+  → copie sélective → égalité des comptes/keys/hashes → preuve de reprise →
+  retrait récupérable de tout MinIO.
+- Copie, parité/reprise et rebind DOCS ne sont pas terminés. L’audit/migration
+  production est lancé en parallèle, sans résultat final inventé.
+- SCW TEM reste en place jusqu’à validation de son remplacement.
 
-No T1/T2/T3 deployment, object copy, deletion, credential action, cluster change
-or billing calculation occurred in this documentation build.
+## 5. Projection d’aboutissement
 
-## 6. Billing annex — last and unresolved
+Après T2, les deux environnements portent exactement le corpus canonique DOCS
+production dans leurs rôles OVH; les identités, objets, consommateurs, workload
+et PVC MinIO sont retirés seulement après parité et reprise. Après T1, le refresh
+est autonome en K8s. T3 vise ensuite un b3-8 existant, mais n’a pas commencé :
+4,095m/8,442 Mi de requests ne tiennent pas dans 1,840m/5,907.82 Mi allouables,
+avec anti-affinity et 16 PVC/15 Cinder RWO. Une étape deux nœuds vérifiée précède
+obligatoirement tout essai un nœud.
 
-The strongest preceding local cost report is
-`docs/reports/couts-2026-07-13_2026-08-09.md`: it nominally ends August 9 and was
-generated August 9 with partial-day data. It is not proof of the last actual
-invoice or of the requested period start. `methode-unites-facturation.md` refers
-to older Wave 250804-028 (June 8–July 5); it is not proof of the latest tariff.
+## 6. Coûts — méthode conservée, résultat non forcé
 
-- Infrastructure: one b3-8 BHS5 projection at `0.082 CAD/h`; period hours and
-  projected amount are unknown until the real start is verified.
-- `720 h / 59.04 CAD` is an old 30-day illustration only, never the current amount.
-- LLM: later count tokens with the **same unit tariffs as the previous month's
-  actual invoice**, once that invoice and its tariffs are identified.
-- No DIRECT/USAGE/CAPACITY choice, token parsing, allocation method or final amount
-  is requested or inferred by D5.
+### Infrastructure
 
-## 7. Replay
+La seule projection facturable demandée est **un b3-8 BHS5** au tarif déjà
+observé de `0.082 CAD/h` :
+
+`1 × 840 h × 0.082 CAD/h = 68.88 CAD`.
+
+Les coûts de deux ou trois nœuds observés sont des coûts plateforme
+pass-through/internes : ils sont explicitement exclus. Les 68.88 CAD sont une
+projection cible, pas une consommation fournisseur mesurée sur la fenêtre.
+
+### LLM
+
+L’[audit JSON](token-audit-2026-08-10_2026-09-13.json) parcourt les sessions
+locales sur les bornes exactes. Claude est dédoublonné par `(fichier,message.id)`,
+avec maximum composante par composante pour 20 divergences; Codex par signature
+exacte `(sessionId,timestamp,usage)`. Les dates sont ramenées en America/Toronto.
+La collecte a été figée le **2026-09-13T21:09:35.483Z** : les sessions du 13
+postérieures à ce cutoff ne sont donc pas inventées, tandis que la projection
+infra couvre contractuellement les 840 heures complètes.
+
+La méthode et les unités du rapport précédent sont conservées : pic capacité
+global glissant de sept jours par fournisseur; deux sièges Claude et un ChatGPT
+Pro à 200 USD/mois; USD→CAD 1.37; marge LLM ×1.15. La plateforme n’entre pas dans
+les numérateurs immo/geo.
+
+| Produit | Claude | Codex | Allocation CAD | Facturable ×1.15 |
+| --- | ---: | ---: | ---: | ---: |
+| immo | 14,009,998,961 | 1,426,882,082 | 121.163246 | **139.337732** |
+| geo | 11,194,704,885 | 1,376,664,354 | 97.284961 | **111.877705** |
+| **immo + geo** | **25,204,703,846** | **2,803,546,436** | **218.448207** | **251.215438 CAD** |
+
+Capacités retenues : Claude **15,138,897,392 tokens / 7 j** (30 août→5
+septembre, pic rafraîchi) et Codex **32,217,805,325 / 7 j** (4→10 mai, pic
+historique audité resté supérieur au pic courant).
+
+Le résultat LLM n’est pas abaissé artificiellement. Par rapport au brouillon de
+30 jours (214.743159 CAD), la fenêtre correcte de 35 jours donne 251.215438 CAD;
+le taux journalier passe de 7.1581 à **7.1776 CAD/j**, soit +0.27 %. L’écart
+absolu vient principalement des cinq jours réintégrés. Forcer une baisse serait
+contraire aux journaux mesurés.
+
+### Synthèse indicative
+
+| Poste | Montant |
+| --- | ---: |
+| Projection infra, un b3-8 | **68.880000 CAD** |
+| Allocation LLM immo+geo | **251.215438 CAD** |
+| **Somme indicative** | **320.095438 CAD** |
+
+## 7. Sources, incertitudes et rejeu
+
+- Les tokens viennent de journaux locaux : l’allocation n’est pas une ligne de
+  facture fournisseur. Les tarifs/change sont repris, pas re-mesurés.
+- Le corpus de capacité historique Codex vient de l’audit dédoublonné du
+  11 septembre; la nouvelle fenêtre l’aurait remplacé si son pic avait été plus
+  élevé. Claude a été rescanné sur toute la fenêtre.
+- Les résultats runtime T1/T2 proviennent des branches de réalisation et des
+  faits owner datés; aucune symétrie production non observée n’est inventée.
+
+Rejeu documentaire et preuve :
 
 ```sh
-make -f docs/architecture/focus/Makefile test build browser clipboard ENV=test-architecture
+make -f docs/architecture/focus/Makefile tokens test build browser clipboard ENV=test-architecture
 ```
-
-Preview: `http://127.0.0.1:5188/`. The build uses the existing Sentropic Focus
-kit read-only and starts no application stack.
