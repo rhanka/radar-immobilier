@@ -56,6 +56,20 @@ object-storage-docs-prod-fast-progress: ## Read aggregate canonical hash progres
 	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- \
 	    /bin/bash -ceu 'if [ -s /evidence/docs-prod-canonical/summary.json ]; then cat /evidence/docs-prod-canonical/summary.json; elif [ -s /evidence/docs-prod-canonical/progress.json ]; then cat /evidence/docs-prod-canonical/progress.json; else echo '\''{"hashedObjects":0,"hashedBytes":0}'\''; fi'
 
+.PHONY: object-storage-docs-prod-fast-stop-readonly
+object-storage-docs-prod-fast-stop-readonly: ## Stop one exact source-only PROD inventory Job
+	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
+	  [ "$(OBJECT_STORAGE_DOCS_PROD_STOP_CONFIRM)" != 1 ] || \
+	  [[ "$(OBJECT_STORAGE_DOCS_PROD_JOB)" != radar-object-storage-fast-inventory-docs-prod-* ]]; then \
+	  echo '[object-storage-docs-prod] require exact Job, KUBECONFIG, confirmation, ENV=prod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
+	  $(KUBECTL) -n "$$namespace" get job/$(OBJECT_STORAGE_DOCS_PROD_JOB) -o json | \
+	    jq -e '.status.active == 1 and any(.spec.template.spec.containers[]; .args[0] | contains("inventory-docs-prod-fast.mjs")) and all(.spec.template.spec.containers[].env[]?; .name | startswith("MIGRATION_DESTINATION_") | not)' >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" delete job/$(OBJECT_STORAGE_DOCS_PROD_JOB) \
+	    --wait=true >/dev/null; \
+	  echo '[object-storage-docs-prod] source-only inventory Job stopped'
+
 .PHONY: object-storage-docs-prod-expand-pvc-quota
 object-storage-docs-prod-expand-pvc-quota: ## Guardedly expand only the PROD PVC count quota from 2 to 3
 	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
