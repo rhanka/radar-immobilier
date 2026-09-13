@@ -1,16 +1,16 @@
 # refresh-cronjob.yaml — RAFRAÎCHISSEMENT PÉRIODIQUE du pipeline DÉTERMINISTE.
 #
 # Deux CronJobs distincts, deux cadences (cf. brainstorm §4.1 « 3 régimes »
-# et SPEC_PERSISTENCE_S3_FIRST §6 « SCW Serverless Jobs + Cron quotidien ») :
+# et SPEC_PERSISTENCE_S3_FIRST §6 « Jobs + Cron quotidien ») :
 #
 #   A. radar-refresh-scrape  (QUOTIDIEN, 03:17 UTC)
 #      scrape + parse + exploit déterministe des ~528 villes config-only → raw/ parsed/
 #      (sur 563 configs ALL_PV_CITIES − 35 fixtures ; couverture data actuelle ~1007)
-#      ontology/ sur SCW. AUCUN LLM. HEAD-skip CAS → ne capte que le NOUVEAU.
+#      ontology/ sur le store DOCS. AUCUN LLM. HEAD-skip CAS → ne capte que le NOUVEAU.
 #      C'est le moteur du « refresh des nouveaux PV tout seul » de la Vague A.
 #
 #   B. radar-refresh-projection  (QUOTIDIEN, 04:30 UTC, APRÈS le scrape)
-#      projette graph/<ville>/latest.json (SCW) → PG. Idempotent (upsert ON
+#      projette graph/<ville>/latest.json (store GRAPH) → PG. Idempotent (upsert ON
 #      CONFLICT). Rattrape en PG tout graphe re-graphifié hors-bande depuis la
 #      veille. NE migre PAS (schéma supposé à jour ; reset DB → passer d'abord
 #      par 31-graph-projection-job.yaml une fois).

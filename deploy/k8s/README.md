@@ -25,7 +25,7 @@ and extended with the sentropic-app integration.
 | Aspect | How radar does it | Source mirrored |
 | --- | --- | --- |
 | **Tenant / workspace** | dedicated `radar-immobilier` Namespace; every resource carries `app.kubernetes.io/part-of: sentropic` and `sentropic.dev/workspace: radar-immobilier` | sentropic per-tenant namespace + `app.kubernetes.io/*` labels (`10-rbac.yaml`, `30-api.yaml`) |
-| **Registry pull** | public `ghcr.io/rhanka/radar-{api,ui}` packages need no pull secret; `radar-obscura` runs the **upstream public Docker Hub image** `docker.io/h4ckf0r0day/obscura` (tag + digest pinned — no GHCR package, no pull secret either); the shared `radar-app` ServiceAccount has no image pull secret | `10-rbac.yaml` |
+| **Registry pull** | `radar-api` and `radar-ui` use public GHCR packages; `radar-obscura` uses the upstream public Docker Hub image pinned by digest. No workload requires a registry pull Secret. | `10-rbac.yaml` |
 | **Auth** | OIDC **relying party** to the shared sentropic IdP (`auth.sent-tech.ca`) | sentropic `35-auth-idp.yaml`, `60-ingress.yaml`, and the RP recipe `apps/auth-idp/RP_SESSION_GLUE.md` |
 | **Public ingress / TLS** | Traefik Ingress on `immo.sent-tech.ca`, cert-manager `letsencrypt-prod` (DNS-01) | sentropic `60-ingress.yaml` |
 | **UI delivery** | nginx-served Svelte SPA that proxies `/api` → api (same-origin) | sentropic `40-ui.yaml` (nginx fans out `/api`) |
@@ -102,7 +102,7 @@ KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-start \
   OBJECT_STORAGE_INVENTORY_CONFIRM=1 ENV=preprod
 ```
 | `kustomization.yaml` | bundles the resources; stamps the `sentropic` part-of + workspace labels |
-| `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / legacy SCW registry pull (transitional, see `10-rbac.yaml`) |
+| `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / TEM credentials |
 
 ## Auth delegation — radar as an OIDC relying party
 
