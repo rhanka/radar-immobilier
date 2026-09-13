@@ -69,6 +69,8 @@ $RECONCILE_OWNED && $EXECUTE_COPY || ! $RECONCILE_OWNED || \
   die '--reconcile-owned requires --execute-copy'
 $RECONCILE_OWNED && [ -n "$LEDGER" ] || ! $RECONCILE_OWNED || \
   die '--reconcile-owned requires --ledger'
+$RECONCILE_OWNED && [ -n "$FENCE_RECORD" ] || ! $RECONCILE_OWNED || \
+  die '--reconcile-owned requires --fence-record'
 [ "$OPERATION" != delta ] || [ -n "$FENCE_RECORD" ] || \
   die 'delta requires --fence-record'
 
@@ -387,3 +389,109 @@ if [ -n "$EXPECTED_MANIFEST" ]; then
     add_missing_proof 'expected manifest is invalid or lacks complete source provenance'
   fi
 fi
+
+TARGET_MANIFEST="$REPORT_DIR/source-included-manifest.jsonl"
+EXPECTED_SOURCE_CONFLICTS="$REPORT_DIR/expected-source-conflicts.jsonl"
+: >"$EXPECTED_SOURCE_CONFLICTS"
+if [ "$EXPECTED_MANIFEST_DIGEST" != null ]; then
+  TARGET_MANIFEST="$EXPECTED_OBJECTS"
+  jq -cn --slurpfile observed "$REPORT_DIR/source-included-manifest.jsonl" \
+    --slurpfile expected "$EXPECTED_OBJECTS" --argfile contract "$EXPECTED_MANIFEST" \
+    --arg endpoint "$SOURCE_ENDPOINT" --arg region "$SOURCE_REGION" \
+    --arg bucket "$SOURCE_BUCKET" --argjson pathStyle "$SOURCE_PATH_STYLE" '
+    def core: del(.etag,.versionId,.classification,.sources);
+    $observed[] as $item |
+    ($expected | map(select(.key == $item.key)) | first) as $approved |
+    select(($approved == null) or (($approved|core) != ($item|core)) or
+      ([$approved.sources[]? | select(.endpoint == $endpoint and .region == $region and
+        .bucket == $bucket and .pathStyle == $pathStyle)] | length != 1)) |
+    {key:$item.key,reason:"source object or provenance differs from approved union"}' \
+    >"$EXPECTED_SOURCE_CONFLICTS"
+  [ ! -s "$EXPECTED_SOURCE_CONFLICTS" ] || \
+    add_missing_proof 'current source disagrees with the approved union'
+fi
+
+PARITY="$REPORT_DIR/parity.json"
+jq -n --slurpfile expected "$TARGET_MANIFEST" --slurpfile actual "$DESTINATION_MANIFEST" '
+  def core: del(.etag,.versionId,.classification,.sources);
+  def bykey($items;$key): $items | map(select(.key == $key)) | first;
+  {missing:[$expected[] | select(bykey($actual;.key) == null) | .key],
+   extra:[$actual[] | select(bykey($expected;.key) == null) | .key],
+   conflicting:[$expected[] as $want | bykey($actual;$want.key) as $got |
+     select($got != null and (($want|core) != ($got|core))) | $want.key],
+   matching:[$expected[] as $want | bykey($actual;$want.key) as $got |
+     select($got != null and (($want|core) == ($got|core))) | $want.key]}' \
+  >"$PARITY"
+
+FENCE_EVIDENCE_DIGEST=null
+if [ -n "$FENCE_RECORD" ]; then
+  if [ -r "$FENCE_RECORD" ] && [ -s "$FENCE_RECORD" ]; then
+    FENCE_EVIDENCE_DIGEST="$(sha256sum "$FENCE_RECORD" | awk '{print $1}')"
+  else
+    add_missing_proof 'fence record is unreadable or empty'
+  fi
+fi
+
+array_json() { printf '%s\n' "$@" | jq -Rsc 'split("\n") | map(select(length > 0))'; }
+PREFIX_JSON="$(array_json "${PREFIXES[@]}")"
+EXCLUDE_PREFIX_JSON="$(array_json "${EXCLUDE_PREFIXES[@]}")"
+MISSING_PROOF_JSON="$(array_json "${MISSING_PROOF[@]}")"
+count_lines() { jq -s 'length' "$1"; }
+sum_bytes() { jq -s 'map(.size) | add // 0' "$1"; }
+SOURCE_COUNT="$(count_lines "$SOURCE_MANIFEST")"
+DESTINATION_COUNT="$(count_lines "$DESTINATION_MANIFEST")"
+FAILURE_COUNT="$(count_lines "$REPORT_DIR/failures.jsonl")"
+MISSING_COUNT="$(jq '.missing | length' "$PARITY")"
+EXTRA_COUNT="$(jq '.extra | length' "$PARITY")"
+CONFLICT_COUNT="$(jq '.conflicting | length' "$PARITY")"
+EXPECTED_SOURCE_CONFLICT_COUNT="$(count_lines "$EXPECTED_SOURCE_CONFLICTS")"
+CUTOVER_READY=false
+if [ "$OPERATION" = delta ] && [ "$FAILURE_COUNT" -eq 0 ] &&
+  [ "$(jq 'length' <<<"$MISSING_PROOF_JSON")" -eq 0 ] &&
+  [ "$MISSING_COUNT" -eq 0 ] && [ "$EXTRA_COUNT" -eq 0 ] &&
+  [ "$CONFLICT_COUNT" -eq 0 ] && [ "$EXPECTED_SOURCE_CONFLICT_COUNT" -eq 0 ]; then
+  CUTOVER_READY=true
+fi
+
+jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane "$PLANE" \
+  --arg se "$SOURCE_ENDPOINT" --arg sr "$SOURCE_REGION" --arg sb "$SOURCE_BUCKET" \
+  --argjson sp "$SOURCE_PATH_STYLE" --arg sf "$SOURCE_IDENTITY_FINGERPRINT" \
+  --arg de "$DESTINATION_ENDPOINT" --arg dr "$DESTINATION_REGION" \
+  --arg db "$DESTINATION_BUCKET" --argjson dp "$DESTINATION_PATH_STYLE" \
+  --arg df "$DESTINATION_IDENTITY_FINGERPRINT" --argjson prefixes "$PREFIX_JSON" \
+  --argjson exclusions "$EXCLUDE_PREFIX_JSON" --argjson missingProof "$MISSING_PROOF_JSON" \
+  --arg expectedDigest "$EXPECTED_MANIFEST_DIGEST" --arg fenceDigest "$FENCE_EVIDENCE_DIGEST" \
+  --argjson executeCopy "$EXECUTE_COPY" --argjson reconcileOwned "$RECONCILE_OWNED" \
+  --argjson concurrency "$CONCURRENCY" --argjson retries "$RETRIES" \
+  --argjson maxFailures "$MAX_FAILURES" --argjson maxObjectBytes "$MAX_OBJECT_BYTES" \
+  --argjson sourceCount "$SOURCE_COUNT" --argjson destinationCount "$DESTINATION_COUNT" \
+  --argjson sourceBytes "$(sum_bytes "$SOURCE_MANIFEST")" \
+  --argjson destinationBytes "$(sum_bytes "$DESTINATION_MANIFEST")" \
+  --argjson failures "$FAILURE_COUNT" --argjson expectedSourceConflicts "$EXPECTED_SOURCE_CONFLICT_COUNT" \
+  --argjson parity "$(cat "$PARITY")" --argjson cutoverReady "$CUTOVER_READY" '
+  {operation:$operation,environment:$environment,plane:$plane,executeCopy:$executeCopy,
+   reconcileOwned:$reconcileOwned,
+   source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,identityFingerprint:$sf},
+   destination:{endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp,identityFingerprint:$df},
+   prefixes:$prefixes,excludePrefixes:$exclusions,
+   limits:{concurrency:$concurrency,retries:$retries,maxFailures:$maxFailures,
+     maxObjectBytes:$maxObjectBytes},
+   counts:{source:$sourceCount,destination:$destinationCount,missing:($parity.missing|length),
+     extra:($parity.extra|length),conflicting:($parity.conflicting|length),
+     matching:($parity.matching|length),failures:$failures,
+     expectedSourceConflicts:$expectedSourceConflicts},
+   bytes:{source:$sourceBytes,destination:$destinationBytes},objects:$parity,
+   missingProof:$missingProof,expectedManifestDigest:
+     (if $expectedDigest == "null" then null else $expectedDigest end),
+   fenceEvidenceDigest:(if $fenceDigest == "null" then null else $fenceDigest end),
+   fenceValidated:false,cutoverReady:$cutoverReady}' >"$REPORT_DIR/summary.json"
+
+STATUS=0
+[ "$FAILURE_COUNT" -eq 0 ] && [ "$(jq 'length' <<<"$MISSING_PROOF_JSON")" -eq 0 ] || STATUS=1
+[ "$EXTRA_COUNT" -eq 0 ] && [ "$CONFLICT_COUNT" -eq 0 ] &&
+  [ "$EXPECTED_SOURCE_CONFLICT_COUNT" -eq 0 ] || STATUS=1
+case "$OPERATION" in
+  verify|delta) [ "$MISSING_COUNT" -eq 0 ] || STATUS=1 ;;
+  copy) $EXECUTE_COPY && [ "$MISSING_COUNT" -ne 0 ] && STATUS=1 ;;
+esac
+exit "$STATUS"
