@@ -411,10 +411,14 @@ if [ -n "$FENCE_RECORD" ]; then
   fi
 fi
 CHECKPOINT_RESUME_REQUIRED=false
+CHECKPOINT_TOOL_COMPLETE=false CHECKPOINT_FINAL_DIGEST=null
 if $CHECKPOINT_REQUESTED; then
   source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/object-storage-checkpoint.sh"
   CHECKPOINT_RUN_STARTED_EPOCH="$(date +%s)"
   if $RESUME; then
+    if [ "$FENCE_EVIDENCE_DIGEST" != null ]; then
+      checkpoint_validate_phase provisional null
+    fi
     checkpoint_load_index source "$WORK_DIR/source-checkpoint-preflight.jsonl"
     checkpoint_validate_bodies source
     checkpoint_load_index destination "$WORK_DIR/destination-checkpoint-preflight.jsonl"
@@ -456,6 +460,13 @@ inventory_side destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST" && \
   DESTINATION_INVENTORY_COMPLETE=true
 if $CHECKPOINT_REQUESTED && $SOURCE_INVENTORY_COMPLETE && $DESTINATION_INVENTORY_COMPLETE; then
   checkpoint_write_progress destination false true
+  if [ "$FENCE_EVIDENCE_DIGEST" != null ]; then
+    if checkpoint_finalize; then
+      CHECKPOINT_TOOL_COMPLETE=true
+    else
+      add_missing_proof 'fenced checkpoint differs from provisional whole-bucket evidence'
+    fi
+  fi
 fi
 jq -c 'select(.classification == "included")' "$SOURCE_MANIFEST" \
   >"$REPORT_DIR/source-included-manifest.jsonl"
@@ -846,6 +857,9 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
   --argjson concurrency "$CONCURRENCY" --argjson retries "$RETRIES" \
   --argjson maxFailures "$MAX_FAILURES" --argjson maxObjectBytes "$MAX_OBJECT_BYTES" \
   --argjson resumeRequired "$CHECKPOINT_RESUME_REQUIRED" \
+  --argjson checkpointEnabled "$CHECKPOINT_REQUESTED" \
+  --argjson checkpointComplete "$CHECKPOINT_TOOL_COMPLETE" \
+  --arg checkpointDigest "$CHECKPOINT_FINAL_DIGEST" \
   --argjson sourceCount "$SOURCE_COUNT" --argjson destinationCount "$DESTINATION_COUNT" \
   --argjson sourceBytes "$(sum_bytes "$SOURCE_MANIFEST")" \
   --argjson destinationBytes "$(sum_bytes "$DESTINATION_MANIFEST")" \
@@ -853,6 +867,8 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
   --argjson parity "$(cat "$PARITY")" --argjson cutoverReady "$CUTOVER_READY" '
   {operation:$operation,environment:$environment,plane:$plane,executeCopy:$executeCopy,
    resumeRequired:$resumeRequired,
+   inventoryCheckpoint:{enabled:$checkpointEnabled,toolComplete:$checkpointComplete,
+     proofDigest:(if $checkpointDigest=="null" then null else $checkpointDigest end)},
    reconcileOwned:$reconcileOwned,
    source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,identityFingerprint:$sf},
    destination:{endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp,identityFingerprint:$df},

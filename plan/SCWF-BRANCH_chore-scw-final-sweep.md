@@ -94,6 +94,7 @@
     - [x] Bind resumable checkpoints to a canonical credential-free configuration digest.
     - [x] Commit provisional root pages and resume with exclusive `StartAfter` boundaries.
     - [x] Commit body shards atomically and resume only missing object evidence.
+    - [x] Finalize stable provisional and resumable fenced chains without validation overclaim.
 - [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
 - [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.

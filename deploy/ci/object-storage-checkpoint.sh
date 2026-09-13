@@ -265,9 +265,10 @@ build_manifest_checkpoint() {
 }
 
 checkpoint_phase_summary() {
-  local side="$1" phase="$2" output="$3" dir="$CHECKPOINT_DIR/$phase/$side"
-  local manifest="$dir/manifest.jsonl" tmp="$dir/manifest.jsonl.tmp" index_root body_root
+  local side="$1" phase="$2" output="$3" dir manifest tmp index_root body_root
   local manifest_hash count bytes
+  dir="$CHECKPOINT_DIR/$phase/$side"
+  manifest="$dir/manifest.jsonl"; tmp="$dir/manifest.jsonl.tmp"
   local -a pages=("$dir"/index-page-*.jsonl) indexes=("$dir"/index-receipt-*.json)
   local -a bodies=("$dir"/body-manifest-*.jsonl) body_receipts=("$dir"/body-receipt-*.json)
   [ -e "${pages[0]}" ] && [ "${#pages[@]}" -eq "${#indexes[@]}" ] &&
@@ -294,6 +295,9 @@ checkpoint_validate_phase() {
   checkpoint_load_index destination "$WORK_DIR/$phase-destination-index.jsonl"
   checkpoint_validate_bodies destination
   $CHECKPOINT_TERMINAL || die "$phase destination index has no terminal receipt"
+  checkpoint_phase_summary source "$phase" "$WORK_DIR/$phase-source-validation.json" &&
+    checkpoint_phase_summary destination "$phase" "$WORK_DIR/$phase-destination-validation.json" ||
+    die "$phase body evidence is incomplete"
   CHECKPOINT_PHASE_OVERRIDE="$saved_phase" FENCE_EVIDENCE_DIGEST="$saved_fence"
 }
 
