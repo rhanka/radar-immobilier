@@ -45,6 +45,11 @@
   - [x] Show all four stages inside Immo ownership, the direct deterministic PG feed and atomic canonical projection.
   - [x] Distinguish the deployed paths from E1–E5 target and Geo's geographic contribution.
   - [x] Regenerate Focus HTML; Chromium renders four diagrams with zoom/full-screen/Escape and no desktop/mobile page overflow.
+- [ ] **Lot 5 — Reconcile infrastructure and processing resource identities.**
+  - [ ] Obtain the owner-requested independent Gemini 3.8 High review.
+  - [ ] Map each Immo DB and object-store role to environment-qualified shared identifiers in both diagrams.
+  - [ ] Verify reader/writer arrows against source and whitelisted deployment configuration.
+  - [ ] Reconcile reviewer findings, regenerate Focus and check the final browser rendering.
 
 ## Merge / Close
 - [ ] Local documentation handoff; no production action or branch merge requested.
