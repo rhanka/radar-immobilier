@@ -37,7 +37,7 @@
 - [x] Lot 3b: Fable GO_WITH_CHANGES reconciled (F1 required complete bindings; F2 defer armed refresh-diag; F3/F4 remaining-client visibility); amended first slice released to Sol.
 - [x] Lot 3c: remove unused object-storage credentials from PostgreSQL migration containers.
 - [x] Lot 3d1: require complete graph bindings in projection Jobs.
-- [ ] Lot 3d2: require complete graph bindings in graphify and export Jobs.
+- [x] Lot 3d2: require complete graph bindings in graphify and export Jobs.
 - [ ] Lot 3d3: require complete scrape bindings in manual Jobs.
 - [ ] Lot 3e: retire uncalled SCW mount executables and correct deployment guidance.
 - [ ] Lot 3f: add and pass scoped offline storage-binding regression checks.
