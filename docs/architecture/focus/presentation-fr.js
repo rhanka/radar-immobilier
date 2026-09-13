@@ -1,6 +1,6 @@
 // French presentation of D2; the complete English repository dossier remains embedded.
 export const presentation = [
-`[JUGEMENT] **Aujourd’hui : examiner le dossier, pas choisir ni démarrer.** Le futur arbitrage porte sur l’ordre des travaux : **A** refresh Graphify dans le pod, puis bascule du stockage ; **B** DAG E1–E5 complet avant bascule ; **C** stockage d’abord, poste LLM conservé temporairement.
+`[JUGEMENT] **Aujourd’hui : examiner le dossier et noter votre choix en brouillon, sans démarrer les travaux.** L’arbitrage porte sur l’ordre des travaux : **A** refresh Graphify dans le pod, puis bascule du stockage ; **B** DAG E1–E5 complet avant bascule ; **C** stockage d’abord, poste LLM conservé temporairement. La section **Trois options** propose les cartes sélectionnables, le commentaire et la copie JSON.
 
 [FAIT · demande du propriétaire] Le périmètre est déjà fixé : **toute la chaîne PV → Signal reste Immo**, les travaux i-cond/Graphify doivent être repris, la préprod précède la production, MinIO et les dépendances stockage/images SCW doivent disparaître. **TEM reste jusqu’au remplacement validé.** Aucun de ces points n’est remis au vote.
 
@@ -54,7 +54,7 @@ Le dossier est **incomplet** : inventaire effectif prod, exploitation des creden
 | Retrait sans perte ni writers concurrents | Ta demande + règles | G3/G4 : parité, IAM/writers, restauration | Inventaire, volume, RPO/RTO |
 | Préprod puis prod, TEM conservé | Ta décision | G0–G6 et exclusion explicite TEM | Aucune autorisation de release |
 | Vrai dossier Focus, avis réels | Ta demande | SvelteFlow, sous-flows, sources embarquées, avis Codex/Gemini distincts | Opus indisponible ; pas de consensus |`,
-`[JUGEMENT] **Pas de demande d’approbation à ce stade.** Les remarques ci-dessous servent à compléter le dossier ; elles ne sélectionnent pas un parcours ni ne déclenchent des travaux.
+`[JUGEMENT] **Pas de demande d’approbation à ce stade.** Vous pouvez sélectionner un parcours dans **Trois options**, le commenter et copier les trois options avec votre choix en JSON. Ce brouillon complète le dossier ; il ne ratifie rien et ne déclenche aucun travail.
 
 Le premier critère propriétaire manquant est l’**enveloppe de reprise acceptable** : indisponibilité, perte de données tolérée (RPO), délai de restauration (RTO), durée de rétention. Il faut également clarifier priorité refresh/retrait, durée tolérable du poste LLM, plafond d’effort, fraîcheur/couverture attendues et responsable d’acceptation de chaque contrat.
 
