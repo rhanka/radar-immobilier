@@ -133,3 +133,97 @@ done
 [ -n "$REPORT_DIR" ] || die '--report-dir is required'
 [ ! -e "$REPORT_DIR/summary.json" ] || die 'report directory already contains a summary'
 mkdir -p "$REPORT_DIR" || die 'cannot create report directory'
+
+for command in aws jq sha256sum mktemp; do
+  command -v "$command" >/dev/null 2>&1 || die "$command is required"
+done
+WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/object-storage-migration.XXXXXX")" || \
+  die 'cannot create work directory'
+trap 'rm -rf "$WORK_DIR"' EXIT
+SOURCE_CONFIG="$WORK_DIR/source-aws-config"
+DESTINATION_CONFIG="$WORK_DIR/destination-aws-config"
+write_aws_config() {
+  local file="$1" region="$2" style="$3" addressing=virtual
+  [ "$style" = false ] || addressing=path
+  printf '[default]\nregion = %s\ns3 =\n  addressing_style = %s\n' \
+    "$region" "$addressing" >"$file"
+  chmod 600 "$file"
+}
+write_aws_config "$SOURCE_CONFIG" "$SOURCE_REGION" "$SOURCE_PATH_STYLE"
+write_aws_config "$DESTINATION_CONFIG" "$DESTINATION_REGION" "$DESTINATION_PATH_STYLE"
+
+credential_fingerprint() { printf '%s' "$1" | sha256sum | awk '{print $1}'; }
+SOURCE_IDENTITY_FINGERPRINT="$(credential_fingerprint "$MIGRATION_SOURCE_ACCESS_KEY_ID")"
+DESTINATION_IDENTITY_FINGERPRINT="$(credential_fingerprint "$MIGRATION_DESTINATION_ACCESS_KEY_ID")"
+AWS_COMMON=(--no-cli-pager --no-paginate --output json)
+aws_side() {
+  local side="$1" endpoint region access secret config
+  shift
+  if [ "$side" = source ]; then
+    endpoint="$SOURCE_ENDPOINT"; region="$SOURCE_REGION"
+    access="$MIGRATION_SOURCE_ACCESS_KEY_ID"; secret="$MIGRATION_SOURCE_SECRET_ACCESS_KEY"
+    config="$SOURCE_CONFIG"
+  else
+    endpoint="$DESTINATION_ENDPOINT"; region="$DESTINATION_REGION"
+    access="$MIGRATION_DESTINATION_ACCESS_KEY_ID"
+    secret="$MIGRATION_DESTINATION_SECRET_ACCESS_KEY"; config="$DESTINATION_CONFIG"
+  fi
+  AWS_ACCESS_KEY_ID="$access" AWS_SECRET_ACCESS_KEY="$secret" AWS_SESSION_TOKEN= \
+    AWS_CONFIG_FILE="$config" AWS_EC2_METADATA_DISABLED=true \
+    aws "${AWS_COMMON[@]}" --endpoint-url "$endpoint" --region "$region" s3api "$@"
+}
+
+retry_json() {
+  local output="$1" side="$2" attempt=1
+  shift 2
+  while [ "$attempt" -le "$RETRIES" ]; do
+    if aws_side "$side" "$@" >"$output" 2>"$WORK_DIR/aws-error"; then return 0; fi
+    attempt=$((attempt + 1))
+  done
+  return 1
+}
+
+bucket_for() {
+  if [ "$1" = source ]; then printf '%s' "$SOURCE_BUCKET"; else printf '%s' "$DESTINATION_BUCKET"; fi
+}
+validate_target() {
+  local side="$1" bucket output="$WORK_DIR/$1-head-bucket.json"
+  bucket="$(bucket_for "$side")"
+  retry_json "$output" "$side" head-bucket --bucket "$bucket" || return 1
+}
+
+list_objects() {
+  local side="$1" output="$2" bucket token="" page=0 response next truncated
+  bucket="$(bucket_for "$side")"; : >"$output"
+  while :; do
+    page=$((page + 1)); response="$WORK_DIR/$side-page-$page.json"
+    args=(list-objects-v2 --bucket "$bucket" --max-keys 1000)
+    [ -z "$token" ] || args+=(--continuation-token "$token")
+    retry_json "$response" "$side" "${args[@]}" || return 1
+    jq -ce '.Contents[]? | {key:.Key,size:.Size,etag:(.ETag // "")}' \
+      "$response" >>"$output" || return 1
+    truncated="$(jq -r '.IsTruncated // false' "$response")"
+    [ "$truncated" = true ] || break
+    next="$(jq -r '.NextContinuationToken // empty' "$response")"
+    [ -n "$next" ] || return 1
+    token="$next"
+  done
+  printf '%s\n' "$page" >"$REPORT_DIR/$side-pages.txt"
+}
+
+matches_any() {
+  local key="$1" prefix
+  shift
+  for prefix in "$@"; do [[ "$key" == "$prefix"* ]] && return 0; done
+  return 1
+}
+classify_key() {
+  local key="$1"
+  if matches_any "$key" "${PREFIXES[@]}"; then
+    printf included
+  elif matches_any "$key" "${EXCLUDE_PREFIXES[@]}"; then
+    printf excluded
+  else
+    printf unclassified
+  fi
+}
