@@ -304,9 +304,18 @@ observe-scheduled-prod: live-ready-prod
 	    -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.ownerReferences[0].name}{"\t"}{.metadata.creationTimestamp}{"\n"}{end}' \
 	    | awk '$$2 == "radar-refresh-pv" { print }' | sort -k3 | tail -1 | cut -f1)"; \
 	  test -n "$$job" || { echo "production scheduled Job owner reference not found" >&2; exit 1; }; \
-	  $(KP) wait --for=condition=complete "job/$$job" --timeout=1200s; \
+	  terminal=""; \
+	  for attempt in $$(seq 1 240); do \
+	    complete="$$($(KP) get "job/$$job" -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}')"; \
+	    failed="$$($(KP) get "job/$$job" -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}')"; \
+	    if [ "$$complete" = "True" ]; then terminal=complete; break; fi; \
+	    if [ "$$failed" = "True" ]; then terminal=failed; break; fi; \
+	    sleep 5; \
+	  done; \
 	  $(KP) get "job/$$job" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,IMAGE:.spec.template.spec.containers[0].image,START:.status.startTime,END:.status.completionTime; \
-	  $(KP) logs "job/$$job" --all-containers=true
+	  $(KP) logs "job/$$job" --all-containers=true; \
+	  test "$$terminal" = complete \
+	    || { echo "production scheduled Job did not complete successfully" >&2; exit 1; }
 
 .PHONY: status-prod logs-prod
 status-prod: guard-prod
