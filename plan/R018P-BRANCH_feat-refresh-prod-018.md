@@ -38,11 +38,11 @@
   - [x] Define one active causal CronJob, two suspended legacy CronJobs, the keyring PVC, dedicated OVH DOCS credentials, and no storage fallback in the production overlay.
   - [x] Add an exact-image render gate that rejects every SCW, MinIO, generic credential, duplicate schedule, or missing keyring reference.
 - [ ] **Lot 1 — Make-only production controls**
-  - [ ] Add namespace/API-server guards, read-only inspection, server dry-run, seed, apply, scheduled observation, status, logs, and rollback targets.
+  - [x] Add namespace/API-server guards, read-only inspection, server dry-run, seed, apply, scheduled observation, status, logs, and rollback targets.
   - [x] Gate render and server dry-run on exact OVH RAW/DOCS coordinates, dedicated credentials, MinIO absence, and zero active storage migration Jobs.
   - [x] Add explicit-confirmation seed/apply/rollback controls that copy the accepted preproduction encrypted account route internally without exposing Secret data.
-  - [ ] Require explicit production confirmation and exact immutable image on every mutating target.
-  - [ ] Fail closed unless OVH DOCS coordinates, dedicated scrape credentials, keyring/runtime resources, MinIO absence, and zero active storage migration Jobs are proved.
+  - [x] Require explicit production confirmation and exact immutable image on every mutating target.
+  - [x] Fail closed unless OVH DOCS coordinates, dedicated scrape credentials, keyring/runtime resources, MinIO absence, and zero active storage migration Jobs are proved.
 - [ ] **Lot 2 — Production activation and acceptance**
   - [ ] Rebase onto the merged T2 transition and rerun offline gates.
   - [ ] Seed the already-enrolled account route without per-token API keys.

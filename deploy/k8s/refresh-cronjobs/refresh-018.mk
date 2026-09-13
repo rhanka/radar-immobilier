@@ -252,6 +252,57 @@ suspend-prod: guard-prod
 	  $(KP) patch cronjob "$$cronjob" --type=merge -p '{"spec":{"suspend":true}}' >/dev/null; \
 	done
 
+.PHONY: live-ready-prod
+live-ready-prod: storage-ready-prod runtime-ready-prod
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.suspend}')" = "false"
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.schedule}')" = "17 5 * * *"
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')" = "$(APPROVED_IMAGE)"
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].env[?(@.name=="REFRESH_PROVIDER")].value}')" = "openai"
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].env[?(@.name=="REFRESH_MODEL")].value}')" = "gpt-5.6-luna"
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].env[?(@.name=="REFRESH_REASONING_EFFORT")].value}')" = "high"
+	@test "$$($(KP) get cronjob radar-refresh-scrape -o jsonpath='{.spec.suspend}')" = "true"
+	@test "$$($(KP) get cronjob radar-refresh-projection -o jsonpath='{.spec.suspend}')" = "true"
+	@phase="$$( $(KP) get pvc radar-refresh-keyring -o jsonpath='{.status.phase}' )"; \
+	  test "$$phase" = "Pending" -o "$$phase" = "Bound" \
+	    || { echo "production keyring PVC is unavailable" >&2; exit 1; }
+
+.PHONY: observe-scheduled-prod
+observe-scheduled-prod: live-ready-prod
+	@test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }
+	@old_schedule="$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.schedule}')"; \
+	  before="$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.status.lastScheduleTime}')"; \
+	  restore() { $(KP) patch cronjob radar-refresh-pv --type=merge \
+	    -p "{\"spec\":{\"schedule\":\"$$old_schedule\"}}" >/dev/null; }; \
+	  trap restore EXIT; \
+	  $(KP) patch cronjob radar-refresh-pv --type=merge \
+	    -p '{"spec":{"schedule":"* * * * *"}}' >/dev/null; \
+	  current=""; \
+	  for attempt in $$(seq 1 24); do \
+	    current="$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.status.lastScheduleTime}')"; \
+	    test -n "$$current" -a "$$current" != "$$before" && break; \
+	    sleep 5; \
+	  done; \
+	  test -n "$$current" -a "$$current" != "$$before" \
+	    || { echo "production CronJob controller did not schedule within 120 seconds" >&2; exit 1; }; \
+	  if ! restore; then echo "failed to restore the production daily schedule" >&2; exit 1; fi; \
+	  trap - EXIT; \
+	  job="$$($(KP) get jobs \
+	    -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.ownerReferences[0].name}{"\t"}{.metadata.creationTimestamp}{"\n"}{end}' \
+	    | awk '$$2 == "radar-refresh-pv" { print }' | sort -k3 | tail -1 | cut -f1)"; \
+	  test -n "$$job" || { echo "production scheduled Job owner reference not found" >&2; exit 1; }; \
+	  $(KP) wait --for=condition=complete "job/$$job" --timeout=1200s; \
+	  $(KP) get "job/$$job" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,IMAGE:.spec.template.spec.containers[0].image,START:.status.startTime,END:.status.completionTime; \
+	  $(KP) logs "job/$$job" --all-containers=true
+
+.PHONY: status-prod logs-prod
+status-prod: guard-prod
+	@test -n "$(JOB_NAME)" || { echo "JOB_NAME is required" >&2; exit 1; }
+	@$(KP) get job "$(JOB_NAME)" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,ACTIVE:.status.active,SUCCEEDED:.status.succeeded,FAILED:.status.failed,START:.status.startTime,END:.status.completionTime,IMAGE:.spec.template.spec.containers[0].image
+
+logs-prod: guard-prod
+	@test -n "$(JOB_NAME)" || { echo "JOB_NAME is required" >&2; exit 1; }
+	@$(KP) logs "job/$(JOB_NAME)" --all-containers=true
+
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
 	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }
