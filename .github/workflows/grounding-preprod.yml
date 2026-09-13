@@ -1,18 +1,7 @@
 name: Grounding citations (preprod, one-shot)
 
-# One-shot PREPROD dispatch of the grounding-citation Job (§citations, Lot 2).
-# Mirrors deploy-preprod's auth/gating (KUBE_CONFIG_DATA_PREPROD + PREPROD_CD_ENABLED).
-# MANUAL only. Applies the extraction-owned Job (deploy/k8s/41-grounding-citation-
-# job.yaml, #588) to radar-immobilier-preprod, pinned to the grounding image
-# (radar-grounding) for ONE city, then polls fail-loud.
-#
-# CONTRACT with #588 (routed to extraction): the Job uses the logical image
-# `radar-grounding` (rewritten by the grounding-preprod overlay), reads env
-# `CITY` (value `${CITY}`, envsubst'd here), and lands in radar-immobilier-preprod.
-#
-# PREREQ (separate, owner/extraction+i-infra, gated D-01): the baseline seed
-# (graph/<city>/latest.json on the preprod MinIO) must exist for the grounding to
-# have nodes to ground — NOT provisioned by this workflow.
+# Permanently disarmed during the OVH cutover. The retired workflow is deleted
+# in the following atomic commit.
 
 on:
   workflow_dispatch:
@@ -36,7 +25,7 @@ env:
 jobs:
   grounding-preprod:
     name: Ground ${{ inputs.city }} (preprod)
-    if: vars.PREPROD_CD_ENABLED == 'true'
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:

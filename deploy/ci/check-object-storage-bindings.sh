@@ -84,6 +84,11 @@ done
 grep -Eiq 'refresh-diag|REFRESH_DIAG_ENABLED|radar-refresh-diag' \
   "$ROOT/.github/workflows/build-push-images.yml" &&
   fail '.github/workflows/build-push-images.yml retains the legacy refresh diagnostic'
+grep -Eiq 'radar-grounding|deploy/grounding' "$ROOT/.github/workflows/build-push-images.yml" &&
+  fail '.github/workflows/build-push-images.yml still builds the retired grounding image'
+for rel in .github/workflows/grounding-preprod.yml .github/workflows/grounding-publish-prod.yml; do
+  grep -Fq 'if: ${{ false }}' "$ROOT/$rel" || fail "$rel is not fail-closed"
+done
 for rel in deploy/k8s/refresh-diag/diag-refresh-job.yaml deploy/k8s/refresh-diag/kustomization.yaml; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
 done
