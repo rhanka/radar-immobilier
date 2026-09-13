@@ -15,6 +15,7 @@
 - [x] Read main, recent retirement branches and the Geo/poc-k8s handoffs; do not change other worktrees or repositories.
 - [x] Forbidden: root `Makefile`, `docker-compose*.yml`, `rules/**`, entrypoints, `.track/**`, other plans, application/infra/workflow edits during the audit phase.
 - [x] SCWF-EX1: extend this audit branch to the exact implementation paths in `docs/reviews/scw-final/build-design.md`, after independent review reconciliation; impact is branch-local manifests/scripts/tests, rollback by reverting the relevant atomic commits, no runtime changes by builders.
+- [x] SCWF-EX2: authorize only the MinIO cutover design now; after conductor release, the exact second-slice paths are those frozen in `docs/reviews/scw-final/minio-cutover-design.md`, with refresh-overlay scope conditional on avoiding duplicate T1 work; rollback is per atomic source commit, never a live reverse-copy.
 - [x] Conditional: legacy grounding retirement requires T1 canonical writer acceptance; resource/data deletion requires parity, recovery and zero-consumer proof. These do not block independent T2 code preparation.
 
 ## Feedback Loop
@@ -45,7 +46,12 @@
 - [x] Lot 3f2: guard retained local-development, diagnostic, and TEM bindings.
 - [x] Lot 3g1: record the first-slice checkpoint and explicit remaining-client list.
 - [ ] Lot 3g2: run final offline gates and complete independent post-build review.
-- [ ] Lot 4: after T1, conductor verifies copy/parity/fencing/recovery and preprod then production cutovers.
+- [x] Lot 3h1: freeze the implementation-ready RAW/DOCS/GRAPH client matrix, migration-tool contract, and second-slice paths.
+- [ ] Lot 3h2: conductor reconciles the design, obtains independent review, and explicitly releases source edits.
+- [ ] Lot 3h3: build and hermetically test the dry-run-default, non-destructive migration/proof tool.
+- [ ] Lot 3h4: inventory/provision/copy/fence and bind preprod RAW/DOCS; preserve the separate GRAPH plane.
+- [ ] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
+- [ ] Lot 4: conductor verifies copy/parity/fencing/recovery and preprod then production cutovers; T1 gates only legacy grounding retirement.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
 
 Audit checkpoint: inventory, file map, and acceptance gates are recorded in
