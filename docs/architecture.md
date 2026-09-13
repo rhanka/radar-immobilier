@@ -79,36 +79,41 @@ Authentication is application-level OIDC authorization code + PKCE. After the br
 
 ## 2. Immo: the four stages from municipal minutes to signals
 
-The four-stage decomposition is **collect → parse/exploit → graphify/ground → project**. It follows the committed refresh study and the `i-cond` orchestration record. Those older records explain the processing boundary; current manifests and live reads take precedence for endpoints and activation.
+The four-stage decomposition is **collect → parse/exploit → graphify/ground → project**. **All four stages belong to Immo**, including its workstation-run Graphify/grounding tools, corpus and graph stores. Kubernetes, the workstation and external S3 are execution/storage locations, not a transfer of ownership to Geo. The Geo API is a separate geographic input; it does not own this PV-to-signal chain.
+
+This is the **as-is** view, not the full-auto target. The older refresh study explains the four-stage baseline; the September 5 consolidated design describes its evolution (mapping below). Current code/manifests and live reads take precedence for deployed wiring.
 
 ```mermaid
 flowchart TB
   websites["Municipal websites<br/>PV PDFs / HTML / public notices"]
-  subgraph deterministic["Kubernetes · radar-immobilier or radar-immobilier-preprod"]
+  provider["LLM provider<br/>Inference may be remote; orchestration is local"]
+  subgraph immo["IMMO · PV to signals"]
+  subgraph deterministic["Kubernetes · Immo tenants"]
     scrape["1 · COLLECT<br/>worker-live → adapters → recueil<br/>URL discovery, HTTP fetch, SHA-256 / CAS"]
     parse["2 · PARSE + EXPLOIT<br/>pdftotext / deterministic detection<br/>extracts + project-state"]
-    project["4 · PROJECT<br/>project-graph-from-s3 → upsertGraph<br/>Idempotent graph-to-PostgreSQL projection"]
+    project["4 · PROJECT CANONICAL GRAPH<br/>project-graph-from-s3 → upsertGraphAtomic<br/>Guarded, atomic projection per city"]
     pub["Grounding publication Job<br/>PUBLISH-ONLY · verify hash / backup / publish<br/>No LLM inside this pod"]
-    geoimport["Geo import / reference resolution<br/>zone_versions + lot_versions<br/>geo_resolutions + geo_unresolved"]
+    geoimport["IMMO adapter / reference resolution<br/>zone_versions + lot_versions<br/>geo_resolutions + geo_unresolved"]
     pg[("PostgreSQL / PostGIS<br/>graph_nodes, graph_edges, application state")]
     api["radar-api<br/>Signal filtering / scoring / evidence / collaboration"]
     ui["radar-ui<br/>Signals, opportunities, sources, map, PDF citations"]
   end
-  subgraph workstation["WORKSTATION · operator-triggered processing today"]
+  subgraph workstation["Workstation · Immo tools"]
     llm["3 · GRAPHIFY + GROUND CITATIONS<br/>Agent / CLI + LLM access or llm-mesh<br/>Nodes, edges, stage, references, verbatim citations"]
     gate["Schema / provenance / non-regression gates<br/>Missing citation remains missing"]
     llm --> gate
   end
-  provider["LLM provider<br/>Inference may be remote; orchestration is local"]
-  corpus[("Corpus store<br/>raw/ + metadata, parsed/, runs/, ontology/")]
-  candidate[("Staged candidates<br/>candidats/CITY/latest.json + SHA-256")]
-  graphstore[("Canonical graph store<br/>graph/CITY/latest.json + history/")]
+  corpus[("IMMO corpus store<br/>raw/ + metadata, parsed/, runs/, ontology/")]
+  candidate[("IMMO staged candidates<br/>candidats/CITY/latest.json + SHA-256")]
+  graphstore[("IMMO canonical graph store<br/>graph/CITY/latest.json + history/")]
+  end
   geosvc["Geo OGC API<br/>Zones / lots / regulations / constraints"]
   websites --> scrape
   scrape --> corpus
   scrape --> parse
   corpus --> parse
   parse --> corpus
+  parse -->|"Current direct deterministic feed<br/>projectStateToGraph → upsertGraph<br/>when DB credentials are wired"| pg
   corpus --> llm
   llm <-->|"Model calls"| provider
   gate -->|"Direct validated graph publication path"| graphstore
@@ -129,9 +134,24 @@ flowchart TB
 | Stage | Actual implementation | Output / boundary | Execution today |
 | --- | --- | --- | --- |
 | 1. Collect | `worker-live.ts`, `recueil.ts`, municipal adapters | Content-addressed raw documents, sidecar metadata, run manifests | In-cluster Job / scrape CronJob |
-| 2. Parse/exploit | `exploit-scrape.ts`, `pdftotext`, deterministic zoning detection | `parsed/` and `ontology/` artifacts; deterministic extraction is distinct from the LLM graph | Same scrape worker with `LIVE_SCRAPE_EXPLOIT=1` |
+| 2. Parse/exploit | `exploit-scrape.ts`, `pdftotext`, deterministic zoning detection, `exploitation.ts` | `parsed/` and `ontology/`; optional **direct additive PG feed** via `projectStateToGraph → upsertGraph`, distinct from the canonical graph path | Same scrape worker with `LIVE_SCRAPE_EXPLOIT=1`; DB feed when explicitly wired |
 | 3. Graphify/ground | `tools/graphify-v23/`, `tools/grounding/`, ontology contracts | Versioned graph with Signal/DesignationEvent nodes, stage/date, source/page/citation; staged candidates for publish-only path | Workstation agent/CLI, with provider access; not a nightly in-cluster LLM service |
-| 4. Project | `project-graph-from-s3.ts` and graph repository | Graph → PostgreSQL; consumed by API and UI | Projection Job / CronJob; does not execute stages 1–3 |
+| 4. Project | `project-graph-from-s3.ts` and `upsertGraphAtomic` | Canonical graph → PostgreSQL, with per-city replacement and non-regression gates | Projection Job / CronJob; does not execute stages 1–3 |
+
+**Two current PG paths, not one serial chain:** deterministic exploitation can already populate graph nodes without the workstation LLM. At the follow-up live inspection on 2026-09-13, `radar-refresh-scrape` had `LIVE_SCRAPE_EXPLOIT=1` and a `POSTGRES_PASSWORD` Secret reference (reference only inspected, not its value). This confirms direct-feed wiring, not the success of every run. The dedicated projection separately reads the canonical S3 graph. The workstation remains required for the LLM-derived extraction/citation path, not for every deterministic signal.
+
+**As-is versus the documented refactoring target** ([consolidated design, September 5](https://github.com/rhanka/radar-immobilier/blob/6296396fed804cf9a3d4a6e031c452af57313357/docs/design/PIPELINE_FULLAUTO_CLUSTER_MESH.md), §§3/5/8/10):
+
+| Four-stage baseline, owned by Immo | Full-auto target, not a deployed-state claim |
+| --- | --- |
+| 1 Collect + 2 Parse/exploit | **E1** deterministic acquisition produces a detection layer on S3 |
+| 3 Graphify/ground on workstation | **E2** LLM detection + **E3** grounding produce separate contributions, with operated LLM execution replacing the workstation dependency |
+| Several current canonical publishers | **E4** deterministic merge of detection + grounding + geographic contributions, through the guarded canonical writer |
+| 4 Canonical projection + separate direct PG feed | **E5** `upsertGraphAtomic` becomes the sole PG writer; the interim direct feed is retired only after the validated cutover |
+
+The target is explicitly an **Immo chain E1–E5 with Geo integration branches**, not a handoff of PV acquisition to Geo. Geo owns geographic acquisition, spatial joins and serving; the **Immo geo-to-graph adapter** consumes those contracts and emits the Immo geographic contribution. Geo never writes Immo `graph_nodes`. Moving inference/orchestration into a shared runtime does not transfer Immo's business pipeline to Geo.
+
+Graphify extraction, evidence and grounding work remains relevant. **Its publication integration is not unchanged:** the full-auto design folds current direct canonical publishers into layer producers plus one merge/writer. The recent `feat/graphify-v23-cas-ingest` work at `73172214` remains in Immo `tools/graphify-v23/**` and its branch plan; it adds immutable CAS ingestion, bounded semantic extraction and candidate gates, not a Geo ownership transfer. That branch's plan still lists full qualification as pending; its existence is not proof of full-auto deployment.
 
 Grounding is an enrichment of stage 3, not a replacement for graph generation. Its publish-only Kubernetes Job verifies the staged content hash, preserves history and publishes one city. The committed grounding README names Sonnet; newer job commentary names a Codex/llm-mesh run. A single current model cannot be inferred from those conflicting records, so the diagram identifies the runtime boundary rather than asserting one provider/model.
 
@@ -170,7 +190,7 @@ Schedules are independent timers, not a dependency-aware workflow. In particular
 
 ## 4. Geo: sources, acquisition, joins and serving
 
-Geo owns reusable geographic acquisition and products. Immo also has its own PV acquisition and graph pipeline: the two PV paths overlap in source material, but they are not evidence of a fully unified pipeline. Geo PV records must not be equated with Immo Signal nodes.
+Geo owns reusable geographic acquisition and products. Immo also has its own PV acquisition and graph pipeline: the two PV paths overlap in source material, but they are not evidence of a fully unified pipeline. **The Geo PV path below is parallel, not stage 1 of the Immo pipeline above.** Geo PV records must not be equated with Immo Signal nodes.
 
 ```mermaid
 flowchart TB
@@ -251,7 +271,7 @@ flowchart LR
   projection --> appdata["Application data / visible signals"]
 ```
 
-The planned evolution moves LLM graph processing to an operated worker/queue with durable progress, quota control, provenance and retries. It is shown here as **PLANNED**, not an existing Kubernetes LLM deployment. Code promotion, data refresh and production-to-preprod copying are three different operations.
+The September full-auto design selects `@sentropic/s3-dag` reconciliation with durable progress, quota control, provenance and retries; it also requires the E4 merge / E5 sole-writer transition described in §2. LLM execution moves off the workstation in that **PLANNED** architecture; no deployed LLM gateway or completed cutover is asserted here. The older June workspace-data/queue proposal is historical context, not the current target. Code promotion, data refresh and production-to-preprod copying are three different operations.
 
 ## 6. Questions for the architecture walkthrough
 
@@ -267,6 +287,8 @@ The planned evolution moves LLM graph processing to an operated worker/queue wit
 | `geo` | `f68d8ddf` (`origin/main`, 2026-09-12) | Current serving overlays, S3 target, joins and acquisition code; local root HEAD was older |
 | `poc-k8s` | `03acdfd` (local HEAD, 2026-09-05) | OVH runbook, shared platform and tenant ownership; its local remote-tracking ref was older |
 | `i-cond` | Local `.lanes/conductor/docs/PLAN_PIPELINE_DONNEES_PREPROD.md`, dated 2026-09-03 | Operational context, workstation requirement and publish-only boundary; historical status superseded where live evidence exists |
+| Immo full-auto design | `6296396fed804cf9a3d4a6e031c452af57313357` (`origin/design/fullauto-pipeline-consolidated`, September 5) | Follow-up ownership/transition audit: E1–E5, geographic seam, interim feed and future sole writer; design, not deployed state |
+| Immo Graphify CAS work | `73172214a369ebfba0aab530dadde873341baa4a` (`feat/graphify-v23-cas-ingest`, September 11) | Follow-up branch inspection against its pre-change parent `8e18f01b`; changes remain in Immo tools and plan; qualification not inferred |
 
 Primary Immo references: [refresh study](study/industrialisation-refresh-suivi.md), [four-stage pipeline study](spec/brainstorm-industrialisation-refresh-data.md), [worker](../api/src/scripts/worker-live.ts), [graph projection](../api/src/scripts/project-graph-from-s3.ts), [grounding tools](../tools/grounding/README.md), [publish-only Job](../deploy/k8s/41-grounding-citation-job.yaml), [OVH preprod refresh overlay](../deploy/k8s/refresh-cronjobs/kustomization.yaml), [prod refresh overlay](../deploy/k8s/refresh-cronjobs-prod/kustomization.yaml), [nginx preprod](../deploy/overlays/preprod/nginx/default.conf), [release workflow](../.github/workflows/build-push-images.yml), [Geo mapper](../api/src/services/geo/run-geo-mapper.ts).
 
