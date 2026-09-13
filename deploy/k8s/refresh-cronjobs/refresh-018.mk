@@ -103,9 +103,9 @@ seed-preprod: guard-preprod
 	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
 	@test -n "$(REFRESH_OWNER_SCOPE_REF)" || { echo "REFRESH_OWNER_SCOPE_REF is required" >&2; exit 1; }
-	@$(K) create secret generic radar-refresh-keyring-bootstrap \
+	@set -o pipefail; $(K) create secret generic radar-refresh-keyring-bootstrap \
 	  --from-file="$(KEYRING_SOURCE_DIR)" --dry-run=client -o yaml | $(K) apply -f -
-	@$(K) create secret generic radar-refresh-runtime \
+	@set -o pipefail; $(K) create secret generic radar-refresh-runtime \
 	  --from-literal=REFRESH_PRINCIPAL_REF=radar-refresh-pv-preprod \
 	  --from-literal=REFRESH_OWNER_SCOPE_REF="$(REFRESH_OWNER_SCOPE_REF)" \
 	  --dry-run=client -o yaml | $(K) apply -f -
@@ -113,13 +113,13 @@ seed-preprod: guard-preprod
 .PHONY: apply-preprod
 apply-preprod: guard-preprod
 	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }
-	@tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
+	@set -e; tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
 	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-preprod IMAGE_REF="$(IMAGE_REF)" RENDER_OUT="$$tmp" ENV=preprod; \
 	  $(K) apply -f "$$tmp"
 
 .PHONY: validate-preprod
 validate-preprod: guard-preprod
-	@tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
+	@set -e; tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
 	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-preprod IMAGE_REF="$(IMAGE_REF)" RENDER_OUT="$$tmp" ENV=preprod; \
 	  $(K) apply --dry-run=server -f "$$tmp" >/dev/null
 
@@ -132,9 +132,10 @@ trigger-preprod: guard-preprod
 .PHONY: observe-scheduled-preprod
 observe-scheduled-preprod: guard-preprod
 	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }
-	@before="$$($(K) get cronjob radar-refresh-pv -o jsonpath='{.status.lastScheduleTime}')"; \
+	@old_schedule="$$($(K) get cronjob radar-refresh-pv -o jsonpath='{.spec.schedule}')"; \
+	  before="$$($(K) get cronjob radar-refresh-pv -o jsonpath='{.status.lastScheduleTime}')"; \
 	  restore() { $(K) patch cronjob radar-refresh-pv --type=merge \
-	    -p '{"spec":{"schedule":"17 5 * * *"}}' >/dev/null; }; \
+	    -p "{\"spec\":{\"schedule\":\"$$old_schedule\"}}" >/dev/null; }; \
 	  trap restore EXIT; \
 	  $(K) patch cronjob radar-refresh-pv --type=merge \
 	    -p '{"spec":{"schedule":"* * * * *"}}' >/dev/null; \
