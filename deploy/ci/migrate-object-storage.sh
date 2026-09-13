@@ -15,6 +15,7 @@ Usage: migrate-object-storage.sh <inventory|copy|verify|delta> [options]
   [--reconcile-owned --ledger FILE]
   [--conditional-write-proof FILE]
   [--checkpoint-dir DIR] [--page-size N] [--time-budget-seconds N] [--resume]
+  [--inventory-proof FILE]
   [--concurrency N] [--retries N] [--max-failures N]
   [--max-object-bytes N]
 EOF
@@ -31,6 +32,7 @@ SOURCE_ENDPOINT="" SOURCE_REGION="" SOURCE_BUCKET="" SOURCE_PATH_STYLE=""
 DESTINATION_ENDPOINT="" DESTINATION_REGION="" DESTINATION_BUCKET=""
 DESTINATION_PATH_STYLE="" EXPECTED_MANIFEST="" FENCE_RECORD="" LEDGER=""
 CONDITIONAL_WRITE_PROOF="" CHECKPOINT_DIR="" RESUME=false CHECKPOINT_REQUESTED=false
+INVENTORY_PROOF=""
 PAGE_SIZE=100 TIME_BUDGET_SECONDS=300
 CONCURRENCY=4 RETRIES=3 MAX_FAILURES=20 MAX_OBJECT_BYTES=5000000000
 PREFIXES=() EXCLUDE_PREFIXES=()
@@ -58,6 +60,7 @@ while [ "$#" -gt 0 ]; do
     --page-size) need_value "$@"; PAGE_SIZE="$2"; CHECKPOINT_REQUESTED=true; shift 2 ;;
     --time-budget-seconds) need_value "$@"; TIME_BUDGET_SECONDS="$2"; CHECKPOINT_REQUESTED=true; shift 2 ;;
     --resume) RESUME=true; CHECKPOINT_REQUESTED=true; shift ;;
+    --inventory-proof) need_value "$@"; INVENTORY_PROOF="$2"; shift 2 ;;
     --execute-copy) EXECUTE_COPY=true; shift ;;
     --reconcile-owned) RECONCILE_OWNED=true; shift ;;
     --concurrency) need_value "$@"; CONCURRENCY="$2"; shift 2 ;;
@@ -80,6 +83,9 @@ $CHECKPOINT_REQUESTED && [ "$OPERATION" = inventory ] || ! $CHECKPOINT_REQUESTED
   die 'checkpoint controls are valid only with the inventory operation'
 $CHECKPOINT_REQUESTED && [ -n "$CHECKPOINT_DIR" ] || ! $CHECKPOINT_REQUESTED || \
   die 'checkpoint controls require --checkpoint-dir'
+if [ -n "$INVENTORY_PROOF" ] && { [ "$OPERATION" != copy ] || ! $EXECUTE_COPY; }; then
+  die '--inventory-proof is valid only with --execute-copy'
+fi
 $RESUME && [ -r "$CHECKPOINT_DIR/config.json" ] || ! $RESUME || \
   die '--resume requires an initialized checkpoint'
 $RECONCILE_OWNED && $EXECUTE_COPY || ! $RECONCILE_OWNED || \
@@ -181,6 +187,7 @@ initialize_checkpoint() {
   exclusions="$(jq -cn --args '$ARGS.positional | sort' -- "${EXCLUDE_PREFIXES[@]}")"
   core="$WORK_DIR/checkpoint-config-core.json"; candidate="$WORK_DIR/checkpoint-config.json"
   jq -n --argjson prefixes "$prefixes" --argjson exclusions "$exclusions" \
+    --arg environment "$ENVIRONMENT" --arg plane "$PLANE" \
     --arg se "$SOURCE_ENDPOINT" --arg sr "$SOURCE_REGION" --arg sb "$SOURCE_BUCKET" \
     --argjson sp "$SOURCE_PATH_STYLE" --arg sf "$SOURCE_IDENTITY_FINGERPRINT" \
     --arg de "$DESTINATION_ENDPOINT" --arg dr "$DESTINATION_REGION" \
@@ -188,7 +195,8 @@ initialize_checkpoint() {
     --arg df "$DESTINATION_IDENTITY_FINGERPRINT" --argjson page "$PAGE_SIZE" \
     --argjson retries "$RETRIES" --argjson concurrency "$CONCURRENCY" \
     --argjson failures "$MAX_FAILURES" --argjson bytes "$MAX_OBJECT_BYTES" '
-    {schemaVersion:1,source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,
+    {schemaVersion:1,environment:$environment,plane:$plane,
+      source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,
       identityFingerprint:$sf},destination:{endpoint:$de,region:$dr,bucket:$db,
       pathStyle:$dp,identityFingerprint:$df},classification:{prefixes:$prefixes,
       excludePrefixes:$exclusions},limits:{pageSize:$page,retries:$retries,
@@ -358,7 +366,7 @@ build_manifest() {
        cacheControl:($head[0].CacheControl // null),
        contentDisposition:($head[0].ContentDisposition // null),
        metadata:($head[0].Metadata // {}),tags:(($tags[0].TagSet // []) | sort_by(.Key)),
-       etag:($listed.etag // ""),versionId:($head[0].VersionId // null),
+       etag:($head[0].ETag // $listed.etag // ""),versionId:($head[0].VersionId // null),
        classification:$classification}' >>"$scratch" || return 1
   done <"$listing"
   jq -cs 'sort_by(.key)[]' "$scratch" >"$output" || return 1
@@ -412,8 +420,9 @@ if [ -n "$FENCE_RECORD" ]; then
 fi
 CHECKPOINT_RESUME_REQUIRED=false
 CHECKPOINT_TOOL_COMPLETE=false CHECKPOINT_FINAL_DIGEST=null
+CHECKPOINT_LIBRARY="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/object-storage-checkpoint.sh"
+if $CHECKPOINT_REQUESTED || [ -n "$INVENTORY_PROOF" ]; then source "$CHECKPOINT_LIBRARY"; fi
 if $CHECKPOINT_REQUESTED; then
-  source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/object-storage-checkpoint.sh"
   CHECKPOINT_RUN_STARTED_EPOCH="$(date +%s)"
   if $RESUME; then
     if [ "$FENCE_EVIDENCE_DIGEST" != null ]; then
@@ -429,6 +438,7 @@ SOURCE_LISTING="$WORK_DIR/source-listing.jsonl"
 DESTINATION_LISTING="$WORK_DIR/destination-listing.jsonl"
 SOURCE_MANIFEST="$REPORT_DIR/source-manifest.jsonl"
 DESTINATION_MANIFEST="$REPORT_DIR/destination-manifest.jsonl"
+INVENTORY_PROOF_DIGEST=null INVENTORY_PROOF_ACCEPTED=false
 
 inventory_side() {
   local side="$1" listing="$2" manifest="$3"
@@ -455,9 +465,27 @@ inventory_side() {
 }
 
 SOURCE_INVENTORY_COMPLETE=false DESTINATION_INVENTORY_COMPLETE=false
-inventory_side source "$SOURCE_LISTING" "$SOURCE_MANIFEST" && SOURCE_INVENTORY_COMPLETE=true
-inventory_side destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST" && \
-  DESTINATION_INVENTORY_COMPLETE=true
+if $EXECUTE_COPY; then
+  : >"$SOURCE_MANIFEST"; : >"$DESTINATION_MANIFEST"
+  if [ -z "$INVENTORY_PROOF" ]; then
+    add_missing_proof 'executed copy requires a finalized inventory proof'
+  elif [ "$FENCE_EVIDENCE_DIGEST" = null ]; then
+    add_missing_proof 'executed copy inventory proof requires a readable fence record'
+  elif consume_inventory_proof "$INVENTORY_PROOF"; then
+    INVENTORY_PROOF_ACCEPTED=true
+    if validate_target source && validate_target destination; then
+      SOURCE_INVENTORY_COMPLETE=true DESTINATION_INVENTORY_COMPLETE=true
+    else
+      add_missing_proof 'inventory-proof target access is unavailable'
+    fi
+  else
+    add_missing_proof 'finalized inventory proof is invalid or mismatched'
+  fi
+else
+  inventory_side source "$SOURCE_LISTING" "$SOURCE_MANIFEST" && SOURCE_INVENTORY_COMPLETE=true
+  inventory_side destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST" && \
+    DESTINATION_INVENTORY_COMPLETE=true
+fi
 if $CHECKPOINT_REQUESTED && $SOURCE_INVENTORY_COMPLETE && $DESTINATION_INVENTORY_COMPLETE; then
   checkpoint_write_progress destination false true
   if [ "$FENCE_EVIDENCE_DIGEST" != null ]; then
@@ -658,6 +686,22 @@ copy_missing_objects() {
   run_copy_tasks "$tasks" "$WORK_DIR/copy-results" missing "$REPORT_DIR/copy-results.jsonl"
 }
 
+refresh_destination_keys() {
+  local results="$1" frozen="$WORK_DIR/destination-before-refresh.jsonl"
+  local listing="$WORK_DIR/destination-refresh-listing.jsonl"
+  local refreshed="$WORK_DIR/destination-refreshed.jsonl"
+  cp "$DESTINATION_MANIFEST" "$frozen"
+  jq -cn --slurpfile source "$REPORT_DIR/source-included-manifest.jsonl" \
+    --slurpfile results "$results" '
+    $results[].key as $key | ($source | map(select(.key == $key)) | first) |
+    select(. != null) | {key:.key,size:.size,etag:""}' >"$listing"
+  build_manifest destination "$listing" "$refreshed" || return 1
+  jq -cs --slurpfile updated "$refreshed" '
+    [$updated[].key] as $keys |
+    (map(select(.key as $key | ($keys | index($key) | not))) + $updated) |
+    sort_by(.key)[]' "$frozen" >"$DESTINATION_MANIFEST"
+}
+
 PARITY="$REPORT_DIR/parity.json"
 compute_parity() {
   jq -n --slurpfile expected "$TARGET_MANIFEST" --slurpfile actual "$DESTINATION_MANIFEST" '
@@ -703,8 +747,7 @@ write_copy_ledger() {
 if [ "$OPERATION" = copy ] && $EXECUTE_COPY && ! $RECONCILE_OWNED &&
   proof_is_complete; then
   copy_missing_objects
-  if list_objects destination "$DESTINATION_LISTING" &&
-    build_manifest destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST"; then
+  if refresh_destination_keys "$REPORT_DIR/copy-results.jsonl"; then
     compute_parity
     write_copy_ledger
   else
@@ -761,8 +804,7 @@ reconcile_owned_objects() {
     add_missing_proof 'foreign or independently modified conflicts cannot be reconciled'; return 1; }
   prove_recoverable_priors "$tasks" || return 1
   run_copy_tasks "$tasks" "$WORK_DIR/reconciliation-results" reconcile "$output"
-  list_objects destination "$DESTINATION_LISTING" &&
-    build_manifest destination "$DESTINATION_LISTING" "$DESTINATION_MANIFEST" || {
+  refresh_destination_keys "$output" || {
     add_missing_proof 'post-reconciliation destination evidence is incomplete'; return 1; }
   compute_parity
   jq -cn --slurpfile results "$output" --slurpfile destination "$DESTINATION_MANIFEST" \
@@ -860,6 +902,8 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
   --argjson checkpointEnabled "$CHECKPOINT_REQUESTED" \
   --argjson checkpointComplete "$CHECKPOINT_TOOL_COMPLETE" \
   --arg checkpointDigest "$CHECKPOINT_FINAL_DIGEST" \
+  --argjson inventoryProofAccepted "$INVENTORY_PROOF_ACCEPTED" \
+  --arg inventoryProofDigest "$INVENTORY_PROOF_DIGEST" \
   --argjson sourceCount "$SOURCE_COUNT" --argjson destinationCount "$DESTINATION_COUNT" \
   --argjson sourceBytes "$(sum_bytes "$SOURCE_MANIFEST")" \
   --argjson destinationBytes "$(sum_bytes "$DESTINATION_MANIFEST")" \
@@ -869,6 +913,8 @@ jq -n --arg operation "$OPERATION" --arg environment "$ENVIRONMENT" --arg plane 
    resumeRequired:$resumeRequired,
    inventoryCheckpoint:{enabled:$checkpointEnabled,toolComplete:$checkpointComplete,
      proofDigest:(if $checkpointDigest=="null" then null else $checkpointDigest end)},
+   inventoryProof:{required:$executeCopy,accepted:$inventoryProofAccepted,
+     proofDigest:(if $inventoryProofDigest=="null" then null else $inventoryProofDigest end)},
    reconcileOwned:$reconcileOwned,
    source:{endpoint:$se,region:$sr,bucket:$sb,pathStyle:$sp,identityFingerprint:$sf},
    destination:{endpoint:$de,region:$dr,bucket:$db,pathStyle:$dp,identityFingerprint:$df},
