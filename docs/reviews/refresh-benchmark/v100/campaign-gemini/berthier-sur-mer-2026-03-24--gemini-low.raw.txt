@@ -1,0 +1,474 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "label": "Procès-verbal de la séance extraordinaire du 24 mars 2026 - Berthier-sur-Mer",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL DE LR SÉAruCT EXTRAORDINAIRE DU CONSEIL DE LA\nMUNICIPAL É OT BERTHIER-SUR-MER, LE MARDI 24 MARS 2026,ADIX-NEUF\nHEURES (19h00), SOUS LA pRÉStOTNCE DE CHANTAL GODIN, MAIRESSE."
+        }
+      ],
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "date": "2026-03-24",
+      "municipality": "berthier-sur-mer",
+      "url": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+      "sourceKind": "pv",
+      "format": "pdf"
+    },
+    {
+      "id": "bylaw-369",
+      "label": "Règlement numéro 369 modifiant la grille des usages du règlement de zonage numéro 265",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+        }
+      ],
+      "numero": "369",
+      "title": "RÈGLEMENT MODIFIANT LA GRILLE DES USAGES DU RÈGLEMENT DE ZONAGE NUMÉRO 265",
+      "stage": "2e_projet",
+      "municipality": "berthier-sur-mer",
+      "meetingDate": "2026-03-24",
+      "resolution": "2026-067",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904"
+    },
+    {
+      "id": "bylaw-265",
+      "label": "Règlement de zonage numéro 265",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "3.7 ADOPTION DU DEUXIÈME PROJET DE RÈGLEMENT NUMÉRO 369 MODIFIANT\nLA GRILLE DES USAGES DU RÈGLEMENT DE ZONAGE NUMÉRO 265"
+        }
+      ],
+      "numero": "265",
+      "title": "Règlement de zonage numéro 265",
+      "municipality": "berthier-sur-mer",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904"
+    },
+    {
+      "id": "bylaw-372",
+      "label": "Règlement numéro 372 modifiant le règlement numéro 360 relatif à la démolition d'immeubles",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté."
+        }
+      ],
+      "numero": "372",
+      "title": "RÈGLEMENT NO 372 AYANT POUR OBJET DE MODIFIER LE RÈGLEMENT NO 360 RELATIF À LA DÉMOLITION D'IMMEUBLES",
+      "stage": "1er_projet",
+      "municipality": "berthier-sur-mer",
+      "meetingDate": "2026-03-24",
+      "resolution": "2026-068",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904"
+    },
+    {
+      "id": "bylaw-360",
+      "label": "Règlement numéro 360 modifiant le règlement numéro 354 relatif à la démolition d'immeubles",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "ATTENDU que la municipalité de Berthier-sur-Mer a adopté en date du 2\ndécembre 2024|e règlement numéro 360 mpdifiant le règlement numéro 354\nrelatif à la démolition d'immeubles;"
+        }
+      ],
+      "numero": "360",
+      "title": "Règlement numéro 360 modifiant le règlement numéro 354 relatif à la démolition d'immeubles",
+      "date": "2024-12-02",
+      "municipality": "berthier-sur-mer",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904"
+    },
+    {
+      "id": "bylaw-373",
+      "label": "Règlement numéro 373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté."
+        }
+      ],
+      "numero": "373",
+      "title": "RÈGLEMENT NO 373 RELATIF À LA SALUBRITÉ, À L'OCCUPATION ET À L'ENTRETIEN DES BÂTIMENTS ET LOGEMENTS",
+      "stage": "1er_projet",
+      "municipality": "berthier-sur-mer",
+      "meetingDate": "2026-03-24",
+      "resolution": "2026-069",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904"
+    },
+    {
+      "id": "zone-rb-23",
+      "label": "Zone Rb 23",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QUE la zone Rb 23, ainsique la création d'une nouvelle zone Rd.5,\n\nsont situées à l'intérieur du périmètre d'urbanisation de la Municipalité"
+        }
+      ],
+      "code": "Rb 23",
+      "municipality": "berthier-sur-mer",
+      "meetingDate": "2026-03-24",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904"
+    },
+    {
+      "id": "zone-rd-5",
+      "label": "Zone Rd.5",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QUE la zone Rb 23, ainsique la création d'une nouvelle zone Rd.5,\n\nsont situées à l'intérieur du périmètre d'urbanisation de la Municipalité"
+        }
+      ],
+      "code": "Rd.5",
+      "municipality": "berthier-sur-mer",
+      "meetingDate": "2026-03-24",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904"
+    },
+    {
+      "id": "event-adoption-2e-projet-369",
+      "label": "Adoption du deuxième projet de règlement no 369",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+        }
+      ],
+      "date": "2026-03-24",
+      "meetingDate": "2026-03-24",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "resolution": "2026-067",
+      "resolutionRef": "2026-067",
+      "etape": "second_projet",
+      "etape_date": "2026-03-24",
+      "reglement_number": "369",
+      "municipality": "berthier-sur-mer",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904"
+    },
+    {
+      "id": "event-adoption-1er-projet-372",
+      "label": "Adoption du premier projet de règlement no 372",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté."
+        }
+      ],
+      "date": "2026-03-24",
+      "meetingDate": "2026-03-24",
+      "decision": "approuvé",
+      "resolution": "2026-068",
+      "resolutionRef": "2026-068",
+      "etape": "projet_reglement",
+      "etape_date": "2026-03-24",
+      "reglement_number": "372",
+      "municipality": "berthier-sur-mer",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904"
+    },
+    {
+      "id": "event-adoption-1er-projet-373",
+      "label": "Adoption du premier projet de règlement no 373",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté."
+        }
+      ],
+      "date": "2026-03-24",
+      "meetingDate": "2026-03-24",
+      "decision": "approuvé",
+      "resolution": "2026-069",
+      "resolutionRef": "2026-069",
+      "etape": "projet_reglement",
+      "etape_date": "2026-03-24",
+      "reglement_number": "373",
+      "municipality": "berthier-sur-mer",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904"
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-369",
+      "target": "bylaw-265",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "3.7 ADOPTION DU DEUXIÈME PROJET DE RÈGLEMENT NUMÉRO 369 MODIFIANT\nLA GRILLE DES USAGES DU RÈGLEMENT DE ZONAGE NUMÉRO 265"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-372",
+      "target": "bylaw-360",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-369",
+      "target": "zone-rd-5",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QUE la zone Rb 23, ainsique la création d'une nouvelle zone Rd.5,\n\nsont situées à l'intérieur du périmètre d'urbanisation de la Municipalité"
+        }
+      ]
+    },
+    {
+      "source": "event-adoption-2e-projet-369",
+      "target": "zone-rb-23",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QUE la zone Rb 23, ainsique la création d'une nouvelle zone Rd.5,\n\nsont situées à l'intérieur du périmètre d'urbanisation de la Municipalité"
+        }
+      ]
+    },
+    {
+      "source": "event-adoption-2e-projet-369",
+      "target": "zone-rd-5",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QUE la zone Rb 23, ainsique la création d'une nouvelle zone Rd.5,\n\nsont situées à l'intérieur du périmètre d'urbanisation de la Municipalité"
+        }
+      ]
+    },
+    {
+      "source": "zone-rb-23",
+      "target": "source-10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QUE la zone Rb 23, ainsique la création d'une nouvelle zone Rd.5,\n\nsont situées à l'intérieur du périmètre d'urbanisation de la Municipalité"
+        }
+      ]
+    },
+    {
+      "source": "zone-rd-5",
+      "target": "source-10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QUE la zone Rb 23, ainsique la création d'une nouvelle zone Rd.5,\n\nsont situées à l'intérieur du périmètre d'urbanisation de la Municipalité"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-369",
+      "target": "source-10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-372",
+      "target": "source-10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-373",
+      "target": "source-10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté."
+        }
+      ]
+    },
+    {
+      "source": "event-adoption-2e-projet-369",
+      "target": "source-10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+        }
+      ]
+    },
+    {
+      "source": "event-adoption-1er-projet-372",
+      "target": "source-10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté."
+        }
+      ]
+    },
+    {
+      "source": "event-adoption-1er-projet-373",
+      "target": "source-10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté."
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "3.7 ADOPTION DU DEUXIÈME PROJET DE RÈGLEMENT NUMÉRO 369 MODIFIANT\nLA GRILLE DES USAGES DU RÈGLEMENT DE ZONAGE NUMÉRO 265"
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté."
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "CONSIDÉRANT QUE la zone Rb 23, ainsique la création d'une nouvelle zone Rd.5,\n\nsont situées à l'intérieur du périmètre d'urbanisation de la Municipalité"
+    },
+    {
+      "id": "ev-4",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+      "modality": "pdf",
+      "page": 6,
+      "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+    },
+    {
+      "id": "ev-5",
+      "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+      "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+      "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté."
+    }
+  ],
+  "input_tokens": 8192,
+  "output_tokens": 2048
+}
+```

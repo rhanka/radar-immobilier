@@ -1,0 +1,512 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "label": "Procès-verbal du 4 mai 2026 - L'Avenir",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Source",
+      "status": "candidate",
+      "date": "2026-05-04",
+      "municipality": "lavenir",
+      "url": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de la\nmunicipalité de L’Avenir, tenue le 4 mai 2026, à 19 h 30 à l’Église St-Pierrede-Durham située au 577 rue Principale à L’Avenir."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-654-12",
+      "label": "Règlement de zonage 654-12",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "654-12",
+      "municipality": "lavenir",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "meetingDate": "2026-05-04",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "ATTENDU QUE la municipalité de L’Avenir a le pouvoir, en vertu de la Loi\nsur l’aménagement et l’urbanisme, de modifier son règlement de zonage\n654-12;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-797-26",
+      "label": "Règlement no. 797-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "797-26",
+      "title": "Amendement règl. zonage",
+      "date": "2026-05-04",
+      "stage": "adoption",
+      "municipality": "lavenir",
+      "zone_cible": "C3",
+      "resolution": "R 2026-05-107",
+      "meetingDate": "2026-05-04",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "id": "zone-c3",
+      "label": "Zone C3",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "C3",
+      "municipality": "lavenir",
+      "usage": "habitation multifamiliale (h3)",
+      "usages_autorises": [
+        "habitation multifamiliale (h3)"
+      ],
+      "bylaw": "654-12",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "meetingDate": "2026-05-04",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+        }
+      ]
+    },
+    {
+      "id": "event-r-2026-05-107",
+      "label": "Adoption règl. 797-26 modifiant le règlement de zonage 654-12",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "rezonage",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "decision": "approuvé",
+      "resolution": "R 2026-05-107",
+      "etape": "adoption",
+      "etape_date": "2026-05-04",
+      "zone_ref": "C3",
+      "reglement_number": "797-26",
+      "municipality": "lavenir",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "id": "signal-r-2026-05-107",
+      "label": "Signal densification résidentielle h3 zone C3",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "densification",
+      "kind": "habitation_multifamiliale",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "resolution": "R 2026-05-107",
+      "scope": "local",
+      "zone_ref": "C3",
+      "reglement_number": "797-26",
+      "etape": "adoption",
+      "etape_date": "2026-05-04",
+      "municipality": "lavenir",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-797-26",
+      "target": "bylaw-654-12",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-amends"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "source": "zone-c3",
+      "target": "bylaw-654-12",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-governed"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Article 2:\nL’annexe B de ce règlement de zonage no 654-12 de la\nmunicipalité de l’Avenir, concernant la grille des usages et normes, est\nmodifiée comme suit :\na) En ajoutant dans la grille représentant la zone C3"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-797-26",
+      "target": "zone-c3",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-applies"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "a) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation."
+        }
+      ]
+    },
+    {
+      "source": "event-r-2026-05-107",
+      "target": "zone-c3",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-targets"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+        }
+      ]
+    },
+    {
+      "source": "event-r-2026-05-107",
+      "target": "zone-c3",
+      "relation": "rezones",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-rezones"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "a) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation."
+        }
+      ]
+    },
+    {
+      "source": "event-r-2026-05-107",
+      "target": "signal-r-2026-05-107",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-raises"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+        }
+      ]
+    },
+    {
+      "source": "signal-r-2026-05-107",
+      "target": "zone-c3",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-concerns"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+        }
+      ]
+    },
+    {
+      "source": "source-36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "target": "bylaw-797-26",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-mentions-bylaw"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "5. ADOPTION RÈGL. 797-26 – AMENDEMENT RÈGL. ZONAGE\nATTENDU QUE la municipalité de L’Avenir a le pouvoir, en vertu de la Loi\nsur l’aménagement et l’urbanisme, de modifier son règlement de zonage\n654-12;"
+        }
+      ]
+    },
+    {
+      "source": "source-36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "target": "zone-c3",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-mentions-zone"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+        }
+      ]
+    },
+    {
+      "source": "source-36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "target": "event-r-2026-05-107",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-mentions-event"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "source": "source-36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "target": "signal-r-2026-05-107",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-mentions-signal"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-797-26",
+      "target": "source-36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-derived-bylaw"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "source": "event-r-2026-05-107",
+      "target": "source-36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-derived-event"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "source": "zone-c3",
+      "target": "source-36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-edge-derived-zone"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-edge-amends",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+    },
+    {
+      "id": "ev-edge-governed",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "Article 2:\nL’annexe B de ce règlement de zonage no 654-12 de la\nmunicipalité de l’Avenir, concernant la grille des usages et normes, est\nmodifiée comme suit :\na) En ajoutant dans la grille représentant la zone C3"
+    },
+    {
+      "id": "ev-edge-applies",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "a) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation."
+    },
+    {
+      "id": "ev-edge-targets",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+    },
+    {
+      "id": "ev-edge-rezones",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "a) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation."
+    },
+    {
+      "id": "ev-edge-raises",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+    },
+    {
+      "id": "ev-edge-concerns",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+    },
+    {
+      "id": "ev-edge-mentions-bylaw",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "5. ADOPTION RÈGL. 797-26 – AMENDEMENT RÈGL. ZONAGE\nATTENDU QUE la municipalité de L’Avenir a le pouvoir, en vertu de la Loi\nsur l’aménagement et l’urbanisme, de modifier son règlement de zonage\n654-12;"
+    },
+    {
+      "id": "ev-edge-mentions-zone",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+    },
+    {
+      "id": "ev-edge-mentions-event",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+    },
+    {
+      "id": "ev-edge-mentions-signal",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+    },
+    {
+      "id": "ev-edge-derived-bylaw",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+    },
+    {
+      "id": "ev-edge-derived-event",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+    },
+    {
+      "id": "ev-edge-derived-zone",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+    }
+  ],
+  "input_tokens": 4200,
+  "output_tokens": 2350
+}
+```

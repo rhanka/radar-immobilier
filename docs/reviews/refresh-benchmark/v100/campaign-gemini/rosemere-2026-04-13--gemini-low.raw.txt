@@ -1,0 +1,415 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "label": "Procès-verbal du Conseil de la Ville de Rosemère - 13 avril 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "date": "2026-04-13",
+      "municipality": "rosemere",
+      "url": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du Conseil tenue à 19 h 30 en la salle du Conseil de\nl'hôtel de ville sise au 100, rue Charbonneau, le 13 avril 2026"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-125",
+      "label": "Dérogation mineure - 262, rue Westward",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "derogation",
+      "decision": "approuvé",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "municipality": "rosemere",
+      "resolution": "2026-04-125",
+      "resolutionRef": "2026-04-125",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-04-13",
+      "description": "D'ACCORDER la demande de dérogation mineure pour la propriété située au 262, rue Westward, afin de permettre une marge de recul arrière de 0,56 mètre pour le garage détaché actuellement présent, alors que le règlement de zonage prescrit un minimum de 7,00 mètres.",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "D'ACCORDER la demande de dérogation mineure pour la propriété située\nau 262, rue Westward, afin de permettre une marge de recul arrière de\n0,56 mètre pour le garage détaché actuellement présent"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-126",
+      "label": "P.I.I.A. Affichage - 307, boulevard Labelle (Continental)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "municipality": "rosemere",
+      "resolution": "2026-04-126",
+      "resolutionRef": "2026-04-126",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "etape": "piia",
+      "etape_date": "2026-04-13",
+      "description": "D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et d'une enseigne sur pylône pour l'établissement Continental situé au 307, boulevard Labelle.",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et\nd'une enseigne sur pylône pour l'établissement Continental situé au\n307, boulevard Labelle, tel qu'illustré dans les plans reçus le"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-127",
+      "label": "P.I.I.A. Affichage - 400, chemin de la Grande-Côte",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "municipality": "rosemere",
+      "resolution": "2026-04-127",
+      "resolutionRef": "2026-04-127",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "etape": "piia",
+      "etape_date": "2026-04-13",
+      "description": "D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le pylône d'enseignes existant situé en cour avant au 400, chemin de la Grande-Côte.",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le\npylône d'enseignes existant situé en cour avant au 400, chemin de la\nGrande-Côte"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-128",
+      "label": "P.I.I.A. Agrandissement - 266, rue du Bocage",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "municipality": "rosemere",
+      "resolution": "2026-04-128",
+      "resolutionRef": "2026-04-128",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "etape": "piia",
+      "etape_date": "2026-04-13",
+      "description": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du Bocage.",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du\nBocage, tel qu'illustré dans les plans soumis réalisés par Jean-Benoit\nTrudel, architecte"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-129",
+      "label": "P.I.I.A. Agrandissement - 338, rue Montview",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "municipality": "rosemere",
+      "resolution": "2026-04-129",
+      "resolutionRef": "2026-04-129",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "etape": "piia",
+      "etape_date": "2026-04-13",
+      "description": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de construction d'un garage annexé au 338, rue Montview.",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de\nconstruction d'un garage annexé au 338, rue Montview, selon les plans\nréalisés par la firme Dessina Plan Plus inc."
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-130",
+      "label": "P.I.I.A. Ouvertures - 355, rue Montcalm",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "municipality": "rosemere",
+      "resolution": "2026-04-130",
+      "resolutionRef": "2026-04-130",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "etape": "piia",
+      "etape_date": "2026-04-13",
+      "description": "D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures pour la propriété située au 355, rue Montcalm.",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures\npour la propriété située au 355, rue Montcalm, tel qu'illustré dans les plans\nréalisés par Mélodie Huneault"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-131",
+      "label": "P.I.I.A. Revêtements et terrasse sur le toit - 5, chemin de la Grande-Côte",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "municipality": "rosemere",
+      "resolution": "2026-04-131",
+      "resolutionRef": "2026-04-131",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "etape": "piia",
+      "etape_date": "2026-04-13",
+      "description": "D'APPROUVER, à titre de P.I.I.A., pour les façades latérales, la substitution du revêtement prévu et l'ajout d'une terrasse au toit au 5, chemin de la Grande-Côte.",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "D'APPROUVER, à titre de P.I.I.A., pour les façades latérales, la substitution\ndu revêtement prévu de panneaux de fibrociment HardiePanel fini lisse"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1004-01-motion",
+      "label": "Règlement 1004-01 - Avis de motion",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "1004-01",
+      "title": "Règlement modifiant plusieurs dispositions du Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux et d'espaces naturels",
+      "date": "2026-04-13",
+      "stage": "avis_motion",
+      "municipality": "rosemere",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "meetingDate": "2026-04-13",
+      "resolution": "2026-04-132",
+      "resolutionRef": "2026-04-132",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera\nadopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs\ndispositions du Règlement 1004 sur la contribution pour fins de parcs"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1004-01-projet",
+      "label": "Règlement 1004-01 - Adoption du projet",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "1004-01",
+      "title": "Règlement modifiant plusieurs dispositions du Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux et d'espaces naturels",
+      "date": "2026-04-13",
+      "stage": "projet",
+      "municipality": "rosemere",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "meetingDate": "2026-04-13",
+      "resolution": "2026-04-133",
+      "resolutionRef": "2026-04-133",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels."
+        }
+      ]
+    },
+    {
+      "id": "signal-1004-01",
+      "label": "Signal - Adoption projet Règlement 1004-01",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "projet_reglement",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "description": "Adoption du projet de Règlement 1004-01 modifiant les contributions pour fins de parcs et fixation de consultation publique au 11 mai 2026.",
+      "resolution": "2026-04-133",
+      "resolutionRef": "2026-04-133",
+      "municipality": "rosemere",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "etape": "projet_reglement",
+      "etape_date": "2026-04-13",
+      "reglement_number": "1004-01",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "DE FIXER la date de la séance de consultation publique sur ledit projet de\nrèglement au lundi 11 mai 2026, à 18 h 30, dans la salle du Conseil de l'hôtel\nde ville de Rosemère, sise au 100, rue Charbonneau."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "target": "event-2026-04-125",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "evidence_refs": [
+        "ev-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "D'ACCORDER la demande de dérogation mineure pour la propriété située\nau 262, rue Westward, afin de permettre une marge de recul arrière de\n0,56 mètre pour le garage détaché actuellement présent"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-04-125",
+      "target": "source-0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "evidence_refs": [
+        "ev-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "D'ACCORDER la demande de dérogation mineure pour la propriété située\nau 262, rue Westward, afin de permettre une marge de recul arrière de\n0,56 mètre pour le garage détaché actuellement présent"
+        }
+      ]
+    },
+    {
+      "source": "source-0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "target": "bylaw-1004-01-motion",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "evidence_refs": [
+        "ev-2"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera\nadopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs\ndispositions du Règlement 1004 sur la contribution pour fins de parcs"
+        }
+      ]
+    },
+    {
+      "source": "source-0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "target": "bylaw-1004-01-projet",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "evidence_refs": [
+        "ev-3"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-1004-01-projet",
+      "target": "bylaw-1004-01-motion",
+      "relation": "lifecycle_predecessor",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "evidence_refs": [
+        "ev-3"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "CONSIDÉRANT qu'un avis de motion a été dûment donné séance tenante;"
+        }
+      ]
+    },
+    {
+      "source": "source-0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "target": "signal-1004-01",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "evidence_refs": [
+        "ev-4"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "DE FIXER la date de la séance de consultation publique sur ledit projet de\nrèglement au lundi 11 mai 2026, à 18 h 30, dans la salle du Conseil de l'hôtel\nde ville de Rosemère, sise au 100, rue Charbonneau."
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "D'ACCORDER la demande de dérogation mineure pour la propriété située au 262, rue Westward, afin de permettre une marge de recul arrière de 0,56 mètre pour le garage détaché actuellement présent, alors que le règlement de zonage prescrit un minimum de 7,00 mètres."
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera adopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs dispositions du Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux et d'espaces naturels."
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions du Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux et d'espaces naturels."
+    },
+    {
+      "id": "ev-4",
+      "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+      "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+      "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "DE FIXER la date de la séance de consultation publique sur ledit projet de règlement au lundi 11 mai 2026, à 18 h 30, dans la salle du Conseil de l'hôtel de ville de Rosemère, sise au 100, rue Charbonneau."
+    }
+  ],
+  "input_tokens": 4850,
+  "output_tokens": 2350
+}
+```

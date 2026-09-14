@@ -1,0 +1,338 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "label": "Ordre du jour - Séance ordinaire du 2 mars 2026 - Ayer's Cliff",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "date": "2026-03-02",
+      "municipality": "ayers-cliff",
+      "url": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ORDRE DU JOUR / AGENDA\n2 MARS / MARCH 2ND 2026"
+        }
+      ]
+    },
+    {
+      "id": "zone-res-10",
+      "label": "Zone Res-10",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "Res-10",
+      "municipality": "ayers-cliff",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "meetingDate": "2026-03-02",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+        }
+      ]
+    },
+    {
+      "id": "zone-rec-5",
+      "label": "Zone Rec-5",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "Rec-5",
+      "municipality": "ayers-cliff",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "meetingDate": "2026-03-02",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)"
+        }
+      ]
+    },
+    {
+      "id": "event-16-1-1-ppcmoi",
+      "label": "Demande de PPCMOI - 881-883 Main, 828 Strathcona",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-03-02",
+      "municipality": "ayers-cliff",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "etape": "ppcmoi",
+      "description": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828, Strathcona – Demande de PPCMOI",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828,\nStrathcona – Demande de PPCMOI"
+        }
+      ]
+    },
+    {
+      "id": "event-16-1-2-ppcmoi",
+      "label": "Projet PPCMOI - 329 rue Tyler (lot 4 665 202)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-03-02",
+      "municipality": "ayers-cliff",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "etape": "ppcmoi",
+      "zone_ref": "Res-10",
+      "no_lot": "4665202",
+      "description": "Matricule 1904-97-9556 lot 4 665 202, 329 rue Tyler, Res-10 Projet PPCMOI construction 1 bâtiment 2 étages 4 logement au total",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+        }
+      ]
+    },
+    {
+      "id": "event-16-1-3-piia",
+      "label": "Projet plan globale et Agrandissements (PIIA-9) - Ripple Cove",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-03-02",
+      "municipality": "ayers-cliff",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "etape": "piia",
+      "zone_ref": "Rec-5",
+      "no_lot": "6108937",
+      "description": "Matricule 1805-72-3947 lot 6 108 937, 329 chemin 694 -716 Ripple Cove, Rec-5- Projet plan globale, future construction et Agrandissements (PIIA-9)",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)"
+        }
+      ]
+    },
+    {
+      "id": "signal-16-1-2-housing",
+      "label": "Signal PPCMOI construction 4 logements - 329 rue Tyler",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "meetingDate": "2026-03-02",
+      "municipality": "ayers-cliff",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "category": "residential_development",
+      "etape": "ppcmoi",
+      "zone_ref": "Res-10",
+      "no_lot": "4665202",
+      "nb_unites_min": 4,
+      "nb_unites_max": 4,
+      "description": "Projet PPCMOI construction 1 bâtiment 2 étages 4 logement au total",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "target": "event-16-1-1-ppcmoi",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-main"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828,\nStrathcona – Demande de PPCMOI"
+        }
+      ]
+    },
+    {
+      "source": "source-0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "target": "event-16-1-2-ppcmoi",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-tyler"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+        }
+      ]
+    },
+    {
+      "source": "source-0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "target": "event-16-1-3-piia",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "evidence_refs": [
+        "ev-piia-ripplecove"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)"
+        }
+      ]
+    },
+    {
+      "source": "event-16-1-2-ppcmoi",
+      "target": "zone-res-10",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-tyler"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+        }
+      ]
+    },
+    {
+      "source": "event-16-1-2-ppcmoi",
+      "target": "signal-16-1-2-housing",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-tyler"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+        }
+      ]
+    },
+    {
+      "source": "signal-16-1-2-housing",
+      "target": "zone-res-10",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-tyler"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+        }
+      ]
+    },
+    {
+      "source": "event-16-1-3-piia",
+      "target": "zone-rec-5",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "evidence_refs": [
+        "ev-piia-ripplecove"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)"
+        }
+      ]
+    },
+    {
+      "source": "zone-res-10",
+      "target": "source-0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-tyler"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+        }
+      ]
+    },
+    {
+      "source": "zone-rec-5",
+      "target": "source-0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "evidence_refs": [
+        "ev-piia-ripplecove"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-agenda-header",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "ORDRE DU JOUR / AGENDA\n2 MARS / MARCH 2ND 2026"
+    },
+    {
+      "id": "ev-ppcmoi-main",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828,\nStrathcona – Demande de PPCMOI"
+    },
+    {
+      "id": "ev-ppcmoi-tyler",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+    },
+    {
+      "id": "ev-piia-ripplecove",
+      "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+      "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+      "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)"
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 1280,
+  "output_tokens": 620
+}
+```

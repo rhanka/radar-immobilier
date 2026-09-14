@@ -1,0 +1,460 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "label": "Procès-verbal de la séance ordinaire du 2 mars 2026 - Sainte-Catherine-de-la-Jacques-Cartier",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "review_status": "validated",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "date": "2026-03-02",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "url": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL DE LA SÉANCE ORDINAIRE DU CONSEIL MUNICIPAL tenue à\nla salle du conseil du centre socioculturel Anne-Hébert ce 2 mars 2026 à 19 h."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1259-2014",
+      "label": "Règlement de zonage numéro 1259-2014",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "review_status": "validated",
+      "numero": "1259-2014",
+      "title": "Règlement de zonage numéro 1259-2014",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 24,
+          "excerpt": "AVIS DE MOTION CONCERNANT UN RÈGLEMENT MODIFIANT LE RÈGLEMENT\nDE ZONAGE NUMÉRO 1259-2014 VISANT À DÉPLACER LES LIMITES DES\nZONES 115-H ET 145-H ET D'EN PRÉCISER LES USAGES ET LES NORMES"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-apr-423-2026",
+      "label": "Projet de règlement APR-423-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "numero": "APR-423-2026",
+      "title": "Règlement modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les limites des zones 115-H et 145-H et d'en préciser les usages et les normes",
+      "stage": "1er_projet",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "zones_ciblees": ["115-H", "145-H"],
+      "resolution": "117-2026",
+      "meetingDate": "2026-03-02",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 25,
+          "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les\nlimites des zones 115-H et 145-H et d’en préciser le"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1260-2014",
+      "label": "Règlement de lotissement 1260-2014",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "review_status": "validated",
+      "numero": "1260-2014",
+      "title": "Règlement de lotissement 1260-2014",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "ATTENDU que l’article 4.1.4 du Règlement de lotissement 1260-2014 prévoit, dans la\nzone 75-H, une largeur de 30 mètres pour les lots d’angle;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1266-2014",
+      "label": "Règlement numéro 1266-2014",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "review_status": "validated",
+      "numero": "1266-2014",
+      "title": "Règlement procédant à la citation du site patrimonial du manoir seigneurial Juchereau-Duchesnay",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 21,
+          "excerpt": "ATTENDU que la Ville de Sainte-Catherine-de-la-Jacques-Cartier, par la voie du\nrèglement numéro 1266-2014, a procédé à la citation du site patrimonial du manoir\nseigneurial Juchereau-Duchesnay sur la recom"
+        }
+      ]
+    },
+    {
+      "id": "zone-115-h",
+      "label": "Zone 115-H",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "code": "115-H",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 24,
+          "excerpt": "AVIS DE MOTION CONCERNANT UN RÈGLEMENT MODIFIANT LE RÈGLEMENT\nDE ZONAGE NUMÉRO 1259-2014 VISANT À DÉPLACER LES LIMITES DES\nZONES 115-H ET 145-H ET D'EN PRÉCISER LES USAGES ET LES NORMES"
+        }
+      ]
+    },
+    {
+      "id": "zone-145-h",
+      "label": "Zone 145-H",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "code": "145-H",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 24,
+          "excerpt": "AVIS DE MOTION CONCERNANT UN RÈGLEMENT MODIFIANT LE RÈGLEMENT\nDE ZONAGE NUMÉRO 1259-2014 VISANT À DÉPLACER LES LIMITES DES\nZONES 115-H ET 145-H ET D'EN PRÉCISER LES USAGES ET LES NORMES"
+        }
+      ]
+    },
+    {
+      "id": "zone-53-h",
+      "label": "Zone 53-H",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "code": "53-H",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "ATTENDU que l’article 7.2.1.2.3 du Règlement de zonage numéro 1259-2014 stipule\ntoutefois que les garages privés attenants doivent respecter la marge latérale\nminimale, qui dans la zone 53-H, est de 2 mètres"
+        }
+      ]
+    },
+    {
+      "id": "zone-75-h",
+      "label": "Zone 75-H",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "code": "75-H",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "ATTENDU que l’article 4.1.4 du Règlement de lotissement 1260-2014 prévoit, dans la\nzone 75-H, une largeur de 30 mètres pour les lots d’angle;"
+        }
+      ]
+    },
+    {
+      "id": "event-111-2026",
+      "label": "Dérogation mineure - 2, rue du Garbin",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "resolution": "111-2026",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "zone_ref": "53-H",
+      "reglement_number": "1259-2014",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-03-02",
+      "description": "Conversion d'un abri d'auto attenant en garage privé attenant avec une marge latérale de 1,67 m au lieu de 2 m",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri\nd’auto en garage privé attenant pour la propriété sise au 2, rue Garbin."
+        }
+      ]
+    },
+    {
+      "id": "event-112-2026",
+      "label": "Dérogation mineure - Lot 6621589",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "resolution": "112-2026",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "zone_ref": "75-H",
+      "no_lot": "6621589",
+      "reglement_number": "1260-2014",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-03-02",
+      "description": "Lotissement d'un lot d'angle d'une largeur de 27,20 mètres au lieu de 30 mètres",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 21,
+          "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot\nd’angle 6 621 589 d’une largeur de 27,20 mètres."
+        }
+      ]
+    },
+    {
+      "id": "event-113-2026",
+      "label": "Subdivision - Lot 6141355 Manoir Juchereau-Duchesnay",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "decision": "approuvé",
+      "kind": "subdivision",
+      "resolution": "113-2026",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "no_lot": "6141355",
+      "reglement_number": "1266-2014",
+      "description": "Approbation de la subdivision d'une parcelle du lot 6 141 355 dans le cadre du réaménagement du pont de la rivière Ontaritzi sur le site patrimonial du manoir seigneurial Juchereau-Duchesnay",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que\nprésenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi sur le site\npatrimonial du manoir seigneurial Jucher"
+        }
+      ]
+    },
+    {
+      "id": "event-117-2026",
+      "label": "Adoption 1er projet APR-423-2026 - Boisé Natura",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "resolution": "117-2026",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "reglement_number": "APR-423-2026",
+      "etape": "projet_reglement",
+      "etape_date": "2026-03-02",
+      "description": "Adoption du premier projet de règlement APR-423-2026 déplaçant les limites des zones 115-H et 145-H pour permettre des résidences unifamiliales jumelées dans le Boisé Natura",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 25,
+          "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les\nlimites des zones 115-H et 145-H et d’en préciser le"
+        }
+      ]
+    },
+    {
+      "id": "signal-117-2026",
+      "label": "Signal rezonage jumelés Boisé Natura",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "category": "rezonage",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "resolution": "117-2026",
+      "municipality": "sainte-catherine-de-la-jacques-cartier",
+      "etape": "projet_reglement",
+      "etape_date": "2026-03-02",
+      "reglement_number": "APR-423-2026",
+      "description": "Projet de règlement APR-423-2026 visant à déplacer les limites des zones 115-H et 145-H pour autoriser 10 résidences unifamiliales jumelées pour la phase 3 de Boisé Natura",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "citations": [
+        {
+          "page": 24,
+          "excerpt": "ATTENDU que la troisième phase du projet prévoit la construction de 10 terrains pour\ndes résidences unifamiliales jumelées;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "event-111-2026",
+      "target": "zone-53-h",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "evidence_refs": ["ev-111"],
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "ATTENDU que l’article 7.2.1.2.3 du Règlement de zonage numéro 1259-2014 stipule\ntoutefois que les garages privés attenants doivent respecter la marge latérale\nminimale, qui dans la zone 53-H, est de 2 mètres"
+        }
+      ]
+    },
+    {
+      "source": "event-112-2026",
+      "target": "zone-75-h",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "evidence_refs": ["ev-112"],
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "ATTENDU que l’article 4.1.4 du Règlement de lotissement 1260-2014 prévoit, dans la\nzone 75-H, une largeur de 30 mètres pour les lots d’angle;"
+        }
+      ]
+    },
+    {
+      "source": "event-117-2026",
+      "target": "zone-115-h",
+      "relation": "rezones",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "evidence_refs": ["ev-117"],
+      "citations": [
+        {
+          "page": 25,
+          "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les\nlimites des zones 115-H et 145-H et d’en préciser le"
+        }
+      ]
+    },
+    {
+      "source": "event-117-2026",
+      "target": "zone-145-h",
+      "relation": "rezones",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "evidence_refs": ["ev-117"],
+      "citations": [
+        {
+          "page": 25,
+          "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les\nlimites des zones 115-H et 145-H et d’en préciser le"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-apr-423-2026",
+      "target": "bylaw-1259-2014",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "evidence_refs": ["ev-117"],
+      "citations": [
+        {
+          "page": 25,
+          "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les\nlimites des zones 115-H et 145-H et d’en préciser le"
+        }
+      ]
+    },
+    {
+      "source": "event-117-2026",
+      "target": "signal-117-2026",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "evidence_refs": ["ev-117"],
+      "citations": [
+        {
+          "page": 24,
+          "excerpt": "ATTENDU que la troisième phase du projet prévoit la construction de 10 terrains pour\ndes résidences unifamiliales jumelées;"
+        }
+      ]
+    },
+    {
+      "source": "signal-117-2026",
+      "target": "zone-115-h",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "evidence_refs": ["ev-117"],
+      "citations": [
+        {
+          "page": 24,
+          "excerpt": "ATTENDU qu’il serait préférable d’inclure la totalité du projet Boisé Natura en\nzone 115-H et d’y prévoir la possibilité de construire des résidences unifamiliales\njumelées;"
+        }
+      ]
+    },
+    {
+      "source": "source-129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "target": "event-117-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "evidence_refs": ["ev-117"],
+      "citations": [
+        {
+          "page": 25,
+          "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les\nlimites des zones 115-H et 145-H et d’en préciser le"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-111",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+      "modality": "pdf",
+      "page": 20,
+      "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri d’auto en garage privé attenant pour la propriété sise au 2, rue Garbin."
+    },
+    {
+      "id": "ev-112",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+      "modality": "pdf",
+      "page": 21,
+      "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot d’angle 6 621 589 d’une largeur de 27,20 mètres."
+    },
+    {
+      "id": "ev-117",
+      "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+      "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+      "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+      "modality": "pdf",
+      "page": 25,
+      "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les limites des zones 115-H et 145-H et d’en préciser les usages et les normes."
+    }
+  ],
+  "input_tokens": 12000,
+  "output_tokens": 1750
+}
+```

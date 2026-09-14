@@ -1,0 +1,807 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "label": "Procès-verbal de la séance ordinaire du 4 août 2026 - Saint-Étienne-de-Bolton",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "url": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Une séance ordinaire du conseil de la Municipalité de SaintÉtienne-de-Bolton, tenue le 4 août 2026 à 19 h 00, au bureau\nmunicipal de la municipalité située au 9, rue de la Montagne,"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-04",
+      "label": "Règlement 2026-04",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "numero": "2026-04",
+      "title": "modifiant le Règlement de plan d’urbanisme 2014-04",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-05",
+      "label": "Règlement 2026-05",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "numero": "2026-05",
+      "title": "modifiant le Règlement de zonage 2014-05",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-06",
+      "label": "Règlement 2026-06",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "numero": "2026-06",
+      "title": "modifiant le règlement de lotissement 2014-06",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-07",
+      "label": "Règlement 2026-07",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "numero": "2026-07",
+      "title": "modifiant le règlement de construction 2014-08",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-08",
+      "label": "Règlement 2026-08",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "numero": "2026-08",
+      "title": "modifiant le règlement de PIIA 2014-09",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-09",
+      "label": "Règlement 2026-09",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "numero": "2026-09",
+      "title": "modifiant le règlement de permis et certificats 2014-10",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-10",
+      "label": "Règlement 2026-10",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "numero": "2026-10",
+      "title": "modifiant le règlement de dérogation mineure 2008-06",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2025-11",
+      "label": "Règlement 2025-11",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "numero": "2025-11",
+      "title": "créant le Règlement sur l’occupation et l’entretien des bâtiments",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-151",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte le Règlement 2025-11 créant le\nRèglement sur l’occupation et l’entretien des bâtiments."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-14",
+      "label": "Règlement 2026-14",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "numero": "2026-14",
+      "title": "modifiant le règlement 2008-04 sur les usages conditionnels",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-152",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "QUE le conseil adopte le Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-15",
+      "label": "Règlement 2026-15",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "candidate",
+      "numero": "2026-15",
+      "title": "abrogeant le règlement 2022-09 et modifiant le règlement 2015-14 sur la sécurité incendie",
+      "date": "2026-08-04",
+      "stage": "avis_motion",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "AVIS DE MOTION est donné est donné par la mairesse, Diane\nDesjardins, qu’à une prochaine séance du conseil sera adopté le\nRèglement 2026-15 abrogeant le règlement 2022-09 et modifiant\nle règlement 2015-14 sur la"
+        }
+      ]
+    },
+    {
+      "id": "zone-COM-1",
+      "label": "Zone COM-1",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "candidate",
+      "code": "COM-1",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale, lot 5 191"
+        }
+      ]
+    },
+    {
+      "id": "zone-RUR-12",
+      "label": "Zone RUR-12",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "candidate",
+      "code": "RUR-12",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886, conformément aux documents et au plan\npréparé par D"
+        }
+      ]
+    },
+    {
+      "id": "zone-RUR-8",
+      "label": "Zone RUR-8",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "candidate",
+      "code": "RUR-8",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1 « Bâtiment,\nconstruction, ut"
+        }
+      ]
+    },
+    {
+      "id": "zone-VIL-2",
+      "label": "Zone VIL-2",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "candidate",
+      "code": "VIL-2",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle\nde couleur gri"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-2026-08-154",
+      "label": "PIIA - Chambre froide extérieure Coopérative - Lot 5 191 695",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-154",
+      "demandeur_corporate": "Coopérative de solidarité de St-Étienne-de-Bolton",
+      "no_lot": "5191695",
+      "zone_ref": "COM-1",
+      "etape": "piia",
+      "etape_date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Autorisation PIIA pour l'ajout d'une toiture pour protéger la chambre froide installée à l'arrière de la Coopérative au 12, rue Principale",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale, lot 5 191"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-2026-08-155",
+      "label": "PIIA - Garage attaché - 24, Allée des Sommets",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-155",
+      "no_lot": "5662886",
+      "zone_ref": "RUR-12",
+      "superficie_m2": 5749.2,
+      "etape": "piia",
+      "etape_date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Autorisation PIIA pour la démolition de l'abri d'auto et ajout d'un garage attaché à la résidence au 24, Allée des Sommets",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886, conformément aux documents et au plan\npréparé par D"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-2026-08-156",
+      "label": "Dérogation mineure - 135, rue de la Serpentine",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "kind": "derogation",
+      "decision": "refusé",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-156",
+      "no_lot": "6380011",
+      "zone_ref": "RUR-8",
+      "superficie_m2": 14689.8,
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Refus de la dérogation mineure visant à réduire à 2,4 m la marge latérale de 3 m pour une piscine creusée",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1 « Bâtiment,\nconstruction, ut"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-2026-08-157",
+      "label": "Dérogation mineure - Abattage d'arbres chemin de la Tour",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "kind": "derogation",
+      "decision": "refusé",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-157",
+      "no_lot": "5191546",
+      "zone_ref": "RUR-12",
+      "reglement_number": "2014-05",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Refus de dérogation mineure pour permettre l'abattage d'arbres sur le lot 5 191 546 du chemin de la Tour en dehors de la période de gel",
+      "motif": "La dérogation mineure ne peut être accordée lorsqu’elle concerne un article du règlement de zonage ayant trait à la protection de l’environnement",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel."
+        }
+      ]
+    },
+    {
+      "id": "designation-event-2026-08-158",
+      "label": "PIIA - Remplacement toiture - 572, 1er Rang",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-158",
+      "no_lot": "5191952",
+      "zone_ref": "VIL-2",
+      "etape": "piia",
+      "etape_date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Autorisation PIIA pour le remplacement du revêtement de la toiture par de la tôle gris foncé au 572, 1er Rang",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle\nde couleur gri"
+        }
+      ]
+    },
+    {
+      "id": "signal-derogation-135-serpentine",
+      "label": "Signal refus dérogation mineure marge latérale",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "category": "derogation_mineure",
+      "kind": "refus_derogation",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-156",
+      "no_lot": "6380011",
+      "zone_ref": "RUR-8",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Refus de réduire la distance de marge latérale à 2,4 m au lieu de 3 m pour une piscine creusée",
+      "scope": "local",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1 « Bâtiment,\nconstruction, ut"
+        }
+      ]
+    },
+    {
+      "id": "signal-derogation-chemin-de-la-tour",
+      "label": "Signal refus dérogation mineure abattage d'arbres hors période de gel",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "status": "validated",
+      "category": "derogation_mineure",
+      "kind": "refus_derogation",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-157",
+      "no_lot": "5191546",
+      "zone_ref": "RUR-12",
+      "reglement_number": "2014-05",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Refus de dérogation mineure visant à permettre l'abattage d'arbres en dehors de la période de gel sur le lot 5 191 546",
+      "scope": "local",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-05",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-10"],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-14",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-11"],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "QUE le conseil adopte le Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels."
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "designation-event-2026-08-154",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-12a"],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale, lot 5 191"
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "designation-event-2026-08-155",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-12b"],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886, conformément aux documents et au plan\npréparé par D"
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "designation-event-2026-08-156",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-13"],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1 « Bâtiment,\nconstruction, ut"
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "designation-event-2026-08-157",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-14a"],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel."
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "designation-event-2026-08-158",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-14b"],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle\nde couleur gri"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-154",
+      "target": "zone-COM-1",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-12a"],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale, lot 5 191"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-155",
+      "target": "zone-RUR-12",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-12b"],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886, conformément aux documents et au plan\npréparé par D"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-156",
+      "target": "zone-RUR-8",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-13"],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1 « Bâtiment,\nconstruction, ut"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-156",
+      "target": "signal-derogation-135-serpentine",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-13"],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1 « Bâtiment,\nconstruction, ut"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-157",
+      "target": "zone-RUR-12",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-14a"],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel."
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-157",
+      "target": "signal-derogation-chemin-de-la-tour",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-14a"],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel."
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-158",
+      "target": "zone-VIL-2",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-14b"],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle\nde couleur gri"
+        }
+      ]
+    },
+    {
+      "source": "signal-derogation-135-serpentine",
+      "target": "zone-RUR-8",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-13"],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1 « Bâtiment,\nconstruction, ut"
+        }
+      ]
+    },
+    {
+      "source": "signal-derogation-chemin-de-la-tour",
+      "target": "zone-RUR-12",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": ["ev-pv-14a"],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-pv-10",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+    },
+    {
+      "id": "ev-pv-11",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "QUE le conseil adopte le Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels."
+    },
+    {
+      "id": "ev-pv-12a",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale, lot 5 191"
+    },
+    {
+      "id": "ev-pv-12b",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886, conformément aux documents et au plan\npréparé par D"
+    },
+    {
+      "id": "ev-pv-13",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1 « Bâtiment,\nconstruction, ut"
+    },
+    {
+      "id": "ev-pv-14a",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel."
+    },
+    {
+      "id": "ev-pv-14b",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle\nde couleur gri"
+    }
+  ],
+  "input_tokens": 5834,
+  "output_tokens": 3488
+}
+```

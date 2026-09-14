@@ -1,0 +1,451 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "label": "Procès-verbal de la séance ordinaire du 5 mai 2026 - Ville de Cowansville",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil de la Ville de Cowansville du\n5 mai 2026, tenue dans la salle de l’hôtel de ville situé au 220, place\nMunicipale."
+        }
+      ],
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "date": "2026-05-05",
+      "municipality": "cowansville",
+      "url": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+      "pdfPath": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "sourceKind": "pv",
+      "format": "pdf"
+    },
+    {
+      "id": "bylaw-1841-53-2026",
+      "label": "Règlement 1841-53-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26\nlogements et de quatre étages dans la zone Rc-23"
+        }
+      ],
+      "numero": "1841-53-2026",
+      "stage": "1er_projet",
+      "municipality": "cowansville",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "meetingDate": "2026-05-05",
+      "resolution": "258-05-2026"
+    },
+    {
+      "id": "bylaw-1842-06-2026",
+      "label": "Règlement 1842-06-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "D’adopter le projet de règlement numéro 1842-06-2026 modifiant le règlement\nde lotissement numéro 1842 afin de préciser les dispositions relatives aux\ncessions pour fins de parcs"
+        }
+      ],
+      "numero": "1842-06-2026",
+      "stage": "projet",
+      "municipality": "cowansville",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "meetingDate": "2026-05-05",
+      "resolution": "260-05-2026"
+    },
+    {
+      "id": "bylaw-1571-08-2026",
+      "label": "Règlement 1571-08-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "D’adopter le projet de règlement numéro 1571-08-2026 modifiant le règlement\nnuméro 1571 relatif aux plans d’implantation et d’intégration architecturale\n(PIIA)"
+        }
+      ],
+      "numero": "1571-08-2026",
+      "stage": "projet",
+      "municipality": "cowansville",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "meetingDate": "2026-05-05",
+      "resolution": "256-05-2026"
+    },
+    {
+      "id": "zone-rc-23",
+      "label": "Zone Rc-23",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Madame la conseillère Nathalie Haman, donne avis de motion qu’à une\nprochaine séance de ce conseil, il sera adopté le Règlement numéro 1841-532026 modifiant le règlement de zonage numéro 1841 afin de permettre les"
+        }
+      ],
+      "code": "Rc-23",
+      "municipality": "cowansville",
+      "secteur": "rue James",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "meetingDate": "2026-05-05"
+    },
+    {
+      "id": "zone-cga-1",
+      "label": "Zone Cga-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Madame la conseillère Nathalie Haman, donne avis de motion qu’à une\nprochaine séance de ce conseil, il sera adopté le Règlement numéro 1841-532026 modifiant le règlement de zonage numéro 1841 afin de permettre les"
+        }
+      ],
+      "code": "Cga-1",
+      "municipality": "cowansville",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "meetingDate": "2026-05-05"
+    },
+    {
+      "id": "zone-cbb-1",
+      "label": "Zone Cbb-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Madame la conseillère Nathalie Haman, donne avis de motion qu’à une\nprochaine séance de ce conseil, il sera adopté le Règlement numéro 1841-532026 modifiant le règlement de zonage numéro 1841 afin de permettre les"
+        }
+      ],
+      "code": "Cbb-1",
+      "municipality": "cowansville",
+      "secteur": "rue de la Rivière",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "meetingDate": "2026-05-05"
+    },
+    {
+      "id": "zone-ib-1",
+      "label": "Zone Ib-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Madame la conseillère Nathalie Haman, donne avis de motion qu’à une\nprochaine séance de ce conseil, il sera adopté le Règlement numéro 1841-532026 modifiant le règlement de zonage numéro 1841 afin de permettre les"
+        }
+      ],
+      "code": "Ib-1",
+      "municipality": "cowansville",
+      "secteur": "chemin Brosseau",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "meetingDate": "2026-05-05"
+    },
+    {
+      "id": "zone-cap-1",
+      "label": "Zone CaP-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 42,
+          "excerpt": "Augmentation du nombre d’unités de location de courte durée, passant\nde 3 à 4 unités (classe d’usage Rt, non autorisée dans la zone CaP-1);"
+        }
+      ],
+      "code": "CaP-1",
+      "municipality": "cowansville",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "meetingDate": "2026-05-05"
+    },
+    {
+      "id": "event-258-05-2026",
+      "label": "Premier projet de règlement 1841-53-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26\nlogements et de quatre étages dans la zone Rc-23"
+        }
+      ],
+      "date": "2026-05-05",
+      "meetingDate": "2026-05-05",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "municipality": "cowansville",
+      "resolution": "258-05-2026",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "description": "Adoption du premier projet de règlement numéro 1841-53-2026 modifiant le règlement de zonage numéro 1841 afin de permettre les habitations de 26 logements et de quatre étages dans la zone Rc-23 (rue James), d’agrandir cette zone à même la zone Cga-1, d’y prévoir des assouplissements relatifs aux marges latérales et à l’aire d’agrément, ainsi que d’exclure l’usage de chenil dans la zone Cbb-1 et de l'autoriser dans la zone Ib-1",
+      "etape": "projet_reglement",
+      "etape_date": "2026-05-05",
+      "zone_ref": "Rc-23",
+      "no_lot": "6512063",
+      "reglement_number": "1841-53-2026"
+    },
+    {
+      "id": "event-315-05-2026",
+      "label": "Second projet PPCMOI 2026-032 (245, rue Principale)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 42,
+          "excerpt": "D’adopter le second projet de PPCMOI numéro 2026-032, afin d’autoriser, sur\nl’immeuble situé au 245, rue Principale (lot 3 357 427 du cadastre du Québec)\nl'ajout d'une unité de logement pour l'hébergement"
+        }
+      ],
+      "date": "2026-05-05",
+      "meetingDate": "2026-05-05",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "dossier": "PPCMOI numéro 2026-032",
+      "municipality": "cowansville",
+      "resolution": "315-05-2026",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "description": "Adoption du second projet de PPCMOI numéro 2026-032 relatif à l'ajout d'une unité de logement pour l'hébergement de courte durée (résidence de tourisme, Rt), totalisant 4 logements en location, ainsi qu'à la régularisation de diverses anomalies liées à l'aire de stationnement, au 245, rue Principale, lot 3 357 427",
+      "etape": "second_projet",
+      "etape_date": "2026-05-05",
+      "zone_ref": "CaP-1",
+      "no_lot": "3357427"
+    },
+    {
+      "id": "event-262-05-2026",
+      "label": "Dérogation mineure 2026-006 (518 rue Principale)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D'approuver la demande de dérogation mineure 2026-006 relative à la\npropriété sise au 518 rue Principale, lot 3 355 762 du cadastre du Québec, afin\nde permettre :"
+        }
+      ],
+      "date": "2026-05-05",
+      "meetingDate": "2026-05-05",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "dossier": "2026-006",
+      "municipality": "cowansville",
+      "resolution": "262-05-2026",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "description": "Dérogation mineure 2026-006 au 518 rue Principale pour l'implantation d'une enseigne de direction à 0,5 m et d'un panneau menu rétroéclairé",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-05-05",
+      "zone_ref": "Cbc-2",
+      "no_lot": "3355762"
+    },
+    {
+      "id": "event-263-05-2026",
+      "label": "Dérogation mineure 2026-034 (111 rue du Muscadet)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D'approuver la demande de dérogation mineure 2026-034 relative à la\npropriété sise au 111 rue du Muscadet, lot 4 445 225 du cadastre du Québec,\nafin de permettre que la superficie des bâtiments"
+        }
+      ],
+      "date": "2026-05-05",
+      "meetingDate": "2026-05-05",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "dossier": "2026-034",
+      "municipality": "cowansville",
+      "resolution": "263-05-2026",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "description": "Demande de dérogation mineure 2026-034 permettant une superficie de bâtiments accessoires de 82,6 m² au lieu de 78,91 m² au 111 rue du Muscadet",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-05-05",
+      "no_lot": "4445225"
+    },
+    {
+      "id": "signal-258-05-2026",
+      "label": "Densification résidentielle zone Rc-23",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "review_status": "passed",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Considérant que le conseil municipal souhaite autoriser la modification\nproposée afin de permettre la réalisation d’un développement domiciliaire situé\nà proximité de l’école primaire Les Colibris;"
+        }
+      ],
+      "category": "densification",
+      "date": "2026-05-05",
+      "meetingDate": "2026-05-05",
+      "description": "Développement domiciliaire situé à proximité de l'école primaire Les Colibris prévoyant des habitations de 26 logements et de quatre étages dans la zone Rc-23",
+      "resolution": "258-05-2026",
+      "scope": "local",
+      "municipality": "cowansville",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "nb_unites_min": 26,
+      "etape": "projet_reglement",
+      "etape_date": "2026-05-05",
+      "zone_ref": "Rc-23",
+      "no_lot": "6512063",
+      "reglement_number": "1841-53-2026"
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "target": "bylaw-1841-53-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "evidence_refs": [
+        "ev-1841-53-2026"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26\nlogements et de quatre étages dans la zone Rc-23"
+        }
+      ]
+    },
+    {
+      "source": "source-0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "target": "event-258-05-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "evidence_refs": [
+        "ev-1841-53-2026"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26\nlogements et de quatre étages dans la zone Rc-23"
+        }
+      ]
+    },
+    {
+      "source": "event-258-05-2026",
+      "target": "zone-rc-23",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "evidence_refs": [
+        "ev-1841-53-2026"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26\nlogements et de quatre étages dans la zone Rc-23"
+        }
+      ]
+    },
+    {
+      "source": "event-258-05-2026",
+      "target": "signal-258-05-2026",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "evidence_refs": [
+        "ev-1841-53-2026"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Considérant que le conseil municipal souhaite autoriser la modification\nproposée afin de permettre la réalisation d’un développement domiciliaire situé\nà proximité de l’école primaire Les Colibris;"
+        }
+      ]
+    },
+    {
+      "source": "signal-258-05-2026",
+      "target": "zone-rc-23",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "evidence_refs": [
+        "ev-1841-53-2026"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Considérant que le présent règlement vise à permettre la construction\nd’immeubles résidentiels comptant 26 logements et de quatre étages dans la\nzone Rc-23, secteur de la rue James"
+        }
+      ]
+    },
+    {
+      "source": "event-315-05-2026",
+      "target": "zone-cap-1",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "evidence_refs": [
+        "ev-315-05-2026"
+      ],
+      "citations": [
+        {
+          "page": 42,
+          "excerpt": "Augmentation du nombre d’unités de location de courte durée, passant\nde 3 à 4 unités (classe d’usage Rt, non autorisée dans la zone CaP-1);"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-1841-53-2026",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26\nlogements et de quatre étages dans la zone Rc-23 (rue James), d’agrandir\ncette zone à même la zone Cga-1, d’y prévoir des assouplissements relatifs\naux marges latérales et à l’aire d’agrément, ainsi que d’exclure l’usage de\nchenil dans la zone Cbb-1 (rue de la Rivière) et de l’autoriser une seule fois\ndans la zone Ib-1 (chemin Brosseau)."
+    },
+    {
+      "id": "ev-315-05-2026",
+      "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+      "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+      "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+      "modality": "pdf",
+      "page": 42,
+      "excerpt": "D’adopter le second projet de PPCMOI numéro 2026-032, afin d’autoriser, sur\nl’immeuble situé au 245, rue Principale (lot 3 357 427 du cadastre du Québec)\nl'ajout d'une unité de logement pour l'hébergement de courte durée (résidence\nde tourisme, Rt), totalisant 4 logements en location, ainsi qu'à la régularisation\nde diverses anomalies liées à l'aire de stationnement, le tout tel\nqu'apparaissant sur les plans et documents soumis au soutien des présentes."
+    }
+  ],
+  "input_tokens": 8392,
+  "output_tokens": 2516
+}
+```

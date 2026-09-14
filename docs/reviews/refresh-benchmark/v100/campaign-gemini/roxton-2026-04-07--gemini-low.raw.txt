@@ -1,0 +1,349 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-0140f19b",
+      "label": "Procès-verbal du conseil de la Municipalité du Canton de Roxton - 7 avril 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "status": "attached",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "date": "2026-04-07",
+      "municipality": "canton-de-roxton",
+      "url": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+      "sourceKind": "pv",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "À une session ordinaire du conseil de la Municipalité du Canton de Roxton,\ntenue le 7 avril 2026 à 19h30, conformément aux dispositions du Code\nmunicipal de la Province de Québec."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-384-2026",
+      "label": "Règlement numéro 384-2026",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "status": "validated",
+      "numero": "384-2026",
+      "title": "Règlement numéro 384-2026 modifiant le règlement de zonage numéro 181-2003 de la Municipalité du Canton de Roxton modifiant les usages permis dans la zone 506",
+      "date": "2026-04-07",
+      "stage": "adoption",
+      "municipality": "canton-de-roxton",
+      "zone_cible": "506",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "resolution": "74-04-2026",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le\nrèglement de zonage numéro 181-2003 de la Municipalité du Canton de\nRoxton modifiant les usages permis dans la zone 506 »."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-181-2003",
+      "label": "Règlement de zonage numéro 181-2003",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "status": "attached",
+      "numero": "181-2003",
+      "title": "règlement de zonage numéro 181-2003",
+      "date": "2003-10-06",
+      "municipality": "canton-de-roxton",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "ATTENDU QUE\nle conseil de la Municipalité de Roxton a adopté, le 6\noctobre 2003, le règlement de zonage numéro 181-2003 ;"
+        }
+      ]
+    },
+    {
+      "id": "zone-506",
+      "label": "Zone 506",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "status": "candidate",
+      "code": "506",
+      "municipality": "canton-de-roxton",
+      "bylaw": "181-2003",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "ATTENDU QUE\nla zone visée, soit la zone 506, constitue un secteur\ndéstructuré pour l’agriculture, où les usages agricoles sont actuellement\nlimités à la culture des sols sans bâtiment;"
+        }
+      ]
+    },
+    {
+      "id": "event-adoption-384-2026",
+      "label": "Adoption du Règlement 384-2026",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "status": "validated",
+      "kind": "rezonage",
+      "date": "2026-04-07",
+      "decision": "approuvé",
+      "municipality": "canton-de-roxton",
+      "resolution": "74-04-2026",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "etape": "adoption",
+      "etape_date": "2026-04-07",
+      "zone_ref": "506",
+      "no_lot": "3841684",
+      "reglement_number": "384-2026",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Il est proposé par Mme. Isabelle Nadeau\nAppuyé par Mme Stéphanie Ménard\nEt résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+        }
+      ]
+    },
+    {
+      "id": "signal-rezonage-zone-506",
+      "label": "Signal - Modification des usages permis dans la zone 506",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "status": "candidate",
+      "category": "rezonage",
+      "date": "2026-04-07",
+      "municipality": "canton-de-roxton",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "resolution": "74-04-2026",
+      "scope": "local",
+      "etape": "adoption",
+      "etape_date": "2026-04-07",
+      "zone_ref": "506",
+      "no_lot": "3841684",
+      "reglement_number": "384-2026",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie\nintégrante du règlement de zonage numéro 181-2003 de la Municipalité de\nRoxton, est modifiée :\na)\npar l’ajout des usages agricoles de"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-384-2026",
+      "target": "bylaw-181-2003",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "evidence_refs": [
+        "ev-amends-181-2003"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le\nrèglement de zonage numéro 181-2003 de la Municipalité du Canton de\nRoxton modifiant les usages permis dans la zone 506 »."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-384-2026",
+      "target": "zone-506",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "evidence_refs": [
+        "ev-bylaw-zone-506"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie\nintégrante du règlement de zonage numéro 181-2003 de la Municipalité de\nRoxton, est modifiée :\na)\npar l’ajout des usages agricoles de"
+        }
+      ]
+    },
+    {
+      "source": "zone-506",
+      "target": "bylaw-181-2003",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "evidence_refs": [
+        "ev-zone-governed-by"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie\nintégrante du règlement de zonage numéro 181-2003 de la Municipalité de\nRoxton, est modifiée :\na)\npar l’ajout des usages agricoles de"
+        }
+      ]
+    },
+    {
+      "source": "event-adoption-384-2026",
+      "target": "zone-506",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "evidence_refs": [
+        "ev-event-targets-zone"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "ATTENDU QUE\nla zone visée, soit la zone 506, constitue un secteur\ndéstructuré pour l’agriculture, où les usages agricoles sont actuellement\nlimités à la culture des sols sans bâtiment;"
+        }
+      ]
+    },
+    {
+      "source": "event-adoption-384-2026",
+      "target": "signal-rezonage-zone-506",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "evidence_refs": [
+        "ev-event-raises-signal"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Il est proposé par Mme. Isabelle Nadeau\nAppuyé par Mme Stéphanie Ménard\nEt résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+        }
+      ]
+    },
+    {
+      "source": "signal-rezonage-zone-506",
+      "target": "zone-506",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "evidence_refs": [
+        "ev-signal-concerns-zone"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie\nintégrante du règlement de zonage numéro 181-2003 de la Municipalité de\nRoxton, est modifiée :\na)\npar l’ajout des usages agricoles de"
+        }
+      ]
+    },
+    {
+      "source": "source-0140f19b",
+      "target": "bylaw-384-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "evidence_refs": [
+        "ev-source-supports-bylaw"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le\nrèglement de zonage numéro 181-2003 de la Municipalité du Canton de\nRoxton modifiant les usages permis dans la zone 506 »."
+        }
+      ]
+    },
+    {
+      "source": "source-0140f19b",
+      "target": "event-adoption-384-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "evidence_refs": [
+        "ev-source-supports-event"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Il est proposé par Mme. Isabelle Nadeau\nAppuyé par Mme Stéphanie Ménard\nEt résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-amends-181-2003",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le règlement de zonage numéro 181-2003 de la Municipalité du Canton de Roxton modifiant les usages permis dans la zone 506 »."
+    },
+    {
+      "id": "ev-bylaw-zone-506",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie intégrante du règlement de zonage numéro 181-2003 de la Municipalité de Roxton, est modifiée : a) par l’ajout des usages agricoles de classe B « élevage » à la liste des usages autorisés dans la zone numéro 506;"
+    },
+    {
+      "id": "ev-zone-governed-by",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie intégrante du règlement de zonage numéro 181-2003 de la Municipalité de Roxton, est modifiée :"
+    },
+    {
+      "id": "ev-event-targets-zone",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "ATTENDU QUE la zone visée, soit la zone 506, constitue un secteur déstructuré pour l’agriculture, où les usages agricoles sont actuellement limités à la culture des sols sans bâtiment;"
+    },
+    {
+      "id": "ev-event-raises-signal",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Il est proposé par Mme. Isabelle Nadeau Appuyé par Mme Stéphanie Ménard Et résolu unanimement que le présent règlement soit adopté et qu'il soit statué et décrété par ce règlement ce qui suit:"
+    },
+    {
+      "id": "ev-signal-concerns-zone",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie intégrante du règlement de zonage numéro 181-2003 de la Municipalité de Roxton, est modifiée : a) par l’ajout des usages agricoles de classe B « élevage » à la liste des usages autorisés dans la zone numéro 506;"
+    },
+    {
+      "id": "ev-source-supports-bylaw",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le règlement de zonage numéro 181-2003 de la Municipalité du Canton de Roxton modifiant les usages permis dans la zone 506 »."
+    },
+    {
+      "id": "ev-source-supports-event",
+      "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+      "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+      "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Il est proposé par Mme. Isabelle Nadeau Appuyé par Mme Stéphanie Ménard Et résolu unanimement que le présent règlement soit adopté et qu'il soit statué et décrété par ce règlement ce qui suit:"
+    }
+  ],
+  "input_tokens": 4600,
+  "output_tokens": 1780
+}
+```

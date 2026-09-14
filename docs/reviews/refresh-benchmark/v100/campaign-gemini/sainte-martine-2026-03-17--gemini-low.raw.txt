@@ -1,0 +1,472 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "label": "Procès-verbal de la séance ordinaire du 17 mars 2026 - Sainte-Martine",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "date": "2026-03-17",
+      "municipality": "sainte-martine",
+      "sourceKind": "pv",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Séance ordinaire du conseil municipal de la Municipalité de Sainte-Martine, tenue\nle 17 mars 2026, à 19 h 30"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-501",
+      "label": "Règlement numéro 2026-501",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2026-501",
+      "title": "Règlement numéro 2026-501 modifiant le Règlement de zonage numéro 2019-342 afin d’ajouter les activités de recherche et développement en agriculture à la liste d’usages commerciaux para-agricoles",
+      "stage": "adoption",
+      "date": "2026-03-17",
+      "meetingDate": "2026-03-17",
+      "municipality": "sainte-martine",
+      "resolution": "2026-03-058",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en\nagriculture à la liste d’usages commerciaux para-agricoles soit adopté."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2019-342",
+      "label": "Règlement de zonage numéro 2019-342",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2019-342",
+      "title": "Règlement de zonage numéro 2019-342",
+      "municipality": "sainte-martine",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en\nagriculture à la liste d’usages commerciaux para-agricoles soit adopté."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2019-341",
+      "label": "Règlement adoptant le plan d’urbanisme numéro 2019-341",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2019-341",
+      "title": "Règlement adoptant le plan d’urbanisme numéro 2019-341",
+      "municipality": "sainte-martine",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "Que soit modifié le Règlement adoptant le plan d’urbanisme numéro 2019341 afin :\n• D’agrandir la zone MxtV-2 à même une partie de la zone P-3 afin\nd’y intégrer le lot numéro 6 660 191."
+        }
+      ]
+    },
+    {
+      "id": "zone-mxtv-2",
+      "label": "Zone MxtV-2",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "MxtV-2",
+      "municipality": "sainte-martine",
+      "meetingDate": "2026-03-17",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "Que soit modifié le Règlement adoptant le plan d’urbanisme numéro 2019341 afin :\n• D’agrandir la zone MxtV-2 à même une partie de la zone P-3 afin\nd’y intégrer le lot numéro 6 660 191."
+        }
+      ]
+    },
+    {
+      "id": "zone-p-3",
+      "label": "Zone P-3",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "P-3",
+      "municipality": "sainte-martine",
+      "meetingDate": "2026-03-17",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "Que soit modifié le Règlement adoptant le plan d’urbanisme numéro 2019341 afin :\n• D’agrandir la zone MxtV-2 à même une partie de la zone P-3 afin\nd’y intégrer le lot numéro 6 660 191."
+        }
+      ]
+    },
+    {
+      "id": "zone-h-31",
+      "label": "Zone H-31",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "H-31",
+      "municipality": "sainte-martine",
+      "meetingDate": "2026-03-17",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "Attendu que les maisons mobiles ne sont pas autorisées en zone H-31 ;"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-03-059",
+      "label": "Modification réglementaire 2025-016 - 122, rue Saint-Joseph",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "rezonage",
+      "date": "2026-03-17",
+      "meetingDate": "2026-03-17",
+      "resolution": "2026-03-059",
+      "dossier": "2025-016",
+      "decision": "approuvé",
+      "etape": "projet_reglement",
+      "etape_date": "2026-03-17",
+      "zone_ref": "MxtV-2",
+      "no_lot": "6660191",
+      "municipality": "sainte-martine",
+      "demandeur": "Louis-David Demers",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "D’autoriser partiellement les demandes de modifications réglementaires comme\nsuit :"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-03-061",
+      "label": "Demande d'autorisation CPTAQ 2026-004 - Rang Touchette",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "cptaq",
+      "date": "2026-03-17",
+      "meetingDate": "2026-03-17",
+      "resolution": "2026-03-061",
+      "dossier": "2026-004",
+      "decision": "approuvé",
+      "etape": "inconnu",
+      "etape_date": "2026-03-17",
+      "municipality": "sainte-martine",
+      "demandeur": "Sylvie Troilo",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 21,
+          "excerpt": "D’appuyer la demande d’autorisation à la CPTAQ telle que présentée, afin de\npermettre l’aliénation et l’utilisation à des fins autres que l’agriculture des lots\nnuméro 6 060 923 et 6 060 924"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-03-062",
+      "label": "Demande PIIA 2026-005 - 182, rue Saint-Joseph",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "piia",
+      "date": "2026-03-17",
+      "meetingDate": "2026-03-17",
+      "resolution": "2026-03-062",
+      "dossier": "2026-005",
+      "decision": "refusé",
+      "etape": "piia",
+      "etape_date": "2026-03-17",
+      "reglement_number": "2022-418",
+      "demandeur_corporate": "WS Québec inc.",
+      "municipality": "sainte-martine",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph."
+        }
+      ]
+    },
+    {
+      "id": "event-2026-03-063",
+      "label": "Demande démolition 2026-007 - 5, rue Phénix",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "derogation",
+      "date": "2026-03-17",
+      "meetingDate": "2026-03-17",
+      "resolution": "2026-03-063",
+      "dossier": "2026-007",
+      "decision": "approuvé",
+      "etape": "inconnu",
+      "etape_date": "2026-03-17",
+      "zone_ref": "H-31",
+      "demandeur": "Olivier Landry",
+      "municipality": "sainte-martine",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de\nreconstruction de l’immeuble, tel que présenté."
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-touchette",
+      "label": "Contrainte agricole CPTAQ - Lots 6060923 et 6060924",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "node_type": "Constraint",
+      "status": "validated",
+      "constraintType": "cptaq",
+      "municipality": "sainte-martine",
+      "organisme": "CPTAQ",
+      "resolution": "2026-03-061",
+      "meetingDate": "2026-03-17",
+      "dossier": "2026-004",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "Attendu la demande d’autorisation à la CPTAQ déposée par madame Sylvie\nTroilo, laquelle concerne l’aliénation et l’utilisation à des fins autres que\nl’agriculture des lots numéro 6 060 923 et 6 060 924"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-2026-501",
+      "target": "bylaw-2019-342",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "evidence_refs": [
+        "ev-bylaw-501-amends-342"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en\nagriculture à la liste d’usages commerciaux para-agricoles soit adopté."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-03-059",
+      "target": "zone-mxtv-2",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "evidence_refs": [
+        "ev-event-059-targets-mxtv2"
+      ],
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "Que soit modifié le Règlement adoptant le plan d’urbanisme numéro 2019341 afin :\n• D’agrandir la zone MxtV-2 à même une partie de la zone P-3 afin\nd’y intégrer le lot numéro 6 660 191."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-03-059",
+      "target": "zone-p-3",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "evidence_refs": [
+        "ev-event-059-targets-p3"
+      ],
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "Que soit modifié le Règlement adoptant le plan d’urbanisme numéro 2019341 afin :\n• D’agrandir la zone MxtV-2 à même une partie de la zone P-3 afin\nd’y intégrer le lot numéro 6 660 191."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-03-063",
+      "target": "zone-h-31",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "evidence_refs": [
+        "ev-event-063-zone-h31"
+      ],
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "Attendu que les maisons mobiles ne sont pas autorisées en zone H-31 ;"
+        }
+      ]
+    },
+    {
+      "source": "source-0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "target": "bylaw-2026-501",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "evidence_refs": [
+        "ev-bylaw-501-amends-342"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en\nagriculture à la liste d’usages commerciaux para-agricoles soit adopté."
+        }
+      ]
+    },
+    {
+      "source": "source-0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "target": "event-2026-03-059",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "evidence_refs": [
+        "ev-event-059-targets-mxtv2"
+      ],
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "D’autoriser partiellement les demandes de modifications réglementaires comme\nsuit :"
+        }
+      ]
+    },
+    {
+      "source": "source-0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "target": "event-2026-03-061",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "evidence_refs": [
+        "ev-event-061-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 21,
+          "excerpt": "D’appuyer la demande d’autorisation à la CPTAQ telle que présentée, afin de\npermettre l’aliénation et l’utilisation à des fins autres que l’agriculture des lots\nnuméro 6 060 923 et 6 060 924"
+        }
+      ]
+    },
+    {
+      "source": "source-0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "target": "event-2026-03-062",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "evidence_refs": [
+        "ev-event-062-piia"
+      ],
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph."
+        }
+      ]
+    },
+    {
+      "source": "source-0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "target": "event-2026-03-063",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "evidence_refs": [
+        "ev-event-063-zone-h31"
+      ],
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de\nreconstruction de l’immeuble, tel que présenté."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-bylaw-501-amends-342",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "sourceUrl": "https://sainte-martine.ca/wp-content/uploads/2026/04/conseil-mars-2026-vf.pdf",
+      "modality": "pdf",
+      "page": 18,
+      "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en\nagriculture à la liste d’usages commerciaux para-agricoles soit adopté."
+    },
+    {
+      "id": "ev-event-059-targets-mxtv2",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "sourceUrl": "https://sainte-martine.ca/wp-content/uploads/2026/04/conseil-mars-2026-vf.pdf",
+      "modality": "pdf",
+      "page": 19,
+      "excerpt": "Que soit modifié le Règlement adoptant le plan d’urbanisme numéro 2019341 afin :\n• D’agrandir la zone MxtV-2 à même une partie de la zone P-3 afin\nd’y intégrer le lot numéro 6 660 191."
+    },
+    {
+      "id": "ev-event-059-targets-p3",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "sourceUrl": "https://sainte-martine.ca/wp-content/uploads/2026/04/conseil-mars-2026-vf.pdf",
+      "modality": "pdf",
+      "page": 19,
+      "excerpt": "Que soit modifié le Règlement adoptant le plan d’urbanisme numéro 2019341 afin :\n• D’agrandir la zone MxtV-2 à même une partie de la zone P-3 afin\nd’y intégrer le lot numéro 6 660 191."
+    },
+    {
+      "id": "ev-event-061-cptaq",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "sourceUrl": "https://sainte-martine.ca/wp-content/uploads/2026/04/conseil-mars-2026-vf.pdf",
+      "modality": "pdf",
+      "page": 21,
+      "excerpt": "D’appuyer la demande d’autorisation à la CPTAQ telle que présentée, afin de\npermettre l’aliénation et l’utilisation à des fins autres que l’agriculture des lots\nnuméro 6 060 923 et 6 060 924"
+    },
+    {
+      "id": "ev-event-062-piia",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "sourceUrl": "https://sainte-martine.ca/wp-content/uploads/2026/04/conseil-mars-2026-vf.pdf",
+      "modality": "pdf",
+      "page": 22,
+      "excerpt": "De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph."
+    },
+    {
+      "id": "ev-event-063-zone-h31",
+      "source_file": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-martine/cas/0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.pdf",
+      "docSha": "0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1",
+      "sourceUrl": "https://sainte-martine.ca/wp-content/uploads/2026/04/conseil-mars-2026-vf.pdf",
+      "modality": "pdf",
+      "page": 22,
+      "excerpt": "D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de\nreconstruction de l’immeuble, tel que présenté."
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 5800,
+  "output_tokens": 2400
+}
+```

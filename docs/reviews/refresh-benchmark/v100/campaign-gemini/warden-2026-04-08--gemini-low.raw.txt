@@ -1,0 +1,323 @@
+```json
+{
+  "contract_version": "immo-pv-extraction-v9",
+  "type": "Graphify Extraction",
+  "nodes": [
+    {
+      "id": "doc-34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "label": "Procès-verbal de la séance ordinaire du Conseil de la Municipalité de Warden - 8 avril 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "date": "2026-04-08",
+      "municipality": "warden",
+      "url": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du Conseil de la Municipalité de Warden tenue le\nmercredi 8 avril 2026, à 19h45, à la mairie de Warden sise au 172, rue Principale à\nWarden."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2017-127",
+      "label": "Règlement de zonage numéro 2017-127",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "Bylaw",
+      "status": "attached",
+      "numero": "2017-127",
+      "title": "Règlement de zonage numéro 2017-127",
+      "municipality": "warden",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "« Projet de règlement numéro 2026-184 modifiant le règlement de zonage\nnuméro 2017-127 afin d'intégrer les dispositions relatives aux territoires\nincompatibles à l'activité minière (TIAM) »."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-184",
+      "label": "Projet de règlement numéro 2026-184",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2026-184",
+      "title": "Projet de règlement numéro 2026-184 modifiant le règlement de zonage numéro 2017-127 afin d'intégrer les dispositions relatives aux territoires incompatibles à l'activité minière (TIAM)",
+      "date": "2026-04-08",
+      "meetingDate": "2026-04-08",
+      "stage": "projet",
+      "municipality": "warden",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "resolution": "2026-04-047",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance\nultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184, intitulé :"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-047",
+      "label": "Avis de motion et adoption du projet de règlement 2026-184 (TIAM)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-04-08",
+      "meetingDate": "2026-04-08",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "resolution": "2026-04-047",
+      "etape": "avis_motion",
+      "etape_date": "2026-04-08",
+      "reglement_number": "2026-184",
+      "municipality": "warden",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "description": "Avis de motion, dépôt et adoption du projet de règlement numéro 2026-184 modifiant le règlement de zonage numéro 2017-127 afin d'intégrer les dispositions relatives aux territoires incompatibles à l'activité minière (TIAM).",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-180",
+      "label": "Règlement numéro 2026-180",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2026-180",
+      "title": "Règlement relatif à la gestion des immeubles patrimoniaux et à la délégation de certains mandats au comité consultatif d'urbanisme",
+      "date": "2026-04-08",
+      "meetingDate": "2026-04-08",
+      "stage": "adoption",
+      "municipality": "warden",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "resolution": "2026-04-062",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la\ndélégation de certains mandats au comité consultatif"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-181",
+      "label": "Règlement numéro 2026-181",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2026-181",
+      "title": "Règlement relatif à la démolition d'immeubles",
+      "date": "2026-04-08",
+      "meetingDate": "2026-04-08",
+      "stage": "adoption",
+      "municipality": "warden",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "resolution": "2026-04-063",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026181 intitulé « Règlement relatif à la démolition d'immeubles »;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-182",
+      "label": "Règlement numéro 2026-182",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2026-182",
+      "title": "Règlement relatif à l'occupation et à l'entretien des bâtiments",
+      "date": "2026-04-08",
+      "meetingDate": "2026-04-08",
+      "stage": "adoption",
+      "municipality": "warden",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "resolution": "2026-04-064",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments »;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-2026-184",
+      "target": "bylaw-2017-127",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "evidence_refs": [
+        "ev-amends-2026-184"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "« Projet de règlement numéro 2026-184 modifiant le règlement de zonage\nnuméro 2017-127 afin d'intégrer les dispositions relatives aux territoires\nincompatibles à l'activité minière (TIAM) »."
+        }
+      ]
+    },
+    {
+      "source": "doc-34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "target": "bylaw-2026-184",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "evidence_refs": [
+        "ev-mentions-bylaw-2026-184"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance\nultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184, intitulé :"
+        }
+      ]
+    },
+    {
+      "source": "doc-34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "target": "event-2026-04-047",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "evidence_refs": [
+        "ev-event-2026-04-047"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+        }
+      ]
+    },
+    {
+      "source": "doc-34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "target": "bylaw-2026-180",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-180"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la\ndélégation de certains mandats au comité consultatif"
+        }
+      ]
+    },
+    {
+      "source": "doc-34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "target": "bylaw-2026-181",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-181"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026181 intitulé « Règlement relatif à la démolition d'immeubles »;"
+        }
+      ]
+    },
+    {
+      "source": "doc-34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "target": "bylaw-2026-182",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-182"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments »;"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-amends-2026-184",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "« Projet de règlement numéro 2026-184 modifiant le règlement de zonage\nnuméro 2017-127 afin d'intégrer les dispositions relatives aux territoires\nincompatibles à l'activité minière (TIAM) »."
+    },
+    {
+      "id": "ev-mentions-bylaw-2026-184",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance\nultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184, intitulé :"
+    },
+    {
+      "id": "ev-event-2026-04-047",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+    },
+    {
+      "id": "ev-bylaw-2026-180",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la\ndélégation de certains mandats au comité consultatif d'urbanisme »;"
+    },
+    {
+      "id": "ev-bylaw-2026-181",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026181 intitulé « Règlement relatif à la démolition d'immeubles »;"
+    },
+    {
+      "id": "ev-bylaw-2026-182",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments »;"
+    }
+  ],
+  "input_tokens": 4028,
+  "output_tokens": 1780
+}
+```
