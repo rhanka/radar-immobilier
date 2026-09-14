@@ -1,0 +1,558 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-pv-2026-08-04",
+      "label": "Procès-verbal de la séance ordinaire du 4 août 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "url": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Une séance ordinaire du conseil de la Municipalité de SaintÉtienne-de-Bolton, tenue le 4 août 2026 à 19 h 00"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-05",
+      "label": "Règlement 2026-05 modifiant le Règlement de zonage 2014-05",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2026-05",
+      "title": "Règlement modifiant le Règlement de zonage 2014-05",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+        },
+        {
+          "page": 10,
+          "excerpt": "2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2014-05",
+      "label": "Règlement de zonage 2014-05",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2014-05",
+      "title": "Règlement de zonage 2014-05",
+      "municipality": "saint-etienne-de-bolton",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+        }
+      ]
+    },
+    {
+      "id": "zone-com-1",
+      "label": "Zone COM-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Zone",
+      "status": "validated",
+      "code": "COM-1",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Zone : COM-1"
+        }
+      ]
+    },
+    {
+      "id": "zone-rur-12",
+      "label": "Zone RUR-12",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Zone",
+      "status": "validated",
+      "code": "RUR-12",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Zone : RUR-12"
+        }
+      ]
+    },
+    {
+      "id": "zone-rur-8",
+      "label": "Zone RUR-8",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Zone",
+      "status": "validated",
+      "code": "RUR-8",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Zone : RUR-8"
+        }
+      ]
+    },
+    {
+      "id": "zone-vil-2",
+      "label": "Zone VIL-2",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Zone",
+      "status": "validated",
+      "code": "VIL-2",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "Zone : VIL-2"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-2026-08-154",
+      "label": "PIIA Chambre froide Coop du Grand-Bois",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "decision": "approuvé",
+      "kind": "piia",
+      "etape": "piia",
+      "demandeur_corporate": "Coopérative de solidarité de St-Étienne-de-Bolton",
+      "municipality": "saint-etienne-de-bolton",
+      "resolution": "2026-08-154",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Autorisation pour l’émission d’un permis pour l’installation à l’arrière du bâtiment de la Coop du Grand-Bois d’une chambre froide extérieure.",
+      "zone_ref": "COM-1",
+      "no_lot": "5191695",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "g. Autorisation pour l’émission d’un permis pour\nl’installation à l’arrière du bâtiment de la Coop du\nGrand-Bois d’une chambre froide extérieure.\nDemandeur : Coopérative de solidarité de St-Étienne-de-Bolton"
+        },
+        {
+          "page": 12,
+          "excerpt": "2026-08-154 Il est proposé par Vincent Jarry\nappuyé par Christine Boutin\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU, l’ajout d’une toiture"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-2026-08-155",
+      "label": "PIIA Garage 24, Allée des Sommets",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "decision": "approuvé",
+      "kind": "piia",
+      "etape": "piia",
+      "municipality": "saint-etienne-de-bolton",
+      "resolution": "2026-08-155",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Autorisation pour démolir l’abri automobile existant et le remplacer par un garage au 24, Allée des Sommets.",
+      "superficie_m2": 5749.2,
+      "zone_ref": "RUR-12",
+      "no_lot": "5662886",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "h. Autorisation pour démolir l’abri automobile\nexistant et le remplacer par un garage au 24, Allée\ndes Sommets.\nAdresse : 24, Allée des Sommets\nLot : 5 662 886\nZone : RUR-12"
+        },
+        {
+          "page": 12,
+          "excerpt": "2026-08-155 Il est proposé par Harry Bird\nappuyé par Jocelyn Brasseur\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-2026-08-156",
+      "label": "Dérogation mineure 135, rue de la Serpentine",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "decision": "refusé",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "municipality": "saint-etienne-de-bolton",
+      "resolution": "2026-08-156",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Refus de la demande de dérogation mineure de réduire la distance entre une piscine creusée et la limite latérale à 2,4 mètres au lieu de 3 mètres au 135, rue de la Serpentine.",
+      "superficie_m2": 14689.8,
+      "zone_ref": "RUR-8",
+      "no_lot": "6380011",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "i. Refus de la demande de dérogation mineure de\nréduire la distance entre une piscine creusée et la"
+        },
+        {
+          "page": 13,
+          "excerpt": "2026-08-156\n\nIl est proposé par Jocelyn Brasseur\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal refuse, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-2026-08-157",
+      "label": "Dérogation mineure lot 5 191 546 chemin de la Tour",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "decision": "refusé",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "municipality": "saint-etienne-de-bolton",
+      "resolution": "2026-08-157",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Refus de la demande de dérogation mineure visant à permettre l’abattage d’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la période de gel.",
+      "zone_ref": "RUR-12",
+      "no_lot": "5191546",
+      "reglement_number": "2014-05",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "j. Refus de la demande de dérogation mineure visant\nà permettre l’abattage d’arbre sur le lot 5 191 546\ndu chemin de la Tour en dehors de la période de\ngel."
+        },
+        {
+          "page": 14,
+          "excerpt": "2026-08-157\n\nIl est proposé par Vincent Jarry\nappuyé par Alexandre Berger\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal refuse, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-2026-08-158",
+      "label": "PIIA Toiture 572, 1er Rang",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "decision": "approuvé",
+      "kind": "piia",
+      "etape": "piia",
+      "municipality": "saint-etienne-de-bolton",
+      "resolution": "2026-08-158",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Autorisation pour le remplacement du revêtement de la toiture de la résidence située au 572, 1er Rang.",
+      "zone_ref": "VIL-2",
+      "no_lot": "5191952",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "k. Autorisation pour le remplacement du revêtement\nde la toiture de la résidence située au 572, 1er Rang.\nAdresse : 572, 1er Rang\nLot : 5 191 952\nZone : VIL-2"
+        },
+        {
+          "page": 14,
+          "excerpt": "2026-08-158 Il est proposé par Robert Bergeron\nappuyé par Christine Boutin\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-2026-05",
+      "target": "bylaw-2014-05",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-amends-2026-05"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-154",
+      "target": "zone-com-1",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-154"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Adresse : 12, rue Principale\nLot : 5 191 695\nZone : COM-1"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-155",
+      "target": "zone-rur-12",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-155"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Adresse : 24, Allée des Sommets\nLot : 5 662 886\nZone : RUR-12"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-156",
+      "target": "zone-rur-8",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-156"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Adresse : 135, rue de la Serpentine\nLot : 6 380 011\nZone : RUR-8"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-157",
+      "target": "zone-rur-12",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-157"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Adresse : de la Tour\nLot : 5 191 546\nZone : RUR-12"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-2026-08-158",
+      "target": "zone-vil-2",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-158"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "Adresse : 572, 1er Rang\nLot : 5 191 952\nZone : VIL-2"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-08-04",
+      "target": "bylaw-2026-05",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-source-bylaw-2026-05"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-08-04",
+      "target": "designation-event-2026-08-154",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-154"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "2026-08-154 Il est proposé par Vincent Jarry\nappuyé par Christine Boutin\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-08-04",
+      "target": "designation-event-2026-08-155",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-155"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "2026-08-155 Il est proposé par Harry Bird\nappuyé par Jocelyn Brasseur\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-08-04",
+      "target": "designation-event-2026-08-156",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-156"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "2026-08-156\n\nIl est proposé par Jocelyn Brasseur\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal refuse, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-08-04",
+      "target": "designation-event-2026-08-157",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-157"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "2026-08-157\n\nIl est proposé par Vincent Jarry\nappuyé par Alexandre Berger\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal refuse, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-08-04",
+      "target": "designation-event-2026-08-158",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-158"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "2026-08-158 Il est proposé par Robert Bergeron\nappuyé par Christine Boutin\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-amends-2026-05",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+    },
+    {
+      "id": "ev-source-bylaw-2026-05",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+    },
+    {
+      "id": "ev-event-154",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Adresse : 12, rue Principale\nLot : 5 191 695\nZone : COM-1"
+    },
+    {
+      "id": "ev-event-155",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "Adresse : 24, Allée des Sommets\nLot : 5 662 886\nZone : RUR-12"
+    },
+    {
+      "id": "ev-event-156",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "Adresse : 135, rue de la Serpentine\nLot : 6 380 011\nZone : RUR-8"
+    },
+    {
+      "id": "ev-event-157",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "Adresse : de la Tour\nLot : 5 191 546\nZone : RUR-12"
+    },
+    {
+      "id": "ev-event-158",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "Adresse : 572, 1er Rang\nLot : 5 191 952\nZone : VIL-2"
+    }
+  ],
+  "input_tokens": 4900,
+  "output_tokens": 2450
+}
+```
