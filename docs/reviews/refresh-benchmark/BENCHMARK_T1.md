@@ -1,6 +1,17 @@
 # Benchmark T1 — décision M1
 
-## Campagne v5 — décision actuelle
+## Campagne v7
+
+Le plafond commun de 65 536 a permis d'exécuter le contrôle Valcourt puis les
+cinq PDF sans 429 ni saturation : 5/5 HTTP 200 et `STOP`, 3/5 sorties acceptées.
+Le F1 macro des cas acceptés est 0,436. Saint-Barthélemy échoue le profil et
+Waterloo la provenance. `gemini-3.8-flash-tiered` LOW est la M1 provisoire,
+sans promotion, en attente des deux jugements aveugles lancés par le conductor.
+
+Le [rapport v7](v7/report.md), le [bundle aveugle](v7/blind-bundle.json) et la
+[consigne juge](v7/judge-prompt.md) portent le détail, les SHA et les réserves.
+
+## Campagne v5 — historique
 
 Le contrôle préalable Valcourt du contrat corrigé a reçu HTTP 200, puis a
 échoué au parse strict : la réponse possède un fence ouvrant et un JSON
