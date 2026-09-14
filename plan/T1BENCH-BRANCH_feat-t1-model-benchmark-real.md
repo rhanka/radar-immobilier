@@ -27,6 +27,7 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 - [x] Lot 5 — Report reproducibility, failures, quota visibility, velocity, and model identity evidence.
 - [x] Lot 6 — Correct the Gemini endpoint diagnosis and guard it without changing historical receipts.
 - [x] Lot 7 — Freeze the T1 integration inputs, adapters, Graphify version, and execution budget.
+- [x] Lot 8 — Enforce one shared runner contract and transport-only retry policy for every live variant.
 
 ## Gates
 
