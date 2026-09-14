@@ -109,24 +109,27 @@
 - [x] Lot 3h5: after preprod acceptance, repeat inventory/provision/copy/fence and bindings for production.
   - [x] Create and validate the dedicated bucket-scoped OVH PROD identity and Kubernetes Secret projections without exposing values.
   - [x] Copy the exact PROD SCW canonical corpus to OVH BHS and record body/key/size parity: 59,017 objects, 12,534,514,457 bytes, manifest SHA-256 `52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425`.
-  - [ ] Revalidate destination headers, user metadata and tags plus the final source scan with the strengthened read-only checker before restoring the exact-parity claim.
+  - [x] Revalidate destination headers, user metadata and tags plus the final source scan with the strengthened read-only checker before restoring the exact-parity claim.
   - [x] Rebind the ready PROD API and prepare the refresh workloads with dedicated OVH references; retain the TEM exception.
   - [x] Remove the proven-empty PROD MinIO StatefulSet, Service, 5Gi PVC and orphan ingress policy after parity.
 - [ ] Lot 4: conductor completes final parity/freshness/recovery verification for the already-performed preprod and production cutovers; T1 gates only legacy grounding retirement.
   - [ ] Reconfirm that PREPROD and PROD OVH DOCS targets match the canonical bodies, attributes, object count, byte count and manifest digest.
+    - [x] PROD strengthened final scan: four receipts green, 59,017 objects / 12,534,514,457 bytes, exact source and target attributes, canonical digest unchanged.
+    - [ ] PREPROD final gate remains to be rerun independently before closing the parent item.
   - [x] PREPROD MinIO StatefulSet, Service, 40Gi PVC and six ingress policies are absent; its non-secret before/after receipt remains on the checkpoint PVC.
   - [x] PROD MinIO resources are absent; the 1Gi checkpoint PVC and canonical recovery evidence remain available.
 - [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
 
 Audit checkpoint: inventory, file map, and acceptance gates are recorded in
-`docs/architecture/scw-final-sweep.md`. The completed PROD Job reports the
-canonical object count, byte count and manifest digest, but final parity is
-reopened for destination attributes and final-source freshness. The fresh
-non-secret PROD receipt records both the `ci-deployer` ResourceQuota read
-denial and the successful full final-status run under the existing read-only
-operator context on the same OVH server and explicit namespace. MinIO
-workloads, Services and data PVCs are recorded absent in both namespaces, while
-the explicit Scaleway TEM configuration and Secret reference remain present.
+`docs/architecture/scw-final-sweep.md`. Strengthened PROD Job `vz8kd` records
+all four final proofs green: exact source, zero destination attribute conflicts,
+exact final destination, and a complete exact-parity summary for 59,017 objects
+and 12,534,514,457 bytes. The non-secret receipts record both the earlier
+`ci-deployer` ResourceQuota read denial and the successful operator observations
+on the same OVH server and explicit namespace. MinIO workloads, Services and
+data PVCs are recorded absent in both namespaces, while the explicit Scaleway
+TEM configuration and Secret reference remain present. PREPROD final gates
+remain open until their independent rerun.
 
 ## Merge / Close
 - [ ] Conductor accepts code, CI, runtime and recovery proof; no closure based only on text search.
