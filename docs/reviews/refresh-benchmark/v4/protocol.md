@@ -43,7 +43,7 @@ Code runtime client, and the benchmark volume has no Anthropic SDK. A custom
 HTTP client would be an unfrozen transport implementation, so the campaign
 waits for a supported path from s-conductor rather than fabricating one.
 
-## Frozen Gemini transport diagnosis
+## Amended Gemini gateway diagnosis
 
 The five initial Candidate G requests returned HTTP 404 without preserving the
 provider body. This is not evidence that Gemini 3.8 or `LOW` is unavailable:
@@ -52,16 +52,21 @@ an earlier native AGY run produced `PING_OK` with effective model
 a time and retain only whitelisted Google error `code`, `status`, and redacted
 `message` fields.
 
-The diagnostic order changes one variable per probe:
+The original runner instantiated `CloudCodeRuntimeClient` directly; it did not
+prove use of the already-operational gateway. The two direct-host probes are
+retained as diagnostics only. A manual host substitution is not a supported
+solution and makes no claim about gateway correctness.
 
-1. reproduce llm-mesh 0.19 exactly (`daily-cloudcode-pa`, model 3.8, `LOW`);
-2. retain model, effort, and body but use AGY's proven `cloudcode-pa` host;
-3. only if the host is not causal, omit effort, then try `MEDIUM` and `HIGH`;
-4. only if still unresolved, compare envelope fields against the proven AGY
-   route, one field per probe.
+The corrected diagnostic order is:
 
-After the first green transport probe, run the complete frozen Lac case. Only
-a green full case authorizes the five-document Candidate G campaign. The
+1. identify the official enrolled-gateway call contract without modifying
+   llm-mesh or sentropic;
+2. obtain a gateway `gemini-3.8-flash` ping with identity, effort, usage, and
+   sanitized transport evidence;
+3. adapt only the radar runner to that gateway contract;
+4. run one frozen Lac case, then all five cases only if it is green.
+
+Only a green full Lac case authorizes the five-document Candidate G campaign. The
 installed package version/static model profile, account public model allowlist
 (or its absence), endpoint, envelope shape, requested/effective model, and
 provider error whitelist are recorded without credentials or response headers.

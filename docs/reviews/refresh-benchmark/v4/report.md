@@ -6,9 +6,9 @@ No current candidate is qualified for T1. The effective historical Sonnet 4.6
 artifacts retain materially more municipal signal than the real Luna-low
 outputs, but they were produced through an older Graphify/prompt path. Luna
 failed the frozen extraction validator on all five PDFs. Gemini 3.8 is not yet
-included in the quality ranking: its llm-mesh 0.19 endpoint defect is proven,
-and the corrected enrolled Cloud Code route currently returns 429 before a
-full document can run. A byte-comparable Sonnet 4.6 run is also still blocked
+included in the quality ranking: the v4 runner used a direct Cloud Code client
+instead of the operational gateway, so its 404/429 diagnostics do not qualify
+a gateway run. A byte-comparable Sonnet 4.6 run is also still blocked
 before contact by the absence of a supported Anthropic runtime client.
 
 ## Executed systems
@@ -17,7 +17,7 @@ before contact by the absence of a supported Anthropic runtime client.
 |---|---:|---|---|
 | Historical Sonnet | 0 reruns; 5 retained outputs | `claude-sonnet-4-6` receipt | historical reference only |
 | Luna low | 5 | `gpt-5.6-luna`, `low`, Codex account | 5 responses; 0/5 validator acceptance |
-| Gemini low | 5 initial + 3 small probes | `gemini-3.8-flash`, `LOW`, Cloud Code account | endpoint cause proven; no full output |
+| Gemini low | 5 initial + 3 small probes | `gemini-3.8-flash`, `LOW`, direct client | gateway run pending; no full output |
 | Comparable Sonnet | 0 | requested `claude-sonnet-4-6` | supported client unavailable |
 
 The five immutable inputs and frozen prompt/schema/oracle hashes are listed in
@@ -49,8 +49,8 @@ Historical retained timing totals 496,883 ms (mean 99,376.6 ms). Luna totals
 600,797 ms (mean 120,159.4 ms), 20.9% slower. Luna reports 61,537 input,
 32,247 output, and 710 reasoning tokens. Codex subscription usage moved from
 60% to 61% over the campaign; no metered API key was used. Cloud Code exposes
-no comparable quota snapshot in the benchmark path; the corrected-host probes
-returned 429 `RESOURCE_EXHAUSTED` twice.
+no comparable quota snapshot in the benchmark path; unsupported manual-host
+probes returned 429 `RESOURCE_EXHAUSTED` twice.
 
 ## Gemini transport finding
 
@@ -58,9 +58,10 @@ The exact llm-mesh 0.19 probe to `daily-cloudcode-pa` returned whitelisted 404
 `NOT_FOUND` / “Requested entity was not found.” Changing only the hostname to
 the AGY-compatible `cloudcode-pa` route changed the result to 429
 `RESOURCE_EXHAUSTED`; model, `LOW`, cap, and envelope fields stayed fixed.
-This proves the original 404 was the `daily-` endpoint, not model absence or an
-unsupported effort. See `gemini-transport-diagnosis.md` and its three redacted
-receipts. No medium/high probe or PDF run was spent after that cause was known.
+This proves only that the direct runner paths differ; it does not identify a
+gateway defect or a supported solution. See `gemini-transport-diagnosis.md`
+and its three redacted receipts. No PDF output from those bypass probes is
+included in the comparison.
 
 ## Judge identity boundary
 
@@ -78,8 +79,9 @@ identified; Astra supplied the second independent path.
   Make targets with the enrolled keyring mounted read-only and copied into an
   ephemeral `/run` filesystem.
 
-The decision boundary is unchanged: obtain a supported llm-mesh Cloud Code
-endpoint with available quota, then require a green one-PDF preflight before
-the five Gemini cases. Obtain a supported comparable Anthropic client before
+The decision boundary is: call the existing gateway through its official
+enrolled contract, then require a green one-PDF preflight before the five
+Gemini cases. Use the same gateway for comparable Sonnet if it exposes that
+provider; otherwise obtain a supported comparable Anthropic client before
 the five Sonnet cases. Re-freeze a three-system blind bundle only after those
 real outputs exist; do not assign failed transports a quality score of zero.

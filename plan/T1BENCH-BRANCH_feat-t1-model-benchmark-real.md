@@ -21,7 +21,7 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 
 - [x] Lot 0 — Read rules/skills; create isolated branch and identify five frozen cases/accounts.
 - [x] Lot 1 — Commit the frozen protocol and hermetic runner tests.
-- [ ] Lot 2 — Record quota/preflight, run five Luna low and five Gemini low cases once (Gemini blocked by transport defect then quota).
+- [ ] Lot 2 — Record quota/preflight, run five Luna low and five Gemini low cases once (Gemini gateway integration pending).
 - [x] Lot 3 — Score deterministic metrics and freeze an identity-blind judge bundle.
 - [x] Lot 4 — Obtain independent Sol xhigh and Astra xhigh judgments through H2A MCP.
 - [x] Lot 5 — Report reproducibility, failures, quota visibility, velocity, and model identity evidence.

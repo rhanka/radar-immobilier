@@ -1,4 +1,4 @@
-# Gemini 3.8 Cloud Code transport diagnosis
+# Gemini 3.8 runner-path diagnosis
 
 Captured 2026-09-14 without API keys, secret-bearing headers, full error
 bodies, or sentropic repository changes.
@@ -10,8 +10,8 @@ bodies, or sentropic repository changes.
   has no explicit `modelIds` allowlist.
 - The 0.19.0 source retained at sentropic worktree commit
   `2f1f6a2e084b93c8a35b3bd8ac59d10e3e7ee5b9` routes that exact model to
-  Cloud Code. Commit `9e0e0ee4` added the model. Its transport constant uses
-  `daily-cloudcode-pa.googleapis.com`.
+  Cloud Code. Commit `9e0e0ee4` added the model. The v4 runner instantiated
+  that direct runtime client rather than the operational gateway.
 - The historical native AGY receipt at
   `.lanes/conductor/tmp/bench-llm/bench/v2/pings/gemini/.h2a/runs/bench-v2-ping-gemini/output.log`
   records effective model `gemini-3.8-flash`, `PING_OK`, and 1.072 s. This
@@ -29,16 +29,17 @@ the same llm-mesh envelope fields. Error evidence was parsed from
 `response.clone().json()` and reduced to `code`, `status`, and redacted
 `message`.
 
-## Finding and boundary
+## Corrected finding and boundary
 
-The first proven cause of the original 404 is the llm-mesh 0.19
-`daily-cloudcode-pa` endpoint: changing only that host reaches the provider's
-quota layer instead of `NOT_FOUND`. Effort is not causal, so the frozen matrix
-does not spend subscription quota on `MEDIUM`/`HIGH` variants.
+The original 404 characterizes only the v4 runner's direct-client path.
+Changing its host manually and reaching a different response is a differential
+diagnostic, not a supported fix and not evidence of a gateway defect. The
+operational gateway must be called through its official contract; effort was
+therefore not varied on the bypass path.
 
-There is no green comparable Gemini case yet. The corrected host currently
-returns 429, so no full frozen-document run is authorized. Native AGY is not a
+There is no green comparable Gemini case yet. The manual-host probe returned
+429, so no full frozen-document run is authorized. Native AGY is not a
 substitute for Candidate G because it cannot attest the same Graphify prompt,
-schema, cap, and validator chain. Candidate G remains pending a supported
-llm-mesh transport correction plus available enrolled-account quota; it is not
-ranked as a zero or declared model-unavailable.
+schema, cap, and validator chain. Candidate G remains pending an official
+gateway ping and radar-runner integration; it is not ranked as a zero or
+declared model-unavailable.
