@@ -59,4 +59,5 @@ test("all live variants use the frozen adapter boundary and execution budget", (
   assert.equal(outputTokenCapForCampaign("v8"), 65_536);
   assert.equal(outputTokenCapForCampaign("v9"), 65_536);
   assert.equal(outputTokenCapForCampaign("v10"), 65_536);
+  assert.equal(outputTokenCapForCampaign("v11"), 65_536);
 });

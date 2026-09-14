@@ -32,10 +32,12 @@ test("the five immutable PDFs and page texts match the manifest", async () => {
 
 test("prompt contract covers each input once and is tied to corrected T1", async () => {
   assert.equal(prompts.graphifyVersion, "0.18.0");
-  assert.equal(prompts.meshVersion, ["v5", "v6", "v7", "v8", "v9", "v10"].includes(campaign) ? "0.19.1" : "0.19.0");
+  assert.equal(prompts.meshVersion, ["v5", "v6", "v7", "v8", "v9", "v10", "v11"].includes(campaign)
+    ? "0.19.1" : "0.19.0");
   assert.equal(prompts.t1Commit,
     process.env.BENCHMARK_T1_COMMIT ?? "f9b311da536bda2e1442d154a05599c35b482518");
-  assert.equal(prompts.maxOutputTokens, ["v7", "v8", "v9", "v10"].includes(campaign) ? 65_536 : 16_384);
+  assert.equal(prompts.maxOutputTokens, ["v7", "v8", "v9", "v10", "v11"].includes(campaign)
+    ? 65_536 : 16_384);
   assert.equal(sha256(prompts.systemPrompt), prompts.systemPromptSha256);
   assert.deepEqual(prompts.documents.map(({ id }) => id).sort(),
     manifest.documents.map(({ id }) => id).sort());
@@ -48,7 +50,7 @@ test("prompt contract covers each input once and is tied to corrected T1", async
 });
 
 test("controls keep their regulatory meaning", () => {
-  if (["v3", "v5", "v6", "v7", "v8", "v9", "v10"].includes(campaign)) {
+  if (["v3", "v5", "v6", "v7", "v8", "v9", "v10", "v11"].includes(campaign)) {
     assert.equal(manifest.documents.some(({ selectionRationale }) =>
       /agenda/.test(selectionRationale) && /not adoption/.test(selectionRationale)), true);
     return;
@@ -58,6 +60,31 @@ test("controls keep their regulatory meaning", () => {
   assert.match(negative.selectionRationale, /Observed no-finding control/);
   assert.match(agenda.selectionRationale, /future agenda/);
   assert.match(agenda.selectionRationale, /no completed adoption/);
+});
+
+test("v11 keeps v10 frozen except for the v7 profile-derived prompt contract", async () => {
+  if (campaign !== "v11") return;
+  const v10Root = resolve(root, "docs/reviews/refresh-benchmark/v10");
+  const v10Manifest = JSON.parse(await readFile(resolve(v10Root, "manifest.json"), "utf8"));
+  const v10Prompts = JSON.parse(await readFile(resolve(v10Root, "prompt-freeze.json"), "utf8"));
+  const { campaign: _v11Campaign, ...v11Manifest } = manifest;
+  const { campaign: _v10Campaign, ...baseManifest } = v10Manifest;
+  assert.deepEqual(v11Manifest, baseManifest);
+  assert.deepEqual(await readFile(resolve(campaignRoot, "manual-oracle.json")),
+    await readFile(resolve(v10Root, "manual-oracle.json")));
+  const stablePrompt = ({ campaign: _campaign, frozenAt: _time, t1Commit: _commit,
+    profileModuleSha256: _profile, corpusModuleSha256: _corpus, documents, ...stable }) => ({ ...stable,
+    documents: documents.map(({ schemaSha256: _schema, promptSha256: _prompt,
+      schemaBytes: _schemaBytes, promptBytes: _promptBytes, ...document }) => document) });
+  assert.deepEqual(stablePrompt(prompts), stablePrompt(v10Prompts));
+  assert.notEqual(prompts.t1Commit, v10Prompts.t1Commit);
+  assert.notEqual(prompts.profileModuleSha256, v10Prompts.profileModuleSha256);
+  assert.notEqual(prompts.corpusModuleSha256, v10Prompts.corpusModuleSha256);
+  for (const document of prompts.documents) {
+    const previous = v10Prompts.documents.find(({ id }) => id === document.id);
+    assert.notEqual(document.schemaSha256, previous.schemaSha256);
+    assert.notEqual(document.promptSha256, previous.promptSha256);
+  }
 });
 
 test("v10 keeps v9 frozen except for the v6 profile-derived prompt contract", async () => {
