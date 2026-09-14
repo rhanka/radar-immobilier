@@ -40,7 +40,7 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 - [x] Lot 14 — Compare Gemini 3.8 Flash HIGH with v7 LOW at the same 65,536-token contract.
 - [x] Lot 15 — Freeze the exact v7 LOW contract as the v9 replay.
 - [x] Lot 16 — Execute five v9 requests without a control and reconcile the measurements.
-- [ ] Lot 17 — Present the M1 owner decision dossier.
+- [x] Lot 17 — Present the M1 owner decision dossier.
 
 ## Gates
 

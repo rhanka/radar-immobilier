@@ -125,6 +125,5 @@ Le manifeste, le gel de prompt et l'oracle sont copiés de v7. Seul le champ
 - Oracle : `4d50a26c869283199c58dcb75cf4055bccb39f988a9c700c026ddd0a1ef87130`.
 - Comparaison : `c31b367c7d371711cd42abbf9c65671be3940d4099b0edb30850d2914a703f32`.
 
-Gates : v9 19/19, cinq reçus v2 requalifiés hors ligne, score 5/5 cas,
-`git diff --check` à exécuter au lot documentaire. Aucun acte produit ni merge
-n'a été effectué.
+Gates : v9 19/19, cinq reçus v2 requalifiés hors ligne, score 5/5 cas et
+`git diff --check` réussi. Aucun acte produit ni merge n'a été effectué.
