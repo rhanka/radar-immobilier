@@ -1,0 +1,813 @@
+```json
+{
+  "contract_version": "immo-pv-extraction-v8",
+  "type": "Graphify Extraction",
+  "nodes": [
+    {
+      "id": "source-pv-2026-09-08",
+      "label": "Procès-verbal – Séance ordinaire – 8 septembre 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "sha256": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "date": "2026-09-08",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "url": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+      "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+      "sourceKind": "pv",
+      "sourceType": "pv",
+      "format": "pdf",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil de la Municipalité de Saint-Barthélemy tenue\nle 8 septembre 2026 à 20h00"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-288-90",
+      "label": "Règlement de zonage numéro 288-90",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "numero": "288-90",
+      "bylawNumber": "288-90",
+      "number": "288-90",
+      "title": "Règlement de zonage numéro 288-90",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "status": "candidate",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-738-26",
+      "label": "Règlement numéro 738-26 amendant le règlement de zonage numéro 288-90 afin de permettre les constructions accessoires en cour avant pour les propriétés en bordure d'un lac",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "numero": "738-26",
+      "bylawNumber": "738-26",
+      "number": "738-26",
+      "title": "Règlement numéro 738-26 amendant le règlement de zonage numéro 288-90 afin de permettre les constructions accessoires en cour avant pour les propriétés en bordure d'un lac",
+      "objet": "Permettre l'implantation de construction et aménagement accessoire en cour avant pour les propriétés en bordure de lac",
+      "date": "2026-09-08",
+      "dateAdoption": "2026-09-08",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "status": "candidate",
+      "stage": "adoption",
+      "stade": "adoption",
+      "meetingDate": "2026-09-08",
+      "resolution": "2026-09-189",
+      "resolutionRef": "2026-09-189",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS\nACCESSOIRES EN COUR AVANT POUR LES PROPRIÉTÉS EN BORDURE D'UN\nLAC"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-739-26",
+      "label": "Règlement numéro 739-26 amendant le règlement de zonage numéro 288-90 afin de permettre des immeubles à logements dans les zones R-7 et R-8",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "numero": "739-26",
+      "bylawNumber": "739-26",
+      "number": "739-26",
+      "title": "Règlement numéro 739-26 amendant le règlement de zonage numéro 288-90 afin de permettre des immeubles à logements dans les zones R-7 et R-8",
+      "objet": "Permettre la densification des zones R-7 et R-8",
+      "date": "2026-09-08",
+      "dateAdoption": "2026-09-08",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "status": "candidate",
+      "stage": "1er_projet",
+      "stade": "1er_projet",
+      "meetingDate": "2026-09-08",
+      "resolution": "2026-09-191",
+      "resolutionRef": "2026-09-191",
+      "zones_ciblees": ["R-7", "R-8"],
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT\nLE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES\nIMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8"
+        }
+      ]
+    },
+    {
+      "id": "zone-r7",
+      "label": "Zone R-7",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "code": "R-7",
+      "zoneCode": "R-7",
+      "code_zone": "R-7",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "bylaw": "288-90",
+      "regl_zonage": "288-90",
+      "status": "candidate",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "meetingDate": "2026-09-08",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À\nLOGEMENTS DANS LES ZONES R-7 ET R-8"
+        }
+      ]
+    },
+    {
+      "id": "zone-r8",
+      "label": "Zone R-8",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "code": "R-8",
+      "zoneCode": "R-8",
+      "code_zone": "R-8",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "bylaw": "288-90",
+      "regl_zonage": "288-90",
+      "status": "candidate",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "meetingDate": "2026-09-08",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À\nLOGEMENTS DANS LES ZONES R-7 ET R-8"
+        }
+      ]
+    },
+    {
+      "id": "de-738-26-adoption",
+      "label": "Adoption du règlement 738-26 – constructions accessoires en cour avant bordure de lac",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "date": "2026-09-08",
+      "meetingDate": "2026-09-08",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "eventType": "rezonage",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "resolution": "2026-09-189",
+      "resolutionRef": "2026-09-189",
+      "reglement_number": "738-26",
+      "etape": "adoption",
+      "etape_date": "2026-09-08",
+      "description": "Adoption du règlement 738-26 amendant le règlement de zonage 288-90 afin de permettre les constructions accessoires en cour avant pour les propriétés en bordure d'un lac",
+      "status": "candidate",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "le règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le\nrèglement de zonage numéro 288-90 afin de permettre les constructions accessoires\nen cour avant pour les propriétés en bordure d'un lac » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "id": "de-738-26-avis-motion",
+      "label": "Avis de motion – règlement 738-26 (séance 7 juillet 2026)",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "date": "2026-07-07",
+      "meetingDate": "2026-07-07",
+      "kind": "rezonage",
+      "eventType": "rezonage",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "reglement_number": "738-26",
+      "etape": "avis_motion",
+      "etape_date": "2026-07-07",
+      "description": "Avis de motion donné à la séance régulière du 7 juillet 2026 pour le règlement 738-26",
+      "status": "candidate",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "avis de motion a été dûment donné à la séance régulière du 7 juillet\n2026;"
+        }
+      ]
+    },
+    {
+      "id": "de-738-26-consultation",
+      "label": "Consultation publique – règlement 738-26 (22 juillet 2026)",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "date": "2026-07-22",
+      "meetingDate": "2026-07-22",
+      "kind": "rezonage",
+      "eventType": "rezonage",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "reglement_number": "738-26",
+      "etape": "consultation_publique",
+      "etape_date": "2026-07-22",
+      "description": "Consultation publique tenue le 22 juillet 2026 relativement au règlement 738-26",
+      "status": "candidate",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "une consultation publique a eu lieu le 22 juillet 2026;"
+        }
+      ]
+    },
+    {
+      "id": "de-739-26-avis-motion",
+      "label": "Avis de motion – règlement 739-26 (séance 8 septembre 2026)",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "date": "2026-09-08",
+      "meetingDate": "2026-09-08",
+      "kind": "rezonage",
+      "eventType": "rezonage",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "resolution": "2026-09-190",
+      "resolutionRef": "2026-09-190",
+      "reglement_number": "739-26",
+      "etape": "avis_motion",
+      "etape_date": "2026-09-08",
+      "description": "Avis de motion donné par le conseiller François Bertrand à la séance du 8 septembre 2026 pour un projet de règlement permettant les immeubles à logements dans les zones R-7 et R-8",
+      "status": "candidate",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Un avis de motion est donné par Monsieur le conseiller François Bertrand à l'effet qu'un\nmembre du conseil pourra déposer et présenter, séance tenante ou ultérieure, un premier\nprojet de règlement amendant le règlement de zonage afin de permettre les immeubles à\nlogements dans les zones R-7 et R-8."
+        }
+      ]
+    },
+    {
+      "id": "de-739-26-premier-projet",
+      "label": "Premier projet de règlement 739-26 – immeubles à logements zones R-7 et R-8",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "date": "2026-09-08",
+      "meetingDate": "2026-09-08",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "eventType": "rezonage",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "resolution": "2026-09-191",
+      "resolutionRef": "2026-09-191",
+      "reglement_number": "739-26",
+      "zone_ref": "R-7",
+      "etape": "projet_reglement",
+      "etape_date": "2026-09-08",
+      "description": "Adoption du premier projet de règlement 739-26 amendant le règlement 288-90 pour permettre des immeubles à logements (H-II, H-III, H-IV) dans les zones R-7 et R-8, conditionnellement à la présence d'égout et d'aqueduc",
+      "status": "candidate",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT\nLE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES\nIMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8"
+        }
+      ]
+    },
+    {
+      "id": "signal-densification-r7-r8",
+      "label": "Signal – densification résidentielle zones R-7 et R-8",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "category": "densification_residentielle",
+      "categorie": "densification_residentielle",
+      "kind": "rezonage",
+      "date": "2026-09-08",
+      "meetingDate": "2026-09-08",
+      "description": "Premier projet de règlement 739-26 visant à permettre les usages H-II, H-III et H-IV dans les zones R-7 et R-8, conditionnellement à la présence d'égout et d'aqueduc et à une contrainte de hauteur par rapport aux propriétés voisines",
+      "status": "candidate",
+      "resolution": "2026-09-191",
+      "resolutionRef": "2026-09-191",
+      "municipality": "saint-barthelemy",
+      "citySlug": "saint-barthelemy",
+      "zone_ref": "R-7",
+      "reglement_number": "739-26",
+      "etape": "projet_reglement",
+      "etape_date": "2026-09-08",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "Le but du présent règlement est de permettre la densification des zones R-7 et R-8"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "bylaw-288-90",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "bylaw-738-26",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "le règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le\nrèglement de zonage numéro 288-90 afin de permettre les constructions accessoires\nen cour avant pour les propriétés en bordure d'un lac » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "bylaw-739-26",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R-8 » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "zone-r7",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À\nLOGEMENTS DANS LES ZONES R-7 ET R-8"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "zone-r8",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À\nLOGEMENTS DANS LES ZONES R-7 ET R-8"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "de-738-26-adoption",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "le règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le\nrèglement de zonage numéro 288-90 afin de permettre les constructions accessoires\nen cour avant pour les propriétés en bordure d'un lac » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "de-739-26-avis-motion",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Un avis de motion est donné par Monsieur le conseiller François Bertrand à l'effet qu'un\nmembre du conseil pourra déposer et présenter, séance tenante ou ultérieure, un premier\nprojet de règlement amendant le règlement de zonage afin de permettre les immeubles à\nlogements dans les zones R-7 et R-8."
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "de-739-26-premier-projet",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R-8 » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "de-738-26-avis-motion",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-6"],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "avis de motion a été dûment donné à la séance régulière du 7 juillet\n2026;"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "de-738-26-consultation",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-7"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "une consultation publique a eu lieu le 22 juillet 2026;"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-09-08",
+      "target": "signal-densification-r7-r8",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "Le but du présent règlement est de permettre la densification des zones R-7 et R-8"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-738-26",
+      "target": "bylaw-288-90",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "le règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le\nrèglement de zonage numéro 288-90 afin de permettre les constructions accessoires\nen cour avant pour les propriétés en bordure d'un lac » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-739-26",
+      "target": "bylaw-288-90",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R-8 » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-739-26",
+      "target": "zone-r7",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R-8 » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-739-26",
+      "target": "zone-r8",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R-8 » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "zone-r7",
+      "target": "bylaw-288-90",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À\nLOGEMENTS DANS LES ZONES R-7 ET R-8"
+        }
+      ]
+    },
+    {
+      "source": "zone-r8",
+      "target": "bylaw-288-90",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À\nLOGEMENTS DANS LES ZONES R-7 ET R-8"
+        }
+      ]
+    },
+    {
+      "source": "de-739-26-premier-projet",
+      "target": "zone-r7",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R-8 » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "de-739-26-premier-projet",
+      "target": "zone-r8",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R-8 » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "de-739-26-premier-projet",
+      "target": "signal-densification-r7-r8",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-8"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "Le but du présent règlement est de permettre la densification des zones R-7 et R-8"
+        }
+      ]
+    },
+    {
+      "source": "signal-densification-r7-r8",
+      "target": "zone-r7",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-8"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "Le but du présent règlement est de permettre la densification des zones R-7 et R-8"
+        }
+      ]
+    },
+    {
+      "source": "signal-densification-r7-r8",
+      "target": "zone-r8",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-8"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "Le but du présent règlement est de permettre la densification des zones R-7 et R-8"
+        }
+      ]
+    },
+    {
+      "source": "de-738-26-avis-motion",
+      "target": "de-738-26-consultation",
+      "relation": "lifecycle_predecessor",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-6", "ev-7"],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "avis de motion a été dûment donné à la séance régulière du 7 juillet\n2026;"
+        }
+      ]
+    },
+    {
+      "source": "de-738-26-consultation",
+      "target": "de-738-26-adoption",
+      "relation": "lifecycle_predecessor",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-7", "ev-2"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "une consultation publique a eu lieu le 22 juillet 2026;"
+        }
+      ]
+    },
+    {
+      "source": "de-739-26-avis-motion",
+      "target": "de-739-26-premier-projet",
+      "relation": "lifecycle_predecessor",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-5", "ev-3"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Un avis de motion est donné par Monsieur le conseiller François Bertrand à l'effet qu'un\nmembre du conseil pourra déposer et présenter, séance tenante ou ultérieure, un premier\nprojet de règlement amendant le règlement de zonage afin de permettre les immeubles à\nlogements dans les zones R-7 et R-8."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-738-26",
+      "target": "source-pv-2026-09-08",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "le règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le\nrèglement de zonage numéro 288-90 afin de permettre les constructions accessoires\nen cour avant pour les propriétés en bordure d'un lac » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-739-26",
+      "target": "source-pv-2026-09-08",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R-8 » soit et est adopté"
+        }
+      ]
+    },
+    {
+      "source": "de-739-26-premier-projet",
+      "target": "source-pv-2026-09-08",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT\nLE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES\nIMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8"
+        }
+      ]
+    },
+    {
+      "source": "de-738-26-adoption",
+      "target": "source-pv-2026-09-08",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS\nACCESSOIRES EN COUR AVANT POUR LES PROPRIÉTÉS EN BORDURE D'UN\nLAC"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90"
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "le règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le\nrèglement de zonage numéro 288-90 afin de permettre les constructions accessoires\nen cour avant pour les propriétés en bordure d'un lac » soit et est adopté"
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R-8 » soit et est adopté"
+    },
+    {
+      "id": "ev-4",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À\nLOGEMENTS DANS LES ZONES R-7 ET R-8"
+    },
+    {
+      "id": "ev-5",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Un avis de motion est donné par Monsieur le conseiller François Bertrand à l'effet qu'un\nmembre du conseil pourra déposer et présenter, séance tenante ou ultérieure, un premier\nprojet de règlement amendant le règlement de zonage afin de permettre les immeubles à\nlogements dans les zones R-7 et R-8."
+    },
+    {
+      "id": "ev-6",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "avis de motion a été dûment donné à la séance régulière du 7 juillet\n2026;"
+    },
+    {
+      "id": "ev-7",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "une consultation publique a eu lieu le 22 juillet 2026;"
+    },
+    {
+      "id": "ev-8",
+      "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+      "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+      "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "Le but du présent règlement est de permettre la densification des zones R-7 et R-8"
+    }
+  ],
+  "input_tokens": 7800,
+  "output_tokens": 2100
+}
+```
