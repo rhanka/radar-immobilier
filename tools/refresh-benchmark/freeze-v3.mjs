@@ -6,6 +6,7 @@ const required = (name) => process.env[name] || (() => { throw new Error(`${name
 const root = required("BENCHMARK_REPOSITORY_ROOT");
 const casRoot = required("BENCHMARK_CAS_ROOT");
 const outputDir = required("BENCHMARK_OUTPUT_DIR");
+const campaign = process.env.BENCHMARK_CAMPAIGN ?? "v3";
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const rows = [
   ["lac-des-seize-iles-2026-09-agenda", "lac-des-seize-iles", "2026-09", "proces-verbaux-lac-des-seize-iles", "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96", "Manual 4-unit future agenda control; agenda is not adoption."],
@@ -29,7 +30,7 @@ for (const [id, city, date, sourceId, digest, selectionRationale] of rows) {
     sourceUrl: meta.sourceUrl, sha256: digest, bytes: pdf.length, pageCount: pages.length,
     textSha256: sha256(text), pageTextSha256: pages.map(sha256), selectionRationale });
 }
-const manifest = { schemaVersion: 2, campaign: "v3", frozenAt: new Date().toISOString(),
+const manifest = { schemaVersion: 2, campaign, frozenAt: new Date().toISOString(),
   sourceRun: "run-dryrun2-final-20260911T215911Z", sourceRunRoot: casRoot,
   parser: "pdftotext -q -enc UTF-8 <pdf> <text>", documents };
 const baselineBytes = await readFile(required("BENCHMARK_BASELINE_GOLD"));
