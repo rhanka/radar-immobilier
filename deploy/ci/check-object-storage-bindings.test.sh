@@ -25,6 +25,7 @@ FILES=(
   deploy/k8s/10-rbac.yaml deploy/k8s/11-ci-deployer-preprod-rbac.yaml
   deploy/k8s/object-storage-docs-prod/kustomization.yaml
   deploy/k8s/object-storage-inventory-preprod/kustomization.yaml deploy/k8s/secrets.example.yaml
+  tools/grounding/drive-grounding.sh
   deploy/k8s/README.md
   .github/workflows/run-job.yaml
 )
@@ -73,6 +74,9 @@ run_bad "$CASE_ROOT" 'rejects a restored SCW image pull secret'; rm -rf "$CASE_R
 
 fixture; echo 'radar-registry-pull' >>"$CASE_ROOT/deploy/k8s/README.md"
 run_bad "$CASE_ROOT" 'rejects restored legacy registry guidance'; rm -rf "$CASE_ROOT"
+
+fixture; echo 'READ_S3_ENDPOINT=https://s3.fr-par.scw.cloud' >>"$CASE_ROOT/tools/grounding/drive-grounding.sh"
+run_bad "$CASE_ROOT" 'rejects a restored grounding storage client'; rm -rf "$CASE_ROOT"
 
 fixture; echo 'REFRESH_DIAG_ENABLED' >>"$CASE_ROOT/.github/workflows/build-push-images.yml"
 run_bad "$CASE_ROOT" 'rejects a restored MinIO refresh diagnostic'; rm -rf "$CASE_ROOT"
