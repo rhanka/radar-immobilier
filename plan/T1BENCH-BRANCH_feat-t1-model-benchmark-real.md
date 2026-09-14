@@ -15,7 +15,8 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 ## Branch Scope Boundaries
 
 - **Allowed**: `tools/refresh-benchmark/**`, `docs/reviews/refresh-benchmark/v4/**`,
-  `docs/reviews/refresh-benchmark/v5/**`, `docs/reviews/refresh-benchmark/v6/**`, this plan.
+  `docs/reviews/refresh-benchmark/v5/**`, `docs/reviews/refresh-benchmark/v6/**`,
+  `docs/reviews/refresh-benchmark/v7/**`, `docs/reviews/refresh-benchmark/BENCHMARK_T1.md`, this plan.
 - **Forbidden**: application/runtime code, `Makefile`, `rules/**`, `.track/**`, sentropic repositories, secrets.
 
 ## Plan
@@ -33,6 +34,7 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 - [x] Lot 10 — Prepare gated package-endpoint preflight and integration-run entry points without live calls.
 - [x] Lot 11 — Diagnose the v4 output cap with one isolated Valcourt request.
 - [x] Lot 12 — Freeze and execute the compact-citation v6 campaign (stopped on measured saturation).
+- [ ] Lot 13 — Re-freeze at 65,536 tokens and execute the complete v7 campaign.
 
 ## Gates
 

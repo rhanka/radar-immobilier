@@ -45,7 +45,10 @@ const oracle = { schemaVersion: 1, frozenAt: new Date().toISOString(), units: go
   lineage: { sourceGoldSha256: sha256(baselineBytes), excludedCity: "warden",
     waterlooDocSha256: waterloo.docSha }, rules: baseline.rules };
 if (gold.length !== 36) throw new Error(`Expected 36 manual units, found ${gold.length}`);
+const oracleBytes = campaign === "v7"
+  ? await readFile(resolve(root, "docs/reviews/refresh-benchmark/v6/manual-oracle.json"))
+  : Buffer.from(JSON.stringify(oracle));
 await writeFile(resolve(outputDir, "manifest.json"), JSON.stringify(manifest), { flag: "wx" });
-await writeFile(resolve(outputDir, "manual-oracle.json"), JSON.stringify(oracle), { flag: "wx" });
+await writeFile(resolve(outputDir, "manual-oracle.json"), oracleBytes, { flag: "wx" });
 console.log(JSON.stringify({ documents: documents.length, manualUnits: gold.length,
-  manifestSha256: sha256(JSON.stringify(manifest)), oracleSha256: sha256(JSON.stringify(oracle)) }));
+  manifestSha256: sha256(JSON.stringify(manifest)), oracleSha256: sha256(oracleBytes) }));

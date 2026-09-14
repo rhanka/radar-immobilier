@@ -4,7 +4,8 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import test from "node:test";
 
-import { adapterBindings, executionContract, frozenInputs, releaseAnchor } from
+import { adapterBindings, executionContract, frozenInputs, outputTokenCapForCampaign,
+  releaseAnchor } from
   "./integration-contract.mjs";
 import { variants } from "./runtime-config.mjs";
 
@@ -53,4 +54,6 @@ test("all live variants use the frozen adapter boundary and execution budget", (
     maxAttempts: 2,
     retryOnlyAfter: "transport_failure",
   });
+  assert.equal(outputTokenCapForCampaign("v6"), 16_384);
+  assert.equal(outputTokenCapForCampaign("v7"), 65_536);
 });

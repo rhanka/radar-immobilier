@@ -3,13 +3,15 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { outputTokenCapForCampaign } from "./integration-contract.mjs";
+
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
 const t1Root = required("BENCHMARK_T1_ROOT");
 const t1Commit = required("BENCHMARK_T1_COMMIT");
 const campaign = process.env.BENCHMARK_CAMPAIGN;
-const maxOutputTokens = 16_384;
+const maxOutputTokens = outputTokenCapForCampaign(campaign);
 const systemPrompt = "You are Graphify's JSON extraction backend. Return only valid JSON matching the requested schema. Do not include Markdown prose outside the JSON object.";
 const manifest = JSON.parse(await readFile(resolve(repositoryRoot,
   `docs/reviews/refresh-benchmark/${campaign ? `${campaign}/` : ""}manifest.json`), "utf8"));
