@@ -6,6 +6,7 @@ const required = (name) => process.env[name] || (() => { throw new Error(`${name
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
 const bundleRoot = required("BENCHMARK_BUNDLE_ROOT");
 const campaign = process.env.BENCHMARK_CAMPAIGN ?? "v6";
+const variant = process.env.BENCHMARK_VARIANT ?? "gemini-low";
 const readJson = async (path) => JSON.parse(await readFile(path, "utf8"));
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const campaignRoot = resolve(repositoryRoot, `docs/reviews/refresh-benchmark/${campaign}`);
@@ -18,7 +19,7 @@ const aliases = {
 const entries = [];
 const mapping = [];
 for (const document of manifest.documents) {
-  const stem = `${document.id}--gemini-low`;
+  const stem = `${document.id}--${variant}`;
   let receipt;
   try { receipt = await readJson(resolve(bundleRoot, "campaign-real", `${stem}.receipt.json`)); }
   catch (error) { if (error.code === "ENOENT") continue; throw error; }
@@ -37,7 +38,7 @@ for (const document of manifest.documents) {
         .map(({ id, label, stage, page, anchor }) => ({ id, label, stage, page, anchor })) },
     system: aliases[kind], payload: JSON.parse(bytes) });
     mapping.push({ documentId: document.id, alias: aliases[kind],
-      system: kind === "baseline" ? "historical-sonnet-4.6" : "gemini-low",
+      system: kind === "baseline" ? "historical-sonnet-4.6" : variant,
       outputSha256: sha256(bytes) });
   }
 }
