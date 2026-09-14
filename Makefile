@@ -469,55 +469,16 @@ object-storage-docs-preprod-provision: ## Create the concern-specific Secret and
 	  echo "[object-storage-docs] provision verified by $$job_ref"
 
 .PHONY: object-storage-docs-preprod-start
-object-storage-docs-preprod-start: ## Apply support and create one resumable full-prefix DOCS inventory Job
-	@if [ "$(OBJECT_STORAGE_DOCS_INVENTORY_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
-	  [ -z "$$KUBECONFIG" ]; then \
-	  echo "[object-storage-docs] refused: require KUBECONFIG, OBJECT_STORAGE_DOCS_INVENTORY_CONFIRM=1, ENV=preprod"; \
-	  exit 1; \
-	fi
-	@$(MAKE) object-storage-docs-preprod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
-	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
-	  $(KUBECTL) -n "$$namespace" get secret radar-docs-s3-credentials -o json | \
-	    jq -e -f deploy/ci/validate-docs-secret.jq >/dev/null; \
-	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
-	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
-	    $(OBJECT_STORAGE_INVENTORY_DIR) >"$$render"; \
-	  $(KUBECTL) apply -f "$$render" >/dev/null; \
-	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_INVENTORY_JOB) -o name
+object-storage-docs-preprod-start: ## Retired after the OVH cutover
+	@echo '[object-storage-docs] retired: no legacy DOCS inventory can be started'; exit 1
 
 .PHONY: object-storage-docs-preprod-retry-never-started
-object-storage-docs-preprod-retry-never-started: ## Replace only one quota-blocked DOCS Job that never created a Pod
-	@if [ "$(OBJECT_STORAGE_DOCS_RETRY_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
-	  [ -z "$$KUBECONFIG" ] || [[ "$(OBJECT_STORAGE_DOCS_RETRY_JOB)" != radar-object-storage-inventory-docs-* ]]; then \
-	  echo "[object-storage-docs] refused: require KUBECONFIG, exact DOCS retry Job, confirmation, ENV=preprod"; \
-	  exit 1; \
-	fi
-	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
-	  job="$(OBJECT_STORAGE_DOCS_RETRY_JOB)"; \
-	  $(KUBECTL) -n "$$namespace" get "job/$$job" -o json | \
-	    jq -e '.metadata.labels["app.kubernetes.io/component"] == "object-storage-inventory" and (.status.active // 0) == 0 and (.status.succeeded // 0) == 0' >/dev/null; \
-	  pods="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o json )"; \
-	  jq -e '.items | length == 0' <<<"$$pods" >/dev/null || \
-	    { echo "[object-storage-docs] refused: retry Job has an associated Pod"; exit 1; }; \
-	  $(KUBECTL) -n "$$namespace" delete "job/$$job" --wait=true >/dev/null; \
-	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_INVENTORY_JOB) -o name
+object-storage-docs-preprod-retry-never-started: ## Retired after the OVH cutover
+	@echo '[object-storage-docs] retired: no legacy DOCS inventory can be retried'; exit 1
 
 .PHONY: object-storage-docs-preprod-prove-conditional-write
-object-storage-docs-preprod-prove-conditional-write: ## Retain one exact source object while proving OVH conditional PUTs
-	@if [ "$(OBJECT_STORAGE_DOCS_PROOF_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
-	  [ -z "$$KUBECONFIG" ]; then \
-	  echo "[object-storage-docs] refused: require KUBECONFIG, OBJECT_STORAGE_DOCS_PROOF_CONFIRM=1, ENV=preprod"; \
-	  exit 1; \
-	fi
-	@$(MAKE) object-storage-docs-preprod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
-	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
-	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
-	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
-	    $(OBJECT_STORAGE_INVENTORY_DIR) >"$$render"; \
-	  $(KUBECTL) apply -f "$$render" >/dev/null; \
-	  job_ref="$$( $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_PROOF_JOB) -o name )"; \
-	  $(KUBECTL) -n "$$namespace" wait --for=condition=complete "$$job_ref" --timeout=900s >/dev/null; \
-	  echo "[object-storage-docs] conditional proof committed by $$job_ref"
+object-storage-docs-preprod-prove-conditional-write: ## Retired after the OVH cutover
+	@echo '[object-storage-docs] retired: conditional-write migration proof is closed'; exit 1
 
 .PHONY: object-storage-docs-preprod-fence
 object-storage-docs-preprod-fence: ## Record zero live MinIO DOCS writers after validated provisional evidence
@@ -542,19 +503,8 @@ object-storage-docs-preprod-fence: ## Record zero live MinIO DOCS writers after 
 	  echo '[object-storage-docs] zero MinIO DOCS writers recorded'
 
 .PHONY: object-storage-docs-preprod-copy
-object-storage-docs-preprod-copy: ## Disabled until the exact PROD-canonical subset replaces full-prefix copy
-	@echo '[object-storage-docs] refused: full preprod source is not the canonical PROD corpus'; exit 1
-	@if [ "$(OBJECT_STORAGE_DOCS_COPY_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
-	  [ -z "$$KUBECONFIG" ]; then \
-	  echo "[object-storage-docs] refused: require KUBECONFIG, OBJECT_STORAGE_DOCS_COPY_CONFIRM=1, ENV=preprod"; \
-	  exit 1; \
-	fi
-	@$(MAKE) object-storage-docs-preprod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
-	@set -euo pipefail; render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
-	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
-	    $(OBJECT_STORAGE_INVENTORY_DIR) >"$$render"; \
-	  $(KUBECTL) apply -f "$$render" >/dev/null; \
-	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_COPY_JOB) -o name
+object-storage-docs-preprod-copy: ## Retired after the OVH cutover
+	@echo '[object-storage-docs] retired: no legacy full-prefix copy can be started'; exit 1
 
 .PHONY: object-storage-docs-preprod-copy-canonical
 object-storage-docs-preprod-copy-canonical: ## Import the PROD manifest and copy its exact corpus SCW-to-OVH
