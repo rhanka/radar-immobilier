@@ -1,13 +1,11 @@
 <script>
-  import { BaseEdge, EdgeLabel } from '@xyflow/svelte';
-  let { id, data, label, markerEnd, markerStart, style, interactionWidth } = $props();
-  const points = $derived(data.routedPoints);
-  const path = $derived(points.map((p, i) => `${i ? 'L' : 'M'} ${p.x} ${p.y}`).join(' '));
-  const placement = $derived.by(() => {
-    const segments = points.slice(1).map((p, i) => ({ a: points[i], b: p, length: Math.abs(p.x - points[i].x) + Math.abs(p.y - points[i].y) }));
-    const middle = [...segments].sort((a, b) => b.length - a.length)[0];
-    return { x: (middle.a.x + middle.b.x) / 2, y: (middle.a.y + middle.b.y) / 2 };
-  });
+  import { BaseEdge, EdgeLabel, getSmoothStepPath } from '@xyflow/svelte';
+  let { id, data, label, markerEnd, markerStart, style, interactionWidth,
+    sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition } = $props();
+  const routed = $derived(getSmoothStepPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, borderRadius: 12, offset: 32 }));
 </script>
-<BaseEdge {id} {path} {markerStart} {markerEnd} {style} {interactionWidth} />
-{#if label}<EdgeLabel x={placement.x} y={placement.y} class="route-label nodrag nopan" title={label}>{label}</EdgeLabel>{/if}
+<g data-canonical-edge={id} data-source={data.source} data-target={data.target} data-label={data.label}
+  data-dashed={data.dashed} data-both={data.both} data-evidence-class={data.evidenceClass} data-runtime-state={data.runtimeState}>
+  <BaseEdge {id} path={routed[0]} {markerStart} {markerEnd} {style} {interactionWidth} />
+</g>
+{#if label}<EdgeLabel x={routed[1]} y={routed[2]} class="route-label nodrag nopan" title={label} data-text-role="edge-label">{label}</EdgeLabel>{/if}

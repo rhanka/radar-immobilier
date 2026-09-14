@@ -1,51 +1,36 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { questions, responsePack } from './choices.js';
+import { readFile } from 'node:fs/promises';
+import { fixedInstructions, questions, responsePack } from './choices.js';
 
-test('D8 exports explicit open questions, selections and comments without reopening fixed decisions', () => {
-  assert.deepEqual(questions.map(({ key }) => key), ['preprod-address', 'automation-scope', 'llm-billing']);
-  assert.ok(questions.every(question => question.question.endsWith('?')));
-  assert.equal(questions.find(question => question.key === 'llm-billing').criticality, 'non-critical');
-  const selections = { 'preprod-address': 'KEEP_VERIFIED', 'automation-scope': 'IMMO_ONLY', 'llm-billing': null };
-  const comments = { 'preprod-address': 'Conserver le lien observé.', 'automation-scope': '', 'llm-billing': 'À rapprocher.' };
-  const result = responsePack({ dossierHash: 'd', artifactInputHash: 'a' }, selections, comments, 'Notes', '2026-09-13T23:00:00Z');
-  assert.equal(result.revision, 'D8');
-  assert.equal(result.buildOnly, true);
-  assert.equal(result.status, 'draft-not-ratified');
-  assert.equal(result.responses[0].selection, 'KEEP_VERIFIED');
-  assert.equal(result.responses[0].comment, 'Conserver le lien observé.');
-  assert.equal(result.responses[2].selection, null);
-  assert.equal(result.responses[2].criticality, 'non-critical');
-  assert.equal(result.responses[2].decisionStatus, 'open-non-blocking');
-  assert.deepEqual(result.fixedInstructions.architectureOrder, ['before', 'after-T3-one-b3-8']);
-  assert.equal(result.fixedInstructions.transitionEvidence.t1.graphify, '0.18.0');
-  assert.equal(result.fixedInstructions.transitionEvidence.t1.model, 'Luna high');
-  assert.equal(result.fixedInstructions.transitionEvidence.t1.firstKubernetesRun, 'failed-before-LLM');
-  assert.equal(result.fixedInstructions.transitionEvidence.t1.providerCompletion, false);
-  assert.equal(result.fixedInstructions.transitionEvidence.t2.rawParity, true);
-  assert.equal(result.fixedInstructions.transitionEvidence.t2.rawOvhRebind, true);
-  assert.equal(result.fixedInstructions.transitionEvidence.t2.docsInventory.preprodMinio.objects, 144193);
-  assert.equal(result.fixedInstructions.transitionEvidence.t2.docsInventory.productionScwDocsPocs.objects, 59017);
-  assert.match(result.fixedInstructions.transitionEvidence.t2.canonicalReference, /exact 59,017 keys\+hashes/);
-  assert.equal(result.fixedInstructions.transitionEvidence.t2.preprodSurplusMigrated, false);
-  const preprod = result.fixedInstructions.transitionEvidence.t2.preproduction;
-  assert.deepEqual([preprod.objects, preprod.bytes, preprod.failed], [59017, 12534514457, 0]);
-  assert.equal(preprod.canonicalManifestSha256, '52646a7b…0425');
-  assert.deepEqual(preprod.quotaBefore, { pvcs: 4, storageGi: 47 });
-  assert.deepEqual(preprod.quotaAfter, { pvcs: 3, storageGi: 7 });
-  assert.equal(preprod.removed.length, 5);
-  assert.deepEqual(preprod.workloadsReady, { api: '1/1', mcp: '1/1', ui: '1/1' });
-  assert.equal(result.fixedInstructions.transitionEvidence.t2.production.status, 'in-progress');
-  assert.equal(result.fixedInstructions.transitionEvidence.t3.status, 'gated');
-  assert.equal(result.fixedInstructions.reporting.startInclusive, '2026-08-10T00:00:00-04:00');
-  assert.equal(result.fixedInstructions.reporting.days, 35);
-  assert.equal(result.fixedInstructions.reporting.hours, 840);
-  assert.equal(result.fixedInstructions.billing.node.quantity, 1);
-  assert.equal(result.fixedInstructions.billing.node.projectedAmountCad, 68.88);
-  assert.equal(result.fixedInstructions.billing.llm.totalFacturableCad, 251.21543767641742);
-  assert.equal(result.fixedInstructions.billing.llm.ratificationStatus, 'open-non-blocking');
-  assert.equal(result.fixedInstructions.billing.indicativeTotalCad, 320.0954376764174);
-  assert.equal(result.fixedInstructions.transitionEvidence.t2.decision, 'MIGRATE+RETAIN');
-  assert.equal(result.fixedInstructions.retainScwTemUntilValidatedReplacement, true);
-  assert.throws(() => responsePack({}, { 'preprod-address': 'UNKNOWN' }, {}, '', null), /Unknown option/);
+const { manifest } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
+const options = ['sonnet-comparable', 'luna-low', 'gemini38-lowest'];
+
+test('M1 is the first question and preserves the exact three-candidate set', () => {
+  assert.equal(questions.length, 3);
+  assert.equal(questions[0].key, 'm1-model');
+  assert.deepEqual(questions[0].options.map(option => option.key), options);
+  assert.match(questions[0].options[0].detail, /clé owner hors dépôt et hors logs/);
+  assert.match(questions[0].context, /no-output Gemini reste non classable/);
+});
+test('Gemini no-output is an attempt, never a result or ranking', () => {
+  const pack = responsePack(manifest);
+  assert.equal(pack.revision, 'D9');
+  assert.deepEqual(pack.m1Decision.optionSet, options);
+  assert.deepEqual(pack.m1Decision.candidateRows.map(row => row.optionId), options);
+  assert.deepEqual(pack.m1Decision.candidateResults, []);
+  assert.deepEqual(pack.m1Decision.ranking, []);
+  assert.equal(pack.m1Decision.ratifiedOptionId, null);
+  const attempt = pack.m1Decision.attempts[0];
+  assert.deepEqual({ classification: attempt.classification, output: attempt.output, qualityMetrics: attempt.qualityMetrics,
+    validOutputLatencyMs: attempt.validOutputLatencyMs, rank: attempt.rank },
+  { classification: 'not-classifiable', output: null, qualityMetrics: null, validOutputLatencyMs: null, rank: null });
+});
+
+test('a browser selection is only a draft and cannot ratify M1', () => {
+  const pack = responsePack(manifest, { 'm1-model': 'sonnet-comparable' });
+  assert.equal(pack.m1Decision.draftSelectedOptionId, 'sonnet-comparable');
+  assert.equal(pack.m1Decision.ratifiedOptionId, null);
+  assert.equal(fixedInstructions.transitionEvidence.t1.production, 'dormant-pending-promotion');
+  assert.equal(fixedInstructions.transitionEvidence.t1.selectedProductionModel, null);
 });

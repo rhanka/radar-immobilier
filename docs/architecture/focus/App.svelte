@@ -2,9 +2,7 @@
   import { onMount } from 'svelte';
   import { marked } from 'marked';
   import DOMPurify from 'dompurify';
-  import { AppShell, ThemeProvider, Container, Badge, Button, Flex, ProgressBar, Textarea } from '@sentropic/design-system-svelte';
-  import { entropicTheme } from '@sentropic/design-system-themes';
-  import Explorer from './Explorer.svelte';
+  import Pairs from './Pairs.svelte';
   import { presentation } from './presentation-fr.js';
   import Choices from './Choices.svelte';
   import MonthlySummary from './MonthlySummary.svelte';
@@ -36,40 +34,38 @@
   function modal(node) { node.showModal(); return { destroy() { node.close(); } }; }
 </script>
 
-<ThemeProvider theme={entropicTheme}>
-  <AppShell><Container size="full" padding={false}>
+<div data-st-theme="entropic">
     <main class="dossier">
       <header class="masthead">
-        <Flex justify="between" align="center" wrap gap={2}>
-          <span class="eyebrow">h2a Focus · dossier de décision · Immo / Geo / Kubernetes</span>
-          <Badge tone="warning">ARCHITECTURE AVANT · ARCHITECTURE APRÈS</Badge>
-        </Flex>
-        <h1>Des nouveaux PV<br>aux signaux visibles.</h1>
-        <p class="lede">Comparer les deux seules architectures de référence : la capture AVANT et la cible APRÈS. L’état effectif et les gates restent du contexte textuel, jamais un troisième graphe principal.</p>
-        <div class="truth-strip"><span><strong>AVANT</strong> MinIO + poste LLM + plateforme trois nœuds</span><span><strong>APRÈS</strong> objets OVH + refresh autonome + un b3-8 après acceptation</span></div>
+        <div class="flex-row">
+        <span class="eyebrow">Focus · rapport architecture · Immo / Geo / Kubernetes</span>
+          <span class="badge warning">2 PAIRES · 4 SCÈNES · 13 SEPTEMBRE 2026</span>
+        </div>
+        <h1>Deux transitions datées,<br>quatre vues vérifiables.</h1>
+        <p class="lede">La production passe de MinIO/SCW à OVH S3/GHCR, avec TEM explicitement conservé. Le refresh passe du poste manuel au CronJob autonome intégré; la production demeure dormante et le modèle reste à ratifier.</p>
+        <div class="truth-strip"><span><strong>9 AOÛT · A</strong> MinIO + restes SCW/registre</span><span><strong>13 SEPT. · A</strong> OVH S3 + GHCR; TEM résiduel</span><span><strong>9 AOÛT · B</strong> refresh manuel depuis le poste</span><span><strong>13 SEPT. · B</strong> CronJob; PROD dormante; modèle en attente</span></div>
       </header>
-      <Explorer graphs={data.graphs} />
+      <Pairs graphs={data.graphs} />
       <nav class="steps" aria-label="Sections du dossier">
         {#each titles as title, index}<button class:active={step === index} aria-current={step === index ? 'step' : undefined} onclick={() => step = index}><span>{index + 1}</span>{title}</button>{/each}
       </nav>
-      <ProgressBar value={step + 1} max={8} label={`Section ${step + 1} sur 8`} size="sm" />
+      <progress value={step + 1} max="8" aria-label={`Section ${step + 1} sur 8`}></progress>
       <section class="decision-content">
-        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D8 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
+        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D9 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
         <!-- The French reading surface links to the complete repository dossier. -->
         {#if step === 5}<Choices manifest={data.manifest} remarks={note} />{:else}<div class="prose" onclick={link} role="presentation">{@html html(presentation[step])}</div>{/if}
-        <Button variant="ghost" size="sm" onclick={() => source = 'decision-dossier'}>Dossier source complet · références et qualification des faits</Button>
-        {#if step === 6}<Button variant="secondary" onclick={() => source = 'decision-reviews'}>Lire les avis réels des reviewers</Button>{/if}
+        <button onclick={() => source = 'decision-dossier'}>Dossier source complet · références et qualification des faits</button>
+        {#if step === 6}<button onclick={() => source = 'decision-reviews'}>Lire les avis réels des reviewers</button>{/if}
       </section>
       <MonthlySummary />
       <section class="notes"><h2>Vos remarques · brouillon local</h2>
         <p>Cette page ne signe rien, ne crée aucune décision Track et ne lance aucun traitement. Les notes restent dans ce navigateur.</p>
-        <Textarea label="Remarques sur les décisions et critères manquants" value={note} oninput={event => save(event.currentTarget.value)} rows={4} />
-        <Flex align="center" gap={2}><Button variant="secondary" onclick={download}>Exporter mes remarques</Button><span role="status">{storageError ? 'Stockage local indisponible : exporter avant de fermer.' : saved ? 'Brouillon enregistré localement — non ratifié' : 'Aucune approbation enregistrée'}</span></Flex>
+        <label>Remarques sur les décisions et critères manquants<textarea value={note} oninput={event => save(event.currentTarget.value)} rows="4"></textarea></label>
+        <div class="flex-row"><button onclick={download}>Exporter mes remarques</button><span role="status">{storageError ? 'Stockage local indisponible : exporter avant de fermer.' : saved ? 'Brouillon enregistré localement — non ratifié' : 'Aucune approbation enregistrée'}</span></div>
       </section>
       <footer><strong>Preuves embarquées · accès hors ligne</strong><div class="source-links">{#each ['architecture', 'transitions-target', 'transitions', 'storage-audit', 'service-provenance', 'continuation-audit', 'decision-dossier', 'decision-reviews', 'proposal'] as name}<button onclick={() => source = name}>{name}</button>{/each}</div>
         <p>Composants Focus, SvelteFlow natif intégral et boîtes parentId imbriquées. Tous les liens sont conservés ; absence de croisements d’arêtes non certifiée.</p>
       </footer>
     </main>
-    {#if source}<dialog class="source-overlay" use:modal onclose={() => source = null} aria-label={`Source ${source}`}><section class="source-sheet"><Button variant="secondary" onclick={() => source = null}>Fermer la source</Button><div class="prose" onclick={link} role="presentation">{@html html(data.docs[source])}</div></section></dialog>{/if}
-  </Container></AppShell>
-</ThemeProvider>
+    {#if source}<dialog class="source-overlay" use:modal onclose={() => source = null} aria-label={`Source ${source}`}><section class="source-sheet"><button onclick={() => source = null}>Fermer la source</button><div class="prose" onclick={link} role="presentation">{@html html(data.docs[source])}</div></section></dialog>{/if}
+</div>
