@@ -29,12 +29,17 @@ for (const document of manifest.documents) {
   if (receipt?.requested?.modelId) models.add(receipt.requested.modelId);
   let raw;
   let output;
-  if (receipt) raw = await readFile(resolve(resultRoot, `${stem}.raw.txt`), "utf8");
+  // A transport failure produces a receipt but never reaches the raw persistence step.
+  if (receipt) {
+    try { raw = await readFile(resolve(resultRoot, `${stem}.raw.txt`), "utf8"); }
+    catch (error) { if (error.code !== "ENOENT") throw error; }
+  }
   if (receipt?.validation?.accepted) output = await readJson(resolve(resultRoot, `${stem}.output.json`));
   const text = await readFile(resolve(repositoryRoot, document.runtimeTextRelativePath), "utf8");
   const pages = text.split("\f"); if (pages.at(-1) === "") pages.pop();
   cases.push({ documentId: document.id,
-    state: !receipt ? "not_launched" : receipt.validation.accepted ? "completed_valid" : "completed_invalid",
+    state: !receipt ? "not_launched" : !receipt.actual ? "transport_failed"
+      : receipt.validation.accepted ? "completed_valid" : "completed_invalid",
     httpStatus: receipt?.wire?.httpStatus ?? null, timingMs: receipt?.timing?.totalMs ?? null,
     usage: receipt?.actual?.usage ?? null, terminalFinishReason: receipt?.wire?.terminalSse?.lastData?.finishReason ?? null,
     validation: receipt?.validation ?? null,

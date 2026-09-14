@@ -63,12 +63,20 @@ export function inspectWireBody(variant, body,
     maxOutputTokens: observed.maxOutputTokens ?? null };
 }
 
+// Cloud Code answers INVALID_ARGUMENT above 64 000 output tokens on claude-sonnet-4-6
+// (measured: 64 000 -> HTTP 200, 64 001 and 65 536 -> HTTP 400), so the v12 Cloud Code
+// transport cannot honour the frozen 65 536 cap. The deviation is bounded to that pair.
+export const CLOUD_CODE_SONNET_OUTPUT_CAP = 64_000;
+
 export function resolveOutputCap(value, { campaign, documentId, variantName }, frozenCap) {
   if (!value) return frozenCap;
   const cap = Number(value);
+  if (campaign === "v12" && variantName === "sonnet-cloudcode"
+    && cap === CLOUD_CODE_SONNET_OUTPUT_CAP) return cap;
   if (campaign !== "v5" || documentId !== "valcourt-2026-06-01-agenda"
     || variantName !== "gemini-low" || cap !== 65_536) {
-    throw new Error("Output-cap override is restricted to the Valcourt v5 Gemini diagnostic");
+    throw new Error("Output-cap override is restricted to the Valcourt v5 Gemini diagnostic"
+      + " and the v12 Cloud Code Sonnet transport cap");
   }
   return cap;
 }
