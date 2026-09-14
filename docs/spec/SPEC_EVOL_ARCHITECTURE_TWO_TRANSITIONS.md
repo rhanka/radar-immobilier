@@ -23,7 +23,7 @@ Status: EVOL design, awaiting two independent adversarial reviews. No Focus impl
 
 [FACT] By the September 13 T2 receipt, production API rollout, OVH GRAPH/SCRAPE bindings and MinIO absence are observed. Final parity acceptance is reopened for destination attributes and final source rescan [S5]. GHCR application-image integration is in main; Geo has a separate stronger runtime/provider-retirement receipt [S6].
 
-[JUDGMENT] A-after shows migrated application storage clients, not a certification that every retained source bucket, historical object, suspended template or provider resource has been deleted. Its caption must state the final T2 sweep/parity gap. SCW TEM is an explicitly retained email exception explained in prose, outside these storage diagrams. The single-node cost projection does not change observed cluster capacity [S5,S7].
+[JUDGMENT] A-after shows migrated application storage clients, not a certification that every retained source bucket, historical object, suspended template or provider resource has been deleted. Its caption must state the final T2 sweep/parity gap. SCW TEM is an explicitly retained email exception visible in all four diagrams until a replacement is validated: show its API email relation in pair A and a transverse annotation, outside the extraction path, in pair B. Its presence must never be styled as eradicated. The single-node cost projection does not change observed cluster capacity [S5,S7].
 
 ## D3 — Pair B: refresh causality and production gate
 
@@ -44,6 +44,25 @@ Status: EVOL design, awaiting two independent adversarial reviews. No Focus impl
 - Each artifact records source revisions and content hashes. HTML/PDF share the graph inventory and captions; none may silently reload a later source under an old report date.
 - Existing service icons and repository attribution are reused. Platform owns cluster/ingress/TLS; Immo owns API/UI/refresh; Geo owns its API/data contract. A library such as Graphify or llm-mesh is not a new network service.
 
+### D4.1 — Owner amendment: compact cards and readable type
+
+[FACT: OWNER] Service cards must be about half as tall as D8, visibly denser, with reduced padding and no large empty zones. Typography must be visibly about twice D8's size and readable at normal browser zoom. The exact French user-node label is `Navigateur utilisateur`; do not uppercase it or render the old `UTILISATEUR / Navigateur` string. Apply this label to all four diagrams and both rendering forms, including PDF [S12].
+
+[FACT: S12] D8 sets ordinary nodes to 350 × 260 CSS px, card padding 16 px and grid gap 10 px. Service titles are 16 px, descriptions and repo labels 12 px, secondary metadata 11 px; subflow titles are 18 px and edge labels 12 px. These source values are the frozen comparison baseline, not measured transformed screen sizes.
+
+| Surface | New design requirement at normal browser zoom |
+| --- | --- |
+| Ordinary service card | Target 130 CSS px high; 120–156 px accepted (46–60% of D8's 260 px); content must not be cropped to meet the target |
+| Card padding / gaps | Padding 6–8 px; row/column gaps 4–6 px; remove the stretching `1fr` description row and empty spacer/footer rows |
+| Service title / node description | At least 32 px / 24 px rendered on screen; short primary labels, full meaning retained |
+| Repo label / necessary status or secondary text | At least 24 px / 22 px rendered on screen; `repo:` and observed/declared/dormant qualification remain visible |
+| Subflow heading / edge label | At least 36 px / 24 px rendered on screen; headers content-sized, without D8's fixed 110 px reservation |
+| Card usable space | Unused trailing vertical space ≤ 12 px; no blank interior row > 12 px; content-sized containers with ≤ 24 px bottom/right slack after children and required routing lanes |
+
+[JUDGMENT] Reconcile larger type with lower cards by using a compact icon/title row, a short role/status line and a compact repo line. Deduplicate repeated service names and metadata; put long evidence prose and full source details in the existing inspector. Do not hide the provider, repo ownership, essential runtime state, TEM exception or source identity needed to understand the graph. Permit wider cards and ordinary scrolling/panning of a complete scene at readable scale; do not shrink fonts or use fit-to-view scaling below these screen minima merely to fit the whole topology into a small viewport. All four complete graphs must still exist; opening an inspector must not be necessary to read their essential meaning.
+
+[JUDGMENT] Typography thresholds apply after SVG/SvelteFlow transforms, not just `getComputedStyle(...).fontSize`. PDF export must preserve at least 18 pt titles, 14 pt descriptions/edges and 12 pt repo/status text in the complete diagram; select a suitable page size/orientation instead of shrinking below these minima. Supplemental detail pages do not waive readable complete views.
+
 ## D5 — Implementation acceptance after design reviews
 
 [JUDGMENT] Release implementation only after two reviews reconcile history/state correctness and presentation/decision integrity. The later scoped plan must cover Mermaid sources, Focus scene selection/rendering, source/provenance mapping, M1 controls, report export and meaningful regressions. It must use existing Make targets and actual browser/clipboard checks; no test is run or reported as passed in this design step.
@@ -54,6 +73,12 @@ Status: EVOL design, awaiting two independent adversarial reviews. No Focus impl
 - Inspect every full Mermaid/SvelteFlow render and every PDF graph page for missing nodes, clipping, unreadable labels, lost nested containment or contradictory status.
 - Compare protected billing content and period against the input report: exact values/method/window unchanged. Textual corrections elsewhere must not regenerate or reinterpret billing.
 - Reject a report presented as completed T2, a three-model winner or active production refresh without the corresponding new dated acceptance evidence.
+- Assert each of the four Mermaid and SvelteFlow scenes contains a visible SCW TEM residual-exception node/annotation stating retention until a validated replacement. Pair B must not connect TEM into the PV extraction chain; pair A labels the email relation. Preserve the exception in every complete PDF view.
+- Assert exactly `Navigateur utilisateur` on the user node in all four scenes and both forms; reject the former label and automatic uppercase presentation.
+- Run later Chromium visual checks at 1440 × 1000 and 1920 × 1080, deviceScaleFactor 1, browser zoom 100%, with no manual zoom adjustment. Capture each initial readable scene, full-scene view, metadata and report export at the same implementation HEAD.
+- Measure ordinary-card height/padding/gaps, content/child bounding boxes and effective transformed text sizes; assert every D4.1 minimum and the card-height band, report medians plus worst cases, and compare against the frozen D8 source baseline. An invisible/clipped label does not satisfy a font-size assertion.
+- Check text overflow, clipping, overlap, blank stretched rows and excess trailing container space, including wrapped TEM text and the dormant production banner. Any necessary routing clearance beyond the slack bound must be measured and justified by an actual edge, not an empty filler panel.
+- Inspect screenshots for visibly larger type, denser cards and legible repo/status/edge labels without zoom; retain the corresponding Chromium metrics. PDF checks must include text size and all four complete-page screenshots, not merely count exported pages. These are future implementation gates, not tests performed by this spec amendment.
 
 ## Graph contracts — design sketches, not deployment manifests
 
@@ -63,7 +88,7 @@ These four Mermaid sketches specify topology and state. Implementation adds the 
 
 ```mermaid
 flowchart LR
-  A_USER["User / browser"] --> A_URL["immo.sent-tech.ca"]
+  A_USER["Navigateur utilisateur"] --> A_URL["immo.sent-tech.ca"]
   subgraph A_CLOUD["OVH BHS5 · production · 2 b3-8 observed"]
     A_EDGE["Shared ingress / TLS"]
     subgraph A_IMMO["Immo · radar-immobilier"]
@@ -87,13 +112,14 @@ flowchart LR
   A_SCWREG["SCW application registry"] -->|"Declared image source"| A_API
   A_SCWREG -->|"Declared image source"| A_UI
   A_SCWREG -.->|"Best-effort mirror; success unverified"| A_GHCR["GHCR mirror"]
+  A_API -.->|"Transactional email · declared"| A_TEM["SCW TEM · authorized residual until validated replacement"]
 ```
 
 ### A-after — production storage and registry, September 13
 
 ```mermaid
 flowchart LR
-  A_USER["User / browser"] --> A_URL["immo.sent-tech.ca"]
+  A_USER["Navigateur utilisateur"] --> A_URL["immo.sent-tech.ca"]
   subgraph A_CLOUD["OVH BHS5 · production · no one-node cutover claimed"]
     A_EDGE["Shared ingress / TLS"]
     subgraph A_IMMO["Immo · radar-immobilier"]
@@ -115,9 +141,10 @@ flowchart LR
   A_CLIENTS -->|"GRAPH / SCRAPE coordinates observed"| A_DOCS
   A_GHCR["GHCR application registry"] -->|"Integrated image source"| A_API
   A_GHCR -->|"Integrated image source"| A_UI
+  A_API -->|"Transactional email · retained"| A_TEM["SCW TEM · authorized residual until validated replacement"]
 ```
 
-[FACT/JUDGMENT: S5,S6] A-after removes MinIO because absence is observed, consolidates object roles into the canonical OVH bucket and removes SCW from these application binding paths. Caption: `Runtime cutover observed 23:39Z; final object-attribute/source-freshness parity and global legacy dependency sweep remain open. Retained source/recovery resources are not represented as live application stores.` Distinguish GHCR integration evidence from a fresh Immo production imageID read, which this receipt does not supply. TEM remains outside scope in text. Geo's historical SCW archive does not become an OGC dependency.
+[FACT/JUDGMENT: S5,S6] A-after removes MinIO because absence is observed, consolidates object roles into the canonical OVH bucket and removes SCW from these storage/image binding paths. Caption: `Runtime cutover observed 23:39Z; final object-attribute/source-freshness parity and global legacy dependency sweep remain open. Retained source/recovery resources are not represented as live application stores. SCW TEM remains the explicitly authorized email exception until a validated replacement.` Distinguish GHCR integration evidence from a fresh Immo production imageID read, which this receipt does not supply. Geo's historical SCW archive does not become an OGC dependency.
 
 ### B-before — production PV-to-Signal refresh, August 9
 
@@ -139,7 +166,8 @@ flowchart LR
   B_OPERATOR -.->|"Manual launch; no scheduled success inferred"| B_PROJECT
   B_SCHEDULE -.->|"Declared only"| B_COLLECT
   B_SCHEDULE -.->|"Declared only"| B_PROJECT
-  B_UI --> B_USER["User · immo.sent-tech.ca"]
+  B_UI -->|"immo.sent-tech.ca"| B_USER["Navigateur utilisateur"]
+  B_TEM["Transverse exception · SCW TEM retained until validated replacement · outside PV extraction"]
 ```
 
 [UNKNOWN: S8] Collection execution placement and exact secret-resolved scrape endpoint are not reconstructed from the mere presence of a Job template. Keep collect/parse outside the cluster containment until dated runtime evidence locates it. The manually controlled pipeline is evidenced as an operating method, not a receipt for a complete August 9 run. Its corpus is separate from the canonical graph store.
@@ -173,7 +201,8 @@ flowchart LR
   B_EXTRACT -.-> B_MODEL["Subscription model · to ratify through M1"]
   B_VALIDATE -.-> B_GRAPH[("OVH canonical graph · validated publication")]
   B_GRAPH -.-> B_PROJECT
-  B_UI --> B_USER["User · immo.sent-tech.ca"]
+  B_UI -->|"immo.sent-tech.ca"| B_USER["Navigateur utilisateur"]
+  B_TEM["Transverse exception · SCW TEM retained until validated replacement · outside PV extraction"]
 ```
 
 [FACT/JUDGMENT: S9] Mandatory separate annotation: `Preproduction accepted: real Luna high Waterloo Signal/PDF, immutable release replay, controller-created Job at 22:21Z. Production promotion remains pending; dashed refresh paths describe the integrated dormant implementation.` The annotation is not a preprod resource subgraph. Existing API/UI/DB serving is distinct from the dormant new writer. A successful replay without additional model calls proves idempotence, not a new benchmark result. Administrator enrollment is not a per-cycle extraction dependency.
@@ -268,5 +297,6 @@ Sources below are immutable commit/path/line anchors. References to runtime rece
 | S9 | Immo `4d5cb8f7`, `docs/reviews/refresh-018/acceptance.md:5,18,24,35,37` | Exact Graphify 0.18 release, Luna high trial, preprod scheduled replay and explicit production dormancy |
 | S10 | Immo `26caa4d9`, `deploy/k8s/60-ingress.yaml:35`, `50-ui.yaml:56,76`, `80-auth.yaml:11`, `api/src/routes/graph-signals.ts:4`; Immo `4d5cb8f7`, `docs/architecture.md:47` | User URL, UI/API/Geo routes, OIDC and graph-node serving; later public URL/SSO observations |
 | S11 | Immo `4d5cb8f7`, `docs/reviews/refresh-018/extraction-baseline-audit.md:9,82,90`; local benchmark `b98aa6cf`, `docs/reviews/refresh-benchmark/v3/report.md:3,12,66,73` | Historical campaigns are not August baseline or matched M1 ranking; Sol-medium diagnostic has fairness limits; judge plan is not completed judging |
+| S12 | Immo `4d5cb8f7`, `docs/architecture/focus/style.css:43,47`, `ServiceNode.svelte:33`, `Subflow.svelte:17`, `scenes.js:18`; owner amendment after initial design handoff | Frozen D8 card/type/layout values; owner requires roughly half-height cards, twice-size visible type, exact French user label and visible TEM in every graph. These frontend filenames are relative to the same `docs/architecture/focus/` directory |
 
 [UNKNOWN] No fresh August 9 per-pod environment/image inventory, successful GHCR mirror inventory, exact-day manual extraction receipts or matched three-option M1 verdict exists among these inspected sources. [JUDGMENT] These gaps limit claims; they do not authorize replacing August with a later preproduction snapshot.

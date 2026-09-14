@@ -19,6 +19,7 @@
 - [x] ARCH2-EX1: the owner requires spec+plan commits only; the conductor retains Track import/write ownership. Harness recorder output is execution evidence, not a persisted Track event.
 - [x] The installed harness recorder emits a placeholder `1970-01-01` timestamp; it is not a historical observation timestamp.
 - [ ] Reconcile two independent reviews at the handed-off HEAD; preserve unresolved disagreements and owner decisions.
+- [x] Owner amendment before review: TEM visible in all four graphs, exact `Navigateur utilisateur` label, roughly half-height cards and double-size visible type; numeric Chromium/PDF acceptance specified without implementation.
 
 ## Orchestration Mode (AI-selected)
 - [x] One isolated documentation branch; no cherry-pick, delegated implementation or parallel writer.
@@ -35,5 +36,7 @@
 - [x] **Lot 3**: specify M1 options, evidence/judges and comment+JSON capture; gate: no invented measurements, no preselected winner.
 - [x] **Lot 4**: prepare the immutable design HEAD for conductor dispatch to historical-correctness and product/decision-integrity reviewers; design acceptance remains pending reconciliation.
   - [x] Harness scope check passed for the two changed paths; whitespace check passed; no application test or browser validation claimed for this spec-only phase.
+  - [x] Amend spec/graph contracts for transverse TEM and compact/readable rendering; preserve review-pending status and unchanged billing/window.
+- [ ] Later visual gate: check all four Mermaid/SvelteFlow/PDF views, exact user label, retained TEM, 120–156 px cards, rendered title/body/status minima, blank-space limits and Chromium screenshots/metrics at normal zoom; do not claim these passed during design.
 - [ ] Conductor: import the reviewed plan into Track, release bounded implementation lots, then run required Focus mapping/browser/clipboard/report checks without changing billing.
 - [ ] Later close: consolidate reviewed EVOL, push/open PR, verify CI, merge commit only and preserve branch; no merge authorization is inferred from this design handoff.
