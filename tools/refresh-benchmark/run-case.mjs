@@ -8,7 +8,9 @@ import { CloudCodeRuntimeClient, CodexRuntimeClient, GeminiAdapter,
   OpenAIAdapter } from "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/index.js";
 import { createLlmMeshFacade } from "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/service/facade.js";
 import { EncryptedFileKeyring } from "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/node/index.js";
-import { inspectWireBody, selectAccount, variants } from "./runtime-config.mjs";
+import { executionContract } from "./integration-contract.mjs";
+import { createAdapterSet, inspectWireBody, selectAccount, validateRetry, variants } from
+  "./runtime-config.mjs";
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
@@ -16,10 +18,10 @@ const caseDocument = required("BENCHMARK_DOCUMENT");
 const variantName = required("BENCHMARK_VARIANT");
 const attemptNumber = Number(process.env.BENCHMARK_ATTEMPT ?? "1");
 const retryReason = process.env.BENCHMARK_RETRY_REASON ?? null;
-if (!Number.isInteger(attemptNumber) || attemptNumber < 1 || attemptNumber > 2) {
-  throw new Error("BENCHMARK_ATTEMPT must be 1 or 2");
+if (!Number.isInteger(attemptNumber) || attemptNumber < 1
+  || attemptNumber > executionContract.maxAttempts) {
+  throw new Error(`BENCHMARK_ATTEMPT must be 1 or ${executionContract.maxAttempts}`);
 }
-if (attemptNumber === 2 && !retryReason) throw new Error("Attempt 2 requires BENCHMARK_RETRY_REASON");
 const variant = variants[variantName];
 if (!variant) throw new Error(`Unsupported live variant: ${variantName}`);
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
@@ -33,6 +35,11 @@ const manifest = JSON.parse(await readFile(resolve(repositoryRoot,
   `docs/reviews/refresh-benchmark/${fixtureCampaign ? `${fixtureCampaign}/` : ""}manifest.json`), "utf8"));
 const frozen = JSON.parse(await readFile(resolve(repositoryRoot,
   `docs/reviews/refresh-benchmark/${fixtureCampaign ? `${fixtureCampaign}/` : ""}prompt-freeze.json`), "utf8"));
+if (frozen.graphifyVersion !== executionContract.graphify.version
+  || frozen.systemPromptSha256 !== executionContract.systemPromptSha256
+  || frozen.maxOutputTokens !== executionContract.maxOutputTokens) {
+  throw new Error("Frozen Graphify prompt contract differs from the integration contract");
+}
 const document = manifest.documents.find(({ id }) => id === caseDocument);
 if (!document) throw new Error(`Unknown frozen document: ${caseDocument}`);
 if (frozen.t1Commit !== t1Commit) throw new Error("T1 prompt commit differs from frozen contract");
@@ -43,7 +50,11 @@ const attemptSuffix = attemptNumber === 1 ? "" : `.attempt-${attemptNumber}`;
 const receiptPath = resolve(outputDir, `${caseId}${attemptSuffix}.receipt.json`);
 const outputPath = resolve(outputDir, `${caseId}${attemptSuffix}.output.json`);
 await mkdir(outputDir, { recursive: true });
-if (attemptNumber === 2) await access(resolve(outputDir, `${caseId}.receipt.json`));
+let previousReceipt = null;
+if (attemptNumber === executionContract.maxAttempts) {
+  previousReceipt = JSON.parse(await readFile(resolve(outputDir, `${caseId}.receipt.json`), "utf8"));
+}
+validateRetry({ attemptNumber, retryReason, previousReceipt });
 for (const path of [receiptPath, outputPath]) await access(path).then(
   () => { throw new Error(`Refusing quality rerun over ${path}`); }, () => undefined);
 
@@ -101,10 +112,8 @@ const observedFetch = async (url, init) => {
 };
 const mesh = createGraphifyMesh({
   routingSubject: { principalRef: "principal:refresh-benchmark", ownerScopeRef },
-  adapters: {
-    gemini: new GeminiAdapter({ client: new CloudCodeRuntimeClient(observedFetch) }),
-    openai: new OpenAIAdapter({ client: new CodexRuntimeClient({ fetch: observedFetch }) }),
-  },
+  adapters: createAdapterSet({ CloudCodeRuntimeClient, CodexRuntimeClient,
+    GeminiAdapter, OpenAIAdapter }, observedFetch),
   createRoutePlanner: (runtime) => facade.createRoutePlanner(runtime),
 });
 const textClient = { mode: "mesh", provider: variant.provider, model: variant.model,
@@ -130,7 +139,7 @@ let error;
 let extraction;
 const started = Date.now();
 const controller = new AbortController();
-const timeout = setTimeout(() => controller.abort(), 480_000);
+const timeout = setTimeout(() => controller.abort(), executionContract.transportTimeoutMs);
 try {
   extraction = (await extractRefreshProfile(corpus.chunks, { textClient, context,
     maxOutputTokens: frozen.maxOutputTokens }))[0]?.extraction;
@@ -144,7 +153,8 @@ const receipt = { schemaVersion: 1, campaign: campaign ?? "v1", caseId, status, 
   documentId: document.id, input: { pdfSha256: document.sha256, textSha256: document.textSha256 },
   requested: { providerId: variant.provider, transportProviderId: variant.transport,
     modelId: variant.model, effort: variant.effort,
-    maxOutputTokens: frozen.maxOutputTokens, transportTimeoutMs: 480_000 }, accountPseudonym, wire,
+    maxOutputTokens: frozen.maxOutputTokens,
+    transportTimeoutMs: executionContract.transportTimeoutMs }, accountPseudonym, wire,
   actual: generated ? { responseId: generated.id, providerId: generated.providerId,
     modelId: generated.modelId, finishReason: generated.finishReason,
     responseTextSha256: sha256(generated.text ?? ""), usage: generated.usage } : null,

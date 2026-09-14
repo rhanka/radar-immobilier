@@ -1,7 +1,27 @@
+import { executionContract } from "./integration-contract.mjs";
+
 export const variants = Object.freeze({
   "luna-low": { provider: "openai", transport: "codex", model: "gpt-5.6-luna", effort: "low" },
   "gemini-low": { provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash", effort: "low" },
 });
+
+export function createAdapterSet(constructors, observedFetch) {
+  const { CloudCodeRuntimeClient, CodexRuntimeClient, GeminiAdapter, OpenAIAdapter } = constructors;
+  return Object.freeze({
+    gemini: new GeminiAdapter({ client: new CloudCodeRuntimeClient(observedFetch) }),
+    openai: new OpenAIAdapter({ client: new CodexRuntimeClient({ fetch: observedFetch }) }),
+  });
+}
+
+export function validateRetry({ attemptNumber, retryReason, previousReceipt }) {
+  if (attemptNumber === 1) return;
+  if (attemptNumber !== executionContract.maxAttempts || !retryReason) {
+    throw new Error(`Attempt ${executionContract.maxAttempts} requires a retry reason`);
+  }
+  if (previousReceipt?.status !== "failed" || previousReceipt.actual !== null) {
+    throw new Error("Retry is allowed only after a transport failure");
+  }
+}
 
 export function selectAccount(accounts, variant) {
   const eligible = accounts.filter(({ providerId }) => providerId === variant.transport);
@@ -11,7 +31,8 @@ export function selectAccount(accounts, variant) {
   return eligible[0];
 }
 
-export function inspectWireBody(variant, body, expectedMaxOutputTokens = 16384) {
+export function inspectWireBody(variant, body,
+  expectedMaxOutputTokens = executionContract.maxOutputTokens) {
   const observed = variant.provider === "gemini"
     ? { model: body.model, effort: body.request?.generationConfig?.thinkingConfig?.thinkingLevel,
       maxOutputTokens: body.request?.generationConfig?.maxOutputTokens }

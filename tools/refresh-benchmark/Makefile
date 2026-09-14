@@ -93,7 +93,10 @@ test-integration-contract-v4:
 	test "$(ENV)" = "test-t1-model-benchmark"
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -w /src $(NODE_IMAGE) \
-	  node --test tools/refresh-benchmark/integration-contract.test.mjs
+	  node --test tools/refresh-benchmark/integration-contract.test.mjs \
+	    tools/refresh-benchmark/runtime-config.test.mjs
+	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/run-case.mjs
 
 test-score-v3:
 	test "$(ENV)" = "test-refresh-benchmark"

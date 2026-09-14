@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { inspectWireBody, selectAccount, variants } from "./runtime-config.mjs";
+import { createAdapterSet, inspectWireBody, selectAccount, validateRetry, variants } from
+  "./runtime-config.mjs";
 
 test("v4 candidates use the lowest explicit effort on enrolled transports", () => {
   assert.deepEqual(variants["luna-low"], {
@@ -38,4 +39,26 @@ test("outgoing wire evidence proves provider model, effort, and cap", () => {
       maxOutputTokens: 16384, thinkingConfig: { thinkingLevel: "HIGH" },
     } },
   }), /Observed effort differs/);
+});
+
+test("adapter construction is identical across the frozen Graphify boundary", () => {
+  class Client { constructor(options) { this.options = options; } }
+  class Adapter { constructor({ client }) { this.client = client; } }
+  const observedFetch = () => undefined;
+  const adapters = createAdapterSet({
+    CloudCodeRuntimeClient: Client, CodexRuntimeClient: Client,
+    GeminiAdapter: Adapter, OpenAIAdapter: Adapter,
+  }, observedFetch);
+  assert.equal(adapters.gemini.client.options, observedFetch);
+  assert.deepEqual(adapters.openai.client.options, { fetch: observedFetch });
+});
+
+test("every variant has the same single transport-retry policy", () => {
+  for (const variant of Object.values(variants)) {
+    assert.doesNotThrow(() => validateRetry({ attemptNumber: 1, previousReceipt: null }));
+    assert.doesNotThrow(() => validateRetry({ attemptNumber: 2, retryReason: "transport",
+      previousReceipt: { status: "failed", actual: null, variant } }));
+    assert.throws(() => validateRetry({ attemptNumber: 2, retryReason: "quality",
+      previousReceipt: { status: "failed", actual: {} } }), /only after a transport failure/);
+  }
 });
