@@ -43,7 +43,9 @@ function provenanceViolations(extraction, document, pages) {
     if (!Number.isInteger(record.page) || record.page < 1 || record.page > pages.length) {
       violations.push({ path, code: "invalid_pdf_page" });
     } else if (typeof record.excerpt !== "string"
-      || !containsNormalizedPdfExcerpt(pages[record.page - 1], record.excerpt)) {
+      || [...record.excerpt].length > 200) {
+      violations.push({ path, code: "entity_citation_excerpt_too_long" });
+    } else if (!containsNormalizedPdfExcerpt(pages[record.page - 1], record.excerpt)) {
       violations.push({ path, code: "ungrounded_pdf_excerpt" });
     }
   };
