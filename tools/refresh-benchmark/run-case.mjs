@@ -4,6 +4,8 @@ import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { createGraphifyMesh } from "/workspace/node_modules/@sentropic/graphify/dist/llm-mesh.js";
+import { validateExtraction, validateProfileExtraction } from
+  "/workspace/node_modules/@sentropic/graphify/dist/index.js";
 import { CloudCodeRuntimeClient, CodexRuntimeClient, GeminiAdapter, getModelProfile,
   OpenAIAdapter } from "/workspace/node_modules/@sentropic/llm-mesh/dist/index.js";
 import { createLlmMeshFacade } from "/workspace/node_modules/@sentropic/llm-mesh/dist/service/facade.js";
@@ -15,6 +17,89 @@ import { createAdapterSet, inspectWireBody, selectAccount, validateRetry, varian
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
+function parseErrorDetails(error, source) {
+  if (!(error instanceof SyntaxError)) return null;
+  const match = error.message.match(/(?:at )?position\s+(\d+)/iu);
+  const leadingWhitespace = source.length - source.trimStart().length;
+  const position = match ? Number(match[1])
+    : source.trimStart().startsWith("```") && error.message.includes("Unexpected token '`'")
+      ? leadingWhitespace : null;
+  return { name: error.name, message: error.message, position };
+}
+function errorDetails(error) {
+  if (!(error instanceof Error)) return { message: String(error) };
+  return { name: error.name, message: error.message,
+    ...(error.cause instanceof Error ? { cause: errorDetails(error.cause) } : {}) };
+}
+function strictJsonCandidate(text) {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/iu);
+  return { text: fenced ? fenced[1].trim() : trimmed, wrapperNormalized: Boolean(fenced) };
+}
+function pageTexts(chunk) {
+  const markers = [...chunk.text.matchAll(/^\[PDF PAGE ([1-9]\d*)\]\n/gm)];
+  return new Map(markers.map((marker, index) => {
+    const start = marker.index + marker[0].length;
+    return [Number(marker[1]), chunk.text.slice(start, markers[index + 1]?.index ?? chunk.text.length)];
+  }));
+}
+function provenanceViolations(extraction, chunk, containsNormalizedPdfExcerpt) {
+  const violations = [];
+  const texts = pageTexts(chunk);
+  const validateRecord = (record, path) => {
+    if (record.source_file !== chunk.originalKey || record.rawRef !== chunk.originalKey
+      || record.docSha !== chunk.docSha || record.sourceUrl !== chunk.sourceUrl
+      || record.modality !== "pdf") violations.push({ path, code: "invalid_pdf_identity" });
+    if (!Number.isInteger(record.page) || !chunk.pages.includes(record.page)) {
+      violations.push({ path, code: "invalid_pdf_page" });
+    } else if (typeof record.excerpt !== "string"
+      || !containsNormalizedPdfExcerpt(texts.get(record.page) ?? "", record.excerpt)) {
+      violations.push({ path, code: "ungrounded_pdf_excerpt" });
+    }
+  };
+  extraction.nodes.forEach((node, index) => {
+    if (!node.node_type) violations.push({ path: `nodes[${index}]`, code: "untyped_node" });
+  });
+  [...extraction.nodes, ...extraction.edges, ...(extraction.hyperedges ?? [])].forEach((entity, index) => {
+    if (entity.source_file !== chunk.originalKey) {
+      violations.push({ path: `entities[${index}]`, code: "invalid_entity_source_file" });
+    }
+  });
+  [...extraction.nodes, ...extraction.edges].forEach((entity, entityIndex) =>
+    (entity.citations ?? []).forEach((citation, citationIndex) =>
+      validateRecord(citation, `entities[${entityIndex}].citations[${citationIndex}]`)));
+  (extraction.evidence ?? []).forEach((evidence, index) => validateRecord(evidence, `evidence[${index}]`));
+  return violations;
+}
+function inspectResponse(text, context, chunk, containsNormalizedPdfExcerpt) {
+  let rawParseError = null;
+  try { JSON.parse(text); } catch (error) { rawParseError = parseErrorDetails(error, text); }
+  const normalized = strictJsonCandidate(text);
+  let parsed;
+  let normalizedParseError = null;
+  try { parsed = JSON.parse(normalized.text); } catch (error) {
+    normalizedParseError = parseErrorDetails(error, normalized.text);
+  }
+  const validation = { jsonValidRaw: rawParseError === null,
+    wrapperNormalized: normalized.wrapperNormalized,
+    jsonValidAfterNormalize: normalizedParseError === null,
+    extractionValid: null, extractionViolations: [], profileValid: null,
+    profileViolations: [], provenanceValid: null, provenanceViolations: [],
+    nativeParseError: normalizedParseError ?? rawParseError,
+    parseErrors: { raw: rawParseError, afterNormalize: normalizedParseError } };
+  if (normalizedParseError) return { validation, parsed: undefined };
+  validation.extractionViolations = validateExtraction(parsed);
+  validation.extractionValid = validation.extractionViolations.length === 0;
+  if (!validation.extractionValid) return { validation, parsed };
+  const profile = validateProfileExtraction(parsed, { profile: context.profile,
+    registryExtraction: context.registryExtraction });
+  validation.profileValid = profile.valid;
+  validation.profileViolations = profile.issues;
+  if (!profile.valid) return { validation, parsed };
+  validation.provenanceViolations = provenanceViolations(parsed, chunk, containsNormalizedPdfExcerpt);
+  validation.provenanceValid = validation.provenanceViolations.length === 0;
+  return { validation, parsed };
+}
 const caseDocument = required("BENCHMARK_DOCUMENT");
 const variantName = required("BENCHMARK_VARIANT");
 const attemptNumber = Number(process.env.BENCHMARK_ATTEMPT ?? "1");
@@ -50,13 +135,14 @@ const caseId = `${document.id}--${variantName}`;
 const attemptSuffix = attemptNumber === 1 ? "" : `.attempt-${attemptNumber}`;
 const receiptPath = resolve(outputDir, `${caseId}${attemptSuffix}.receipt.json`);
 const outputPath = resolve(outputDir, `${caseId}${attemptSuffix}.output.json`);
+const rawPath = resolve(outputDir, `${caseId}${attemptSuffix}.raw.txt`);
 await mkdir(outputDir, { recursive: true });
 let previousReceipt = null;
 if (attemptNumber === executionContract.maxAttempts) {
   previousReceipt = JSON.parse(await readFile(resolve(outputDir, `${caseId}.receipt.json`), "utf8"));
 }
 validateRetry({ attemptNumber, retryReason, previousReceipt });
-for (const path of [receiptPath, outputPath]) await access(path).then(
+for (const path of [receiptPath, outputPath, rawPath]) await access(path).then(
   () => { throw new Error(`Refusing quality rerun over ${path}`); }, () => undefined);
 
 const runRoot = resolve(repositoryRoot, manifest.sourceRunRoot);
@@ -74,7 +160,7 @@ const profileModuleSha256 = sha256(await readFile(profileModulePath));
 if (profileModuleSha256 !== frozen.profileModuleSha256) throw new Error("T1 profile module hash mismatch");
 if (sha256(await readFile(corpusModulePath)) !== frozen.corpusModuleSha256) throw new Error("T1 corpus module hash mismatch");
 const { extractRefreshProfile, loadRefreshProfileContext } = await import(pathToFileURL(profileModulePath));
-const { materializeRefreshCorpus } = await import(pathToFileURL(corpusModulePath));
+const { containsNormalizedPdfExcerpt, materializeRefreshCorpus } = await import(pathToFileURL(corpusModulePath));
 const originalKey = document.originalKey;
 const manifestKey = "refresh-benchmark-input.tsv";
 const tsv = `source_id\tcity_slug\tsha\trepresentation_key\tsidecar_key\n${document.sourceId}\t${document.city}\t${document.sha256}\t${originalKey}\t${originalKey}.meta.json\n`;
@@ -99,6 +185,12 @@ let wire;
 let generated;
 let generationStarted;
 let inputHashes;
+let normalizedResponse;
+let responseValidation = { jsonValidRaw: null, wrapperNormalized: null,
+  jsonValidAfterNormalize: null, extractionValid: null, extractionViolations: [],
+  profileValid: null, profileViolations: [], provenanceValid: null,
+  provenanceViolations: [], nativeParseError: null,
+  parseErrors: { raw: null, afterNormalize: null } };
 const routeOutcomes = [];
 const observedFetch = async (url, init) => {
   const fetchStarted = Date.now();
@@ -137,7 +229,13 @@ const textClient = { mode: "mesh", provider: variant.provider, model: variant.mo
       maxOutputTokens: input.maxOutputTokens, signal: controller.signal };
     generated = await mesh.generateValidated(request, async (response) => {
       generated = response;
-      await input.validateResponse(response.text ?? "");
+      const responseText = response.text ?? "";
+      await writeFile(rawPath, responseText, "utf8");
+      const inspected = inspectResponse(responseText, context, corpus.chunks[0],
+        containsNormalizedPdfExcerpt);
+      responseValidation = inspected.validation;
+      normalizedResponse = inspected.parsed;
+      await input.validateResponse(responseText);
     });
     await writeFile(input.outputPath, generated.text ?? "", "utf8");
     return { status: "completed", provider: variant.provider, mode: "mesh", model: variant.model,
@@ -154,21 +252,13 @@ try {
     maxOutputTokens: frozen.maxOutputTokens }))[0]?.extraction;
 } catch (caught) {
   status = "failed";
-  error = caught instanceof Error ? { name: caught.name, message: caught.message } : { message: String(caught) };
+  error = errorDetails(caught);
 } finally { clearTimeout(timeout); }
 const completed = Date.now();
-let responseJsonValid = null;
-if (generated?.text) {
-  try {
-    await writeFile(outputPath, JSON.stringify(JSON.parse(generated.text)), "utf8");
-    responseJsonValid = true;
-  } catch (parseError) {
-    responseJsonValid = false;
-    status = "failed";
-    error ??= { name: "SyntaxError", message: "Model response is not valid JSON" };
-  }
+if (responseValidation.jsonValidAfterNormalize) {
+  await writeFile(outputPath, JSON.stringify(normalizedResponse), "utf8");
 }
-const receipt = { schemaVersion: 1, campaign: campaign ?? "v1", caseId, status, t1Commit, profileModuleSha256,
+const receipt = { schemaVersion: 2, campaign: campaign ?? "v1", caseId, status, t1Commit, profileModuleSha256,
   documentId: document.id, input: { pdfSha256: document.sha256, textSha256: document.textSha256 },
   requested: { providerId: variant.provider, transportProviderId: variant.transport,
     modelId: variant.model, effort: variant.effort,
@@ -177,13 +267,14 @@ const receipt = { schemaVersion: 1, campaign: campaign ?? "v1", caseId, status, 
   actual: generated ? { responseId: generated.id, providerId: generated.providerId,
     modelId: generated.modelId, finishReason: generated.finishReason,
     responseTextSha256: sha256(generated.text ?? ""), usage: generated.usage } : null,
-  validation: { jsonValid: responseJsonValid, extractionAccepted: Boolean(extraction),
-    routeOutcomes, fallbackAvailable: false },
+  validation: { ...responseValidation, extractionAccepted: Boolean(extraction),
+    accepted: Boolean(extraction), routeOutcomes, fallbackAvailable: false },
   hashes: inputHashes, timing: { startedAt: new Date(started).toISOString(),
     completedAt: new Date(completed).toISOString(), totalMs: completed - started,
     queueMs: wire && generationStarted ? Date.parse(wire.fetchStartedAt) - generationStarted : null,
     runMs: wire ? completed - Date.parse(wire.fetchStartedAt) : null }, attempts: 1,
-  extractionAccepted: Boolean(extraction), attemptNumber, retryReason, error };
+  extractionAccepted: Boolean(extraction), attemptNumber, retryReason, error,
+  artifacts: { receiptPath, rawPath, outputPath: responseValidation.jsonValidAfterNormalize ? outputPath : null } };
 await writeFile(receiptPath, JSON.stringify(receipt), "utf8");
 console.log(JSON.stringify(receipt));
 if (status !== "completed") process.exitCode = 1;
