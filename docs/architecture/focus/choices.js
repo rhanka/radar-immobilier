@@ -4,11 +4,8 @@ export const fixedInstructions = {
   retainScwTemUntilValidatedReplacement: true,
   transitionEvidence: {
     asOfDate: '2026-09-13',
-    t1: {
-      graphify: '0.18.0', model: 'Luna high', status: 'validation-in-progress',
-      firstKubernetesRun: 'failed-before-LLM', failure: 'input object was .html; PDF required',
-      providerCompletion: false, typedSignalAndExactPdf: false, scheduleAcceptance: false,
-    },
+    t1: { graphify: '0.18.0', acceptanceModelTrial: 'Luna high', preproduction: 'accepted',
+      production: 'dormant-pending-promotion', selectedProductionModel: null },
     t2: {
       decision: 'MIGRATE+RETAIN', rawParity: true, rawOvhRebind: true,
       docsBucketProvisioned: true, docsSecretProvisioned: true,
@@ -20,7 +17,8 @@ export const fixedInstructions = {
         removed: ['MinIO StatefulSet', 'MinIO Pod', 'MinIO Service', '40 Gi data PVC', 'six MinIO NetworkPolicies'],
         retained: ['migration/checkpoint PVC'], quotaBefore: { pvcs: 4, storageGi: 47 }, quotaAfter: { pvcs: 3, storageGi: 7 },
         workloadsReady: { api: '1/1', mcp: '1/1', ui: '1/1' } },
-      production: { status: 'in-progress', accepted: false },
+      production: { status: 'runtime-cutover-observed', accepted: false,
+        open: ['destination attribute parity', 'final source rescan', 'global legacy dependency sweep'] },
     },
     t3: { status: 'gated', verdict: 'await production T2 and post-cleanup capacity proof', targetNodes: 1,
       requiredSequence: ['production T2 complete', 'post-cleanup remeasurement', 'rightsizing', 'constraints reconciled', 'verified two-node step', 'one-node test'] },
@@ -28,7 +26,7 @@ export const fixedInstructions = {
   reporting: {
     timezone: 'America/Toronto', startInclusive: '2026-08-10T00:00:00-04:00',
     endExclusive: '2026-09-14T00:00:00-04:00', days: 35, hours: 840,
-    joinEvidence: 'last cost report merged on origin/main ends 2026-08-09',
+    joinEvidence: 'preceding report at historical revision 72b966664523801ea00cfcb704e0285ee765c136; no main-ancestry claim',
     externalInvoiceBoundaryVerified: false, tokenCaptureCutoff: '2026-09-13T21:09:35.483Z',
   },
   billing: {
@@ -44,13 +42,13 @@ export const fixedInstructions = {
 };
 
 export const questions = [
-  { key: 'preprod-address', criticality: 'non-blocking',
-    question: 'Quelle adresse doit devenir le point d’entrée propriétaire de la préproduction ?',
-    context: 'Les preuves confirment preprod.immo.sent-tech.ca; preprod.sent-tech.ca reste une intention non tranchée.',
+  { key: 'm1-model', criticality: 'architecture',
+    question: 'Quel candidat M1 faut-il ratifier après un benchmark apparié complet ?',
+    context: 'Aucun modèle n’est sélectionné. Laisser vide diffère la décision; le no-output Gemini reste non classable et ne constitue pas un résultat.',
     options: [
-      { key: 'KEEP_VERIFIED', title: 'Conserver l’adresse vérifiée', detail: 'Garder preprod.immo.sent-tech.ca comme entrée canonique.' },
-      { key: 'ALIAS_PORTAL', title: 'Créer un alias ou portail', detail: 'Faire de preprod.sent-tech.ca une entrée distincte, après conception et vérification.' },
-      { key: 'DEFER', title: 'Différer', detail: 'Ne changer aucune adresse tant que le besoin propriétaire n’est pas précisé.' },
+      { key: 'sonnet-comparable', title: 'Sonnet comparable', detail: 'Même corpus/prompt/schéma/cap; clé owner hors dépôt et hors logs.' },
+      { key: 'luna-low', title: 'Luna low', detail: 'À exécuter sous le même contrat; le trial Luna high ne préjuge pas du résultat.' },
+      { key: 'gemini38-lowest', title: 'Gemini 3.8 lowest', detail: 'À qualifier; une tentative sans sortie ne reçoit ni score ni rang.' },
     ] },
   { key: 'automation-scope', criticality: 'architecture',
     question: 'Le périmètre futur d’automatisation doit-il rester limité à Immo ou inclure les extractions Geo assistées ?',
@@ -78,11 +76,19 @@ export function responsePack(manifest, selections = {}, comments = {}, remarks =
       selection, decisionStatus: selection === null ? (question.criticality === 'non-critical' ? 'open-non-blocking' : 'open') : 'owner-draft-not-ratified',
       comment: comments[question.key] ?? '', options: question.options };
   });
-  return { schema: 'immo-focus-owner-response/v6', dossier: 'immo-before-after-and-reporting', revision: 'D8',
+  const candidateRows = ['sonnet-comparable', 'luna-low', 'gemini38-lowest'].map(optionId => ({ optionId,
+    state: optionId === 'gemini38-lowest' ? 'not-classifiable' : 'not-measured', resultId: null }));
+  return { schema: 'immo-focus-owner-response/v7', dossier: 'immo-two-dated-transitions', revision: 'D9',
     dossierHash: manifest.dossierHash, artifactInputHash: manifest.artifactInputHash, capturedAt,
     buildOnly: true, status: 'draft-not-ratified',
     authority: 'open answers captured as a local draft; fixed owner decisions remain unchanged; no deployment, invoice or Track decision emitted',
     responses,
+    m1Decision: { schema: 'docs/architecture/focus/m1-decision.schema.json', status: 'awaiting-matched-benchmark',
+      optionSet: ['sonnet-comparable', 'luna-low', 'gemini38-lowest'], candidateRows,
+      attempts: [{ attemptId: 'historical-gemini-no-output', optionId: 'gemini38-lowest', classification: 'not-classifiable', output: null,
+        qualityMetrics: null, validOutputLatencyMs: null, rank: null }],
+      candidateResults: [], ranking: [], draftSelectedOptionId: selections['m1-model'] ?? null, ratifiedOptionId: null,
+      sonnetCredentialPolicy: 'owner-controlled token; read-only; outside repository, argv, logs, commits and PDF' },
     fixedInstructions, unresolvedEvidence: [
       'T1 valid-PDF provider completion, typed Signal/exact PDF, replay and schedule acceptance',
       'production T2 DOCS copy, parity/recovery, rebind and MinIO removal',

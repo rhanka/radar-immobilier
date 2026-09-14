@@ -1,10 +1,9 @@
 <script>
   import { onMount } from 'svelte';
-  import { Badge, Button, Flex, Radio, Stack, Textarea, Tile } from '@sentropic/design-system-svelte';
   import { questions, responsePack } from './choices.js';
   let { manifest, remarks = '' } = $props();
   let selections = $state({}), comments = $state({}), status = $state(''), copyError = $state('');
-  let storageKey = $derived(`immo-focus-d8-responses:${manifest.artifactInputHash}`);
+  let storageKey = $derived(`immo-focus-d9-responses:${manifest.artifactInputHash}`);
   let json = $derived(JSON.stringify(responsePack(manifest, selections, comments, remarks, null), null, 2));
   onMount(() => {
     try {
@@ -27,7 +26,7 @@
   }
   function download() {
     const url = URL.createObjectURL(new Blob([packText()], { type: 'application/json' }));
-    const a = document.createElement('a'); a.href = url; a.download = 'immo-reponses-d8.json'; a.click(); URL.revokeObjectURL(url);
+    const a = document.createElement('a'); a.href = url; a.download = 'immo-reponses-d9.json'; a.click(); URL.revokeObjectURL(url);
   }
 </script>
 
@@ -36,29 +35,30 @@
   <p>Chaque question précède ses options. Les réponses restent des brouillons locaux : elles ne modifient ni les décisions déjà ratifiées, ni Track, ni le déploiement.</p>
   {#each questions as question}
     <section class="question-block" aria-labelledby={`question-${question.key}`}>
-      <Flex justify="between" align="start" wrap gap={2}>
+      <div class="flex-row">
         <h3 id={`question-${question.key}`}>{question.question}</h3>
-        <Badge tone={question.criticality === 'architecture' ? 'warning' : 'neutral'}>{question.criticality === 'non-critical' ? 'Non critique' : question.criticality}</Badge>
-      </Flex>
+        <span class="badge" class:warning={question.criticality === 'architecture'}>{question.criticality === 'non-critical' ? 'Non critique' : question.criticality}</span>
+      </div>
       <p>{question.context}</p>
       <div class="option-grid" aria-label={`Options pour ${question.question}`}>
-        {#each question.options as option}<Tile><Stack gap={3}>
-          <Flex justify="between" wrap gap={2}><Badge tone="neutral">{option.key}</Badge>{#if selections[question.key] === option.key}<Badge tone="success">Sélectionnée</Badge>{/if}</Flex>
+        {#each question.options as option}<article class="option"><div>
+          <div class="flex-row"><span class="badge">{option.key}</span>{#if selections[question.key] === option.key}<span class="badge selected">Sélectionnée</span>{/if}</div>
           <h4>{option.title}</h4>
-          <Radio name={question.key} value={option.key} label={`Choisir : ${option.title}`} checked={selections[question.key] === option.key} onchange={() => select(question.key, option.key)} />
+          <label><input type="radio" name={question.key} value={option.key} checked={selections[question.key] === option.key} onchange={() => select(question.key, option.key)} /> Choisir : {option.title}</label>
           <p>{option.detail}</p>
-        </Stack></Tile>{/each}
+        </div></article>{/each}
       </div>
-      <Textarea label={`Commentaire — ${question.question}`} helperText="Inclus avec ce choix dans le JSON local." value={comments[question.key] ?? ''} rows={3} oninput={event => comment(question.key, event.currentTarget.value)} />
+      <label>Commentaire — {question.question}<textarea value={comments[question.key] ?? ''} rows="3" oninput={event => comment(question.key, event.currentTarget.value)}></textarea></label>
     </section>
   {/each}
-  <Flex gap={2} wrap><Button variant="primary" onclick={copy}>Copier les réponses en JSON</Button><Button variant="secondary" onclick={download}>Télécharger les réponses en JSON</Button><Button variant="ghost" onclick={() => { selections = {}; comments = {}; persist(); }}>Effacer les réponses</Button></Flex>
+  <div class="flex-row"><button onclick={copy}>Copier les réponses en JSON</button><button onclick={download}>Télécharger les réponses en JSON</button><button onclick={() => { selections = {}; comments = {}; persist(); }}>Effacer les réponses</button></div>
   <p role="status">{copyError || status}</p>
-  <details class="choice-json" open={Boolean(copyError)}><summary>Voir le JSON réel des questions, options, choix et commentaires</summary><textarea aria-label="JSON des réponses D8" readonly value={json} rows={20}></textarea></details>
+  <details class="choice-json" open={Boolean(copyError)}><summary>Voir le JSON réel des questions, options, choix et commentaires</summary><textarea aria-label="JSON des réponses D9" readonly value={json} rows={20}></textarea></details>
 </section>
 <style>
   .choices { margin-block: 24px; } .question-block { border-top: 1px solid var(--st-semantic-border-subtle); padding-block: 24px; }
   .option-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-block: 20px; }
+  .option { padding: 16px; border: 1px solid var(--st-semantic-border-subtle); }
   h3, h4 { margin: 0; } h3 { font-size: 1.15rem; } h4 { font-size: 1rem; } p { font-size: .9rem; line-height: 1.5; }
   .choice-json textarea { width: 100%; margin-top: 16px; font-family: monospace; font-size: .8rem; }
   @media (max-width: 850px) { .option-grid { grid-template-columns: 1fr; } }

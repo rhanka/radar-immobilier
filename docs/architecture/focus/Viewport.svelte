@@ -1,11 +1,8 @@
 <script>
   import { useSvelteFlow } from '@xyflow/svelte';
-  let { bounds, width, height } = $props();
-  const { fitBounds } = useSvelteFlow();
+  const { setViewport } = useSvelteFlow();
   $effect(() => {
-    if (!width || !height) return;
-    const target = bounds;
-    const timer = setTimeout(() => fitBounds(target, { padding: 0.15, duration: 150 }), 40);
+    const timer = setTimeout(() => setViewport({ x: 24, y: 24, zoom: 1 }, { duration: 0 }), 40);
     return () => clearTimeout(timer);
   });
 </script>

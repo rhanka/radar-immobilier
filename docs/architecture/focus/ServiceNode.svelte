@@ -6,7 +6,10 @@
   const sides = [['left', Position.Left], ['right', Position.Right], ['top', Position.Top], ['bottom', Position.Bottom]];
 </script>
 
-<div class="architecture-node service-node" data-repo={data.provenance.repos?.join(' + ') ?? 'unassigned'}>
+<div class="architecture-node service-node" data-node-kind="ordinary" data-id={data.entity.id}
+  data-parent-id={data.parentId ?? ''} data-evidence-class={data.evidenceClass}
+  data-runtime-state={data.runtimeState} data-repo={data.provenance.repo.join(' + ')}
+  data-kind={data.kind} data-label={data.label} title={data.label}>
   <!-- Preserve the Focus router's exact side/slot handle contract. -->
   {#each ['target', 'source'] as type}
     {#each sides as [side, position]}
@@ -17,28 +20,17 @@
   {/each}
   <header>
     <ServiceIcon kind={data.provenance.icon} />
-    <div><span class="node-kind">{data.kind}</span><strong class="service-name">{data.provenance.service}</strong></div>
+    <strong class="service-name" data-text-role="service-title">{data.title}</strong>
   </header>
-  <div class="node-description">
-    <strong>{data.title}</strong>
-    {#if data.function}<span>{data.function}</span>{/if}
-    {#if data.detail}<span>{data.detail}</span>{/if}
-  </div>
-  <footer>
-    <strong class="repo-label">{data.provenance.repoLabel}</strong>
-    <span class="repo-role">{data.provenance.role}</span>
-  </footer>
+  <span class="node-status" data-text-role="status">{data.statusLabel} · {data.provenance.role}</span>
+  <strong class="repo-label" data-text-role="repo">{data.provenance.repoLabel}</strong>
 </div>
 <style>
-  .service-node { width: 100%; height: 100%; padding: 16px; display: grid; grid-template-rows: auto 1fr auto; gap: 10px; border: 1px solid var(--st-semantic-border-strong); border-left: 4px solid var(--st-semantic-data-category1); background: var(--st-semantic-surface-raised, #fff); color: var(--st-semantic-text-primary); text-align: left; }
-  header { display: flex; align-items: center; gap: 13px; }
-  header div { min-width: 0; }
-  .node-kind { display: block; font-size: 11px; letter-spacing: .06em; color: var(--st-semantic-text-secondary); }
-  .service-name { display: block; font-size: 16px; line-height: 1.25; margin-top: 3px; }
-  .node-description { display: flex; flex-direction: column; gap: 5px; overflow-wrap: anywhere; font-size: 12px; line-height: 1.35; }
-  .node-description strong { font-size: 13px; font-weight: 650; }
-  footer { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--st-semantic-border-subtle); padding-top: 9px; line-height: 1.3; }
-  .repo-label { font-size: 12px; }
-  .repo-role { font-size: 11px; color: var(--st-semantic-text-secondary); }
+  .service-node { width: 100%; height: 100%; padding: 8px; display: flex; flex-direction: column; gap: 4px; overflow: hidden; border: 2px solid var(--st-semantic-border-strong); border-left: 8px solid var(--st-semantic-data-category1); background: var(--st-semantic-surface-raised, #fff); color: var(--st-semantic-text-primary); text-align: left; }
+  header { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .service-name { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 32px; line-height: 1.4; }
+  .node-status, .repo-label { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
+  .node-status { font-size: 22px; color: var(--st-semantic-text-secondary); }
+  .repo-label { font-size: 24px; }
   :global(.connection-handle) { opacity: 0; pointer-events: none; }
 </style>

@@ -1,32 +1,32 @@
 <script>
-  import { Badge, Flex, Tile } from '@sentropic/design-system-svelte';
   const reportPrefix = location.pathname.includes('/reports/architecture-monthly/') ? './' : '../reports/architecture-monthly/';
   const transitions = [
-    { key: 'T1', status: 'validation', detail: 'Premier run arrêté avant le LLM; PDF valide, provider, Signal/preuve et schedule restent à accepter.', tone: 'warning' },
-    { key: 'T2', status: 'préprod accepté', detail: 'OVH 59 017 objets / 12 534 514 457 octets, failed 0; MinIO et PVC data retirés. Production en cours.', tone: 'success' },
-    { key: 'T3', status: 'gated', detail: 'Aucune réduction avant T2 production, re-mesure post-cleanup et étape deux nœuds vérifiée.', tone: 'warning' },
+    { key: 'A', status: 'cutover observé partiel', detail: 'OVH S3 et absence MinIO observés; GHCR intégré. Parité finale/balayage ouverts; TEM conservé.', tone: 'warning' },
+    { key: 'B', status: 'préprod acceptée', detail: 'CronJob autonome accepté en préproduction. Production dormante jusqu’à promotion; modèle en attente M1.', tone: 'warning' },
+    { key: 'M1', status: 'à ratifier', detail: 'Sonnet comparable, Luna low, Gemini 3.8 lowest. Aucun gagnant; no-output Gemini non classable.', tone: 'warning' },
   ];
 </script>
 
 <section class="monthly-summary" aria-labelledby="monthly-summary-title">
-  <Flex justify="between" align="center" wrap gap={2}>
+  <div class="flex-row">
     <div><span class="eyebrow">Après le dossier · données actualisées</span><h2 id="monthly-summary-title">Résumé du rapport mensuel</h2></div>
-    <Badge tone="neutral">10 août → 13 septembre 2026 inclus</Badge>
-  </Flex>
+    <span class="badge">10 août → 13 septembre 2026 inclus</span>
+  </div>
   <div class="summary-grid">
-    <Tile><p class="label">Période</p><strong>35 jours · 840 h</strong><p>America/Toronto, sans trou après le rapport terminé le 9 août.</p></Tile>
-    <Tile><p class="label">Infrastructure</p><strong>68,88 CAD</strong><p>Projection ratifiée : un b3-8 à 0,082 CAD/h.</p></Tile>
-    <Tile><p class="label">Allocation LLM</p><strong>251,215438 CAD</strong><p>Méthode et coût encore non ratifiés; statut non critique.</p></Tile>
-    <Tile><p class="label">Total indicatif</p><strong>320,095438 CAD</strong><p>Infra + allocation LLM; pas une facture fournisseur.</p></Tile>
+    <article><p class="label">Période</p><strong>35 jours · 840 h</strong><p>America/Toronto, sans trou après le rapport terminé le 9 août.</p></article>
+    <article><p class="label">Infrastructure</p><strong>68,88 CAD</strong><p>Projection de référence : un b3-8 à 0,082 CAD/h; pas un état runtime.</p></article>
+    <article><p class="label">Allocation LLM</p><strong>251,215438 CAD</strong><p>Méthode et coût provisoires; statut non critique et non final.</p></article>
+    <article><p class="label">Total indicatif</p><strong>320,095438 CAD</strong><p>Infra + allocation LLM; pas une facture fournisseur.</p></article>
   </div>
   <h3>État des transitions</h3>
   <div class="transition-grid">
-    {#each transitions as transition}<article data-transition={transition.key}><Badge tone={transition.tone}>{transition.key} · {transition.status}</Badge><p>{transition.detail}</p></article>{/each}
+    {#each transitions as transition}<article data-transition={transition.key}><span class="badge">{transition.key} · {transition.status}</span><p>{transition.detail}</p></article>{/each}
   </div>
-  <Flex gap={2} wrap>
+  <div class="flex-row">
     <a class="report-link" href={`${reportPrefix}report-through-2026-09-13.html`} download>Télécharger le rapport HTML</a>
     <a class="report-link" href={`${reportPrefix}report-through-2026-09-13.pdf`} download>Télécharger le rapport PDF</a>
-  </Flex>
+    <a class="report-link" href="../../spec/reports/study-2026-08/report.pdf" download>Télécharger le rapport précédent joint</a>
+  </div>
   <p class="availability">Liens locaux : disponibles lorsque les artefacts mensuels sont présents à côté du dossier.</p>
 </section>
 

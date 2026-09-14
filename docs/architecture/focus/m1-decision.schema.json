@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sent-tech.ca/schemas/immo-m1-decision-v1.json",
+  "title": "Immo M1 extraction-model decision",
+  "type": "object",
+  "required": ["status", "optionSet", "candidateRows", "attempts", "candidateResults", "ranking", "ratifiedOptionId"],
+  "properties": {
+    "status": { "enum": ["awaiting-matched-benchmark", "ready-for-ratification", "ratified"] },
+    "optionSet": {
+      "const": ["sonnet-comparable", "luna-low", "gemini38-lowest"]
+    },
+    "candidateRows": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {
+        "type": "object", "required": ["optionId", "state", "resultId"], "additionalProperties": false,
+        "properties": {
+          "optionId": { "enum": ["sonnet-comparable", "luna-low", "gemini38-lowest"] },
+          "state": { "enum": ["not-measured", "not-qualified", "not-classifiable", "result-available"] },
+          "resultId": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["attemptId", "optionId", "classification", "output", "qualityMetrics", "validOutputLatencyMs", "rank"],
+        "properties": {
+          "attemptId": { "type": "string", "minLength": 1 },
+          "optionId": { "enum": ["sonnet-comparable", "luna-low", "gemini38-lowest"] },
+          "classification": { "enum": ["qualified-output", "not-qualified", "not-classifiable"] },
+          "output": {}, "qualityMetrics": {}, "validOutputLatencyMs": { "type": ["number", "null"] }, "rank": { "type": ["integer", "null"] }
+        }
+      }
+    },
+    "candidateResults": { "type": "array", "items": { "type": "object", "required": ["resultId", "optionId", "output"] } },
+    "ranking": { "type": "array", "items": { "enum": ["sonnet-comparable", "luna-low", "gemini38-lowest"] }, "uniqueItems": true },
+    "draftSelectedOptionId": { "type": ["string", "null"], "enum": ["sonnet-comparable", "luna-low", "gemini38-lowest", null] },
+    "ratifiedOptionId": { "type": ["string", "null"], "enum": ["sonnet-comparable", "luna-low", "gemini38-lowest", null] }
+  },
+  "additionalProperties": true
+}
