@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "campaign": "v5",
+  "decision": "no_m1_promotion",
+  "control": {
+    "documentId": "valcourt-2026-06-01-agenda",
+    "profileValid": null,
+    "profileValidationReached": false,
+    "profileControlPassed": false,
+    "accepted": false,
+    "reason": "incomplete_fenced_json",
+    "httpStatus": 200,
+    "latencyMs": 56170,
+    "inputTokens": 7838,
+    "outputTokens": 14360,
+    "totalTokens": 22198
+  },
+  "requests": {
+    "geminiUsed": 1,
+    "geminiCeiling": 8,
+    "campaignExecuted": 0,
+    "campaignPlanned": 5,
+    "campaignAccepted": 0,
+    "anthropicUsed": 0
+  },
+  "campaignStopped": true,
+  "campaignStopReason": "Valcourt control did not reach profile validation because the response was incomplete JSON.",
+  "anthropicProcessEnvironment": "absent",
+  "judgesRun": false,
+  "judgesReason": "No accepted candidate output.",
+  "t1Commit": "5f227929ee71747cc7f3dc8245167b7d7f42c69d",
+  "profileModuleSha256": "ae8852d3fbbcab6ac93f9ad484b750ebcfbb7b95893a2b9ad2c63df2dc558f3d",
+  "manifestSha256": "e3c6976f2b1143a60faa09cb94a6a512d7c0cc071c60273adc841075217398f7",
+  "promptFreezeSha256": "c0bb9d11835be0cbc5d3819efbf220e0edb304d11016ffcbfa5efc362ea152c8"
+}
