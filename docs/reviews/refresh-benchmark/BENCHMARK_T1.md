@@ -128,3 +128,15 @@ fallback multi-route et comportement de llm-mesh 0.19.2.
 
 Les données structurées de synthèse sont dans `v4/campaign-summary.json`; les
 reçus PDF × modèle sont dans `v4/campaign-real/`.
+
+## Décision M1 consolidée — v9
+
+[FAIT] Le rejeu exact LOW v9 accepte 3/5 PDF, comme v7, sans variation de la
+décision d'acceptation sur les cinq cas. Les écarts F1 observés v7 → v9 sont
+Lac 0,000, Saint-Étienne +0,364, Valcourt 0,000, Saint-Barthélemy N-A et
+Waterloo N-A. Deux observations par PDF ne donnent pas une variance statistique.
+
+[JUGEMENT] La recommandation M1 consolidée est **B** : attendre la clarification
+du statut et des `evidence_refs`, puis exiger au moins 4/5 acceptés sur deux
+runs avant promotion. Le choix owner A/B/C/D et ses faits contradictoires sont
+présentés dans [DECISION_M1.md](DECISION_M1.md).
