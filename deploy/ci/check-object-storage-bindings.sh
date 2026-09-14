@@ -40,6 +40,16 @@ RETIRED_LAUNCHERS=(
   'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-copy'
   'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-start'
 )
+RETIRED_STORAGE_TOOLS=(
+  tools/graphify-v23/preflight.sh
+  tools/graphify-v23/gate.sh
+  tools/graphify-v23/runner.sh
+  tools/graphify-v23/runner-llm-desc-validation.sh
+  tools/grounding/stage-candidate.sh
+  tools/grounding/gate-grounding.sh
+  tools/grounding/worker-grounding.sh
+  tools/grounding/drive-grounding.sh
+)
 FAIL=0
 fail() { echo "FAIL: $*" >&2; FAIL=$((FAIL + 1)); }
 
@@ -121,6 +131,15 @@ for entry in "${RETIRED_LAUNCHERS[@]}"; do
   grep -Eq 'KUBECTL|kubectl|[[:space:]](apply|create|delete)[[:space:]]' <<<"$body" &&
     fail "$rel target $target retains a cluster mutation"
 done
+for rel in "${RETIRED_STORAGE_TOOLS[@]}"; do
+  first_actions="$(grep -Ev '^[[:space:]]*(#|$)' "$ROOT/$rel" | head -n 3)"
+  grep -Eq '^set -e?uo pipefail$' <<<"$(sed -n '1p' <<<"$first_actions")" ||
+    fail "$rel no longer starts fail-closed"
+  grep -Fq 'retired:' <<<"$(sed -n '2p' <<<"$first_actions")" ||
+    fail "$rel lost its retirement marker"
+  [ "$(sed -n '3p' <<<"$first_actions")" = 'exit 1' ] ||
+    fail "$rel can execute beyond its retirement marker"
+done
 grep -Eiq 'radar-registry-pull|SCW[[:space:]]+(Container[[:space:]]+)?registry' \
   "$ROOT/deploy/k8s/README.md" && fail 'deploy/k8s/README.md retains legacy registry guidance'
 grep -Eiq 's3\.fr-par\.scw\.cloud|radar-immobilier-docs-pocs|radar-s3-credentials|Scaleway|SCW' \
@@ -170,6 +189,11 @@ for expected in \
 done
 grep -Fq 'SCW_TEM_API_BASE_URL: "https://api.scaleway.com"' "$ROOT/deploy/k8s/30-api.yaml" || fail 'TEM configuration changed'
 grep -Fq 'name: radar-tem-credentials' "$ROOT/deploy/k8s/30-api.yaml" || fail 'TEM Secret reference changed'
+grep -Eq '^[[:space:]]*bash tools/graphify-v23/(preflight|runner)\.sh' \
+  "$ROOT/docs/spec/reports/2.3-completude-1105.md" &&
+  fail 'the graphify completeness report still exposes a retired launcher'
+jq -e '.rerunCommand == null' "$ROOT/docs/spec/reports/2.3-completude-1105.json" >/dev/null ||
+  fail 'the graphify completeness receipt still exposes a retired launcher'
 
 if [ "$FAIL" -ne 0 ]; then
   echo "object-storage binding check: $FAIL failure(s)" >&2

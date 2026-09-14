@@ -9,6 +9,11 @@ ok() { PASS=$((PASS + 1)); echo "ok: $1"; }
 bad() { FAIL=$((FAIL + 1)); echo "FAIL: $1" >&2; }
 run_ok() { bash "$CHECK" "$1" >/dev/null 2>&1 && ok "$2" || bad "$2"; }
 run_bad() { bash "$CHECK" "$1" >/dev/null 2>&1 && bad "$2" || ok "$2"; }
+run_retired() {
+  local output status
+  output="$(bash "$ROOT/$1" 2>&1)"; status=$?
+  [ "$status" -ne 0 ] && grep -Fq 'retired:' <<<"$output" && ok "$2" || bad "$2"
+}
 
 FILES=(
   Makefile .env.example .github/workflows/build-push-images.yml
@@ -25,7 +30,11 @@ FILES=(
   deploy/k8s/10-rbac.yaml deploy/k8s/11-ci-deployer-preprod-rbac.yaml
   deploy/k8s/object-storage-docs-prod/kustomization.yaml
   deploy/k8s/object-storage-inventory-preprod/kustomization.yaml deploy/k8s/secrets.example.yaml
-  tools/grounding/drive-grounding.sh
+  tools/graphify-v23/preflight.sh tools/graphify-v23/gate.sh tools/graphify-v23/runner.sh
+  tools/graphify-v23/runner-llm-desc-validation.sh tools/grounding/stage-candidate.sh
+  tools/grounding/gate-grounding.sh tools/grounding/worker-grounding.sh
+  tools/grounding/drive-grounding.sh docs/spec/reports/2.3-completude-1105.md
+  docs/spec/reports/2.3-completude-1105.json
   deploy/k8s/README.md
   .github/workflows/run-job.yaml
 )
@@ -35,6 +44,13 @@ fixture() {
 }
 
 run_ok "$ROOT" 'accepts the released manifests'
+for retired_tool in \
+  tools/graphify-v23/preflight.sh tools/graphify-v23/gate.sh tools/graphify-v23/runner.sh \
+  tools/graphify-v23/runner-llm-desc-validation.sh tools/grounding/stage-candidate.sh \
+  tools/grounding/gate-grounding.sh tools/grounding/worker-grounding.sh \
+  tools/grounding/drive-grounding.sh; do
+  run_retired "$retired_tool" "fails closed: $retired_tool"
+done
 
 fixture; echo '# https://s3.fr-par.scw.cloud' >>"$CASE_ROOT/deploy/k8s/32-graph-projection-only-job.yaml"
 run_bad "$CASE_ROOT" 'rejects a legacy endpoint literal'; rm -rf "$CASE_ROOT"
@@ -77,6 +93,12 @@ run_bad "$CASE_ROOT" 'rejects restored legacy registry guidance'; rm -rf "$CASE_
 
 fixture; echo 'READ_S3_ENDPOINT=https://s3.fr-par.scw.cloud' >>"$CASE_ROOT/tools/grounding/drive-grounding.sh"
 run_bad "$CASE_ROOT" 'rejects a restored grounding storage client'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i '0,/^exit 1$/{s/^exit 1$/true/}' "$CASE_ROOT/tools/graphify-v23/gate.sh"
+run_bad "$CASE_ROOT" 'rejects a rearmed legacy storage tool'; rm -rf "$CASE_ROOT"
+
+fixture; echo 'bash tools/graphify-v23/runner.sh' >>"$CASE_ROOT/docs/spec/reports/2.3-completude-1105.md"
+run_bad "$CASE_ROOT" 'rejects restored legacy launch instructions'; rm -rf "$CASE_ROOT"
 
 fixture; echo 'REFRESH_DIAG_ENABLED' >>"$CASE_ROOT/.github/workflows/build-push-images.yml"
 run_bad "$CASE_ROOT" 'rejects a restored MinIO refresh diagnostic'; rm -rf "$CASE_ROOT"
