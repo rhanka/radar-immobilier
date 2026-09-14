@@ -14,17 +14,27 @@ export interface RefreshCorpusChunk {
   readonly text: string;
 }
 
+// Anchor floor, counted in normalized code points: below it a substring match no longer proves
+// the excerpt is the passage on the cited page. The unit differs from the 20 raw code points the
+// entity citation floor declares, so callers that own a raw floor must check both (refresh-profile).
+export const MIN_ANCHOR_NORMALIZED_CODE_POINTS = 12;
+
+export function normalizePdfExcerpt(value: string): string {
+  return value.normalize("NFKC").normalize("NFD")
+    .replace(/\p{M}/gu, "").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+}
+
 export function containsNormalizedPdfExcerpt(
   pageText: string,
   excerpt: string,
 ): boolean {
   // The product guarantee is passage-on-page, not typographic equality. This same strict
-  // normalized-substring anchor is applied to entity citations and evidence[] excerpts.
-  const normalize = (value: string): string => value.normalize("NFKC").normalize("NFD")
-    .replace(/\p{M}/gu, "").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
-  const normalizedExcerpt = normalize(excerpt);
+  // normalized-substring anchor is applied to entity citations, to evidence[] excerpts and to the
+  // v2.3 graph build (refresh-v23.ts), which reports its own failure as an ungrounded citation.
+  const normalizedExcerpt = normalizePdfExcerpt(excerpt);
 
-  return [...normalizedExcerpt].length >= 12 && normalize(pageText).includes(normalizedExcerpt);
+  return [...normalizedExcerpt].length >= MIN_ANCHOR_NORMALIZED_CODE_POINTS
+    && normalizePdfExcerpt(pageText).includes(normalizedExcerpt);
 }
 
 export interface RefreshCorpusDocument {

@@ -86,9 +86,9 @@ function compactEdgeExtraction(): Extraction {
   return value;
 }
 
-async function captureExtractionError(text: string): Promise<Error> {
+async function captureExtractionError(text: string, chunkText?: string): Promise<Error> {
   try {
-    await extractRefreshProfile([chunk()], {
+    await extractRefreshProfile([chunk(undefined, chunkText)], {
       context, textClient: client([{ text }], []), maxOutputTokens: 512,
     });
   } catch (error) {
@@ -421,6 +421,57 @@ describe("refresh profile extraction", () => {
     })).resolves.toHaveLength(1);
   });
 
+  it.each([
+    ["the last line of the real v13 page", "ADOPTÉE", 7],
+    ["a punctuated 20-code-point excerpt", "1 2 3 4 5 6 7 8 9 10", 11],
+  ])("should refuse %s in evidence as excerpt_below_anchor_floor, not as ungrounded",
+    async (_case, excerpt, normalizedCodePoints) => {
+      // Both strings are verbatim on the cited page: naming them ungrounded stated a cause that is
+      // false. The anchor floor is 12 normalized code points and now carries its own refusal.
+      const pageText = `${oracle.excerpt}\n${v13Cases.pageText}\n${excerpt}`;
+      expect(pageText).toContain(excerpt);
+      const value = extraction();
+      value.evidence = [{ id: "ev-floor", source_file: oracle.originalKey, rawRef: oracle.originalKey,
+        docSha: oracle.docSha, sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page,
+        excerpt }];
+      const error = await captureExtractionError(JSON.stringify(value), `[PDF PAGE 3]\n${pageText}`);
+      expect(error.message).toContain("excerpt_below_anchor_floor");
+      expect(error.message).toContain(`${normalizedCodePoints} letters and digits`);
+      expect(error.message).not.toContain("ungrounded PDF excerpt");
+    });
+
+  it("should accept an evidence excerpt of exactly 12 normalized code points", async () => {
+    // The announced minLength is the floor the anchor enforces, in the unit the model can count.
+    const excerpt = "ADOPTÉE 12345";
+    expect([...excerpt.normalize("NFKC").normalize("NFD").replace(/\p{M}/gu, "")
+      .toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")]).toHaveLength(12);
+    const value = extraction();
+    value.evidence = [{ id: "ev-floor-exact", source_file: oracle.originalKey, rawRef: oracle.originalKey,
+      docSha: oracle.docSha, sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page, excerpt }];
+    const results = await extractRefreshProfile([chunk(undefined,
+      `[PDF PAGE 3]\n${oracle.excerpt}\n${excerpt}`)], { context,
+      textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.evidence![0]!.excerpt).toBe(excerpt);
+  });
+
+  it("should refuse a 20-code-point entity citation excerpt that normalizes under the anchor floor",
+    async () => {
+      // The two floors are expressed in different units: 20 raw code points in the schema, 12
+      // normalized in the anchor. This excerpt clears the first and fails the second, verbatim on
+      // its page; it is refused once, under the single name the prompt teaches.
+      const excerpt = "1 2 3 4 5 6 7 8 9 10";
+      expect([...excerpt]).toHaveLength(20);
+      const value = compactExtraction();
+      value.nodes[0]!.citations![0]!.excerpt = excerpt;
+      const error = await captureExtractionError(JSON.stringify(value),
+        `[PDF PAGE 3]\n${oracle.excerpt}\n${excerpt}`);
+      expect(error.message).toContain("entity_citation_excerpt_too_short");
+      expect(error.message).toContain("20 code points and 11 once normalized");
+      expect(error.message).not.toContain("ungrounded PDF excerpt");
+      expect(error.message).not.toContain("excerpt_below_anchor_floor");
+    });
+
   it("should load an unregistered PV profile and refuse registry-backed output", async () => {
     const pvContext = loadRefreshProfileContext({ root: "/unused", profilePath, unregisteredOnly: true });
     expect(pvContext.registries).toEqual({});
@@ -491,12 +542,20 @@ describe("refresh profile extraction", () => {
     });
     expect(schema.graph_contract.entity_citations.items.description)
       .toContain("entity_citation_excerpt_too_short");
+    expect(schema.graph_contract.entity_citations.items.description)
+      .toContain("under 12 once normalized to letters and digits");
     expect(schema.evidence.pdf_identity).toMatchObject({ docSha: oracle.docSha, rawRef: oracle.originalKey });
     expect(schema.evidence.citation.required).toEqual(["page", "excerpt"]);
-    expect(schema.evidence.evidence_item.required).toContain("modality");
     expect(schema.evidence.citation.properties).not.toHaveProperty("source_file");
     expect(schema.evidence.citation.properties).not.toHaveProperty("modality");
     expect(schema.evidence.citation.properties.excerpt.minLength).toBe(20);
+    expect(schema.evidence.evidence_item.required).toContain("modality");
+    expect(schema.evidence.evidence_item.required).toEqual(
+      ["id", "source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"]);
+    // The announced floor is the one the anchor enforces, in the unit the model can count.
+    expect(schema.evidence.evidence_item.properties.excerpt.minLength).toBe(12);
+    expect(schema.evidence.evidence_item.properties.excerpt.description)
+      .toContain("excerpt_below_anchor_floor");
     expect(schema.evidence.allowedPages).toEqual([3]);
     expect(seen[0]).toMatchObject({ maxOutputTokens: 512 });
     expect(seen[0]!.prompt).toContain(`[PDF PAGE 3]\n${oracle.excerpt}`);
