@@ -45,7 +45,7 @@ export interface RefreshProfileChunk {
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
 }
-export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v4";
+export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v5";
 export function loadRefreshProfileContext(options: LoadRefreshProfileContextOptions): RefreshProfileContext {
   if (options.unregisteredOnly) {
     if (!options.profilePath) throw new Error("Unregistered-only refresh requires an explicit profile path");
@@ -67,6 +67,10 @@ function allowedNodeTypes(context: RefreshProfileContext): string[] {
     return !registry || registry in context.registries;
   }).map(([type]) => type);
 }
+function pdfIdentityFor(chunk: RefreshCorpusChunk): Record<string, string> {
+  return { source_file: chunk.originalKey, rawRef: chunk.originalKey,
+    docSha: chunk.docSha, sourceUrl: chunk.sourceUrl, modality: "pdf" };
+}
 function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): string {
   const allowed = new Set(allowedNodeTypes(context));
   const properties = Object.fromEntries(Object.entries(context.profile.node_types)
@@ -81,14 +85,13 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
       requires_evidence_refs: spec.requires_evidence || evidenceRelations.has(type),
     }]] : [];
   }));
-  const pdfIdentity = { source_file: chunk.originalKey, rawRef: chunk.originalKey,
-    docSha: chunk.docSha, sourceUrl: chunk.sourceUrl, modality: "pdf" };
+  const pdfIdentity = pdfIdentityFor(chunk);
   const pdfIdentityProperties = Object.fromEntries(Object.entries(pdfIdentity)
     .map(([key, value]) => [key, { const: value }]));
-  const citation = { type: "object",
-    required: ["source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"],
-    properties: { ...pdfIdentityProperties, page: { enum: chunk.pages },
-      excerpt: { type: "string", minLength: 1, description: "verbatim text from the cited page" } } };
+  const citation = { type: "object", required: ["page", "excerpt"],
+    properties: { page: { enum: chunk.pages }, excerpt: { type: "string", minLength: 1,
+      maxLength: 200, description: "short verbatim text from the cited page" } },
+    description: "The profile injects the constant PDF identity before validation." };
   return JSON.stringify({
     contract_version: REFRESH_PROFILE_CONTRACT_VERSION,
     type: "Graphify Extraction",
@@ -105,7 +108,7 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
         required_for_relation_types: context.profile.evidence_policy.relation_types },
       entity_citations: { node_field: "nodes[].citations", edge_field: "edges[].citations",
         required_for: ["every node", "every edge"], type: "array", minItems: 1, items: citation,
-        description: "Evidence refs do not replace page-level citations on each node and edge." },
+        description: "Emit only page and excerpt; the profile injects the constant PDF identity." },
     },
     evidence: { pdf_identity: pdfIdentity, allowedPages: chunk.pages,
       citation,
@@ -117,6 +120,23 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
     constraints: ["Omit facts absent from the chunk, including in-force status and residential unit counts.",
       "An empty nodes/edges/evidence extraction is valid; the enclosing chunk retains the verified PDF identity."],
   });
+}
+function injectCitationIdentity(value: unknown, chunk: RefreshCorpusChunk): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const root = value as Record<string, unknown>;
+  const identity = pdfIdentityFor(chunk);
+  for (const collection of [root["nodes"], root["edges"]]) {
+    if (!Array.isArray(collection)) continue;
+    for (const entity of collection) {
+      if (!entity || typeof entity !== "object" || Array.isArray(entity)) continue;
+      const record = entity as Record<string, unknown>;
+      if (!Array.isArray(record["citations"])) continue;
+      record["citations"] = record["citations"].map((citation) =>
+        citation && typeof citation === "object" && !Array.isArray(citation)
+          ? { ...(citation as Record<string, unknown>), ...identity } : citation);
+    }
+  }
+  return value;
 }
 function physicalPageTexts(chunk: RefreshCorpusChunk): ReadonlyMap<number, string> {
   const markers = [...chunk.text.matchAll(/^\[PDF PAGE ([1-9]\d*)\]\n/gm)];
@@ -173,7 +193,7 @@ function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: R
   const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/iu);
   const candidate = fenced ? fenced[1]!.trim() : trimmed;
   try {
-    parsed = JSON.parse(candidate);
+    parsed = injectCitationIdentity(JSON.parse(candidate), chunk);
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new Error(`Invalid JSON for chunk ${chunk.id}: ${error.message}`, { cause: error });
@@ -221,11 +241,12 @@ export async function extractRefreshProfile(
         prompt: `Contract ${REFRESH_PROFILE_CONTRACT_VERSION}. Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
 Every node file_type must be "document" for this PDF. Edge confidence, when present, must be
 "AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.
-Every entity and nested citation must use the exact PDF identity in the schema. Evidence refs are
+Every entity must use the exact PDF identity in the schema. Evidence refs are
 non-empty arrays of string IDs from evidence[].id, never embedded objects. Evidence refs do not replace citations.
-Every node and every edge must include a non-empty citations array whose objects use the complete
-citation shape in the schema, including source_file and page. Follow the relation source/target signatures
-exactly. Every excerpt must be non-empty verbatim text on its claimed physical PDF page.
+Every node and every edge must include a non-empty citations array. Each citation must contain only page
+and excerpt (at most 200 characters). Do not repeat the document identity inside citations; the profile
+injects it before validation. Follow the relation source/target signatures exactly. Every excerpt must be
+non-empty verbatim text on its claimed physical PDF page.
 If no supported fact is grounded in the PDF, return empty nodes, edges, and evidence.\n\n${buildProfileChunkPrompt(options.context, {
           filePath: chunk.originalKey, fileType: "document", text: chunk.text,
         })}`,

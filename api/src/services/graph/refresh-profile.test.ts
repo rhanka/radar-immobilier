@@ -51,6 +51,13 @@ function extraction(page = oracle.page): Extraction {
   };
 }
 
+function compactExtraction(page = oracle.page): Extraction {
+  const value = extraction(page);
+  value.nodes[0]!.citations = [{ page, excerpt: oracle.excerpt } as
+    unknown as NonNullable<Extraction["nodes"][number]["citations"]>[number]];
+  return value;
+}
+
 async function captureExtractionError(text: string): Promise<Error> {
   try {
     await extractRefreshProfile([chunk()], {
@@ -113,6 +120,29 @@ describe("refresh profile extraction", () => {
     expect(results[0]!.extraction).toEqual(extraction());
   });
 
+  it("should expand compact model citations with the exact PDF identity", async () => {
+    const results = await extractRefreshProfile([chunk()], {
+      context, textClient: client([{ text: JSON.stringify(compactExtraction()) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction).toEqual(extraction());
+  });
+
+  it("should reject a compact citation without its required page", async () => {
+    const invalid = compactExtraction();
+    delete (invalid.nodes[0]!.citations![0] as { page?: number }).page;
+    await expect(extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("missing_citation_page");
+  });
+
+  it("should reject a compact citation without its required excerpt", async () => {
+    const invalid = compactExtraction();
+    delete (invalid.nodes[0]!.citations![0] as { excerpt?: string }).excerpt;
+    await expect(extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("ungrounded PDF excerpt");
+  });
+
   it("should load an unregistered PV profile and refuse registry-backed output", async () => {
     const pvContext = loadRefreshProfileContext({ root: "/unused", profilePath, unregisteredOnly: true });
     expect(pvContext.registries).toEqual({});
@@ -145,7 +175,7 @@ describe("refresh profile extraction", () => {
     expect(results[1]).toMatchObject({ chunk: { originalKey: oracle.originalKey },
       extraction: { nodes: [], edges: [] } });
     const schema = JSON.parse(seen[0]!.schema);
-    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v4");
+    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v5");
     expect(schema.contract_version).toBe(REFRESH_PROFILE_CONTRACT_VERSION);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
     expect(schema.ontology.relation_signatures.supports).toMatchObject({
@@ -165,15 +195,16 @@ describe("refresh profile extraction", () => {
       node_field: "nodes[].citations", edge_field: "edges[].citations",
       required_for: ["every node", "every edge"], minItems: 1,
     });
-    expect(schema.graph_contract.entity_citations.items.required).toEqual(expect.arrayContaining([
-      "source_file", "page",
-    ]));
+    expect(schema.graph_contract.entity_citations.items.required).toEqual(["page", "excerpt"]);
+    expect(schema.graph_contract.entity_citations.items.properties).toEqual({
+      page: { enum: [3] }, excerpt: { type: "string", minLength: 1, maxLength: 200,
+        description: "short verbatim text from the cited page" },
+    });
     expect(schema.evidence.pdf_identity).toMatchObject({ docSha: oracle.docSha, rawRef: oracle.originalKey });
-    expect(schema.evidence.citation.required).toContain("source_file");
-    expect(schema.evidence.citation.required).toContain("modality");
+    expect(schema.evidence.citation.required).toEqual(["page", "excerpt"]);
     expect(schema.evidence.evidence_item.required).toContain("modality");
-    expect(schema.evidence.citation.properties.source_file).toEqual({ const: oracle.originalKey });
-    expect(schema.evidence.citation.properties.modality).toEqual({ const: "pdf" });
+    expect(schema.evidence.citation.properties).not.toHaveProperty("source_file");
+    expect(schema.evidence.citation.properties).not.toHaveProperty("modality");
     expect(schema.evidence.citation.properties.excerpt.minLength).toBe(1);
     expect(schema.evidence.allowedPages).toEqual([3]);
     expect(seen[0]).toMatchObject({ maxOutputTokens: 512 });
@@ -183,6 +214,7 @@ describe("refresh profile extraction", () => {
     expect(seen[0]!.prompt).toContain("arrays of string IDs from evidence[].id");
     expect(seen[0]!.prompt).toContain("Evidence refs do not replace citations");
     expect(seen[0]!.prompt).toContain("Every node and every edge must include a non-empty citations array");
+    expect(seen[0]!.prompt).toContain("Do not repeat the document identity inside citations");
     expect(seen[0]!.prompt).toContain("non-empty verbatim text on its claimed physical PDF page");
   });
 
@@ -230,7 +262,7 @@ describe("refresh profile extraction", () => {
     expect(seen).toHaveLength(2);
   });
 
-  it("should reject incomplete PDF identity, evidence identity, aliases and missing entity source files", async () => {
+  it("should reject invalid evidence identity, aliases and missing entity source files", async () => {
     const reject = async (mutate: (value: Extraction) => void, message: string) => {
       const invalid = extraction();
       mutate(invalid);
@@ -238,8 +270,6 @@ describe("refresh profile extraction", () => {
         textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
       })).rejects.toThrow(message);
     };
-    await reject((value) => { value.nodes[0]!.citations![0]!.rawRef = "raw/wrong.pdf"; }, "invalid original PDF identity");
-    await reject((value) => { delete value.nodes[0]!.citations![0]!.modality; }, "invalid original PDF identity");
     await reject((value) => { value.evidence = [{ id: "ev-1", source_file: oracle.originalKey,
       rawRef: oracle.originalKey, docSha: "f".repeat(64), sourceUrl: oracle.sourceUrl,
       modality: "pdf", page: oracle.page, excerpt: oracle.excerpt }]; }, "invalid original PDF identity");
