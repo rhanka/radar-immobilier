@@ -19,14 +19,20 @@ import {
 } from "./refresh-profile.js";
 
 const oraclePath = new URL("../../../tests/fixtures/refresh-018/oracle.json", import.meta.url);
+const v11CasesPath = new URL("../../../tests/fixtures/refresh-018/v11-citation-cases.json", import.meta.url);
 const profilePath = fileURLToPath(new URL("../../../../radar/ontology/ontology-profile.yaml", import.meta.url));
 interface Oracle { meetingDate: string; sourceUrl: string; docSha: string; originalKey: string; page: number;
   resolution: string; bylawNumber: string; stage: string; excerpt: string; forbiddenProperties: string[] }
+interface V11Case { caseId: string; path: string; page: number; codePoints: number; excerpt: string;
+  pageText: string; refusedAs: string }
+interface V11Cases { overlongExcerpt: V11Case; shortLabelExcerpt: V11Case }
 let oracle!: Oracle;
+let v11Cases!: V11Cases;
 let context!: RefreshProfileContext;
 
 beforeAll(async () => {
   oracle = JSON.parse(await readFile(oraclePath, "utf8"));
+  v11Cases = JSON.parse(await readFile(v11CasesPath, "utf8"));
   const profile = loadOntologyProfile(profilePath);
   const registries = Object.fromEntries(Object.keys(profile.registries).map((id) => [id, []]));
   context = { profile, registries, registryExtraction: registryRecordsToExtraction(registries, profile) };
@@ -187,7 +193,7 @@ describe("refresh profile extraction", () => {
     expect(results[0]!.extraction).toEqual(extraction());
   });
 
-  it("should accept the exact declared v7 contract version", async () => {
+  it("should accept the exact declared v8 contract version", async () => {
     const declared = { ...compactExtraction(), contract_version: REFRESH_PROFILE_CONTRACT_VERSION };
     const results = await extractRefreshProfile([chunk()], { context,
       textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
@@ -195,7 +201,7 @@ describe("refresh profile extraction", () => {
     expect(results[0]!.extraction).toEqual(extraction());
   });
 
-  it.each(["immo-pv-extraction-v6", "immo-pv-extraction-v5"])(
+  it.each(["immo-pv-extraction-v7", "immo-pv-extraction-v6", "immo-pv-extraction-v5"])(
     "should reject declared legacy contract version %s with a named violation", async (contractVersion) => {
       const declared = { ...compactExtraction(), contract_version: contractVersion };
       await expect(extractRefreshProfile([chunk()], { context,
@@ -254,33 +260,61 @@ describe("refresh profile extraction", () => {
     })).rejects.toThrow(field === "page" ? "missing_citation_page" : "ungrounded PDF excerpt");
   });
 
-  it.each(["node", "edge"] as const)("should reject a 201-character %s citation excerpt", async (kind) => {
-    const longExcerpt = "é".repeat(201);
-    const invalid = kind === "node" ? compactExtraction() : compactEdgeExtraction();
-    const citation = kind === "node" ? invalid.nodes[0]!.citations![0]! : invalid.edges[0]!.citations![0]!;
-    citation.excerpt = longExcerpt;
-    await expect(extractRefreshProfile([chunk(undefined,
-      `[PDF PAGE 3]\n${oracle.excerpt}\n${longExcerpt}`)], { context,
-      textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
-    })).rejects.toThrow("entity_citation_excerpt_too_long");
-  });
+  it.each(["node", "edge"] as const)("should truncate a 260-character %s citation excerpt to a verbatim prefix",
+    async (kind) => {
+      const passage = `${oracle.excerpt} ${"é".repeat(260)}`;
+      const longExcerpt = [...passage].slice(0, 260).join("");
+      const value = kind === "node" ? compactExtraction() : compactEdgeExtraction();
+      const citation = kind === "node" ? value.nodes[0]!.citations![0]! : value.edges[0]!.citations![0]!;
+      citation.excerpt = longExcerpt;
+      const results = await extractRefreshProfile([chunk(undefined, `[PDF PAGE 3]\n${passage}`)], { context,
+        textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+      });
+      const accepted = kind === "node" ? results[0]!.extraction.nodes[0]! : results[0]!.extraction.edges[0]!;
+      const excerpt = accepted.citations![0]!.excerpt!;
+      expect([...excerpt]).toHaveLength(200);
+      expect(excerpt).toBe([...passage].slice(0, 200).join(""));
+      expect(passage.startsWith(excerpt)).toBe(true);
+    });
 
-  it.each([
-    [200, false],
-    [201, true],
-  ] as const)("should enforce %i out-of-BMP citation code points", async (codePointCount, shouldReject) => {
-    const excerpt = "𐐀".repeat(codePointCount);
+  it.each([200, 201, 260])("should keep %i out-of-BMP citation code points within the bound",
+    async (codePointCount) => {
+      const excerpt = "𐐀".repeat(codePointCount);
+      const value = compactExtraction();
+      value.nodes[0]!.citations![0]!.excerpt = excerpt;
+      const results = await extractRefreshProfile([chunk(undefined,
+        `[PDF PAGE 3]\n${oracle.excerpt}\n${excerpt}`)], { context,
+        textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+      });
+      // Code points, not UTF-16 units: each astral character counts once.
+      expect([...results[0]!.extraction.nodes[0]!.citations![0]!.excerpt!])
+        .toHaveLength(Math.min(codePointCount, 200));
+    });
+
+  it("should accept the real v11 excerpt refused as too long, truncated to its verbatim prefix", async () => {
+    const measured = v11Cases.overlongExcerpt;
+    expect(measured.codePoints).toBe(203);
     const value = compactExtraction();
-    value.nodes[0]!.citations![0]!.excerpt = excerpt;
-    const promise = extractRefreshProfile([chunk(undefined,
-      `[PDF PAGE 3]\n${oracle.excerpt}\n${excerpt}`)], { context,
+    value.nodes[0]!.citations![0]!.excerpt = measured.excerpt;
+    const results = await extractRefreshProfile([chunk(undefined,
+      `[PDF PAGE 3]\n${measured.pageText}`)], { context,
       textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
     });
-    if (shouldReject) {
-      await expect(promise).rejects.toThrow("entity_citation_excerpt_too_long: maximum 200 Unicode code points");
-    } else {
-      await expect(promise).resolves.toHaveLength(1);
-    }
+    const excerpt = results[0]!.extraction.nodes[0]!.citations![0]!.excerpt!;
+    expect(excerpt).toBe([...measured.excerpt].slice(0, 200).join(""));
+    expect(measured.pageText).toContain(excerpt);
+  });
+
+  it("should still refuse the real v11 short-label excerpt under the anchor floor", async () => {
+    const measured = v11Cases.shortLabelExcerpt;
+    // Verbatim on its page, but 8 normalized code points: the 12-code-point floor is a deliberate
+    // guarantee against accidental matches and is left untouched by v8.
+    expect(measured.pageText).toContain(measured.excerpt);
+    const value = compactExtraction();
+    value.nodes[0]!.citations![0]!.excerpt = measured.excerpt;
+    await expect(extractRefreshProfile([chunk(undefined, `[PDF PAGE 3]\n${measured.pageText}`)], { context,
+      textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("ungrounded PDF excerpt");
   });
 
   it("should preserve the distinct unbounded evidence excerpt contract", async () => {
@@ -339,7 +373,7 @@ describe("refresh profile extraction", () => {
     expect(results[1]).toMatchObject({ chunk: { originalKey: oracle.originalKey },
       extraction: { nodes: [], edges: [] } });
     const schema = JSON.parse(seen[0]!.schema);
-    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v7");
+    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v8");
     expect(schema.contract_version).toBe(REFRESH_PROFILE_CONTRACT_VERSION);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
     const nodeStatuses = ["candidate", "attached", "needs_review", "validated", "rejected", "superseded"];
@@ -370,16 +404,16 @@ describe("refresh profile extraction", () => {
     });
     expect(schema.graph_contract.entity_citations.items.required).toEqual(["page", "excerpt"]);
     expect(schema.graph_contract.entity_citations.items.properties).toEqual({
-      page: { enum: [3] }, excerpt: { type: "string", minLength: 1, maxLength: 200,
-        description: "Exact beginning of the cited passage, at most 200 characters; "
-          + "cut off even mid-word and never completed or corrected." },
+      page: { enum: [3] }, excerpt: { type: "string", minLength: 20, maxLength: 200,
+        description: "Exact beginning of the cited passage, 20 to 200 characters, "
+          + "copied verbatim and never completed or corrected." },
     });
     expect(schema.evidence.pdf_identity).toMatchObject({ docSha: oracle.docSha, rawRef: oracle.originalKey });
     expect(schema.evidence.citation.required).toEqual(["page", "excerpt"]);
     expect(schema.evidence.evidence_item.required).toContain("modality");
     expect(schema.evidence.citation.properties).not.toHaveProperty("source_file");
     expect(schema.evidence.citation.properties).not.toHaveProperty("modality");
-    expect(schema.evidence.citation.properties.excerpt.minLength).toBe(1);
+    expect(schema.evidence.citation.properties.excerpt.minLength).toBe(20);
     expect(schema.evidence.allowedPages).toEqual([3]);
     expect(seen[0]).toMatchObject({ maxOutputTokens: 512 });
     expect(seen[0]!.prompt).toContain(`[PDF PAGE 3]\n${oracle.excerpt}`);
@@ -393,11 +427,12 @@ describe("refresh profile extraction", () => {
     expect(seen[0]!.prompt).toContain('{"edges":[{"evidence_refs":["ev-1"]}],"evidence":[{"id":"ev-1"}]}');
     expect(seen[0]!.prompt).toContain("Every node and every edge must include a non-empty citations array");
     expect(seen[0]!.prompt).toContain("Do not repeat the document identity inside citations");
-    expect(seen[0]!.prompt).toContain("exact beginning of the cited passage, at most 200 characters");
-    expect(seen[0]!.prompt).toContain("cut it off");
-    expect(seen[0]!.prompt).toContain("even in the middle of a word; never complete or correct it");
-    expect(seen[0]!.prompt).toContain(
-      'passage "Construction de douze logements" -> excerpt "Construction de douze loge"');
+    expect(seen[0]!.prompt).toContain("exact beginning of the cited passage, between 20 and 200 characters");
+    expect(seen[0]!.prompt).toContain("never complete or correct it");
+    expect(seen[0]!.prompt).toContain("A short label is not an excerpt on its own");
+    expect(seen[0]!.prompt).toContain("until you pass 20 characters, without inventing the continuation");
+    // The v7 mid-word cut instruction is gone: measured v11 output obeys it and still overshoots.
+    expect(seen[0]!.prompt).not.toContain("cut it off");
     expect(seen[0]!.prompt).toContain('PDF text says "YvesMalouin"');
     expect(seen[0]!.prompt).toContain('never "Yves-Malouin"');
   });
