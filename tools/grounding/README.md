@@ -1,5 +1,8 @@
 # tools/grounding — ré-ancrage (grounding) des signaux v2.3
 
+> **Retired after the OVH cutover.** The legacy worker, driver, staging and
+> publication entrypoints fail closed. The material below is historical only.
+
 Pipeline pour ancrer chaque Signal/DesignationEvent à sa source réelle
 (PV + page + citation verbatim + URL streamable), satisfaire le gate v2.3 et
 alimenter le bouton PDF + la citation de l'UI.

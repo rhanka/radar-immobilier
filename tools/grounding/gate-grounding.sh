@@ -20,6 +20,9 @@
 # $run_dir/status/central.jsonl en cas d'échec 7bis (même format que le gate).
 set -euo pipefail
 
+echo '[object-storage] retired: legacy grounding publisher disabled after the OVH cutover' >&2
+exit 1
+
 CITY="${1:?city requis}"
 CANDIDATE="${2:?candidate_json requis}"
 BASELINE="${3:?baseline_json requis}"

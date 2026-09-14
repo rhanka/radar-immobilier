@@ -7,7 +7,10 @@ object-storage-migration-test: ## Run the hermetic object-storage migration cont
 
 .PHONY: object-storage-bindings-test
 object-storage-bindings-test: ## Verify released bindings and reject retired storage entrypoints
-	@bash -n tools/grounding/drive-grounding.sh
+	@bash -n tools/graphify-v23/preflight.sh tools/graphify-v23/gate.sh \
+	  tools/graphify-v23/runner.sh tools/graphify-v23/runner-llm-desc-validation.sh \
+	  tools/grounding/stage-candidate.sh tools/grounding/gate-grounding.sh \
+	  tools/grounding/worker-grounding.sh tools/grounding/drive-grounding.sh
 	@bash deploy/ci/check-object-storage-bindings.test.sh
 
 .PHONY: object-storage-docs-prod-provision
