@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "bundleSha256": "208dc0a8cd67c35e6b6a24701042d9457d15b41d94c180a7f8bf916fb4d17b5c",
+  "perDocument": [
+    {
+      "documentId": "lac-des-seize-iles-2026-09-agenda",
+      "systems": [
+        {
+          "system": "system-02004a62770a",
+          "supportedOracleUnitIds": ["L54", "L55"],
+          "missedOracleUnitIds": ["L36", "L37"],
+          "unsupported": [
+            {
+              "summary": "Adoption du règlement 2026-102-01 présentée comme déjà réalisée",
+              "page": 1,
+              "reason": "L'ordre du jour indique une adoption prévue; il ne confirme pas que le conseil l'a adoptée."
+            },
+            {
+              "summary": "Incidence directe sur les conditions des nouveaux lotissements résidentiels",
+              "page": 1,
+              "reason": "Le document mentionne la contribution pour fins de parcs et le lotissement, sans établir cette incidence ni le caractère résidentiel."
+            }
+          ],
+          "citationDefects": [
+            "L55: la citation de l'ordre du jour ne soutient pas le verbe « adopte » au passé; elle soutient seulement une adoption prévue.",
+            "L54: le champ reglement_number contient le numéro de dossier DDM2026-058, et non un numéro de règlement.",
+            "Les findings ne portent pas d'URL ni d'empreinte du PDF dans leur citation propre; la traçabilité repose sur le document parent."
+          ],
+          "usefulness": 3,
+          "notes": "Les deux sujets urbanistiques sont repérés, mais les points 3.6 et 3.7 sont omis. L55 comporte une erreur de décision importante: l'action est planifiée, non confirmée."
+        },
+        {
+          "system": "system-20d310137265",
+          "supportedOracleUnitIds": ["L36", "L54", "L55"],
+          "missedOracleUnitIds": ["L37"],
+          "unsupported": [],
+          "citationDefects": [
+            "L'extrait du point 5.5 est tronqué en fin de citation (« d’es »), tout en restant suffisant pour identifier le règlement et l'item."
+          ],
+          "usefulness": 4,
+          "notes": "L36 est correctement rattaché au point 3.6 avec un statut candidat et une date de séance. L37 n'est pas modélisé séparément. L55 reste candidat et sans résultat, ce qui n'en fait pas une adoption confirmée; les citations portent la page, l'URL et l'empreinte du document."
+        }
+      ],
+      "ranking": ["system-20d310137265", "system-02004a62770a"],
+      "reason": "system-20d310137265 couvre une unité de plus, conserve la distinction entre signal candidat et décision réalisée et fournit une traçabilité structurée. system-02004a62770a est utile mais omet les deux points 3.6-3.7 et transforme L55 en adoption accomplie."
+    },
+    {
+      "documentId": "saint-etienne-de-bolton-2026-08-04",
+      "systems": [
+        {
+          "system": "system-02004a62770a",
+          "supportedOracleUnitIds": ["B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11", "B14", "BC2010-11", "BC2014-11", "BC2023-02", "B155", "B156", "B157", "B158"],
+          "missedOracleUnitIds": ["B154"],
+          "unsupported": [
+            {
+              "summary": "Les trois règlements de concordance regroupés sous la mention « démolition »",
+              "page": 11,
+              "reason": "Le texte identifie 2023-02 comme règlement de démolition; 2010-11 concerne les ententes de travaux municipaux et 2014-11 les conditions d'émission de permis."
+            }
+          ],
+          "citationDefects": [
+            "Les citations de B11, B14 et de la conformité au schéma contiennent « [...] » et ne sont pas des extraits continus.",
+            "Pour plusieurs décisions PIIA et de dérogation, l'extrait cité ne reprend pas toujours la zone ou le contexte utilisé dans la description; seule la page est fournie.",
+            "Les findings ne portent pas d'URL ni d'empreinte du PDF dans leur citation propre; la traçabilité repose sur le document parent."
+          ],
+          "usefulness": 4,
+          "notes": "La couverture est très élevée (16 unités sur 17) et les lots, zones, résolutions et résultats sont généralement bien restitués. La qualification etape « entree_vigueur » des trois unités BC n'est pas établie par le texte ni par l'oracle, qui laisse leur étape inconnue."
+        },
+        {
+          "system": "system-20d310137265",
+          "supportedOracleUnitIds": ["B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11", "B14", "B154", "B155", "B156", "B157", "B158"],
+          "missedOracleUnitIds": ["BC2010-11", "BC2014-11", "BC2023-02"],
+          "unsupported": [],
+          "citationDefects": [],
+          "usefulness": 4,
+          "notes": "Les 14 unités retenues ont des citations détaillées avec page, URL et empreinte du document; les événements PIIA et de dérogation sont reliés aux zones. Les trois unités de non-modification et de transmission au titre du schéma sont absentes. Les champs outcome des nœuds ne sont pas normalisés, mais les résolutions citées rendent les décisions lisibles."
+        }
+      ],
+      "ranking": ["system-02004a62770a", "system-20d310137265"],
+      "reason": "system-02004a62770a couvre 16 des 17 unités oracle et fournit les trois unités BC absentes de l'autre sortie; son avantage de rappel est réel malgré une étape mal qualifiée et des citations moins autonomes. system-20d310137265 est plus structuré et précis sur les événements détaillés, mais omet les trois unités de concordance."
+    },
+    {
+      "documentId": "valcourt-2026-06-01-agenda",
+      "systems": [
+        {
+          "system": "system-02004a62770a",
+          "supportedOracleUnitIds": ["V71", "V72", "V73", "V74", "V75"],
+          "missedOracleUnitIds": ["V132"],
+          "unsupported": [
+            {
+              "summary": "Densification résidentielle douce au 1070, rue Bissonnette",
+              "page": 1,
+              "reason": "Le document mentionne deux bâtiments unifamiliaux jumelés, mais ne qualifie pas le projet de densification résidentielle douce."
+            },
+            {
+              "summary": "Développement du secteur résidentiel pour le remblai au 1075",
+              "page": 1,
+              "reason": "L'item mentionne le PIIA, le secteur Boisé du Ruisseau et le remblai, sans établir ce cadre de développement résidentiel."
+            },
+            {
+              "summary": "Examen accompli par le conseil de la demande au 1045",
+              "page": 1,
+              "reason": "L'ordre du jour établit l'inscription du point 7.3, pas qu'un examen ou une décision a déjà eu lieu."
+            },
+            {
+              "summary": "Adoption déjà réalisée du second projet 560-28",
+              "page": 1,
+              "reason": "Le libellé de l'ordre du jour annonce l'adoption du second projet; l'oracle précise que l'adoption n'est pas confirmée."
+            },
+            {
+              "summary": "Qualification de 560-28 comme avant-dernière phase réglementaire",
+              "page": 1,
+              "reason": "Cette qualification de séquence n'est pas fournie par le document."
+            },
+            {
+              "summary": "Activité en cours de l'organisme de logement social sur le territoire",
+              "page": 2,
+              "reason": "Le document soutient l'approbation d'un budget révisé, mais pas cette conclusion territoriale."
+            }
+          ],
+          "citationDefects": [
+            "V75: la citation de l'ordre du jour ne prouve pas une adoption accomplie; elle justifie seulement l'inscription d'une adoption prévue.",
+            "V73: la citation justifie l'inscription de l'item, pas l'examen accompli décrit dans le texte.",
+            "Les findings ne portent pas d'URL ni d'empreinte du PDF dans leur citation propre; la traçabilité repose sur le document parent."
+          ],
+          "usefulness": 3,
+          "notes": "V71 à V75 sont repérés et V132 est manqué. La sortie ajoute plusieurs caractérisations non présentes et confond, pour V75, l'inscription à l'ordre du jour avec une adoption réalisée; le budget de l'Office est un extra textuellement repéré, mais sa portée est surinterprétée."
+        },
+        {
+          "system": "system-20d310137265",
+          "supportedOracleUnitIds": ["V71", "V72", "V73", "V74", "V75"],
+          "missedOracleUnitIds": ["V132"],
+          "unsupported": [],
+          "citationDefects": [],
+          "usefulness": 4,
+          "notes": "Les cinq points 7.1 à 7.5 sont cités à la page 1 avec URL et empreinte du document. V75 est conservé comme signal candidat à l'étape second_projet, sans outcome; le libellé « adoption » reprend le titre de l'ordre du jour sans confirmer le résultat. L'écart de nomenclature « 2e_projet »/« second_projet » est mineur."
+        }
+      ],
+      "ranking": ["system-20d310137265", "system-02004a62770a"],
+      "reason": "system-20d310137265 restitue les cinq unités urbanistiques avec citations structurées et ne transforme pas V75 en résultat acquis. Les deux sorties manquent V132, mais system-02004a62770a ajoute plusieurs inférences et une erreur de décision sur V75."
+    }
+  ],
+  "overall": {
+    "ranking": ["system-20d310137265", "system-02004a62770a"],
+    "winner": "system-20d310137265",
+    "reason": "system-20d310137265 est premier globalement par la qualité de traçabilité, la structuration des relations et l'absence de conclusions non étayées sur les trois documents. system-02004a62770a a une meilleure couverture brute au document de Saint-Étienne-de-Bolton et une unité de plus au total, mais comporte des erreurs de statut dans Lac-des-Seize-Îles et Valcourt ainsi que plusieurs extrapolations. Le classement privilégie la fiabilité décisionnelle et la vérifiabilité en plus du rappel oracle.",
+    "confidence": "medium",
+    "limitations": [
+      "Le bundle est partiel et couvre seulement trois documents acceptés.",
+      "Les deux sorties ne normalisent pas les événements et les résultats de la même façon; le classement pondère donc la précision et la traçabilité en plus du rappel oracle.",
+      "Aucune conclusion ne porte sur les documents refusés ni sur un usage de production."
+    ]
+  }
+}
