@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "bundleSha256": "208dc0a8cd67c35e6b6a24701042d9457d15b41d94c180a7f8bf916fb4d17b5c",
+  "perDocument": [
+    {
+      "documentId": "lac-des-seize-iles-2026-09-agenda",
+      "systems": [
+        {
+          "system": "system-02004a62770a",
+          "supportedOracleUnitIds": ["L54", "L55"],
+          "missedOracleUnitIds": ["L36", "L37"],
+          "unsupported": [],
+          "citationDefects": ["Décision : le document est un ordre du jour; la sortie affirme que le conseil adopte 2026-102-01, alors que l'adoption n'est que prévue."],
+          "usefulness": 3,
+          "notes": "Deux unités sont précises et citées à la bonne page, mais les deux étapes relatives au règlement 2026-08 sont absentes."
+        },
+        {
+          "system": "system-20d310137265",
+          "supportedOracleUnitIds": ["L36", "L54", "L55"],
+          "missedOracleUnitIds": ["L37"],
+          "unsupported": [],
+          "citationDefects": ["Étape : le nœud 2026-08 est au stade « projet » à partir de l'avis de motion; le dépôt distinct de 3.7 n'est ni cité ni représenté."],
+          "usefulness": 4,
+          "notes": "Trois unités sont traçables par des extraits de page 1; le dépôt du projet 2026-08 reste manquant."
+        }
+      ],
+      "ranking": ["system-20d310137265", "system-02004a62770a"],
+      "reason": "Le premier couvre une unité oracle de plus et ne transforme pas l'adoption inscrite à l'ordre du jour en décision réalisée."
+    },
+    {
+      "documentId": "saint-etienne-de-bolton-2026-08-04",
+      "systems": [
+        {
+          "system": "system-02004a62770a",
+          "supportedOracleUnitIds": ["B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11", "B14", "BC2010-11", "BC2014-11", "BC2023-02", "B155", "B156", "B157", "B158"],
+          "missedOracleUnitIds": ["B154"],
+          "unsupported": [],
+          "citationDefects": ["Étape : pour BC2010-11, BC2014-11 et BC2023-02, « entrée_vigueur » n'est pas établie; le procès-verbal établit plutôt une résolution, une transmission et un avis public."],
+          "usefulness": 5,
+          "notes": "Seize unités sont restituées avec numéros, décisions, dates et citations utiles; seule l'autorisation PIIA de chambre froide manque."
+        },
+        {
+          "system": "system-20d310137265",
+          "supportedOracleUnitIds": ["B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11", "B14", "B154", "B155", "B156", "B157", "B158"],
+          "missedOracleUnitIds": ["BC2010-11", "BC2014-11", "BC2023-02"],
+          "unsupported": [],
+          "citationDefects": [],
+          "usefulness": 4,
+          "notes": "Les quatorze unités représentées sont bien étayées par des citations et incluent B154, mais les trois unités de non-modification ne sont pas extraites."
+        }
+      ],
+      "ranking": ["system-02004a62770a", "system-20d310137265"],
+      "reason": "Le premier a la couverture oracle la plus complète, avec 16 unités contre 14."
+    },
+    {
+      "documentId": "valcourt-2026-06-01-agenda",
+      "systems": [
+        {
+          "system": "system-02004a62770a",
+          "supportedOracleUnitIds": ["V71", "V72", "V73", "V74", "V75"],
+          "missedOracleUnitIds": ["V132"],
+          "unsupported": [
+            {
+              "summary": "Qualifie la construction de deux jumelés de « densification résidentielle douce ».",
+              "page": 1,
+              "reason": "L'ordre du jour mentionne deux bâtiments unifamiliaux jumelés, sans qualifier leur effet de densification."
+            }
+          ],
+          "citationDefects": ["Décision : la sortie dit que le conseil procède à l'adoption du second projet 560-28; l'ordre du jour confirme seulement l'inscription de cet item, pas son issue."],
+          "usefulness": 3,
+          "notes": "Les cinq unités d'urbanisme de la page 1 sont retrouvées, mais V132 est absent et le statut du second projet est suraffirmé."
+        },
+        {
+          "system": "system-20d310137265",
+          "supportedOracleUnitIds": ["V71", "V72", "V73", "V74", "V75"],
+          "missedOracleUnitIds": ["V132"],
+          "unsupported": [],
+          "citationDefects": ["Décision : le libellé d'événement « Adoption du second projet » reprend l'ordre du jour sans distinguer explicitement une adoption réalisée d'une adoption prévue."],
+          "usefulness": 4,
+          "notes": "Les cinq unités de page 1 sont structurées avec des citations exactes et l'étape « second_projet »; la convention de prêt à usage de page 3 est absente."
+        }
+      ],
+      "ranking": ["system-20d310137265", "system-02004a62770a"],
+      "reason": "La couverture oracle est égale, mais le premier ajoute des citations structurées sans qualifier le projet comme une densification établie."
+    }
+  ],
+  "overall": {
+    "ranking": ["system-20d310137265", "system-02004a62770a"],
+    "winner": "system-20d310137265",
+    "reason": "Premier sur deux des trois documents, avec des citations plus directement exploitables et moins d'interprétations non établies; l'autre sortie domine toutefois le procès-verbal de Saint-Étienne-de-Bolton.",
+    "confidence": "medium",
+    "limitations": [
+      "Le jugement porte seulement sur les trois documents acceptés présents dans le bundle.",
+      "Les ordres du jour établissent une inscription ou une action prévue, non une décision réalisée.",
+      "Les deux formats de sortie ne présentent pas les mêmes champs de synthèse, ce qui limite la comparaison de l'utilité de lecture."
+    ]
+  }
+}
