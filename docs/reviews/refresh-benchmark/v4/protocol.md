@@ -41,7 +41,9 @@ account transport exposes them; otherwise the report says unavailable.
 For every document/system record status, accepted extraction, elapsed time,
 provider/model/effort observed on the outgoing request, input/output/reasoning
 tokens when exposed, and response/output hashes. Fail closed on absent or
-mismatched observed model/effort.
+mismatched observed model/effort. The installed Codex transport does not
+project `maxOutputTokens` onto its provider request; retain a `null` observed
+cap and report this asymmetry. Cloud Code must expose the frozen 16,384 cap.
 
 Validate output against the frozen T1 validator. Separately measure citation
 identity (`source_file`, `rawRef`, `docSha`, `sourceUrl`, modality), physical PDF
