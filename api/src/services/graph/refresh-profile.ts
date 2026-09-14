@@ -185,15 +185,28 @@ function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
   }
 }
 
+function strictJsonCandidate(text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("```")) return trimmed;
+  const firstLineEnd = trimmed.indexOf("\n");
+  if (firstLineEnd < 0) throw new SyntaxError("Invalid JSON fence: missing body line");
+  const rawLabel = trimmed.slice(3, firstLineEnd);
+  const label = rawLabel.endsWith("\r") ? rawLabel.slice(0, -1) : rawLabel;
+  if (label !== "" && label.toLowerCase() !== "json") {
+    throw new SyntaxError("Invalid JSON fence: expected an empty or json label");
+  }
+  const closingLineStart = trimmed.lastIndexOf("\n");
+  if (closingLineStart === firstLineEnd || trimmed.slice(closingLineStart + 1) !== "```") {
+    throw new SyntaxError("Invalid JSON fence: missing final closing fence");
+  }
+  return trimmed.slice(firstLineEnd + 1, closingLineStart).trim();
+}
+
 function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: RefreshProfileContext,
   pageTexts: ReadonlyMap<number, string>): Extraction {
   let parsed: unknown;
-  // Match Graphify's strict whole-response fence rule until gr-conductor exports its parser.
-  const trimmed = text.trim();
-  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/iu);
-  const candidate = fenced ? fenced[1]!.trim() : trimmed;
   try {
-    parsed = injectCitationIdentity(JSON.parse(candidate), chunk);
+    parsed = injectCitationIdentity(JSON.parse(strictJsonCandidate(text)), chunk);
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new Error(`Invalid JSON for chunk ${chunk.id}: ${error.message}`, { cause: error });
