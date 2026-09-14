@@ -6,7 +6,9 @@
     "document": "saint-etienne-de-bolton-2026-08-04",
     "documentSha256": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
     "page": 12,
-    "pageTextSha256": "7f51a8824f1e94507d4294981b3333a9236ca523d08eac69a7e645dda1fea157",
+    "manifestPageTextSha256": "7f51a8824f1e94507d4294981b3333a9236ca523d08eac69a7e645dda1fea157",
+    "pageTextSha256": "186831824002deb1ad107d168190311fd744bf61f10a4949f3ab7dd777e77397",
+    "shaNote": "manifestPageTextSha256 is the page hash carried by the v13 campaign manifest, which is not in the repository and cannot be recomputed from this file. pageTextSha256 is the SHA-256 of the pageText string delivered below, UTF-8, and is asserted by refresh-profile.test.ts: it is the one that certifies what a maintainer edits here.",
     "note": "Real v13 contrastive pair, item h of the 4 August 2026 Saint-Etienne-de-Bolton minutes: both strings are verbatim on page 12, only the second states the decision."
   },
   "zoneLabelExcerpt": {

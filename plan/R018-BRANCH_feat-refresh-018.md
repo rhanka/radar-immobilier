@@ -84,6 +84,12 @@
 - [x] C07j: freeze the five-PDF manual baseline and version-comparison protocol before any further model call.
 - [x] C07k: bound v7 entity citation prefixes and normalize page anchors typographically with a 12-character
   floor; the guarantee is passage-on-page, not typographic equality, and `evidence[]` shares only the anchor rule.
+  Three call sites share that anchor: entity citations and `evidence[]` in `refresh-profile.ts`, plus the v2.3
+  graph build (`refresh-v23.ts`), which reports its own failure as `Citation is not grounded on original PDF page`.
+- [x] C07l: give the anchor floor its own refusal (`excerpt_below_anchor_floor`) instead of reporting a short
+  but verbatim excerpt as ungrounded, announce it in `evidence_item.excerpt.minLength`, and check the entity
+  citation floor in both units (20 raw code points and 12 normalized) under one name; expose the compact
+  page/excerpt citation shape only under `graph_contract.entity_citations`, where identity injection applies.
 - [x] C14b: emit a redacted model-call count and latency receipt without prompts, outputs or account material.
 - [x] C14c: identify the exact live schema and prompt by digest in the redacted model-call receipt.
 - [x] C14d: distinguish completed generation from failure instead of treating cleanup as a provider response.
