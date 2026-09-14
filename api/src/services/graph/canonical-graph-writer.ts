@@ -27,11 +27,10 @@
  *   4. `S3ObjectStore.put()` refuses the canonical key outright, so a writer
  *      that skips this module fails loudly instead of silently.
  *
- * DECLARED LIMIT — the shell writers (`tools/graphify-v23/gate.sh`,
- * `tools/grounding/publish-citation-grounding.sh`) publish with `s5cmd` and do
- * NOT go through this module. They were only made fail-closed on their backup
- * probe; they still hold no expected-version and can still overwrite a version
- * this module archived. Treat concurrent shell publication as unprotected.
+ * DECLARED LIMIT — `tools/grounding/publish-citation-grounding.sh` publishes
+ * with `s5cmd` and does NOT go through this module. The legacy graphify gate is
+ * retired, but this retained manual publisher still holds no expected-version.
+ * Treat concurrent shell publication as unprotected.
  */
 import { createHash } from "node:crypto";
 import {
