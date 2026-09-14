@@ -507,51 +507,8 @@ object-storage-docs-preprod-copy: ## Retired after the OVH cutover
 	@echo '[object-storage-docs] retired: no legacy full-prefix copy can be started'; exit 1
 
 .PHONY: object-storage-docs-preprod-copy-canonical
-object-storage-docs-preprod-copy-canonical: ## Import the PROD manifest and copy its exact corpus SCW-to-OVH
-	@if [ "$(OBJECT_STORAGE_DOCS_CANONICAL_COPY_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
-	  [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" ] || \
-	  [ ! -s "$(OBJECT_STORAGE_DOCS_CANONICAL_MANIFEST)" ] || \
-	  [ "$(OBJECT_STORAGE_DOCS_CANONICAL_DIGEST)" != "$(OBJECT_STORAGE_DOCS_OFFICIAL_DIGEST)" ]; then \
-	  echo '[object-storage-docs] refused: require both kubeconfigs, canonical manifest/digest, confirmation, ENV=preprod'; \
-	  exit 1; \
-	fi
-	@set -euo pipefail; manifest="$(OBJECT_STORAGE_DOCS_CANONICAL_MANIFEST)"; \
-	  digest="$(OBJECT_STORAGE_DOCS_CANONICAL_DIGEST)"; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
-	  preprod_server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
-	  preprod_namespace="$$( $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )"; \
-	  prod_server="$$( KUBECONFIG="$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
-	  prod_namespace="$$( KUBECONFIG="$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )"; \
-	  [ "$$preprod_server" = "$(OBJECT_STORAGE_OVH_SERVER)" ] && [ "$$prod_server" = "$(OBJECT_STORAGE_OVH_SERVER)" ] && \
-	    [ "$$preprod_namespace" = "$$namespace" ] && \
-	    { [ -z "$$prod_namespace" ] || [ "$$prod_namespace" = radar-immobilier ]; } || \
-	    { echo '[object-storage-docs] refused: exact OVH namespaces are unproved'; exit 1; }; \
-	  [ "$$(sha256sum "$$manifest" | awk '{print $$1}')" = "$$digest" ] || \
-	    { echo '[object-storage-docs] canonical digest differs'; exit 1; }; \
-	  jq -es -f deploy/ci/docs-canonical-manifest.jq "$$manifest" >/dev/null || \
-	    { echo '[object-storage-docs] canonical corpus contract differs'; exit 1; }; \
-	  KUBECONFIG="$(OBJECT_STORAGE_DOCS_PROD_KUBECONFIG)" $(KUBECTL) -n radar-immobilier \
-	    get secret radar-s3-credentials -o json | jq -e -f deploy/ci/docs-prod-source-secret.jq | \
-	    $(KUBECTL) apply -f - >/dev/null; \
-	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-docs-canonical \
-	    --from-literal="manifestSha256=$$digest" --dry-run=client -o yaml | \
-	    $(KUBECTL) apply -f - >/dev/null; \
-	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
-	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
-	    $(OBJECT_STORAGE_INVENTORY_DIR) >"$$render"; $(KUBECTL) apply -f "$$render" >/dev/null; \
-	  job_ref="$$( $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_CANONICAL_COPY_JOB) -o name )"; \
-	  job="$${job_ref#job.batch/}"; pod=''; running=false; \
-	  for ((attempt=1; attempt<=300; attempt++)); do \
-	    pod="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o jsonpath='{.items[0].metadata.name}' )"; \
-	    if [ -n "$$pod" ] && [ "$$( $(KUBECTL) -n "$$namespace" get pod "$$pod" -o jsonpath='{.status.phase}' )" = Running ]; then \
-	      running=true; break; \
-	    fi; \
-	    sleep 2; \
-	  done; \
-	  $$running || { echo '[object-storage-docs] canonical copy Pod did not start'; exit 1; }; \
-	  $(KUBECTL) -n "$$namespace" exec -i "$$pod" -- /bin/bash -ceu \
-	    'umask 077; target=/evidence/prod-canonical-manifest.jsonl; if [ -e "$$target" ]; then [ "$$(sha256sum "$$target" | awk '\''{print $$1}'\'')" = "$$1" ]; exit; fi; cat >"$$target.tmp"; [ "$$(sha256sum "$$target.tmp" | awk '\''{print $$1}'\'')" = "$$1" ]; sync -f "$$target.tmp"; mv "$$target.tmp" "$$target"' \
-	    -- "$$digest" <"$$manifest"; \
-	  echo "[object-storage-docs] canonical copy started as $$job_ref"
+object-storage-docs-preprod-copy-canonical: ## Retired after the OVH cutover
+	@echo '[object-storage-docs] retired: canonical migration is closed by its final receipt'; exit 1
 
 .PHONY: object-storage-docs-preprod-copy-progress
 object-storage-docs-preprod-copy-progress: ## Report canonical copy progress without object keys
