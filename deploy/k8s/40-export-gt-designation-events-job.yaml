@@ -84,7 +84,7 @@ spec:
                 }
                 const bucket = process.env.GRAPH_S3_BUCKET;
                 const prefix = process.env.GT_S3_PREFIX || 'gt/designation-events-167-v2-20260803';
-                const s3 = new S3Client({ endpoint: process.env.GRAPH_S3_ENDPOINT, region: process.env.GRAPH_S3_REGION || 'fr-par', credentials: { accessKeyId: process.env.GRAPH_S3_ACCESS_KEY, secretAccessKey: process.env.GRAPH_S3_SECRET_KEY }, forcePathStyle: process.env.GRAPH_S3_FORCE_PATH_STYLE === 'true' });
+                const s3 = new S3Client({ endpoint: process.env.GRAPH_S3_ENDPOINT, region: process.env.GRAPH_S3_REGION, credentials: { accessKeyId: process.env.GRAPH_S3_ACCESS_KEY, secretAccessKey: process.env.GRAPH_S3_SECRET_KEY }, forcePathStyle: process.env.GRAPH_S3_FORCE_PATH_STYLE === 'true' });
                 const manifest = { source: 'graph/<graph_city_slug>/latest.json', prefix, contract: 'flat natural-key (city_slug,node_type,node_id,kind,label,date,etape,bylaw_numero,source_url,zone_ref,no_lot,docSha,page) — export-designation-events.ts', types: ['DesignationEvent'], perCity: {}, totals: { cities: cities.length, citiesWithGraph: 0, citiesAbsent: 0, events: 0, sourceUrlHttp: 0, sourceUrlAny: 0 } };
                 for (const city of cities) {
                   let body;
@@ -140,17 +140,17 @@ spec:
             - name: GT_S3_PREFIX
               value: "gt/designation-events-167-v2-20260803"
             - name: GRAPH_S3_ENDPOINT
-              value: "https://s3.fr-par.scw.cloud"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_ENDPOINT } }
             - name: GRAPH_S3_BUCKET
-              value: "radar-immobilier-docs-pocs"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_BUCKET } }
             - name: GRAPH_S3_REGION
-              value: "fr-par"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_REGION } }
             - name: GRAPH_S3_FORCE_PATH_STYLE
-              value: "false"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_FORCE_PATH_STYLE } }
             - name: GRAPH_S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_ACCESS_KEY } }
             - name: GRAPH_S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_SECRET_KEY } }
           envFrom:
             - configMapRef:
                 name: radar-api
