@@ -1,0 +1,568 @@
+```json
+{
+  "contract_version": "immo-pv-extraction-v5",
+  "type": "Graphify Extraction",
+  "nodes": [
+    {
+      "id": "source-31df8f",
+      "label": "PV Séance ordinaire – 1er juin 2026 – Valcourt",
+      "file_type": "document",
+      "node_type": "Source",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "sha256": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "date": "2026-06-01",
+      "municipality": "valcourt",
+      "citySlug": "valcourt",
+      "url": "https://www.valcourt.ca/app/uploads/2026/09/1er-juin-2026.pdf",
+      "sourceUrl": "https://www.valcourt.ca/app/uploads/2026/09/1er-juin-2026.pdf",
+      "sourceKind": "pv",
+      "sourceType": "pv",
+      "format": "pdf",
+      "slug": "valcourt-pv-2026-06-01",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE ORDINAIRE\nLUNDI 1ER JUIN 2026\nOrdre du jour"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-560-28",
+      "label": "Second projet de règlement 560-28 amendant le règlement de zonage 560",
+      "file_type": "document",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "numero": "560-28",
+      "bylawNumber": "560-28",
+      "number": "560-28",
+      "title": "Second projet de règlement 560-28 amendant le règlement de zonage 560",
+      "municipality": "valcourt",
+      "citySlug": "valcourt",
+      "stage": "2e_projet",
+      "stade": "2e_projet",
+      "meetingDate": "2026-06-01",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.5 ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-560",
+      "label": "Règlement de zonage 560",
+      "file_type": "document",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "numero": "560",
+      "bylawNumber": "560",
+      "number": "560",
+      "title": "Règlement de zonage 560",
+      "municipality": "valcourt",
+      "citySlug": "valcourt",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-1070-bissonnette-lotissement",
+      "label": "PIIA – 1070 rue Bissonnette – Boisé du Ruisseau – Lotissement",
+      "file_type": "document",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "kind": "piia",
+      "eventType": "piia",
+      "type_evenement": "piia",
+      "municipality": "valcourt",
+      "citySlug": "valcourt",
+      "meetingDate": "2026-06-01",
+      "etape": "piia",
+      "etape_date": "2026-06-01",
+      "description": "PIIA Boisé du Ruisseau – Lotissement au 1070, rue Bissonnette",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.1 1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-1070-bissonnette-construction",
+      "label": "PIIA – 1070 rue Bissonnette – Boisé du Ruisseau – Construction de deux bâtiments principaux unifamiliaux jumelés",
+      "file_type": "document",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "kind": "piia",
+      "eventType": "piia",
+      "type_evenement": "piia",
+      "municipality": "valcourt",
+      "citySlug": "valcourt",
+      "meetingDate": "2026-06-01",
+      "etape": "piia",
+      "etape_date": "2026-06-01",
+      "description": "PIIA Boisé du Ruisseau – Construction de deux bâtiments principaux unifamiliaux jumelés au 1070, rue Bissonnette",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.2 1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE DEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-1045-bissonnette-construction",
+      "label": "PIIA – 1045 rue Bissonnette – Boisé du Ruisseau – Construction d'un bâtiment principal – Habitation unifamiliale isolée",
+      "file_type": "document",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "kind": "piia",
+      "eventType": "piia",
+      "type_evenement": "piia",
+      "municipality": "valcourt",
+      "citySlug": "valcourt",
+      "meetingDate": "2026-06-01",
+      "etape": "piia",
+      "etape_date": "2026-06-01",
+      "description": "PIIA Boisé du Ruisseau – Construction d'un bâtiment principal – Habitation unifamiliale isolée au 1045, rue Bissonnette",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.3 1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D'UN BÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-1075-bissonnette-remblai",
+      "label": "PIIA – 1075 rue Bissonnette – Boisé du Ruisseau – Remblai",
+      "file_type": "document",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "kind": "piia",
+      "eventType": "piia",
+      "type_evenement": "piia",
+      "municipality": "valcourt",
+      "citySlug": "valcourt",
+      "meetingDate": "2026-06-01",
+      "etape": "piia",
+      "etape_date": "2026-06-01",
+      "description": "PIIA Boisé du Ruisseau – Remblai au 1075, rue Bissonnette",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.4 1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI"
+        }
+      ]
+    },
+    {
+      "id": "signal-rezonage-560-28",
+      "label": "Signal – Amendement règlement de zonage 560 (second projet 560-28)",
+      "file_type": "document",
+      "node_type": "Signal",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "category": "reglementation_urbanisme",
+      "kind": "rezonage",
+      "meetingDate": "2026-06-01",
+      "municipality": "valcourt",
+      "citySlug": "valcourt",
+      "etape": "second_projet",
+      "etape_date": "2026-06-01",
+      "reglement_number": "560-28",
+      "description": "Adoption du second projet de règlement 560-28 amendant le règlement de zonage 560",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.5 ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-560-28",
+      "target": "bylaw-560",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.5 ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "bylaw-560-28",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.5 ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "bylaw-560",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "event-piia-1070-bissonnette-lotissement",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.1 1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "event-piia-1070-bissonnette-construction",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.2 1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE DEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "event-piia-1045-bissonnette-construction",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.3 1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D'UN BÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "event-piia-1075-bissonnette-remblai",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.4 1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "signal-rezonage-560-28",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.5 ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "bylaw-560-28",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.5 ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "event-piia-1070-bissonnette-lotissement",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.1 1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "event-piia-1070-bissonnette-construction",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.2 1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE DEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "event-piia-1045-bissonnette-construction",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.3 1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D'UN BÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE"
+        }
+      ]
+    },
+    {
+      "source": "source-31df8f",
+      "target": "event-piia-1075-bissonnette-remblai",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.4 1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-560-28",
+      "target": "source-31df8f",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.5 ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-1070-bissonnette-lotissement",
+      "target": "source-31df8f",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.1 1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-1070-bissonnette-construction",
+      "target": "source-31df8f",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.2 1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE DEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-1045-bissonnette-construction",
+      "target": "source-31df8f",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.3 1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D'UN BÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-1075-bissonnette-remblai",
+      "target": "source-31df8f",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "status": "candidate",
+      "review_status": "needs_review",
+      "assertion_basis": "explicit",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.4 1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "rawRef": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "sourceUrl": "https://www.valcourt.ca/app/uploads/2026/09/1er-juin-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.5 ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560"
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "rawRef": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "sourceUrl": "https://www.valcourt.ca/app/uploads/2026/09/1er-juin-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.1 1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT"
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "rawRef": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "sourceUrl": "https://www.valcourt.ca/app/uploads/2026/09/1er-juin-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.2 1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE DEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+    },
+    {
+      "id": "ev-4",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "rawRef": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "sourceUrl": "https://www.valcourt.ca/app/uploads/2026/09/1er-juin-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.3 1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D'UN BÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE"
+    },
+    {
+      "id": "ev-5",
+      "source_file": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "rawRef": "raw/proces-verbaux-valcourt--le-val-saint-francois/cas/31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf",
+      "docSha": "31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d",
+      "sourceUrl": "https://www.valcourt.ca/app/uploads/2026/09/1er-juin-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.4 1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI"
+    }
+  ],
+  "input_tokens": 3200,
+  "output_tokens": 1950
+}
+```
