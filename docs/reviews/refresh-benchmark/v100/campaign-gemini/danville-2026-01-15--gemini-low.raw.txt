@@ -1,0 +1,126 @@
+{
+  "contract_version": "immo-pv-extraction-v9",
+  "type": "Graphify Extraction",
+  "nodes": [
+    {
+      "id": "source-267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f",
+      "label": "Procès-verbal de l'assemblée extraordinaire du 26 janvier 2026 - Ville de Danville",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-danville/cas/267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f.pdf",
+      "status": "attached",
+      "docSha": "267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f",
+      "date": "2026-01-26",
+      "municipality": "danville",
+      "url": "https://danville.ca/wp-content/uploads/2026/01/2026-01-26-Extrapv-budget.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de l’assemblée extraordinaire du conseil municipal de la Ville de\nDanville, tenue le 26e jour du mois de janvier de l’an 2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-danville-2026-01",
+      "label": "Règlement 2026-01",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-danville/cas/267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f.pdf",
+      "status": "candidate",
+      "numero": "2026-01",
+      "title": "Règlement 2026-01 relatif à l'imposition des taux de taxes et des compensations pour l'exercice financier 2026",
+      "stage": "projet",
+      "municipality": "danville",
+      "meetingDate": "2026-01-26",
+      "resolution": "20260126-13",
+      "docSha": "267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Avis de motion est donné par le conseiller Richard Lefebvre à l’effet qu’il adoptera\nou fera adopter, lors d’une séance ultérieure de ce conseil, le règlement 2026-01"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-danville-2026-02",
+      "label": "Règlement 2026-02",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-danville/cas/267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f.pdf",
+      "status": "candidate",
+      "numero": "2026-02",
+      "title": "Règlement 2026-02 établissant la tarification pour l’utilisation des biens, des services et des activités de la Ville de Danville pour l’année 2026",
+      "stage": "projet",
+      "municipality": "danville",
+      "meetingDate": "2026-01-26",
+      "resolution": "20260126-14",
+      "docSha": "267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par le conseiller Émile Lachance à l’effet qu’il adoptera\nou fera adopter, lors d’une séance ultérieure de ce conseil, le règlement 2026-02"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f",
+      "target": "bylaw-danville-2026-01",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-danville/cas/267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-01"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Avis de motion est donné par le conseiller Richard Lefebvre à l’effet qu’il adoptera\nou fera adopter, lors d’une séance ultérieure de ce conseil, le règlement 2026-01"
+        }
+      ]
+    },
+    {
+      "source": "source-267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f",
+      "target": "bylaw-danville-2026-02",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-danville/cas/267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-02"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par le conseiller Émile Lachance à l’effet qu’il adoptera\nou fera adopter, lors d’une séance ultérieure de ce conseil, le règlement 2026-02"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-bylaw-2026-01",
+      "source_file": "raw/proces-verbaux-danville/cas/267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f.pdf",
+      "rawRef": "raw/proces-verbaux-danville/cas/267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f.pdf",
+      "docSha": "267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f",
+      "sourceUrl": "https://danville.ca/wp-content/uploads/2026/01/2026-01-26-Extrapv-budget.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "Avis de motion est donné par le conseiller Richard Lefebvre à l’effet qu’il adoptera ou fera adopter, lors d’une séance ultérieure de ce conseil, le règlement 2026-01 relatif à l'imposition des taux de taxes et des compensations pour l'exercice financier 2026."
+    },
+    {
+      "id": "ev-bylaw-2026-02",
+      "source_file": "raw/proces-verbaux-danville/cas/267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f.pdf",
+      "rawRef": "raw/proces-verbaux-danville/cas/267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f.pdf",
+      "docSha": "267cf55375589af178e8a0892f48bdea1b86c374be66aea849f9e9b8b9da018f",
+      "sourceUrl": "https://danville.ca/wp-content/uploads/2026/01/2026-01-26-Extrapv-budget.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Avis de motion est donné par le conseiller Émile Lachance à l’effet qu’il adoptera ou fera adopter, lors d’une séance ultérieure de ce conseil, le règlement 2026-02 établissant la tarification pour l’utilisation des biens, des services et des activités de la Ville de Danville pour l’année 2026."
+    }
+  ],
+  "input_tokens": 1550,
+  "output_tokens": 980
+}

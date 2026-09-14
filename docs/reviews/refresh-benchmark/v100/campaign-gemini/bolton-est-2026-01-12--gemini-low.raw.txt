@@ -1,0 +1,372 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "label": "ORDRE DU JOUR – 12 JANVIER 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "date": "2026-01-12",
+      "municipality": "bolton-est",
+      "url": "https://www.boltonest.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/ordres-du-jour/2026/odj-12-janvier-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ORDRE DU JOUR – 12 JANVIER 2026"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-6116054",
+      "label": "Dérogation mineure – Lot 6 116 054",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "derogation",
+      "municipality": "bolton-est",
+      "date": "2026-01-12",
+      "meetingDate": "2026-01-12",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-01-12",
+      "no_lot": "6116054",
+      "description": "Dérogation mineure – Lot 6 116 054 – 4 Impasse des Châtelains",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.3. Dérogation mineure – Lot 6 116 054 – 4 Impasse des Châtelains"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-4860343",
+      "label": "Demande de PIIA – Lot 4 860 343",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "piia",
+      "municipality": "bolton-est",
+      "date": "2026-01-12",
+      "meetingDate": "2026-01-12",
+      "etape": "piia",
+      "etape_date": "2026-01-12",
+      "no_lot": "4860343",
+      "description": "Demande de PIIA – Lot 4 860 343 – 5 rue Castel",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.4. Demande de PIIA – Lot 4 860 343 – 5 rue Castel"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-4860346",
+      "label": "Demande de PIIA – Lot 4 860 346",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "piia",
+      "municipality": "bolton-est",
+      "date": "2026-01-12",
+      "meetingDate": "2026-01-12",
+      "etape": "piia",
+      "etape_date": "2026-01-12",
+      "no_lot": "4860346",
+      "description": "Demande de PIIA – Lot 4 860 346 – 7 rue Castel",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.5. Demande de PIIA – Lot 4 860 346 – 7 rue Castel"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-4860502",
+      "label": "Demande de PIIA – Lot 4 860 502",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "piia",
+      "municipality": "bolton-est",
+      "date": "2026-01-12",
+      "meetingDate": "2026-01-12",
+      "etape": "piia",
+      "etape_date": "2026-01-12",
+      "no_lot": "4860502",
+      "description": "Demande de PIIA – Lot 4 860 502 – 19 rue Horse Shoe",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.6. Demande de PIIA – Lot 4 860 502 – 19 rue Horse Shoe"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-6465655",
+      "label": "Demande de PIIA – Lot 6 465 655",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "piia",
+      "municipality": "bolton-est",
+      "date": "2026-01-12",
+      "meetingDate": "2026-01-12",
+      "etape": "piia",
+      "etape_date": "2026-01-12",
+      "no_lot": "6465655",
+      "description": "Demande de PIIA – Lot 6 465 655 – 74 rue de Lac-Spring",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.7. Demande de PIIA – Lot 6 465 655 – 74 rue de Lac-Spring"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-6668264p",
+      "label": "Demande de PIIA – Lot 6 668 264-P",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "piia",
+      "municipality": "bolton-est",
+      "date": "2026-01-12",
+      "meetingDate": "2026-01-12",
+      "etape": "piia",
+      "etape_date": "2026-01-12",
+      "no_lot": "6668264",
+      "description": "Demande de PIIA – Lot 6 668 264-P",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.8. Demande de PIIA – Lot 6 668 264-P"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-456",
+      "label": "Règlement numéro 2026-456",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2026-456",
+      "municipality": "bolton-est",
+      "stage": "projet",
+      "title": "Règlement numéro 2026-456 décrétant l’élaboration des plans et devis en vue de la mise aux normes des chemins Pinard, Sanders et Bergeron autorisant un emprunt au fonds général de la Municipalité au montant total de 69 696$ pour en acquitter les coûts et imposant une compensation afin de pourvoir au remboursement de l’emprunt",
+      "meetingDate": "2026-01-12",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "8.4. Avis de motion – Règlement numéro 2026-456 décrétant l’élaboration des"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "target": "event-dm-6116054",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "evidence_refs": [
+        "ev-dm-6116054"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.3. Dérogation mineure – Lot 6 116 054 – 4 Impasse des Châtelains"
+        }
+      ]
+    },
+    {
+      "source": "source-23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "target": "event-piia-4860343",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "evidence_refs": [
+        "ev-piia-4860343"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.4. Demande de PIIA – Lot 4 860 343 – 5 rue Castel"
+        }
+      ]
+    },
+    {
+      "source": "source-23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "target": "event-piia-4860346",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "evidence_refs": [
+        "ev-piia-4860346"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.5. Demande de PIIA – Lot 4 860 346 – 7 rue Castel"
+        }
+      ]
+    },
+    {
+      "source": "source-23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "target": "event-piia-4860502",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "evidence_refs": [
+        "ev-piia-4860502"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.6. Demande de PIIA – Lot 4 860 502 – 19 rue Horse Shoe"
+        }
+      ]
+    },
+    {
+      "source": "source-23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "target": "event-piia-6465655",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "evidence_refs": [
+        "ev-piia-6465655"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.7. Demande de PIIA – Lot 6 465 655 – 74 rue de Lac-Spring"
+        }
+      ]
+    },
+    {
+      "source": "source-23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "target": "event-piia-6668264p",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "evidence_refs": [
+        "ev-piia-6668264p"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.8. Demande de PIIA – Lot 6 668 264-P"
+        }
+      ]
+    },
+    {
+      "source": "source-23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "target": "bylaw-2026-456",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-456"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "8.4. Avis de motion – Règlement numéro 2026-456 décrétant l’élaboration des"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-dm-6116054",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "rawRef": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "sourceUrl": "https://www.boltonest.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/ordres-du-jour/2026/odj-12-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.3. Dérogation mineure – Lot 6 116 054 – 4 Impasse des Châtelains"
+    },
+    {
+      "id": "ev-piia-4860343",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "rawRef": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "sourceUrl": "https://www.boltonest.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/ordres-du-jour/2026/odj-12-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.4. Demande de PIIA – Lot 4 860 343 – 5 rue Castel"
+    },
+    {
+      "id": "ev-piia-4860346",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "rawRef": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "sourceUrl": "https://www.boltonest.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/ordres-du-jour/2026/odj-12-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.5. Demande de PIIA – Lot 4 860 346 – 7 rue Castel"
+    },
+    {
+      "id": "ev-piia-4860502",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "rawRef": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "sourceUrl": "https://www.boltonest.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/ordres-du-jour/2026/odj-12-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.6. Demande de PIIA – Lot 4 860 502 – 19 rue Horse Shoe"
+    },
+    {
+      "id": "ev-piia-6465655",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "rawRef": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "sourceUrl": "https://www.boltonest.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/ordres-du-jour/2026/odj-12-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.7. Demande de PIIA – Lot 6 465 655 – 74 rue de Lac-Spring"
+    },
+    {
+      "id": "ev-piia-6668264p",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "rawRef": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "sourceUrl": "https://www.boltonest.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/ordres-du-jour/2026/odj-12-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.8. Demande de PIIA – Lot 6 668 264-P"
+    },
+    {
+      "id": "ev-bylaw-2026-456",
+      "source_file": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "rawRef": "raw/proces-verbaux-bolton-est/cas/23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1.pdf",
+      "docSha": "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1",
+      "sourceUrl": "https://www.boltonest.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/ordres-du-jour/2026/odj-12-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "8.4. Avis de motion – Règlement numéro 2026-456 décrétant l’élaboration des plans et devis en vue de la mise aux normes des chemins Pinard, Sanders et"
+    }
+  ],
+  "input_tokens": 1250,
+  "output_tokens": 1600
+}
+```

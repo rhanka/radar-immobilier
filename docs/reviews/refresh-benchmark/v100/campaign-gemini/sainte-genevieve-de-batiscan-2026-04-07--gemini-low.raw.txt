@@ -1,0 +1,368 @@
+{
+  "nodes": [
+    {
+      "id": "source-2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+      "label": "Procès-verbal de la séance ordinaire du 7 avril 2026 - Sainte-Geneviève-de-Batiscan",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+      "date": "2026-04-07",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "url": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE RÉGULIÈRE DU 7 AVRIL 2026\nÀ une séance régulière du conseil municipal tenue le 7 avril 2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-509-07-04-26",
+      "label": "Règlement 509-07-04-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "509-07-04-26",
+      "title": "Règlement modifiant le règlement de zonage 310-1901-09 et ses amendements afin d’identifier les aires de protection des lieux de captage des eaux souterraines ainsi que la création de dispositions relatives aux éoliennes de la MRC des Chenaux",
+      "stage": "1er_projet",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "date": "2026-04-07",
+      "resolution": "26-04-04",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPTION DU 1ER PROJET DE RÈGLEMENT NUMÉRO 509-07-04-26\nMODIFIANT LE RÈGLEMENT DE ZONAGE 310-19-01-09"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-310-19-01-09",
+      "label": "Règlement de zonage 310-19-01-09",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "310-19-01-09",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Avis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage no 310-19-01-09"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-510-07-04-26",
+      "label": "Règlement 510-07-04-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "510-07-04-26",
+      "title": "Règlement modifiant le plan d’urbanisme",
+      "stage": "1er_projet",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "date": "2026-04-07",
+      "resolution": "26-04-05",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "ADOPTION DU 1er PROJET DE RÈGLEMENT NO 510-07-04-26 MODIFIANT\nLE PLAN D’URBANISME"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-309-19-01-09",
+      "label": "Plan d'urbanisme règlement no 309-19-01-09",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "309-19-01-09",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme règlement no 309-19-01-09"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-507-02-03-26",
+      "label": "Règlement no 507-02-03-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "507-02-03-26",
+      "title": "Règlement déléguant le pouvoir d'autoriser des dépenses et de passer des contrats remplaçant les règlements 408-02-04-18, 421-04-03-19, 457-04-04-22 et 464-03-10-22",
+      "stage": "adoption",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "date": "2026-04-07",
+      "resolution": "26-04-06",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "ADOPTION DU RÈGLEMENT NO 507-02-03-26 DÉLÉGUANT LE POUVOIR\nD’AUTORISER DES DÉPENSES ET DE PASSER DES CONTRATS"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-508-02-03-26",
+      "label": "Règlement # 508-02-03-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "508-02-03-26",
+      "title": "Règlement décrétant une dépense de 417 404,63$ et un emprunt de 380 000,00$ sur 10 ans pour l’acquisition d’un tracteur porte-outils avec souffleuse et débroussailleuse",
+      "stage": "adoption",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "date": "2026-04-07",
+      "resolution": "26-04-07",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "ADOPTION DU RÈGLEMENT # 508-02-03-26 DÉCRÉTANT UNE DÉPENSE DE\n417 404,63$ ET UN EMPRUNT DE 380 000,00$ SUR 10 ANS POUR\nL’ACQUISITION D’UN TRACTEUR PORTE-OUTILS AVEC SOUFFLEUSE ET\nDÉBROUSSAILLEUSE"
+        }
+      ]
+    },
+    {
+      "id": "event-26-04-04",
+      "label": "Adoption du 1er projet de règlement 509-07-04-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "resolution": "26-04-04",
+      "resolutionRef": "Résolution 26-04-04",
+      "date": "2026-04-07",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "etape": "projet_reglement",
+      "etape_date": "2026-04-07",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "reglement_number": "509-07-04-26",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par M. Yanick Godon, appuyé par Mme Virginie\nLavoie et résolu à l’unanimité des conseillers d’adopter le règlement 509-07-04-26"
+        }
+      ]
+    },
+    {
+      "id": "event-26-04-05",
+      "label": "Adoption du 1er projet de règlement 510-07-04-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "resolution": "26-04-05",
+      "resolutionRef": "Résolution 26-04-05",
+      "date": "2026-04-07",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "etape": "projet_reglement",
+      "etape_date": "2026-04-07",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "reglement_number": "510-07-04-26",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par M. Hugo Massicotte, appuyé par M. Yanick\nGodon et résolu à l’unanimité des conseillers d’adopter le règlement 510-07-04-26"
+        }
+      ]
+    },
+    {
+      "id": "event-26-04-06",
+      "label": "Adoption du règlement 507-02-03-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "resolution": "26-04-06",
+      "resolutionRef": "Résolution 26-04-06",
+      "date": "2026-04-07",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "etape": "adoption",
+      "etape_date": "2026-04-07",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "reglement_number": "507-02-03-26",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "PAR CES MOTIFS, il est proposé par M. Benoit Magny, appuyé par Mme Virginie\nLavoie et résolu à l’unanimité des conseillers d’adopter le règlement décrit ci-dessus"
+        }
+      ]
+    },
+    {
+      "id": "event-26-04-07",
+      "label": "Adoption du règlement 508-02-03-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "resolution": "26-04-07",
+      "resolutionRef": "Résolution 26-04-07",
+      "date": "2026-04-07",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "etape": "adoption",
+      "etape_date": "2026-04-07",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "reglement_number": "508-02-03-26",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "À CES CAUSES, il est proposé par M. Yanick Godon, appuyé par M. Hugo Massicotte\net résolu à l’unanimité des conseillers que le règlement suivant soit adopté."
+        }
+      ]
+    },
+    {
+      "id": "signal-eoliennes-captage-eau",
+      "label": "Encadrement éoliennes et aires de protection de captage des eaux",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "urbanisme",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "municipality": "sainte-genevieve-de-batiscan",
+      "resolution": "26-04-04",
+      "resolutionRef": "Résolution 26-04-04",
+      "scope": "local",
+      "reglement_number": "509-07-04-26",
+      "description": "Adoption du premier projet de règlement créant des normes pour l'implantation d'éoliennes et identifiant les aires de captage des eaux souterraines.",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPTION DU 1ER PROJET DE RÈGLEMENT NUMÉRO 509-07-04-26\nMODIFIANT LE RÈGLEMENT DE ZONAGE 310-19-01-09 ET SES\nAMENDEMENTS AFIN D’IDENTIFIER LES AIRES DE PROTECTION DES\nLIEUX DE CAPTAGE DES EAUX SOUTERRAINES"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-509-07-04-26",
+      "target": "bylaw-310-19-01-09",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "evidence_refs": [
+        "ev-amends-509-310"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Ce règlement modifie le règlement de zonage numéro 310-19-01-09."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-510-07-04-26",
+      "target": "bylaw-309-19-01-09",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "evidence_refs": [
+        "ev-amends-510-309"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Ce règlement modifie le plan d’urbanisme 309-19-01-09."
+        }
+      ]
+    },
+    {
+      "source": "event-26-04-04",
+      "target": "signal-eoliennes-captage-eau",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "evidence_refs": [
+        "ev-event-26-04-04"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par M. Yanick Godon, appuyé par Mme Virginie\nLavoie et résolu à l’unanimité des conseillers d’adopter le règlement 509-07-04-26"
+        }
+      ]
+    },
+    {
+      "source": "source-2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+      "target": "bylaw-509-07-04-26",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "evidence_refs": [
+        "ev-event-26-04-04"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPTION DU 1ER PROJET DE RÈGLEMENT NUMÉRO 509-07-04-26"
+        }
+      ]
+    },
+    {
+      "source": "source-2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+      "target": "event-26-04-04",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "evidence_refs": [
+        "ev-event-26-04-04"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par M. Yanick Godon, appuyé par Mme Virginie\nLavoie et résolu à l’unanimité des conseillers d’adopter le règlement 509-07-04-26"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-amends-509-310",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+      "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "Ce règlement modifie le règlement de zonage numéro 310-19-01-09. Il a pour objet de modifier le règlement de zonage pour d’identifier les aires de protection des lieux de captage des eaux souterraines"
+    },
+    {
+      "id": "ev-amends-510-309",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+      "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "Ce règlement modifie le plan d’urbanisme 309-19-01-09. Il a pour objet de modifier le plan d’urbanisme pour encadrer l’implantation d’éoliennes sur son territoire"
+    },
+    {
+      "id": "ev-event-26-04-04",
+      "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+      "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+      "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par M. Yanick Godon, appuyé par Mme Virginie Lavoie et résolu à l’unanimité des conseillers d’adopter le règlement 509-07-04-26 et décrète ce qui suit :"
+    }
+  ],
+  "input_tokens": 5824,
+  "output_tokens": 1720
+}

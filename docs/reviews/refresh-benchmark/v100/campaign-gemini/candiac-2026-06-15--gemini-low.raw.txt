@@ -1,0 +1,229 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "label": "RÈGLEMENT 5005-024",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "municipality": "candiac",
+      "url": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+      "sourceKind": "reglement",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "RÈGLEMENT 5005-024\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\nCERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE\nD’ÉTUDES ET DE MESURES DE MITIGATION"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-5005-024",
+      "label": "Règlement 5005-024",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "5005-024",
+      "title": "RÈGLEMENT 5005-024 MODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET CERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE D’ÉTUDES ET DE MESURES DE MITIGATION, NOTAMMENT EN BORDURE D’AUTOROUTE, ET EXIGER LA CONSTRUCTION DES OUVRAGES REQUIS AVANT L’ÉMISSION D’UN PERMIS DE CONSTRUCTION",
+      "municipality": "candiac",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "RÈGLEMENT 5005-024\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\nCERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE\nD’ÉTUDES ET DE MESURES DE MITIGATION, NOTAMMENT EN\nBORDURE D’AUTOROUTE"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-5005",
+      "label": "Règlement 5005",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "5005",
+      "title": "Règlement 5005 relatif aux permis et certificats",
+      "municipality": "candiac",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ARTICLE 1.\nLe présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+        }
+      ]
+    },
+    {
+      "id": "constraint-ferroviaire-bruit-vibrations",
+      "label": "Contrainte d'aire d'influence ferroviaire",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "autre",
+      "municipality": "candiac",
+      "description": "Exigences d'études acoustiques (55 dBA Leq24h) et de vibrations (0,14 mm/s) et mesures de mitigation pour projet de lotissement résidentiel ou sensible dans l'aire d'influence d'une voie ferrée",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "evidence_refs": [
+        "ev-ferroviaire-1"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "« 8° dans le cas d’un projet de lotissement destiné à un usage résidentiel\nou sensible dans l’aire d’influence d’une voie ferrée, les documents\nsuivants :"
+        }
+      ]
+    },
+    {
+      "id": "constraint-bruit-autoroute",
+      "label": "Contrainte de niveau sonore élevé générée par une autoroute",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "autre",
+      "municipality": "candiac",
+      "description": "Exigences d'étude acoustique et mesures de mitigation sonore (maximum 55 dBA Leq24h) en bordure des autoroutes 30, 15, 930 et route 132 préalablement à l'émission de permis de construction d'usage Habitation (H) ou sensible",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "evidence_refs": [
+        "ev-autoroute-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "« 18° dans le cas d’un terrain situé en tout ou en partie à l’intérieur\nd’une zone de niveau sonore élevé générée par une autoroute"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-5005-024",
+      "target": "bylaw-5005",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "evidence_refs": [
+        "ev-amends-5005"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ARTICLE 1.\nLe présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+        }
+      ]
+    },
+    {
+      "source": "source-1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "target": "bylaw-5005-024",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "evidence_refs": [
+        "ev-source-bylaw"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "RÈGLEMENT 5005-024\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\nCERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE\nD’ÉTUDES ET DE MESURES DE MITIGATION"
+        }
+      ]
+    },
+    {
+      "source": "source-1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "target": "bylaw-5005",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "evidence_refs": [
+        "ev-amends-5005"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ARTICLE 1.\nLe présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+        }
+      ]
+    },
+    {
+      "source": "constraint-ferroviaire-bruit-vibrations",
+      "target": "source-1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "evidence_refs": [
+        "ev-ferroviaire-1"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "« 8° dans le cas d’un projet de lotissement destiné à un usage résidentiel\nou sensible dans l’aire d’influence d’une voie ferrée, les documents\nsuivants :"
+        }
+      ]
+    },
+    {
+      "source": "constraint-bruit-autoroute",
+      "target": "source-1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "evidence_refs": [
+        "ev-autoroute-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "« 18° dans le cas d’un terrain situé en tout ou en partie à l’intérieur\nd’une zone de niveau sonore élevé générée par une autoroute"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-source-bylaw",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "RÈGLEMENT 5005-024\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\nCERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE\nD’ÉTUDES ET DE MESURES DE MITIGATION, NOTAMMENT EN\nBORDURE D’AUTOROUTE"
+    },
+    {
+      "id": "ev-amends-5005",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "ARTICLE 1.\nLe présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+    },
+    {
+      "id": "ev-ferroviaire-1",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "« 8° dans le cas d’un projet de lotissement destiné à un usage résidentiel\nou sensible dans l’aire d’influence d’une voie ferrée, les documents\nsuivants :"
+    },
+    {
+      "id": "ev-autoroute-1",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "« 18° dans le cas d’un terrain situé en tout ou en partie à l’intérieur\nd’une zone de niveau sonore élevé générée par une autoroute"
+    }
+  ],
+  "input_tokens": 1780,
+  "output_tokens": 1250
+}
+```

@@ -1,0 +1,397 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "label": "Procès-verbal du conseil municipal - 13 avril 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "review_status": "validated",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil municipal de la Ville de Mont-SaintHilaire tenue à la salle La Nature-en-Mouvement, le lundi 13 avril 2026 à 19 h 30."
+        }
+      ],
+      "properties": {
+        "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+        "date": "2026-04-13",
+        "municipality": "mont-saint-hilaire",
+        "url": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+        "pdfPath": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+        "sourceKind": "pv",
+        "format": "pdf",
+        "status": "validated"
+      }
+    },
+    {
+      "id": "bylaw-1230-7",
+      "label": "Règlement numéro 1230-7",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "review_status": "validated",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la mod"
+        }
+      ],
+      "properties": {
+        "numero": "1230-7",
+        "title": "Règlement amendant le Règlement du plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la modification des limites de certains ilots déstructurés",
+        "date": "2026-04-13",
+        "status": "validated",
+        "stage": "adoption",
+        "municipality": "mont-saint-hilaire",
+        "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+        "meetingDate": "2026-04-13",
+        "resolution": "2026-131"
+      }
+    },
+    {
+      "id": "bylaw-1230-8",
+      "label": "Projet de Règlement numéro 1230-8",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "candidate",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement du Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé, en réponse à l’"
+        }
+      ],
+      "properties": {
+        "numero": "1230-8",
+        "title": "Règlement amendant le Règlement du Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé, en réponse à l’adoption d’une nouvelle orientation gouvernementale en matière d’habitation",
+        "date": "2026-04-13",
+        "status": "candidate",
+        "stage": "projet",
+        "municipality": "mont-saint-hilaire",
+        "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+        "meetingDate": "2026-04-13",
+        "resolution": "2026-133"
+      }
+    },
+    {
+      "id": "bylaw-1235-34",
+      "label": "Second projet de Règlement numéro 1235-34",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "candidate",
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "Que le second projet de Règlement numéro 1235-34, intitulé : « Règlement amendant le Règlement de zonage numéro 1235 afin de modifier les limites de quatre zones dans le secteur de la rue des Vétérans »"
+        }
+      ],
+      "properties": {
+        "numero": "1235-34",
+        "title": "Règlement amendant le Règlement de zonage numéro 1235 afin de modifier les limites de quatre zones dans le secteur de la rue des Vétérans",
+        "date": "2026-04-13",
+        "status": "candidate",
+        "stage": "2e_projet",
+        "municipality": "mont-saint-hilaire",
+        "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+        "meetingDate": "2026-04-13",
+        "resolution": "2026-134"
+      }
+    },
+    {
+      "id": "bylaw-1235-35",
+      "label": "Règlement numéro 1235-35",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "review_status": "validated",
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement de zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la modification des lim"
+        }
+      ],
+      "properties": {
+        "numero": "1235-35",
+        "title": "Règlement amendant le Règlement de zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la modification des limites de certains ilots déstructurés",
+        "date": "2026-04-13",
+        "status": "validated",
+        "stage": "adoption",
+        "municipality": "mont-saint-hilaire",
+        "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+        "meetingDate": "2026-04-13",
+        "resolution": "2026-135"
+      }
+    },
+    {
+      "id": "designation-event-2026-128",
+      "label": "Approbation de PIIA (Résolution 2026-128)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et les recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications requises ou aux compléments d'in"
+        }
+      ],
+      "properties": {
+        "date": "2026-04-13",
+        "meetingDate": "2026-04-13",
+        "decision": "approuvé",
+        "status": "validated",
+        "kind": "piia",
+        "municipality": "mont-saint-hilaire",
+        "resolution": "2026-128",
+        "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+        "etape": "piia",
+        "etape_date": "2026-04-13"
+      }
+    },
+    {
+      "id": "designation-event-2026-129",
+      "label": "Refus de PIIA (Résolution 2026-129)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "node_type": "DesignationEvent",
+      "status": "rejected",
+      "review_status": "rejected",
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "Que ce conseil approuve les recommandations et refuse les plans d'implantation et d'intégration architecturale énumérés ci-dessus, et ce, selon les motifs formulés auxdites recommandations."
+        }
+      ],
+      "properties": {
+        "date": "2026-04-13",
+        "meetingDate": "2026-04-13",
+        "decision": "refusé",
+        "status": "rejected",
+        "kind": "piia",
+        "municipality": "mont-saint-hilaire",
+        "resolution": "2026-129",
+        "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+        "etape": "piia",
+        "etape_date": "2026-04-13"
+      }
+    },
+    {
+      "id": "signal-1230-8",
+      "label": "Signal concordance habitation - Règlement 1230-8",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "review_status": "candidate",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement du Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé, en réponse à l’"
+        }
+      ],
+      "properties": {
+        "category": "urbanisme",
+        "date": "2026-04-13",
+        "meetingDate": "2026-04-13",
+        "description": "Adoption du projet de Règlement 1230-8 amendant le plan d'urbanisme en réponse à une nouvelle orientation gouvernementale en matière d'habitation",
+        "status": "candidate",
+        "resolution": "2026-133",
+        "scope": "local",
+        "municipality": "mont-saint-hilaire",
+        "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+        "etape": "projet_reglement",
+        "etape_date": "2026-04-13",
+        "reglement_number": "1230-8"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "target": "bylaw-1230-7",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "evidence_refs": [
+        "ev-1230-7"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la mod"
+        }
+      ]
+    },
+    {
+      "source": "source-0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "target": "bylaw-1230-8",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "evidence_refs": [
+        "ev-1230-8"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement du Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé, en réponse à l’"
+        }
+      ]
+    },
+    {
+      "source": "source-0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "target": "bylaw-1235-34",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "evidence_refs": [
+        "ev-1235-34"
+      ],
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "Que le second projet de Règlement numéro 1235-34, intitulé : « Règlement amendant le Règlement de zonage numéro 1235 afin de modifier les limites de quatre zones dans le secteur de la rue des Vétérans »"
+        }
+      ]
+    },
+    {
+      "source": "source-0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "target": "bylaw-1235-35",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "evidence_refs": [
+        "ev-1235-35"
+      ],
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement de zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la modification des lim"
+        }
+      ]
+    },
+    {
+      "source": "source-0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "target": "designation-event-2026-128",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "evidence_refs": [
+        "ev-2026-128"
+      ],
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et les recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications requises ou aux compléments d'in"
+        }
+      ]
+    },
+    {
+      "source": "source-0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "target": "designation-event-2026-129",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "evidence_refs": [
+        "ev-2026-129"
+      ],
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "Que ce conseil approuve les recommandations et refuse les plans d'implantation et d'intégration architecturale énumérés ci-dessus, et ce, selon les motifs formulés auxdites recommandations."
+        }
+      ]
+    },
+    {
+      "source": "source-0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "target": "signal-1230-8",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "evidence_refs": [
+        "ev-1230-8"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement du Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé, en réponse à l’"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-1230-7",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+      "modality": "pdf",
+      "page": 18,
+      "excerpt": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la modification des limites de certains ilots déstructurés », soit et est adopté par ce conseil."
+    },
+    {
+      "id": "ev-1230-8",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+      "modality": "pdf",
+      "page": 18,
+      "excerpt": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement du Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé, en réponse à l’adoption d’une nouvelle orientation gouvernementale en matière d’habitation », soit et est adopté par ce conseil."
+    },
+    {
+      "id": "ev-1235-34",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+      "modality": "pdf",
+      "page": 19,
+      "excerpt": "Que le second projet de Règlement numéro 1235-34, intitulé : « Règlement amendant le Règlement de zonage numéro 1235 afin de modifier les limites de quatre zones dans le secteur de la rue des Vétérans », soit et est adopté par ce conseil."
+    },
+    {
+      "id": "ev-1235-35",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+      "modality": "pdf",
+      "page": 19,
+      "excerpt": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement de zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la modification des limites de certains ilots déstructurés », soit et est adopté par ce conseil."
+    },
+    {
+      "id": "ev-2026-128",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+      "modality": "pdf",
+      "page": 16,
+      "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et les recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications requises ou aux compléments d'information exigés auxdites recommandations."
+    },
+    {
+      "id": "ev-2026-129",
+      "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+      "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+      "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+      "modality": "pdf",
+      "page": 17,
+      "excerpt": "Que ce conseil approuve les recommandations et refuse les plans d'implantation et d'intégration architecturale énumérés ci-dessus, et ce, selon les motifs formulés auxdites recommandations."
+    }
+  ],
+  "input_tokens": 5420,
+  "output_tokens": 2345
+}
+```

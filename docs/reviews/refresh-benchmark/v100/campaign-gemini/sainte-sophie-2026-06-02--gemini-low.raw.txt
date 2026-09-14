@@ -1,0 +1,657 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "label": "Ordre du jour - Séance ordinaire du 2 juin 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "date": "2026-06-02",
+      "municipality": "sainte-sophie",
+      "url": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ORDRE DU JOUR\nSÉANCE ORDINAIRE DU CONSEIL MUNICIPAL\nTENUE LE MARDI 2 JUIN 2026 À 19 H"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-sp-2026-14",
+      "label": "Second projet de règlement SP-2026-14",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "SP-2026-14",
+      "stage": "2e_projet",
+      "municipality": "sainte-sophie",
+      "meetingDate": "2026-06-02",
+      "title": "Amendement au Règlement 1297-2020 relatif au zonage afin de modifier l'article 1.4.2 ainsi que les annexes 2 – Plan de zonage et 3 – Grille des spécifications, zone CH-217",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-14 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER\nL’ARTICLE 1.4.2 AINSI QUE LES ANNEXES 2 – PLAN DE ZONAGE ET 3 –\nGRILLE DES SPÉCIFICATION, ZONE CH-217"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-sp-2026-15",
+      "label": "Second projet de règlement SP-2026-15",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "SP-2026-15",
+      "stage": "2e_projet",
+      "municipality": "sainte-sophie",
+      "meetingDate": "2026-06-02",
+      "title": "Amendement au Règlement 1297-2020 relatif au zonage afin de modifier l'annexe 3 - Grille des spécifications, zone V-802",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-15 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER\nL’ANNEXE 3 - GRILLE DES SPÉCIFICATIONS, ZONE V-802"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1470-2026",
+      "label": "Règlement 1470-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "1470-2026",
+      "stage": "adoption",
+      "municipality": "sainte-sophie",
+      "meetingDate": "2026-06-02",
+      "title": "Amendement au Règlement 1296-2020 relatif au plan d'urbanisme afin d’assurer sa conformité au Règlement 399-25 modifiant le Règlement 188-07 relatif au schéma d’aménagement et de développement révisé",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "RÈGLEMENT 1470-2026 - AMENDEMENT AU RÈGLEMENT 1296-2020\nRELATIF AU PLAN D’URBANISME AFIN D’ASSURER SA CONFORMITÉ AU\nRÈGLEMENT 399-25 MODIFIANT LE RÈGLEMENT 188-07 RELATIF AU\nSCHÉMA D’AMÉNAGEMENT ET DE DÉVEL"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1471-2026",
+      "label": "Règlement 1471-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "1471-2026",
+      "stage": "adoption",
+      "municipality": "sainte-sophie",
+      "meetingDate": "2026-06-02",
+      "title": "Amendement au Règlement 1297-2020 relatif au zonage afin d’assurer sa conformité au Règlement 399-25 modifiant le Règlement 188-07 relatif au schéma d’aménagement et de développement revisé",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "RÈGLEMENT 1471-2026\n\nAMENDEMENT AU RÈGLEMENT 1297-2020\nRELATIF AU ZONAGE AFIN D’ASSURER SA\nCONFORMITÉ AU RÈGLEMENT 399-25\nMODIFIANT LE RÈGLEMENT 188-07 RELATIF\nAU SCHÉMA D’AMÉNAGEMENT ET DE\nDÉVELOPPEMENT\nRE"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1472-2026",
+      "label": "Règlement 1472-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "1472-2026",
+      "stage": "adoption",
+      "municipality": "sainte-sophie",
+      "meetingDate": "2026-06-02",
+      "title": "Amendement au Règlement 1299-2020 relatif aux permis et certificats afin d’assurer sa conformité au Règlement 399-25 modifiant le Règlement 188-07 relatif au schéma d’aménagement et de développement révisé",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 41,
+          "excerpt": "RÈGLEMENT 1472-2026 - AMENDEMENT AU RÈGLEMENT 1299-2020\nRELATIF AUX PERMIS ET CERTIFICATS AFIN D’ASSURER SA\nCONFORMITÉ AU RÈGLEMENT 399-25 MODIFIANT LE RÈGLEMENT 18807 RELATIF AU SCHÉMA D’AMÉNAGEMENT ET DE D"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1473-2026",
+      "label": "Règlement 1473-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "1473-2026",
+      "stage": "adoption",
+      "municipality": "sainte-sophie",
+      "meetingDate": "2026-06-02",
+      "title": "Amendement au Règlement 1300-2020 relatif au plan d’implantation et d’intégration architecturale afin d’assurer sa conformité au Règlement 399-25 modifiant le Règlement 188-07",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 42,
+          "excerpt": "RÈGLEMENT 1473-2026 - AMENDEMENT AU RÈGLEMENT 1300-2020\nRELATIF\nAU PLAN D’IMPLANTATION ET D’INTÉGRATION\nARCHITECTURALE AFIN D’ASSURER SA CONFORMITÉ AU\nRÈGLEMENT 399-25 MODIFIANT LE RÈGLEMENT 188-07 REL"
+        }
+      ]
+    },
+    {
+      "id": "zone-u-720",
+      "label": "Zone U-720",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "U-720",
+      "municipality": "sainte-sophie",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "1° Le remplacement de la zone PERIU-500 par la zone U-720, le tout tel\nque montré à l’annexe A du présent règlement;"
+        }
+      ]
+    },
+    {
+      "id": "zone-u-721",
+      "label": "Zone U-721",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "U-721",
+      "municipality": "sainte-sophie",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "2° Le remplacement de la zone IND-407 par la zone U-721, le tout tel que\nmontré à l’annexe A du présent règlement;"
+        }
+      ]
+    },
+    {
+      "id": "zone-cons-301",
+      "label": "Zone CONS-301",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "CONS-301",
+      "municipality": "sainte-sophie",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "5° La création des zones CONS-301 et RU-630 à même une partie de la\nzone RU-620, le tout tel que montré à l’annexe C du présent règlement;"
+        }
+      ]
+    },
+    {
+      "id": "zone-cons-302",
+      "label": "Zone CONS-302",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "CONS-302",
+      "municipality": "sainte-sophie",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "6° La création des zones CONS-302 et RU-631 à même une partie de la\nzone RU-619, le tout tel que montré à l’annexe D du présent règlement;"
+        }
+      ]
+    },
+    {
+      "id": "zone-cons-303",
+      "label": "Zone CONS-303",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "CONS-303",
+      "municipality": "sainte-sophie",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "7° La création de la zone CONS-303 à même une partie des zones RU-607\net RU-608, le tout tel que montré à l’annexe E du présent règlement."
+        }
+      ]
+    },
+    {
+      "id": "zone-ru-630",
+      "label": "Zone RU-630",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "RU-630",
+      "municipality": "sainte-sophie",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "5° La création des zones CONS-301 et RU-630 à même une partie de la\nzone RU-620, le tout tel que montré à l’annexe C du présent règlement;"
+        }
+      ]
+    },
+    {
+      "id": "zone-ru-631",
+      "label": "Zone RU-631",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "RU-631",
+      "municipality": "sainte-sophie",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "6° La création des zones CONS-302 et RU-631 à même une partie de la\nzone RU-619, le tout tel que montré à l’annexe D du présent règlement;"
+        }
+      ]
+    },
+    {
+      "id": "constraint-milieu-humide-lot-4545697",
+      "label": "Protection des milieux humides et hydriques sur le lot 4 545 697",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "milieu_humide",
+      "municipality": "sainte-sophie",
+      "description": "Dispositions relatives à la protection des milieux humides et hydriques sur le lot 4 545 697 (zone U-720)",
+      "meetingDate": "2026-06-02",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "evidence_refs": [
+        "ev-lot-milieu-humide"
+      ],
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "« 11.2.2 Dispositions relatives à la protection des milieux humides et\nhydriques sur le lot 4 545 697 (zone U-720)"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "target": "bylaw-sp-2026-14",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-sp-2026-14"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "1.10\n\nSecond projet de règlement SP-2026-14 - Amendement au Règlement 1297-2020 relatif\nau zonage afin de modifier l'article 1.4.2 ainsi que les annexes 2 – Plan de zonage et 3\n– Grille des spécifications, zone "
+        }
+      ]
+    },
+    {
+      "source": "source-09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "target": "bylaw-sp-2026-15",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-sp-2026-15"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "1.11\n\nSecond projet de règlement SP-2026-15 - Amendement au Règlement 1297-2020 relatif\nau zonage afin de modifier l'annexe 3 - Grille des spécifications, zone V-802"
+        }
+      ]
+    },
+    {
+      "source": "source-09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "target": "bylaw-1470-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-1470-2026"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "1.12\n\nRèglement 1470-2026 - Amendement au Règlement 1296-2020 relatif au plan\nd'urbanisme afin d’assurer sa conformité au Règlement 399-25 modifiant le Règlement\n188-07 relatif au schéma d’aménagement et de "
+        }
+      ]
+    },
+    {
+      "source": "source-09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "target": "bylaw-1471-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-1471-2026"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "1.13\n\nRèglement 1471-2026 - Amendement au Règlement 1297-2020 relatif au zonage afin\nd’assurer sa conformité au Règlement 399-25 modifiant le Règlement 188-07 relatif au\nschéma d’aménagement et de développement"
+        }
+      ]
+    },
+    {
+      "source": "source-09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "target": "bylaw-1472-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-1472-2026"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "1.14\n\nRèglement 1472-2026 - Amendement au Règlement 1299-2020 relatif aux permis et\ncertificats afin d’assurer sa conformité au Règlement 399-25 modifiant le Règlement\n188-07 relatif au schéma d’aménagement et"
+        }
+      ]
+    },
+    {
+      "source": "source-09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "target": "bylaw-1473-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-1473-2026"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "1.15\n\nRèglement 1473-2026 - Amendement au Règlement 1300-2020 relatif aux plans\nd'implantation et d'intégration architecturale (PIIA) afin d’assurer sa conformité au\nRèglement 399-25 modifiant le Règlement "
+        }
+      ]
+    },
+    {
+      "source": "bylaw-1471-2026",
+      "target": "zone-u-720",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-zone-u720"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "1° Le remplacement de la zone PERIU-500 par la zone U-720, le tout tel\nque montré à l’annexe A du présent règlement;"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-1471-2026",
+      "target": "zone-u-721",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-zone-u721"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "2° Le remplacement de la zone IND-407 par la zone U-721, le tout tel que\nmontré à l’annexe A du présent règlement;"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-1471-2026",
+      "target": "zone-cons-301",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-zone-cons301"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "5° La création des zones CONS-301 et RU-630 à même une partie de la\nzone RU-620, le tout tel que montré à l’annexe C du présent règlement;"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-1471-2026",
+      "target": "zone-cons-302",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-zone-cons302"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "6° La création des zones CONS-302 et RU-631 à même une partie de la\nzone RU-619, le tout tel que montré à l’annexe D du présent règlement;"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-1471-2026",
+      "target": "zone-cons-303",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-zone-cons303"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "7° La création de la zone CONS-303 à même une partie des zones RU-607\net RU-608, le tout tel que montré à l’annexe E du présent règlement."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-1471-2026",
+      "target": "zone-ru-630",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-zone-ru630"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "5° La création des zones CONS-301 et RU-630 à même une partie de la\nzone RU-620, le tout tel que montré à l’annexe C du présent règlement;"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-1471-2026",
+      "target": "zone-ru-631",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-zone-ru631"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "6° La création des zones CONS-302 et RU-631 à même une partie de la\nzone RU-619, le tout tel que montré à l’annexe D du présent règlement;"
+        }
+      ]
+    },
+    {
+      "source": "constraint-milieu-humide-lot-4545697",
+      "target": "zone-u-720",
+      "relation": "constrains",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "evidence_refs": [
+        "ev-lot-milieu-humide"
+      ],
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "« 11.2.2 Dispositions relatives à la protection des milieux humides et\nhydriques sur le lot 4 545 697 (zone U-720)"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-sp-2026-14",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "1.10\n\nSecond projet de règlement SP-2026-14 - Amendement au Règlement 1297-2020 relatif\nau zonage afin de modifier l'article 1.4.2 ainsi que les annexes 2 – Plan de zonage et 3\n– Grille des spécifications, zone CH-217"
+    },
+    {
+      "id": "ev-sp-2026-15",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "1.11\n\nSecond projet de règlement SP-2026-15 - Amendement au Règlement 1297-2020 relatif\nau zonage afin de modifier l'annexe 3 - Grille des spécifications, zone V-802"
+    },
+    {
+      "id": "ev-1470-2026",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "1.12\n\nRèglement 1470-2026 - Amendement au Règlement 1296-2020 relatif au plan\nd'urbanisme afin d’assurer sa conformité au Règlement 399-25 modifiant le Règlement\n188-07 relatif au schéma d’aménagement et de développement révisé, lequel modifie\nplusieurs aires d’affectation et diverses dispositions"
+    },
+    {
+      "id": "ev-1471-2026",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "1.13\n\nRèglement 1471-2026 - Amendement au Règlement 1297-2020 relatif au zonage afin\nd’assurer sa conformité au Règlement 399-25 modifiant le Règlement 188-07 relatif au\nschéma d’aménagement et de développement révisé, lequel modifie plusieurs aires\nd’affectation et diverses dispositions"
+    },
+    {
+      "id": "ev-1472-2026",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "1.14\n\nRèglement 1472-2026 - Amendement au Règlement 1299-2020 relatif aux permis et\ncertificats afin d’assurer sa conformité au Règlement 399-25 modifiant le Règlement\n188-07 relatif au schéma d’aménagement et de développement révisé, lequel modifie\nplusieurs aires d’affectation et diverses dispositions"
+    },
+    {
+      "id": "ev-1473-2026",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "1.15\n\nRèglement 1473-2026 - Amendement au Règlement 1300-2020 relatif aux plans\nd'implantation et d'intégration architecturale (PIIA) afin d’assurer sa conformité au\nRèglement 399-25 modifiant le Règlement 188-07 relatif au schéma d’aménagement et\nde développement révisé, lequel modifie plusieurs aires d’affectation et diverses\ndispositions"
+    },
+    {
+      "id": "ev-zone-u720",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 26,
+      "excerpt": "1° Le remplacement de la zone PERIU-500 par la zone U-720, le tout tel\nque montré à l’annexe A du présent règlement;"
+    },
+    {
+      "id": "ev-zone-u721",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 26,
+      "excerpt": "2° Le remplacement de la zone IND-407 par la zone U-721, le tout tel que\nmontré à l’annexe A du présent règlement;"
+    },
+    {
+      "id": "ev-zone-cons301",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 26,
+      "excerpt": "5° La création des zones CONS-301 et RU-630 à même une partie de la\nzone RU-620, le tout tel que montré à l’annexe C du présent règlement;"
+    },
+    {
+      "id": "ev-zone-cons302",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 26,
+      "excerpt": "6° La création des zones CONS-302 et RU-631 à même une partie de la\nzone RU-619, le tout tel que montré à l’annexe D du présent règlement;"
+    },
+    {
+      "id": "ev-zone-cons303",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 26,
+      "excerpt": "7° La création de la zone CONS-303 à même une partie des zones RU-607\net RU-608, le tout tel que montré à l’annexe E du présent règlement."
+    },
+    {
+      "id": "ev-zone-ru630",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 26,
+      "excerpt": "5° La création des zones CONS-301 et RU-630 à même une partie de la\nzone RU-620, le tout tel que montré à l’annexe C du présent règlement;"
+    },
+    {
+      "id": "ev-zone-ru631",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 26,
+      "excerpt": "6° La création des zones CONS-302 et RU-631 à même une partie de la\nzone RU-619, le tout tel que montré à l’annexe D du présent règlement;"
+    },
+    {
+      "id": "ev-lot-milieu-humide",
+      "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+      "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+      "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+      "modality": "pdf",
+      "page": 22,
+      "excerpt": "« 11.2.2 Dispositions relatives à la protection des milieux humides et\nhydriques sur le lot 4 545 697 (zone U-720)\nSelon les informations du Plan régional des milieux hydriques et humides\nde la MRC adopté en 2023, il y aurait la présence d’un milieu humide et\nde deux cours d’eau"
+    }
+  ],
+  "input_tokens": 7100,
+  "output_tokens": 2800
+}
+```

@@ -1,0 +1,625 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "label": "Procès-verbal de la séance ordinaire du 9 mars 2026 - Sainte-Thècle",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "date": "2026-03-09",
+      "municipality": "sainte-thecle",
+      "url": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil de la Municipalité de Sainte-Thècle tenue le lundi\n9 mars 2026, à 20 heures, sous la présidence du maire Éric Blouin."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-434-2026",
+      "label": "Règlement 434-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "434-2026",
+      "title": "Remplaçant le Règlement 430-2025 : Modifiant le règlement de zonage numéro 337-2016 afin d’interdire la production d’énergie à des fins commerciales à proximité des immeubles protégés et des zones récréatives ou de villégiature",
+      "stage": "2e_projet",
+      "municipality": "sainte-thecle",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "meetingDate": "2026-03-09",
+      "resolution": "2026-03-075",
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est unanimement résolu que le conseil\nadopte le 2e projet de règlement 434-2026 remplaçant le règlement 430-2025 modifiant le\nrèglement de zonage numéro 33"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-435-2026",
+      "label": "Règlement 435-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "435-2026",
+      "title": "Règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments sur le territoire de la Municipalité de Sainte-Thècle",
+      "stage": "1er_projet",
+      "municipality": "sainte-thecle",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "meetingDate": "2026-03-09",
+      "resolution": "2026-03-076",
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Jacques Tessier et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments sur\nle territoir"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-436-2026",
+      "label": "Règlement 436-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "436-2026",
+      "title": "Règlement 436-2026 modifiant le règlement 398-2023 qui modifiait le règlement de zonage #337-2016 pour préciser les modalités applicables aux établissements d’hébergement touristique et autoriser les résidences de tourisme et principale sur le territoire de la Municipalité de Sainte-Thècle",
+      "stage": "1er_projet",
+      "municipality": "sainte-thecle",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "meetingDate": "2026-03-09",
+      "resolution": "2026-03-078",
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 436-2026 modifiant le règlement 398-2023 qui modifiait le\nrèglement de zonage #33"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-437-2026",
+      "label": "Règlement 437-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "437-2026",
+      "title": "Règlement 437-2026 modifiant les règlements 421-2025, 189-2002 et 48-93 concernant la transmission de la demande de dérogation mineure",
+      "stage": "1er_projet",
+      "municipality": "sainte-thecle",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "meetingDate": "2026-03-09",
+      "resolution": "2026-03-080",
+      "citations": [
+        {
+          "page": 23,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 437-2026 modifiant les règlements 421-2025, 189-2002 et 48-93\nconcernant la tran"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-440-2026",
+      "label": "Règlement 440-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "440-2026",
+      "title": "Règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe D pour enlever la note N.B. 22 et ajouter la note N.B. 7 dans la zone 96-Rc et pour modifier l’annexe B pour ajouter la définition d’un conteneur",
+      "stage": "1er_projet",
+      "municipality": "sainte-thecle",
+      "zone_cible": "96-Rc",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "meetingDate": "2026-03-09",
+      "resolution": "2026-03-083",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe\nD pour enlever la no"
+        }
+      ]
+    },
+    {
+      "id": "zone-96-rc",
+      "label": "Zone 96-Rc",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "96-Rc",
+      "municipality": "sainte-thecle",
+      "bylaw": "337-2016",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "meetingDate": "2026-03-09",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe\nD pour enlever la no"
+        }
+      ]
+    },
+    {
+      "id": "zone-22-af-4ha",
+      "label": "Zone 22-AF(4HA)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "22-AF(4HA)",
+      "municipality": "sainte-thecle",
+      "usage": "sylviculture",
+      "bylaw": "337-2016",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "meetingDate": "2026-03-09",
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "CONSIDÉRANT qu’une partie du lot 4 757 089 est située dans la zone 22-AF(4HA) qui permet\nl’installation d’un conteneur à des fins de sylviculture;"
+        }
+      ]
+    },
+    {
+      "id": "event-res-2026-03-072",
+      "label": "Demande d’autorisation conteneur lot 4 757 089",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "municipality": "sainte-thecle",
+      "resolution": "2026-03-072",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "description": "Demande au propriétaire du lot 4 757 089 de déplacer son conteneur maritime dans la zone 22-AF(4HA) située au nord de son terrain.",
+      "zone_ref": "22-AF(4HA)",
+      "no_lot": "4757089",
+      "reglement_number": "337-2016",
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Roxanne Bureau-Grenier et il est résolu unanimement\nque le conseil de la municipalité de Sainte-Thècle demande au propriétaire du lot 4 757 089 de"
+        }
+      ]
+    },
+    {
+      "id": "event-res-2026-03-085",
+      "label": "Demande CPTAQ Ferme Michel Lebel SENC",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "demandeur_corporate": "Ferme Michel Lebel SENC",
+      "municipality": "sainte-thecle",
+      "resolution": "2026-03-085",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "description": "Appui à la demande de la Ferme Michel Lebel SENC pour l'acquisition d'une partie du lot 4 756 274 d'environ 4,6 acres",
+      "no_lot": "4756274",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est résolu unanimement que le conseil\nmunicipal appuie la demande de la Ferme Michel Lebel SENC pour l’acquisition d’une partie du\nlot 4 756 274 d’e"
+        }
+      ]
+    },
+    {
+      "id": "event-res-2026-03-086",
+      "label": "Dérogation mineure 250-252, rue Notre-Dame",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "municipality": "sainte-thecle",
+      "resolution": "2026-03-086",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "description": "Accepte la demande de dérogation mineure pour le 250-252, rue Notre-Dame afin de lotir la partie arrière du terrain donnant sur la rue Bédard avec une largeur de 13,72 mètres, en diminuant la marge de recul latérale à 4 mètres",
+      "citations": [
+        {
+          "page": 27,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Roxanne Bureau-Grenier et il est résolu unanimement\nque le conseil municipal accepte la demande de dérogation mineure pour le 250-252, rue NotreDame afin de lotir la p"
+        }
+      ]
+    },
+    {
+      "id": "event-res-2026-03-087",
+      "label": "Dérogation mineure 500, rue Bédard",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "decision": "refusé",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "municipality": "sainte-thecle",
+      "resolution": "2026-03-087",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "description": "Refuse la demande de dérogation mineure pour la construction d’un garage dépassant la superficie maximale de 150 m², mais autorise la marge latérale gauche à 1,25 m avec conditions.",
+      "citations": [
+        {
+          "page": 27,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est résolu unanimement que le conseil\nmunicipal refuse la demande de dérogation mineure pour la construction d’un garage dépassant la\nsuperficie ma"
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-4756274",
+      "label": "Contrainte CPTAQ - Lot 4 756 274",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "municipality": "sainte-thecle",
+      "organisme": "CPTAQ",
+      "resolution": "2026-03-085",
+      "description": "Autorisation de la CPTAQ requise pour l’acquisition d’une partie du lot 4 756 274 d’environ 4,6 acres par la Ferme Michel Lebel SENC",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "meetingDate": "2026-03-09",
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "CONSIDÉRANT que la Ferme Michel Lebel SENC désire obtenir l’autorisation de la CPTAQ\npour l’acquisition d’une partie du lot 4 756 274 d’environ 4,6 acres;"
+        }
+      ]
+    },
+    {
+      "id": "signal-tes-canada",
+      "label": "Signal - Rejet du projet éolien de TES Canada",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "energie",
+      "kind": "opposition_eolienne",
+      "date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "description": "La Municipalité de Sainte-Thècle ne soutient pas l'implantation d'éoliennes sur son territoire dans le cadre du Projet Mauricie et demande de retirer son territoire du périmètre considéré.",
+      "resolution": "2026-03-073",
+      "scope": "local",
+      "municipality": "sainte-thecle",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nde la municipalité de Sainte-Thècle :\n•\n•\n\nNE SOUTIENT PAS l’implantation d’éoliennes sur son territoire dans "
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "target": "bylaw-434-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-bylaw-434"
+      ],
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est unanimement résolu que le conseil\nadopte le 2e projet de règlement 434-2026 remplaçant le règlement 430-2025 modifiant le\nrèglement de zonage numéro 33"
+        }
+      ]
+    },
+    {
+      "source": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "target": "bylaw-435-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-bylaw-435"
+      ],
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Jacques Tessier et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments sur\nle territoir"
+        }
+      ]
+    },
+    {
+      "source": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "target": "bylaw-436-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-bylaw-436"
+      ],
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 436-2026 modifiant le règlement 398-2023 qui modifiait le\nrèglement de zonage #33"
+        }
+      ]
+    },
+    {
+      "source": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "target": "bylaw-437-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-bylaw-437"
+      ],
+      "citations": [
+        {
+          "page": 23,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 437-2026 modifiant les règlements 421-2025, 189-2002 et 48-93\nconcernant la tran"
+        }
+      ]
+    },
+    {
+      "source": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "target": "bylaw-440-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-bylaw-440"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe\nD pour enlever la no"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-440-2026",
+      "target": "zone-96-rc",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-bylaw-440"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe\nD pour enlever la no"
+        }
+      ]
+    },
+    {
+      "source": "zone-96-rc",
+      "target": "bylaw-440-2026",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-bylaw-440"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe\nD pour enlever la no"
+        }
+      ]
+    },
+    {
+      "source": "event-res-2026-03-072",
+      "target": "zone-22-af-4ha",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-event-072"
+      ],
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Roxanne Bureau-Grenier et il est résolu unanimement\nque le conseil de la municipalité de Sainte-Thècle demande au propriétaire du lot 4 757 089 de"
+        }
+      ]
+    },
+    {
+      "source": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "target": "signal-tes-canada",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-signal-tes"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nde la municipalité de Sainte-Thècle :\n•\n•\n\nNE SOUTIENT PAS l’implantation d’éoliennes sur son territoire dans "
+        }
+      ]
+    },
+    {
+      "source": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "target": "event-res-2026-03-085",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-cptaq-85"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est résolu unanimement que le conseil\nmunicipal appuie la demande de la Ferme Michel Lebel SENC pour l’acquisition d’une partie du\nlot 4 756 274 d’e"
+        }
+      ]
+    },
+    {
+      "source": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "target": "event-res-2026-03-086",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-event-086"
+      ],
+      "citations": [
+        {
+          "page": 27,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Roxanne Bureau-Grenier et il est résolu unanimement\nque le conseil municipal accepte la demande de dérogation mineure pour le 250-252, rue NotreDame afin de lotir la p"
+        }
+      ]
+    },
+    {
+      "source": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "target": "event-res-2026-03-087",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-event-087"
+      ],
+      "citations": [
+        {
+          "page": 27,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est résolu unanimement que le conseil\nmunicipal refuse la demande de dérogation mineure pour la construction d’un garage dépassant la\nsuperficie ma"
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-4756274",
+      "target": "source-28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "evidence_refs": [
+        "ev-cptaq-85"
+      ],
+      "citations": [
+        {
+          "page": 26,
+          "excerpt": "CONSIDÉRANT que la Ferme Michel Lebel SENC désire obtenir l’autorisation de la CPTAQ\npour l’acquisition d’une partie du lot 4 756 274 d’environ 4,6 acres;"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-434",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "sourceUrl": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "modality": "pdf",
+      "page": 20,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est unanimement résolu que le conseil adopte le 2e projet de règlement 434-2026 remplaçant le règlement 430-2025"
+    },
+    {
+      "id": "ev-bylaw-435",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "sourceUrl": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "modality": "pdf",
+      "page": 20,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Jacques Tessier et il est unanimement résolu que le conseil adopte le 1er projet de règlement 435-2026"
+    },
+    {
+      "id": "ev-bylaw-436",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "sourceUrl": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "modality": "pdf",
+      "page": 22,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil adopte le 1er projet de règlement 436-2026 modifiant le règlement 398-2023"
+    },
+    {
+      "id": "ev-bylaw-437",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "sourceUrl": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "modality": "pdf",
+      "page": 23,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est unanimement résolu que le conseil adopte le 1er projet de règlement 437-2026"
+    },
+    {
+      "id": "ev-bylaw-440",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "sourceUrl": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "modality": "pdf",
+      "page": 26,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil adopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe D pour enlever la note N.B. 22 et ajouter la note N.B. 7 dans la zone 96-Rc"
+    },
+    {
+      "id": "ev-event-072",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "sourceUrl": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "modality": "pdf",
+      "page": 17,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Roxanne Bureau-Grenier et il est résolu unanimement que le conseil de la municipalité de Sainte-Thècle demande au propriétaire du lot 4 757 089 de déplacer son conteneur maritime dans la zone 22-AF(4HA)"
+    },
+    {
+      "id": "ev-signal-tes",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "sourceUrl": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "modality": "pdf",
+      "page": 18,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil de la municipalité de Sainte-Thècle : NE SOUTIENT PAS l’implantation d’éoliennes sur son territoire dans le cadre du Projet Mauricie"
+    },
+    {
+      "id": "ev-cptaq-85",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "sourceUrl": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "modality": "pdf",
+      "page": 26,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est résolu unanimement que le conseil municipal appuie la demande de la Ferme Michel Lebel SENC pour l’acquisition d’une partie du lot 4 756 274 d’environ 4,6 acres."
+    },
+    {
+      "id": "ev-event-086",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "sourceUrl": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "modality": "pdf",
+      "page": 27,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Roxanne Bureau-Grenier et il est résolu unanimement que le conseil municipal accepte la demande de dérogation mineure pour le 250-252, rue NotreDame"
+    },
+    {
+      "id": "ev-event-087",
+      "source_file": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-thecle/cas/28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.pdf",
+      "docSha": "28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861",
+      "sourceUrl": "https://ste-thecle.qc.ca/wp-content/uploads/proces-verbaux-mars2026.pdf",
+      "modality": "pdf",
+      "page": 27,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est résolu unanimement que le conseil municipal refuse la demande de dérogation mineure pour la construction d’un garage dépassant la superficie maximale permise de 150 mètres carrés"
+    }
+  ],
+  "input_tokens": 5800,
+  "output_tokens": 2800
+}
+```

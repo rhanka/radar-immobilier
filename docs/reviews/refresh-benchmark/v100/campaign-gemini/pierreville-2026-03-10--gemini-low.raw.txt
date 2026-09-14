@@ -1,0 +1,294 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "label": "Procès-verbal du conseil municipal de Pierreville - 10 mars 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "date": "2026-03-10",
+      "municipality": "pierreville",
+      "url": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de Pierreville,\ntenue le mardi 10 mars 2026 à 19 h 00 à l’hôtel de ville, au 26, rue Ally\nà Pierreville."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-268-2025",
+      "label": "Projet de règlement 268-2025",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "268-2025",
+      "title": "Adoption du deuxième (2ième) projet de règlement 268-2025 modifiant le règlement de zonage 160-2017 pour la construction d’un triplex sur la rue Georges",
+      "stage": "2e_projet",
+      "municipality": "pierreville",
+      "zone_cible": "H-06",
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "meetingDate": "2026-03-10",
+      "resolution": "2026-03-80",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "19. ADOPTION DU DEUXIÈME (2IÈME) PROJET DE\nRÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE\nZONAGE 160-2017 POUR LA CONSTRUCTION D’UN\nTRIPLEX SUR LA RUE GEORGES"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-160-2017",
+      "label": "Règlement de zonage 160-2017",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "160-2017",
+      "title": "règlement de zonage 160-2017",
+      "municipality": "pierreville",
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "19. ADOPTION DU DEUXIÈME (2IÈME) PROJET DE\nRÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE\nZONAGE 160-2017 POUR LA CONSTRUCTION D’UN\nTRIPLEX SUR LA RUE GEORGES"
+        }
+      ]
+    },
+    {
+      "id": "zone-h-06",
+      "label": "Zone H-06",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "H-06",
+      "municipality": "pierreville",
+      "bylaw": "160-2017",
+      "usages_autorises": [
+        "Groupe habitation II (H2)",
+        "Trifamiliale isolée"
+      ],
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "meetingDate": "2026-03-10",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "CONSIDÉRANT QUE la Municipalité désire modifier les usages de la\nzone H-06 ;"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-03-80",
+      "label": "Adoption du second projet de règlement 268-2025 (Zone H-06)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-03-10",
+      "meetingDate": "2026-03-10",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "municipality": "pierreville",
+      "resolution": "2026-03-80",
+      "etape": "second_projet",
+      "etape_date": "2026-03-10",
+      "zone_ref": "H-06",
+      "reglement_number": "268-2025",
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "description": "Modifier la grille des usages de la zone H-06 de l’annexe 3 du règlement de zonage 160-2017 afin de permettre Trifamiliale isolée",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :"
+        }
+      ]
+    },
+    {
+      "id": "signal-2026-03-80",
+      "label": "Signal densification résidentielle - Triplex rue Georges (Zone H-06)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "densification",
+      "kind": "rezonage_triplex",
+      "date": "2026-03-10",
+      "meetingDate": "2026-03-10",
+      "resolution": "2026-03-80",
+      "scope": "local",
+      "municipality": "pierreville",
+      "etape": "second_projet",
+      "etape_date": "2026-03-10",
+      "zone_ref": "H-06",
+      "reglement_number": "268-2025",
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "description": "Modification réglementaire pour permettre trifamiliale isolée (triplex) sur la rue Georges en zone H-06 afin de favoriser la densification des milieux urbains",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "CONSIDÉRANT QUE la Municipalité de Pierreville applique sur son\nterritoire un règlement de zonage et qu’il apparait nécessaire d’apporter\ndes modifications à ce règlement puisque la vision de la Municipal"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-268-2025",
+      "target": "bylaw-160-2017",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "evidence_refs": [
+        "ev-amends-268-160"
+      ],
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "19. ADOPTION DU DEUXIÈME (2IÈME) PROJET DE\nRÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE\nZONAGE 160-2017 POUR LA CONSTRUCTION D’UN\nTRIPLEX SUR LA RUE GEORGES"
+        }
+      ]
+    },
+    {
+      "source": "zone-h-06",
+      "target": "bylaw-160-2017",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "evidence_refs": [
+        "ev-zone-annexe-3"
+      ],
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "Modifier la grille des usages de la zone H-06 de l’annexe 3 du règlement\nde zonage 160-2017 afin de permettre :\nGroupe habitation II (H2)"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-03-80",
+      "target": "zone-h-06",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "evidence_refs": [
+        "ev-event-targets-zone"
+      ],
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "CONSIDÉRANT QUE la Municipalité désire modifier les usages de la\nzone H-06 ;"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-03-80",
+      "target": "signal-2026-03-80",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "evidence_refs": [
+        "ev-signal-densification"
+      ],
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "CONSIDÉRANT QUE la Municipalité de Pierreville applique sur son\nterritoire un règlement de zonage et qu’il apparait nécessaire d’apporter\ndes modifications à ce règlement puisque la vision de la Municipal"
+        }
+      ]
+    },
+    {
+      "source": "source-1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "target": "bylaw-268-2025",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "evidence_refs": [
+        "ev-pv-resolution-80"
+      ],
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :"
+        }
+      ]
+    },
+    {
+      "source": "source-1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "target": "event-2026-03-80",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "evidence_refs": [
+        "ev-pv-resolution-80"
+      ],
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-amends-268-160",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+      "modality": "pdf",
+      "page": 15,
+      "excerpt": "19. ADOPTION DU DEUXIÈME (2IÈME) PROJET DE RÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE ZONAGE 160-2017 POUR LA CONSTRUCTION D’UN TRIPLEX SUR LA RUE GEORGES"
+    },
+    {
+      "id": "ev-zone-annexe-3",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+      "modality": "pdf",
+      "page": 16,
+      "excerpt": "Modifier la grille des usages de la zone H-06 de l’annexe 3 du règlement de zonage 160-2017 afin de permettre : Groupe habitation II (H2)"
+    },
+    {
+      "id": "ev-event-targets-zone",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+      "modality": "pdf",
+      "page": 15,
+      "excerpt": "CONSIDÉRANT QUE la Municipalité désire modifier les usages de la zone H-06 ;"
+    },
+    {
+      "id": "ev-signal-densification",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+      "modality": "pdf",
+      "page": 16,
+      "excerpt": "CONSIDÉRANT QUE la Municipalité de Pierreville applique sur son territoire un règlement de zonage et qu’il apparait nécessaire d’apporter des modifications à ce règlement puisque la vision de la Municipalité est de favoriser la densification des milieux urbains ;"
+    },
+    {
+      "id": "ev-pv-resolution-80",
+      "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+      "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+      "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+      "modality": "pdf",
+      "page": 16,
+      "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de la municipalité de Pierreville décrète et statue par le présent règlement ce qui suit :"
+    }
+  ],
+  "input_tokens": 6800,
+  "output_tokens": 1400
+}
+```

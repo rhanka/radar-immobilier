@@ -1,0 +1,248 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "label": "Procès-verbal du Conseil de la Municipalité de Dosquet - 13 janvier 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "date": "2026-01-13",
+      "municipality": "dosquet",
+      "url": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal du Conseil de la Municipalité de Dosquet\nPROVINCE DE QUÉBEC\nM.R.C. DE LOTBINIÈRE\nMUNICIPALITÉ DE DOSQUET\nSéance ordinaire du conseil de cette municipalité tenue le mardi, 13 janvier 2026,"
+        }
+      ]
+    },
+    {
+      "id": "zone-25a",
+      "label": "Zone 25A",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "25A",
+      "municipality": "dosquet",
+      "usage": "résidentiel",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "meetingDate": "2026-01-13",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "id": "zone-5h",
+      "label": "Zone 5H",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "5H",
+      "municipality": "dosquet",
+      "usage": "résidentiel",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "meetingDate": "2026-01-13",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "id": "event-26-01-08",
+      "label": "Appui à une demande adressée à la CPTAQ - Résolution 26-01-08",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-01-13",
+      "meetingDate": "2026-01-13",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "municipality": "dosquet",
+      "resolution": "26-01-08",
+      "resolutionRef": "26-01-08",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "description": "Appui à une demande adressée à la Commission de la protection du territoire agricole du Québec pour étendre un droit résidentiel à la partie du lot 6 274 449 située en zone agricole.",
+      "superficie_m2": 4631.6,
+      "no_lot": "6274449",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "26-01-08\n\nAPPUI À UNE DEMANDE ADRESSÉE À COMMISSION DE LA\nPROTECTION DU TERRITOIRE AGRICOLE DU QUÉBEC."
+        },
+        {
+          "page": 8,
+          "excerpt": "POUR CES MOTIFS : IL EST PROPOSÉ par madame Mélanie St-Jean ET\nRÉSOLU À L’UNANIMITÉ des membres présents :\nQue la municipalité est favorable et recommande la demande."
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-6274449",
+      "label": "Zone agricole CPTAQ - Lot 6 274 449",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "municipality": "dosquet",
+      "organisme": "Commission de la protection du territoire agricole du Québec",
+      "resolution": "26-01-08",
+      "resolutionRef": "26-01-08",
+      "description": "Portion du lot 6 274 449 située dans la zone agricole (superficie de 4 631,6 m²).",
+      "superficie_concernee_m2": 4631.6,
+      "meetingDate": "2026-01-13",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "evidence_refs": [
+        "ev-26-01-08-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 est situé en partie dans le périmètre urbain et en\npartie dans la zone agricole, et qu’il possède une superficie totale de 7 200 m²;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "target": "event-26-01-08",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-26-01-08-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "26-01-08\n\nAPPUI À UNE DEMANDE ADRESSÉE À COMMISSION DE LA\nPROTECTION DU TERRITOIRE AGRICOLE DU QUÉBEC."
+        }
+      ]
+    },
+    {
+      "source": "event-26-01-08",
+      "target": "zone-25a",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-26-01-08-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "source": "event-26-01-08",
+      "target": "zone-5h",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-26-01-08-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "source": "source-20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "target": "zone-25a",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-26-01-08-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "source": "source-20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "target": "zone-5h",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-26-01-08-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-6274449",
+      "target": "zone-25a",
+      "relation": "constrains",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-26-01-08-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 est situé en partie dans le périmètre urbain et en\npartie dans la zone agricole, et qu’il possède une superficie totale de 7 200 m²;"
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-6274449",
+      "target": "source-20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-26-01-08-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE la superficie visée par la demande correspond à la portion située\ndans la zone agricole, laquelle a une superficie de 4 631,6 m²;"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-26-01-08-cptaq",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "APPUI À UNE DEMANDE ADRESSÉE À COMMISSION DE LA PROTECTION DU TERRITOIRE AGRICOLE DU QUÉBEC."
+    }
+  ],
+  "input_tokens": 3610,
+  "output_tokens": 1580
+}
+```

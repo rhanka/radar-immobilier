@@ -1,0 +1,263 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "label": "Procès-verbal de la séance ordinaire du conseil d’Orford du 2 mars 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "date": "2026-03-02",
+      "municipality": "orford",
+      "url": "https://canton.orford.qc.ca/wp-content/uploads/2026/04/2026-03-02_PV.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil d’Orford tenue à la mairie, le\nlundi 2 mars 2026 à compter de 19 h."
+        }
+      ]
+    },
+    {
+      "id": "zone-r38",
+      "label": "Zone R38",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "R38",
+      "municipality": "orford",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "meetingDate": "2026-03-02",
+      "citations": [
+        {
+          "page": 43,
+          "excerpt": "Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38."
+        }
+      ]
+    },
+    {
+      "id": "zone-c3",
+      "label": "Zone C3",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "C3",
+      "municipality": "orford",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "meetingDate": "2026-03-02",
+      "citations": [
+        {
+          "page": 45,
+          "excerpt": "Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 –\nZone C3."
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-03-59",
+      "label": "Approbation PIIA - Lot 6 474 528 (Résolution 2026-03-59)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "decision": "approuvé",
+      "kind": "piia",
+      "demandeur_corporate": "9350-2722 Québec Inc.",
+      "municipality": "orford",
+      "resolution": "2026-03-59",
+      "resolutionRef": "2026-03-59",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "description": "Approbation du projet de PIIA relatif à l'aire de stationnement en pente pour le lot 6 474 528 adjacent à la rue de la Bourrasque conditionnellement à l'intégration d'un aménagement de gestion des eaux pluviales.",
+      "etape": "piia",
+      "etape_date": "2026-03-02",
+      "zone_ref": "R38",
+      "no_lot": "6474528",
+      "reglement_number": "955",
+      "citations": [
+        {
+          "page": 43,
+          "excerpt": "D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à\nun endroit où la pente du terrain est d'au plus 18,7 %."
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-03-60",
+      "label": "Approbation PIIA - 2197-2199 chemin du Parc (Résolution 2026-03-60)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "decision": "approuvé",
+      "kind": "piia",
+      "demandeur": "Eric Graveson",
+      "municipality": "orford",
+      "resolution": "2026-03-60",
+      "resolutionRef": "2026-03-60",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "description": "Approbation du projet de PIIA concernant des travaux de rénovation au 2197-2199 chemin du Parc conditionnellement au dépôt d'un plan d'aménagement paysager.",
+      "etape": "piia",
+      "etape_date": "2026-03-02",
+      "zone_ref": "C3",
+      "no_lot": "3786675",
+      "reglement_number": "955",
+      "citations": [
+        {
+          "page": 45,
+          "excerpt": "D’APPROUVER le présent projet de PIIA concernant les travaux de rénovation."
+        }
+      ]
+    },
+    {
+      "id": "signal-rci-consolidation-2026-03-62",
+      "label": "Demande d'agrandissement d'un secteur de consolidation - MRC de Memphrémagog",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "rezonage",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "description": "Demande à la MRC de Memphrémagog de modifier le Règlement de contrôle intérimaire numéro 16-21 et le schéma d'aménagement pour agrandir le secteur de consolidation en y intégrant le lot 3 787 898 pour permettre une nouvelle voie de circulation.",
+      "resolution": "2026-03-62",
+      "resolutionRef": "2026-03-62",
+      "scope": "regional",
+      "municipality": "orford",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "no_lot": "3787898",
+      "reglement_number": "16-21",
+      "citations": [
+        {
+          "page": 47,
+          "excerpt": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle\nintérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur\nde consolidation, le tout de manière à y intégrer"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "target": "event-piia-2026-03-59",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-piia-59"
+      ],
+      "citations": [
+        {
+          "page": 43,
+          "excerpt": "D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à\nun endroit où la pente du terrain est d'au plus 18,7 %."
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-03-59",
+      "target": "zone-r38",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-piia-59"
+      ],
+      "citations": [
+        {
+          "page": 43,
+          "excerpt": "Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38."
+        }
+      ]
+    },
+    {
+      "source": "source-105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "target": "event-piia-2026-03-60",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-piia-60"
+      ],
+      "citations": [
+        {
+          "page": 45,
+          "excerpt": "D’APPROUVER le présent projet de PIIA concernant les travaux de rénovation."
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-03-60",
+      "target": "zone-c3",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-piia-60"
+      ],
+      "citations": [
+        {
+          "page": 45,
+          "excerpt": "Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 –\nZone C3."
+        }
+      ]
+    },
+    {
+      "source": "source-105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "target": "signal-rci-consolidation-2026-03-62",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-signal-62"
+      ],
+      "citations": [
+        {
+          "page": 47,
+          "excerpt": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle\nintérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur\nde consolidation, le tout de manière à y intégrer"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-piia-59",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "rawRef": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "sourceUrl": "https://canton.orford.qc.ca/wp-content/uploads/2026/04/2026-03-02_PV.pdf",
+      "modality": "pdf",
+      "page": 43,
+      "excerpt": "D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à un endroit où la pente du terrain est d'au plus 18,7 %."
+    },
+    {
+      "id": "ev-piia-60",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "rawRef": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "sourceUrl": "https://canton.orford.qc.ca/wp-content/uploads/2026/04/2026-03-02_PV.pdf",
+      "modality": "pdf",
+      "page": 45,
+      "excerpt": "D’APPROUVER le présent projet de PIIA concernant les travaux de rénovation."
+    },
+    {
+      "id": "ev-signal-62",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "rawRef": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "sourceUrl": "https://canton.orford.qc.ca/wp-content/uploads/2026/04/2026-03-02_PV.pdf",
+      "modality": "pdf",
+      "page": 47,
+      "excerpt": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle intérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur de consolidation, le tout de manière à y intégrer"
+    }
+  ],
+  "input_tokens": 10520,
+  "output_tokens": 1260
+}
+```
