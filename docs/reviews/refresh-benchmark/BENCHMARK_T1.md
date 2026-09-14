@@ -140,3 +140,57 @@ Waterloo N-A. Deux observations par PDF ne donnent pas une variance statistique.
 du statut et des `evidence_refs`, puis exiger au moins 4/5 acceptés sur deux
 runs avant promotion. Le choix owner A/B/C/D et ses faits contradictoires sont
 présentés dans [DECISION_M1.md](DECISION_M1.md).
+
+## Campagne v12 — Sonnet comparable
+
+[FAIT] La case « Sonnet comparable : `N-A` » de v9 est levée. À gel identique à
+v9 — produit `f96356e9`, profil `b1d3989b…`, mêmes cinq PDF, même prompt, delta
+réduit au modèle et au transport — `claude-sonnet-4-6` obtient **0/5 sorties
+acceptées en direct Anthropic et 0/5 en Cloud Code**, contre 3/5 et F1 macro
+0,558 pour Gemini LOW v9.
+
+[FAIT] Les dix appels modèle ont reçu HTTP 200 : ce n'est pas un échec de
+transport. Les dix sorties franchissent normalisation et extraction (10/10) puis
+tombent aux couches métier — profil 2/5 en direct et 3/5 en Cloud Code,
+provenance 0/5 des deux côtés. Aucun P/R/F1 Sonnet n'est calculable, le scoreur
+n'évaluant que les sorties acceptées : la qualité sémantique de Sonnet sur ce
+corpus reste **non mesurée**. Latence moyenne 137,3 s en direct et 130,5 s en
+Cloud Code, contre 30,7 s pour Gemini; p95 observés 243,2 s, 223,6 s et 47,1 s.
+Coût unitaire `N-A` : le dépôt ne porte aucun tarif par token, seulement des
+forfaits au siège sans dénominateur en tokens.
+
+[FAIT] Deux familles de refus dominent. `unknown_status` frappe trois PDF en
+direct et deux en Cloud Code : c'est l'ambiguïté de contrat déjà documentée en
+v9 — le profil décrit les valeurs métier (`en_vigueur`, `actif`, `projet`) en
+prose tandis que le validateur compare `status` à la liste générique de
+durcissement. Sonnet écrit la valeur métier, Gemini LOW la valeur générique.
+`ungrounded_pdf_excerpt` frappe les autres cas, refus que Gemini subit aussi sur
+Waterloo. Avant requalification, les dix reçus portent en outre
+`missing_citation_source_file` sur toutes les entités : Sonnet n'émet pas
+`source_file` dans ses citations.
+
+[FAIT] Le transport Cloud Code refuse le plafond gelé de 65 536 (sondes :
+64 000 → 200, 64 001 → 400, 65 536 → 400) et tourne à 64 000. L'écart n'a
+tronqué aucune sortie : cinq fins `STOP`, jamais `MAX_TOKENS`, plus longue
+sortie à 39 % du plafond appliqué.
+
+[FAIT] Un seul incident transport : Saint-Barthélemy direct, tentative 1,
+`ETIMEDOUT` après 3 528 s. La relance contractuelle (`maxAttempts=2`,
+`retryOnlyAfter=transport_failure`) a reçu HTTP 200 en 126 s. Aucune relance de
+qualité n'a été faite.
+
+[FAIT] Le bundle aveugle `v12/blind-bundle.json` (`15794e4e…`) est gelé avec sa
+map et son prompt de juge; aucun juge n'a été lancé. Il ne contient que trois
+entrées sous un alias unique, faute de sortie Sonnet acceptée : **aucun
+classement entre systèmes n'en sortira**. Il est livré comme artefact de
+traçabilité.
+
+[JUGEMENT] Ce résultat ne suffit pas à écarter Sonnet du corpus M1. Deux des
+trois familles de refus pointent vers le contrat (`status` ambigu, `source_file`
+non exigé explicitement) plutôt que vers la compétence du modèle, et la
+recommandation B de v9 — clarifier le statut et les `evidence_refs` avant
+d'exiger 4/5 — vaut donc aussi pour Sonnet. Rejouer Sonnet après cette
+clarification est le prochain test utile; conclure maintenant sur le modèle
+reviendrait à conclure sur le validateur.
+
+Détail, reçus et SHA : [v12/report.md](v12/report.md).
