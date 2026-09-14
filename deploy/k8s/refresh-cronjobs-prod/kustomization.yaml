@@ -29,3 +29,33 @@ patches:
       - op: replace
         path: /spec/suspend
         value: false
+
+  # Keep the dormant legacy scrape workload structurally identical to the
+  # preproduction twin without activating it or overriding production storage.
+  - target:
+      kind: CronJob
+      name: radar-refresh-scrape
+    patch: |
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: radar-refresh-scrape
+      spec:
+        jobTemplate:
+          spec:
+            backoffLimit: 1
+            activeDeadlineSeconds: 10800
+            template:
+              spec:
+                containers:
+                  - name: scrape
+                    env:
+                      - name: NODE_OPTIONS
+                        value: "--max-old-space-size=2560 --dns-result-order=ipv4first"
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 768Mi
+                      limits:
+                        cpu: 500m
+                        memory: 3Gi

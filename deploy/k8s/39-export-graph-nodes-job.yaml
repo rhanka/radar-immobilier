@@ -115,7 +115,7 @@ spec:
                 const key = (process.env.EXPORT_S3_PREFIX || 'scratch/postapply-graph-nodes') + '/graph_nodes.ndjson';
                 const s3 = new S3Client({
                   endpoint: process.env.GRAPH_S3_ENDPOINT,
-                  region: process.env.GRAPH_S3_REGION || 'fr-par',
+                  region: process.env.GRAPH_S3_REGION,
                   credentials: { accessKeyId: process.env.GRAPH_S3_ACCESS_KEY, secretAccessKey: process.env.GRAPH_S3_SECRET_KEY },
                   forcePathStyle: process.env.GRAPH_S3_FORCE_PATH_STYLE === 'true',
                 });
@@ -135,17 +135,17 @@ spec:
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
             - name: GRAPH_S3_ENDPOINT
-              value: "https://s3.fr-par.scw.cloud"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_ENDPOINT } }
             - name: GRAPH_S3_BUCKET
-              value: "radar-immobilier-docs-pocs"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_BUCKET } }
             - name: GRAPH_S3_REGION
-              value: "fr-par"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_REGION } }
             - name: GRAPH_S3_FORCE_PATH_STYLE
-              value: "false"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_FORCE_PATH_STYLE } }
             - name: GRAPH_S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_ACCESS_KEY } }
             - name: GRAPH_S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_SECRET_KEY } }
           envFrom:
             - configMapRef:
                 name: radar-api

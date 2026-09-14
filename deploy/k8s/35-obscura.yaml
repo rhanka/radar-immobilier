@@ -13,10 +13,9 @@
 #     CMD ["serve","--port","9222","--host","0.0.0.0"], EXPOSE 9222,
 #     no USER (config User "0"), Env SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt.
 #
-# Why no in-house wrapper image any more: the former
-# rg.fr-par.scw.cloud/radar-immobilier/radar-obscura (obscura/Dockerfile) only
-# re-packaged the SAME upstream v0.1.5 release tarball; the SCW registry is
-# being decommissioned and publishing a replacement to GHCR would have required
+# Why no in-house wrapper image any more: the former private-registry wrapper
+# only re-packaged the SAME upstream v0.1.5 release tarball; publishing a
+# replacement to GHCR would have required
 # a manual "make the package public" act (new GHCR packages are private by
 # default), which the owner ruled out. Same version as the wrapper's pin
 # (v0.1.5) → no behaviour change for the api (OBSCURA_CDP_URL, 30-api.yaml).

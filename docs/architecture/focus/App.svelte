@@ -54,7 +54,7 @@
       </nav>
       <ProgressBar value={step + 1} max={8} label={`Section ${step + 1} sur 8`} size="sm" />
       <section class="decision-content">
-        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D7 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
+        <div class="section-heading"><span class="eyebrow">{step + 1} / 8 · dossier D8 · 13 septembre 2026</span><h2>{titles[step]}</h2></div>
         <!-- The French reading surface links to the complete repository dossier. -->
         {#if step === 5}<Choices manifest={data.manifest} remarks={note} />{:else}<div class="prose" onclick={link} role="presentation">{@html html(presentation[step])}</div>{/if}
         <Button variant="ghost" size="sm" onclick={() => source = 'decision-dossier'}>Dossier source complet · références et qualification des faits</Button>

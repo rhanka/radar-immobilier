@@ -143,7 +143,7 @@ verify-render-prod:
 	  ! grep -q 'name: radar-s3-credentials' "$$tmp" \
 	    || { echo "production render retains generic storage credentials" >&2; exit 1; }; \
 	  grep -q 'name: radar-scrape-s3-credentials' "$$tmp"; \
-	  grep -q 'name: radar-refresh-keyring-bootstrap' "$$tmp"; \
+	  grep -q 'secretName: radar-refresh-keyring-bootstrap' "$$tmp"; \
 	  grep -q 'claimName: radar-refresh-keyring' "$$tmp"; \
 	  test "$$(grep -c "image: $(APPROVED_IMAGE)" "$$tmp")" -eq 4; \
 	  pv="$$(awk 'BEGIN { RS="---" } /kind: CronJob/ && /name: radar-refresh-pv/ { print }' "$$tmp")"; \
@@ -248,10 +248,10 @@ runtime-ready-prod: guard-prod
 	  || { echo "production refresh runtime identity is incomplete" >&2; exit 1; }
 
 .PHONY: apply-prod
-apply-prod: storage-ready-prod runtime-ready-prod
+apply-prod: $(if $(filter 1,$(PROD_CONFIRM)),storage-ready-prod runtime-ready-prod)
 	@test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }
 	@set -e; tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
-	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp" ENV=test-refresh-prod-018; \
+	  make -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp" ENV=test-refresh-prod-018; \
 	  $(KP) apply --dry-run=server -f "$$tmp" >/dev/null; \
 	  $(KP) apply -f "$$tmp" >/dev/null; \
 	  test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.suspend}')" = "false"; \
@@ -331,7 +331,23 @@ logs-prod: guard-prod
 	  | awk '/refresh-pv: (starting|model call (completed|failed)|completed)/' )"; \
 	  test -n "$$evidence" || { echo "production refresh emitted no safe receipt evidence" >&2; exit 1; }; \
 	  printf '%s\n' "$$evidence"
-
+.PHONY: verify-renders
+verify-renders:
+	@set -euo pipefail; tmp="$$(mktemp -d)"; trap 'rm -rf "$$tmp"' EXIT; \
+	  preprod_image='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000'; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-preprod IMAGE_REF="$$preprod_image" RENDER_OUT="$$tmp/preprod.yaml" ENV=$(ENV); \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp/prod.yaml" ENV=$(ENV); \
+	  for render in "$$tmp/preprod.yaml" "$$tmp/prod.yaml"; do \
+	    test -s "$$render" || { echo "empty refresh render: $$render" >&2; exit 1; }; \
+	    awk 'BEGIN{RS="\n---\n"} /[^[:space:]]/ { if ($$0 !~ /apiVersion:/ || $$0 !~ /kind:/) { print "missing apiVersion/kind in refresh render" > "/dev/stderr"; bad=1 } } END{ exit bad }' "$$render"; \
+	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 3 \
+	      || { echo "refresh render must contain exactly three CronJobs: $$render" >&2; exit 1; }; \
+	    awk 'function flush(){if(active && literal && reference){print "mixed value/valueFrom: " name > "/dev/stderr"; bad=1} literal=0; reference=0} \
+	      /^[[:space:]]*- name:/ {flush(); active=1; name=$$0; next} \
+	      active && /^[[:space:]]+value:[[:space:]]/ {literal=1} \
+	      active && /^[[:space:]]+valueFrom:[[:space:]]*$$/ {reference=1} \
+	      END {flush(); exit bad}' "$$render"; \
+	  done
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
 	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }

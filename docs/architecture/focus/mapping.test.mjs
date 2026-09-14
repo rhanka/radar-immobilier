@@ -59,17 +59,18 @@ test('unsupported syntax and dangling references fail closed', () => {
   assert.throws(() => parseMermaid('flowchart LR\na --> b --> c', 'bad', 'bad'), /unsupported/);
 });
 
-test('D7 presents only complete before and after architecture while billing stays last', () => {
+test('D8 presents only complete before and after architecture while billing stays last', () => {
   assert.equal(presentation.length, 8);
   assert.match(presentation[0], /AVANT.*poste LLM.*API préprod.*MinIO.*RAW\/DOCS/s);
   assert.match(presentation[1], /ARCHITECTURE APRÈS.*RAW.*DOCS.*OVH.*Graphify.*un b3-8/s);
-  assert.match(presentation[2], /PAS UN TROISIÈME GRAPHE.*0\.18\.0.*Luna high.*avant l’appel LLM.*HTML.*PDF/s);
+  assert.match(presentation[2], /PAS UN TROISIÈME GRAPHE.*0\.18\.0.*Luna high.*59 017 objets.*12 534 514 457.*52646a7b…0425.*failed=0.*production T2 est en cours/s);
   assert.match(presentation[4], /DÉCISIONS DÉJÀ RATIFIÉES.*59 017.*surplus préprod.*SCW TEM/s);
   assert.match(presentation[7], /FACTURATION · EN DERNIER.*10 août.*13 septembre.*840 heures.*68,88 CAD/s);
   assert.match(presentation[7], /251,215438 CAD LLM.*320,095438 CAD/s);
   assert.match(presentation[7], /question \*\*non critique\*\*/);
   assert.equal(docs['decision-dossier'].match(/^## /gm).length, 8);
-  assert.match(docs['decision-dossier'], /Revision \*\*D7/);
+  assert.match(docs['decision-dossier'], /Revision \*\*D8/);
+  assert.match(docs['decision-dossier'], /59,017 objects \/ 12,534,514,457.*52646a7b…0425.*failed=0.*40 Gi.*six NetworkPolicies.*three PVCs \/ 7 Gi.*API, MCP and UI remain 1\/1/s);
   assert.match(docs['decision-dossier'], /canonical reference.*exactly.*59,017 keys\+hashes/s);
   assert.match(docs.transitions, /August 10 through September 13 inclusive/);
   assert.match(currentReport, /10 août → 13 septembre 2026/);
