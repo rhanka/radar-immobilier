@@ -1,6 +1,6 @@
 # Two dated architecture transitions for Immo Focus
 
-Status: EVOL design, awaiting two independent adversarial reviews. No Focus implementation or production promotion is accepted by this document.
+Status: EVOL design reviewed by two independent adversarial legs; cycle v6 consensus `GO` releases bounded implementation only. No production promotion is accepted by this document.
 
 ## Intent and boundary
 
@@ -10,16 +10,16 @@ Status: EVOL design, awaiting two independent adversarial reviews. No Focus impl
 
 ## D1 — Dates, evidence and honest state
 
-- [FACT] August baseline means latest first-parent main commit at or before `2026-08-09T23:59:59-04:00`, not the most recently dated side-branch commit.
-- [FACT] Immo baseline: `26caa4d95fe09a6cccb665cd88942f1edfb853c8` (August 9, 21:56 Toronto); Geo: `49573c0f9356d97e64563d87fa6038678acb9902` (23:57).
-- [FACT] Current documentary main: Immo `4d5cb8f7f5e7934196b57e29305fec37813bf7a9`; Geo `5a262a9bd12b1e2196ee0a9bb8b46b5e6277616e`. Pin sources rather than silently reading moving refs during rendering.
+- [FACT] The August documentary anchor is the latest first-parent main commit at or before `2026-08-09T23:59:59-04:00`, not the most recently dated side-branch commit. This Git selection rule reconstructs declarations available by that cutoff; it is not a runtime inventory or proof that every declared relation executed that day.
+- [FACT] Immo documentary anchor: `26caa4d95fe09a6cccb665cd88942f1edfb853c8` (August 9, 21:56 Toronto); Geo: `49573c0f9356d97e64563d87fa6038678acb9902` (23:57). Commit author/committer timestamps establish repository ordering only, not operational observation time.
+- [FACT] September documentary main anchors inspected for this design: Immo `4d5cb8f7f5e7934196b57e29305fec37813bf7a9`; Geo `5a262a9bd12b1e2196ee0a9bb8b46b5e6277616e`. Pin the full revision and blob path when rendering. Later side-branch artifacts remain branch-scoped evidence unless their exact revisions are independently cited; they are not silently promoted to main history.
 - [FACT] T2 runtime receipt is on Immo `9d004b0fc9af3df970df22ed439eb46be5b80b06`, separate from documentary main, observed at September 13 `23:39:15Z` [S5].
 - [UNKNOWN] poc-k8s local `origin/main` is stale at July 5. Use `0f382f12027953335455f46d041b23414fcf9a9c` as a dated platform report source, not a newly fetched main attestation; its August 1 report agrees with the August 9 cost report [S2].
 - [JUDGMENT] Every node/edge has evidence class `observed`, `declared`, `historical`, `dormant` or `unknown`, plus repo, commit, path, line anchor and observation date where available. Historical prose cannot override later executable configuration or a later runtime receipt.
 
 ## D2 — Pair A: storage/registry only
 
-[FACT] By August 9, production compute was already OVH BHS5 with two b3-8 nodes; Immo used its in-cluster MinIO declaration, SCW graph/scrape coordinates and SCW application registry. GHCR mirroring existed but was best effort, not evidence that Immo pulled GHCR [S2,S3]. Geo's serving bucket was already OVH; it is a stable external data dependency in this pair [S4].
+[FACT] By August 9, the repository declared production compute on OVH BHS5 with two b3-8 nodes, an in-cluster Immo MinIO API binding, SCW graph/scrape coordinates, suspended refresh CronJobs and an SCW application registry. GHCR mirroring was also declared as best effort. These pinned manifests establish configuration, not an August 9 runtime inventory, secret resolution, traffic, successful mirror or completed refresh [S2,S3]. Geo's serving bucket was declared on OVH as a stable external data dependency in this pair [S4].
 
 [FACT] By the September 13 T2 receipt, production API rollout, OVH GRAPH/SCRAPE bindings and MinIO absence are observed. Final parity acceptance is reopened for destination attributes and final source rescan [S5]. GHCR application-image integration is in main; Geo has a separate stronger runtime/provider-retirement receipt [S6].
 
@@ -31,7 +31,7 @@ Status: EVOL design, awaiting two independent adversarial reviews. No Focus impl
 
 [FACT] Graphify 0.18.0 is integrated and preproduction accepted a grounded Waterloo Signal/PDF, exact-image replay and a controller-created CronJob run. Production remains dormant pending independent promotion [S9]. The earlier HTML-input failure is superseded as preproduction status, retained only as history.
 
-[JUDGMENT] B-after draws the new causal path inside a visibly dormant production refresh boundary. A separate annotation states the preproduction acceptance and exact receipt. The administrator workstation only enrolls/configures credentials; it is not part of scheduled extraction. The model label is `To ratify through M1`; Luna high appears only as an observed acceptance trial, never the selected benchmark winner.
+[JUDGMENT] B-after draws the new causal path inside a visibly dormant production refresh boundary. A separate annotation states the preproduction acceptance and exact receipt. The administrator workstation only enrolls/configures credentials; it is not part of scheduled extraction. The model label is `To ratify through M1`; Luna high appears only as an observed acceptance trial, never the selected benchmark winner. Pair B names the corpus and publication graph by durable function, not by object-storage provider. Pair A alone carries the dated SCW-to-OVH storage transition; changing provider must not change the refresh contract or logical node identity.
 
 ## D4 — Four canonical diagrams, two rendering forms
 
@@ -43,6 +43,11 @@ Status: EVOL design, awaiting two independent adversarial reviews. No Focus impl
 - Render pair A together, then pair B, in Focus and the dated report. PDF includes all four complete diagrams at readable size; optional detail pages supplement, never replace, a complete view. Do not continue to call a two-graph screenshot the full architecture export.
 - Each artifact records source revisions and content hashes. HTML/PDF share the graph inventory and captions; none may silently reload a later source under an old report date.
 - Existing service icons and repository attribution are reused. Platform owns cluster/ingress/TLS; Immo owns API/UI/refresh; Geo owns its API/data contract. A library such as Graphify or llm-mesh is not a new network service.
+- `docs/architecture.md` is the authoritative Mermaid source for these four scene IDs; `docs/architecture/focus/scene-metadata.js` is the authoritative exhaustive provenance/state map keyed by scene plus case-sensitive Mermaid node/group or deterministic edge ID. No default/fallback entry is legal. Each node/group has non-null `kind`, `repo`, `evidenceClass` and `runtimeState`; each edge has non-null `evidenceClass` and `runtimeState`. Closed evidence classes are `observed|declared|historical|dormant|unknown|external`; runtime states are `active|suspended|dormant|manual|retained|unknown|not-applicable`. Provider/repo values are explicit sorted identifiers or `external`, never inferred from label text.
+- Canonical labels convert CRLF to LF, replace only case-insensitive `<br>`, `<br/>` or `<br />` with LF, trim each line, collapse internal ASCII whitespace to one space and normalize NFC; HTML entities are forbidden in canonical Mermaid labels. Clusters join the node array with `kind:"cluster"` and their real `parentId`; roots use `null`. Node IDs are verbatim case-sensitive Mermaid IDs. Edge IDs are `source + "__" + target + "__" + sha256(normalizedLabel).slice(0,12)`; duplicate endpoint+label edges fail instead of receiving order-dependent IDs. Mermaid parsing rejects unknown statements, duplicate IDs, missing metadata and extra metadata.
+- For each scene, serialize compact UTF-8/NFC JSON with LF and keys in fixed order `sceneId,pair,date,nodes,edges`; sort nodes by `id` and include `id,kind,label,evidenceClass,runtimeState,parentId,repo`; sort edges by `id` and include `id,source,target,label,dashed,both,evidenceClass,runtimeState`. Hash with SHA-256. Focus reconstructs this projection independently from parsed Mermaid plus the exhaustive metadata map, then browser checks reconstruct it again from native DOM attributes/content. The report manifest embeds the same full projection/hash and each captured page prints its scene ID/hash. Missing, extra, reordered or divergent topology/state/provenance fails; copied hashes alone cannot pass. Every transition update changes reference, Focus inventory and report manifest atomically.
+- The current report window is exactly August 10 through September 13, 2026 inclusive in America/Toronto: `[2026-08-10T00:00:00-04:00, 2026-09-14T00:00:00-04:00)`, 35 days / 840 hours. Architecture corrections do not move this boundary or silently recalculate the protected cost method and amounts.
+- Attach the preceding report `docs/spec/reports/study-2026-08/report.pdf`, SHA-256 `86ae37810016bca61cc897105121cfcbcd1951426fc889616ae1efe37ae29528`. Its historical source revision is `72b966664523801ea00cfcb704e0285ee765c136`, which is not treated as main ancestry and must not be cherry-picked. The HTML links that exact file. The final PDF first contains the current report and four graph pages, then the predecessor's nine pages as a visual appendix, and also embeds the original bytes as attachment `study-2026-08-report.pdf`. Page merging may renumber/recompress objects and is not the byte proof: extract the embedded attachment with `pdfdetach`, hash the extracted bytes and require exact equality with the source SHA-256.
 
 ### D4.1 — Owner amendment: compact cards and readable type
 
@@ -72,6 +77,9 @@ Status: EVOL design, awaiting two independent adversarial reviews. No Focus impl
 - Assert B-after production dormancy, preproduction acceptance as an annotation and no model choice before M1 ratification.
 - Inspect every full Mermaid/SvelteFlow render and every PDF graph page for missing nodes, clipping, unreadable labels, lost nested containment or contradictory status.
 - Compare protected billing content and period against the input report: exact values/method/window unchanged. Textual corrections elsewhere must not regenerate or reinterpret billing.
+- Assert the exact inclusive report label `10 août → 13 septembre 2026`, the timestamp interval, 35 days and 840 hours in HTML, PDF text and the evidence manifest.
+- Assert the preceding PDF path/SHA-256, nine source pages, a working HTML download and embedded attachment name. Extract it with `pdfdetach`, compare exact SHA-256, and record current-report end, four graph-page numbers, predecessor start/end and attachment hash in `previousReport`. Separately render source pages 1–9 and the recorded final-PDF appendix range with Poppler 26.01.0 `pdftoppm -png -r 144 -cropbox -singlefile`; require equal page counts and exact ordered PNG SHA-256 equality. Record renderer/version/flags, both per-page hash arrays and the one-to-one page map. Verify the four complete graph pages before the predecessor range. Reject mention-only, attachment-only, page-count-only or visually substituted appendices.
+- Assert `docs/architecture.md`, Focus and PDF manifest expose the same ordered four scene IDs, canonical projections and SHA-256 values. Reconstruct the native DOM projection, verify every `parentId` and exact edge, bind each PDF capture/page to its scene hash, and reject a missing/reordered/topology-divergent scene. A transition change is incomplete until all three committed surfaces move together.
 - Reject a report presented as completed T2, a three-model winner or active production refresh without the corresponding new dated acceptance evidence.
 - Assert each of the four Mermaid and SvelteFlow scenes contains a visible SCW TEM residual-exception node/annotation stating retention until a validated replacement. Pair B must not connect TEM into the PV extraction chain; pair A labels the email relation. Preserve the exception in every complete PDF view.
 - Assert exactly `Navigateur utilisateur` on the user node in all four scenes and both forms; reject the former label and automatic uppercase presentation.
@@ -79,6 +87,8 @@ Status: EVOL design, awaiting two independent adversarial reviews. No Focus impl
 - Measure ordinary-card height/padding/gaps, content/child bounding boxes and effective transformed text sizes; assert every D4.1 minimum and the card-height band, report medians plus worst cases, and compare against the frozen D8 source baseline. An invisible/clipped label does not satisfy a font-size assertion.
 - Check text overflow, clipping, overlap, blank stretched rows and excess trailing container space, including wrapped TEM text and the dormant production banner. Any necessary routing clearance beyond the slack bound must be measured and justified by an actual edge, not an empty filler panel.
 - Inspect screenshots for visibly larger type, denser cards and legible repo/status/edge labels without zoom; retain the corresponding Chromium metrics. PDF checks must include text size and all four complete-page screenshots, not merely count exported pages. These are future implementation gates, not tests performed by this spec amendment.
+- Give every native ordinary card `data-node-kind="ordinary"`, every text element `data-text-role`, every node `data-id`/`data-parent-id`/`data-evidence-class`/`data-runtime-state`, and every edge its canonical ID/endpoints/state. For each of the four scenes and both fixed viewports, record every card's transformed rectangle, padding/gaps, content bounds and trailing slack; every required SvelteFlow text role's computed size, transform scale, effective pixels and glyph/content bounds; every Mermaid node/cluster/edge label's SVG bounding box; and every native/Mermaid edge path's transformed bounding rectangle, computed stroke visibility, total length and sampled points at no more than 8 CSS px intervals. Zero-length, hidden, missing or clipped edge geometry fails unless the canonical metadata names an explicit tested exception (none exist initially). Aggregate only after every inventory entry passes, then report median and worst case.
+- The complete-scene bounds are the union of every node, cluster, edge-label and sampled edge-path geometry box at native graph transform `scale(1)`. Initial and export checks use browser zoom 100%, deviceScaleFactor 1 and no fit-to-view below scale 1. Panning/scrolling is allowed in Focus; the full-scene capture expands the canvas at the same scale rather than shrinking it. Require every sampled edge point and all inventory boxes—including TEM and the dormant banner—to intersect and remain inside that full capture without clipping. PDF pages bind the same edge inventory, scene hash and capture hash; measurements apply recorded print scale and fail any effective-size minimum. Each scene retains its full screenshot, smallest text, worst card, edge inventory and capture hash; supplemental pages cannot repair a failed complete view.
 
 ## Graph contracts — design sketches, not deployment manifests
 
@@ -88,32 +98,35 @@ These four Mermaid sketches specify topology and state. Implementation adds the 
 
 ```mermaid
 flowchart LR
-  A_USER["Navigateur utilisateur"] --> A_URL["immo.sent-tech.ca"]
-  subgraph A_CLOUD["OVH BHS5 · production · 2 b3-8 observed"]
-    A_EDGE["Shared ingress / TLS"]
-    subgraph A_IMMO["Immo · radar-immobilier"]
-      A_UI["radar-ui"] -->|"/api"| A_API["radar-api"]
-      A_API -->|"SQL"| A_DB[("PostgreSQL / PostGIS")]
-      A_API -->|"Declared API object binding"| A_MINIO[("MinIO + PVC · raw / derived docs")]
-      A_CLIENTS["Graph/scrape storage clients · declarations"]
+  A_USER["Navigateur utilisateur"] -.->|"Declared public route"| A_URL["immo.sent-tech.ca · declared"]
+  subgraph A_CLOUD["OVH BHS5 · production topology · declared"]
+    A_EDGE["Shared ingress / TLS · declared"]
+    subgraph A_IMMO["Immo · radar-immobilier · declared"]
+      A_UI["radar-ui · declared"] -.->|"Declared /api"| A_API["radar-api · declared"]
+      A_API -.->|"Declared SQL"| A_DB[("PostgreSQL / PostGIS · declared")]
+      A_API -.->|"Declared API object binding"| A_MINIO[("MinIO + PVC · raw / derived docs · declared")]
+      A_CLIENTS["Graph/scrape storage clients · declared"]
     end
-    A_SSO["Sentropic SSO · auth.sent-tech.ca"]
-    A_GEO["Geo OGC API · stable dependency"]
-    A_EDGE --> A_UI
-    A_EDGE --> A_SSO
-    A_UI -->|"OGC collections"| A_GEO
-    A_API <-->|"OIDC / JWKS"| A_SSO
+    A_SSO["Sentropic SSO · auth.sent-tech.ca · declared"]
+    A_GEO["Geo OGC API · declared dependency"]
+    A_CAPACITY["Observed platform note · two b3-8 by August 9 · capacity only"]
+    A_EDGE -.->|"Declared ingress"| A_UI
+    A_EDGE -.->|"Declared ingress"| A_SSO
+    A_UI -.->|"Declared OGC collections"| A_GEO
+    A_API -.->|"Declared OIDC / JWKS"| A_SSO
   end
-  A_URL --> A_EDGE
-  A_USER <-->|"Login redirects"| A_SSO
-  A_GEO --> A_GEOS3[("OVH sentropic-geo · already migrated")]
-  A_CLIENTS -.->|"Graph binding; projection suspended"| A_SCWGRAPH[("SCW docs-pocs · graph")]
-  A_CLIENTS -.->|"Scrape contract; live secret not audited"| A_SCWDOCS[("SCW docs · raw / parsed")]
-  A_SCWREG["SCW application registry"] -->|"Declared image source"| A_API
-  A_SCWREG -->|"Declared image source"| A_UI
-  A_SCWREG -.->|"Best-effort mirror; success unverified"| A_GHCR["GHCR mirror"]
-  A_API -.->|"Transactional email · declared"| A_TEM["SCW TEM · authorized residual until validated replacement"]
+  A_URL -.->|"Declared ingress route"| A_EDGE
+  A_USER -.->|"Declared login redirects"| A_SSO
+  A_GEO -.->|"Declared client binding"| A_GEOS3[("OVH sentropic-geo · declared")]
+  A_CLIENTS -.->|"Declared graph binding; suspended"| A_SCWGRAPH[("SCW docs-pocs · graph · declared")]
+  A_CLIENTS -.->|"Declared scrape contract; secret not audited"| A_SCWDOCS[("SCW docs · raw / parsed · declared")]
+  A_SCWREG["SCW application registry · declared"] -.->|"Declared image source"| A_API
+  A_SCWREG -.->|"Declared image source"| A_UI
+  A_SCWREG -.->|"Declared best-effort mirror; success unknown"| A_GHCR["GHCR mirror · declared"]
+  A_API -.->|"Transactional email · declared"| A_TEM["SCW TEM · declared residual until validated replacement"]
 ```
+
+[FACT/JUDGMENT: S2,S3,S4] A-before is a documentary configuration reconstruction. Dashed storage/image/email edges mean `declared`, not failed or observed traffic. The two-node OVH platform statement and suspended CronJob declarations are preserved separately from unverified secret resolution, image pulls, application storage use and refresh execution.
 
 ### A-after — production storage and registry, September 13
 
@@ -156,7 +169,7 @@ flowchart LR
     B_OPERATOR["Operator"] --> B_EXTRACT["Graphify agents · model/effort not historically attested"]
   end
   B_CORPUS -->|"Read source evidence"| B_EXTRACT
-  B_EXTRACT -->|"Validated graph output"| B_GRAPH[("SCW graph/city/latest.json")]
+  B_EXTRACT -->|"Validated graph output"| B_GRAPH[("Published graph contract · city/latest.json")]
   subgraph B_CLOUD["OVH · production Immo"]
     B_PROJECT["Projection Job · manual"] -->|"Atomic upsert"| B_DB[("PostgreSQL graph")]
     B_SCHEDULE["Scrape / projection CronJobs · SUSPENDED"]
@@ -170,14 +183,14 @@ flowchart LR
   B_TEM["Transverse exception · SCW TEM retained until validated replacement · outside PV extraction"]
 ```
 
-[UNKNOWN: S8] Collection execution placement and exact secret-resolved scrape endpoint are not reconstructed from the mere presence of a Job template. Keep collect/parse outside the cluster containment until dated runtime evidence locates it. The manually controlled pipeline is evidenced as an operating method, not a receipt for a complete August 9 run. Its corpus is separate from the canonical graph store.
+[UNKNOWN: S8] Collection execution placement and exact secret-resolved scrape endpoint are not reconstructed from the mere presence of a Job template. Keep collect/parse outside the cluster containment until dated runtime evidence locates it. The manually controlled pipeline is evidenced as an operating method, not a receipt for a complete August 9 run. Its corpus is separate from the canonical graph store. The functional labels deliberately omit the backing provider; pair A carries that physical placement.
 
 ### B-after — production refresh implementation, September 13; activation dormant
 
 ```mermaid
 flowchart LR
   B_CITY["Municipal PV sources"]
-  B_CORPUS[("OVH PV corpus / durable checkpoints")]
+  B_CORPUS[("Durable PV corpus / checkpoints")]
   subgraph B_WORKSTATION["Administrator workstation · not an extraction worker"]
     B_OPERATOR["Operator · enrollment / configuration only"]
   end
