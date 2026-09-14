@@ -1,14 +1,14 @@
 # radar-immobilier on Kubernetes — deployed as a *sentropic app*
 
 This directory holds the **tenant-owned** manifests that deploy
-`radar-immobilier` on the shared Scaleway **poc-k8s** cluster *as a sentropic
-app*: a tenant/workspace under the sentropic platform, with **human auth
+`radar-immobilier` on the shared OVH MKS cluster managed by **poc-k8s** *as a
+sentropic app*: a tenant/workspace under the sentropic platform, with **human auth
 delegated to the shared sentropic Identity Provider** and the **code managed in
 a named sentropic workspace**.
 
-> **PREPARED, NOT APPLIED.** Everything here is authored and validated offline.
-> Nothing in this branch touches a live cluster. Applying to a real cluster is a
-> deliberate human action with cluster credentials — see
+> **SOURCE CHANGES DO NOT DEPLOY THEMSELVES.** These manifests describe active
+> environments, but editing or validating them does not mutate a cluster.
+> Applying a change is a deliberate human or controlled CI action — see
 > [Manual deploy (human, with cluster creds)](#manual-deploy-human-with-cluster-creds).
 
 The pattern mirrors the **sentropic** tenant layout
@@ -25,7 +25,7 @@ and extended with the sentropic-app integration.
 | Aspect | How radar does it | Source mirrored |
 | --- | --- | --- |
 | **Tenant / workspace** | dedicated `radar-immobilier` Namespace; every resource carries `app.kubernetes.io/part-of: sentropic` and `sentropic.dev/workspace: radar-immobilier` | sentropic per-tenant namespace + `app.kubernetes.io/*` labels (`10-rbac.yaml`, `30-api.yaml`) |
-| **Registry pull** | public `ghcr.io/rhanka/radar-{api,ui,grounding}` packages need no pull secret; `radar-obscura` runs the **upstream public Docker Hub image** `docker.io/h4ckf0r0day/obscura` (tag + digest pinned — no GHCR package, no pull secret either); the shared `radar-app` ServiceAccount still carries the legacy SCW `radar-registry-pull` secret only while the live prod/preprod Deployments run SCW-tagged images — its retirement is a separate PR after the GHCR promotion | `10-rbac.yaml` |
+| **Registry pull** | `radar-api` and `radar-ui` use public GHCR packages; `radar-obscura` uses the upstream public Docker Hub image pinned by digest. No workload requires a registry pull Secret. | `10-rbac.yaml` |
 | **Auth** | OIDC **relying party** to the shared sentropic IdP (`auth.sent-tech.ca`) | sentropic `35-auth-idp.yaml`, `60-ingress.yaml`, and the RP recipe `apps/auth-idp/RP_SESSION_GLUE.md` |
 | **Public ingress / TLS** | Traefik Ingress on `immo.sent-tech.ca`, cert-manager `letsencrypt-prod` (DNS-01) | sentropic `60-ingress.yaml` |
 | **UI delivery** | nginx-served Svelte SPA that proxies `/api` → api (same-origin) | sentropic `40-ui.yaml` (nginx fans out `/api`) |
@@ -35,9 +35,8 @@ and extended with the sentropic-app integration.
 | File | Purpose |
 | --- | --- |
 | `00-namespace.yaml` | tenant Namespace + workspace/part-of labels (operator owns the live copy + RQ/LimitRange/NetPol) |
-| `10-rbac.yaml` | `radar-app` ServiceAccount + legacy SCW pull secret (transitional: no manifest in this directory needs it any more — api/ui/grounding are public GHCR, obscura is the public upstream Docker Hub image — it stays until the live prod/preprod Deployments are promoted to GHCR images; retired in a follow-up PR) |
+| `10-rbac.yaml` | `radar-app` ServiceAccount; public GHCR and Docker Hub images require no pull secret |
 | `20-postgres-postgis.yaml` | Postgres 16 + PostGIS StatefulSet + headless Service + 5Gi PVC |
-| `25-minio.yaml` | in-cluster MinIO (S3) StatefulSet + Service for raw-document storage |
 | `30-api.yaml` | radar API (Hono) Deployment + Service + non-secret ConfigMap (incl. OIDC RP env) |
 | `35-obscura.yaml` | headless-browser CDP service for scraping — upstream public `docker.io/h4ckf0r0day/obscura:0.1.5@sha256:…` (nothing built in-house, no registry credential), dormant `replicas: 0` |
 | `40-maildev.yaml` | SMTP sink (POC) |
@@ -45,8 +44,21 @@ and extended with the sentropic-app integration.
 | `60-ingress.yaml` | public Traefik Ingress for `immo.sent-tech.ca` + cert-manager TLS |
 | `70-networkpolicy.yaml` | tenant-side additive NetworkPolicy: Traefik → `radar-ui`:8080 (see "Ingress reaches the UI pod, not the api") |
 | `80-auth.yaml` | declarative record of the sentropic OIDC delegation (`radar-sentropic-auth` ConfigMap) |
+
+### Object-storage post-cutover state
+
+The preproduction and production migration Jobs are retired after accepted
+parity receipts. Their launch targets remain as fail-closed compatibility
+stubs, and the environment overlays no longer package migration tools. The
+checkpoint PVCs remain for evidence custody; the final-status targets verify
+OVH bindings, MinIO absence, rollout health, and the retained TEM exception.
+
+Migration implementations remain in `deploy/ci/` only for hermetic regression
+tests and historical receipt validation. They are not rendered into a deployed
+environment. Restoring any retired Job manifest is rejected by the
+object-storage binding gate.
 | `kustomization.yaml` | bundles the resources; stamps the `sentropic` part-of + workspace labels |
-| `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / legacy SCW registry pull (transitional, see `10-rbac.yaml`) |
+| `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / TEM credentials |
 
 ## Auth delegation — radar as an OIDC relying party
 
@@ -179,6 +191,111 @@ make k8s-validate K8S_VALIDATE_WITH_CLUSTER=1 KUBECONFIG=<path> ENV=<env>
 > uses the always-present `kubectl kustomize` render + the structural check. If
 > `kubeconform` lands later, wire `kustomize build deploy/k8s | kubeconform`
 > into `k8s-validate` for full schema validation.
+
+## Manual Job object-storage prerequisites
+
+The manual graph and scrape Jobs require complete provider-neutral bindings;
+they do not contain endpoint, region, bucket, path-style, or credential values.
+
+| Store | Required `radar-api` ConfigMap keys | Required Secret |
+| --- | --- | --- |
+| Graph | `GRAPH_S3_ENDPOINT`, `GRAPH_S3_REGION`, `GRAPH_S3_BUCKET`, `GRAPH_S3_FORCE_PATH_STYLE` | `radar-graph-s3-credentials`: `GRAPH_S3_ACCESS_KEY`, `GRAPH_S3_SECRET_KEY` |
+| Scrape | `SCRAPE_S3_ENDPOINT`, `SCRAPE_S3_REGION`, `SCRAPE_S3_BUCKET`, `SCRAPE_S3_FORCE_PATH_STYLE` | `radar-scrape-s3-credentials`: `SCRAPE_S3_ACCESS_KEY`, `SCRAPE_S3_SECRET_KEY` |
+
+These references are non-optional so an incomplete binding fails before the
+container starts instead of falling back to the main store. They are
+prerequisites, not a deployment claim: the fresh preproduction `radar-api`
+ConfigMap does not yet contain either key family, the scrape Secret was absent,
+and production remains unverified. Do not dispatch these Jobs until the target
+namespace has been inventoried and all referenced keys have been validated.
+The armed refresh diagnostic remains on its existing binding pending that later
+cutover; this first slice deliberately does not edit or deploy it.
+
+## RAW/DOCS object-storage migration proof tool
+
+`deploy/ci/migrate-object-storage.sh` is a bounded, non-destructive RAW/DOCS
+inventory and copy tool. It does not support GRAPH, Geo, TEM, deletion, bucket
+provisioning, IAM changes, writer fencing, deployment, or rollback. Its output
+is offline/operator evidence, not runtime acceptance.
+
+The source and destination credentials are separate process inputs and are
+never written to reports:
+
+```text
+MIGRATION_SOURCE_ACCESS_KEY_ID
+MIGRATION_SOURCE_SECRET_ACCESS_KEY
+MIGRATION_DESTINATION_ACCESS_KEY_ID
+MIGRATION_DESTINATION_SECRET_ACCESS_KEY
+```
+
+Every invocation supplies complete endpoint, region, bucket, and path-style
+coordinates for both sides, at least one classified `prefix/`, and a fresh
+report directory. `head-bucket` proves that each supplied identity can address
+the exact target. Reports contain only a SHA-256 fingerprint of each access-key
+ID. `copy` is a dry run unless `--execute-copy` is present; there is no delete
+operation.
+
+```text
+deploy/ci/migrate-object-storage.sh <inventory|copy|verify|delta>
+  --environment <preprod|prod> --plane <RAW|DOCS>
+  --source-endpoint URL --source-region REGION --source-bucket BUCKET
+  --source-path-style <true|false>
+  --destination-endpoint URL --destination-region REGION
+  --destination-bucket BUCKET --destination-path-style <true|false>
+  --prefix PREFIX/ [--prefix PREFIX/ ...] --report-dir DIR
+  [--exclude-prefix PREFIX/ ...] [--expected-manifest FILE]
+  [--execute-copy] [--fence-record FILE]
+  [--reconcile-owned --ledger FILE]
+  [--conditional-write-proof FILE]
+  [--checkpoint-dir DIR] [--page-size N] [--time-budget-seconds N] [--resume]
+  [--inventory-proof FILE]
+  [--concurrency N] [--retries N] [--max-failures N]
+  [--max-object-bytes N]
+```
+
+Included prefixes may not overlap each other or any repeated explicit
+exclusion. Every source key is streamed and classified as included, excluded,
+or unclassified; any unclassified key blocks proof. Manifests record byte size,
+streamed SHA-256, content headers, user metadata, tags, diagnostic ETag, and
+VersionId. ETags are never treated as content hashes. Defaults are concurrency
+4, three attempts per operation, 20 object failures, and a 5 GB per-object
+temporary-file ceiling; the bounded overrides are recorded in `summary.json`.
+Every executed copy also requires a capability proof, no older and valid for no
+more than 48 hours, bound to the exact destination and migration identity. The
+operator must validate and retain its external probe transcript; tool receipts
+keep `providerEnforcementValidated:false`.
+For a large inventory, use `--checkpoint-dir` with a fresh `--report-dir` on
+each attempt; add `--resume` after the first. Complete the separate provisional
+and fenced chains before any write. `copy --execute-copy` then requires
+`--inventory-proof <checkpoint>/final-inventory.json` plus the same non-empty
+`--fence-record`; it never treats `fenceValidated:false` as external approval.
+
+DOCS `copy`, `verify`, and `delta` require `--expected-manifest`. The versioned
+JSON document has top-level `sources[]` and `objects[]`; every object holds the
+approved content fields above plus `sources[]` with exact physical coordinate
+provenance. Multi-source entries require `observedAt`, `manifestSha256`, and
+`fenceSha256` for every physical source. The tool hashes this input, refuses
+source overlap with different bytes or metadata, and permits destination extras
+only when they are objects in the approved union. It never selects which source
+is authoritative and never claims the supplied fence was validated.
+
+Missing objects are uploaded from bounded temporary files with
+`If-None-Match: *`, then completely re-read and entered in
+`copy-ledger.jsonl`. A normal conflict is never overwritten. The exceptional
+`--reconcile-owned` mode additionally requires a non-empty fence record, the
+original immutable ledger, enabled destination versioning, exact current
+destination equality with that ledger, and a readable non-null prior VersionId.
+It re-reads the prior version's body and metadata before an `If-Match` write,
+then records distinct recoverable prior/new versions and hashes. Any foreign or
+independently modified object fails closed.
+
+Only `delta` can set `cutoverReady: true`, and only for complete hash/metadata
+parity with zero errors plus a non-empty fence artifact digest. The receipt
+also records `fenceValidated: false`: the conductor must separately validate
+writer fencing, freshness across every physical source, application bindings,
+real reads/writes, paired DB/object recovery, and the preprod-before-production
+cutover. Source retention and any later deletion remain separately approved
+operator actions.
 
 ## Production refresh CronJobs
 

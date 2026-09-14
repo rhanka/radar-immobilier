@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+ROOT="${1:-$(cd "$(dirname "$0")/../.." && pwd)}"
+GRAPH_FILES=(
+  deploy/k8s/31-graph-projection-job.yaml
+  deploy/k8s/32-graph-projection-only-job.yaml
+  deploy/k8s/37-graphify34-apply-job.yaml
+  deploy/k8s/38-graphify34-emit-candidates-job.yaml
+  deploy/k8s/39-export-graph-nodes-job.yaml
+  deploy/k8s/40-export-gt-designation-events-job.yaml
+)
+SCRAPE_FILES=(deploy/k8s/33-scrape-job.yaml deploy/k8s/33b-scrape-cities-job.yaml)
+FILES=("${GRAPH_FILES[@]}" "${SCRAPE_FILES[@]}" deploy/k8s/36-db-migrate-job.yaml)
+PUBLIC_IMAGE_FILES=(
+  deploy/k8s/10-rbac.yaml
+  deploy/k8s/11-ci-deployer-preprod-rbac.yaml
+  deploy/k8s/secrets.example.yaml
+)
+RETIRED_MIGRATION_JOBS=(
+  deploy/k8s/object-storage-docs-prod/inventory-job.yaml
+  deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml
+  deploy/k8s/object-storage-docs-prod/conditional-proof-job.yaml
+  deploy/k8s/object-storage-docs-prod/copy-job.yaml
+  deploy/k8s/object-storage-inventory-preprod/job.yaml
+  deploy/k8s/object-storage-inventory-preprod/docs-inventory-job.yaml
+  deploy/k8s/object-storage-inventory-preprod/docs-conditional-proof-job.yaml
+  deploy/k8s/object-storage-inventory-preprod/docs-copy-job.yaml
+  deploy/k8s/object-storage-inventory-preprod/docs-canonical-copy-job.yaml
+)
+RETIRED_LAUNCHERS=(
+  'Makefile|object-storage-inventory-preprod-start'
+  'Makefile|object-storage-docs-preprod-start'
+  'Makefile|object-storage-docs-preprod-retry-never-started'
+  'Makefile|object-storage-docs-preprod-prove-conditional-write'
+  'Makefile|object-storage-docs-preprod-copy'
+  'Makefile|object-storage-docs-preprod-copy-canonical'
+  'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-fast-start'
+  'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-proof'
+  'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-copy'
+  'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-start'
+)
+FAIL=0
+fail() { echo "FAIL: $*" >&2; FAIL=$((FAIL + 1)); }
+
+while IFS= read -r path; do
+  rel="${path#"$ROOT/"}"
+  grep -Ev '^[[:space:]]*(#|$)' "$path" |
+    grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|rg\.fr-par\.scw\.cloud|radar-registry-pull|graph-copy-creds|key:[[:space:]]*SCW_(AK|SK)' &&
+    fail "$rel contains an active legacy SCW/MinIO reference"
+done < <(find "$ROOT/.github/workflows" "$ROOT/deploy/k8s" -type f \
+  \( -name '*.yaml' -o -name '*.yml' \) \
+  ! -path "$ROOT/deploy/k8s/object-storage-docs-prod/*" \
+  ! -path "$ROOT/deploy/k8s/object-storage-inventory-preprod/*" | sort)
+
+binding() {
+  local rel="$1" var="$2" ref_kind="$3" resource="$4" key="$5" block
+  block="$(awk -v var="$var" '
+    $0 ~ "^[[:space:]]*- name: " var "[[:space:]]*$" { found=1; print; next }
+    found && $0 ~ "^[[:space:]]*- name: " { exit }
+    found { print }
+  ' "$ROOT/$rel")"
+  [ -n "$block" ] || { fail "$rel missing $var"; return; }
+  grep -Fq 'valueFrom:' <<<"$block" || fail "$rel $var is not a reference"
+  grep -Eq '^[[:space:]]+value:[[:space:]]' <<<"$block" && fail "$rel $var mixes or uses value"
+  grep -Fq "$ref_kind:" <<<"$block" || fail "$rel $var is not a $ref_kind"
+  grep -Fq "name: $resource" <<<"$block" || fail "$rel $var uses the wrong resource"
+  grep -Fq "key: $key" <<<"$block" || fail "$rel $var uses the wrong key"
+  grep -Eq 'optional:[[:space:]]*true' <<<"$block" && fail "$rel $var is optional"
+}
+
+for rel in "${GRAPH_FILES[@]}"; do
+  for suffix in ENDPOINT BUCKET REGION FORCE_PATH_STYLE; do
+    binding "$rel" "GRAPH_S3_$suffix" configMapKeyRef radar-api "GRAPH_S3_$suffix"
+  done
+  for suffix in ACCESS_KEY SECRET_KEY; do
+    binding "$rel" "GRAPH_S3_$suffix" secretKeyRef radar-graph-s3-credentials "GRAPH_S3_$suffix"
+  done
+done
+for rel in "${SCRAPE_FILES[@]}"; do
+  for suffix in ENDPOINT BUCKET REGION FORCE_PATH_STYLE; do
+    binding "$rel" "SCRAPE_S3_$suffix" configMapKeyRef radar-api "SCRAPE_S3_$suffix"
+  done
+  for suffix in ACCESS_KEY SECRET_KEY; do
+    binding "$rel" "SCRAPE_S3_$suffix" secretKeyRef radar-scrape-s3-credentials "SCRAPE_S3_$suffix"
+  done
+  grep -Eiq 'radar-graph-s3-credentials|sentropic-geo|GEO_[A-Z0-9_]*S3' "$ROOT/$rel" &&
+    fail "$rel reuses a GRAPH or Geo identity for DOCS"
+done
+
+for rel in "${FILES[@]}"; do
+  grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|sentropic-geo|GEO_DOCUMENTS_S3' "$ROOT/$rel" && fail "$rel contains a forbidden storage literal"
+  grep -Eq 'optional:[[:space:]]*true|radar-s3-credentials' "$ROOT/$rel" && fail "$rel retains an optional or generic credential fallback"
+done
+for suffix in ENDPOINT BUCKET REGION FORCE_PATH_STYLE ACCESS_KEY SECRET_KEY; do
+  binding deploy/k8s/30-api.yaml "S3_$suffix" secretKeyRef \
+    radar-docs-s3-credentials "DOCS_S3_$suffix"
+done
+grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs' \
+  "$ROOT/deploy/k8s/30-api.yaml" && fail 'deploy/k8s/30-api.yaml retains a legacy storage binding'
+grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|radar-s3-credentials|optional:[[:space:]]*true' \
+  "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" && fail 'deploy/k8s/34-refresh-cronjob.yaml retains a legacy storage binding'
+grep -Fq 'name: radar-refresh-pv' "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" ||
+  fail 'deploy/k8s/34-refresh-cronjob.yaml lost radar-refresh-pv'
+for rel in "${PUBLIC_IMAGE_FILES[@]}"; do
+  grep -Eiq 'radar-registry-pull|rg\.fr-par\.scw\.cloud' "$ROOT/$rel" &&
+    fail "$rel retains a legacy SCW registry reference"
+done
+for rel in "${RETIRED_MIGRATION_JOBS[@]}"; do
+  [ ! -e "$ROOT/$rel" ] || fail "$rel must remain retired after the OVH cutover"
+done
+for entry in "${RETIRED_LAUNCHERS[@]}"; do
+  rel="${entry%%|*}"
+  target="${entry#*|}"
+  body="$(awk -v target="$target:" '
+    $0 ~ "^" target { found=1; next }
+    found && $0 !~ /^\t/ && $0 !~ /^$/ { exit }
+    found { print }
+  ' "$ROOT/$rel")"
+  grep -Fq 'retired:' <<<"$body" || fail "$rel target $target is not fail-closed"
+  grep -Eq 'KUBECTL|kubectl|[[:space:]](apply|create|delete)[[:space:]]' <<<"$body" &&
+    fail "$rel target $target retains a cluster mutation"
+done
+grep -Eiq 'radar-registry-pull|SCW[[:space:]]+(Container[[:space:]]+)?registry' \
+  "$ROOT/deploy/k8s/README.md" && fail 'deploy/k8s/README.md retains legacy registry guidance'
+grep -Eiq 's3\.fr-par\.scw\.cloud|radar-immobilier-docs-pocs|radar-s3-credentials|Scaleway|SCW' \
+  "$ROOT/tools/grounding/drive-grounding.sh" &&
+  fail 'tools/grounding/drive-grounding.sh retains a legacy object-storage binding'
+grep -Eiq 'refresh-diag|REFRESH_DIAG_ENABLED|radar-refresh-diag' \
+  "$ROOT/.github/workflows/build-push-images.yml" &&
+  fail '.github/workflows/build-push-images.yml retains the legacy refresh diagnostic'
+grep -Eiq 'radar-grounding|deploy/grounding' "$ROOT/.github/workflows/build-push-images.yml" &&
+  fail '.github/workflows/build-push-images.yml still builds the retired grounding image'
+[ ! -e "$ROOT/.github/workflows/grounding-preprod.yml" ] ||
+  fail '.github/workflows/grounding-preprod.yml must be retired'
+[ ! -e "$ROOT/.github/workflows/grounding-publish-prod.yml" ] ||
+  fail '.github/workflows/grounding-publish-prod.yml must be retired'
+[ ! -e "$ROOT/deploy/k8s/41-grounding-citation-job.yaml" ] ||
+  fail 'deploy/k8s/41-grounding-citation-job.yaml must be retired'
+for rel in deploy/k8s/grounding-preprod/kustomization.yaml deploy/k8s/grounding-preprod/projection-job.preprod.yaml; do
+  [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
+done
+for rel in deploy/k8s/71-networkpolicy-graph-projection-minio-preprod.yaml \
+  deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml deploy/grounding/Dockerfile; do
+  [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
+done
+[ ! -e "$ROOT/deploy/k8s/41-grounding-worklist-configmap.yaml" ] ||
+  fail 'deploy/k8s/41-grounding-worklist-configmap.yaml must be retired'
+for rel in deploy/k8s/refresh-diag/diag-refresh-job.yaml deploy/k8s/refresh-diag/kustomization.yaml; do
+  [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
+done
+
+for rel in scripts/mount-scw.sh scripts/umount-scw.sh; do
+  [ ! -e "$ROOT/$rel" ] || fail "$rel must be retired"
+done
+[ ! -e "$ROOT/deploy/k8s/25-minio.yaml" ] || fail 'deploy/k8s/25-minio.yaml must be retired'
+for rel in deploy/k8s/kustomization.yaml deploy/k8s/70-networkpolicy.yaml; do
+  grep -Eiq 'radar-minio|component:[[:space:]]*minio|25-minio\.yaml' "$ROOT/$rel" &&
+    fail "$rel retains a PROD MinIO resource"
+done
+[ ! -e "$ROOT/deploy/k8s/32b-reproject-etape-job.yaml" ] ||
+  fail 'deploy/k8s/32b-reproject-etape-job.yaml must be retired'
+for expected in \
+  'S3_ENDPOINT=http://minio:9000' \
+  'S3_REGION=fr-par' \
+  'S3_BUCKET=radar-immobilier-raw' \
+  'S3_ACCESS_KEY=minioadmin' \
+  'S3_SECRET_KEY=minioadmin'; do
+  grep -Fqx "$expected" "$ROOT/.env.example" || fail ".env.example local setting changed: $expected"
+done
+grep -Fq 'SCW_TEM_API_BASE_URL: "https://api.scaleway.com"' "$ROOT/deploy/k8s/30-api.yaml" || fail 'TEM configuration changed'
+grep -Fq 'name: radar-tem-credentials' "$ROOT/deploy/k8s/30-api.yaml" || fail 'TEM Secret reference changed'
+
+if [ "$FAIL" -ne 0 ]; then
+  echo "object-storage binding check: $FAIL failure(s)" >&2
+  exit 1
+fi
+echo "object-storage binding check: ok (${#FILES[@]} released manifests)"
+echo "object-storage legacy client ledger: empty"
