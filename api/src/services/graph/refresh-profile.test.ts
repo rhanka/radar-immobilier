@@ -169,11 +169,15 @@ describe("refresh profile extraction", () => {
     expect(error.message).toContain("missing_citation_page");
   });
 
-  it("should accept output with profile-compliant entity citations", async () => {
-    const results = await extractRefreshProfile([chunk()], {
-      context, textClient: client([{ text: JSON.stringify(extraction()) }], []), maxOutputTokens: 512,
-    });
-    expect(results[0]!.extraction).toEqual(extraction());
+  it("should accept every status value announced by the product profile", async () => {
+    for (const status of context.profile.hardening.statuses) {
+      const value = extraction();
+      value.nodes[0]!.status = status;
+      const results = await extractRefreshProfile([chunk()], {
+        context, textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+      });
+      expect(results[0]!.extraction).toEqual(value);
+    }
   });
 
   it("should expand compact model citations with the exact PDF identity", async () => {
@@ -183,7 +187,7 @@ describe("refresh profile extraction", () => {
     expect(results[0]!.extraction).toEqual(extraction());
   });
 
-  it("should accept the exact declared v5 contract version", async () => {
+  it("should accept the exact declared v6 contract version", async () => {
     const declared = { ...compactExtraction(), contract_version: REFRESH_PROFILE_CONTRACT_VERSION };
     const results = await extractRefreshProfile([chunk()], { context,
       textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
@@ -191,8 +195,8 @@ describe("refresh profile extraction", () => {
     expect(results[0]!.extraction).toEqual(extraction());
   });
 
-  it("should reject a declared v4 contract version with a named violation", async () => {
-    const declared = { ...compactExtraction(), contract_version: "immo-pv-extraction-v4" };
+  it("should reject a declared v5 contract version with a named violation", async () => {
+    const declared = { ...compactExtraction(), contract_version: "immo-pv-extraction-v5" };
     await expect(extractRefreshProfile([chunk()], { context,
       textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
     })).rejects.toThrow("contract_version_mismatch");
@@ -323,9 +327,17 @@ describe("refresh profile extraction", () => {
     expect(results[1]).toMatchObject({ chunk: { originalKey: oracle.originalKey },
       extraction: { nodes: [], edges: [] } });
     const schema = JSON.parse(seen[0]!.schema);
-    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v5");
+    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v6");
     expect(schema.contract_version).toBe(REFRESH_PROFILE_CONTRACT_VERSION);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
+    const nodeStatuses = ["candidate", "attached", "needs_review", "validated", "rejected", "superseded"];
+    expect(context.profile.hardening.statuses).toEqual(nodeStatuses);
+    for (const nodeType of ["Constraint", "Bylaw"]) {
+      expect(schema.ontology.node_properties[nodeType].status).toEqual({
+        type: "string", enum: nodeStatuses,
+        description: "Exact node status accepted by the product validator.",
+      });
+    }
     expect(schema.ontology.relation_signatures.supports).toMatchObject({
       source_node_types: ["Source"], requires_evidence_refs: true,
     });
@@ -338,6 +350,7 @@ describe("refresh profile extraction", () => {
     });
     expect(schema.graph_contract.evidence_refs).toMatchObject({
       type: "array", items: { type: "string", references: "evidence[].id" }, minItems: 1,
+      required_for: ["every edge"],
     });
     expect(schema.graph_contract.entity_citations).toMatchObject({
       node_field: "nodes[].citations", edge_field: "edges[].citations",
@@ -361,9 +374,15 @@ describe("refresh profile extraction", () => {
     expect(seen[0]!.prompt).toContain("never emit a numeric confidence");
     expect(seen[0]!.prompt).toContain("arrays of string IDs from evidence[].id");
     expect(seen[0]!.prompt).toContain("Evidence refs do not replace citations");
+    expect(seen[0]!.prompt).toContain("use only ontology.node_properties.<node_type>.status.enum");
+    expect(seen[0]!.prompt).toContain(`- allowed_statuses: ${nodeStatuses.join(", ")}`);
+    expect(seen[0]!.prompt).toContain("Every edge must carry at least one evidence_refs ID that exists in evidence[]");
+    expect(seen[0]!.prompt).toContain('{"edges":[{"evidence_refs":["ev-1"]}],"evidence":[{"id":"ev-1"}]}');
     expect(seen[0]!.prompt).toContain("Every node and every edge must include a non-empty citations array");
     expect(seen[0]!.prompt).toContain("Do not repeat the document identity inside citations");
-    expect(seen[0]!.prompt).toContain("non-empty verbatim text on its claimed physical PDF page");
+    expect(seen[0]!.prompt).toContain("including mistakes, spacing, and typography; correct nothing");
+    expect(seen[0]!.prompt).toContain('PDF text says "YvesMalouin"');
+    expect(seen[0]!.prompt).toContain('never "Yves-Malouin"');
   });
 
   it("should reject the page-3 quotation when the model attributes it to page 1", async () => {
