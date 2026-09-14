@@ -421,7 +421,7 @@ object-storage-inventory-preprod-start: ## Retired after the OVH cutover
 	@echo '[object-storage-inventory] retired: no MinIO inventory can be started'; exit 1
 
 .PHONY: object-storage-docs-preprod-validate
-object-storage-docs-preprod-validate: ## Render support and validate the DOCS bucket/inventory Jobs offline
+object-storage-docs-preprod-validate: ## Validate post-cutover support and retired migration Jobs offline
 	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[object-storage-docs] kubectl not found"; exit 1; }
 	@jq -n -f deploy/ci/docs-secret-from-raw.jq >/dev/null
 	@jq -n -f deploy/ci/validate-docs-secret.jq >/dev/null
@@ -447,14 +447,10 @@ object-storage-docs-preprod-validate: ## Render support and validate the DOCS bu
 	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
 	@$(KUBECTL) create --dry-run=client --validate=false \
 	  -f $(OBJECT_STORAGE_DOCS_BUCKET_JOB) -o name >/dev/null
-	@$(KUBECTL) create --dry-run=client --validate=false \
-	  -f $(OBJECT_STORAGE_DOCS_INVENTORY_JOB) -o name >/dev/null
-	@$(KUBECTL) create --dry-run=client --validate=false \
-	  -f $(OBJECT_STORAGE_DOCS_PROOF_JOB) -o name >/dev/null
-	@$(KUBECTL) create --dry-run=client --validate=false \
-	  -f $(OBJECT_STORAGE_DOCS_COPY_JOB) -o name >/dev/null
-	@$(KUBECTL) create --dry-run=client --validate=false \
-	  -f $(OBJECT_STORAGE_DOCS_CANONICAL_COPY_JOB) -o name >/dev/null
+	@for manifest in job.yaml docs-inventory-job.yaml docs-conditional-proof-job.yaml \
+	  docs-copy-job.yaml docs-canonical-copy-job.yaml; do \
+	  test ! -e "$(OBJECT_STORAGE_INVENTORY_DIR)/$$manifest"; \
+	done
 
 .PHONY: object-storage-docs-preprod-provision
 object-storage-docs-preprod-provision: ## Create the concern-specific Secret and exact BHS DOCS bucket
