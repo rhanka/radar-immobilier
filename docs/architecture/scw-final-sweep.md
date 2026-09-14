@@ -3,6 +3,7 @@
 Date: 2026-09-13
 Audit baseline: `097036783006226afea53a6b49383bf70890774f` (`origin/main`)
 Live transition receipt: [`evidence/scw-final-sweep-prod-live-receipt-2026-09-13.json`](evidence/scw-final-sweep-prod-live-receipt-2026-09-13.json)
+Final parity receipt: [`evidence/scw-final-sweep-prod-final-parity-receipt-2026-09-14.json`](evidence/scw-final-sweep-prod-final-parity-receipt-2026-09-14.json)
 Scope: historical baseline plus non-secret transition reconciliation. The
 freshness pass was read-only; it did not mutate storage, cluster resources,
 Secrets, or workloads.
@@ -26,19 +27,26 @@ data PVC, or ingress NetworkPolicy; the 1 Gi evidence checkpoint PVC remains
 Bound. These are accepted facts about the performed transition, not a rollback
 of the historical baseline below.
 
-Final parity acceptance is nevertheless reopened. That completed Job proved
-destination bodies, SHA-256 values, sizes and the exact key/size set, but its
-version did not compare destination Content-Type/Encoding/Cache-Control/
-Disposition, user metadata or tags, and its summary did not record the later
-final-source rescan fields. A fresh read-only full scan with the strengthened
-checker must pass before `exactParity` is accepted again. The repository
-`object-storage-docs-prod-final-status` target first stopped at the quota check
-because the production `ci-deployer` may not `get resourcequotas`. Re-running
-that same read-only target with the existing operator context on the identical
-OVH API server and explicit production namespace passed fully: MinIO absence,
-checkpoint, quota, dedicated DOCS/GRAPH/SCRAPE bindings, API rollout and TEM
-preservation. The linked receipt records both the restricted-principal denial
-and the successful final status without object keys or Secret values.
+Final production parity was restored by the strengthened read-only Job
+`radar-object-storage-copy-docs-prod-vz8kd`. Its four separate checkpoint
+proofs record zero source missing/extra/size conflicts, zero destination
+attribute conflicts, zero destination missing/extra/size conflicts, and a
+complete summary. The final source and destination scans each verified 59,017
+objects and 12,534,514,457 bytes against canonical manifest SHA-256
+`52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425`;
+the copy pass matched every object, copied none, pruned none and failed none.
+Source and target exactness, attribute parity, overall exact parity and
+completion are all true. The final parity receipt records the SHA-256 of each
+proof file without object keys or Secret values.
+
+The repository `object-storage-docs-prod-final-status` target first stopped at
+the quota check because the production `ci-deployer` may not `get
+resourcequotas`. Re-running that same read-only target with the existing
+operator context on the identical OVH API server and explicit production
+namespace passed fully: MinIO absence, checkpoint, quota, dedicated
+DOCS/GRAPH/SCRAPE bindings, API rollout and TEM preservation. The live
+transition receipt records both the restricted-principal denial and the
+successful final status without object keys or Secret values.
 
 The branch plan records the earlier preproduction transition separately. This
 freshness pass did not re-observe preproduction and therefore makes no newer

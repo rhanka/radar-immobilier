@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-09-14T00:50:37.811Z",
+  "environment": "prod",
+  "cluster": {
+    "server": "https://hlhedx.c1.bhs5.k8s.ovh.net",
+    "namespace": "radar-immobilier"
+  },
+  "job": {
+    "name": "radar-object-storage-copy-docs-prod-vz8kd",
+    "uid": "07d568ee-ba1c-4934-9e99-755e940e106a",
+    "podUid": "f62d9f2d-ba4e-4854-97e8-483d91bdd6e7",
+    "complete": true,
+    "podSucceeded": true,
+    "restarts": 0
+  },
+  "proofs": {
+    "sourceFinalDiff": {
+      "file": "source-final-diff.json",
+      "sha256": "bbeb344f7fc0506291966c970f4efb23cf3395e2fb9d8fc2b6e8294dca9b9915",
+      "missing": 0,
+      "extra": 0,
+      "sizeConflicts": 0
+    },
+    "targetAttributeConflicts": {
+      "file": "target-attribute-conflicts.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "conflicts": 0
+    },
+    "targetFinalDiff": {
+      "file": "target-final-diff.json",
+      "sha256": "bbeb344f7fc0506291966c970f4efb23cf3395e2fb9d8fc2b6e8294dca9b9915",
+      "missing": 0,
+      "extra": 0,
+      "sizeConflicts": 0
+    },
+    "summary": {
+      "file": "summary.json",
+      "sha256": "0e23deaa2d7982794f33673fecf0776f25b64a22e70be6cd42d4789122d92ca6",
+      "expected": 59017,
+      "processed": 59017,
+      "matching": 59017,
+      "copied": 0,
+      "failed": 0,
+      "logicalBytes": 12534514457,
+      "sourceVerifiedObjects": 59017,
+      "sourceVerifiedBytes": 12534514457,
+      "targetVerifiedObjects": 59017,
+      "targetVerifiedBytes": 12534514457,
+      "canonicalDigest": "52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425",
+      "sourceManifestDigest": "52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425",
+      "sourceObservedAt": "2026-09-14T00:41:05.839Z",
+      "targetObservedAt": "2026-09-14T00:50:37.808Z",
+      "completedAt": "2026-09-14T00:50:37.811Z",
+      "sourceExact": true,
+      "targetExactParity": true,
+      "exactParity": true,
+      "complete": true
+    }
+  },
+  "capture": {
+    "method": "read-only checkpoint PVC reader",
+    "readerPodRemovedAfterCapture": true,
+    "secretValuesCaptured": false,
+    "objectKeysCaptured": false
+  }
+}
