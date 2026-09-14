@@ -48,6 +48,11 @@ V13_T1_ROOT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/t1-v13-19d0d8b2
 V13_ARM_DIR = $(if $(filter gemini-low,$(VARIANT)),campaign-gemini,$(if $(filter sonnet-direct,$(VARIANT)),campaign-direct,campaign-cloudcode))
 V13_ARM_RESULTS = $(V13_RESULTS)/$(V13_ARM_DIR)
 ORACLE_V2_ROOT := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark
+# v14 and v15 share one contract, one snapshot and one cap: CAMPAIGN selects the result root.
+V14_T1_ROOT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/t1-v14-d93f5c93
+V14X_RESULTS = $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/$(CAMPAIGN)
+V14X_CONTROL_RESULTS = $(V14X_RESULTS)/control
+V14X_GEMINI_RESULTS = $(V14X_RESULTS)/campaign-gemini
 RUNTIME_TEXT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/runtime-text
 CAS_ROOT := $(MAIN_ROOT)/.lanes/conductor/tmp/graphify-cas/run-dryrun2-final-20260911T215911Z
 NODE_IMAGE := node:22-bookworm-slim
@@ -65,6 +70,9 @@ T1_COMMIT_V10 := 50d91e0e12a0d990a5ba23cb1f01104d01bcbb78
 T1_COMMIT_V11 := 5068dda38bffe8659a85c2e51f566fb9c6ad4584
 # Contract immo-pv-extraction-v8, PR #688 (fix/refresh-profile-contract-v6).
 T1_COMMIT_V13 := 19d0d8b2edc6900180780478c6b8b4a9feeb5b52
+# Contract immo-pv-extraction-v9, same PR #688 branch. ac99728f carried the first v9 wording,
+# which the v14 Valcourt control measured as emptying an agenda extraction; d93f5c93 fixes it.
+T1_COMMIT_V14 := d93f5c9358656536da8c90d91300fcb6076484a4
 KEYRING_SOURCE := /home/antoinefa/.sentropic/llm-mesh-keyring
 BASELINE_GOLD := $(MAIN_ROOT)/.lanes/conductor/tmp/bench-llm/bench/v2/gold.json
 PREFLIGHT_FILE ?= preflight-before.json
@@ -78,6 +86,7 @@ GEMINI_MODEL ?= gemini-3.8-flash-tiered
 .PHONY: test-v11 score-v11 t1-v11-snapshot replay-v11-freeze prepare-prompts-v11 run-v11-control run-v11-real requalify-v11-receipts
 .PHONY: probe-v12-cloudcode check-v12-ping ping-v12-direct ping-v12-cloudcode replay-v12-freeze run-v12-real requalify-v12-receipts score-v12 test-v12 freeze-blind-v12
 .PHONY: build-oracle-v2 test-oracle-v2 compare-oracle-v1-v2
+.PHONY: t1-v14-snapshot replay-v14-freeze prepare-prompts-v14 check-v15-replay run-v14-control run-v14-real requalify-v14-receipts score-v14 test-v14 freeze-blind-v14
 .PHONY: t1-v13-snapshot replay-v13-freeze prepare-prompts-v13 run-v13-control run-v13-real requalify-v13-receipts score-v13 test-v13 freeze-blind-v13
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
@@ -1081,3 +1090,104 @@ compare-oracle-v1-v2:
 	  -e BENCHMARK_COMPARISON_ARMS='$(COMPARISON_ARMS)' \
 	  -e BENCHMARK_COMPARISON_OUTPUT=/out/$(or $(COMPARISON_FILE),oracle-v2-comparison.json) \
 	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/compare-oracle-v1-v2.mjs
+
+# ── v14 / v15 : contract v9, Gemini LOW, cap 64 000 ───────────────────────────
+# v14 changes exactly one thing against v13: the profile contract. v15 is an exact replay of
+# v14 - same snapshot, same corpus, same oracle, same cap - so the pair measures variance.
+t1-v14-snapshot:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	mkdir -p $(V14_T1_ROOT)
+	git -C $(BENCHMARK_ROOT) archive $(T1_COMMIT_V14) | tar -x -C $(V14_T1_ROOT)
+
+replay-v14-freeze:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	test ! -e $(V14X_RESULTS)/manifest.json
+	mkdir -p $(V14X_RESULTS)
+	cp $(V13_RESULTS)/manifest.json $(V14X_RESULTS)/manifest.json
+	cp $(V13_RESULTS)/manual-oracle.json $(V14X_RESULTS)/manual-oracle.json
+	sed -i 's/"campaign":"v13"/"campaign":"$(CAMPAIGN)"/' $(V14X_RESULTS)/manifest.json
+
+prepare-prompts-v14: t1-v14-snapshot
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V14_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V14X_RESULTS),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=$(CAMPAIGN) \
+	  -e BENCHMARK_FREEZE_OUTPUT=/results/prompt-freeze.json \
+	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V14) \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  sh -c 'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/prepare-prompts.mjs'
+
+# The exact-replay proof: v15 reproduces every v14 schema and prompt hash, and the same cap.
+check-v15-replay:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_REPLAY_REFERENCE=v14 \
+	  -e BENCHMARK_REPLAY_CAMPAIGN=v15 -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/check-exact-replay.mjs
+
+run-v14-control: check-v4-integration-ready t1-v14-snapshot
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	test -f $(V14X_RESULTS)/manifest.json -a -f $(V14X_RESULTS)/prompt-freeze.json
+	mkdir -p $(V14X_CONTROL_RESULTS)
+	$(MAKE) run-case DOC=valcourt-2026-06-01-agenda VARIANT=gemini-low CAMPAIGN=$(CAMPAIGN) \
+	  CAMPAIGN_RESULTS=$(V14X_CONTROL_RESULTS) T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V14) \
+	  T1_CAMPAIGN_ROOT=$(V14_T1_ROOT) ENV=$(ENV)
+
+run-v14-real: check-v4-integration-ready t1-v14-snapshot
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	test -f $(V14X_RESULTS)/manifest.json -a -f $(V14X_RESULTS)/prompt-freeze.json
+	test "$(VARIANT)" = "gemini-low"
+	mkdir -p $(V14X_GEMINI_RESULTS)
+	$(MAKE) run-case DOC=$(DOC) VARIANT=$(VARIANT) CAMPAIGN=$(CAMPAIGN) \
+	  CAMPAIGN_RESULTS=$(V14X_GEMINI_RESULTS) ATTEMPT=$(or $(ATTEMPT),1) \
+	  RETRY_REASON='$(RETRY_REASON)' T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V14) \
+	  T1_CAMPAIGN_ROOT=$(V14_T1_ROOT) ENV=$(ENV)
+
+requalify-v14-receipts: t1-v14-snapshot
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V14_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V14X_GEMINI_RESULTS),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=/workspace/t1 \
+	  -e BENCHMARK_CAMPAIGN=$(CAMPAIGN) -e BENCHMARK_VARIANT=gemini-low \
+	  -e BENCHMARK_RESULT_ROOT=/results -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
+	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/requalify-v14-receipts.mjs'
+
+score-v14:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V14X_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=$(CAMPAIGN) \
+	  -e BENCHMARK_VARIANT=gemini-low -e BENCHMARK_RESULT_ROOT=/results/campaign-gemini \
+	  -e BENCHMARK_SCORE_OUTPUT=/results/comparison-gemini-low.json \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/score-v6.mjs
+
+freeze-blind-v14:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V14X_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=$(CAMPAIGN) \
+	  -e BENCHMARK_BUNDLE_ROOT=/results -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/freeze-blind-v13.mjs
+
+test-v14: runtime-text
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=$(or $(CAMPAIGN),v14) \
+	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V14) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node --test tools/refresh-benchmark/benchmark.test.mjs \
+	    tools/refresh-benchmark/integration-contract.test.mjs \
+	    tools/refresh-benchmark/runtime-config.test.mjs
+	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) sh -c 'node --check tools/refresh-benchmark/requalify-v14-receipts.mjs \
+	    && node --check tools/refresh-benchmark/check-exact-replay.mjs'
