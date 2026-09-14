@@ -91,6 +91,13 @@ test("the frozen v10 contract cap applies without a diagnostic override", () => 
   assert.throws(() => resolveOutputCap("16384", context, 65_536), /restricted to the Valcourt/);
 });
 
+test("the frozen v11 contract cap applies without a diagnostic override", () => {
+  const context = { campaign: "v11", documentId: "waterloo-2026-08-18",
+    variantName: "gemini-low" };
+  assert.equal(resolveOutputCap(undefined, context, 65_536), 65_536);
+  assert.throws(() => resolveOutputCap("16384", context, 65_536), /restricted to the Valcourt/);
+});
+
 test("terminal Cloud Code SSE evidence retains only closure metadata", () => {
   const transcript = [
     'data: {"response":{"candidates":[{"content":{"parts":[{"text":"secret body"}]}}]}}',

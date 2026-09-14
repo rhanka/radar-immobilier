@@ -38,5 +38,5 @@ export const executionContract = Object.freeze({
 });
 
 export function outputTokenCapForCampaign(campaign) {
-  return ["v7", "v8", "v9", "v10"].includes(campaign) ? 65_536 : executionContract.maxOutputTokens;
+  return ["v7", "v8", "v9", "v10", "v11"].includes(campaign) ? 65_536 : executionContract.maxOutputTokens;
 }
