@@ -1,129 +1,2831 @@
 {
-  "schema": "immo-architecture-monthly-evidence/v5",
-  "revision": "D8",
-  "generatedAt": "2026-09-13T22:55:05.016Z",
+  "schema": "immo-architecture-monthly-evidence/v6",
+  "revision": "D9",
+  "generatedAt": "2026-09-14T17:55:25.519Z",
   "period": {
     "timezone": "America/Toronto",
     "startInclusive": "2026-08-10T00:00:00-04:00",
     "endExclusive": "2026-09-14T00:00:00-04:00",
     "days": 35,
     "hours": 840,
-    "joinEvidence": "last cost report merged on origin/main ends 2026-08-09",
-    "externalInvoiceIdentityVerified": false,
-    "tokenCaptureCutoff": "2026-09-13T21:09:35.483Z",
-    "september13TokensAfterCutoffIncluded": false
+    "inclusiveLabel": "10 août → 13 septembre 2026",
+    "joinEvidence": "preceding report is located at historical revision 72b966664523801ea00cfcb704e0285ee765c136 without claiming main ancestry",
+    "externalInvoiceIdentityVerified": true,
+    "tokenCaptureCutoff": "2026-09-14T04:57:42.751Z",
+    "september13TokensAfterCutoffIncluded": true
   },
   "transitionState": {
-    "t1": {
+    "refresh": {
       "graphify": "0.18.0",
-      "model": "Luna high",
-      "firstKubernetesRun": "failed before LLM because input was .html, PDF required",
-      "accepted": false
+      "llmMesh": "0.19.1",
+      "cronUtc": "05:17",
+      "preproduction": "accepted",
+      "production": "dormant-pending-PR-682-promotion",
+      "selectedProductionModel": null
+    },
+    "hosting": {
+      "july": "Scaleway-only before OVH decision",
+      "august10": "approximately 90 percent migrated to OVH with MinIO retained",
+      "september13": "OVH preproduction and production without MinIO"
     },
     "t2": {
       "rawParityAndOvhRebind": true,
-      "docsHistoricalPreprodMinio": {
-        "objects": 144193,
-        "gigabytes": 28.34
-      },
-      "docsProductionScwReference": {
-        "bucket": "docs-pocs",
-        "objects": 59017,
-        "bytes": 12534514457
-      },
-      "ownerDecision": "production source is exact initial canonical set; OVH prod and preprod converge to same 59,017 keys+hashes; preprod surplus not migrated",
-      "implementationCommit": {
-        "branch": "chore/scw-final-sweep",
-        "head": "2ccabfc8",
-        "onOriginMain": false
-      },
-      "preproduction": {
-        "status": "accepted",
+      "minioRemovedFrom": [
+        "preproduction",
+        "production"
+      ],
+      "mergedPullRequests": [
+        683,
+        685
+      ],
+      "copyJob": {
+        "name": "radar-object-storage-copy-docs-prod-vz8kd",
         "objects": 59017,
         "bytes": 12534514457,
-        "canonicalManifestSha256": "52646a7b…0425",
+        "copied": 0,
         "failed": 0,
-        "docsOvhActive": true,
-        "removed": [
-          "MinIO StatefulSet",
-          "MinIO Pod",
-          "MinIO Service",
-          "40 Gi data PVC",
-          "six MinIO NetworkPolicies"
-        ],
-        "retained": [
-          "migration/checkpoint PVC"
-        ],
-        "quotaBefore": {
-          "pvcs": 4,
-          "storageGi": 47
-        },
-        "quotaAfter": {
-          "pvcs": 3,
-          "storageGi": 7
-        },
-        "workloadsReady": {
-          "api": "1/1",
-          "mcp": "1/1",
-          "ui": "1/1"
-        }
+        "sha256Anchors": 4
       },
-      "production": {
-        "status": "in-progress",
-        "accepted": false
-      }
+      "workloadsOnOvhS3": [
+        "api",
+        "graph",
+        "scrape"
+      ],
+      "scwRadarException": "TEM"
     },
-    "t3": {
-      "status": "gated",
-      "verdict": "await production T2 and post-cleanup capacity proof"
+    "cluster": {
+      "r2_15": {
+        "created": true,
+        "allocatableMiB": 12785,
+        "cpuPercent": 70,
+        "memoryPercent": 53
+      },
+      "kedaRemoved": true,
+      "b3_8Drained": 3,
+      "consolidationComplete": true
     },
     "scwTem": "retained until replacement validated"
   },
   "focus": {
     "html": "architecture-before-after-2026-09-13.html",
-    "htmlSha256": "f59ff8166aa9113f1fc1e9f3eb66c494dd1ed292dfeb9548207dc0bb98b008c7",
-    "artifactInputHash": "e8e3eaa3b6e272bb8ba37dd7cd76cc1877fa03e9bb1c90712d90b3e0da014bcd",
-    "architectureHash": "85759954afba141dace08405ed3382833350b472889e3ea786bdb32cb841b4fd",
+    "htmlSha256": "57c397b0ddda71d43a70a3289122fd9282ae984342fc42d9ef6d2123039c3a70",
+    "artifactInputHash": "537cf7b42ad1b918ef3ac79bf18365d2abcda9d7c04ca9b2bdc3f3a0e428e299",
+    "architectureHash": "2983f6ca18be0a68699f0a7e2d40a50a8a0a41362f61ec0a53fd04fdcca79e17",
     "transitionTargetsHash": "ca590533cede86b1713edfb0fbfbe95da25e1e6fc95eab2672d36dfd31384a81",
     "dossierHash": "e032da5a8cae6483bf3988eb7a84af5d550adbda2fcda6e14cfc05d25d8a4714",
-    "presentationHash": "0d1a618c5e308ac15838b5ad95781c42c7913dd5db9bdab6eb854231a010186f",
-    "choicesHash": "2aaa5fbaa2420b356127215f14e60f611c30cd49e8a9317b6f1289947a234cb8",
+    "presentationHash": "1f2f40c7010f8214eb659b8e279f27c2b746e7dad1f9f6fba9405b07de31826f",
+    "choicesHash": "92f1929e84f835051c207dc879032e9428a0f289f8c6e747dca729a7e9bd5c3c",
     "nativeNestedSvelteFlow": true,
-    "renderedMermaidCount": 2,
-    "primaryArchitectureViews": [
-      "asis-1",
-      "target-3"
+    "renderedMermaidCount": 5,
+    "graphOrder": [
+      "hosting-july-2026",
+      "hosting-august-20260810",
+      "hosting-today-20260913",
+      "pipeline-before-20260810",
+      "pipeline-after-20260913"
+    ],
+    "canonicalScenes": [
+      {
+        "id": "hosting-july-2026",
+        "pair": "A",
+        "date": "2026-07",
+        "sceneHash": "107d9cb7d741e54901aa14aa0aa4042b6cb069b4beae16e1ab8e1d4654a552e9",
+        "projection": {
+          "sceneId": "hosting-july-2026",
+          "pair": "A",
+          "date": "2026-07",
+          "nodes": [
+            {
+              "id": "A_API",
+              "kind": "service",
+              "label": "[API] radar-api",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_DB",
+              "kind": "store",
+              "label": "[DB] radar-postgres",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_DOCS",
+              "kind": "store",
+              "label": "[DOCS] radar-immobilier-docs",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_DOCS_S3",
+              "kind": "store",
+              "label": "[DOCS-POCS] docs-pocs",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_EDGE",
+              "kind": "network",
+              "label": "Load balancer → Traefik / TLS",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_SCW",
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_GEO",
+              "kind": "service",
+              "label": "[GEO-API] geo-api · geo",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GEO_DB",
+              "kind": "store",
+              "label": "[GEO-DB] geo / postgis",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GEO_S3",
+              "kind": "store",
+              "label": "[GEO-S3] sentropic-geo",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GRAPH_S3",
+              "kind": "store",
+              "label": "[GRAPH] radar-immobilier-graph",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_MINIO",
+              "kind": "store",
+              "label": "[MINIO] radar-minio · PVC",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PROD",
+              "kind": "cluster",
+              "label": "PRODUCTION · namespaces",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_SCW",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PROJECT",
+              "kind": "schedule",
+              "label": "[PROJECT] refresh-projection",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_RAW",
+              "kind": "store",
+              "label": "[RAW] radar-immobilier-raw",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SCRAPE",
+              "kind": "schedule",
+              "label": "[SCRAPE] radar-refresh-scrape",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SCW",
+              "kind": "cluster",
+              "label": "Scaleway · cluster Kubernetes",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_SCWREG",
+              "kind": "registry",
+              "label": "[SCW-REG] registre Scaleway",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SSO",
+              "kind": "service",
+              "label": "sentropic · auth-idp",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "sentropic"
+              ]
+            },
+            {
+              "id": "A_SSO_DB",
+              "kind": "store",
+              "label": "[SSO-DB] PostgreSQL SSO",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "sentropic"
+              ]
+            },
+            {
+              "id": "A_TEM",
+              "kind": "exception",
+              "label": "[SCW-TEM] Scaleway TEM",
+              "evidenceClass": "historical",
+              "runtimeState": "retained",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_UI",
+              "kind": "service",
+              "label": "[UI] radar-ui",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_URL",
+              "kind": "endpoint",
+              "label": "immo.sent-tech.ca",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_USER",
+              "kind": "actor",
+              "label": "Navigateur utilisateur",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "A_WS",
+              "kind": "workstation",
+              "label": "[WS-IMMO] poste opérateur",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "A_API__A_DB__a7056a455639",
+              "source": "A_API",
+              "target": "A_DB",
+              "label": "SQL",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_DOCS__09b842cf0f0e",
+              "source": "A_API",
+              "target": "A_DOCS",
+              "label": "documents dérivés",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_DOCS_S3__f5c326db33fd",
+              "source": "A_API",
+              "target": "A_DOCS_S3",
+              "label": "lecture PDF source",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_RAW__7bbc36a7e539",
+              "source": "A_API",
+              "target": "A_RAW",
+              "label": "objets RAW",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_SSO__d3792b8bf3a6",
+              "source": "A_API",
+              "target": "A_SSO",
+              "label": "OIDC / JWKS",
+              "dashed": false,
+              "both": true,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_TEM__0f9920188952",
+              "source": "A_API",
+              "target": "A_TEM",
+              "label": "courriel transactionnel",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "retained"
+            },
+            {
+              "id": "A_EDGE__A_UI__e3b0c44298fc",
+              "source": "A_EDGE",
+              "target": "A_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GEO__A_GEO_DB__a7056a455639",
+              "source": "A_GEO",
+              "target": "A_GEO_DB",
+              "label": "SQL",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GEO__A_GEO_S3__d0c2db91c0a1",
+              "source": "A_GEO",
+              "target": "A_GEO_S3",
+              "label": "lecture produits",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GRAPH_S3__A_PROJECT__e3b0c44298fc",
+              "source": "A_GRAPH_S3",
+              "target": "A_PROJECT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_MINIO__A_DOCS__9413868e65b3",
+              "source": "A_MINIO",
+              "target": "A_DOCS",
+              "label": "bucket sur PVC",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_MINIO__A_RAW__9413868e65b3",
+              "source": "A_MINIO",
+              "target": "A_RAW",
+              "label": "bucket sur PVC",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PROJECT__A_DB__a45bd616013a",
+              "source": "A_PROJECT",
+              "target": "A_DB",
+              "label": "étape 4 · upsert",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_SCRAPE__A_GRAPH_S3__a3953fb4b45e",
+              "source": "A_SCRAPE",
+              "target": "A_GRAPH_S3",
+              "label": "corpus et graphe",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_SCRAPE__A_RAW__902bf4477875",
+              "source": "A_SCRAPE",
+              "target": "A_RAW",
+              "label": "étapes 1 et 2",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_SCWREG__A_API__21b2eed1e328",
+              "source": "A_SCWREG",
+              "target": "A_API",
+              "label": "images",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_SCWREG__A_GEO__21b2eed1e328",
+              "source": "A_SCWREG",
+              "target": "A_GEO",
+              "label": "images",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_SCWREG__A_UI__21b2eed1e328",
+              "source": "A_SCWREG",
+              "target": "A_UI",
+              "label": "images",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_SSO__A_SSO_DB__1225ae6c1ae6",
+              "source": "A_SSO",
+              "target": "A_SSO_DB",
+              "label": "sessions",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_UI__A_API__702acf7c08d3",
+              "source": "A_UI",
+              "target": "A_API",
+              "label": "/api",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_UI__A_GEO__81fb168117fb",
+              "source": "A_UI",
+              "target": "A_GEO",
+              "label": "OGC",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_URL__A_EDGE__e3b0c44298fc",
+              "source": "A_URL",
+              "target": "A_EDGE",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_USER__A_SSO__3747cb0a027a",
+              "source": "A_USER",
+              "target": "A_SSO",
+              "label": "Redirection login",
+              "dashed": false,
+              "both": true,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_USER__A_URL__e3b0c44298fc",
+              "source": "A_USER",
+              "target": "A_URL",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_WS__A_GRAPH_S3__ccdcfe6ec99d",
+              "source": "A_WS",
+              "target": "A_GRAPH_S3",
+              "label": "étape 3 · Graphify local",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            }
+          ]
+        },
+        "nodes": 21,
+        "edges": 25,
+        "subflows": 2
+      },
+      {
+        "id": "hosting-august-20260810",
+        "pair": "A",
+        "date": "2026-08-10",
+        "sceneHash": "cab0c5ed3bbd90531f28735880e3cef399fb31294a7d8bb244b2077b6ab406d4",
+        "projection": {
+          "sceneId": "hosting-august-20260810",
+          "pair": "A",
+          "date": "2026-08-10",
+          "nodes": [
+            {
+              "id": "A_API",
+              "kind": "service",
+              "label": "[API] radar-api",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_DB",
+              "kind": "store",
+              "label": "[DB] radar-postgres",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_DOCS",
+              "kind": "store",
+              "label": "[DOCS] radar-immobilier-docs",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_DOCS_S3",
+              "kind": "store",
+              "label": "[DOCS-POCS] docs-pocs",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_EDGE",
+              "kind": "network",
+              "label": "Load balancer → Traefik / TLS",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_OVH",
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_GEO",
+              "kind": "service",
+              "label": "[GEO-API] geo-api · geo",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GEO_DB",
+              "kind": "store",
+              "label": "[GEO-DB] geo / postgis",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GEO_S3",
+              "kind": "store",
+              "label": "[GEO-S3] sentropic-geo",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GRAPH_S3",
+              "kind": "store",
+              "label": "[GRAPH] radar-immobilier-graph",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_MINIO",
+              "kind": "store",
+              "label": "[MINIO] radar-minio · PVC",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_OVH",
+              "kind": "cluster",
+              "label": "OVHcloud BHS · cluster poc-ca",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_PROD",
+              "kind": "cluster",
+              "label": "PRODUCTION · namespaces",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_OVH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PROJECT",
+              "kind": "schedule",
+              "label": "[PROJECT] refresh-projection",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_RAW",
+              "kind": "store",
+              "label": "[RAW] radar-immobilier-raw",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_REG",
+              "kind": "registry",
+              "label": "[REG] registre applicatif",
+              "evidenceClass": "unknown",
+              "runtimeState": "unknown",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SCRAPE",
+              "kind": "schedule",
+              "label": "[SCRAPE] radar-refresh-scrape",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SSO",
+              "kind": "service",
+              "label": "sentropic · auth-idp",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "sentropic"
+              ]
+            },
+            {
+              "id": "A_SSO_DB",
+              "kind": "store",
+              "label": "[SSO-DB] PostgreSQL SSO",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "sentropic"
+              ]
+            },
+            {
+              "id": "A_TEM",
+              "kind": "exception",
+              "label": "[SCW-TEM] Scaleway TEM",
+              "evidenceClass": "historical",
+              "runtimeState": "retained",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_UI",
+              "kind": "service",
+              "label": "[UI] radar-ui",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_URL",
+              "kind": "endpoint",
+              "label": "immo.sent-tech.ca",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_USER",
+              "kind": "actor",
+              "label": "Navigateur utilisateur",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "A_WS",
+              "kind": "workstation",
+              "label": "[WS-IMMO] poste opérateur",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "A_API__A_DB__a7056a455639",
+              "source": "A_API",
+              "target": "A_DB",
+              "label": "SQL",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_DOCS__09b842cf0f0e",
+              "source": "A_API",
+              "target": "A_DOCS",
+              "label": "documents dérivés",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_DOCS_S3__f5c326db33fd",
+              "source": "A_API",
+              "target": "A_DOCS_S3",
+              "label": "lecture PDF source",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_RAW__7bbc36a7e539",
+              "source": "A_API",
+              "target": "A_RAW",
+              "label": "objets RAW",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_SSO__d3792b8bf3a6",
+              "source": "A_API",
+              "target": "A_SSO",
+              "label": "OIDC / JWKS",
+              "dashed": false,
+              "both": true,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_TEM__0f9920188952",
+              "source": "A_API",
+              "target": "A_TEM",
+              "label": "courriel transactionnel",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "retained"
+            },
+            {
+              "id": "A_EDGE__A_UI__e3b0c44298fc",
+              "source": "A_EDGE",
+              "target": "A_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GEO__A_GEO_DB__a7056a455639",
+              "source": "A_GEO",
+              "target": "A_GEO_DB",
+              "label": "SQL",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GEO__A_GEO_S3__d0c2db91c0a1",
+              "source": "A_GEO",
+              "target": "A_GEO_S3",
+              "label": "lecture produits",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GRAPH_S3__A_PROJECT__e3b0c44298fc",
+              "source": "A_GRAPH_S3",
+              "target": "A_PROJECT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_MINIO__A_DOCS__9413868e65b3",
+              "source": "A_MINIO",
+              "target": "A_DOCS",
+              "label": "bucket sur PVC",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_MINIO__A_RAW__9413868e65b3",
+              "source": "A_MINIO",
+              "target": "A_RAW",
+              "label": "bucket sur PVC",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PROJECT__A_DB__a45bd616013a",
+              "source": "A_PROJECT",
+              "target": "A_DB",
+              "label": "étape 4 · upsert",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_REG__A_API__21b2eed1e328",
+              "source": "A_REG",
+              "target": "A_API",
+              "label": "images",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "unknown",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_REG__A_GEO__21b2eed1e328",
+              "source": "A_REG",
+              "target": "A_GEO",
+              "label": "images",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "unknown",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_REG__A_UI__21b2eed1e328",
+              "source": "A_REG",
+              "target": "A_UI",
+              "label": "images",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "unknown",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_SCRAPE__A_GRAPH_S3__a3953fb4b45e",
+              "source": "A_SCRAPE",
+              "target": "A_GRAPH_S3",
+              "label": "corpus et graphe",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_SCRAPE__A_RAW__902bf4477875",
+              "source": "A_SCRAPE",
+              "target": "A_RAW",
+              "label": "étapes 1 et 2",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_SSO__A_SSO_DB__1225ae6c1ae6",
+              "source": "A_SSO",
+              "target": "A_SSO_DB",
+              "label": "sessions",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_UI__A_API__702acf7c08d3",
+              "source": "A_UI",
+              "target": "A_API",
+              "label": "/api",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_UI__A_GEO__81fb168117fb",
+              "source": "A_UI",
+              "target": "A_GEO",
+              "label": "OGC",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_URL__A_EDGE__e3b0c44298fc",
+              "source": "A_URL",
+              "target": "A_EDGE",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_USER__A_SSO__3747cb0a027a",
+              "source": "A_USER",
+              "target": "A_SSO",
+              "label": "Redirection login",
+              "dashed": false,
+              "both": true,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_USER__A_URL__e3b0c44298fc",
+              "source": "A_USER",
+              "target": "A_URL",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_WS__A_GRAPH_S3__ccdcfe6ec99d",
+              "source": "A_WS",
+              "target": "A_GRAPH_S3",
+              "label": "étape 3 · Graphify local",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            }
+          ]
+        },
+        "nodes": 21,
+        "edges": 25,
+        "subflows": 2
+      },
+      {
+        "id": "hosting-today-20260913",
+        "pair": "A",
+        "date": "2026-09-13",
+        "sceneHash": "88dea090f286b59905db7c190bd2a2be9f330cf0a7d927cb4d70d489fed44f38",
+        "projection": {
+          "sceneId": "hosting-today-20260913",
+          "pair": "A",
+          "date": "2026-09-13",
+          "nodes": [
+            {
+              "id": "A_EDGE",
+              "kind": "network",
+              "label": "Load balancer → Traefik / TLS",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_OVH",
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_GEO",
+              "kind": "service",
+              "label": "[GEO-API] geo-api · geo",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GEO_DB",
+              "kind": "store",
+              "label": "[GEO-DB] geo / postgis",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GEO_S3",
+              "kind": "store",
+              "label": "[GEO-S3] sentropic-geo",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GHCR",
+              "kind": "registry",
+              "label": "[GHCR] registres applicatifs",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_OVH",
+              "kind": "cluster",
+              "label": "OVHcloud BHS · cluster poc-ca",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_PP_API",
+              "kind": "service",
+              "label": "[PP-API] radar-api",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PP_DB",
+              "kind": "store",
+              "label": "[PP-DB] radar-postgres",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PP_GEO",
+              "kind": "service",
+              "label": "[PP-GEO] geo-api · geo-preprod",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PREPROD",
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_PP_GEO_S3",
+              "kind": "store",
+              "label": "[PP-GEO-S3] geo-preprod",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_PP_GRAPH",
+              "kind": "store",
+              "label": "[PP-GRAPH] graph-preprod",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PP_PROJECT",
+              "kind": "schedule",
+              "label": "[PP-PROJECT] refresh-projection",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PP_RAW",
+              "kind": "store",
+              "label": "[PP-RAW-OVH] raw préprod",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PP_S3",
+              "kind": "store",
+              "label": "[PP-DOCS-OVH] docs préprod",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PP_SCRAPE",
+              "kind": "schedule",
+              "label": "[PP-SCRAPE] refresh-scrape",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PP_SSO",
+              "kind": "service",
+              "label": "sentropic-preprod · auth-idp",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PREPROD",
+              "repo": [
+                "sentropic"
+              ]
+            },
+            {
+              "id": "A_PP_SSO_DB",
+              "kind": "store",
+              "label": "[PP-SSO-DB] PostgreSQL SSO",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PREPROD",
+              "repo": [
+                "sentropic"
+              ]
+            },
+            {
+              "id": "A_PP_UI",
+              "kind": "service",
+              "label": "[PP-UI] radar-ui",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PP_URL",
+              "kind": "endpoint",
+              "label": "preprod.immo.sent-tech.ca",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PR_API",
+              "kind": "service",
+              "label": "[PR-API] radar-api",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PR_DB",
+              "kind": "store",
+              "label": "[PR-DB] radar-postgres",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PR_RAW",
+              "kind": "store",
+              "label": "[PR-RAW-OVH] raw production",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PR_REFRESH",
+              "kind": "schedule",
+              "label": "[PR-REFRESH] refresh production",
+              "evidenceClass": "declared",
+              "runtimeState": "dormant",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PR_S3",
+              "kind": "store",
+              "label": "[PR-DOCS-OVH] docs production",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PR_UI",
+              "kind": "service",
+              "label": "[PR-UI] radar-ui",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PREPROD",
+              "kind": "cluster",
+              "label": "PRÉPRODUCTION · sans MinIO",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_OVH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_PROD",
+              "kind": "cluster",
+              "label": "PRODUCTION · sans MinIO",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_OVH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SSO",
+              "kind": "service",
+              "label": "sentropic · auth-idp",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "sentropic"
+              ]
+            },
+            {
+              "id": "A_SSO_DB",
+              "kind": "store",
+              "label": "[PR-SSO-DB] PostgreSQL SSO",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_PROD",
+              "repo": [
+                "sentropic"
+              ]
+            },
+            {
+              "id": "A_TEM",
+              "kind": "exception",
+              "label": "[SCW-TEM] Scaleway TEM",
+              "evidenceClass": "observed",
+              "runtimeState": "retained",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_URL",
+              "kind": "endpoint",
+              "label": "immo.sent-tech.ca",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_USER",
+              "kind": "actor",
+              "label": "Navigateur utilisateur",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "A_WS",
+              "kind": "workstation",
+              "label": "[WS-ADMIN] poste opérateur",
+              "evidenceClass": "observed",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "A_EDGE__A_PP_UI__e3b0c44298fc",
+              "source": "A_EDGE",
+              "target": "A_PP_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_EDGE__A_PR_UI__e3b0c44298fc",
+              "source": "A_EDGE",
+              "target": "A_PR_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GEO__A_GEO_DB__a7056a455639",
+              "source": "A_GEO",
+              "target": "A_GEO_DB",
+              "label": "SQL",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GEO__A_GEO_S3__d0c2db91c0a1",
+              "source": "A_GEO",
+              "target": "A_GEO_S3",
+              "label": "lecture produits",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GHCR__A_GEO__21b2eed1e328",
+              "source": "A_GHCR",
+              "target": "A_GEO",
+              "label": "images",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GHCR__A_PP_API__21b2eed1e328",
+              "source": "A_GHCR",
+              "target": "A_PP_API",
+              "label": "images",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GHCR__A_PR_API__21b2eed1e328",
+              "source": "A_GHCR",
+              "target": "A_PR_API",
+              "label": "images",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_API__A_PP_DB__a7056a455639",
+              "source": "A_PP_API",
+              "target": "A_PP_DB",
+              "label": "SQL",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_API__A_PP_RAW__7bbc36a7e539",
+              "source": "A_PP_API",
+              "target": "A_PP_RAW",
+              "label": "objets RAW",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_API__A_PP_S3__5a8217ad6fe3",
+              "source": "A_PP_API",
+              "target": "A_PP_S3",
+              "label": "documents canoniques",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_API__A_PP_SSO__d3792b8bf3a6",
+              "source": "A_PP_API",
+              "target": "A_PP_SSO",
+              "label": "OIDC / JWKS",
+              "dashed": false,
+              "both": true,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_GEO__A_PP_GEO_S3__d0c2db91c0a1",
+              "source": "A_PP_GEO",
+              "target": "A_PP_GEO_S3",
+              "label": "lecture produits",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_GRAPH__A_PP_PROJECT__e3b0c44298fc",
+              "source": "A_PP_GRAPH",
+              "target": "A_PP_PROJECT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_PROJECT__A_PP_DB__a45bd616013a",
+              "source": "A_PP_PROJECT",
+              "target": "A_PP_DB",
+              "label": "étape 4 · upsert",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_SCRAPE__A_PP_GRAPH__902bf4477875",
+              "source": "A_PP_SCRAPE",
+              "target": "A_PP_GRAPH",
+              "label": "étapes 1 et 2",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_SSO__A_PP_SSO_DB__1225ae6c1ae6",
+              "source": "A_PP_SSO",
+              "target": "A_PP_SSO_DB",
+              "label": "sessions",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_UI__A_PP_API__702acf7c08d3",
+              "source": "A_PP_UI",
+              "target": "A_PP_API",
+              "label": "/api",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_UI__A_PP_GEO__81fb168117fb",
+              "source": "A_PP_UI",
+              "target": "A_PP_GEO",
+              "label": "OGC",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PP_URL__A_EDGE__e3b0c44298fc",
+              "source": "A_PP_URL",
+              "target": "A_EDGE",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PR_API__A_PR_DB__a7056a455639",
+              "source": "A_PR_API",
+              "target": "A_PR_DB",
+              "label": "SQL",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PR_API__A_PR_RAW__7bbc36a7e539",
+              "source": "A_PR_API",
+              "target": "A_PR_RAW",
+              "label": "objets RAW",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PR_API__A_PR_S3__5a8217ad6fe3",
+              "source": "A_PR_API",
+              "target": "A_PR_S3",
+              "label": "documents canoniques",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PR_API__A_SSO__d3792b8bf3a6",
+              "source": "A_PR_API",
+              "target": "A_SSO",
+              "label": "OIDC / JWKS",
+              "dashed": false,
+              "both": true,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PR_API__A_TEM__0f9920188952",
+              "source": "A_PR_API",
+              "target": "A_TEM",
+              "label": "courriel transactionnel",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "retained"
+            },
+            {
+              "id": "A_PR_REFRESH__A_PR_DB__248e15a038f5",
+              "source": "A_PR_REFRESH",
+              "target": "A_PR_DB",
+              "label": "étapes 1 à 4",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "A_PR_UI__A_GEO__81fb168117fb",
+              "source": "A_PR_UI",
+              "target": "A_GEO",
+              "label": "OGC",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_PR_UI__A_PR_API__702acf7c08d3",
+              "source": "A_PR_UI",
+              "target": "A_PR_API",
+              "label": "/api",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_SSO__A_SSO_DB__1225ae6c1ae6",
+              "source": "A_SSO",
+              "target": "A_SSO_DB",
+              "label": "sessions",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_URL__A_EDGE__e3b0c44298fc",
+              "source": "A_URL",
+              "target": "A_EDGE",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_USER__A_PP_URL__e3b0c44298fc",
+              "source": "A_USER",
+              "target": "A_PP_URL",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_USER__A_SSO__3747cb0a027a",
+              "source": "A_USER",
+              "target": "A_SSO",
+              "label": "Redirection login",
+              "dashed": false,
+              "both": true,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_USER__A_URL__e3b0c44298fc",
+              "source": "A_USER",
+              "target": "A_URL",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_WS__A_PP_API__512afb6c7631",
+              "source": "A_WS",
+              "target": "A_PP_API",
+              "label": "administration",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "manual"
+            }
+          ]
+        },
+        "nodes": 30,
+        "edges": 33,
+        "subflows": 3
+      },
+      {
+        "id": "pipeline-before-20260810",
+        "pair": "B",
+        "date": "2026-08-10",
+        "sceneHash": "11da8420eb070a55d8c3598b970f24a5d807c8f4a61024299ef42d50ed4dffd6",
+        "projection": {
+          "sceneId": "pipeline-before-20260810",
+          "pair": "B",
+          "date": "2026-08-10",
+          "nodes": [
+            {
+              "id": "B_API",
+              "kind": "service",
+              "label": "[API] radar-api",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "B_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_CITY",
+              "kind": "source",
+              "label": "Sources municipales · PV",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_COLLECT",
+              "kind": "process",
+              "label": "Étape 1 · collecte",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": "B_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_CORPUS",
+              "kind": "store",
+              "label": "Corpus PV · CAS / parsed",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_DB",
+              "kind": "store",
+              "label": "[DB] PostgreSQL graphe",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "B_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_EDGE",
+              "kind": "network",
+              "label": "Load balancer → Traefik / TLS",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "B_OVH",
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "B_EXTRACT",
+              "kind": "process",
+              "label": "Étape 3 · Graphify 2.3 local",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": "B_WORKSTATION",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_GRAPH",
+              "kind": "store",
+              "label": "Contrat de graphe publié",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_KEYS",
+              "kind": "identity",
+              "label": "Clés LLM hors cluster",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": "B_WORKSTATION",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_OPERATOR",
+              "kind": "actor",
+              "label": "Opérateur",
+              "evidenceClass": "external",
+              "runtimeState": "manual",
+              "parentId": "B_WORKSTATION",
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_OPS",
+              "kind": "workstation",
+              "label": "[WS-OPS] poste opérateur",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": "B_WORKSTATION",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_OVH",
+              "kind": "cluster",
+              "label": "OVHcloud BHS · cluster poc-ca",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "B_PARSE",
+              "kind": "process",
+              "label": "Étape 2 · parse / exploit",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": "B_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_PROD",
+              "kind": "cluster",
+              "label": "PRODUCTION · namespaces",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "B_OVH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_PROJECT",
+              "kind": "process",
+              "label": "Étape 4 · projection manuelle",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": "B_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_PROVIDERS",
+              "kind": "service",
+              "label": "Fournisseurs LLM",
+              "evidenceClass": "external",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_SCHEDULE",
+              "kind": "schedule",
+              "label": "Automatisation impossible",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_TEM",
+              "kind": "exception",
+              "label": "[SCW-TEM] Scaleway TEM",
+              "evidenceClass": "historical",
+              "runtimeState": "retained",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_UI",
+              "kind": "service",
+              "label": "[UI] radar-ui",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": "B_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_USER",
+              "kind": "actor",
+              "label": "Navigateur utilisateur",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_WORKSTATION",
+              "kind": "cluster",
+              "label": "Poste opérateur · hors cluster",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "B_API__B_UI__e3b0c44298fc",
+              "source": "B_API",
+              "target": "B_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_CITY__B_COLLECT__e3b0c44298fc",
+              "source": "B_CITY",
+              "target": "B_COLLECT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_COLLECT__B_PARSE__e3b0c44298fc",
+              "source": "B_COLLECT",
+              "target": "B_PARSE",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_CORPUS__B_EXTRACT__578eb8d4f908",
+              "source": "B_CORPUS",
+              "target": "B_EXTRACT",
+              "label": "lecture des preuves",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_DB__B_API__e3b0c44298fc",
+              "source": "B_DB",
+              "target": "B_API",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_EDGE__B_UI__e3b0c44298fc",
+              "source": "B_EDGE",
+              "target": "B_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_EXTRACT__B_GRAPH__b59511071b0e",
+              "source": "B_EXTRACT",
+              "target": "B_GRAPH",
+              "label": "graphe validé",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_EXTRACT__B_PROVIDERS__076a12428b1b",
+              "source": "B_EXTRACT",
+              "target": "B_PROVIDERS",
+              "label": "appels depuis le poste",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_GRAPH__B_PROJECT__e3b0c44298fc",
+              "source": "B_GRAPH",
+              "target": "B_PROJECT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_KEYS__B_EXTRACT__e3b0c44298fc",
+              "source": "B_KEYS",
+              "target": "B_EXTRACT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_OPERATOR__B_OPS__a40c53c45255",
+              "source": "B_OPERATOR",
+              "target": "B_OPS",
+              "label": "pilotage",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_OPS__B_COLLECT__10fae9b7b77b",
+              "source": "B_OPS",
+              "target": "B_COLLECT",
+              "label": "lancement manuel",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_OPS__B_EXTRACT__61f0f15e3ae9",
+              "source": "B_OPS",
+              "target": "B_EXTRACT",
+              "label": "étape 3 sur le poste",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_OPS__B_PROJECT__10fae9b7b77b",
+              "source": "B_OPS",
+              "target": "B_PROJECT",
+              "label": "lancement manuel",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_PARSE__B_CORPUS__e3b0c44298fc",
+              "source": "B_PARSE",
+              "target": "B_CORPUS",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_PROJECT__B_DB__98b047b8f969",
+              "source": "B_PROJECT",
+              "target": "B_DB",
+              "label": "upsert atomique",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_SCHEDULE__B_COLLECT__23084d71adaf",
+              "source": "B_SCHEDULE",
+              "target": "B_COLLECT",
+              "label": "déclaré seulement",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_SCHEDULE__B_PROJECT__23084d71adaf",
+              "source": "B_SCHEDULE",
+              "target": "B_PROJECT",
+              "label": "déclaré seulement",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_UI__B_USER__68a175aa6596",
+              "source": "B_UI",
+              "target": "B_USER",
+              "label": "immo.sent-tech.ca",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            }
+          ]
+        },
+        "nodes": 18,
+        "edges": 19,
+        "subflows": 3
+      },
+      {
+        "id": "pipeline-after-20260913",
+        "pair": "B",
+        "date": "2026-09-13",
+        "sceneHash": "9be9460fd6030f306148c2eb392aa56cd26021dc83047f94ed9d859b4fbdd2a7",
+        "projection": {
+          "sceneId": "pipeline-after-20260913",
+          "pair": "B",
+          "date": "2026-09-13",
+          "nodes": [
+            {
+              "id": "B_API",
+              "kind": "service",
+              "label": "[API] radar-api",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_CITY",
+              "kind": "source",
+              "label": "Sources municipales · PV",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_COLLECT",
+              "kind": "process",
+              "label": "Étape 1 · collecte intégrée",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_CORPUS",
+              "kind": "store",
+              "label": "Corpus PV durable",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_CRON",
+              "kind": "schedule",
+              "label": "CronJob radar-refresh-pv",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_DB",
+              "kind": "store",
+              "label": "[DB] PostgreSQL graphe",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_DRIVER",
+              "kind": "process",
+              "label": "Run autonome in-cluster",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_EDGE",
+              "kind": "network",
+              "label": "Load balancer → Traefik / TLS",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_OVH",
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "B_GRAPH",
+              "kind": "store",
+              "label": "Graphe canonique publié",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_GRAPHIFY",
+              "kind": "process",
+              "label": "Étape 3 · Graphify 0.18.0",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_KEYRING",
+              "kind": "identity",
+              "label": "Keyring radar chiffré",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_MESH",
+              "kind": "process",
+              "label": "llm-mesh 0.19.1 in-process",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_OVH",
+              "kind": "cluster",
+              "label": "OVHcloud BHS · cluster poc-ca",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "B_PARSE",
+              "kind": "process",
+              "label": "Étape 2 · parse / exploit",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_PREPROD",
+              "kind": "cluster",
+              "label": "PRÉPRODUCTION · acceptée",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_OVH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_PROD",
+              "kind": "cluster",
+              "label": "PRODUCTION · DORMANTE",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": "B_OVH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_PROD_CRON",
+              "kind": "schedule",
+              "label": "CronJob production dormant",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": "B_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_PROJECT",
+              "kind": "process",
+              "label": "Étape 4 · projection atomique",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_PROMOTION",
+              "kind": "decision",
+              "label": "PR #682 · non promue",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": "B_PROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_PROVIDERS",
+              "kind": "service",
+              "label": "Fournisseurs LLM",
+              "evidenceClass": "external",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_TEM",
+              "kind": "exception",
+              "label": "[SCW-TEM] Scaleway TEM",
+              "evidenceClass": "observed",
+              "runtimeState": "retained",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_UI",
+              "kind": "service",
+              "label": "[UI] radar-ui",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_USER",
+              "kind": "actor",
+              "label": "Navigateur utilisateur",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_VALIDATE",
+              "kind": "process",
+              "label": "Validation Signal / PDF",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "B_PREPROD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_WS",
+              "kind": "workstation",
+              "label": "[WS-ADMIN] poste opérateur",
+              "evidenceClass": "observed",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "B_API__B_UI__e3b0c44298fc",
+              "source": "B_API",
+              "target": "B_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_CITY__B_COLLECT__e3b0c44298fc",
+              "source": "B_CITY",
+              "target": "B_COLLECT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_COLLECT__B_PARSE__e3b0c44298fc",
+              "source": "B_COLLECT",
+              "target": "B_PARSE",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_CORPUS__B_GRAPHIFY__578eb8d4f908",
+              "source": "B_CORPUS",
+              "target": "B_GRAPHIFY",
+              "label": "lecture des preuves",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_CRON__B_DRIVER__e3b0c44298fc",
+              "source": "B_CRON",
+              "target": "B_DRIVER",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_DB__B_API__e3b0c44298fc",
+              "source": "B_DB",
+              "target": "B_API",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_DRIVER__B_COLLECT__e3b0c44298fc",
+              "source": "B_DRIVER",
+              "target": "B_COLLECT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_DRIVER__B_GRAPHIFY__e3b0c44298fc",
+              "source": "B_DRIVER",
+              "target": "B_GRAPHIFY",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_EDGE__B_UI__e3b0c44298fc",
+              "source": "B_EDGE",
+              "target": "B_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_GRAPH__B_PROJECT__e3b0c44298fc",
+              "source": "B_GRAPH",
+              "target": "B_PROJECT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_GRAPHIFY__B_MESH__e3b0c44298fc",
+              "source": "B_GRAPHIFY",
+              "target": "B_MESH",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_KEYRING__B_MESH__e3b0c44298fc",
+              "source": "B_KEYRING",
+              "target": "B_MESH",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_MESH__B_PROVIDERS__b050b07f9735",
+              "source": "B_MESH",
+              "target": "B_PROVIDERS",
+              "label": "appels in-cluster",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_MESH__B_VALIDATE__e3b0c44298fc",
+              "source": "B_MESH",
+              "target": "B_VALIDATE",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_PARSE__B_CORPUS__e3b0c44298fc",
+              "source": "B_PARSE",
+              "target": "B_CORPUS",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_PROJECT__B_DB__98b047b8f969",
+              "source": "B_PROJECT",
+              "target": "B_DB",
+              "label": "upsert atomique",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_PROMOTION__B_PROD_CRON__494117023813",
+              "source": "B_PROMOTION",
+              "target": "B_PROD_CRON",
+              "label": "promotion non effectuée",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_UI__B_USER__68a175aa6596",
+              "source": "B_UI",
+              "target": "B_USER",
+              "label": "immo.sent-tech.ca",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_VALIDATE__B_GRAPH__b59511071b0e",
+              "source": "B_VALIDATE",
+              "target": "B_GRAPH",
+              "label": "graphe validé",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_WS__B_KEYRING__cb4aac8f87b0",
+              "source": "B_WS",
+              "target": "B_KEYRING",
+              "label": "enrôlement seulement",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "manual"
+            }
+          ]
+        },
+        "nodes": 22,
+        "edges": 20,
+        "subflows": 3
+      }
     ],
     "serviceIconsAndRepoProvenance": "required for every node and group"
   },
   "billing": {
-    "infrastructureProjection": {
+    "paidCadToDate": 0,
+    "invoices": [
+      {
+        "id": "QC281819",
+        "amountCad": 0
+      },
+      {
+        "id": "QC285954",
+        "amountCad": 0
+      }
+    ],
+    "trialCredit": {
+      "initialCad": 270,
+      "consumedCad": 179.23,
+      "expiredCad": 90.77,
+      "expiredOn": "2026-08-12"
+    },
+    "septemberUnbilledEstimateCad": 71.62,
+    "firstRealDebitExpectedAround": "2026-10-01",
+    "payableBasis": {
       "quantity": 1,
-      "sku": "b3-8",
-      "hourlyRateCad": 0.082,
-      "hours": 840,
-      "amountCad": 68.88,
-      "excluded": "observed two/three-node platform pass-through/internal costs"
+      "sku": "r2-15",
+      "monthlyCad": 58.58,
+      "excludes": "three b3-8 operator-error overcost"
     },
     "llmAllocation": {
-      "immoCad": 139.33773242975033,
-      "geoCad": 111.87770524666708,
-      "totalCad": 251.21543767641742,
-      "method": "previous-report subscription capacity allocation and unit basis; refreshed deduplicated local sessions"
-    },
-    "indicativeTotalCad": 320.0954376764174
+      "immoCad": 142.48476964674762,
+      "geoCad": 112.23163135257916,
+      "totalCad": 254.71640099932677,
+      "method": "provisional, non-critical and non-final allocation; not an invoice"
+    }
   },
   "claims": {
-    "deployment": "preproduction T2 accepted; production T2 in progress; complete AFTER is not deployed",
-    "invoice": "none",
-    "decisionOptions": "three explicit open questions; local drafts only; fixed owner decisions unchanged",
-    "llmRatification": "open-non-blocking"
+    "deployment": "MinIO removed from preproduction and production; refresh preproduction accepted; refresh production dormant pending PR 682 promotion",
+    "invoice": "paid to date: CAD 0.00",
+    "decisionOptions": "M1 has exactly three candidates; no winner; Gemini no-output is not classifiable and is not a result",
+    "llmRatification": "provisional-non-critical-non-final"
+  },
+  "previousReport": {
+    "file": "rapport-mois-2026-07-13_2026-08-09.pdf",
+    "path": "docs/reports/rapport-mois-2026-07-13_2026-08-09.pdf",
+    "sha256": "86ae37810016bca61cc897105121cfcbcd1951426fc889616ae1efe37ae29528",
+    "pages": 9,
+    "embedded": false,
+    "attached": false,
+    "note": "v11: cited by path only. The concatenated copy and the PDF attachment were removed on owner instruction."
   },
   "sourceFiles": [
     {
       "path": "docs/architecture.md",
-      "role": "before-state",
-      "sha256": "85759954afba141dace08405ed3382833350b472889e3ea786bdb32cb841b4fd"
+      "role": "canonical-five-scene-source",
+      "sha256": "2983f6ca18be0a68699f0a7e2d40a50a8a0a41362f61ec0a53fd04fdcca79e17"
     },
     {
       "path": "docs/architecture/transitions-target.md",
@@ -146,85 +2848,227 @@
       "sha256": "e032da5a8cae6483bf3988eb7a84af5d550adbda2fcda6e14cfc05d25d8a4714"
     },
     {
-      "path": "docs/reports/architecture-monthly/report-through-2026-09-13.md",
-      "role": "monthly-report",
-      "sha256": "a79bab5d8123a041b45eb6ed59989f69bb3be2d43af9e6345c2e3f03fd1c962b"
+      "path": "docs/reports/rapport-mois-2026-08-10_2026-09-13.md",
+      "role": "monthly-activity-report",
+      "sha256": "948f1c7bb17b575e059ac07da332707c7febf922fc86661a04014f17d92dc73a"
+    },
+    {
+      "path": "docs/reports/couts-2026-08-10_2026-09-13.md",
+      "role": "separate-cost-report",
+      "sha256": "8110dcc4e918df373fb846908de479a2926f73d18a8e677ea1cdbdd88ad776f9"
     },
     {
       "path": "docs/reports/architecture-monthly/token-audit-2026-08-10_2026-09-13.json",
       "role": "token-audit",
-      "sha256": "1a6e47c6cba0c22eff6198461668ce2957064cf9ffcd475b366067c0cf1f0cba"
+      "sha256": "baa30546a2232e3f08950a32730c213edbdd647684bc9854426aa6bcfecca136"
     },
     {
-      "path": "docs/reports/couts-2026-07-13_2026-08-09.md",
-      "role": "preceding-merged-report",
-      "sha256": "93b34620760c78dafa76cda071cc67d40d4e52a554827c8a5042a4d3b334f64b"
+      "path": "docs/reports/rapport-mois-2026-07-13_2026-08-09.pdf",
+      "role": "preceding-report-exact-copy",
+      "sha256": "86ae37810016bca61cc897105121cfcbcd1951426fc889616ae1efe37ae29528"
     }
   ],
-  "replay": "make -f docs/architecture/focus/Makefile tokens test build browser clipboard report-check ENV=test-architecture",
+  "replay": "make -f docs/architecture/focus/Makefile test build audit browser clipboard report-check PORT=5200 ENV=test-architecture-two-transitions",
   "report": {
-    "markdown": "report-through-2026-09-13.md",
-    "html": "report-through-2026-09-13.html",
-    "pdf": "report-through-2026-09-13.pdf",
-    "markdownSha256": "a79bab5d8123a041b45eb6ed59989f69bb3be2d43af9e6345c2e3f03fd1c962b",
-    "htmlSha256": "fa5a6ca145860cd3adb291f8a44aee862d685ef804d759a1445023f6b6dce851",
-    "pdfSha256": "444963b8c262becf7bbaaba7b06e61cc9ef6bb371edd6dd9db79033cc58e31af",
-    "staticDiagrams": [
-      "asis-1",
-      "target-3"
-    ],
-    "nativeDiagramPages": [
+    "markdown": "rapport-mois-2026-08-10_2026-09-13.md",
+    "html": "rapport-mois-2026-08-10_2026-09-13.html",
+    "pdf": "rapport-mois-2026-08-10_2026-09-13.pdf",
+    "markdownSha256": "948f1c7bb17b575e059ac07da332707c7febf922fc86661a04014f17d92dc73a",
+    "htmlSha256": "dddac4bf10c7432ebc2aecb3f24637035cbc70fc8d76a54b64c9f017f679c366",
+    "pdfSha256": "32dc4294027564d3cd5f4d824327d9618b890d94cca9c4fd21017e55cf12f67c",
+    "currentReportPages": 15,
+    "totalPages": 15,
+    "chromium": {
+      "zoom": 1,
+      "deviceScaleFactor": 1
+    },
+    "diagramPage": {
+      "paper": "A4 portrait",
+      "orientation": "portrait",
+      "mode": "whole scene, no split",
+      "widthPx": 718,
+      "heightPx": 1047,
+      "imageBoxPx": {
+        "widthPx": 716,
+        "heightPx": 823
+      },
+      "printScale": 1,
+      "minTypePt": 2.159321032072368,
+      "inlineMinTypePt": 2.3480506232267526,
+      "typeFloorPt": null
+    },
+    "inlineScenes": [
       {
-        "title": "Architecture AVANT · schéma complet",
-        "graph": "asis-1",
-        "partition": null
+        "id": "hosting-today-20260913",
+        "section": 6,
+        "anchor": null,
+        "part": "A",
+        "fit": 0.16123672614317705,
+        "annexLabel": "A3",
+        "widthPx": 703,
+        "heightPx": 340,
+        "halfPageHeightPx": 508,
+        "withinHalfPage": true
       },
       {
-        "title": "Architecture AVANT · partition · haut gauche",
-        "graph": "asis-1",
-        "partition": "haut gauche"
-      },
-      {
-        "title": "Architecture AVANT · partition · haut droite",
-        "graph": "asis-1",
-        "partition": "haut droite"
-      },
-      {
-        "title": "Architecture AVANT · partition · bas gauche",
-        "graph": "asis-1",
-        "partition": "bas gauche"
-      },
-      {
-        "title": "Architecture AVANT · partition · bas droite",
-        "graph": "asis-1",
-        "partition": "bas droite"
-      },
-      {
-        "title": "Architecture APRÈS · schéma complet",
-        "graph": "target-3",
-        "partition": null
-      },
-      {
-        "title": "Architecture APRÈS · partition · haut gauche",
-        "graph": "target-3",
-        "partition": "haut gauche"
-      },
-      {
-        "title": "Architecture APRÈS · partition · haut droite",
-        "graph": "target-3",
-        "partition": "haut droite"
-      },
-      {
-        "title": "Architecture APRÈS · partition · bas gauche",
-        "graph": "target-3",
-        "partition": "bas gauche"
-      },
-      {
-        "title": "Architecture APRÈS · partition · bas droite",
-        "graph": "target-3",
-        "partition": "bas droite"
+        "id": "pipeline-after-20260913",
+        "section": 5,
+        "anchor": "<strong>Après</strong>",
+        "part": "B",
+        "fit": 0.14230609837737895,
+        "annexLabel": "B2",
+        "widthPx": 703,
+        "heightPx": 177,
+        "halfPageHeightPx": 508,
+        "withinHalfPage": true
       }
     ],
-    "diagramPage": "A3 landscape"
+    "graphPages": [
+      {
+        "sceneId": "hosting-july-2026",
+        "annex": "Annexe A1",
+        "part": "A",
+        "pair": "A",
+        "date": "2026-07",
+        "sceneHash": "107d9cb7d741e54901aa14aa0aa4042b6cb069b4beae16e1ab8e1d4654a552e9",
+        "page": 11,
+        "captureSha256": "f7ee5757dfb3c8b42fa55bca883931eb104fc445a7ad002f55986db7f477fc89",
+        "widthPx": 4360,
+        "heightPx": 1995,
+        "pageFit": 0.16424546702304416,
+        "measuredFit": 0.16424526949541285,
+        "measuredTypePt": 2.710046946674312,
+        "commentLines": 4,
+        "wholeScene": true,
+        "nativeScale": 1,
+        "deviceScaleFactor": 1,
+        "effectiveTypePt": {
+          "code": 2.7100502058802283,
+          "title": 3.9418912085530597,
+          "name": 2.956418406414795,
+          "detail": 2.956418406414795,
+          "repo": 2.956418406414795,
+          "edge": 2.956418406414795
+        },
+        "renderedPagePngSha256": "b784ae6343b9016a496612bb49eacb3369667d33b7d403a5a435d8949d3db404",
+        "renderedPagePng": ".generated/report-graph-hosting-july-2026.png"
+      },
+      {
+        "sceneId": "hosting-august-20260810",
+        "annex": "Annexe A2",
+        "part": "A",
+        "pair": "A",
+        "date": "2026-08-10",
+        "sceneHash": "cab0c5ed3bbd90531f28735880e3cef399fb31294a7d8bb244b2077b6ab406d4",
+        "page": 12,
+        "captureSha256": "6ee2d53b0f960be08abf118600847c98111ba79871fa05f40ab28fcb2ea21fef",
+        "widthPx": 4360,
+        "heightPx": 1995,
+        "pageFit": 0.16424546702304416,
+        "measuredFit": 0.16424526949541285,
+        "measuredTypePt": 2.710046946674312,
+        "commentLines": 4,
+        "wholeScene": true,
+        "nativeScale": 1,
+        "deviceScaleFactor": 1,
+        "effectiveTypePt": {
+          "code": 2.7100502058802283,
+          "title": 3.9418912085530597,
+          "name": 2.956418406414795,
+          "detail": 2.956418406414795,
+          "repo": 2.956418406414795,
+          "edge": 2.956418406414795
+        },
+        "renderedPagePngSha256": "3e5e3c34fb722e5a93f40228bf044f2d9844ef94c282bdaf414b4f70319b02e8",
+        "renderedPagePng": ".generated/report-graph-hosting-august-20260810.png"
+      },
+      {
+        "sceneId": "hosting-today-20260913",
+        "annex": "Annexe A3",
+        "part": "A",
+        "pair": "A",
+        "date": "2026-09-13",
+        "sceneHash": "88dea090f286b59905db7c190bd2a2be9f330cf0a7d927cb4d70d489fed44f38",
+        "page": 13,
+        "captureSha256": "fe2975345094b7aecdfbbd08f95cbda588a777de90187d56888eeacddf5fa035",
+        "widthPx": 4360,
+        "heightPx": 2107,
+        "pageFit": 0.16424546702304416,
+        "measuredFit": 0.16424526949541285,
+        "measuredTypePt": 2.710046946674312,
+        "commentLines": 5,
+        "wholeScene": true,
+        "nativeScale": 1,
+        "deviceScaleFactor": 1,
+        "effectiveTypePt": {
+          "code": 2.7100502058802283,
+          "title": 3.9418912085530597,
+          "name": 2.956418406414795,
+          "detail": 2.956418406414795,
+          "repo": 2.956418406414795,
+          "edge": 2.956418406414795
+        },
+        "renderedPagePngSha256": "948b72145d328e5039791378ef8a8976be8b23c02b6ce854892482c1bdfaa4fe",
+        "renderedPagePng": ".generated/report-graph-hosting-today-20260913.png"
+      },
+      {
+        "sceneId": "pipeline-before-20260810",
+        "annex": "Annexe B1",
+        "part": "B",
+        "pair": "B",
+        "date": "2026-08-10",
+        "sceneHash": "11da8420eb070a55d8c3598b970f24a5d807c8f4a61024299ef42d50ed4dffd6",
+        "page": 14,
+        "captureSha256": "472db3ff80df04653672a73c13ce32bf0a1b42377ce35e0f1d0421f29d2c0a4f",
+        "widthPx": 5472,
+        "heightPx": 1293,
+        "pageFit": 0.13086809872450156,
+        "measuredFit": 0.13086794133771928,
+        "measuredTypePt": 2.159321032072368,
+        "commentLines": 4,
+        "wholeScene": true,
+        "nativeScale": 1,
+        "deviceScaleFactor": 1,
+        "effectiveTypePt": {
+          "code": 2.159323628954276,
+          "title": 3.1408343693880374,
+          "name": 2.355625777041028,
+          "detail": 2.355625777041028,
+          "repo": 2.355625777041028,
+          "edge": 2.355625777041028
+        },
+        "renderedPagePngSha256": "77ea45e5e1b01e0138a8ce90e6038e6ee8167fb33acc9913e4926be4f62c3cd6",
+        "renderedPagePng": ".generated/report-graph-pipeline-before-20260810.png"
+      },
+      {
+        "sceneId": "pipeline-after-20260913",
+        "annex": "Annexe B2",
+        "part": "B",
+        "pair": "B",
+        "date": "2026-09-13",
+        "sceneHash": "9be9460fd6030f306148c2eb392aa56cd26021dc83047f94ed9d859b4fbdd2a7",
+        "page": 15,
+        "captureSha256": "2194284b011540fd1666c2ca53c0e09441b083332eb6560db2587cd0f38fbe13",
+        "widthPx": 4940,
+        "heightPx": 1247,
+        "pageFit": 0.14496158627944788,
+        "measuredFit": 0.14496141194331985,
+        "measuredTypePt": 2.3918632970647775,
+        "commentLines": 5,
+        "wholeScene": true,
+        "nativeScale": 1,
+        "deviceScaleFactor": 1,
+        "effectiveTypePt": {
+          "code": 2.39186617361089,
+          "title": 3.4790780707067492,
+          "name": 2.609308553030062,
+          "detail": 2.609308553030062,
+          "repo": 2.609308553030062,
+          "edge": 2.609308553030062
+        },
+        "renderedPagePngSha256": "cab858fd883bb36d4515f6a51cd5696c6c1540dc6c47860eabd0672216c60940",
+        "renderedPagePng": ".generated/report-graph-pipeline-after-20260913.png"
+      }
+    ]
   }
 }

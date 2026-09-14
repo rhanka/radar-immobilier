@@ -1,0 +1,375 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Rapport de coûts · 10 août → 13 septembre 2026</title><style>
+@page{size:A4;margin:14mm 12mm}*{box-sizing:border-box}body{font:14px/1.48 Arial,sans-serif;color:#172033;margin:0}main{page:report}h1{font-size:30px;border-bottom:4px solid #145f68;padding-bottom:12px}h2{font-size:21px;color:#145f68;margin-top:30px;break-after:avoid}h3{font-size:17px}table{border-collapse:collapse;width:100%;font-size:12px;margin:16px 0}th,td{border:1px solid #bdcad0;padding:7px;vertical-align:top}th{background:#eaf3f4;text-align:left}code{background:#edf1f3;padding:1px 4px}pre{white-space:pre-wrap;background:#edf1f3;padding:10px}blockquote{border-left:4px solid #d58b14;margin:18px 0;padding:8px 16px;background:#fff4dc}@media print{a{color:inherit}}
+</style></head><body><main><h1>Coûts immo &amp; geo — 10 août → 13 septembre 2026</h1>
+<p><strong>Période</strong> : <code>2026-08-10T00:00:00-04:00</code> → <code>2026-09-13T23:59:59-04:00</code>, soit 35 jours.<br><strong>Établi le 14 septembre 2026</strong> : montants en CAD. L’infrastructure, la clé de répartition et l’allocation des abonnements LLM sont séparées.<br><strong>Qualification LLM</strong> : allocation <strong>provisoire, non critique et non finale</strong> ; ce n’est pas une ligne de facture fournisseur par produit.</p>
+<blockquote>
+<p><strong>Résultat</strong> : <strong>aucune facturation ce mois-ci</strong> — la consommation d’infrastructure est couverte par les crédits OVH. Coût de référence de l’hébergement mutualisé : <strong>58,58 CAD/mois</strong> pour l’instance <code>r2-15</code>, dont <strong>12,2 % ≈ 7,14 CAD/mois</strong> revenant à immo et <strong>2,4 % ≈ 1,43 CAD/mois</strong> à geo, au prorata des ressources réservées. Allocation LLM de la période : <strong>254,72 CAD</strong> après marge ×1,15.</p>
+</blockquote>
+<h2>Résumé exécutif</h2>
+<table>
+<thead>
+<tr>
+<th>Poste</th>
+<th align="right">Mesure ou projection</th>
+<th>Qualification</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Facturé ce mois-ci</td>
+<td align="right"><strong>0,00 CAD</strong></td>
+<td>Consommation couverte par les crédits OVH</td>
+</tr>
+<tr>
+<td>Instance mutualisée <code>r2-15</code></td>
+<td align="right"><strong>58,58 CAD/mois</strong></td>
+<td>Coût de référence de l’infrastructure sent-tech, tous services confondus</td>
+</tr>
+<tr>
+<td>Part immo, au prorata des réservations</td>
+<td align="right"><strong>12,2 % ≈ 7,14 CAD/mois</strong></td>
+<td>Référence, non facturée ce mois-ci</td>
+</tr>
+<tr>
+<td>Part geo, au prorata des réservations</td>
+<td align="right"><strong>2,4 % ≈ 1,43 CAD/mois</strong></td>
+<td>Référence, non facturée ce mois-ci</td>
+</tr>
+<tr>
+<td>Coût de référence de l’ancienne configuration</td>
+<td align="right"><strong>179,58 CAD/mois</strong></td>
+<td>3 × <code>b3-8</code> à 59,86 CAD, avant optimisation</td>
+</tr>
+<tr>
+<td>Abonnements LLM alloués, marge ×1,15</td>
+<td align="right"><strong>254,72 CAD</strong></td>
+<td>Calcul d’allocation, pas une facture fournisseur par tenant</td>
+</tr>
+</tbody></table>
+<h2>1. Infrastructure</h2>
+<h3>1.1 Aucune facturation ce mois-ci</h3>
+<p>Les deux factures émises sur la période, QC281819 et QC285954, sont à <strong>0,00 CAD</strong>. La consommation d’infrastructure a été absorbée par le crédit d’essai OVH.</p>
+<table>
+<thead>
+<tr>
+<th>Élément</th>
+<th align="right">Montant</th>
+<th>Traitement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Facture QC281819</td>
+<td align="right"><strong>0,00 CAD</strong></td>
+<td>Aucun montant facturable</td>
+</tr>
+<tr>
+<td>Facture QC285954</td>
+<td align="right"><strong>0,00 CAD</strong></td>
+<td>Aucun montant facturable</td>
+</tr>
+<tr>
+<td>Crédit d’essai initial</td>
+<td align="right"><strong>270,00 CAD</strong></td>
+<td>Crédit, pas une dépense payée</td>
+</tr>
+<tr>
+<td>Crédit consommé</td>
+<td align="right"><strong>179,23 CAD</strong></td>
+<td>Valeur consommée, pas une dépense payée</td>
+</tr>
+<tr>
+<td>Crédit expiré le 12 août</td>
+<td align="right"><strong>90,77 CAD</strong></td>
+<td>Solde expiré</td>
+</tr>
+<tr>
+<td>Septembre</td>
+<td align="right"><strong>≈ 71,62 CAD</strong></td>
+<td>Valeur non facturée, couverte par le crédit</td>
+</tr>
+<tr>
+<td><strong>Facturé sur la période</strong></td>
+<td align="right"><strong>0,00 CAD</strong></td>
+<td>Règle appliquée</td>
+</tr>
+</tbody></table>
+<p>Le premier débit réel est attendu vers le <strong>1er octobre 2026</strong>. Les parts calculées ci-dessous sont donc des <strong>montants de référence</strong>, pas des montants dus.</p>
+<h3>1.2 L’infrastructure est mutualisée entre tous les services sent-tech</h3>
+<p>L’ensemble des services sent-tech — dont immo et geo, mais aussi les autres produits et les composants de plateforme — tourne sur une <strong>infrastructure mutualisée</strong>, aujourd’hui consolidée sur <strong>une seule instance <code>r2-15</code></strong> après optimisation. L’ancienne configuration reposait sur trois instances <code>b3-8</code> à 59,86 CAD, soit <strong>179,58 CAD/mois</strong> de coût de référence ; l’instance actuelle coûte <strong>58,58 CAD/mois</strong>.</p>
+<p>Capacité réellement allouable de cette instance, mesurée le 14 septembre 2026 à 13:16:52 UTC (<code>kubectl get node … -o jsonpath=&#39;{.status.allocatable}&#39;</code>) :</p>
+<table>
+<thead>
+<tr>
+<th>Ressource</th>
+<th align="right">Allouable mesuré</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Processeur</td>
+<td align="right"><strong>1 840 m</strong> (milli-CPU)</td>
+</tr>
+<tr>
+<td>Mémoire</td>
+<td align="right"><strong>12 785,78 MiB</strong></td>
+</tr>
+</tbody></table>
+<h3>1.3 Clé de répartition — prorata des ressources réservées</h3>
+<p>La méthode est celle des rapports précédents : pour chaque produit, on calcule sa <strong>part du processeur</strong> et sa <strong>part de la mémoire</strong>, puis la <strong>moyenne des deux parts</strong> sert de clé. La nouveauté de ce mois est la grandeur mesurée : ce ne sont plus des relevés d’usage instantané, mais les <strong>ressources réservées</strong> (<code>requests</code>) déclarées par chaque service, c’est-à-dire ce que le produit immobilise effectivement sur l’instance.</p>
+<p>Réservations relevées le 14 septembre 2026 entre 13:16 et 13:22 UTC (<code>kubectl get pods -A -o json</code>, somme par espace de noms). Le périmètre immo réunit <code>radar-immobilier</code> (production) et <code>radar-immobilier-preprod</code> ; le périmètre geo réunit <code>geo</code> et <code>geo-preprod</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">Processeur réservé</th>
+<th align="right">part CPU</th>
+<th align="right">Mémoire réservée</th>
+<th align="right">part mémoire</th>
+<th align="right"><strong>clé</strong></th>
+<th align="right"><strong>≈ CAD/mois</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>immo</strong></td>
+<td align="right"><strong>295 m</strong> (145 + 150)</td>
+<td align="right">16,0 %</td>
+<td align="right"><strong>1 068 MiB</strong> (470 + 598)</td>
+<td align="right">8,4 %</td>
+<td align="right"><strong>12,2 %</strong></td>
+<td align="right"><strong>≈ 7,14</strong></td>
+</tr>
+<tr>
+<td><strong>geo</strong></td>
+<td align="right"><strong>30 m</strong> (20 + 10)</td>
+<td align="right">1,6 %</td>
+<td align="right"><strong>416 MiB</strong> (288 + 128)</td>
+<td align="right">3,3 %</td>
+<td align="right"><strong>2,4 %</strong></td>
+<td align="right"><strong>≈ 1,43</strong></td>
+</tr>
+</tbody></table>
+<p>La clé est la <strong>moyenne de la part processeur et de la part mémoire</strong>, comme dans les rapports précédents.</p>
+<p>Les parts sont calculées <strong>par rapport à l’allouable de l’instance <code>r2-15</code></strong>, pas par rapport au total réservé : c’est la capacité de l’instance qui est achetée, et c’est donc elle qui constitue le dénominateur. Le solde — plateforme mutualisée, composants Kubernetes et autres produits sent-tech — n’est pas un poste client de ce rapport.</p>
+<p>Un produit compte ici <strong>ses deux environnements</strong>, préproduction incluse : depuis la refonte du cycle de livraison, la préproduction est une capacité permanente du produit, pas un montage temporaire.</p>
+<h3>1.4 Réduction de la sur-réservation</h3>
+<p>Les réservations déclarées étaient nettement supérieures à l’usage réel. Une <strong>optimisation a été faite sur les ressources immo et geo</strong>, en même temps que le passage à une seule instance.</p>
+<p>Pour <strong>geo</strong>, la baisse est tracée et datée : le processeur réservé passe de <strong>105 m à 20 m</strong> (−81 %), la mémoire restant inchangée à 288 MiB. Le point de départ vient d’un relevé de capacité daté du 13 septembre, et le point d’arrivée d’une lecture directe du cluster le 14 septembre.</p>
+<p>Pour <strong>immo</strong>, aucun point de départ tracé n’a pu être établi : l’espace de noms de production était explicitement exclu des relevés de capacité antérieurs, et aucun changement de <code>requests</code> sur les manifestes immo n’apparaît dans l’historique Git de la fenêtre. La réduction constatée sur l’instance n’est donc pas rattachable à une valeur « avant » vérifiable — <strong>source-gap assumé, aucun chiffre n’est avancé</strong>.</p>
+<h3>1.5 Marge de l’instance consolidée</h3>
+<p>Deux lectures distinctes, prises le 14 septembre 2026 dans la même fenêtre de mesure :</p>
+<table>
+<thead>
+<tr>
+<th>Lecture</th>
+<th align="right">Processeur</th>
+<th align="right">Mémoire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Total <strong>réservé</strong> par l’ensemble des services, rapporté à l’allouable</td>
+<td align="right"><strong>83,6 %</strong></td>
+<td align="right"><strong>57,7 %</strong></td>
+</tr>
+<tr>
+<td><strong>Usage instantané</strong> du nœud (<code>kubectl top node</code>)</td>
+<td align="right"><strong>15 %</strong></td>
+<td align="right"><strong>38 %</strong></td>
+</tr>
+</tbody></table>
+<p>L’écart entre les deux lignes est la sur-réservation résiduelle de l’ensemble des services hébergés. La seconde ligne est un <strong>relevé ponctuel</strong>, pas une moyenne ni un percentile : elle confirme l’état consolidé, elle ne constitue pas une preuve de tenue en charge.</p>
+<h2>2. Abonnements IA et agents LLM</h2>
+<h3>2.1 Périmètre et formule</h3>
+<p>Le calcul <code>token-audit.mjs</code> applique les mêmes règles que le rapport précédent :</p>
+<ul>
+<li>groupe <strong>immo</strong> : dépôt <code>radar-immobilier</code> seulement ;</li>
+<li>groupe <strong>geo</strong> : dépôts <code>geo</code> et <code>geo-quebec</code> ;</li>
+<li>groupe <strong>plateforme</strong> : séparé et exclu des numérateurs immo/geo ;</li>
+<li>fenêtre : 10 août→13 septembre inclus, fuseau America/Toronto ;</li>
+<li>capacité : pic global glissant de sept jours, calculé séparément pour Claude et Codex ; le pic historique reste utilisé lorsqu’il est supérieur ;</li>
+<li>forfaits : <strong>2 sièges Claude à 200 USD/mois</strong> et <strong>1 abonnement ChatGPT Pro à 200 USD/mois</strong> pour Codex ;</li>
+<li>change : <strong>1,37 CAD/USD</strong> ; marge <strong>×1,15 sur le LLM seulement</strong>.</li>
+</ul>
+<p>Pour un fournisseur donné, l’allocation suit :</p>
+<p><code>tokens produit / (pic 7 j × 35/7) × (sièges × 200 USD × 35/30) × 1,37 × 1,15</code>.</p>
+<p>Les facteurs de durée s’appliquent symétriquement à la capacité et au forfait. Une fenêtre plus longue augmente le montant uniquement si elle apporte des jetons supplémentaires ; la comparaison normalisée à 30 jours est donc publiée séparément.</p>
+<h3>2.2 Garde de périmètre et dédoublonnage</h3>
+<p>Le contrôle de périmètre établi lors du rapport précédent est conservé : <strong>16 009 fichiers indexés et 16 009 chemins uniques</strong>, aucune session attribuée simultanément aux groupes immo, geo et plateforme, soit <strong>0 session croisée et 0 jeton croisé</strong>. Les ensembles de dépôts utilisés par l’audit courant restent disjoints.</p>
+<p>Pour Claude, l’unité dédupliquée est le couple <code>(fichier, message.id)</code>. Lorsqu’un même identifiant présente des compteurs divergents, le maximum composante par composante est retenu. Pour Codex, l’unité dédupliquée est la signature exacte <code>(sessionId, timestamp, usage)</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Contrôle courant</th>
+<th align="right">Valeur</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fichiers Claude parcourus</td>
+<td align="right"><strong>380</strong></td>
+</tr>
+<tr>
+<td>Lignes Claude parcourues</td>
+<td align="right"><strong>1 500 286</strong></td>
+</tr>
+<tr>
+<td>Enregistrements Claude avec usage</td>
+<td align="right"><strong>210 157</strong></td>
+</tr>
+<tr>
+<td>Messages Claude uniques</td>
+<td align="right"><strong>85 139</strong></td>
+</tr>
+<tr>
+<td>Répétitions Claude retirées</td>
+<td align="right"><strong>125 018</strong></td>
+</tr>
+<tr>
+<td>Usages Claude divergents</td>
+<td align="right"><strong>20</strong></td>
+</tr>
+<tr>
+<td>Lignes Claude malformées</td>
+<td align="right"><strong>4</strong></td>
+</tr>
+<tr>
+<td>Sessions Codex</td>
+<td align="right"><strong>1 314</strong></td>
+</tr>
+<tr>
+<td>Tours Codex</td>
+<td align="right"><strong>100 696</strong></td>
+</tr>
+<tr>
+<td>Doublons Codex retirés</td>
+<td align="right"><strong>75</strong></td>
+</tr>
+</tbody></table>
+<h3>2.3 Volumes corrigés et pics de capacité</h3>
+<table>
+<thead>
+<tr>
+<th>Groupe / capacité</th>
+<th align="right">Claude</th>
+<th align="right">Codex</th>
+<th align="right">Total</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pic capacité 7 jours</td>
+<td align="right"><strong>15 138 897 392</strong></td>
+<td align="right"><strong>32 217 805 325</strong></td>
+<td align="right">N-A</td>
+</tr>
+<tr>
+<td>immo, période</td>
+<td align="right"><strong>14 153 024 311</strong></td>
+<td align="right"><strong>2 197 150 625</strong></td>
+<td align="right"><strong>16 350 174 936 (16,35 Md)</strong></td>
+</tr>
+<tr>
+<td>geo, période</td>
+<td align="right"><strong>11 231 142 644</strong></td>
+<td align="right"><strong>1 376 664 354</strong></td>
+<td align="right"><strong>12 607 806 998 (12,61 Md)</strong></td>
+</tr>
+</tbody></table>
+<p>Le pic Claude se place du <strong>30 août au 5 septembre</strong>. Le pic Codex conservé est l’historique audité du <strong>4 au 10 mai</strong>, supérieur au pic de la fenêtre courante. Ces fenêtres ne sont pas déplacées pour infléchir l’allocation.</p>
+<p>Par rapport aux volumes corrigés du rapport précédent :</p>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">Période précédente, 30 j</th>
+<th align="right">Période courante, 35 j</th>
+<th align="right">Variation totale</th>
+<th align="right">Variation par jour</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right"><strong>12,37 Md</strong></td>
+<td align="right"><strong>16,35 Md</strong></td>
+<td align="right"><strong>+32,2 %</strong></td>
+<td align="right"><strong>+13,3 %</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right"><strong>10,09 Md</strong></td>
+<td align="right"><strong>12,61 Md</strong></td>
+<td align="right"><strong>+25,0 %</strong></td>
+<td align="right"><strong>+7,1 %</strong></td>
+</tr>
+</tbody></table>
+<h3>2.4 Allocation LLM après marge</h3>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">Avant marge</th>
+<th align="right">Marge ×1,15</th>
+<th align="right"><strong>Allocation</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">123,899800</td>
+<td align="right">×1,15</td>
+<td align="right"><strong>142,484770 CAD</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">97,592723</td>
+<td align="right">×1,15</td>
+<td align="right"><strong>112,231631 CAD</strong></td>
+</tr>
+<tr>
+<td><strong>immo + geo</strong></td>
+<td align="right"><strong>221,492523</strong></td>
+<td align="right">×1,15</td>
+<td align="right"><strong>254,716401 CAD</strong></td>
+</tr>
+</tbody></table>
+<p>Le total publié est <strong>254,72 CAD</strong> après arrondi.</p>
+<h2>3. Pourquoi le LLM augmente, et ce qu’il faut optimiser</h2>
+<p>Le mois précédent totalisait <strong>214,743159 CAD</strong>. La période courante atteint <strong>254,716401 CAD</strong>, soit <strong>+39,973242 CAD (+18,6 %)</strong> en valeur nominale. Ramenée à 30 jours, l’allocation courante vaut <strong>218,328344 CAD</strong>, soit <strong>+3,585185 CAD (+1,7 %)</strong> : à durée comparable, la hausse est donc faible, et l’essentiel de l’écart nominal vient de la fenêtre, qui compte <strong>35 jours au lieu de 30</strong>.</p>
+<p><strong>Ce qui a consommé des jetons ce mois-ci n’est pas du produit, c’est de l’infrastructure.</strong> Trois chantiers se sont enchaînés sur la fenêtre, tous très coûteux en jetons parce qu’ils procèdent par essais, vérifications et reprises sur un environnement réel plutôt que par écriture de code :</p>
+<ol>
+<li>les <strong>essais de migration</strong> entre fournisseurs, avec les vérifications d’équivalence à chaque étape ;</li>
+<li>le <strong>passage de trois instances à une seule</strong>, qui impose de re-mesurer et de réajuster les réservations de tous les services ;</li>
+<li>le <strong>remplacement du stockage interne au cluster par le stockage objet du fournisseur</strong>, avec recopie puis contrôle de 59 017 objets et repointage de chaque composant.</li>
+</ol>
+<p>La hausse la plus visible est celle de Codex sur immo, qui passe de <strong>0,268 Md</strong> à <strong>2,197 Md</strong> de jetons, tandis que le dénominateur de capacité Codex reste le pic historique audité.</p>
+<p><strong>Un travail d’optimisation de la consommation de jetons est nécessaire</strong> — désigné « rtk » par l’owner. Son contenu n’est pas encore spécifié dans le dépôt : <strong>source-gap</strong>, à cadrer avant de l’annoncer comme une action datée. Le levier attendu est de réduire la part d’exploration répétée sur les chantiers d’infrastructure, qui est le poste dominant de ce mois.</p>
+<h2>4. Total de période et limites</h2>
+<table>
+<thead>
+<tr>
+<th>Poste</th>
+<th align="right">Montant retenu</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Infrastructure facturée</td>
+<td align="right"><strong>0,00 CAD</strong> (crédits OVH)</td>
+</tr>
+<tr>
+<td>Allocation LLM provisoire après marge</td>
+<td align="right"><strong>254,72 CAD</strong></td>
+</tr>
+<tr>
+<td><strong>Total facturé de la période</strong></td>
+<td align="right"><strong>0,00 CAD</strong></td>
+</tr>
+<tr>
+<td><strong>Total alloué de la période, LLM inclus</strong></td>
+<td align="right"><strong>254,72 CAD</strong></td>
+</tr>
+</tbody></table>
+<ul>
+<li>Les parts d’infrastructure — immo ≈ 7,14 CAD/mois, geo ≈ 1,43 CAD/mois — sont des <strong>références de prorata</strong>, pas des montants dus : rien n’est facturé tant que le crédit couvre la consommation.</li>
+<li>La clé de répartition repose sur une <strong>lecture unique</strong> des réservations, le 14 septembre. Un autre moment pourrait produire une autre ventilation ; ce n’est pas une moyenne temporelle.</li>
+<li>Le stockage objet, le trafic, les répartiteurs de charge et les services tiers restent <strong>non-vérifiés</strong> dans cette projection centrée sur l’instance ; aucun montant nul n’est inféré pour eux.</li>
+<li>La valeur « avant » de la réduction de réservation immo est un <strong>source-gap</strong> ; seule la baisse geo, de 105 m à 20 m, est datée et sourcée.</li>
+<li>Les journaux locaux mesurent l’usage des agents, pas une facture fournisseur par produit.</li>
+<li>L’allocation LLM est <strong>provisoire, non critique et non finale</strong> ; elle ne conditionne ni la promotion du pipeline ni une décision d’exploitation.</li>
+</ul>
+<hr>
+<p><em>Sources : factures OVH QC281819 et QC285954 ; état du crédit d’essai ; tarifs mesurés <code>b3-8</code> et <code>r2-15</code> ; relevés cluster du 14 septembre 2026 (allouable du nœud, réservations par espace de noms, usage instantané) ; relevé de capacité geo du 13 septembre ; <code>docs/reports/architecture-monthly/token-audit.mjs</code> ; sortie <code>token-audit-2026-08-10_2026-09-13.json</code> régénérée le 14 septembre ; méthode et clés du rapport <code>couts-2026-07-13_2026-08-09.*</code>.</em></p>
+</main></body></html>
