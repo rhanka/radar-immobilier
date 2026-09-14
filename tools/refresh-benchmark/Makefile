@@ -1211,3 +1211,82 @@ test-v14: runtime-text
 	  -w /src $(NODE_IMAGE) sh -c 'node --check tools/refresh-benchmark/requalify-v14-receipts.mjs \
 	    && node --check tools/refresh-benchmark/check-exact-replay.mjs \
 	    && node --check tools/refresh-benchmark/check-v16-freeze.mjs'
+
+# ---------------------------------------------------------------------------
+# Campagne v100 : même contrat que v16 (93994e45), même plafond 64 000, même
+# modèle et même effort. Seul le corpus bouge — 100 PV stratifiés au lieu de 5 —
+# pour mesurer une distribution (acceptation, refus, latence, tokens) et non un
+# tirage. Le corpus est mis en scène sous scratchtmp, hors du gel v13.
+V100_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v100
+V100_GEMINI_RESULTS := $(V100_RESULTS)/campaign-gemini
+V100_T1_ROOT := $(V16_T1_ROOT)
+V100_CAS := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/v100-cas
+
+.PHONY: t1-v100-snapshot prepare-prompts-v100 run-v100-real requalify-v100-receipts aggregate-v100 freeze-blind-v100
+
+t1-v100-snapshot:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	mkdir -p $(V100_T1_ROOT)
+	test -f $(V100_T1_ROOT)/api/src/services/graph/refresh-profile.ts \
+	  || git -C $(BENCHMARK_ROOT) archive $(T1_COMMIT_V16) | tar -x -C $(V100_T1_ROOT)
+
+prepare-prompts-v100: t1-v100-snapshot
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test -f $(V100_RESULTS)/manifest.json
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V100_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V100_RESULTS),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v100 \
+	  -e BENCHMARK_FREEZE_OUTPUT=/results/prompt-freeze.json \
+	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V16) \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  sh -c 'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/prepare-prompts.mjs' >/dev/null
+
+run-v100-real: check-v4-integration-ready t1-v100-snapshot
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test "$(VARIANT)" = "gemini-low"
+	test -f $(V100_RESULTS)/manifest.json -a -f $(V100_RESULTS)/prompt-freeze.json
+	mkdir -p $(V100_GEMINI_RESULTS)
+	docker run --rm --tmpfs /workspace --tmpfs /run --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V100_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V100_GEMINI_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=/workspace/t1 \
+	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V16) -e BENCHMARK_CAMPAIGN=v100 \
+	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_OUTPUT_DIR=/results \
+	  -e BENCHMARK_VARIANT=$(VARIANT) -e BENCHMARK_V100_SLICE='$(SLICE)' \
+	  -e BENCHMARK_V100_MAX_REQUESTS=$(or $(MAX_REQUESTS),100) \
+	  -e BENCHMARK_V100_DEADLINE_MS=$(or $(DEADLINE_MS),0) \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/run-v100-batch.mjs'
+
+requalify-v100-receipts: t1-v100-snapshot
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V100_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V100_GEMINI_RESULTS),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=/workspace/t1 \
+	  -e BENCHMARK_CAMPAIGN=v100 -e BENCHMARK_VARIANT=gemini-low \
+	  -e BENCHMARK_RESULT_ROOT=/results -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
+	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/requalify-v14-receipts.mjs'
+
+aggregate-v100:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V100_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_RESULT_ROOT=/results \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/aggregate-v100.mjs
+
+freeze-blind-v100:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V100_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_RESULT_ROOT=/results \
+	  -e BENCHMARK_JUDGE_SAMPLE=$(or $(JUDGE_SAMPLE),20) \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/freeze-blind-v100.mjs
