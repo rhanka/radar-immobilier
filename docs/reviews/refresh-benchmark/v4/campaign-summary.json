@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "campaign": "v4-real",
+  "contract": {
+    "graphify": "0.18.0",
+    "llmMesh": "0.19.1",
+    "geminiModel": "gemini-3.8-flash-tiered",
+    "geminiEffort": "LOW",
+    "maxOutputTokens": 16384,
+    "maxAttempts": 2,
+    "retryOnlyAfter": "transport_failure"
+  },
+  "gemini": {
+    "aggregate": {
+      "http200": 5,
+      "requested": 5,
+      "jsonValid": 0,
+      "extractionAccepted": 0,
+      "latencyMsTotal": 156972,
+      "latencyMsMean": 31394.4,
+      "inputTokens": 67397,
+      "outputTokens": 46553,
+      "totalTokens": 113950,
+      "judgeScore": null
+    },
+    "cases": [
+      {"documentId":"lac-des-seize-iles-2026-09-agenda","http":200,"latencyMs":12308,"jsonValid":false,"validation":"recorded_failed","inputTokens":6923,"outputTokens":3431,"judgeScore":null,"receipt":"campaign-real/lac-des-seize-iles-2026-09-agenda--gemini-low.attempt-2.receipt.json","preNetworkReceipt":"campaign-real/lac-des-seize-iles-2026-09-agenda--gemini-low.receipt.json"},
+      {"documentId":"saint-etienne-de-bolton-2026-08-04","http":200,"latencyMs":46652,"jsonValid":false,"validation":"recorded_failed","inputTokens":19407,"outputTokens":13295,"judgeScore":null,"receipt":"campaign-real/saint-etienne-de-bolton-2026-08-04--gemini-low.receipt.json"},
+      {"documentId":"valcourt-2026-06-01-agenda","http":200,"latencyMs":14353,"jsonValid":false,"validation":"recorded_failed","inputTokens":7377,"outputTokens":4938,"judgeScore":null,"receipt":"campaign-real/valcourt-2026-06-01-agenda--gemini-low.receipt.json"},
+      {"documentId":"saint-barthelemy-2026-09-08","http":200,"latencyMs":32057,"jsonValid":false,"validation":"recorded_failed","inputTokens":14637,"outputTokens":9936,"judgeScore":null,"receipt":"campaign-real/saint-barthelemy-2026-09-08--gemini-low.receipt.json"},
+      {"documentId":"waterloo-2026-08-18","http":200,"latencyMs":51602,"jsonValid":false,"validation":"recorded_failed","inputTokens":19053,"outputTokens":14953,"judgeScore":null,"receipt":"campaign-real/waterloo-2026-08-18--gemini-low.receipt.json"}
+    ]
+  },
+  "sonnetComparable": {
+    "status": "N-A",
+    "reason": "credential_injection_not_authorized",
+    "repositoryClientPresent": true,
+    "processEnvironmentConfigured": false,
+    "keyringAnthropicAccounts": 0,
+    "outsideRepositoryCredential": "detected_not_loaded",
+    "requested": 5,
+    "executed": 0,
+    "receipts": "campaign-real/*--sonnet-4.6.receipt.json"
+  },
+  "judging": {
+    "newCalls": 0,
+    "reason": "no candidate output passed JSON validation",
+    "historicalReceipts": ["judge-sol-xhigh.json", "judge-astra-xhigh.json"],
+    "historicalScope": ["luna-low", "historical-sonnet-4.6"]
+  },
+  "m1Recommendation": {
+    "model": null,
+    "decision": "do_not_promote_any_model",
+    "reason": "Gemini failed JSON validation 5/5; Sonnet comparable was not executed; historical Luna failed the validator 5/5."
+  }
+}
