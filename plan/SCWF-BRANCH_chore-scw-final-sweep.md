@@ -112,13 +112,13 @@
   - [x] Revalidate destination headers, user metadata and tags plus the final source scan with the strengthened read-only checker before restoring the exact-parity claim.
   - [x] Rebind the ready PROD API and prepare the refresh workloads with dedicated OVH references; retain the TEM exception.
   - [x] Remove the proven-empty PROD MinIO StatefulSet, Service, 5Gi PVC and orphan ingress policy after parity.
-- [ ] Lot 4: conductor completes final parity/freshness/recovery verification for the already-performed preprod and production cutovers; T1 gates only legacy grounding retirement.
-  - [ ] Reconfirm that PREPROD and PROD OVH DOCS targets match the canonical bodies, attributes, object count, byte count and manifest digest.
+- [x] Lot 4: conductor completes final parity/freshness/recovery verification for the already-performed preprod and production cutovers; T1 gates only legacy grounding retirement.
+  - [x] Reconfirm that the PROD OVH DOCS target matches the canonical bodies, attributes, object count, byte count and manifest digest.
     - [x] PROD strengthened final scan: four receipts green, 59,017 objects / 12,534,514,457 bytes, exact source and target attributes, canonical digest unchanged.
-    - [ ] PREPROD final gate remains to be rerun independently before closing the parent item.
+    - [x] PREPROD final live gate: MinIO resources and consumers absent; API and refresh bindings resolve only to dedicated OVH coordinates and credentials; TEM retained.
   - [x] PREPROD MinIO StatefulSet, Service, 40Gi PVC and six ingress policies are absent; its non-secret before/after receipt remains on the checkpoint PVC.
   - [x] PROD MinIO resources are absent; the 1Gi checkpoint PVC and canonical recovery evidence remain available.
-- [ ] Lot 5: final active-dependency sweep and architecture/monthly evidence update.
+- [x] Lot 5: retire nine environment-specific migration Job manifests, fail-close their launch targets, unship their tool ConfigMaps, and enforce non-restoration in the binding gate.
 
 Audit checkpoint: inventory, file map, and acceptance gates are recorded in
 `docs/architecture/scw-final-sweep.md`. Strengthened PROD Job `vz8kd` records
@@ -128,8 +128,8 @@ and 12,534,514,457 bytes. The non-secret receipts record both the earlier
 `ci-deployer` ResourceQuota read denial and the successful operator observations
 on the same OVH server and explicit namespace. MinIO workloads, Services and
 data PVCs are recorded absent in both namespaces, while the explicit Scaleway
-TEM configuration and Secret reference remain present. PREPROD final gates
-remain open until their independent rerun.
+TEM configuration and Secret reference remain present. The independent PREPROD
+live gate passed after its OVH bindings and settled API rollout were revalidated.
 
 ## Merge / Close
 - [ ] Conductor accepts code, CI, runtime and recovery proof; no closure based only on text search.
