@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+
+import { executionContract } from "./integration-contract.mjs";
 
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
@@ -17,11 +19,16 @@ const campaignRoot = resolve(repositoryRoot, `docs/reviews/refresh-benchmark/${c
 const manifest = await readJson(resolve(campaignRoot, "manifest.json"));
 const oracle = await readJson(resolve(campaignRoot, "manual-oracle.json"));
 const promptFreeze = await readJson(resolve(campaignRoot, "prompt-freeze.json"));
+// The contract allows one retry after a transport failure: attempt 2 is then the terminal attempt.
+const terminalStem = async (baseStem) => {
+  const retried = `${baseStem}.attempt-${executionContract.maxAttempts}`;
+  return access(resolve(resultRoot, `${retried}.receipt.json`)).then(() => retried, () => baseStem);
+};
 const cases = [];
 const efforts = new Set();
 const models = new Set();
 for (const document of manifest.documents) {
-  const stem = `${document.id}--${variant}`;
+  const stem = await terminalStem(`${document.id}--${variant}`);
   let receipt;
   try { receipt = await readJson(resolve(resultRoot, `${stem}.receipt.json`)); }
   catch (error) { if (error.code !== "ENOENT") throw error; }

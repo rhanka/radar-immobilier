@@ -1,10 +1,12 @@
 import { createHash } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { validateExtraction, validateProfileExtraction } from
   "/workspace/node_modules/@sentropic/graphify/dist/index.js";
+
+import { executionContract } from "./integration-contract.mjs";
 
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
@@ -65,12 +67,24 @@ function provenanceViolations(extraction, document, pages) {
   return violations;
 }
 
+// The contract allows one retry after a transport failure: attempt 2 is then the terminal attempt.
+async function terminalStem(baseStem) {
+  const retried = `${baseStem}.attempt-${executionContract.maxAttempts}`;
+  return access(resolve(resultRoot, `${retried}.receipt.json`)).then(() => retried, () => baseStem);
+}
+
 const summary = [];
 for (const document of manifest.documents) {
-  const stem = `${document.id}--${variant}`;
+  const stem = await terminalStem(`${document.id}--${variant}`);
   const receiptPath = resolve(resultRoot, `${stem}.receipt.json`);
-  const raw = await readFile(resolve(resultRoot, `${stem}.raw.txt`), "utf8");
   const receipt = JSON.parse(await readFile(receiptPath, "utf8"));
+  // A transport failure never reaches the raw persistence step: there is nothing to requalify.
+  if (!receipt.actual) {
+    summary.push({ documentId: document.id, profileValid: null, provenanceValid: null,
+      accepted: receipt.validation.accepted, state: "transport_failed" });
+    continue;
+  }
+  const raw = await readFile(resolve(resultRoot, `${stem}.raw.txt`), "utf8");
   if (receipt.actual?.responseTextSha256 !== sha256(raw)) throw new Error(`Raw hash mismatch: ${stem}`);
   const extraction = parseRaw(raw);
   const extractionViolations = validateExtraction(extraction);
