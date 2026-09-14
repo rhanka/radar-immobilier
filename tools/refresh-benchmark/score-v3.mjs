@@ -65,7 +65,7 @@ async function readJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
 }
 
-if (process.env.BENCHMARK_SCORE_OUTPUT) {
+if (process.env.BENCHMARK_SCORE_OUTPUT && !process.env.BENCHMARK_IMPORT_ONLY) {
   const rootPath = process.env.BENCHMARK_SCORE_ROOT;
   const manifest = await readJson(resolve(rootPath, "manifest.json"));
   const oracle = await readJson(resolve(rootPath, "manual-oracle.json"));

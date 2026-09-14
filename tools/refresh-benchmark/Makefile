@@ -18,7 +18,7 @@ BASELINE_GOLD := $(MAIN_ROOT)/.lanes/conductor/tmp/bench-llm/bench/v2/gold.json
 PREFLIGHT_FILE ?= preflight-before.json
 PREFLIGHT_MODEL ?= gpt-5.6-sol
 
-.PHONY: test test-v3 test-v4 test-score-v3 score-v3 freeze-blind-v3 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 run-v3-sol-normal run-v4-all quota inspect-validation
+.PHONY: test test-v3 test-v4 test-score-v3 test-score-v4 score-v3 score-v4 freeze-blind-v3 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 run-v3-sol-normal run-v4-all quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -81,6 +81,20 @@ test-score-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -w /src $(NODE_IMAGE) node --test tools/refresh-benchmark/score-v3.test.mjs
+
+test-score-v4:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node --test tools/refresh-benchmark/score-v4.test.mjs
+
+score-v4:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V4_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_SCORE_ROOT=/results \
+	  -e BENCHMARK_SCORE_OUTPUT=/results/comparison.json -e BENCHMARK_IMPORT_ONLY=1 \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/score-v4.mjs
 
 score-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
