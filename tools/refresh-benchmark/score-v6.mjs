@@ -1,0 +1,46 @@
+import { createHash } from "node:crypto";
+import { readFile, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+
+const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
+const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
+const resultRoot = required("BENCHMARK_RESULT_ROOT");
+const outputPath = required("BENCHMARK_SCORE_OUTPUT");
+delete process.env.BENCHMARK_SCORE_OUTPUT;
+const { scoreValid } = await import("./score-v3.mjs");
+const { citationHealth } = await import("./score-v4.mjs");
+const readJson = async (path) => JSON.parse(await readFile(path, "utf8"));
+const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+const manifest = await readJson(resolve(repositoryRoot, "docs/reviews/refresh-benchmark/v6/manifest.json"));
+const oracle = await readJson(resolve(repositoryRoot, "docs/reviews/refresh-benchmark/v6/manual-oracle.json"));
+const cases = [];
+for (const document of manifest.documents) {
+  const stem = `${document.id}--gemini-low`;
+  let receipt;
+  try { receipt = await readJson(resolve(resultRoot, `${stem}.receipt.json`)); }
+  catch (error) { if (error.code !== "ENOENT") throw error; }
+  let raw;
+  let output;
+  if (receipt) raw = await readFile(resolve(resultRoot, `${stem}.raw.txt`), "utf8");
+  if (receipt?.validation?.accepted) output = await readJson(resolve(resultRoot, `${stem}.output.json`));
+  const text = await readFile(resolve(repositoryRoot, document.runtimeTextRelativePath), "utf8");
+  const pages = text.split("\f"); if (pages.at(-1) === "") pages.pop();
+  cases.push({ documentId: document.id,
+    state: !receipt ? "not_launched" : receipt.validation.accepted ? "completed_valid" : "completed_invalid",
+    httpStatus: receipt?.wire?.httpStatus ?? null, timingMs: receipt?.timing?.totalMs ?? null,
+    usage: receipt?.actual?.usage ?? null, terminalFinishReason: receipt?.wire?.terminalSse?.lastData?.finishReason ?? null,
+    validation: receipt?.validation ?? null,
+    raw: raw ? { sha256: sha256(raw), characters: [...raw].length, bytes: Buffer.byteLength(raw) } : null,
+    outputSha256: output ? sha256(JSON.stringify(output)) : null,
+    quality: output ? scoreValid(output, document,
+      oracle.units.filter(({ doc_sha: digest }) => digest === document.sha256)) : null,
+    citations: output ? citationHealth(output, document, pages) : null });
+}
+const accepted = cases.filter(({ state }) => state === "completed_valid").length;
+const result = { schemaVersion: 1, campaign: "v6", model: "gemini-3.8-flash-tiered",
+  effort: "LOW", maxOutputTokens: 16_384, cases,
+  totals: { launched: cases.filter(({ state }) => state !== "not_launched").length,
+    accepted, planned: manifest.documents.length }, campaignStopped: true,
+  stopReason: "saint-etienne-de-bolton-2026-08-04 returned MAX_TOKENS and incomplete JSON" };
+await writeFile(outputPath, JSON.stringify(result), { flag: "wx" });
+console.log(JSON.stringify({ launched: result.totals.launched, accepted, planned: result.totals.planned }));

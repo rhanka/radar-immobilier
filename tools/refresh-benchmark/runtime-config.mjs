@@ -51,3 +51,46 @@ export function inspectWireBody(variant, body,
   return { model: observed.model, effort: variant.effort, providerEffort: observed.effort,
     maxOutputTokens: observed.maxOutputTokens ?? null };
 }
+
+export function resolveOutputCap(value, { campaign, documentId, variantName }, frozenCap) {
+  if (!value) return frozenCap;
+  const cap = Number(value);
+  if (campaign !== "v5" || documentId !== "valcourt-2026-06-01-agenda"
+    || variantName !== "gemini-low" || cap !== 65_536) {
+    throw new Error("Output-cap override is restricted to the Valcourt v5 Gemini diagnostic");
+  }
+  return cap;
+}
+
+export function inspectCloudCodeSse(transcript) {
+  let dataEventCount = 0;
+  let doneMarker = false;
+  let lastData = null;
+  for (const line of transcript.split(/\r?\n/u)) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith("data:")) continue;
+    const data = trimmed.slice(5).trim();
+    if (data === "[DONE]") {
+      doneMarker = true;
+      continue;
+    }
+    if (!data) continue;
+    try {
+      const parsed = JSON.parse(data);
+      const payload = parsed.response ?? parsed;
+      const finishReason = payload.candidates?.[0]?.finishReason;
+      const usage = payload.usageMetadata;
+      const usageMetadata = usage && typeof usage === "object" ? Object.fromEntries(
+        ["promptTokenCount", "candidatesTokenCount", "thoughtsTokenCount", "totalTokenCount"]
+          .filter((key) => typeof usage[key] === "number").map((key) => [key, usage[key]]),
+      ) : null;
+      dataEventCount += 1;
+      lastData = { hasFinishReason: typeof finishReason === "string",
+        finishReason: typeof finishReason === "string" ? finishReason : null,
+        hasUsageMetadata: usageMetadata !== null, usageMetadata };
+    } catch {
+      // Mirror llm-mesh: malformed SSE data lines are ignored.
+    }
+  }
+  return { dataEventCount, doneMarker, lastData };
+}

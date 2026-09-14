@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createAdapterSet, inspectWireBody, selectAccount, validateRetry, variants } from
+import { createAdapterSet, inspectCloudCodeSse, inspectWireBody, resolveOutputCap,
+  selectAccount, validateRetry, variants } from
   "./runtime-config.mjs";
 
 test("v4 candidates use the lowest explicit effort on enrolled transports", () => {
@@ -39,6 +40,30 @@ test("outgoing wire evidence proves provider model, effort, and cap", () => {
       maxOutputTokens: 16384, thinkingConfig: { thinkingLevel: "HIGH" },
     } },
   }), /Observed effort differs/);
+});
+
+test("the elevated cap is restricted to the single Valcourt diagnosis", () => {
+  const context = { campaign: "v5", documentId: "valcourt-2026-06-01-agenda",
+    variantName: "gemini-low" };
+  assert.equal(resolveOutputCap(undefined, context, 16_384), 16_384);
+  assert.equal(resolveOutputCap("65536", context, 16_384), 65_536);
+  assert.throws(() => resolveOutputCap("65536", { ...context, documentId: "waterloo" }, 16_384),
+    /restricted to the Valcourt/);
+});
+
+test("terminal Cloud Code SSE evidence retains only closure metadata", () => {
+  const transcript = [
+    'data: {"response":{"candidates":[{"content":{"parts":[{"text":"secret body"}]}}]}}',
+    'data: {"response":{"candidates":[{"finishReason":"MAX_TOKENS"}],"usageMetadata":'
+      + '{"promptTokenCount":10,"candidatesTokenCount":20,"thoughtsTokenCount":3,'
+      + '"totalTokenCount":33,"sensitive":"discard"}}}',
+    "data: [DONE]", "",
+  ].join("\n");
+  assert.deepEqual(inspectCloudCodeSse(transcript), { dataEventCount: 2, doneMarker: true,
+    lastData: { hasFinishReason: true, finishReason: "MAX_TOKENS", hasUsageMetadata: true,
+      usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 20,
+        thoughtsTokenCount: 3, totalTokenCount: 33 } } });
+  assert.doesNotMatch(JSON.stringify(inspectCloudCodeSse(transcript)), /secret body|sensitive/);
 });
 
 test("adapter construction is identical across the frozen Graphify boundary", () => {
