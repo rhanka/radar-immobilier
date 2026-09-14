@@ -8,8 +8,8 @@ node "$root/deploy/ci/copy-canonical-docs-parity.hermetic.test.mjs"
 for kustomization in \
   "$root/deploy/k8s/object-storage-docs-prod/kustomization.yaml" \
   "$root/deploy/k8s/object-storage-inventory-preprod/kustomization.yaml"; do
-  grep -F 'copy-canonical-docs-parity.mjs=../../ci/copy-canonical-docs-parity.mjs' \
-    "$kustomization" >/dev/null
+  ! grep -Eq 'radar-object-storage-(docs-prod-tool|inventory-tool)|copy-canonical-docs' \
+    "$kustomization"
 done
 test_tmp="$(mktemp -d /tmp/canonical-docs-test.XXXXXX)"
 trap 'rm -rf "$test_tmp"' EXIT
