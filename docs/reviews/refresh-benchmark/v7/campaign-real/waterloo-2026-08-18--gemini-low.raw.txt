@@ -1,0 +1,569 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "label": "Procès-verbal de la séance ordinaire du 18 août 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "review_status": "validated",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "date": "2026-08-18",
+      "municipality": "waterloo",
+      "url": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de la Ville de Waterloo, tenue le 18 août à 2026 19 h 00"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-26-956-2",
+      "label": "Règlement 26-956-2",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "review_status": "validated",
+      "numero": "26-956-2",
+      "title": "Règlement modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés",
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "municipality": "waterloo",
+      "resolution": "26.08.22.1",
+      "stage": "adoption",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption 26-956-2 - Règlement modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés"
+        },
+        {
+          "page": 3,
+          "excerpt": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés tel que soumis"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-26-957-1",
+      "label": "Règlement 26-957-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "review_status": "validated",
+      "numero": "26-957-1",
+      "title": "Règlement sur le lotissement en lien avec certains sites patrimoniaux",
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "municipality": "waterloo",
+      "resolution": "26.08.22.2",
+      "stage": "adoption",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Adoption 26-957-1 - Règlement sur le lotissement en lien avec certains sites patrimoniaux"
+        },
+        {
+          "page": 3,
+          "excerpt": "Que le conseil municipal adopte le Règlement 26-957-1 sur le lotissement en lien avec certains sites patrimoniaux tel que soumis"
+        }
+      ]
+    },
+    {
+      "id": "event-derogation-80-yves-malouin",
+      "label": "Dérogation mineure - 80, rue Yves-Malouin",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "kind": "derogation",
+      "decision": "approuvé",
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "resolution": "26.08.26.2",
+      "dossier": "CCU 2026-107",
+      "municipality": "waterloo",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-18",
+      "description": "Dérogation mineure pour l'implantation latérale et la marge arrière au 80, rue Yves-Malouin pour des maisons jumelées.",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Dérogation mineure, implantation latérale et arrière, 80, rue Yves-Malouin (CCU 2026-107)"
+        },
+        {
+          "page": 11,
+          "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée, notamment pour l'implantation et la marge arrière du 80, rue Yves-Malouin."
+        }
+      ]
+    },
+    {
+      "id": "event-derogation-82-yves-malouin",
+      "label": "Dérogation mineure - 82, rue Yves-Malouin",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "kind": "derogation",
+      "decision": "approuvé",
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "resolution": "26.08.26.3",
+      "dossier": "CCU 2026-108",
+      "zone_ref": "R-37",
+      "municipality": "waterloo",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-18",
+      "description": "Dérogation mineure pour l'implantation latérale et marge arrière au 82, rue Yves-Malouin (ancienne zone R-37).",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Dérogation mineure, implantation latérale et arrière, 82, rue Yves-Malouin (CCU 2026-108)"
+        },
+        {
+          "page": 11,
+          "excerpt": "l'implantation des bâtiments existants dans le secteur (ancienne zone R-37)"
+        },
+        {
+          "page": 12,
+          "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée, notamment pour l'implantation et la marge arrière du 82, rue Yves-Malouin."
+        }
+      ]
+    },
+    {
+      "id": "event-derogation-153-manege",
+      "label": "Dérogation mineure - 153, rue du Manège",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "kind": "derogation",
+      "decision": "approuvé",
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "resolution": "26.08.26.4",
+      "dossier": "CCU 2026-110",
+      "zone_ref": "H-92",
+      "municipality": "waterloo",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-18",
+      "description": "Dérogation mineure pour l'implantation d'un nouveau bâtiment de type unifamiliale jumelée au 153, rue du Manège.",
+      "conditions": [
+        "obtenir l'aval du service des incendies concernant la distance entre l'aire de stationnement et la future borne-fontaine"
+      ],
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Dérogation mineure, implantation, 153, rue du Manège (CCU 2026-110)"
+        },
+        {
+          "page": 12,
+          "excerpt": "devrait être modifié par une future modification aux normes de la zone H-92."
+        },
+        {
+          "page": 12,
+          "excerpt": "Que le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 153, rue du Manège, telle que demandée"
+        }
+      ]
+    },
+    {
+      "id": "event-derogation-155-manege",
+      "label": "Dérogation mineure - 155, rue du Manège",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "kind": "derogation",
+      "decision": "approuvé",
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "resolution": "26.08.26.5",
+      "dossier": "CCU 2026-111",
+      "zone_ref": "H-92",
+      "municipality": "waterloo",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-18",
+      "description": "Dérogation mineure pour l'implantation d'un nouveau bâtiment de type unifamiliale jumelée au 155, rue du Manège.",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Dérogation mineure, implantation, 155, rue du Manège (CCU 2026-111)"
+        },
+        {
+          "page": 12,
+          "excerpt": "se verra corrigé par une future modification aux normes de la zone H-92;"
+        },
+        {
+          "page": 13,
+          "excerpt": "Que le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 155, rue du Manège, telle que demandée"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-80-82-yves-malouin",
+      "label": "PIIA - Construction neuve 80-82, rue Yves-Malouin",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "resolution": "26.08.26.8",
+      "dossier": "CCU 2026-109",
+      "municipality": "waterloo",
+      "etape": "piia",
+      "etape_date": "2026-08-18",
+      "description": "PIIA pour une construction neuve au 80-82, rue Yves-Malouin.",
+      "conditions": [
+        "présenter aux CCU les plans d'aménagement du terrain pour approbation à une date ultérieure"
+      ],
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "PIIA - Construction neuve, 80-82, rue Yves-Malouin (CCU 2026109)"
+        },
+        {
+          "page": 14,
+          "excerpt": "Que le conseil municipal approuve la demande PIIA pour une construction neuve au 80-82, rue Yves-Malouin, tel que demandé"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-153-155-manege",
+      "label": "PIIA - Construction neuve 153 et 155, rue du Manège",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "resolution": "26.08.26.9",
+      "dossier": "CCU 2026-112",
+      "municipality": "waterloo",
+      "etape": "piia",
+      "etape_date": "2026-08-18",
+      "description": "PIIA pour un projet de construction résidentielle neuve au 153 et 155, rue du Manège.",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "PIIA - Construction neuve, 153 et 155, rue du Manège (CCU 2026112)"
+        },
+        {
+          "page": 14,
+          "excerpt": "Que le conseil approuve le projet de construction résidentielle neuve au 153 et 155, rue du Manège, tel que présenté."
+        }
+      ]
+    },
+    {
+      "id": "zone-h-92",
+      "label": "Zone H-92",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "candidate",
+      "code": "H-92",
+      "municipality": "waterloo",
+      "meetingDate": "2026-08-18",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "devrait être modifié par une future modification aux normes de la zone H-92."
+        }
+      ]
+    },
+    {
+      "id": "zone-r-37",
+      "label": "Zone R-37",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "review_status": "candidate",
+      "code": "R-37",
+      "municipality": "waterloo",
+      "meetingDate": "2026-08-18",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "description": "Ancienne zone R-37",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "l'implantation des bâtiments existants dans le secteur (ancienne zone R-37)"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "bylaw-26-956-2",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption 26-956-2 - Règlement modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés"
+        },
+        {
+          "page": 3,
+          "excerpt": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés tel que soumis"
+        }
+      ],
+      "evidence_refs": ["ev-1"]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "bylaw-26-957-1",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Adoption 26-957-1 - Règlement sur le lotissement en lien avec certains sites patrimoniaux"
+        },
+        {
+          "page": 3,
+          "excerpt": "Que le conseil municipal adopte le Règlement 26-957-1 sur le lotissement en lien avec certains sites patrimoniaux tel que soumis"
+        }
+      ],
+      "evidence_refs": ["ev-2"]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-derogation-80-yves-malouin",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Dérogation mineure, implantation latérale et arrière, 80, rue Yves-Malouin (CCU 2026-107)"
+        }
+      ],
+      "evidence_refs": ["ev-3"]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-derogation-82-yves-malouin",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Dérogation mineure, implantation latérale et arrière, 82, rue Yves-Malouin (CCU 2026-108)"
+        }
+      ],
+      "evidence_refs": ["ev-4"]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-derogation-153-manege",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Dérogation mineure, implantation, 153, rue du Manège (CCU 2026-110)"
+        }
+      ],
+      "evidence_refs": ["ev-5"]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-derogation-155-manege",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Dérogation mineure, implantation, 155, rue du Manège (CCU 2026-111)"
+        }
+      ],
+      "evidence_refs": ["ev-6"]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-piia-80-82-yves-malouin",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "PIIA - Construction neuve, 80-82, rue Yves-Malouin (CCU 2026109)"
+        }
+      ],
+      "evidence_refs": ["ev-7"]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-piia-153-155-manege",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "PIIA - Construction neuve, 153 et 155, rue du Manège (CCU 2026112)"
+        }
+      ],
+      "evidence_refs": ["ev-8"]
+    },
+    {
+      "source": "event-derogation-82-yves-malouin",
+      "target": "zone-r-37",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "l'implantation des bâtiments existants dans le secteur (ancienne zone R-37)"
+        }
+      ],
+      "evidence_refs": ["ev-4"]
+    },
+    {
+      "source": "event-derogation-153-manege",
+      "target": "zone-h-92",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "devrait être modifié par une future modification aux normes de la zone H-92."
+        }
+      ],
+      "evidence_refs": ["ev-5"]
+    },
+    {
+      "source": "event-derogation-155-manege",
+      "target": "zone-h-92",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "se verra corrigé par une future modification aux normes de la zone H-92;"
+        }
+      ],
+      "evidence_refs": ["ev-6"]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés tel que soumis"
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "Que le conseil municipal adopte le Règlement 26-957-1 sur le lotissement en lien avec certains sites patrimoniaux tel que soumis"
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Dérogation mineure, implantation latérale et arrière, 80, rue Yves-Malouin (CCU 2026-107)"
+    },
+    {
+      "id": "ev-4",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "l'implantation des bâtiments existants dans le secteur (ancienne zone R-37)"
+    },
+    {
+      "id": "ev-5",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "devrait être modifié par une future modification aux normes de la zone H-92."
+    },
+    {
+      "id": "ev-6",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "se verra corrigé par une future modification aux normes de la zone H-92;"
+    },
+    {
+      "id": "ev-7",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "PIIA - Construction neuve, 80-82, rue Yves-Malouin (CCU 2026109)"
+    },
+    {
+      "id": "ev-8",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "PIIA - Construction neuve, 153 et 155, rue du Manège (CCU 2026112)"
+    }
+  ],
+  "input_tokens": 4650,
+  "output_tokens": 2550
+}
+```
