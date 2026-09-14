@@ -43,9 +43,11 @@ object-storage-docs-prod-validate: ## Validate PROD post-cutover support and ret
 	@bash -n deploy/ci/migrate-object-storage.sh deploy/ci/object-storage-checkpoint.sh
 	@bash -n deploy/ci/docs-api-rebind-patch.hermetic.test.sh
 	@bash -n deploy/ci/docs-prod-parity-receipt.hermetic.test.sh
+	@bash -n deploy/ci/docs-prod-final-proof-bundle.test.sh
 	@bash deploy/ci/docs-prod-runtime-secrets.hermetic.test.sh
 	@bash deploy/ci/docs-api-rebind-patch.hermetic.test.sh
 	@bash deploy/ci/docs-prod-parity-receipt.hermetic.test.sh
+	@bash deploy/ci/docs-prod-final-proof-bundle.test.sh
 	@set -o pipefail; $(MAKE) --no-print-directory -n object-storage-minio-prod-finalize \
 	  OBJECT_STORAGE_MINIO_PROD_FINALIZE_CONFIRM=1 \
 	  OBJECT_STORAGE_DOCS_PROD_PARITY_JOB=radar-object-storage-copy-docs-prod-hermetic \
@@ -265,7 +267,11 @@ object-storage-docs-prod-final-status: ## Prove PROD DOCS binding and MinIO abse
 	  ! $(KUBECTL) -n "$$namespace" get statefulset/radar-minio >/dev/null 2>&1; \
 	  ! $(KUBECTL) -n "$$namespace" get service/radar-minio >/dev/null 2>&1; \
 	  ! $(KUBECTL) -n "$$namespace" get pvc/minio-data-radar-minio-0 >/dev/null 2>&1; \
-	  ! $(KUBECTL) -n "$$namespace" get networkpolicy/allow-api-to-minio >/dev/null 2>&1; \
+	  for policy in allow-api-to-minio allow-graph-projection-to-minio \
+	    allow-grounding-to-minio allow-object-storage-inventory-to-minio \
+	    allow-scrape-to-minio allow-snapshot-dump-to-minio; do \
+	    ! $(KUBECTL) -n "$$namespace" get networkpolicy/"$$policy" >/dev/null 2>&1; \
+	  done; \
 	  $(KUBECTL) -n "$$namespace" get pvc/radar-object-storage-docs-prod-checkpoint -o json | \
 	    jq -e '.status.phase == "Bound" and .status.capacity.storage == "1Gi"' >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json | \
@@ -282,7 +288,7 @@ object-storage-docs-prod-final-status: ## Prove PROD DOCS binding and MinIO abse
 	    <<<"$$deployment" >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get secret/radar-tem-credentials >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" rollout status deployment/radar-api --timeout=60s >/dev/null; \
-	  jq -n '{minio:{statefulSet:false,service:false,pvc:false},checkpoint:{phase:"Bound",capacity:"1Gi"},quota:{secrets:{hard:15,used:15},pvcs:{hard:3,used:2}},docs:{bucket:"radar-immobilier-docs",graphBinding:true,scrapeBinding:true},tem:{apiBase:"https://api.scaleway.com",secretReference:"radar-tem-credentials",preserved:true}}'
+	  jq -n '{minio:{statefulSet:false,service:false,pvc:false,networkPolicies:false},checkpoint:{phase:"Bound",capacity:"1Gi"},quota:{secrets:{hard:15,used:15},pvcs:{hard:3,used:2}},docs:{bucket:"radar-immobilier-docs",graphBinding:true,scrapeBinding:true},tem:{apiBase:"https://api.scaleway.com",secretReference:"radar-tem-credentials",preserved:true}}'
 
 .PHONY: object-storage-docs-prod-start
 object-storage-docs-prod-start: ## Retired after the OVH cutover

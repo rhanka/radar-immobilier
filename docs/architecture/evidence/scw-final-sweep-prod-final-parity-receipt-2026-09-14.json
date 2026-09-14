@@ -43,6 +43,14 @@
       "copied": 0,
       "failed": 0,
       "logicalBytes": 12534514457,
+      "elapsedSeconds": 627.281,
+      "opsPerSecond": 94.08383164801741,
+      "logicalMiBPerSecond": 19.05660223450692,
+      "etaSeconds": 0,
+      "schemaVersion": 1,
+      "prunedExtra": 0,
+      "conditionalWriteProofDigest": "2733b75f7bbfb6b2a5b8e40e918a28d0110d2e53508284ac94f1cc5d2b55ba0c",
+      "destinationIdentityFingerprint": "f6ab9151ce89e38ab8963e6a7779ce55cbcff3ec8c43ae706392dcd95cec8506",
       "sourceVerifiedObjects": 59017,
       "sourceVerifiedBytes": 12534514457,
       "targetVerifiedObjects": 59017,
@@ -60,6 +68,7 @@
   },
   "capture": {
     "method": "read-only checkpoint PVC reader",
+    "committedProofBundle": "scw-final-sweep-prod-vz8kd",
     "readerPodRemovedAfterCapture": true,
     "secretValuesCaptured": false,
     "objectKeysCaptured": false
