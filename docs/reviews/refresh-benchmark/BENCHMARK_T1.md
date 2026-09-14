@@ -322,3 +322,48 @@ unique, donc non comparatif. Coût unitaire `N-A`, source manquante.
 
 Détail, reçus et SHA : [v14/report.md](v14/report.md) et [v15/report.md](v15/report.md).
 Comparaison v1 contre v2 par PV et par bras : [oracle-v2-comparison.json](oracle-v2-comparison.json).
+
+## Campagne v16 — même contrat v9, schéma corrigé après la revue
+
+[FAIT] **Une seule variable déplacée : le schéma émis.** Les deux majeurs de la revue
+v9 changent ce que le modèle lit — la forme compacte `{page, excerpt}` n'est plus
+annoncée sous `evidence` (M1), et `evidence_item.excerpt.minLength` passe de 1 à 12
+avec une description alignée sur le plancher d'ancrage (M2). `make check-v16-freeze`
+prouve le reste immobile : même corpus, même oracle, même plafond 64 000, même prompt
+système, mêmes `chunkId` et pages, et **`promptSha256` identique sur les cinq
+documents**. Seuls bougent `t1Commit`, les deux hachages de module et les cinq
+`schemaSha256`.
+
+| Agrégat | v14 | v15 | **v16** |
+| --- | ---: | ---: | ---: |
+| Acceptés | 5/5 | 5/5 | **3/5** |
+| Classes de refus | aucune | aucune | **`ungrounded_pdf_excerpt`, 2 PV** |
+| `evidence[]` compacts (M1) | 0/34 | 0/30 | **0/41** |
+| `evidence[]` sous 12 normalisés (M2) | 0/34 | 0/30 | **0/41** |
+| Citations d'entités sous 20 bruts / 12 normalisés | 0/103 | 0/94 | **0/132** |
+| Macro F1 oracle v2, acceptés | 0,576 | 0,582 | **0,566** (3 documents) |
+| Macro F1 oracle v2, population fixe | 0,576 | 0,582 | **0,425** |
+| Tokens entrée / sortie | 70 080 / 42 920 | 70 080 / 39 225 | **69 630 / 55 882** |
+
+[FAIT] **Les deux motifs de M1 et M2 sont absents des sorties** : aucun `evidence[]`
+compact sur 41, aucun extrait `evidence[]` sous le plancher d'ancrage, aucune citation
+d'entité sous l'un ou l'autre plancher sur 132.
+
+[FAIT] **Les deux refus sont des erreurs de page, mesurées.** Waterloo : le PV porte
+deux dérogations quasi identiques, « … du 80, rue YvesMalouin » en page 11 et « … du
+82 » en page 12 ; v16 a cité les deux en page 11, l'ancrage page-locale a arrêté la
+seconde. Saint-Barthélemy : une citation dont les 104 premiers caractères normalisés
+sont en page 4 et dont la suite est en page 5. Extraits refusés à 168 et 115
+caractères normalisés — **aucun plancher en cause**.
+
+[FAIT] **Le validateur v16 ne refuse rien que v15 acceptait** : les dix reçus v14 et
+v15 requalifiés hors ligne sous le snapshot v16 rendent le même verdict à l'octet
+près, 10/10 acceptés, `git diff` vide.
+
+[JUGEMENT] Le seuil B « ≥ 4/5 sur deux runs », atteint par la paire v14 + v15, **n'est
+pas ré-établi pour le schéma d'après-revue** : v16 n'apporte qu'une observation, le
+plafond de 5 requêtes est consommé et aucune retry de qualité n'était autorisée. Ce
+qui est établi, c'est que la correction n'introduit aucune classe de refus et ne
+durcit rien ; ce qui ne l'est pas, c'est le taux d'acceptation du nouveau schéma.
+
+Détail, reçus et SHA : [v16/report.md](v16/report.md).

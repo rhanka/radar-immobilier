@@ -50,6 +50,12 @@ V13_ARM_RESULTS = $(V13_RESULTS)/$(V13_ARM_DIR)
 ORACLE_V2_ROOT := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark
 # v14 and v15 share one contract, one snapshot and one cap: CAMPAIGN selects the result root.
 V14_T1_ROOT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/t1-v14-d93f5c93
+# v16 keeps the same corpus, oracle, model and cap, and changes the contract snapshot alone: the
+# two majors of the v9 review move what the model reads, so the profile and corpus module hashes
+# and every per-document schema hash move with them. v16 is not an exact replay of v15.
+V16_T1_ROOT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/t1-v16-93994e45
+V14X_T1_ROOT = $(if $(filter v16,$(CAMPAIGN)),$(V16_T1_ROOT),$(V14_T1_ROOT))
+V14X_T1_COMMIT = $(if $(filter v16,$(CAMPAIGN)),$(T1_COMMIT_V16),$(T1_COMMIT_V14))
 V14X_RESULTS = $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/$(CAMPAIGN)
 V14X_CONTROL_RESULTS = $(V14X_RESULTS)/control
 V14X_GEMINI_RESULTS = $(V14X_RESULTS)/campaign-gemini
@@ -73,6 +79,10 @@ T1_COMMIT_V13 := 19d0d8b2edc6900180780478c6b8b4a9feeb5b52
 # Contract immo-pv-extraction-v9, same PR #688 branch. ac99728f carried the first v9 wording,
 # which the v14 Valcourt control measured as emptying an agenda extraction; d93f5c93 fixes it.
 T1_COMMIT_V14 := d93f5c9358656536da8c90d91300fcb6076484a4
+# Same contract number v9, same PR #688 branch, after the v9 review: M1 stops announcing the
+# compact page/excerpt citation shape under evidence, M2 gives the anchor floor its own refusal
+# and raises evidence_item.excerpt.minLength from 1 to 12.
+T1_COMMIT_V16 := 93994e454a91031dcbbd49b8590fdd45b47a6cd4
 KEYRING_SOURCE := /home/antoinefa/.sentropic/llm-mesh-keyring
 BASELINE_GOLD := $(MAIN_ROOT)/.lanes/conductor/tmp/bench-llm/bench/v2/gold.json
 PREFLIGHT_FILE ?= preflight-before.json
@@ -86,7 +96,7 @@ GEMINI_MODEL ?= gemini-3.8-flash-tiered
 .PHONY: test-v11 score-v11 t1-v11-snapshot replay-v11-freeze prepare-prompts-v11 run-v11-control run-v11-real requalify-v11-receipts
 .PHONY: probe-v12-cloudcode check-v12-ping ping-v12-direct ping-v12-cloudcode replay-v12-freeze run-v12-real requalify-v12-receipts score-v12 test-v12 freeze-blind-v12
 .PHONY: build-oracle-v2 test-oracle-v2 compare-oracle-v1-v2
-.PHONY: t1-v14-snapshot replay-v14-freeze prepare-prompts-v14 check-v15-replay run-v14-control run-v14-real requalify-v14-receipts score-v14 test-v14 freeze-blind-v14
+.PHONY: t1-v14-snapshot replay-v14-freeze prepare-prompts-v14 check-v15-replay check-v16-freeze run-v14-control run-v14-real requalify-v14-receipts score-v14 test-v14 freeze-blind-v14
 .PHONY: t1-v13-snapshot replay-v13-freeze prepare-prompts-v13 run-v13-control run-v13-real requalify-v13-receipts score-v13 test-v13 freeze-blind-v13
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
@@ -1096,12 +1106,12 @@ compare-oracle-v1-v2:
 # v14 - same snapshot, same corpus, same oracle, same cap - so the pair measures variance.
 t1-v14-snapshot:
 	test "$(ENV)" = "test-t1-model-benchmark"
-	mkdir -p $(V14_T1_ROOT)
-	git -C $(BENCHMARK_ROOT) archive $(T1_COMMIT_V14) | tar -x -C $(V14_T1_ROOT)
+	mkdir -p $(V14X_T1_ROOT)
+	git -C $(BENCHMARK_ROOT) archive $(V14X_T1_COMMIT) | tar -x -C $(V14X_T1_ROOT)
 
 replay-v14-freeze:
 	test "$(ENV)" = "test-t1-model-benchmark"
-	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15" -o "$(CAMPAIGN)" = "v16"
 	test ! -e $(V14X_RESULTS)/manifest.json
 	mkdir -p $(V14X_RESULTS)
 	cp $(V13_RESULTS)/manifest.json $(V14X_RESULTS)/manifest.json
@@ -1110,15 +1120,15 @@ replay-v14-freeze:
 
 prepare-prompts-v14: t1-v14-snapshot
 	test "$(ENV)" = "test-t1-model-benchmark"
-	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15" -o "$(CAMPAIGN)" = "v16"
 	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
 	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
-	  --mount type=bind,source=$(V14_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V14X_T1_ROOT),target=/t1-source,readonly \
 	  --mount type=bind,source=$(V14X_RESULTS),target=/results \
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=$(CAMPAIGN) \
 	  -e BENCHMARK_FREEZE_OUTPUT=/results/prompt-freeze.json \
-	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V14) \
+	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_T1_COMMIT=$(V14X_T1_COMMIT) \
 	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
 	  sh -c 'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/prepare-prompts.mjs'
 
@@ -1130,30 +1140,39 @@ check-v15-replay:
 	  -e BENCHMARK_REPLAY_CAMPAIGN=v15 -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
 	  node tools/refresh-benchmark/check-exact-replay.mjs
 
+# The v16 freeze proof: everything v15 had, except the contract snapshot and the hashes that
+# depend on it. It names the expected deltas instead of asserting an exact replay that is false.
+check-v16-freeze:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_REPLAY_REFERENCE=v15 \
+	  -e BENCHMARK_REPLAY_CAMPAIGN=v16 -e BENCHMARK_EXPECTED_T1_COMMIT=$(T1_COMMIT_V16) \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/check-v16-freeze.mjs
+
 run-v14-control: check-v4-integration-ready t1-v14-snapshot
-	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15" -o "$(CAMPAIGN)" = "v16"
 	test -f $(V14X_RESULTS)/manifest.json -a -f $(V14X_RESULTS)/prompt-freeze.json
 	mkdir -p $(V14X_CONTROL_RESULTS)
 	$(MAKE) run-case DOC=valcourt-2026-06-01-agenda VARIANT=gemini-low CAMPAIGN=$(CAMPAIGN) \
-	  CAMPAIGN_RESULTS=$(V14X_CONTROL_RESULTS) T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V14) \
-	  T1_CAMPAIGN_ROOT=$(V14_T1_ROOT) ENV=$(ENV)
+	  CAMPAIGN_RESULTS=$(V14X_CONTROL_RESULTS) T1_CAMPAIGN_COMMIT=$(V14X_T1_COMMIT) \
+	  T1_CAMPAIGN_ROOT=$(V14X_T1_ROOT) ENV=$(ENV)
 
 run-v14-real: check-v4-integration-ready t1-v14-snapshot
-	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15" -o "$(CAMPAIGN)" = "v16"
 	test -f $(V14X_RESULTS)/manifest.json -a -f $(V14X_RESULTS)/prompt-freeze.json
 	test "$(VARIANT)" = "gemini-low"
 	mkdir -p $(V14X_GEMINI_RESULTS)
 	$(MAKE) run-case DOC=$(DOC) VARIANT=$(VARIANT) CAMPAIGN=$(CAMPAIGN) \
 	  CAMPAIGN_RESULTS=$(V14X_GEMINI_RESULTS) ATTEMPT=$(or $(ATTEMPT),1) \
-	  RETRY_REASON='$(RETRY_REASON)' T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V14) \
-	  T1_CAMPAIGN_ROOT=$(V14_T1_ROOT) ENV=$(ENV)
+	  RETRY_REASON='$(RETRY_REASON)' T1_CAMPAIGN_COMMIT=$(V14X_T1_COMMIT) \
+	  T1_CAMPAIGN_ROOT=$(V14X_T1_ROOT) ENV=$(ENV)
 
 requalify-v14-receipts: t1-v14-snapshot
 	test "$(ENV)" = "test-t1-model-benchmark"
-	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15" -o "$(CAMPAIGN)" = "v16"
 	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
 	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
-	  --mount type=bind,source=$(V14_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V14X_T1_ROOT),target=/t1-source,readonly \
 	  --mount type=bind,source=$(V14X_GEMINI_RESULTS),target=/results \
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=/workspace/t1 \
@@ -1163,7 +1182,7 @@ requalify-v14-receipts: t1-v14-snapshot
 
 score-v14:
 	test "$(ENV)" = "test-t1-model-benchmark"
-	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15" -o "$(CAMPAIGN)" = "v16"
 	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
 	  --mount type=bind,source=$(V14X_RESULTS),target=/results \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=$(CAMPAIGN) \
@@ -1173,7 +1192,7 @@ score-v14:
 
 freeze-blind-v14:
 	test "$(ENV)" = "test-t1-model-benchmark"
-	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15"
+	test "$(CAMPAIGN)" = "v14" -o "$(CAMPAIGN)" = "v15" -o "$(CAMPAIGN)" = "v16"
 	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
 	  --mount type=bind,source=$(V14X_RESULTS),target=/results \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=$(CAMPAIGN) \
@@ -1184,10 +1203,11 @@ test-v14: runtime-text
 	test "$(ENV)" = "test-t1-model-benchmark"
 	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=$(or $(CAMPAIGN),v14) \
-	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V14) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  -e BENCHMARK_T1_COMMIT=$(V14X_T1_COMMIT) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
 	  node --test tools/refresh-benchmark/benchmark.test.mjs \
 	    tools/refresh-benchmark/integration-contract.test.mjs \
 	    tools/refresh-benchmark/runtime-config.test.mjs
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -w /src $(NODE_IMAGE) sh -c 'node --check tools/refresh-benchmark/requalify-v14-receipts.mjs \
-	    && node --check tools/refresh-benchmark/check-exact-replay.mjs'
+	    && node --check tools/refresh-benchmark/check-exact-replay.mjs \
+	    && node --check tools/refresh-benchmark/check-v16-freeze.mjs'
