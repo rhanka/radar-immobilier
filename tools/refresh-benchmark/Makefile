@@ -17,8 +17,11 @@ KEYRING_SOURCE := /home/antoinefa/.sentropic/llm-mesh-keyring
 BASELINE_GOLD := $(MAIN_ROOT)/.lanes/conductor/tmp/bench-llm/bench/v2/gold.json
 PREFLIGHT_FILE ?= preflight-before.json
 PREFLIGHT_MODEL ?= gpt-5.6-sol
+GEMINI_DIAGNOSTIC_FILE ?= gemini-diagnostic.json
+GEMINI_ENDPOINT ?= mesh
+GEMINI_EFFORT ?= low
 
-.PHONY: test test-v3 test-v4 test-score-v3 test-score-v4 score-v3 score-v4 freeze-blind-v3 freeze-blind-v4 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 run-v3-sol-normal run-v4-all quota inspect-validation
+.PHONY: test test-v3 test-v4 test-score-v3 test-score-v4 score-v3 score-v4 freeze-blind-v3 freeze-blind-v4 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 gemini-diagnostic run-v3-sol-normal run-v4-all quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -77,6 +80,8 @@ test-v4: runtime-text
 	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V3) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
 	  node --test tools/refresh-benchmark/benchmark.test.mjs tools/refresh-benchmark/runtime-config.test.mjs \
 	    tools/refresh-benchmark/gemini-diagnostic.test.mjs
+	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/gemini-preflight.mjs
 
 test-score-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
@@ -169,6 +174,18 @@ preflight-v3:
 	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_MODEL=$(PREFLIGHT_MODEL) \
 	  -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec node tools/refresh-benchmark/codex-preflight.mjs'
+
+gemini-diagnostic:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --tmpfs /workspace --tmpfs /run \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V4_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_PREFLIGHT_OUTPUT=/results/$(GEMINI_DIAGNOSTIC_FILE) \
+	  -e BENCHMARK_MODEL=gemini-3.8-flash -e BENCHMARK_EFFORT=$(GEMINI_EFFORT) \
+	  -e BENCHMARK_ENDPOINT=$(GEMINI_ENDPOINT) -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec node tools/refresh-benchmark/gemini-preflight.mjs'
 
 run-v3-sol-normal:
 	test "$(ENV)" = "test-refresh-benchmark"
