@@ -123,6 +123,9 @@ for entry in "${RETIRED_LAUNCHERS[@]}"; do
 done
 grep -Eiq 'radar-registry-pull|SCW[[:space:]]+(Container[[:space:]]+)?registry' \
   "$ROOT/deploy/k8s/README.md" && fail 'deploy/k8s/README.md retains legacy registry guidance'
+grep -Eiq 's3\.fr-par\.scw\.cloud|radar-immobilier-docs-pocs|radar-s3-credentials|Scaleway|SCW' \
+  "$ROOT/tools/grounding/drive-grounding.sh" &&
+  fail 'tools/grounding/drive-grounding.sh retains a legacy object-storage binding'
 grep -Eiq 'refresh-diag|REFRESH_DIAG_ENABLED|radar-refresh-diag' \
   "$ROOT/.github/workflows/build-push-images.yml" &&
   fail '.github/workflows/build-push-images.yml retains the legacy refresh diagnostic'

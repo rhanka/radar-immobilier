@@ -7,6 +7,7 @@ object-storage-migration-test: ## Run the hermetic object-storage migration cont
 
 .PHONY: object-storage-bindings-test
 object-storage-bindings-test: ## Verify released bindings and reject retired storage entrypoints
+	@bash -n tools/grounding/drive-grounding.sh
 	@bash deploy/ci/check-object-storage-bindings.test.sh
 
 .PHONY: object-storage-docs-prod-provision
