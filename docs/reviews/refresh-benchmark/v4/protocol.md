@@ -43,6 +43,29 @@ Code runtime client, and the benchmark volume has no Anthropic SDK. A custom
 HTTP client would be an unfrozen transport implementation, so the campaign
 waits for a supported path from s-conductor rather than fabricating one.
 
+## Frozen Gemini transport diagnosis
+
+The five initial Candidate G requests returned HTTP 404 without preserving the
+provider body. This is not evidence that Gemini 3.8 or `LOW` is unavailable:
+an earlier native AGY run produced `PING_OK` with effective model
+`gemini-3.8-flash`. Before ranking Candidate G, run one small transport probe at
+a time and retain only whitelisted Google error `code`, `status`, and redacted
+`message` fields.
+
+The diagnostic order changes one variable per probe:
+
+1. reproduce llm-mesh 0.19 exactly (`daily-cloudcode-pa`, model 3.8, `LOW`);
+2. retain model, effort, and body but use AGY's proven `cloudcode-pa` host;
+3. only if the host is not causal, omit effort, then try `MEDIUM` and `HIGH`;
+4. only if still unresolved, compare envelope fields against the proven AGY
+   route, one field per probe.
+
+After the first green transport probe, run the complete frozen Lac case. Only
+a green full case authorizes the five-document Candidate G campaign. The
+installed package version/static model profile, account public model allowlist
+(or its absence), endpoint, envelope shape, requested/effective model, and
+provider error whitelist are recorded without credentials or response headers.
+
 Accounts are identified only by one-way pseudonyms. No secret or auth material
 may enter an artifact. Quota snapshots are retained before and after when the
 account transport exposes them; otherwise the report says unavailable.
