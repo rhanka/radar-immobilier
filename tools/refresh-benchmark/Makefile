@@ -21,8 +21,9 @@ PREFLIGHT_MODEL ?= gpt-5.6-sol
 GEMINI_DIAGNOSTIC_FILE ?= gemini-diagnostic.json
 GEMINI_ENDPOINT ?= mesh
 GEMINI_EFFORT ?= low
+GEMINI_MODEL ?= gemini-3.8-flash-tiered
 
-.PHONY: test test-v3 test-v4 test-diagnosis-v4 test-integration-contract-v4 check-v4-integration-ready preflight-v4-integration run-v4-integration test-score-v3 test-score-v4 score-v3 score-v4 freeze-blind-v3 freeze-blind-v4 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 gemini-diagnostic run-v3-sol-normal run-v4-all quota inspect-validation
+.PHONY: test test-v3 test-v4 test-diagnosis-v4 test-integration-contract-v4 install-v4-integration-deps check-v4-integration-ready preflight-v4-integration run-v4-integration test-score-v3 test-score-v4 score-v3 score-v4 freeze-blind-v3 freeze-blind-v4 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 gemini-diagnostic gemini-catalogue-probe gemini-catalogue-probe-check run-v3-sol-normal run-v4-all quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -103,12 +104,19 @@ test-integration-contract-v4:
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/check-release-readiness.mjs
 
+install-v4-integration-deps:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --tmpfs /workspace \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/repo,readonly \
+	  --mount type=volume,source=$(INTEGRATION_MODULES),target=/workspace/node_modules \
+	  -w /workspace node:24-bookworm-slim sh -c 'cp -a /repo/. /workspace/ && npm ci'
+
 check-v4-integration-ready:
 	test "$(ENV)" = "test-t1-model-benchmark"
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  --mount type=volume,source=$(INTEGRATION_MODULES),target=/workspace/node_modules,readonly \
 	  -e BENCHMARK_GRAPHIFY_PACKAGE_JSON=/workspace/node_modules/@sentropic/graphify/package.json \
-	  -e BENCHMARK_MESH_PACKAGE_JSON=/workspace/node_modules/@sentropic/llm-mesh-refresh/package.json \
+	  -e BENCHMARK_MESH_PACKAGE_JSON=/workspace/node_modules/@sentropic/llm-mesh/package.json \
 	  -w /src $(NODE_IMAGE) node tools/refresh-benchmark/check-release-readiness.mjs
 
 preflight-v4-integration: check-v4-integration-ready
@@ -220,9 +228,31 @@ gemini-diagnostic:
 	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
 	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_PREFLIGHT_OUTPUT=/results/$(GEMINI_DIAGNOSTIC_FILE) \
-	  -e BENCHMARK_MODEL=gemini-3.8-flash -e BENCHMARK_EFFORT=$(GEMINI_EFFORT) \
+	  -e BENCHMARK_MODEL=$(GEMINI_MODEL) -e BENCHMARK_EFFORT=$(GEMINI_EFFORT) \
 	  -e BENCHMARK_ENDPOINT=$(GEMINI_ENDPOINT) -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec node tools/refresh-benchmark/gemini-preflight.mjs'
+
+gemini-catalogue-probe-check:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/gemini-catalogue-probe.mjs
+
+gemini-catalogue-probe: gemini-catalogue-probe-check
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --tmpfs /workspace --tmpfs /run \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V4_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  --mount type=volume,source=$(INTEGRATION_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
+	  -e GEMINI_CATALOGUE_D_P1_OUTPUT=/results/gemini-pro-catalogue-d-p1.json \
+	  -e GEMINI_CATALOGUE_D_P2_OUTPUT=/results/gemini-pro-catalogue-d-p2.json \
+	  -e GEMINI_PROBE_B2_OUTPUT=/results/gemini-pro-suffix-probe-b2.json \
+	  -e GEMINI_PROBE_E_OUTPUT=/results/gemini-pro-suffix-probe-e.json \
+	  -e GEMINI_PROBE_F_OUTPUT=/results/gemini-pro-suffix-probe-f.json \
+	  -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec node tools/refresh-benchmark/gemini-catalogue-probe.mjs'
 
 run-v3-sol-normal:
 	test "$(ENV)" = "test-refresh-benchmark"

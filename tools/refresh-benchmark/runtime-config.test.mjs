@@ -9,7 +9,7 @@ test("v4 candidates use the lowest explicit effort on enrolled transports", () =
     provider: "openai", transport: "codex", model: "gpt-5.6-luna", effort: "low",
   });
   assert.deepEqual(variants["gemini-low"], {
-    provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash", effort: "low",
+    provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash-tiered", effort: "low",
   });
 });
 
@@ -30,12 +30,12 @@ test("outgoing wire evidence proves provider model, effort, and cap", () => {
     model: "gpt-5.6-luna", reasoning: { effort: "low" },
   }), { model: "gpt-5.6-luna", effort: "low", providerEffort: "low", maxOutputTokens: null });
   assert.deepEqual(inspectWireBody(variants["gemini-low"], {
-    model: "gemini-3.8-flash", request: { generationConfig: {
+    model: "gemini-3.8-flash-tiered", request: { generationConfig: {
       maxOutputTokens: 16384, thinkingConfig: { thinkingLevel: "LOW" },
     } },
-  }), { model: "gemini-3.8-flash", effort: "low", providerEffort: "LOW", maxOutputTokens: 16384 });
+  }), { model: "gemini-3.8-flash-tiered", effort: "low", providerEffort: "LOW", maxOutputTokens: 16384 });
   assert.throws(() => inspectWireBody(variants["gemini-low"], {
-    model: "gemini-3.8-flash", request: { generationConfig: {
+    model: "gemini-3.8-flash-tiered", request: { generationConfig: {
       maxOutputTokens: 16384, thinkingConfig: { thinkingLevel: "HIGH" },
     } },
   }), /Observed effort differs/);
