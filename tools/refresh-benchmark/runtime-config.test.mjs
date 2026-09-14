@@ -14,6 +14,18 @@ test("v4 candidates use the lowest explicit effort on enrolled transports", () =
   });
 });
 
+test("v8 changes only Gemini effort on the same catalog wire model", () => {
+  assert.deepEqual(variants["gemini-high"], {
+    provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash-tiered", effort: "high",
+  });
+  assert.deepEqual(inspectWireBody(variants["gemini-high"], {
+    model: "gemini-3.8-flash-tiered", request: { generationConfig: {
+      maxOutputTokens: 65_536, thinkingConfig: { thinkingLevel: "HIGH" },
+    } },
+  }, 65_536), { model: "gemini-3.8-flash-tiered", effort: "high",
+    providerEffort: "HIGH", maxOutputTokens: 65_536 });
+});
+
 test("account selection is owner-scoped by facade and transport-specific", () => {
   const accounts = [{ accountId: "c", providerId: "codex" },
     { accountId: "g", providerId: "cloud-code" }];
@@ -54,6 +66,13 @@ test("the elevated cap is restricted to the single Valcourt diagnosis", () => {
 test("the frozen v7 cap applies without a diagnostic override", () => {
   const context = { campaign: "v7", documentId: "waterloo-2026-08-18",
     variantName: "gemini-low" };
+  assert.equal(resolveOutputCap(undefined, context, 65_536), 65_536);
+  assert.throws(() => resolveOutputCap("16384", context, 65_536), /restricted to the Valcourt/);
+});
+
+test("the frozen v8 cap applies without a diagnostic override", () => {
+  const context = { campaign: "v8", documentId: "waterloo-2026-08-18",
+    variantName: "gemini-high" };
   assert.equal(resolveOutputCap(undefined, context, 65_536), 65_536);
   assert.throws(() => resolveOutputCap("16384", context, 65_536), /restricted to the Valcourt/);
 });

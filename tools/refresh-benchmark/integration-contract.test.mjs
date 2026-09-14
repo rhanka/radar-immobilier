@@ -43,7 +43,7 @@ test("all live variants use the frozen adapter boundary and execution budget", (
     gemini: { adapter: "GeminiAdapter", client: "CloudCodeRuntimeClient" },
     openai: { adapter: "OpenAIAdapter", client: "CodexRuntimeClient" },
   });
-  assert.deepEqual(Object.values(variants).map(({ provider }) => provider).sort(),
+  assert.deepEqual([...new Set(Object.values(variants).map(({ provider }) => provider))].sort(),
     Object.keys(adapterBindings).sort());
   assert.deepEqual(executionContract, {
     graphify: { packageName: "@sentropic/graphify", version: "0.18.0" },
@@ -56,4 +56,5 @@ test("all live variants use the frozen adapter boundary and execution budget", (
   });
   assert.equal(outputTokenCapForCampaign("v6"), 16_384);
   assert.equal(outputTokenCapForCampaign("v7"), 65_536);
+  assert.equal(outputTokenCapForCampaign("v8"), 65_536);
 });

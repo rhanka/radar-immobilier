@@ -7,6 +7,7 @@ const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
 const resultRoot = required("BENCHMARK_RESULT_ROOT");
 const outputPath = required("BENCHMARK_SCORE_OUTPUT");
 const campaign = process.env.BENCHMARK_CAMPAIGN ?? "v6";
+const variant = process.env.BENCHMARK_VARIANT ?? "gemini-low";
 delete process.env.BENCHMARK_SCORE_OUTPUT;
 const { scoreValid } = await import("./score-v3.mjs");
 const { citationHealth } = await import("./score-v4.mjs");
@@ -17,11 +18,13 @@ const manifest = await readJson(resolve(campaignRoot, "manifest.json"));
 const oracle = await readJson(resolve(campaignRoot, "manual-oracle.json"));
 const promptFreeze = await readJson(resolve(campaignRoot, "prompt-freeze.json"));
 const cases = [];
+const efforts = new Set();
 for (const document of manifest.documents) {
-  const stem = `${document.id}--gemini-low`;
+  const stem = `${document.id}--${variant}`;
   let receipt;
   try { receipt = await readJson(resolve(resultRoot, `${stem}.receipt.json`)); }
   catch (error) { if (error.code !== "ENOENT") throw error; }
+  if (receipt?.requested?.effort) efforts.add(receipt.requested.effort.toUpperCase());
   let raw;
   let output;
   if (receipt) raw = await readFile(resolve(resultRoot, `${stem}.raw.txt`), "utf8");
@@ -47,8 +50,10 @@ const blockingCase = cases.find(({ httpStatus, terminalFinishReason }) =>
 const stopReason = !campaignStopped ? null : blockingCase
   ? `${blockingCase.documentId} returned ${blockingCase.httpStatus === 429 ? "HTTP 429" : "MAX_TOKENS"}`
   : "campaign incomplete";
+if (efforts.size > 1) throw new Error("Campaign receipts do not share one effort");
+const effort = [...efforts][0] ?? null;
 const result = { schemaVersion: 1, campaign, model: "gemini-3.8-flash-tiered",
-  effort: "LOW", maxOutputTokens: promptFreeze.maxOutputTokens, cases,
+  effort, maxOutputTokens: promptFreeze.maxOutputTokens, cases,
   totals: { launched: cases.filter(({ state }) => state !== "not_launched").length,
     accepted, planned: manifest.documents.length }, campaignStopped, stopReason };
 await writeFile(outputPath, JSON.stringify(result), { flag: "wx" });

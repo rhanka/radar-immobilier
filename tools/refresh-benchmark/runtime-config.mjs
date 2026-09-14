@@ -4,6 +4,7 @@ export const variants = Object.freeze({
   "luna-low": { provider: "openai", transport: "codex", model: "gpt-5.6-luna", effort: "low" },
   // Wire ID announced by fetchAvailableModels; replace with llm-mesh 0.19.2 mapping.
   "gemini-low": { provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash-tiered", effort: "low" },
+  "gemini-high": { provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash-tiered", effort: "high" },
 });
 
 export function createAdapterSet(constructors, observedFetch) {
@@ -13,7 +14,7 @@ export function createAdapterSet(constructors, observedFetch) {
   if (!baseGemini) throw new Error("Gemini 3.8 base profile is unavailable");
   return Object.freeze({
     gemini: new GeminiAdapter({ client: new CloudCodeRuntimeClient(observedFetch),
-      models: [{ ...baseGemini, modelId: variants["gemini-low"].model }] }),
+      models: [{ ...baseGemini, modelId: variants["gemini-high"].model }] }),
     openai: new OpenAIAdapter({ client: new CodexRuntimeClient({ fetch: observedFetch }) }),
   });
 }

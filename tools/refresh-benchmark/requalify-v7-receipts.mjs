@@ -10,9 +10,11 @@ const required = (name) => process.env[name] || (() => { throw new Error(`${name
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
 const resultRoot = required("BENCHMARK_RESULT_ROOT");
 const t1Root = required("BENCHMARK_T1_ROOT");
+const campaign = process.env.BENCHMARK_CAMPAIGN ?? "v7";
+const variant = process.env.BENCHMARK_VARIANT ?? "gemini-low";
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const manifest = JSON.parse(await readFile(resolve(repositoryRoot,
-  "docs/reviews/refresh-benchmark/v7/manifest.json"), "utf8"));
+  `docs/reviews/refresh-benchmark/${campaign}/manifest.json`), "utf8"));
 const profileModulePath = resolve(t1Root, "api/src/services/graph/refresh-profile.ts");
 const corpusModulePath = resolve(t1Root, "api/src/services/graph/refresh-corpus.ts");
 const { loadRefreshProfileContext } = await import(pathToFileURL(profileModulePath));
@@ -63,7 +65,7 @@ function provenanceViolations(extraction, document, pages) {
 
 const summary = [];
 for (const document of manifest.documents) {
-  const stem = `${document.id}--gemini-low`;
+  const stem = `${document.id}--${variant}`;
   const receiptPath = resolve(resultRoot, `${stem}.receipt.json`);
   const raw = await readFile(resolve(resultRoot, `${stem}.raw.txt`), "utf8");
   const receipt = JSON.parse(await readFile(receiptPath, "utf8"));
