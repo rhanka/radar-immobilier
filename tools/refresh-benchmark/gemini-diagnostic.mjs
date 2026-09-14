@@ -3,6 +3,13 @@ export const CLOUD_CODE_ENDPOINTS = Object.freeze({
   agy: "https://cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse",
 });
 
+export function resolveCloudCodeEndpoint(mode, adapterEndpoint) {
+  if (mode === "package") return String(adapterEndpoint);
+  const endpoint = CLOUD_CODE_ENDPOINTS[mode];
+  if (!endpoint) throw new Error("BENCHMARK_ENDPOINT must be package, mesh, or agy");
+  return endpoint;
+}
+
 const redactMessage = (value) => String(value ?? "")
   .slice(0, 400)
   .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted-email]")

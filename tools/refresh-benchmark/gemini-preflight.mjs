@@ -10,6 +10,7 @@ import { EncryptedFileKeyring } from
 import {
   CLOUD_CODE_ENDPOINTS,
   buildProbeRequest,
+  resolveCloudCodeEndpoint,
   sanitizeCloudCodeError,
 } from "./gemini-diagnostic.mjs";
 
@@ -25,8 +26,9 @@ if (effort && !["low", "medium", "high"].includes(effort)) {
   throw new Error("BENCHMARK_EFFORT must be omit, low, medium, or high");
 }
 const endpointName = process.env.BENCHMARK_ENDPOINT ?? "mesh";
-const endpoint = CLOUD_CODE_ENDPOINTS[endpointName];
-if (!endpoint) throw new Error("BENCHMARK_ENDPOINT must be mesh or agy");
+if (endpointName !== "package" && !CLOUD_CODE_ENDPOINTS[endpointName]) {
+  throw new Error("BENCHMARK_ENDPOINT must be package, mesh, or agy");
+}
 
 const keyring = new EncryptedFileKeyring("/run/benchmark-keyring");
 const facade = createLlmMeshFacade({ mode: "cli",
@@ -51,11 +53,12 @@ let wire = null;
 const observedFetch = async (url, init) => {
   const bodyText = String(init?.body ?? "");
   const body = JSON.parse(bodyText);
-  const response = await fetch(endpoint, init);
+  const effectiveEndpoint = resolveCloudCodeEndpoint(endpointName, url);
+  const response = await fetch(effectiveEndpoint, init);
   const errorPayload = response.ok ? null : await response.clone().json().catch(() => null);
   wire = {
     adapterEndpoint: String(url),
-    effectiveEndpoint: endpoint,
+    effectiveEndpoint,
     httpStatus: response.status,
     model: body.model ?? null,
     providerEffort: body.request?.generationConfig?.thinkingConfig?.thinkingLevel ?? null,
