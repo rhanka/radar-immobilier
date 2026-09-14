@@ -6,7 +6,10 @@ CHROME ?= /home/antoinefa/.cache/ms-playwright/chromium_headless_shell-1234/chro
 ENV ?= test-architecture
 PORT ?= 5188
 RUN = docker run --rm --network none --cpus=1.5 --memory=1536m --pids-limit=256 --user "$$(id -u):$$(id -g)" -e NODE_OPTIONS=--max-old-space-size=1100 -v $(FOCUS_DIR)/../..:/docs -v $(KIT_ROOT):/kit:ro -w /docs/architecture/focus $(NODE_IMAGE) node
-.PHONY: deps dependency-versions build map mermaid test browser clipboard inspect-live reset-live-zoom clean-live tokens report-check serve-run chrome-run audit
+# Même montage que RUN, mais sur le réseau de l'hôte : seul l'export a besoin de
+# joindre le Chromium de contrôle sur 127.0.0.1:9238.
+RUN_CDP = docker run --rm --network host --cpus=1.5 --memory=1536m --pids-limit=256 --user "$$(id -u):$$(id -g)" -e NODE_OPTIONS=--max-old-space-size=1100 -v $(FOCUS_DIR)/../..:/docs -v $(KIT_ROOT):/kit:ro -w /docs/architecture/focus $(NODE_IMAGE) node
+.PHONY: deps dependency-versions build map mermaid test browser clipboard inspect-live reset-live-zoom clean-live tokens report-check serve-run chrome-run audit export-scenes
 dependency-versions:
 	docker run --rm --network host $(NODE_IMAGE) npm view @xyflow/svelte@1.6.6 version
 deps:
@@ -26,6 +29,12 @@ build: mermaid
 	$(RUN) portable.mjs
 	docker run --rm --network host --cpus=1.5 --memory=1024m --user "$$(id -u):$$(id -g)" -v $(FOCUS_DIR)/../..:/docs -w /docs/architecture/focus $(NODE_IMAGE) node report-render.mjs
 	cd $(FOCUS_DIR) && node report-finalize.mjs
+# Export versionné des cinq scènes : PNG pleine résolution native + Mermaid source
+# + graphe formel JSON, dans docs/reports/assets/2026-09/archi/.
+# Exige le Chromium de `chrome-run` déjà démarré. N'écrit ni rapport ni PDF.
+export-scenes: mermaid
+	$(RUN) node_modules/vite/bin/vite.js build --config vite.config.js --configLoader runner
+	$(RUN_CDP) export-scenes.mjs
 test: map
 	$(RUN) --test mapping.test.mjs nested.test.mjs choices.test.mjs provenance.test.mjs
 	git diff --check
