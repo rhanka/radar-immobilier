@@ -1,0 +1,904 @@
+{
+  "nodes": [
+    {
+      "id": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "label": "Procès-verbal de la séance ordinaire du 4 août 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "url": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Une séance ordinaire du conseil de la Municipalité de SaintÉtienne-de-Bolton, tenue le 4 août 2026 à 19 h 00"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2014-05",
+      "label": "Règlement de zonage 2014-05",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "numero": "2014-05",
+      "title": "Règlement de zonage 2014-05",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-05",
+      "label": "Règlement 2026-05",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "numero": "2026-05",
+      "title": "Règlement 2026-05 modifiant le Règlement de zonage 2014-05",
+      "stage": "adoption",
+      "date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "resolution": "2026-08-150",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+        },
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus mentionnés."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2025-11",
+      "label": "Règlement 2025-11",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "numero": "2025-11",
+      "title": "Règlement 2025-11 créant le Règlement sur l’occupation et l’entretien des bâtiments",
+      "stage": "adoption",
+      "date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "resolution": "2026-08-151",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte le Règlement 2025-11 créant le Règlement sur l’occupation et l’entretien des bâtiments."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-14",
+      "label": "Règlement 2026-14",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "numero": "2026-14",
+      "title": "Règlement 2026-14 modifiant le règlement 2008-04 sur les usages conditionnels",
+      "stage": "adoption",
+      "date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "resolution": "2026-08-152",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "QUE le conseil adopte le Règlement 2026-14 modifiant le règlement 2008-04 sur les usages conditionnels."
+        }
+      ]
+    },
+    {
+      "id": "zone-com-1",
+      "label": "Zone COM-1",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "code": "COM-1",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Zone : COM-1"
+        }
+      ]
+    },
+    {
+      "id": "zone-rur-12",
+      "label": "Zone RUR-12",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "code": "RUR-12",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Zone : RUR-12"
+        }
+      ]
+    },
+    {
+      "id": "zone-rur-8",
+      "label": "Zone RUR-8",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "code": "RUR-8",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Zone : RUR-8"
+        }
+      ]
+    },
+    {
+      "id": "zone-vil-2",
+      "label": "Zone VIL-2",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "code": "VIL-2",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "Zone : VIL-2"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-08-154",
+      "label": "Autorisation PIIA - Coop du Grand-Bois",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "decision": "approuvé",
+      "kind": "piia",
+      "etape": "piia",
+      "etape_date": "2026-08-04",
+      "resolution": "2026-08-154",
+      "municipality": "saint-etienne-de-bolton",
+      "demandeur_corporate": "Coopérative de solidarité de St-Étienne-de-Bolton",
+      "zone_ref": "COM-1",
+      "no_lot": "5191695",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Autorisation pour l’ajout d’une toiture pour protéger la chambre froide à l'arrière de la Coopérative au 12, rue Principale.",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Demandeur : Coopérative de solidarité de St-Étienne-de-Bolton Adresse : 12, rue Principale Lot : 5 191 695 Zone : COM-1"
+        },
+        {
+          "page": 12,
+          "excerpt": "2026-08-154 Il est proposé par Vincent Jarry appuyé par Christine Boutin et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-08-155",
+      "label": "Autorisation PIIA - 24, Allée des Sommets",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "decision": "approuvé",
+      "kind": "piia",
+      "etape": "piia",
+      "etape_date": "2026-08-04",
+      "resolution": "2026-08-155",
+      "municipality": "saint-etienne-de-bolton",
+      "zone_ref": "RUR-12",
+      "no_lot": "5662886",
+      "superficie_m2": 5749.2,
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Autorisation pour démolir l’abri automobile existant et le remplacer par un garage attaché au 24, Allée des Sommets.",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Lot : 5 662 886 Zone : RUR-12 Nature de la demande : Garage attaché à la résidence à la place de l’abri existant."
+        },
+        {
+          "page": 12,
+          "excerpt": "2026-08-155 Il est proposé par Harry Bird appuyé par Jocelyn Brasseur et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-08-156",
+      "label": "Refus dérogation mineure - 135, rue de la Serpentine",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "decision": "refusé",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-04",
+      "resolution": "2026-08-156",
+      "municipality": "saint-etienne-de-bolton",
+      "zone_ref": "RUR-8",
+      "no_lot": "6380011",
+      "superficie_m2": 14689.8,
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Refus de la demande de dérogation mineure visant à réduire à 2,4 mètres la marge latérale de 3 mètres pour une piscine creusée.",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Lot : 6 380 011 Zone : RUR-8 Nature de la demande : Document photo en complément avec la dernière présentation auprès du CCU."
+        },
+        {
+          "page": 13,
+          "excerpt": "2026-08-156 Il est proposé par Jocelyn Brasseur appuyé par Harry Bird et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-08-157",
+      "label": "Refus dérogation mineure - Lot 5 191 546 chemin de la Tour",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "decision": "refusé",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-04",
+      "resolution": "2026-08-157",
+      "reglement_number": "2014-05",
+      "municipality": "saint-etienne-de-bolton",
+      "zone_ref": "RUR-12",
+      "no_lot": "5191546",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Refus de la demande de dérogation mineure visant à permettre l’abattage d’arbres en période de dégel (Article 116 du règlement de zonage 2014-05).",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Lot : 5 191 546 Zone : RUR-12 Nature de la demande : Procéder à un abattage d’arbres conformément aux permis émis mais en période de dégel (Article 116 du règlement de zonage 2014-05)."
+        },
+        {
+          "page": 14,
+          "excerpt": "2026-08-157 Il est proposé par Vincent Jarry appuyé par Alexandre Berger et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-08-158",
+      "label": "Autorisation PIIA - 572, 1er Rang",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "decision": "approuvé",
+      "kind": "piia",
+      "etape": "piia",
+      "etape_date": "2026-08-04",
+      "resolution": "2026-08-158",
+      "municipality": "saint-etienne-de-bolton",
+      "zone_ref": "VIL-2",
+      "no_lot": "5191952",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Autorisation pour le remplacement du revêtement de la toiture de la résidence située au 572, 1er Rang par un revêtement en tôle.",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "Lot : 5 191 952 Zone : VIL-2 Nature de la demande : Remplacement du revêtement de la toiture en bardeaux d’asphalte pour de la tôle."
+        },
+        {
+          "page": 14,
+          "excerpt": "2026-08-158 Il est proposé par Robert Bergeron appuyé par Christine Boutin et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise"
+        }
+      ]
+    },
+    {
+      "id": "constraint-mont-gauvin-gel",
+      "label": "Protection environnementale milieu sensible mont Gauvin",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "constraintType": "autre",
+      "status": "actif",
+      "municipality": "saint-etienne-de-bolton",
+      "loi": "Règlement de zonage 2014-05, article 116",
+      "resolution": "2026-08-157",
+      "meetingDate": "2026-08-04",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Norme règlementaire d’abattage d’arbres en période de gel pour protéger l'environnement dans les milieux sensibles et paysages naturels d’intérêt supérieur (mont Gauvin).",
+      "evidence_refs": [
+        "ev-constraint-gel-p13"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "l’abattage d’arbre en période de gel est une norme règlementaire spécifique pour protéger l’environnement dans les milieux sensibles et les paysages naturels d’intérêt supérieur tel le mont Gauvin"
+        }
+      ]
+    },
+    {
+      "id": "signal-derogation-refus-serpentine",
+      "label": "Signal refus dérogation piscine",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "category": "derogation_mineure",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "status": "validated",
+      "resolution": "2026-08-156",
+      "municipality": "saint-etienne-de-bolton",
+      "zone_ref": "RUR-8",
+      "no_lot": "6380011",
+      "outcome": "refusé",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Refus de réduction de la marge latérale pour piscine creusée.",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "2026-08-156 Il est proposé par Jocelyn Brasseur appuyé par Harry Bird et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "id": "signal-derogation-refus-arbre",
+      "label": "Signal refus dérogation abattage arbre dégel",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "category": "derogation_mineure",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "status": "validated",
+      "resolution": "2026-08-157",
+      "municipality": "saint-etienne-de-bolton",
+      "zone_ref": "RUR-12",
+      "no_lot": "5191546",
+      "outcome": "refusé",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "description": "Refus d'abattage d'arbres hors période de gel sur terrain sensible.",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "2026-08-157 Il est proposé par Vincent Jarry appuyé par Alexandre Berger et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-2026-05",
+      "target": "bylaw-2014-05",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-05-p10"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+        }
+      ]
+    },
+    {
+      "source": "zone-com-1",
+      "target": "bylaw-2014-05",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-05-p10"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+        }
+      ]
+    },
+    {
+      "source": "zone-rur-12",
+      "target": "bylaw-2014-05",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-157-p13"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Zone : RUR-12 Nature de la demande : Procéder à un abattage d’arbres conformément aux permis émis mais en période de dégel (Article 116 du règlement de zonage 2014-05)."
+        }
+      ]
+    },
+    {
+      "source": "zone-rur-8",
+      "target": "bylaw-2014-05",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-156-p13"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "selon le tableau 1 « Bâtiment, construction, utilisation et ouvrage accessoire permis dans la cour » de l’article 39 du règlement de zonage ;"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-154",
+      "target": "zone-com-1",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-154-p11"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Lot : 5 191 695 Zone : COM-1"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-155",
+      "target": "zone-rur-12",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-155-p12"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Lot : 5 662 886 Zone : RUR-12 Nature de la demande : Garage attaché à la résidence à la place de l’abri existant."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-156",
+      "target": "zone-rur-8",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-156-p13"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Lot : 6 380 011 Zone : RUR-8 Nature de la demande : Document photo en complément avec la dernière présentation auprès du CCU."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-157",
+      "target": "zone-rur-12",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-157-p13"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Lot : 5 191 546 Zone : RUR-12 Nature de la demande : Procéder à un abattage d’arbres conformément aux permis émis mais en période de dégel (Article 116 du règlement de zonage 2014-05)."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-158",
+      "target": "zone-vil-2",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-158-p14"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "Lot : 5 191 952 Zone : VIL-2 Nature de la demande : Remplacement du revêtement de la toiture en bardeaux d’asphalte pour de la tôle."
+        }
+      ]
+    },
+    {
+      "source": "constraint-mont-gauvin-gel",
+      "target": "zone-rur-12",
+      "relation": "constrains",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-constraint-gel-p13",
+        "ev-event-157-p13"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "l’abattage d’arbre en période de gel est une norme règlementaire spécifique pour protéger l’environnement dans les milieux sensibles et les paysages naturels d’intérêt supérieur tel le mont Gauvin"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-156",
+      "target": "signal-derogation-refus-serpentine",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-156-p13"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "2026-08-156 Il est proposé par Jocelyn Brasseur appuyé par Harry Bird et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-157",
+      "target": "signal-derogation-refus-arbre",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-157-p14"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "2026-08-157 Il est proposé par Vincent Jarry appuyé par Alexandre Berger et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse"
+        }
+      ]
+    },
+    {
+      "source": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "target": "bylaw-2026-05",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-150-p10"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus mentionnés."
+        }
+      ]
+    },
+    {
+      "source": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "target": "event-2026-08-154",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-154-p12"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "2026-08-154 Il est proposé par Vincent Jarry appuyé par Christine Boutin et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "target": "event-2026-08-155",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-155-p12"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "2026-08-155 Il est proposé par Harry Bird appuyé par Jocelyn Brasseur et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "target": "event-2026-08-156",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-156-p13"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "2026-08-156 Il est proposé par Jocelyn Brasseur appuyé par Harry Bird et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "target": "event-2026-08-157",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-157-p14"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "2026-08-157 Il est proposé par Vincent Jarry appuyé par Alexandre Berger et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse"
+        }
+      ]
+    },
+    {
+      "source": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "target": "event-2026-08-158",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-158-p14"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "2026-08-158 Il est proposé par Robert Bergeron appuyé par Christine Boutin et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-154",
+      "target": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-154-p12"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "2026-08-154 Il est proposé par Vincent Jarry appuyé par Christine Boutin et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-155",
+      "target": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-155-p12"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "2026-08-155 Il est proposé par Harry Bird appuyé par Jocelyn Brasseur et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-156",
+      "target": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-156-p13"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "2026-08-156 Il est proposé par Jocelyn Brasseur appuyé par Harry Bird et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse, sur recommandation du CCU"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-157",
+      "target": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-157-p14"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "2026-08-157 Il est proposé par Vincent Jarry appuyé par Alexandre Berger et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-158",
+      "target": "source-saint-etienne-de-bolton-pv-2026-08-04",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-res-158-p14"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "2026-08-158 Il est proposé par Robert Bergeron appuyé par Christine Boutin et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-source-p1",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "Une séance ordinaire du conseil de la Municipalité de SaintÉtienne-de-Bolton, tenue le 4 août 2026 à 19 h 00"
+    },
+    {
+      "id": "ev-bylaw-2026-05-p10",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+    },
+    {
+      "id": "ev-res-150-p10",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus mentionnés."
+    },
+    {
+      "id": "ev-event-154-p11",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Lot : 5 191 695 Zone : COM-1"
+    },
+    {
+      "id": "ev-res-154-p12",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "2026-08-154 Il est proposé par Vincent Jarry appuyé par Christine Boutin et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise, sur recommandation du CCU"
+    },
+    {
+      "id": "ev-event-155-p12",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "Lot : 5 662 886 Zone : RUR-12 Nature de la demande : Garage attaché à la résidence à la place de l’abri existant."
+    },
+    {
+      "id": "ev-res-155-p12",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "2026-08-155 Il est proposé par Harry Bird appuyé par Jocelyn Brasseur et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise, sur recommandation du CCU"
+    },
+    {
+      "id": "ev-event-156-p13",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "Lot : 6 380 011 Zone : RUR-8 Nature de la demande : Document photo en complément avec la dernière présentation auprès du CCU."
+    },
+    {
+      "id": "ev-res-156-p13",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "2026-08-156 Il est proposé par Jocelyn Brasseur appuyé par Harry Bird et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse, sur recommandation du CCU"
+    },
+    {
+      "id": "ev-event-157-p13",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "Lot : 5 191 546 Zone : RUR-12 Nature de la demande : Procéder à un abattage d’arbres conformément aux permis émis mais en période de dégel (Article 116 du règlement de zonage 2014-05)."
+    },
+    {
+      "id": "ev-constraint-gel-p13",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "l’abattage d’arbre en période de gel est une norme règlementaire spécifique pour protéger l’environnement dans les milieux sensibles et les paysages naturels d’intérêt supérieur tel le mont Gauvin"
+    },
+    {
+      "id": "ev-res-157-p14",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "2026-08-157 Il est proposé par Vincent Jarry appuyé par Alexandre Berger et résolu à l’unanimité des conseillers présents QUE le conseil municipal refuse"
+    },
+    {
+      "id": "ev-event-158-p14",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "Lot : 5 191 952 Zone : VIL-2 Nature de la demande : Remplacement du revêtement de la toiture en bardeaux d’asphalte pour de la tôle."
+    },
+    {
+      "id": "ev-res-158-p14",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "2026-08-158 Il est proposé par Robert Bergeron appuyé par Christine Boutin et résolu à l’unanimité des conseillers présents QUE le conseil municipal autorise"
+    }
+  ],
+  "input_tokens": 5800,
+  "output_tokens": 2800
+}
