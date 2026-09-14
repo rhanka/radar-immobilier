@@ -23,6 +23,8 @@ export const frozenInputs = Object.freeze({
 });
 
 export const adapterBindings = Object.freeze({
+  anthropic: Object.freeze({ adapter: "Graphify text client",
+    client: "Anthropic Messages API or CloudCodeRuntimeClient" }),
   gemini: Object.freeze({ adapter: "GeminiAdapter", client: "CloudCodeRuntimeClient" }),
   openai: Object.freeze({ adapter: "OpenAIAdapter", client: "CodexRuntimeClient" }),
 });
@@ -38,5 +40,6 @@ export const executionContract = Object.freeze({
 });
 
 export function outputTokenCapForCampaign(campaign) {
-  return ["v7", "v8", "v9", "v10", "v11"].includes(campaign) ? 65_536 : executionContract.maxOutputTokens;
+  return ["v7", "v8", "v9", "v10", "v11", "v12"].includes(campaign)
+    ? 65_536 : executionContract.maxOutputTokens;
 }

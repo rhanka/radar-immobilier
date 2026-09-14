@@ -5,6 +5,10 @@ export const variants = Object.freeze({
   // Wire ID announced by fetchAvailableModels; replace with llm-mesh 0.19.2 mapping.
   "gemini-low": { provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash-tiered", effort: "low" },
   "gemini-high": { provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash-tiered", effort: "high" },
+  "sonnet-direct": { provider: "anthropic", transport: "anthropic-direct",
+    model: "claude-sonnet-4-6", effort: null },
+  "sonnet-cloudcode": { provider: "anthropic", transport: "cloud-code",
+    model: "claude-sonnet-4-6", effort: "low" },
 });
 
 export function createAdapterSet(constructors, observedFetch) {
@@ -39,13 +43,19 @@ export function selectAccount(accounts, variant) {
 
 export function inspectWireBody(variant, body,
   expectedMaxOutputTokens = executionContract.maxOutputTokens) {
-  const observed = variant.provider === "gemini"
+  const observed = variant.transport === "cloud-code"
     ? { model: body.model, effort: body.request?.generationConfig?.thinkingConfig?.thinkingLevel,
       maxOutputTokens: body.request?.generationConfig?.maxOutputTokens }
-    : { model: body.model, effort: body.reasoning?.effort, maxOutputTokens: body.max_output_tokens };
-  const providerEffort = variant.provider === "gemini" ? variant.effort.toUpperCase() : variant.effort;
+    : variant.provider === "anthropic"
+      ? { model: body.model, effort: body.output_config?.effort ?? null,
+        maxOutputTokens: body.max_tokens }
+      : { model: body.model, effort: body.reasoning?.effort, maxOutputTokens: body.max_output_tokens };
+  const providerEffort = variant.transport === "cloud-code" && variant.effort
+    ? variant.effort.toUpperCase() : variant.effort;
   if (observed.model !== variant.model) throw new Error("Observed model differs from frozen request");
-  if (observed.effort !== providerEffort) throw new Error("Observed effort differs from frozen request");
+  if (variant.effort !== null && observed.effort !== providerEffort) {
+    throw new Error("Observed effort differs from frozen request");
+  }
   if (observed.maxOutputTokens !== undefined && observed.maxOutputTokens !== expectedMaxOutputTokens) {
     throw new Error("Observed output cap differs from frozen request");
   }

@@ -32,11 +32,11 @@ test("the five immutable PDFs and page texts match the manifest", async () => {
 
 test("prompt contract covers each input once and is tied to corrected T1", async () => {
   assert.equal(prompts.graphifyVersion, "0.18.0");
-  assert.equal(prompts.meshVersion, ["v5", "v6", "v7", "v8", "v9", "v10", "v11"].includes(campaign)
+  assert.equal(prompts.meshVersion, ["v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12"].includes(campaign)
     ? "0.19.1" : "0.19.0");
   assert.equal(prompts.t1Commit,
     process.env.BENCHMARK_T1_COMMIT ?? "f9b311da536bda2e1442d154a05599c35b482518");
-  assert.equal(prompts.maxOutputTokens, ["v7", "v8", "v9", "v10", "v11"].includes(campaign)
+  assert.equal(prompts.maxOutputTokens, ["v7", "v8", "v9", "v10", "v11", "v12"].includes(campaign)
     ? 65_536 : 16_384);
   assert.equal(sha256(prompts.systemPrompt), prompts.systemPromptSha256);
   assert.deepEqual(prompts.documents.map(({ id }) => id).sort(),
@@ -50,7 +50,7 @@ test("prompt contract covers each input once and is tied to corrected T1", async
 });
 
 test("controls keep their regulatory meaning", () => {
-  if (["v3", "v5", "v6", "v7", "v8", "v9", "v10", "v11"].includes(campaign)) {
+  if (["v3", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12"].includes(campaign)) {
     assert.equal(manifest.documents.some(({ selectionRationale }) =>
       /agenda/.test(selectionRationale) && /not adoption/.test(selectionRationale)), true);
     return;
@@ -112,7 +112,7 @@ test("v10 keeps v9 frozen except for the v6 profile-derived prompt contract", as
 });
 
 test("later campaigns keep the v7 corpus and prompt contract equivalent apart from metadata", async () => {
-  if (!["v8", "v9"].includes(campaign)) return;
+  if (!["v8", "v9", "v12"].includes(campaign)) return;
   const v7Root = resolve(root, "docs/reviews/refresh-benchmark/v7");
   const v7Manifest = JSON.parse(await readFile(resolve(v7Root, "manifest.json"), "utf8"));
   const v7Prompts = JSON.parse(await readFile(resolve(v7Root, "prompt-freeze.json"), "utf8"));

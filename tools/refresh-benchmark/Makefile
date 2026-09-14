@@ -33,6 +33,9 @@ V11_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v11
 V11_CONTROL_RESULTS := $(V11_RESULTS)/control
 V11_REAL_RESULTS := $(V11_RESULTS)/campaign-real
 V11_T1_ROOT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/t1-v11-5068dda3
+V12_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v12
+V12_DIRECT_RESULTS := $(V12_RESULTS)/campaign-direct
+V12_CLOUDCODE_RESULTS := $(V12_RESULTS)/campaign-cloudcode
 RUNTIME_TEXT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/runtime-text
 CAS_ROOT := $(MAIN_ROOT)/.lanes/conductor/tmp/graphify-cas/run-dryrun2-final-20260911T215911Z
 NODE_IMAGE := node:22-bookworm-slim
@@ -59,6 +62,7 @@ GEMINI_MODEL ?= gemini-3.8-flash-tiered
 
 .PHONY: test test-v3 test-v4 test-v5 test-v6 test-v7 test-v8 test-v9 test-v10 test-diagnosis-v4 test-integration-contract-v4 install-v4-integration-deps check-v4-integration-ready preflight-v4-integration run-v4-integration run-v4-real provider-availability test-score-v3 test-score-v4 score-v3 score-v4 score-v6 score-v7 score-v8 score-v9 score-v10 freeze-blind-v3 freeze-blind-v4 freeze-blind-v6 freeze-blind-v7 freeze-blind-v8 runtime-text t1-v8-snapshot t1-v9-snapshot t1-v10-snapshot freeze-v3 freeze-v5 freeze-v6 freeze-v7 freeze-v8 replay-v9-freeze replay-v10-freeze prepare-prompts-v3 prepare-prompts-v5 prepare-prompts-v6 prepare-prompts-v7 prepare-prompts-v8 prepare-prompts-v10 run-v3 run-v4 run-v5-control run-v5-cap run-v5-real run-v6-control run-v6-real run-v7-control run-v7-real run-v8-control run-v8-real run-v9-real run-v10-control run-v10-real requalify-v6-control requalify-v7-receipts requalify-v8-receipts requalify-v9-receipts requalify-v10-receipts sonnet-env-status preflight-v3 gemini-diagnostic gemini-catalogue-probe gemini-catalogue-probe-check run-v3-sol-normal run-v4-all quota inspect-validation
 .PHONY: test-v11 score-v11 t1-v11-snapshot replay-v11-freeze prepare-prompts-v11 run-v11-control run-v11-real requalify-v11-receipts
+.PHONY: check-v12-ping ping-v12-direct ping-v12-cloudcode replay-v12-freeze run-v12-real requalify-v12-receipts score-v12 test-v12
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -194,6 +198,45 @@ test-v11: runtime-text
 	  node --test tools/refresh-benchmark/benchmark.test.mjs \
 	    tools/refresh-benchmark/integration-contract.test.mjs \
 	    tools/refresh-benchmark/runtime-config.test.mjs
+
+test-v12: runtime-text
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v12 \
+	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V9) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node --test tools/refresh-benchmark/benchmark.test.mjs \
+	    tools/refresh-benchmark/integration-contract.test.mjs \
+	    tools/refresh-benchmark/runtime-config.test.mjs
+	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/sonnet-runtime.mjs
+
+check-v12-ping:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/sonnet-ping.mjs
+
+ping-v12-direct: check-v12-ping
+	test -n "$$ANTHROPIC_API_KEY"
+	mkdir -p $(V12_RESULTS)
+	docker run --rm --tmpfs /workspace \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V12_RESULTS),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e ANTHROPIC_API_KEY -e BENCHMARK_SONNET_TRANSPORT=direct \
+	  -e BENCHMARK_PING_OUTPUT=/results/ping-sonnet-direct.json \
+	  -w /src $(NODE_IMAGE) node tools/refresh-benchmark/sonnet-ping.mjs
+
+ping-v12-cloudcode: check-v12-ping
+	mkdir -p $(V12_RESULTS)
+	docker run --rm --tmpfs /workspace --tmpfs /run \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V12_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_SONNET_TRANSPORT=cloudcode \
+	  -e BENCHMARK_PING_OUTPUT=/results/ping-sonnet-cloudcode.json \
+	  -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec node tools/refresh-benchmark/sonnet-ping.mjs'
 
 test-diagnosis-v4:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -341,6 +384,17 @@ score-v11:
 	  -e BENCHMARK_SCORE_OUTPUT=/results/comparison.json -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
 	  node tools/refresh-benchmark/score-v6.mjs
 
+score-v12:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test "$(VARIANT)" = "sonnet-direct" -o "$(VARIANT)" = "sonnet-cloudcode"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V12_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v12 \
+	  -e BENCHMARK_VARIANT=$(VARIANT) \
+	  -e BENCHMARK_RESULT_ROOT=/results/$(if $(filter sonnet-direct,$(VARIANT)),campaign-direct,campaign-cloudcode) \
+	  -e BENCHMARK_SCORE_OUTPUT=/results/comparison-$(VARIANT).json \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/score-v6.mjs
+
 score-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
 	docker run --rm --network none \
@@ -466,6 +520,15 @@ replay-v11-freeze:
 	cp $(V10_RESULTS)/manifest.json $(V11_RESULTS)/manifest.json
 	cp $(V10_RESULTS)/manual-oracle.json $(V11_RESULTS)/manual-oracle.json
 	sed -i 's/"campaign":"v10"/"campaign":"v11"/' $(V11_RESULTS)/manifest.json
+
+replay-v12-freeze:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test ! -e $(V12_RESULTS)/manifest.json
+	mkdir -p $(V12_RESULTS)
+	cp $(V9_RESULTS)/manifest.json $(V12_RESULTS)/manifest.json
+	cp $(V9_RESULTS)/prompt-freeze.json $(V12_RESULTS)/prompt-freeze.json
+	cp $(V9_RESULTS)/manual-oracle.json $(V12_RESULTS)/manual-oracle.json
+	sed -i 's/"campaign":"v9"/"campaign":"v12"/' $(V12_RESULTS)/manifest.json $(V12_RESULTS)/prompt-freeze.json
 
 prepare-prompts-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
@@ -653,6 +716,14 @@ run-v11-real: check-v4-integration-ready t1-v11-snapshot
 	  CAMPAIGN_RESULTS=$(V11_REAL_RESULTS) T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V11) \
 	  T1_CAMPAIGN_ROOT=$(V11_T1_ROOT) ENV=$(ENV)
 
+run-v12-real: check-v4-integration-ready t1-v9-snapshot
+	test -f $(V12_RESULTS)/manifest.json -a -f $(V12_RESULTS)/prompt-freeze.json
+	test "$(VARIANT)" = "sonnet-direct" -o "$(VARIANT)" = "sonnet-cloudcode"
+	mkdir -p $(if $(filter sonnet-direct,$(VARIANT)),$(V12_DIRECT_RESULTS),$(V12_CLOUDCODE_RESULTS))
+	$(MAKE) run-case DOC=$(DOC) VARIANT=$(VARIANT) CAMPAIGN=v12 \
+	  CAMPAIGN_RESULTS=$(if $(filter sonnet-direct,$(VARIANT)),$(V12_DIRECT_RESULTS),$(V12_CLOUDCODE_RESULTS)) \
+	  T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V9) T1_CAMPAIGN_ROOT=$(V9_T1_ROOT) ENV=$(ENV)
+
 requalify-v6-control:
 	test "$(ENV)" = "test-t1-model-benchmark"
 	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
@@ -721,6 +792,19 @@ requalify-v11-receipts: t1-v11-snapshot
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=/workspace/t1 \
 	  -e BENCHMARK_CAMPAIGN=v11 -e BENCHMARK_VARIANT=gemini-low \
+	  -e BENCHMARK_RESULT_ROOT=/results -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
+	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/requalify-v7-receipts.mjs'
+
+requalify-v12-receipts: t1-v9-snapshot
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test "$(VARIANT)" = "sonnet-direct" -o "$(VARIANT)" = "sonnet-cloudcode"
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V9_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(if $(filter sonnet-direct,$(VARIANT)),$(V12_DIRECT_RESULTS),$(V12_CLOUDCODE_RESULTS)),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=/workspace/t1 \
+	  -e BENCHMARK_CAMPAIGN=v12 -e BENCHMARK_VARIANT=$(VARIANT) \
 	  -e BENCHMARK_RESULT_ROOT=/results -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
 	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/requalify-v7-receipts.mjs'
 
@@ -809,6 +893,7 @@ run-case: runtime-text
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 \
 	  -e BENCHMARK_T1_COMMIT=$(or $(T1_CAMPAIGN_COMMIT),$(T1_COMMIT)) -e BENCHMARK_CAMPAIGN=$(CAMPAIGN) \
 	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
+	  -e ANTHROPIC_API_KEY \
 	  -e BENCHMARK_OUTPUT_DIR=/results -e BENCHMARK_DOCUMENT=$(DOC) \
 	  -e BENCHMARK_VARIANT=$(VARIANT) -e BENCHMARK_ATTEMPT=$(or $(ATTEMPT),1) \
 	  -e BENCHMARK_MAX_OUTPUT_TOKENS=$(BENCHMARK_MAX_OUTPUT_TOKENS) \

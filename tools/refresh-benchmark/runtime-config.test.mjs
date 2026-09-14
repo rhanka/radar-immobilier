@@ -26,6 +26,23 @@ test("v8 changes only Gemini effort on the same catalog wire model", () => {
     providerEffort: "HIGH", maxOutputTokens: 65_536 });
 });
 
+test("v12 Sonnet paths keep one model and expose only Cloud Code LOW effort", () => {
+  assert.deepEqual(variants["sonnet-direct"], { provider: "anthropic",
+    transport: "anthropic-direct", model: "claude-sonnet-4-6", effort: null });
+  assert.deepEqual(variants["sonnet-cloudcode"], { provider: "anthropic",
+    transport: "cloud-code", model: "claude-sonnet-4-6", effort: "low" });
+  assert.deepEqual(inspectWireBody(variants["sonnet-direct"], {
+    model: "claude-sonnet-4-6", max_tokens: 65_536,
+  }, 65_536), { model: "claude-sonnet-4-6", effort: null,
+    providerEffort: null, maxOutputTokens: 65_536 });
+  assert.deepEqual(inspectWireBody(variants["sonnet-cloudcode"], {
+    model: "claude-sonnet-4-6", request: { generationConfig: {
+      maxOutputTokens: 65_536, thinkingConfig: { thinkingLevel: "LOW" },
+    } },
+  }, 65_536), { model: "claude-sonnet-4-6", effort: "low",
+    providerEffort: "LOW", maxOutputTokens: 65_536 });
+});
+
 test("account selection is owner-scoped by facade and transport-specific", () => {
   const accounts = [{ accountId: "c", providerId: "codex" },
     { accountId: "g", providerId: "cloud-code" }];
