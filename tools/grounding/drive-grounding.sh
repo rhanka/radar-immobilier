@@ -10,6 +10,9 @@
 # tools/graphify-v23/gate.sh pour la publication atomique S3.
 set -uo pipefail
 
+echo '[object-storage] retired: legacy grounding driver disabled after the OVH cutover' >&2
+exit 1
+
 WORKLIST="${1:?worklist requis}"
 RUN_DIR="${2:?run_dir requis}"
 N_LANES="${3:-2}"

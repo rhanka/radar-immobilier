@@ -278,7 +278,7 @@ s3-ls: ## List keys under PREFIX=<prefix>
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: worker-live
-worker-live: ## Live-scrape config-only PV cities → SCW (CITIES="a b", LIMIT=n)
+worker-live: ## Live-scrape config-only PV cities → configured object storage (CITIES="a b", LIMIT=n)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm -T \
 	  -e LIVE_SCRAPE_LIMIT=$(LIMIT) api \
 	  npx tsx src/scripts/worker-live.ts $(CITIES)
