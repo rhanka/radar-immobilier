@@ -1,0 +1,86 @@
+{
+  "alias": "doc-106e70aa38c4",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0e9ecd4fe34e684a006aa8777dc99087d2b95c85b77f8ca646",
+  "usage": {
+    "input_tokens": 16840,
+    "input_tokens_details": {
+      "cache_write_tokens": 16837,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1930,
+    "output_tokens_details": {
+      "reasoning_tokens": 1264
+    },
+    "total_tokens": 18770
+  },
+  "latencyMs": 32133,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-106e70aa38c4",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Avis de motion du règlement no 383 modifiant le règlement de zonage no 247.",
+        "page": 6,
+        "supported": false,
+        "evidenceInExtraction": "L’extraction mentionne les règlements nos 247 et 383, mais ne représente pas l’avis de motion comme acte distinct."
+      },
+      {
+        "id": "u2",
+        "summary": "Dépôt et adoption du premier projet de règlement no 383 modifiant le règlement de zonage no 247.",
+        "page": 7,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud bylaw-383 indique le stade «1er_projet», la résolution 2026-04-117 et cite l’adoption à la page 7."
+      },
+      {
+        "id": "u3",
+        "summary": "Avis de motion du règlement no 384 concernant les PPCMOI.",
+        "page": 7,
+        "supported": false,
+        "evidenceInExtraction": "Le règlement no 384 est extrait au stade de premier projet, mais son avis de motion n’est pas recensé comme acte distinct."
+      },
+      {
+        "id": "u4",
+        "summary": "Dépôt et adoption du premier projet de règlement no 384 sur les PPCMOI.",
+        "page": 8,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud bylaw-384 indique le stade «1er_projet», la résolution 2026-04-119 et cite l’adoption à la page 8."
+      },
+      {
+        "id": "u5",
+        "summary": "Recommandation municipale relative à une demande d’autorisation CPTAQ visant l’échange et le lotissement de parcelles des lots 5 652 594 et 5 889 436.",
+        "page": 8,
+        "supported": true,
+        "evidenceInExtraction": "L’événement event-cptaq-453952 recense la demande de lotissement et la résolution 2026-04-120, mais qualifie à tort la décision d’«approuvé»."
+      }
+    ],
+    "supportedUnitIds": [
+      "u2",
+      "u4",
+      "u5"
+    ],
+    "missedUnitIds": [
+      "u1",
+      "u3"
+    ],
+    "unsupportedClaims": [
+      {
+        "summary": "La demande d’autorisation CPTAQ 453952 aurait été approuvée.",
+        "page": 8,
+        "reason": "Le procès-verbal atteste une recommandation municipale sur une demande adressée à la CPTAQ, non une décision d’approbation rendue par la CPTAQ."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 8,
+        "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h demande d’autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler pour h demande de lotissement 453952",
+        "defect": "Cette citation tronquée et dégradée par l’OCR établit l’existence de la demande, mais ne soutient pas l’attribut «decision: approuvé»."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "Les deux adoptions de premiers projets sont correctement extraites. Les deux avis de motion sont omis comme actes distincts, et le statut de la demande CPTAQ est surinterprété."
+  }
+}

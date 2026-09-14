@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "blindBundleSha256": "3a5d475bc4201da6fcf22868c5bb5d267c24f53b41cf41d37584fe6380370ca4",
+  "mapping": [
+    {
+      "alias": "doc-f018068aab4c",
+      "documentId": "chibougamau-2026-05-16",
+      "city": "chibougamau",
+      "date": "2026-05-16",
+      "sizeBucket": "S",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "8097b340d1a676b4fad76bf73f87fa45f7c93839e3f5c3637085822c57e40dec"
+    },
+    {
+      "alias": "doc-3b98550975d9",
+      "documentId": "amherst-2026-06-08",
+      "city": "amherst",
+      "date": "2026-06-08",
+      "sizeBucket": "S",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "a221b9b5735a2867fcee93c4c48a425be659fb8d9144296f08c920956d324fb6"
+    },
+    {
+      "alias": "doc-855281eaad87",
+      "documentId": "saint-charles-de-bourget-2026-05-04",
+      "city": "saint-charles-de-bourget",
+      "date": "2026-05-04",
+      "sizeBucket": "S",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "9b7b61e348b5be2b04284c9151a6c32dbbfdc0d5ae23adbf7048e8bd7edfe25f"
+    },
+    {
+      "alias": "doc-f48f4958d435",
+      "documentId": "acton-vale-2026-03-16",
+      "city": "acton-vale",
+      "date": "2026-03-16",
+      "sizeBucket": "S",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "c415d6fc414e42ff59f4db1cab91f2f41955e22a585ad1bcc7f37191c46f7f77"
+    },
+    {
+      "alias": "doc-3b8ebeaa48d7",
+      "documentId": "saint-henri-2026-03-02",
+      "city": "saint-henri",
+      "date": "2026-03-02",
+      "sizeBucket": "S",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "00f6f6471c7f647549d6b2b864be5cebb1e8bff844e8c53b3db3c0ea5d701ce5"
+    },
+    {
+      "alias": "doc-7b0a52813cad",
+      "documentId": "sainte-brigide-diberville-2026-06-01",
+      "city": "sainte-brigide-diberville",
+      "date": "2026-06-01",
+      "sizeBucket": "S",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "335ba546cd0acf8aa8b93f038f0afcd2bd5a4daec0d4911dcfcc477f55d0d67c"
+    },
+    {
+      "alias": "doc-8873b88e5157",
+      "documentId": "stoneham-et-tewkesbury-2026-06-08",
+      "city": "stoneham-et-tewkesbury",
+      "date": "2026-06-08",
+      "sizeBucket": "M",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "e7aac4dd66013e24ac144a381b7f0ba6fa6634b742201bdb86e31be6b66deff0"
+    },
+    {
+      "alias": "doc-3056d1a14425",
+      "documentId": "saint-just-de-bretenieres-2026-02-02",
+      "city": "saint-just-de-bretenieres",
+      "date": "2026-02-02",
+      "sizeBucket": "M",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "1f862b295eb08413431516062929551550d1ff09fab50721e38f6c1cb1640cb6"
+    },
+    {
+      "alias": "doc-5fc746435a1d",
+      "documentId": "sainte-clotilde-2026-04-20",
+      "city": "sainte-clotilde",
+      "date": "2026-04-20",
+      "sizeBucket": "M",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "d1b9758ade485bf703c57fef4c61d4da159061a7e02f44ca0b4fa9c66992542d"
+    },
+    {
+      "alias": "doc-a6f870c15163",
+      "documentId": "sainte-francoise--becancour-2026-05-04",
+      "city": "sainte-francoise--becancour",
+      "date": "2026-05-04",
+      "sizeBucket": "M",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "78b4c56b3a751d17b7b8da3f401232b34cda129d6678394c31565b008ee0634a"
+    },
+    {
+      "alias": "doc-106e70aa38c4",
+      "documentId": "saint-sylvere-2026-04-07",
+      "city": "saint-sylvere",
+      "date": "2026-04-07",
+      "sizeBucket": "M",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "374fa9fb356c3150874830c668dbbff3ab07db4ece9b32b7ccb98f65cb9f427e"
+    },
+    {
+      "alias": "doc-16d15ce7068c",
+      "documentId": "lorraine-2026-01-13",
+      "city": "lorraine",
+      "date": "2026-01-13",
+      "sizeBucket": "M",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "33ab1ad62d6c3c3944d7831e74e59e055f82995c7e8777fc5dfde3f6d0f11b0c"
+    },
+    {
+      "alias": "doc-9f1943a9c6a8",
+      "documentId": "sainte-sophie-2026-06-02",
+      "city": "sainte-sophie",
+      "date": "2026-06-02",
+      "sizeBucket": "L",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "394351039e042f1a02511d37acb9f893e1acebc3de4ab88a22da29768a852432"
+    },
+    {
+      "alias": "doc-62130f4ec984",
+      "documentId": "cowansville-2026-05-05",
+      "city": "cowansville",
+      "date": "2026-05-05",
+      "sizeBucket": "L",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "696a38fe11d07ddf865b03dfa3eff6a4c4968af357c3585890e3bea4f90931cf"
+    },
+    {
+      "alias": "doc-a98a84c82e60",
+      "documentId": "mont-saint-hilaire-2026-04-13",
+      "city": "mont-saint-hilaire",
+      "date": "2026-04-13",
+      "sizeBucket": "L",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "83bc07dcae6d0bb99c3fb24458832501bab68896baf3ffd0fdc31880e1a26758"
+    },
+    {
+      "alias": "doc-9de4114e4eaa",
+      "documentId": "la-peche-2026-06-01",
+      "city": "la-peche",
+      "date": "2026-06-01",
+      "sizeBucket": "L",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "81fd56d6f4bad4ae0638dbb768b4eecb5ae849b046d3d165b152a1e912288895"
+    },
+    {
+      "alias": "doc-c049610c376f",
+      "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+      "city": "saint-odilon-de-cranbourne",
+      "date": "2026-01-12",
+      "sizeBucket": "L",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "19aac96d1ed1f241d043c1335eb3d305e15bac4bcf4dd55be72ed665eec98f00"
+    },
+    {
+      "alias": "doc-c7f5f9b28bc4",
+      "documentId": "lac-etchemin-2026-02-03",
+      "city": "lac-etchemin",
+      "date": "2026-02-03",
+      "sizeBucket": "L",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "24f41f88efad01f5c8bae73946ef13a9761341c8d21b4b5471a14aa6b4b706da"
+    },
+    {
+      "alias": "doc-3c69d1923ad4",
+      "documentId": "lac-des-seize-iles-2026-09-agenda",
+      "city": "lac-des-seize-iles",
+      "date": "2026-09",
+      "sizeBucket": "ancre",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "c03014364e7f3fe896692b6924b6d7507a6e0ada3306bf583f78d8d31d5408d9"
+    },
+    {
+      "alias": "doc-1edf6f0d0834",
+      "documentId": "saint-barthelemy-2026-09-08",
+      "city": "saint-barthelemy",
+      "date": "2026-09-08",
+      "sizeBucket": "ancre",
+      "accepted": true,
+      "violationCodes": [],
+      "outputSha256": "d189256b6bdef97f7a7ec8d1735a8be173a38a1ef2bcb3f77274aa43a0bfdb35"
+    },
+    {
+      "alias": "doc-82dd7a232a14",
+      "documentId": "coteau-du-lac-2026-02-10",
+      "city": "coteau-du-lac",
+      "date": "2026-02-10",
+      "sizeBucket": "S",
+      "accepted": false,
+      "violationCodes": [
+        "ungrounded_pdf_excerpt"
+      ],
+      "outputSha256": "c79ad6b539ab9457807c0d4f86b993d238f8489c1bdad87691ec91d33f55ce2f"
+    },
+    {
+      "alias": "doc-13b280729dcb",
+      "documentId": "sainte-angele-de-monnoir-2026-01-13",
+      "city": "sainte-angele-de-monnoir",
+      "date": "2026-01-13",
+      "sizeBucket": "M",
+      "accepted": false,
+      "violationCodes": [
+        "ungrounded_pdf_excerpt"
+      ],
+      "outputSha256": "7400a00528ece43a9d93211e899ec5ade18ccab8ed8b1bdaf9e8d921d5899075"
+    },
+    {
+      "alias": "doc-42f66d3a99f1",
+      "documentId": "sainte-martine-2026-03-17",
+      "city": "sainte-martine",
+      "date": "2026-03-17",
+      "sizeBucket": "L",
+      "accepted": false,
+      "violationCodes": [
+        "missing_evidence_ref"
+      ],
+      "outputSha256": "edeab362009a2424625f2d1cf2e56367a013bfa7454b7d628ad6a40ee4afab66"
+    },
+    {
+      "alias": "doc-3410d2e9b34e",
+      "documentId": "sainte-croix-2026-05-05",
+      "city": "sainte-croix",
+      "date": "2026-05-05",
+      "sizeBucket": "L",
+      "accepted": false,
+      "violationCodes": [
+        "missing_evidence_ref"
+      ],
+      "outputSha256": "c7d1bed49ac9df05e907e797d6c1c6754848cd1e63bc6fc3c3c4c46d0d76dd8a"
+    },
+    {
+      "alias": "doc-8072604a9d5e",
+      "documentId": "dollard-des-ormeaux-2026-02-10",
+      "city": "dollard-des-ormeaux",
+      "date": "2026-02-10",
+      "sizeBucket": "S",
+      "accepted": false,
+      "violationCodes": [
+        "inferred_relation_disallowed"
+      ],
+      "outputSha256": "4aba78f322a9a5f4ac8a07b96c976d708c4d21eba2375647bcd590dc3ed5fad4"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "alias": "doc-a6f870c15163",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0ecaa77c9930f9ce006aa87afe263c87d28e797cf21a285fca",
+  "usage": {
+    "input_tokens": 20138,
+    "input_tokens_details": {
+      "cache_write_tokens": 20135,
+      "cached_tokens": 0
+    },
+    "output_tokens": 3188,
+    "output_tokens_details": {
+      "reasoning_tokens": 2306
+    },
+    "total_tokens": 23326
+  },
+  "latencyMs": 87858,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-a6f870c15163",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Adoption du projet de règlement #55-2026 modifiant le règlement de zonage #2010-03, présenté comme second projet dans le titre, mais comme premier projet dans le dispositif; il prévoit notamment l’agrandissement de la zone M-03 à même la zone IND-02.",
+        "page": 7,
+        "supported": true,
+        "evidenceInExtraction": "Le règlement #55-2026, l’événement d’adoption, le signal de rezonage et les zones M-03 et IND-02 sont extraits; l’étape exacte est toutefois contradictoire."
+      },
+      {
+        "id": "u2",
+        "summary": "Avis de motion du règlement #58-2026 modifiant le plan d’urbanisme #2010-01 afin d’agrandir l’affectation mixte à même l’affectation industrielle.",
+        "page": 8,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud bylaw-58-2026 et sa relation avec le plan d’urbanisme #2010-01 reprennent l’avis de motion, mais omettent son objet précis."
+      },
+      {
+        "id": "u3",
+        "summary": "Avis de motion du règlement #59-2026 modifiant le règlement de construction #2010-05 afin de permettre les pieux dans l’agrandissement des bâtiments.",
+        "page": 8,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud bylaw-59-2026 et sa relation avec le règlement de construction #2010-05 reprennent l’avis de motion, mais omettent son objet précis."
+      },
+      {
+        "id": "u4",
+        "summary": "Adoption du règlement #56-2026 relatif à l’aménagement des entrées privées et à la fermeture des fossés de chemins.",
+        "page": 8,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ni événement ne recense cette adoption."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3"
+    ],
+    "missedUnitIds": [
+      "u4"
+    ],
+    "unsupportedClaims": [
+      {
+        "summary": "Le règlement #55-2026 est catégoriquement au stade « second_projet ».",
+        "page": 7,
+        "reason": "Le titre annonce l’adoption du second projet, mais la résolution 61-05-2026 citée dit expressément que le conseil adopte le premier projet; l’étape n’est donc pas établie sans réserve."
+      },
+      {
+        "summary": "Le règlement #55-2026 « définit » les zones M-03 et IND-02.",
+        "page": 7,
+        "reason": "Le texte indique que la zone M-03 sera agrandie à même la zone IND-02; il soutient une modification de délimitation, non une relation de définition des zones."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 7,
+        "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026",
+        "defect": "Cette citation ne soutient pas l’attribut « 2e_projet » ou « second_projet » porté par l’extraction; elle affirme au contraire l’adoption du premier projet."
+      },
+      {
+        "page": 7,
+        "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026",
+        "defect": "Dans plusieurs arêtes, l’extrait est tronqué avant « modifiant le règlement de zonage #2010-03 » et ne soutient donc pas à lui seul la relation d’amendement ni la portée de rezonage affirmée."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "L’extraction couvre les trois principaux actes visant explicitement le zonage, le plan d’urbanisme et la construction, mais elle omet l’adoption du règlement #56-2026 et traite sans réserve une incohérence interne importante entre le titre et le dispositif du règlement #55-2026."
+  }
+}

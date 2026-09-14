@@ -1,0 +1,146 @@
+{
+  "alias": "doc-42f66d3a99f1",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0a37c00e5326525f006aa878b9b76087d2959f0ca89ef41321",
+  "usage": {
+    "input_tokens": 21833,
+    "input_tokens_details": {
+      "cache_write_tokens": 21830,
+      "cached_tokens": 0
+    },
+    "output_tokens": 2740,
+    "output_tokens_details": {
+      "reasoning_tokens": 1398
+    },
+    "total_tokens": 24573
+  },
+  "latencyMs": 46980,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-42f66d3a99f1",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Adoption du Règlement numéro 2026-503 modifiant les conditions d’émission de certains permis et certificats concernant des immeubles situés en zone agricole.",
+        "page": 17,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u2",
+        "summary": "Avis de motion donné le 20 janvier 2026 pour le Règlement numéro 2026-501 modifiant le règlement de zonage.",
+        "page": 18,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u3",
+        "summary": "Adoption d’un premier projet du Règlement numéro 2026-501 le 20 janvier 2026.",
+        "page": 18,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u4",
+        "summary": "Tenue d’une assemblée publique de consultation le 10 février 2026 sur le Règlement numéro 2026-501.",
+        "page": 18,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u5",
+        "summary": "Adoption d’un second projet du Règlement numéro 2026-501 le 10 février 2026.",
+        "page": 18,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u6",
+        "summary": "Adoption du Règlement numéro 2026-501 ajoutant les activités de recherche et développement en agriculture aux usages commerciaux para-agricoles.",
+        "page": 18,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud bylaw-2026-501 indique l’adoption du règlement, la résolution 2026-03-058 et cite verbatim la décision à la page 18."
+      },
+      {
+        "id": "u7",
+        "summary": "Autorisation partielle de la demande de modification réglementaire 2025-016 au 122, rue Saint-Joseph, touchant le plan d’urbanisme, le zonage, les zones MxtV-2 et P-3 et le lot 6 660 191; refus de porter à 24 le nombre de logements et de modifier l’article 6.20.",
+        "page": 19,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud event-2026-03-059 recense la modification réglementaire et les zones visées, mais réduit à tort la décision partielle à « approuvé » et lui attribue prématurément l’étape « projet_reglement »."
+      },
+      {
+        "id": "u8",
+        "summary": "Autorisation de la demande de modification du Règlement de zonage numéro 2019-342 afin de permettre certaines activités artisanales dans une résidence, sous conditions.",
+        "page": 20,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u9",
+        "summary": "Refus de la demande de PIIA 2026-005 visant l’installation de panneaux solaires au 182, rue Saint-Joseph.",
+        "page": 22,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud event-2026-03-062 indique correctement le dossier, l’adresse, la décision de refus et cite verbatim la décision à la page 22."
+      },
+      {
+        "id": "u10",
+        "summary": "Traitement du projet de lotissement du 330, rang Laberge et exigence d’une contribution monétaire de 7 625,90 $ pour fins de parcs, terrains de jeux et espaces naturels.",
+        "page": 23,
+        "supported": false,
+        "evidenceInExtraction": ""
+      }
+    ],
+    "supportedUnitIds": [
+      "u6",
+      "u7",
+      "u9"
+    ],
+    "missedUnitIds": [
+      "u1",
+      "u2",
+      "u3",
+      "u4",
+      "u5",
+      "u8",
+      "u10"
+    ],
+    "unsupportedClaims": [
+      {
+        "summary": "La décision relative à la demande 2025-016 est qualifiée sans réserve d’« approuvé ».",
+        "page": 19,
+        "reason": "Le conseil n’autorise la demande que partiellement et refuse expressément deux modifications, dont l’augmentation à 24 logements."
+      },
+      {
+        "summary": "La demande 2025-016 est placée à l’étape « projet_reglement ».",
+        "page": 19,
+        "reason": "La résolution autorise partiellement la demande et mandate l’administration pour préparer les documents requis; elle n’atteste pas l’adoption d’un projet de règlement."
+      },
+      {
+        "summary": "La demande de démolition 2026-007 au 5, rue Phénix est classée comme une dérogation.",
+        "page": 22,
+        "reason": "Le texte atteste une autorisation de démolition et un programme de réutilisation du sol, non une dérogation mineure."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 19,
+        "excerpt": "D’autoriser partiellement les demandes de modifications réglementaires comme\nsuit :",
+        "defect": "La citation soutient une autorisation partielle, mais non la valeur non nuancée « décision : approuvé » ni l’étape « projet_reglement » attribuées au nœud."
+      },
+      {
+        "page": 19,
+        "excerpt": "Que soit modifié le Règlement adoptant le plan d’urbanisme numéro 2019341 afin :\n• D’agrandir la zone MxtV-2 à même une partie de la zone P-3 afin\nd’y intégrer le lot numéro 6 660 191.",
+        "defect": "L’extrait n’est pas verbatim : le document porte « numéro 2019-341 », avec un trait d’union."
+      },
+      {
+        "page": 22,
+        "excerpt": "D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de\nreconstruction de l’immeuble, tel que présenté.",
+        "defect": "La citation soutient une autorisation de démolition, mais ne soutient pas la classification de l’événement comme « derogation »."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "L’extraction saisit correctement l’adoption du règlement de zonage 2026-501 et le refus du PIIA, et repère la modification réglementaire du 122, rue Saint-Joseph. Elle omet toutefois sept actes d’urbanisme attestés, notamment toute la procédure antérieure du règlement 2026-501, le règlement sur les permis, une autre modification de zonage et le lotissement. Elle confond aussi une démolition avec une dérogation et simplifie incorrectement une décision partielle."
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "alias": "doc-13b280729dcb",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0de680d35a3f5f10006aa8779db32087d2b97046630610ff44",
+  "usage": {
+    "input_tokens": 11236,
+    "input_tokens_details": {
+      "cache_write_tokens": 11233,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1616,
+    "output_tokens_details": {
+      "reasoning_tokens": 1023
+    },
+    "total_tokens": 12852
+  },
+  "latencyMs": 31969,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-13b280729dcb",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Approbation par la résolution 26-01-015 de la demande de PIIA liée au permis 2025-85 pour modifier les portes et fenêtres du bâtiment principal au 152, rue Principale, avec autorisation du certificat sous condition du respect des autres dispositions du règlement d’urbanisme.",
+        "page": 11,
+        "supported": true,
+        "evidenceInExtraction": "L’événement event-26-01-015 et le signal signal-26-01-015 recensent correctement l’approbation de la demande de PIIA, le dossier 2025-85, l’adresse, les travaux, la résolution et la condition."
+      },
+      {
+        "id": "u2",
+        "summary": "Avis de motion du Règlement numéro 599-26 visant à interdire l’épandage de déjections animales, de boues ou de résidus provenant d’une fabrique de pâtes et papiers à certaines dates en 2026.",
+        "page": 8,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ni événement ne recense cet avis de motion."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1"
+    ],
+    "missedUnitIds": [
+      "u2"
+    ],
+    "unsupportedClaims": [],
+    "citationDefects": [
+      {
+        "page": 11,
+        "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de\nPIIA pour le 152, rue Principale",
+        "defect": "L’extrait franchit la limite de page : la page 11 se termine après « accepte la demande de », tandis que « PIIA pour le 152, rue Principale » figure à la page 12. La citation attribuée uniquement à la page 11 n’est donc pas verbatim à cette page."
+      },
+      {
+        "page": 11,
+        "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de\nPIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation à\nla condition que toutes les autres dispositions du règlement d’urbanisme soient\nrespectées.",
+        "defect": "Cet extrait de preuve est attribué à la page 11, mais sa partie à compter de « PIIA pour le 152, rue Principale » se trouve à la page 12, y compris la condition extraite."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "L’extraction décrit correctement le PIIA, mais omet l’avis de motion du Règlement 599-26. Les citations principales du PIIA doivent être réparties entre les pages 11 et 12."
+  }
+}

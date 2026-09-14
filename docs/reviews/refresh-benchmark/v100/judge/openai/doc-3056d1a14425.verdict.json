@@ -1,0 +1,31 @@
+{
+  "alias": "doc-3056d1a14425",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0f192a088498be28006aa87806242487d289902ba34522d720",
+  "usage": {
+    "input_tokens": 10210,
+    "input_tokens_details": {
+      "cache_write_tokens": 10207,
+      "cached_tokens": 0
+    },
+    "output_tokens": 569,
+    "output_tokens_details": {
+      "reasoning_tokens": 408
+    },
+    "total_tokens": 10779
+  },
+  "latencyMs": 25221,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-3056d1a14425",
+    "units": [],
+    "supportedUnitIds": [],
+    "missedUnitIds": [],
+    "unsupportedClaims": [],
+    "citationDefects": [],
+    "usefulness": 2,
+    "notes": "Le PV n’atteste aucun acte d’urbanisme appartenant aux catégories visées. La résolution 40 demande seulement que le règlement sur une bande boisée soit revu, sans avis de motion, adoption de règlement ni changement de zonage. La résolution 41, correctement décrite et citée dans l’extraction, porte sur l’acceptation d’une déclaration de compétence de la MRC concernant certaines autorisations en milieux hydriques; elle ne constitue pas une unité d’urbanisme selon la typologie demandée."
+  }
+}

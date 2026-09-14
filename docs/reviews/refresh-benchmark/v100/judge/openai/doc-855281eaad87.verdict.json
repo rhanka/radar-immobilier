@@ -1,0 +1,79 @@
+{
+  "alias": "doc-855281eaad87",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0aa8254922ae7dff006aa87a01b05c87d2ba154a6953bf911b",
+  "usage": {
+    "input_tokens": 8574,
+    "input_tokens_details": {
+      "cache_write_tokens": 8571,
+      "cached_tokens": 0
+    },
+    "output_tokens": 2087,
+    "output_tokens_details": {
+      "reasoning_tokens": 1329
+    },
+    "total_tokens": 10661
+  },
+  "latencyMs": 56171,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-855281eaad87",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Adoption prévue du règlement no 446.26 concernant l’exercice du droit de préemption par la municipalité",
+        "page": 1,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-446-26 et preuve ev-bylaw-446-26; l’acte est extrait, mais le champ stage «adoption» ne précise pas qu’il s’agit seulement d’un point projeté à l’ordre du jour."
+      },
+      {
+        "id": "u2",
+        "summary": "Demande de dérogation mineure au 237, chemin Maltais-Laberge",
+        "page": 1,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-derogation-237-chemin-maltais-laberge et preuve ev-derogation."
+      },
+      {
+        "id": "u3",
+        "summary": "Avis de motion et dépôt prévus du projet de règlement omnibus municipal no 447.26 relatif à la paix, à l’ordre et à la sécurité publique",
+        "page": 2,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-447-26 et preuve ev-bylaw-447-26; l’acte est extrait, mais le champ stage «avis_motion» ne précise pas qu’il figure seulement dans un projet d’ordre du jour."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3"
+    ],
+    "missedUnitIds": [],
+    "unsupportedClaims": [
+      {
+        "summary": "Le règlement no 446.26 a été adopté le 1er juin 2026",
+        "page": 1,
+        "reason": "Le document est un projet d’ordre du jour et non le procès-verbal d’une séance tenue; il annonce un point intitulé «ADOPTION», sans attester que l’adoption a effectivement eu lieu."
+      },
+      {
+        "summary": "L’avis de motion relatif au règlement no 447.26 a été donné le 1er juin 2026",
+        "page": 2,
+        "reason": "Le document annonce cet avis de motion dans un projet d’ordre du jour, mais n’atteste pas que l’acte a effectivement été accompli."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 1,
+        "excerpt": "6.3\n\nADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\nPRÉEMPTION PAR LA MUNICIPALITÉ",
+        "defect": "L’extrait est verbatim et à la bonne page, mais il provient explicitement d’un projet d’ordre du jour; il ne soutient pas l’affirmation implicite d’une adoption effectivement accomplie."
+      },
+      {
+        "page": 2,
+        "excerpt": "10.2\n\nAVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT OMNIBUS MUNICIPAL\nNO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE",
+        "defect": "L’extrait est verbatim et à la bonne page, mais il ne soutient pas l’affirmation implicite que l’avis de motion et le dépôt ont effectivement eu lieu."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "Les trois actes visés sont recensés, mais une relecture est nécessaire pour distinguer les points projetés des actes effectivement accomplis. La demande à la CPTAQ concernant l’aliénation du lot 5 682 717 est textuellement étayée, mais elle ne correspond pas à l’une des catégories d’actes d’urbanisme énumérées; sa représentation à la fois comme événement et comme contrainte est redondante."
+  }
+}

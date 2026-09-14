@@ -1,0 +1,131 @@
+{
+  "alias": "doc-8873b88e5157",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_098886f05b796c79006aa87a39eda887d291e24400f7bb413b",
+  "usage": {
+    "input_tokens": 18255,
+    "input_tokens_details": {
+      "cache_write_tokens": 18252,
+      "cached_tokens": 0
+    },
+    "output_tokens": 2207,
+    "output_tokens_details": {
+      "reasoning_tokens": 1034
+    },
+    "total_tokens": 20462
+  },
+  "latencyMs": 50830,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-8873b88e5157",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Dérogation mineure pour construire une piscine en cour avant au 2135, route de Tewkesbury, recommandée favorablement avec exigence d’un écran opaque.",
+        "page": 38,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ni signal ne représente cette dérogation mineure."
+      },
+      {
+        "id": "u2",
+        "summary": "Dérogation mineure pour régulariser une habitation ayant une marge latérale de 2,55 m au 53, chemin Plamondon, recommandée favorablement.",
+        "page": 40,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ni signal ne représente cette dérogation mineure."
+      },
+      {
+        "id": "u3",
+        "summary": "PIIA pour des bâtiments commerciaux d’entreposage et un stationnement au 2757, boulevard Talbot, recommandé favorablement avec exigences.",
+        "page": 42,
+        "supported": false,
+        "evidenceInExtraction": "L’extraction crée la zone CA-102 et la relie au règlement 09-603, mais elle ne représente ni la demande de PIIA ni la recommandation d’approbation."
+      },
+      {
+        "id": "u4",
+        "summary": "PIIA pour agrandir l’accès et le stationnement au 98, 1re Avenue, recommandé pour refus.",
+        "page": 44,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ni signal ne représente cette demande de PIIA."
+      },
+      {
+        "id": "u5",
+        "summary": "PIIA pour implanter une piscine dans les bandes de protection d’un secteur de forte pente au 105, chemin de la Tourterelle, recommandé favorablement.",
+        "page": 46,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ni signal ne représente cette demande de PIIA."
+      },
+      {
+        "id": "u6",
+        "summary": "PIIA pour aménager une aire de stationnement de plus de 150 m² au 144, chemin du Sommet, recommandé favorablement.",
+        "page": 48,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ni signal ne représente cette demande de PIIA."
+      },
+      {
+        "id": "u7",
+        "summary": "PIIA pour modifier l’enseigne d’Excavation JDS au 2523, boulevard Talbot, recommandé favorablement.",
+        "page": 50,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ni signal ne représente cette demande de PIIA."
+      },
+      {
+        "id": "u8",
+        "summary": "Adoption du Règlement 26-1105 modifiant le règlement de zonage 09-591, notamment pour créer RT-503 et agrandir F-304 et CS-507.",
+        "page": 52,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud bylaw-26-1105 indique l’adoption et la modification du règlement 09-591; les zones RT-503, F-304 et CS-507 et leurs changements sont aussi extraits."
+      },
+      {
+        "id": "u9",
+        "summary": "Adoption du Règlement 26-1106 modifiant le règlement de PIIA 09-603 afin d’encadrer la nouvelle zone RT-503.",
+        "page": 54,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud bylaw-26-1106 indique correctement l’adoption et la modification du règlement 09-603."
+      },
+      {
+        "id": "u10",
+        "summary": "Refus de la demande visée par le premier projet de résolution PPCMOI pour un projet résidentiel intégré de 18 logements au 102, 1re Avenue.",
+        "page": 56,
+        "supported": true,
+        "evidenceInExtraction": "Les nœuds event-16-3-ppcmoi et signal-16-3-ppcmoi représentent le refus du PPCMOI, son adresse et ses 18 logements."
+      }
+    ],
+    "supportedUnitIds": [
+      "u8",
+      "u9",
+      "u10"
+    ],
+    "missedUnitIds": [
+      "u1",
+      "u2",
+      "u3",
+      "u4",
+      "u5",
+      "u6",
+      "u7"
+    ],
+    "unsupportedClaims": [
+      {
+        "summary": "Le PPCMOI du 102, 1re Avenue est qualifié de « rezonage ».",
+        "page": 56,
+        "reason": "Le document le présente comme un projet particulier de construction, de modification ou d’occupation d’un immeuble; il ne le qualifie pas de rezonage."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 42,
+        "excerpt": "Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une aire de stationnement de plus de 150 m2 au 2757, boulevard Talbot",
+        "defect": "La citation du nœud zone-CA-102 ne contient pas la mention « zone CA-102 » et ne soutient donc pas, à elle seule, le code de zone affirmé."
+      },
+      {
+        "page": 56,
+        "excerpt": "de refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser\nun projet résidentiel intégré de trois\nbâtiments principaux compr",
+        "defect": "L’extrait est tronqué au milieu d’un mot et ne soutient pas les détails affirmés dans les nœuds, notamment les 18 logements, l’adresse et les numéros de lots."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "Les deux adoptions réglementaires et le PPCMOI sont extraits, mais les deux dérogations mineures et les cinq décisions de PIIA sont omises. L’extraction est donc très incomplète pour les actes d’urbanisme individuels."
+  }
+}

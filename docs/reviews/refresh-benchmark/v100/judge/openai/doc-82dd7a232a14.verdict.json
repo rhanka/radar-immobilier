@@ -1,0 +1,77 @@
+{
+  "alias": "doc-82dd7a232a14",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0a8f197e7f559f75006aa879db694887d2aefa72df67b5d94d",
+  "usage": {
+    "input_tokens": 6296,
+    "input_tokens_details": {
+      "cache_write_tokens": 6293,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1571,
+    "output_tokens_details": {
+      "reasoning_tokens": 925
+    },
+    "total_tokens": 7867
+  },
+  "latencyMs": 38368,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-82dd7a232a14",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Demande d’approbation de PIIA pour le 3, rue Principale, concernant une enseigne sur vitrage",
+        "page": 3,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-piia-3-principale et preuve ev-piia-3 avec citation verbatim à la page 3."
+      },
+      {
+        "id": "u2",
+        "summary": "Demande d’approbation de PIIA pour le 9, rue Principale, concernant la modification d’une enseigne sur poteau",
+        "page": 3,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-piia-9-principale et preuve ev-piia-9 avec citation verbatim à la page 3."
+      },
+      {
+        "id": "u3",
+        "summary": "Approbation d’une demande de PPCMOI pour le 25, rue des Chutes, visant un agrandissement résidentiel",
+        "page": 3,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-ppcmoi-25-chutes-approbation et preuve ev-ppcmoi-approbation avec citation verbatim à la page 3."
+      },
+      {
+        "id": "u4",
+        "summary": "Adoption du premier projet de résolution relatif au PPCMOI du 25, rue des Chutes, visant un agrandissement résidentiel",
+        "page": 3,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-ppcmoi-25-chutes-premier-projet et preuve ev-ppcmoi-premier-projet avec citation verbatim à la page 3."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3",
+      "u4"
+    ],
+    "missedUnitIds": [],
+    "unsupportedClaims": [
+      {
+        "summary": "Le premier projet de résolution relatif au PPCMOI est classé comme une étape « projet_reglement »",
+        "page": 3,
+        "reason": "Le document atteste un « Premier projet de résolution », et non un projet de règlement; cette classification apparaît dans le nœud correspondant et dans le signal PPCMOI."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 3,
+        "excerpt": "8.3. Demande d’un PPCMOI\n\na)\n\nApprobation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)",
+        "defect": "Cette citation associée au signal-ppcmoi-25-chutes ne soutient pas son étape « projet_reglement »; elle ne vise que l’approbation de la demande. Le premier projet est en outre qualifié de résolution dans le document."
+      }
+    ],
+    "usefulness": 4,
+    "notes": "Les quatre actes d’urbanisme sont recensés et correctement localisés. Les citations sont verbatim, sauf qu’une citation du signal ne soutient pas l’étape qui lui est attribuée. La source est un ordre du jour, et non un procès-verbal; elle atteste les points inscrits, sans démontrer à elle seule leur réalisation effective."
+  }
+}
