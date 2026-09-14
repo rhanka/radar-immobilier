@@ -45,7 +45,7 @@ export interface RefreshProfileChunk {
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
 }
-export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v6";
+export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v7";
 export function loadRefreshProfileContext(options: LoadRefreshProfileContextOptions): RefreshProfileContext {
   if (options.unregisteredOnly) {
     if (!options.profilePath) throw new Error("Unregistered-only refresh requires an explicit profile path");
@@ -95,7 +95,8 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
     .map(([key, value]) => [key, { const: value }]));
   const citation = { type: "object", required: ["page", "excerpt"],
     properties: { page: { enum: chunk.pages }, excerpt: { type: "string", minLength: 1,
-      maxLength: 200, description: "short verbatim text from the cited page" } },
+      maxLength: 200, description: "Exact beginning of the cited passage, at most 200 characters; "
+        + "cut off even mid-word and never completed or corrected." } },
     description: "The profile injects the constant PDF identity before validation." };
   return JSON.stringify({
     contract_version: REFRESH_PROFILE_CONTRACT_VERSION,
@@ -288,7 +289,10 @@ non-empty arrays of string IDs from evidence[].id, never embedded objects. Evide
 Every edge must carry at least one evidence_refs ID that exists in evidence[]. Minimal example:
 {"edges":[{"evidence_refs":["ev-1"]}],"evidence":[{"id":"ev-1"}]}.
 Every node and every edge must include a non-empty citations array. Each citation must contain only page
-and excerpt (at most 200 characters). Do not repeat the document identity inside citations; the profile
+and excerpt. The excerpt is the exact beginning of the cited passage, at most 200 characters; cut it off
+even in the middle of a word; never complete or correct it.
+Cut example: passage "Construction de douze logements" -> excerpt "Construction de douze loge".
+Do not repeat the document identity inside citations; the profile
 injects it before validation. Follow the relation source/target signatures exactly. Copy every excerpt
 exactly as it appears in the PDF text, including mistakes, spacing, and typography; correct nothing.
 Contrastive example: if the PDF text says "YvesMalouin", keep "YvesMalouin"; never "Yves-Malouin".

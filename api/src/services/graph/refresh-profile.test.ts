@@ -187,7 +187,7 @@ describe("refresh profile extraction", () => {
     expect(results[0]!.extraction).toEqual(extraction());
   });
 
-  it("should accept the exact declared v6 contract version", async () => {
+  it("should accept the exact declared v7 contract version", async () => {
     const declared = { ...compactExtraction(), contract_version: REFRESH_PROFILE_CONTRACT_VERSION };
     const results = await extractRefreshProfile([chunk()], { context,
       textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
@@ -195,12 +195,13 @@ describe("refresh profile extraction", () => {
     expect(results[0]!.extraction).toEqual(extraction());
   });
 
-  it("should reject a declared v5 contract version with a named violation", async () => {
-    const declared = { ...compactExtraction(), contract_version: "immo-pv-extraction-v5" };
-    await expect(extractRefreshProfile([chunk()], { context,
-      textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
-    })).rejects.toThrow("contract_version_mismatch");
-  });
+  it.each(["immo-pv-extraction-v6", "immo-pv-extraction-v5"])(
+    "should reject declared legacy contract version %s with a named violation", async (contractVersion) => {
+      const declared = { ...compactExtraction(), contract_version: contractVersion };
+      await expect(extractRefreshProfile([chunk()], { context,
+        textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
+      })).rejects.toThrow("contract_version_mismatch");
+    });
 
   it("should accept absent v4 version while replacing five false identity fields", async () => {
     const modelExcerpt = `Adoption ${oracle.bylawNumber}`;
@@ -268,7 +269,7 @@ describe("refresh profile extraction", () => {
     [200, false],
     [201, true],
   ] as const)("should enforce %i out-of-BMP citation code points", async (codePointCount, shouldReject) => {
-    const excerpt = "😀".repeat(codePointCount);
+    const excerpt = "𐐀".repeat(codePointCount);
     const value = compactExtraction();
     value.nodes[0]!.citations![0]!.excerpt = excerpt;
     const promise = extractRefreshProfile([chunk(undefined,
@@ -293,6 +294,17 @@ describe("refresh profile extraction", () => {
       textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
     });
     expect(results[0]!.extraction.evidence![0]!.excerpt).toHaveLength(201);
+  });
+
+  it("should apply typographic page anchoring to evidence excerpts", async () => {
+    const pageText = `${oracle.excerpt}\nLa demande de M. YvesMalouin vise la propriété désignée.`;
+    const value = extraction();
+    value.evidence = [{ id: "ev-normalized", source_file: oracle.originalKey, rawRef: oracle.originalKey,
+      docSha: oracle.docSha, sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page,
+      excerpt: "YVES-MALOUÏN vise la propriété" }];
+    await expect(extractRefreshProfile([chunk(undefined, `[PDF PAGE 3]\n${pageText}`)], { context,
+      textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+    })).resolves.toHaveLength(1);
   });
 
   it("should load an unregistered PV profile and refuse registry-backed output", async () => {
@@ -327,7 +339,7 @@ describe("refresh profile extraction", () => {
     expect(results[1]).toMatchObject({ chunk: { originalKey: oracle.originalKey },
       extraction: { nodes: [], edges: [] } });
     const schema = JSON.parse(seen[0]!.schema);
-    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v6");
+    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v7");
     expect(schema.contract_version).toBe(REFRESH_PROFILE_CONTRACT_VERSION);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
     const nodeStatuses = ["candidate", "attached", "needs_review", "validated", "rejected", "superseded"];
@@ -359,7 +371,8 @@ describe("refresh profile extraction", () => {
     expect(schema.graph_contract.entity_citations.items.required).toEqual(["page", "excerpt"]);
     expect(schema.graph_contract.entity_citations.items.properties).toEqual({
       page: { enum: [3] }, excerpt: { type: "string", minLength: 1, maxLength: 200,
-        description: "short verbatim text from the cited page" },
+        description: "Exact beginning of the cited passage, at most 200 characters; "
+          + "cut off even mid-word and never completed or corrected." },
     });
     expect(schema.evidence.pdf_identity).toMatchObject({ docSha: oracle.docSha, rawRef: oracle.originalKey });
     expect(schema.evidence.citation.required).toEqual(["page", "excerpt"]);
@@ -380,7 +393,11 @@ describe("refresh profile extraction", () => {
     expect(seen[0]!.prompt).toContain('{"edges":[{"evidence_refs":["ev-1"]}],"evidence":[{"id":"ev-1"}]}');
     expect(seen[0]!.prompt).toContain("Every node and every edge must include a non-empty citations array");
     expect(seen[0]!.prompt).toContain("Do not repeat the document identity inside citations");
-    expect(seen[0]!.prompt).toContain("including mistakes, spacing, and typography; correct nothing");
+    expect(seen[0]!.prompt).toContain("exact beginning of the cited passage, at most 200 characters");
+    expect(seen[0]!.prompt).toContain("cut it off");
+    expect(seen[0]!.prompt).toContain("even in the middle of a word; never complete or correct it");
+    expect(seen[0]!.prompt).toContain(
+      'passage "Construction de douze logements" -> excerpt "Construction de douze loge"');
     expect(seen[0]!.prompt).toContain('PDF text says "YvesMalouin"');
     expect(seen[0]!.prompt).toContain('never "Yves-Malouin"');
   });
