@@ -1,0 +1,155 @@
+{
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "effort": "xhigh"
+  },
+  "perDocument": [
+    {
+      "documentId": "lac-des-seize-iles-2026-09-agenda",
+      "systems": [
+        {
+          "system": "system-844774967f33",
+          "supported": ["L54", "L55"],
+          "missed": ["L36", "L37"],
+          "unsupported": [],
+          "citationDefects": [
+            "The quoted agenda lines and physical page 1 support both findings, but source_file, rawRef, docSha, sourceUrl, and modality are absent."
+          ],
+          "usefulness": 3,
+          "notes": "It identifies the exact minor-variance file and lot-subdivision bylaw but omits both 2026-08 procedural units. The L55 narrative says the council adopts the bylaw even though this is only an agenda, so completion is not confirmed."
+        },
+        {
+          "system": "system-bcb4a6c0ccc2",
+          "supported": ["L37", "L54", "L55"],
+          "missed": ["L36"],
+          "unsupported": [],
+          "citationDefects": [],
+          "usefulness": 4,
+          "notes": "Citation identity, page, and excerpts are strong. The 2026-08 node quotes both the notice-of-motion and filing lines but represents only one generic project-stage bylaw, so L36 is not independently encoded. The 2026-102-01 node also has a contradictory status of projet alongside stage adoption."
+        }
+      ]
+    },
+    {
+      "documentId": "saint-barthelemy-2026-09-08",
+      "systems": [
+        {
+          "system": "system-844774967f33",
+          "supported": ["S738", "S739M", "S739P", "S194", "S195", "S196", "S197", "S203"],
+          "missed": [],
+          "unsupported": [],
+          "citationDefects": [
+            "Every page value is a resolution suffix (189, 190, 191, 194, 195, 196, 197, or 203), not a physical PDF page; the supporting text is actually on pages 4, 4, 5, 6, 7, 7, 8, and 10 respectively.",
+            "Citations lack source_file, rawRef, docSha, sourceUrl, and modality, and several are assembled with ellipses rather than supplied as one contiguous verbatim excerpt."
+          ],
+          "usefulness": 4,
+          "notes": "All eight oracle units are substantively recovered with specific regulations, zones, matricules, constraints, and infrastructure effects. The four property/infrastructure decisions are nevertheless typed with an unknown stage despite the minutes confirming adoption."
+        },
+        {
+          "system": "system-bcb4a6c0ccc2",
+          "supported": ["S738", "S739P"],
+          "missed": ["S739M", "S194", "S195", "S196", "S197", "S203"],
+          "unsupported": [],
+          "citationDefects": [
+            "The 739-26 event references ev_p4 and ev_p5, but ev_p4 quotes the 738-26 adoption and ev_p5 quotes only the densification objective; neither excerpt quotes the 739-26 adoption anchor, and no evidence item captures the distinct notice of motion."
+          ],
+          "usefulness": 2,
+          "notes": "The two represented zoning units are well structured, but six of eight oracle units are absent. Marking 738-26 en_vigueur is stronger than the document, which confirms adoption and says entry into force will occur according to law."
+        }
+      ]
+    },
+    {
+      "documentId": "saint-etienne-de-bolton-2026-08-04",
+      "systems": [
+        {
+          "system": "system-844774967f33",
+          "supported": ["B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11", "B14", "BC2010-11", "BC2014-11", "BC2023-02", "B155", "B156", "B157", "B158"],
+          "missed": ["B154"],
+          "unsupported": [],
+          "citationDefects": [
+            "The page numbers are physically correct and the quoted clauses are supported, but citations omit source identity fields and some combine separated passages with ellipses rather than preserving one contiguous excerpt."
+          ],
+          "usefulness": 4,
+          "notes": "It recovers 16 of 17 oracle units, including the three non-modification notices, but misses the PIIA authorization for the cold-room roof at 12 rue Principale. Seven adoption units and three notice units are each collapsed into one finding, reducing per-unit operability; the notices are also labeled entree_vigueur although the oracle stage is unknown."
+        },
+        {
+          "system": "system-bcb4a6c0ccc2",
+          "supported": ["B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11", "B14", "B154", "B155", "B156", "B157", "B158"],
+          "missed": ["BC2010-11", "BC2014-11", "BC2023-02"],
+          "unsupported": [],
+          "citationDefects": [
+            "B04 through B10 all rely on the same excerpt, 'QUE le conseil municipal adopte les Règlements ci-dessus mentionnés'; the excerpt does not itself identify which seven bylaws are above it, so each unit's citation is incomplete in isolation."
+          ],
+          "usefulness": 4,
+          "notes": "It provides granular nodes for 14 oracle units, including B154, with complete source identity and accurate pages. It omits all three concordance/non-modification notices. The en_vigueur status assigned to the nine adopted bylaws is not established by minutes that confirm adoption only."
+        }
+      ]
+    },
+    {
+      "documentId": "valcourt-2026-06-01-agenda",
+      "systems": [
+        {
+          "system": "system-844774967f33",
+          "supported": ["V71", "V72", "V73", "V74", "V75"],
+          "missed": ["V132"],
+          "unsupported": [
+            "The revised 2026 budget of the Office municipal d'habitation is document-supported but is not an oracle unit and supplies no concrete municipal-document densification signal beyond general housing-organism activity."
+          ],
+          "citationDefects": [
+            "The page numbers and agenda text are accurate, but source_file, rawRef, docSha, sourceUrl, and modality are absent."
+          ],
+          "usefulness": 3,
+          "notes": "It captures all five page-1 urbanism units but misses the 4111 rue Carpentier loan-for-use convention. For V75 it converts an agenda heading into a claim that adoption occurred, contrary to the oracle's explicit warning that adoption is unconfirmed."
+        },
+        {
+          "system": "system-bcb4a6c0ccc2",
+          "supported": ["V75"],
+          "missed": ["V71", "V72", "V73", "V74", "V132"],
+          "unsupported": [],
+          "citationDefects": [],
+          "usefulness": 2,
+          "notes": "It conservatively encodes the second-project stage and unknown decision with complete, page-accurate evidence, but omits five of six oracle units. One derived_from edge targets an ID ending in .pdf that does not correspond to the source node, reducing graph usability."
+        }
+      ]
+    },
+    {
+      "documentId": "waterloo-2026-08-18",
+      "systems": [
+        {
+          "system": "system-844774967f33",
+          "supported": ["W001"],
+          "missed": [],
+          "unsupported": [
+            "The claim that the rue Nadeau Hydro-Québec servitude signals a real-estate development is not stated by the text; the servitude, network extension, and service to an owner are supported."
+          ],
+          "citationDefects": [
+            "Every finding reports page 1. The W001 adoption is completed on physical page 3, while the other cited material occurs on pages 2, 3, 9, and 11 through 14.",
+            "Citations lack source_file, rawRef, docSha, sourceUrl, and modality and frequently splice non-contiguous clauses with ellipses."
+          ],
+          "usefulness": 3,
+          "notes": "W001 is correctly identified. Ten additional non-oracle findings are mostly well supported by the document text, including 26-957-1, four minor variances, and two residential PIIAs; because the frozen Waterloo oracle is partial, those text-supported extras cannot fairly be treated as false positives."
+        },
+        {
+          "system": "system-bcb4a6c0ccc2",
+          "supported": ["W001"],
+          "missed": [],
+          "unsupported": [],
+          "citationDefects": [
+            "W001 is cited to the adoption heading on page 2, while the oracle's decisive council-adoption clause is on page 3; the excerpt therefore establishes the agenda/topic and stage label but does not quote the operative resolution."
+          ],
+          "usefulness": 3,
+          "notes": "It encodes W001 with complete source identity and also captures the document-supported 26-957-1 adoption and four minor variances. The partial oracle prevents a reliable precision judgment for these extras or a recall penalty for other non-oracle signals omitted by this system."
+        }
+      ]
+    }
+  ],
+  "overall": {
+    "ranking": ["system-844774967f33", "system-bcb4a6c0ccc2"],
+    "reason": "system-844774967f33 ranks first because it substantively supports 32 of 36 frozen oracle units versus 21 of 36 for system-bcb4a6c0ccc2, with especially large advantages on Saint-Barthélemy and Valcourt and a smaller advantage on Saint-Étienne-de-Bolton. system-bcb4a6c0ccc2 has materially better source identity, graph structure, and usually better physical-page discipline, but those operational strengths do not compensate for its major omissions. system-844774967f33's lead is tempered by absent citation identity, incorrect page fields on Saint-Barthélemy and Waterloo, grouped units, and occasional conversion of agenda items into completed decisions.",
+    "confidence": "high",
+    "limitations": [
+      "Waterloo's frozen oracle is explicitly partial, so non-oracle but text-supported findings there cannot be used for a complete false-positive or recall comparison.",
+      "The systems expose different payload shapes: flat findings versus a graph with separate nodes, edges, and evidence. Citation completeness and grouping therefore require functional rather than field-for-field comparison.",
+      "L36 is counted as missed for system-bcb4a6c0ccc2 because its notice-of-motion wording appears only inside a shared citation and is not independently represented as a stage or event; a more permissive citation-only mapping could count it as partially supported."
+    ]
+  }
+}

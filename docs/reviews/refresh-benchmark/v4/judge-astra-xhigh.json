@@ -1,0 +1,286 @@
+{
+  "judge": {
+    "model": "gpt-6",
+    "effort": null,
+    "modelIdentifierVerified": false,
+    "environmentEvidence": "The runtime instructions identify this assistant as Codex based on GPT-6. They do not expose an exact deployment identifier or reasoning effort. Selected runtime environment variables and ancestor launch arguments exposed neither; lookup of this runtime session returned no live identity record. The requested output filename is not proof of model or effort.",
+    "sessionId": "01a09d42-8c31-7250-9f8e-647592f87da7"
+  },
+  "perDocument": [
+    {
+      "documentId": "lac-des-seize-iles-2026-09-agenda",
+      "systems": [
+        {
+          "system": "system-844774967f33",
+          "supported": [
+            "L54",
+            "L55"
+          ],
+          "missed": [
+            "L36",
+            "L37"
+          ],
+          "unsupported": [
+            "L55: 'Le conseil adopte' asserts a completed adoption, although the source only schedules it for 14 September. The underlying agenda item is real; its completion is unproven."
+          ],
+          "citationDefects": [
+            "Both findings omit source_file, rawRef, docSha, sourceUrl and modality; their source identity is supplied only by the bundle's document wrapper.",
+            "Both references correctly point to physical page 1. L55's quotation changes apostrophe typography and removes line breaks, so it is not strictly verbatim; L54's quotation is exact."
+          ],
+          "usefulness": 2,
+          "notes": "Recovers the property-specific derogation and subdivision-fee amendment, but misses both steps of bylaw 2026-08. L54 remains appropriately pending. L55 is credited as an identifiable scheduled oracle unit, not as proof of adoption or of a quantified residential benefit."
+        },
+        {
+          "system": "system-bcb4a6c0ccc2",
+          "supported": [
+            "L36",
+            "L37",
+            "L54",
+            "L55"
+          ],
+          "missed": [],
+          "unsupported": [],
+          "citationDefects": [
+            "The combined 2026-08 excerpt and the 2026-102-01 excerpt flatten line breaks. They match page 1 after whitespace normalization, rather than strictly verbatim."
+          ],
+          "usefulness": 4,
+          "notes": "The combined bylaw-2026-08 citation explicitly contains both the motion and draft-deposit agenda items, so both are recoverable. They are not separately modeled as procedural events, and stage='projet' loses the distinction. Candidate/project statuses preserve uncertainty about the scheduled adoption and derogation. Identity fields and evidence links are consistent with the supplied document."
+        }
+      ]
+    },
+    {
+      "documentId": "saint-barthelemy-2026-09-08",
+      "systems": [
+        {
+          "system": "system-844774967f33",
+          "supported": [
+            "S738",
+            "S739M",
+            "S739P",
+            "S194",
+            "S195",
+            "S196",
+            "S197",
+            "S203"
+          ],
+          "missed": [],
+          "unsupported": [
+            "S203's label calls the development zones 'confirmées'; the source says 'zones de développement possibles'. The aqueduct-extension authorization and stated water capacity are supported.",
+            "S739P overstates the clarity of permission for H-IV: article 3 explicitly adds habitation II and III, whereas article 4 sets conditions for H-II, H-III and H-IV. The output should preserve that textual distinction."
+          ],
+          "citationDefects": [
+            "All eight page values are resolution-number suffixes, not physical PDF pages: 189->4, 190->4, 191->5, 194->6, 195->7, 196->7, 197->8, 203->10. The document has only 12 pages.",
+            "Several quotations combine separated passages with [...] or reconstructed article headings. Even after correcting the page, these are not contiguous verbatim excerpts; other differences include punctuation and apostrophe changes.",
+            "Every finding lacks source_file, rawRef, docSha, sourceUrl and modality within the payload.",
+            "The S739P excerpt quotes proposed substantive provisions rather than the adoption sentence; the S203 excerpt quotes capacity rather than the operative authorization. Both decisions are corroborated elsewhere on the corresponding physical pages."
+          ],
+          "usefulness": 3,
+          "notes": "All eight oracle subjects are recovered, including the separate motion and first project, permanent-development restrictions, slope remediation, transfer obligations and water-service capacity. S194, S195, S196, S197 and S203 have etape='inconnu' despite the oracle's adoption stage; their descriptions nevertheless identify the actual authorizations. The no_lot fields for S194-S196 contain assessment matricules, not established cadastral lot numbers. Broad substantive value is substantially reduced by the unusable page references."
+        },
+        {
+          "system": "system-bcb4a6c0ccc2",
+          "supported": [
+            "S738",
+            "S739P"
+          ],
+          "missed": [
+            "S739M",
+            "S194",
+            "S195",
+            "S196",
+            "S197",
+            "S203"
+          ],
+          "unsupported": [
+            "bylaw_738_26 sets status and statut to en_vigueur. Page 4 establishes adoption and says the bylaw will enter into force according to law; actual commencement is not established."
+          ],
+          "citationDefects": [
+            "ev_p1 joins the municipality heading to the minutes sentence while omitting the intervening postal address, without an omission marker; it is not a contiguous excerpt.",
+            "ev_p4, attached to bylaw_739_26, event_2026_09_191 and the zone nodes, actually quotes the adoption of 738-26. ev_p5 supplies the R-7/R-8 densification objective but not the 739-26 identifier, adoption sentence or detailed conditions.",
+            "ev_p3 and ev_p4 flatten whitespace; ev_p5 is verbatim. Physical page numbers and supplied citation identity fields are consistent."
+          ],
+          "usefulness": 2,
+          "notes": "The two zoning changes are real and the first-project stage for 739-26 is retained. The Bylaw and DesignationEvent representations are counted once per underlying oracle unit. Six units are absent, including the separate motion and all land/service transactions. 'Sous certaines conditions' omits the actual sewer, aqueduct and neighboring-height constraints that matter for feasibility."
+        }
+      ]
+    },
+    {
+      "documentId": "saint-etienne-de-bolton-2026-08-04",
+      "systems": [
+        {
+          "system": "system-844774967f33",
+          "supported": [
+            "B04",
+            "B05",
+            "B06",
+            "B07",
+            "B08",
+            "B09",
+            "B10",
+            "B11",
+            "B14",
+            "BC2010-11",
+            "BC2014-11",
+            "BC2023-02",
+            "B155",
+            "B156",
+            "B157",
+            "B158"
+          ],
+          "missed": [
+            "B154"
+          ],
+          "unsupported": [
+            "The grouped conformity declaration for BC2010-11, BC2014-11 and BC2023-02 is labeled entree_vigueur. Resolution 2026-08-153 orders transmission and public notice of non-modification; it does not establish a new entry into force for those bylaws."
+          ],
+          "citationDefects": [
+            "The B04-B10 quotation cites the historical adoption of drafts and public consultation, omitting the operative 'QUE le conseil municipal adopte les Règlements ci-dessus mentionnés' on page 10. The final adoption is corroborated by the document, but not by the selected quotation alone.",
+            "The B11, B14 and conformity quotations assemble noncontiguous passages with [...]; added list punctuation and normalized apostrophes also prevent strict verbatim containment.",
+            "B155-B158 quotations match their physical pages after whitespace and apostrophe normalization. Pages 10 and 14 are valid operative evidence for B04-B10 and B158 even though the frozen oracle points to agenda summaries on page 2.",
+            "All findings lack source_file, rawRef, docSha, sourceUrl and modality in the payload."
+          ],
+          "usefulness": 3,
+          "notes": "Sixteen oracle subjects are identifiable, but only thirteen have the correct procedural characterization; the three conformity subjects are present with the wrong stage. Grouping the seven explicitly enumerated adoptions under their shared resolution does not constitute seven omissions. The garage and both refusals are well described, with lots, zones and reasons. The cold-room roof PIIA at 12 rue Principale is absent."
+        },
+        {
+          "system": "system-bcb4a6c0ccc2",
+          "supported": [
+            "B04",
+            "B05",
+            "B06",
+            "B07",
+            "B08",
+            "B09",
+            "B10",
+            "B11",
+            "B14",
+            "B154",
+            "B155",
+            "B156",
+            "B157",
+            "B158"
+          ],
+          "missed": [
+            "BC2010-11",
+            "BC2014-11",
+            "BC2023-02"
+          ],
+          "unsupported": [
+            "All nine extracted Bylaw nodes, covering 2026-04 through 2026-10, 2025-11 and 2026-14, assert status=en_vigueur. The supplied minutes establish adoption, not completed entry-into-force requirements."
+          ],
+          "citationDefects": [
+            "The shared ev-p10-adoption-urbanisme excerpt says only 'les Règlements ci-dessus mentionnés'; it omits the enumerated identifiers needed to support each individual bylaw without consulting surrounding text.",
+            "Eight of the fourteen evidence excerpts flatten line breaks rather than preserving strict verbatim text. All fourteen are contained on their stated physical pages after whitespace normalization.",
+            "Page 10 for the seven adoptions and page 14 for B158 are valid operative citations despite the oracle's page-2 agenda anchors. Identity fields and evidence references are consistent."
+          ],
+          "usefulness": 3,
+          "notes": "Individually identifies all nine adoptions and all five property decisions, including the cold-room roof omitted by the other system. The PIIA approvals and derogation refusals are grounded, with correct lots and zones. The three non-modification units are entirely absent. Systematic unsupported en_vigueur statuses prevent treating the regulatory state as reliable without review."
+        }
+      ]
+    },
+    {
+      "documentId": "valcourt-2026-06-01-agenda",
+      "systems": [
+        {
+          "system": "system-844774967f33",
+          "supported": [
+            "V71",
+            "V72",
+            "V73",
+            "V74",
+            "V75"
+          ],
+          "missed": [
+            "V132"
+          ],
+          "unsupported": [
+            "V75 says the council proceeds with adoption of the second project; this agenda establishes only a scheduled item, not a completed vote.",
+            "V75's claim that this is the 'avant-dernière phase réglementaire' is not supported by the supplied document."
+          ],
+          "citationDefects": [
+            "The six quoted agenda items are on the correct physical pages, but whitespace is flattened and V73 changes an apostrophe. None is strictly verbatim; all match after the stated typographic normalization.",
+            "Findings lack source_file, rawRef, docSha, sourceUrl and modality in the payload."
+          ],
+          "usefulness": 3,
+          "notes": "Separates the four distinct PIIA requests, including the subdivision and two-building construction at the same 1070 Bissonnette address. The second-project stage is identified but its completion is overstated. The 4111 Carpentier use-loan agreement is missed. The extra OMH revised-budget item is genuinely on page 2, but demonstrates no new housing or densification project and adds little benchmark value; it is not a fabricated municipal fact."
+        },
+        {
+          "system": "system-bcb4a6c0ccc2",
+          "supported": [
+            "V75"
+          ],
+          "missed": [
+            "V71",
+            "V72",
+            "V73",
+            "V74",
+            "V132"
+          ],
+          "unsupported": [
+            "The Source label identifies the document as a procès-verbal; the supplied document is an ordre du jour. The event description itself correctly retains the agenda-only qualification."
+          ],
+          "citationDefects": [
+            "One derived_from edge targets source-31df8f116d84d1f50ef34a2aa8f746c6025c56089383b27345b901c8e45c026d.pdf, which does not exist as a node; the actual Source ID has no .pdf suffix.",
+            "The single ev-p1-urbanisme excerpt is verbatim on page 1 and its identity fields are consistent. citations contains resolvable evidence-ID strings rather than inline citation objects; formal schema acceptance was not tested."
+          ],
+          "usefulness": 2,
+          "notes": "Correctly leaves the second-project decision unknown and counts its Bylaw/Event pair as one unit. Four concrete PIIA opportunities and the property-use agreement are missing. Good support for one unit cannot compensate for the limited coverage."
+        }
+      ]
+    },
+    {
+      "documentId": "waterloo-2026-08-18",
+      "systems": [
+        {
+          "system": "system-844774967f33",
+          "supported": [
+            "W001"
+          ],
+          "missed": [],
+          "unsupported": [
+            "The rue Nadeau servitude is real, but its description infers a connection to a real-estate development that the source does not establish. The no-nuisance condition on signing is also omitted."
+          ],
+          "citationDefects": [
+            "All eleven findings incorrectly cite page 1. In payload order the supporting physical pages are 2, 2, 3, 3, 11, 11-12, 12, 12-13, 14, 14 and 9.",
+            "Several quotations concatenate separated passages using [...]; whitespace, punctuation and the extracted YvesMalouin/Yves-Malouin spelling also differ. These should not be represented as contiguous verbatim excerpts.",
+            "All findings lack source_file, rawRef, docSha, sourceUrl and modality within the payload."
+          ],
+          "usefulness": 3,
+          "notes": "W001's adoption and referral to the MRC are correctly described. Waterloo's oracle is partial: the referendum-process certificate, prior consultation, 26-957-1 adoption, four derogations, two residential PIIA approvals and servitude all have documentary support beyond W001. The 153 Manège fire-service condition and the 80-82 Yves-Malouin landscaping-plan condition are usefully retained. The consultation occurred on 3 August, while the deposit described in that finding occurred on 18 August; the single date field conflates them. Strong substantive coverage remains difficult to audit because every page reference is wrong."
+        },
+        {
+          "system": "system-bcb4a6c0ccc2",
+          "supported": [
+            "W001"
+          ],
+          "missed": [],
+          "unsupported": [],
+          "citationDefects": [
+            "W001 cites the adoption heading correctly located on page 2, rather than the operative adoption and MRC-referral text on page 3. This is weaker support, not a physical-page error for the quoted heading.",
+            "The 80 and 82 Yves-Malouin decision excerpts restore a hyphen absent from the supplied extracted decision text, so they fail strict containment despite supporting the correct decisions on pages 11 and 12.",
+            "All nine evidence excerpts flatten line breaks. Seven match after whitespace normalization; the remaining two need the YvesMalouin spelling adjustment. Citation identities and evidence links are consistent."
+          ],
+          "usefulness": 3,
+          "notes": "W001 and the additional 26-957-1 adoption and four derogations are grounded. The R-37 and H-92 nodes are corroborated contextual zones, not additional independent opportunities; R-37 is explicitly a former zone in the citation. No oracle omission can be asserted beyond the single partial unit. Compared with the document, the two residential PIIA approvals on page 14 are absent, as are the certificate and consultation-deposit events. The 153 Manège approval omits its mandatory fire-service clearance condition, and the adoption summaries omit MRC conformity referrals."
+        }
+      ]
+    }
+  ],
+  "overall": {
+    "ranking": [
+      "system-844774967f33",
+      "system-bcb4a6c0ccc2"
+    ],
+    "reason": "system-844774967f33 ranks first for substantive signal discovery: 32 of 36 frozen oracle subjects are identifiable, versus 22 for system-bcb4a6c0ccc2, counting explicitly recoverable grouped units once and retaining the stated stage defects. Its advantage is concentrated in Saint-Barthélemy's land and water-service decisions and Valcourt's four PIIA requests; it also captures more supported residential procedure and conditions in Waterloo. system-bcb4a6c0ccc2 leads in source-identity completeness, page localization, Lac-des-Seize-Îles coverage and the Bolton cold-room PIIA. Those strengths do not overcome its omissions, and its unsupported en_vigueur statuses are material. The first-ranked output still requires substantial citation repair and correction of procedural certainty; this is a qualitative usefulness ranking, not a declaration of validator acceptance or a production-readiness result.",
+    "confidence": "moderate",
+    "limitations": [
+      "Only protocol.md and blind-bundle.json supplied benchmark evidence. No identity map, comparison report, candidate directory, git history, external source or other benchmark report was consulted. No mapping from opaque system labels to models was inferred.",
+      "The supported lists mean the underlying oracle subjects are identifiable in the payload and corroborated by the document. They do not certify every attached assertion, procedural stage or citation. Stage errors and unsupported strengthening are explicitly reported; the 32/36 and 22/36 figures are semantic coverage counts, not strict stage-correct recall.",
+      "Waterloo has a partial one-unit oracle. Source-supported additions were assessed against the text and were not automatically counted as false positives; missing non-oracle content is described qualitatively.",
+      "Physical page and excerpt checks use the page-separated text supplied in the bundle, not independently fetched PDFs. Strict verbatim differences are distinguished from whitespace/typographic normalization and from substantively wrong citations. Valid operative passages need not share the oracle's agenda-anchor page.",
+      "The frozen validator, extraction prompt and schema were not supplied as permitted inputs. No claim of formal schema validity or acceptance is made for either payload shape, and absent structured provenance is not silently filled in.",
+      "The bundle gives dimensions and a 1-5 usefulness scale but no weighting formula or scale anchors. The overall ordering is qualitative and based on five documents; repeated Bylaw/Event representations and grouped references are not raw-count advantages.",
+      "The protocol names intended systems and judges, but contains no opaque-label mapping. Intended judge configuration and the requested filename do not establish this session's actual deployment identifier or effort; that runtime-verification gap is recorded in judge."
+    ]
+  }
+}
