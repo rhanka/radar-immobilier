@@ -35,7 +35,7 @@
 
 ## UAT Management (in orchestration context)
 - [x] No application UAT or root checkout switch for spec-only work.
-- [ ] A later implementation must qualify the same HEAD in isolated browser checks before owner-facing UAT.
+- [x] The implementation is qualified in isolated Chromium checks at 1440×1000 and 1920×1080, device scale 1 and zoom 100%, including the offline artifact and real clipboard round-trip.
 
 ## Plan / Todo (lot-based)
 - [x] **Lot 0**: read rules and skills; open `harness branch init`, `harness brainstorm --peers 2 --ladder evol`, and `harness plan --lots 5` through Make/container execution.
@@ -45,11 +45,11 @@
 - [x] **Lot 4**: prepare the immutable design HEAD for conductor dispatch to historical-correctness and product/decision-integrity reviewers; design acceptance remains pending reconciliation.
   - [x] Harness scope check passed for the two changed paths; whitespace check passed; no application test or browser validation claimed for this spec-only phase.
   - [x] Amend spec/graph contracts for transverse TEM and compact/readable rendering; preserve review-pending status and unchanged billing/window.
-- [ ] Later visual gate: check all four Mermaid/SvelteFlow/PDF views, exact user label, retained TEM, 120–156 px cards, rendered title/body/status minima, blank-space limits and Chromium screenshots/metrics at normal zoom; do not claim these passed during design.
-- [ ] **Lot 5**: commit the reviewed spec/review records and authoritative four-scene `architecture.md`; gate canonical scene/source inventory.
-- [ ] **Lot 6**: implement exhaustive metadata, canonical hashes and M1 JSON Schema/invalid fixtures; gate mapping/nesting/provenance/schema tests.
-- [ ] **Lot 7**: render four native SvelteFlow and four Mermaid views with compact readable nodes; gate Chromium 1440×1000 and 1920×1080 at zoom 100%.
-- [ ] **Lot 8**: update the 10 August–13 September report, append and embed the pinned preceding PDF, and bind four graph pages; gate manifest/PDF/page parity.
-- [ ] **Lot 9**: run full Focus build, browser, clipboard and report checks; inspect screenshots/PDF pages; update the lane report.
+- [x] Visual gate: all four Mermaid/SvelteFlow/PDF views, exact user label, retained TEM, 144 px cards, 8 px padding, 32/24/22 px visible type, child containment, blank-space limits and Chromium screenshots/metrics pass at normal zoom.
+- [x] **Lot 5**: preserve the reviewed spec/review records and authoritative four-scene `architecture.md`; canonical scene/source inventory passes.
+- [x] **Lot 6**: implement exhaustive metadata, canonical hashes and M1 JSON Schema; mapping, nesting, provenance and decision-state tests pass 10/10.
+- [x] **Lot 7**: render four native SvelteFlow and four Mermaid views with compact readable nodes; Chromium passes at 1440×1000 and 1920×1080, device scale 1 and zoom 100%.
+- [x] **Lot 8**: update the 10 August–13 September report, append and embed the pinned preceding PDF, and bind four graph pages; manifest, attachment extraction and per-page visual parity pass.
+- [x] **Lot 9**: run full Focus build, browser, clipboard, zero-vulnerability audit and report checks; inspect screenshots and PDF pages; update the lane report.
 - [ ] Conductor: import the reviewed plan into Track without changing billing.
 - [ ] Later close: consolidate reviewed EVOL, push/open PR, verify CI, merge commit only and preserve branch; no merge authorization is inferred from this design handoff.
