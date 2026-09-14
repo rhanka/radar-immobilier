@@ -82,6 +82,8 @@
 - [x] C07h: freeze the provider-free Waterloo `immo-pv-extraction-v3` receipt with exact source, schema and prompt hashes; preserve v1/v2 evidence unchanged.
 - [x] C07i: keep the strict legacy-excerpt-alias regression type-safe without weakening runtime rejection.
 - [x] C07j: freeze the five-PDF manual baseline and version-comparison protocol before any further model call.
+- [x] C07k: bound v7 entity citation prefixes and normalize page anchors typographically with a 12-character
+  floor; the guarantee is passage-on-page, not typographic equality, and `evidence[]` shares only the anchor rule.
 - [x] C14b: emit a redacted model-call count and latency receipt without prompts, outputs or account material.
 - [x] C14c: identify the exact live schema and prompt by digest in the redacted model-call receipt.
 - [x] C14d: distinguish completed generation from failure instead of treating cleanup as a provider response.

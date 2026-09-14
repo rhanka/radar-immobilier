@@ -18,10 +18,13 @@ export function containsNormalizedPdfExcerpt(
   pageText: string,
   excerpt: string,
 ): boolean {
-  const normalize = (value: string): string => value.replace(/\s+/g, " ").trim();
+  // The product guarantee is passage-on-page, not typographic equality. This same strict
+  // normalized-substring anchor is applied to entity citations and evidence[] excerpts.
+  const normalize = (value: string): string => value.normalize("NFKC").normalize("NFD")
+    .replace(/\p{M}/gu, "").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
   const normalizedExcerpt = normalize(excerpt);
 
-  return normalizedExcerpt.length > 0 && normalize(pageText).includes(normalizedExcerpt);
+  return [...normalizedExcerpt].length >= 12 && normalize(pageText).includes(normalizedExcerpt);
 }
 
 export interface RefreshCorpusDocument {
