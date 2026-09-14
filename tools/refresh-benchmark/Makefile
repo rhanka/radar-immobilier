@@ -10,6 +10,7 @@ RUNTIME_TEXT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/runtime-text
 CAS_ROOT := $(MAIN_ROOT)/.lanes/conductor/tmp/graphify-cas/run-dryrun2-final-20260911T215911Z
 NODE_IMAGE := node:22-bookworm-slim
 ROOT_MODULES := radar-test-refresh-018_radar-test-root-node-modules
+INTEGRATION_MODULES ?= $(ROOT_MODULES)
 OWNER_SCOPE := cli:antoinefa-ROG-Flow-Z13-GZ302EA-GZ302EA
 T1_COMMIT := f9b311da536bda2e1442d154a05599c35b482518
 T1_COMMIT_V3 := 8f10ba1690a67e223851a467508f06e59d2ec668
@@ -21,7 +22,7 @@ GEMINI_DIAGNOSTIC_FILE ?= gemini-diagnostic.json
 GEMINI_ENDPOINT ?= mesh
 GEMINI_EFFORT ?= low
 
-.PHONY: test test-v3 test-v4 test-diagnosis-v4 test-integration-contract-v4 test-score-v3 test-score-v4 score-v3 score-v4 freeze-blind-v3 freeze-blind-v4 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 gemini-diagnostic run-v3-sol-normal run-v4-all quota inspect-validation
+.PHONY: test test-v3 test-v4 test-diagnosis-v4 test-integration-contract-v4 check-v4-integration-ready test-score-v3 test-score-v4 score-v3 score-v4 freeze-blind-v3 freeze-blind-v4 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 gemini-diagnostic run-v3-sol-normal run-v4-all quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -94,9 +95,20 @@ test-integration-contract-v4:
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -w /src $(NODE_IMAGE) \
 	  node --test tools/refresh-benchmark/integration-contract.test.mjs \
+	    tools/refresh-benchmark/release-readiness.test.mjs \
 	    tools/refresh-benchmark/runtime-config.test.mjs
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/run-case.mjs
+	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/check-release-readiness.mjs
+
+check-v4-integration-ready:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=volume,source=$(INTEGRATION_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_GRAPHIFY_PACKAGE_JSON=/workspace/node_modules/@sentropic/graphify/package.json \
+	  -e BENCHMARK_MESH_PACKAGE_JSON=/workspace/node_modules/@sentropic/llm-mesh-refresh/package.json \
+	  -w /src $(NODE_IMAGE) node tools/refresh-benchmark/check-release-readiness.mjs
 
 test-score-v3:
 	test "$(ENV)" = "test-refresh-benchmark"

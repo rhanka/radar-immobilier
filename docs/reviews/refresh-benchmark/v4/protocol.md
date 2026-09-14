@@ -33,9 +33,9 @@ frozen 16,384 tokens. One retry is allowed only after a transport failure.
   this to Cloud Code `thinkingLevel: LOW`.
 - Comparable S: `anthropic/claude-sonnet-4-6`, same frozen Graphify request,
   schema, prompt, and 16,384-token cap. `ANTHROPIC_API_KEY` may only enter the
-  isolated runtime from `/home/antoinefa/src/sentropic/.env`; its value must
-  never be read into logs, copied, or committed. This is distinct from the
-  historical baseline.
+  isolated runtime from an owner-managed file outside this repository; its
+  value must never be read into logs, copied, or committed. This is distinct
+  from the historical baseline.
 
 Comparable S is blocked before provider contact in the installed runtime:
 llm-mesh exports `AnthropicAdapter`, but no `AnthropicRuntimeClient` or Claude
@@ -67,6 +67,11 @@ The corrected diagnostic order is:
 3. obtain a standard-host `gemini-3.8-flash` ping with identity, effort, usage,
    and sanitized transport evidence;
 4. run one frozen Lac case, then all five cases only if it is green.
+
+The release anchor is `releaseAnchor` in `integration-contract.mjs`; both its
+version and publication evidence remain `null` during preparation.
+`make -C tools/refresh-benchmark check-v4-integration-ready` verifies the exact
+installed llm-mesh version and Graphify 0.18 without contacting a provider.
 
 No external gateway is part of this path. Only a green full Lac case authorizes
 the five-document Candidate G campaign. The
