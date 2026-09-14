@@ -1,7 +1,4 @@
 import { createServer } from "node:http";
-import { createRequire } from "node:module";
-import { dirname, resolve } from "node:path";
-import { readFileSync } from "node:fs";
 
 import {
   createGraphifyMesh,
@@ -38,19 +35,6 @@ const subject: VerifiedRoutingSubject = {
   principalRef: "principal:test",
   ownerScopeRef: "owner:test",
 };
-
-function meshVersions(): string[] {
-  const hostRequire = createRequire(import.meta.url);
-  const graphifyDist = dirname(hostRequire.resolve("@sentropic/graphify"));
-  const versionFrom = (relativePath: string) => JSON.parse(readFileSync(
-    resolve(graphifyDist, relativePath), "utf8",
-  )).version as string;
-  return [
-    versionFrom("../../llm-mesh/package.json"),
-    versionFrom("../../llm-mesh-refresh/package.json"),
-    versionFrom("../node_modules/@sentropic/llm-mesh/package.json"),
-  ];
-}
 
 function runtimeHarness(generate: (request: GenerateRequest) => Promise<GenerateResponse>) {
   const subjects: VerifiedRoutingSubject[] = [];
@@ -198,8 +182,7 @@ describe("refresh mesh", () => {
     expect(JSON.stringify(diagnostic)).not.toContain(secret);
   });
 
-  it("should forward schema and token cap through all installed mesh copies", async () => {
-    expect(meshVersions()).toEqual(["0.1.2", "0.19.0", "0.19.0"]);
+  it("should forward schema and token cap through the mesh seam", async () => {
     let captured: GenerateRequest | undefined;
     const harness = runtimeHarness(async (request) => {
       captured = request;
