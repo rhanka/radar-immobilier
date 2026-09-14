@@ -194,3 +194,70 @@ clarification est le prochain test utile; conclure maintenant sur le modèle
 reviendrait à conclure sur le validateur.
 
 Détail, reçus et SHA : [v12/report.md](v12/report.md).
+
+## Campagne v13 — contrat v8, Gemini LOW contre Sonnet 4.6
+
+[FAIT] Le contrat `immo-pv-extraction-v8` (produit `19d0d8b2`, PR #688) fait
+passer **Sonnet Cloud Code de 0/5 à 4/5** sorties acceptées et **Gemini LOW de
+3/5 à 4/5**. Le **seuil B « ≥ 4/5 » est atteint par les deux bras**. Le plafond
+de sortie est commun et gelé à 64 000, valeur la plus haute que Cloud Code
+accepte : la déviation de plafond assumée en v12 disparaît.
+
+[FAIT] Corpus, oracle et manifeste sont ceux de v9 — l'oracle est byte-identique
+(`4d50a26c…`). Seuls le profil et le plafond bougent; prompt et schéma sont
+reconstruits depuis le profil v8, ce qui est l'objet même de la campagne.
+
+[FAIT] Quatre familles de refus disparaissent complètement des dix reçus :
+`unknown_status` (4 occurrences en v12 → 0), `entity_citation_excerpt_too_long`
+(5 → 0, devenue inatteignable), `missing_evidence_ref` (v12 1 et v9 3 → 0) et
+`incompatible_source_type` (1 → 0). L'hypothèse de v12 — « deux des trois familles
+pointent vers le contrat, pas vers le modèle » — est donc **mesurée**, pas
+seulement supposée. La troncature côté profil borne 28 extraits côté Gemini et 22
+côté Sonnet, tous restés ancrés.
+
+[FAIT] Il reste **une seule classe de refus, identique sur les deux bras** :
+`ungrounded_pdf_excerpt` sur Saint-Étienne, ×4 côté Gemini et ×17 côté Sonnet, sur
+les quatre libellés `Zone : COM-1`, `Zone : RUR-12`, `Zone : RUR-8`, `Zone : VIL-2`
+— 8 à 9 caractères normalisés contre un plancher d'ancrage de 12. Le plancher de
+20 caractères demandé par le prompt v8 **n'est appliqué par aucun des deux
+modèles** sur ces libellés.
+
+[FAIT] La correspondance à l'oracle **baisse** alors que l'acceptation monte :
+F1 macro Gemini 0,558 (v9) → 0,133 (v13), Sonnet `N-A` (v12) → 0,222 (v13). Deux
+causes mesurées, distinctes :
+
+- **Valcourt, artefact de convention d'ancre.** Les ancres de l'oracle portent la
+  numérotation de point (`7.1 1070, RUE BISSONNETTE`); sous v8 les deux modèles
+  commencent l'extrait après cette numérotation. L'extrait reste verbatim et ancré,
+  mais le scoreur ne l'apparie plus. Ancre privée de sa numérotation, Valcourt
+  remonte à 0,667 (Gemini) et 0,769 (Sonnet), contre 0,769 pour Gemini v5.
+- **Saint-Étienne et Saint-Barthélemy, perte réelle.** Saint-Étienne passe de 4
+  unités appariées sur 17 à 0 : les nœuds citent le libellé de zone au lieu du
+  texte de décision — même bascule que celle qui cause le refus d'ancrage.
+  Saint-Barthélemy, nouvellement accepté, n'apparie 0 unité sur 8 : les pages
+  citées (3–5) ne couvrent pas l'étendue de l'oracle (4 à 8 et 10).
+
+[FAIT] Les bases de calcul macro **diffèrent d'une campagne à l'autre** : le
+scoreur ne note que les acceptés, et l'ensemble accepté a changé. À population
+fixe (mêmes quatre documents, oracle sans numérotation, acceptation ignorée) :
+Gemini v5 0,383 · **Sonnet v8 0,359** · **Gemini v8 0,267**.
+
+[FAIT] Bras Sonnet direct : `N-A, non nécessaire`. Les cinq appels Cloud Code ont
+reçu HTTP 200 et `STOP`, aucun repli transport n'était justifié et aucune clé
+Anthropic n'a été chargée. Latence : Gemini 30 537 ms de moyenne contre 121 790 ms
+pour Sonnet.
+
+[FAIT] Le bundle aveugle `v13/blind-bundle.json` (`dc3d35c8…`) est gelé avec sa map
+et sa consigne de juge; aucun juge n'a été lancé. Contrairement à v12 il est
+**comparable** : 8 entrées, 2 alias, `comparable: true` sur 4 documents sur 5.
+
+[JUGEMENT] Sonnet 4.6 n'est plus écartable : v12 concluait qu'on ne pouvait pas
+conclure, v13 mesure 4/5 accepté et le meilleur des deux bras à population fixe,
+au prix d'une latence deux à quatre fois supérieure à Gemini LOW. Mais le seuil B
+seul ne tranche pas : l'acceptation et la correspondance à l'oracle évoluent en
+sens contraires, et deux décisions de garantie produit restent ouvertes pour
+l'owner — le traitement du libellé court face au plancher d'ancrage de 12, et la
+convention d'ancre de l'oracle, qui fait dépendre le score de la présence d'une
+numérotation en tête d'extrait.
+
+Détail, reçus et SHA : [v13/report.md](v13/report.md).
