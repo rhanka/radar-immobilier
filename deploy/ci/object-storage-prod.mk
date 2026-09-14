@@ -68,21 +68,8 @@ object-storage-docs-prod-validate: ## Validate PROD post-cutover support and ret
 	done
 
 .PHONY: object-storage-docs-prod-fast-start
-object-storage-docs-prod-fast-start: ## Start the low-memory canonical PROD inventory
-	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
-	  [ "$(OBJECT_STORAGE_DOCS_PROD_FAST_CONFIRM)" != 1 ]; then \
-	  echo '[object-storage-docs-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
-	fi
-	@$(MAKE) object-storage-docs-prod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
-	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
-	  server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
-	  [ "$$server" = "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ] || \
-	    { echo '[object-storage-docs-prod] refused non-OVH context'; exit 1; }; \
-	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
-	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
-	    $(OBJECT_STORAGE_DOCS_PROD_DIR) >"$$render"; \
-	  $(KUBECTL) apply -f "$$render" >/dev/null; \
-	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/fast-inventory-job.yaml -o name
+object-storage-docs-prod-fast-start: ## Retired after the OVH cutover
+	@echo '[object-storage-docs-prod] retired: no legacy fast inventory can be started'; exit 1
 
 .PHONY: object-storage-docs-prod-fast-progress
 object-storage-docs-prod-fast-progress: ## Read aggregate canonical hash progress without keys
@@ -130,39 +117,12 @@ object-storage-docs-prod-fetch-canonical: ## Fetch the canonical manifests witho
 	  jq '{objects,bytes,manifestSha256,canonicalSha256}' "$$destination/summary.json"
 
 .PHONY: object-storage-docs-prod-proof
-object-storage-docs-prod-proof: ## Prove conditional OVH writes for the canonical PROD target
-	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
-	  [ "$(OBJECT_STORAGE_DOCS_PROD_PROOF_CONFIRM)" != 1 ]; then \
-	  echo '[object-storage-docs-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
-	fi
-	@$(MAKE) object-storage-docs-prod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
-	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
-	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
-	    "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]; \
-	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
-	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
-	    $(OBJECT_STORAGE_DOCS_PROD_DIR) >"$$render"; \
-	  $(KUBECTL) apply -f "$$render" >/dev/null; \
-	  job_ref="$$( $(KUBECTL) create \
-	    -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/conditional-proof-job.yaml -o name )"; \
-	  $(KUBECTL) -n "$$namespace" wait --for=condition=complete "$$job_ref" \
-	    --timeout=900s >/dev/null; echo "$$job_ref"
+object-storage-docs-prod-proof: ## Retired after the OVH cutover
+	@echo '[object-storage-docs-prod] retired: conditional-write migration proof is closed'; exit 1
 
 .PHONY: object-storage-docs-prod-copy
-object-storage-docs-prod-copy: ## Start the exact canonical copy to OVH PROD
-	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
-	  [ "$(OBJECT_STORAGE_DOCS_PROD_COPY_CONFIRM)" != 1 ]; then \
-	  echo '[object-storage-docs-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
-	fi
-	@$(MAKE) object-storage-docs-prod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
-	@set -euo pipefail; \
-	  [ "$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )" = \
-	    "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ]; \
-	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
-	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
-	    $(OBJECT_STORAGE_DOCS_PROD_DIR) >"$$render"; \
-	  $(KUBECTL) apply -f "$$render" >/dev/null; \
-	  $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml -o name
+object-storage-docs-prod-copy: ## Retired after the OVH cutover
+	@echo '[object-storage-docs-prod] retired: canonical migration is closed by its final receipt'; exit 1
 
 .PHONY: object-storage-docs-prod-copy-progress
 object-storage-docs-prod-copy-progress: ## Read copy/parity progress without printing keys
@@ -320,35 +280,8 @@ object-storage-docs-prod-final-status: ## Prove PROD DOCS binding and MinIO abse
 	  jq -n '{minio:{statefulSet:false,service:false,pvc:false},checkpoint:{phase:"Bound",capacity:"1Gi"},quota:{secrets:{hard:15,used:15},pvcs:{hard:3,used:2}},docs:{bucket:"radar-immobilier-docs",graphBinding:true,scrapeBinding:true},tem:{apiBase:"https://api.scaleway.com",secretReference:"radar-tem-credentials",preserved:true}}'
 
 .PHONY: object-storage-docs-prod-start
-object-storage-docs-prod-start: ## Create the resumable PROD DOCS inventory Job
-	@if [ "$(ENV)" != prod ] || [ -z "$$KUBECONFIG" ] || \
-	  [ "$(OBJECT_STORAGE_DOCS_PROD_INVENTORY_CONFIRM)" != 1 ]; then \
-	  echo '[object-storage-docs-prod] require KUBECONFIG, confirmation, ENV=prod'; exit 1; \
-	fi
-	@$(MAKE) object-storage-docs-prod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
-	@set -euo pipefail; namespace="$(OBJECT_STORAGE_DOCS_PROD_NAMESPACE)"; \
-	  server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
-	  [ "$$server" = "$(OBJECT_STORAGE_DOCS_PROD_SERVER)" ] || \
-	    { echo '[object-storage-docs-prod] refused non-OVH context'; exit 1; }; \
-	  $(KUBECTL) -n "$$namespace" get secret/radar-docs-s3-credentials -o json | \
-	    jq -e -f deploy/ci/validate-docs-secret.jq >/dev/null; \
-	  render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
-	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
-	    $(OBJECT_STORAGE_DOCS_PROD_DIR) >"$$render"; \
-	  $(KUBECTL) apply -f "$$render" >/dev/null; \
-	  phase="$$( $(KUBECTL) -n "$$namespace" get \
-	    pvc/radar-object-storage-docs-prod-checkpoint -o jsonpath='{.status.phase}' )"; \
-	  [[ "$$phase" =~ ^(Pending|Bound)$$ ]] || \
-	    { echo '[object-storage-docs-prod] checkpoint PVC has an invalid phase'; exit 1; }; \
-	  $(KUBECTL) -n "$$namespace" get resourcequota/tenant-quota -o json | \
-	    jq -e '.status.hard.persistentvolumeclaims == "3" and .status.used.persistentvolumeclaims == "3" and (.status.hard | has("requests.storage") | not)' >/dev/null; \
-	  job_ref="$$( $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/inventory-job.yaml -o name )"; \
-	  job="$${job_ref#job.batch/}"; \
-	  $(KUBECTL) -n "$$namespace" wait --for=condition=PodScheduled \
-	    pod -l "job-name=$$job" --timeout=120s >/dev/null; \
-	  $(KUBECTL) -n "$$namespace" wait --for=jsonpath='{.status.phase}'=Bound \
-	    pvc/radar-object-storage-docs-prod-checkpoint --timeout=120s >/dev/null; \
-	  echo "$$job_ref"
+object-storage-docs-prod-start: ## Retired after the OVH cutover
+	@echo '[object-storage-docs-prod] retired: no legacy PROD inventory can be started'; exit 1
 
 .PHONY: object-storage-docs-prod-progress
 object-storage-docs-prod-progress: ## Report aggregate PROD DOCS checkpoint progress without keys
