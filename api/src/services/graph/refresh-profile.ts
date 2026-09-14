@@ -206,17 +206,33 @@ function strictJsonCandidate(text: string): string {
   return trimmed.slice(firstLineEnd + 1, closingLineStart).trim();
 }
 
+function validateDeclaredContractVersion(value: unknown, chunk: RefreshCorpusChunk): void {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return;
+  const root = value as Record<string, unknown>;
+  if (!("contract_version" in root)) {
+    // Missing version intentionally preserves v4 compatibility: its seven-field citations are
+    // accepted while all five identity fields are overwritten from the chunk (covered by test).
+    return;
+  }
+  if (root["contract_version"] !== REFRESH_PROFILE_CONTRACT_VERSION) {
+    throw new Error(`Model output violates contract_version_mismatch for chunk ${chunk.id}`);
+  }
+  delete root["contract_version"];
+}
+
 function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: RefreshProfileContext,
   pageTexts: ReadonlyMap<number, string>): Extraction {
   let parsed: unknown;
   try {
-    parsed = injectCitationIdentity(JSON.parse(strictJsonCandidate(text)), chunk);
+    parsed = JSON.parse(strictJsonCandidate(text));
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new Error(`Invalid JSON for chunk ${chunk.id}: ${error.message}`, { cause: error });
     }
     throw error;
   }
+  validateDeclaredContractVersion(parsed, chunk);
+  parsed = injectCitationIdentity(parsed, chunk);
   const baseErrors = validateExtraction(parsed);
   if (baseErrors.length > 0) throw new Error(`Invalid Graphify extraction for chunk ${chunk.id}: ${baseErrors.join("; ")}`);
   for (const node of (parsed as Extraction).nodes) {

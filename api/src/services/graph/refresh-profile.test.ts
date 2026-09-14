@@ -167,6 +167,38 @@ describe("refresh profile extraction", () => {
     expect(results[0]!.extraction).toEqual(extraction());
   });
 
+  it("should accept the exact declared v5 contract version", async () => {
+    const declared = { ...compactExtraction(), contract_version: REFRESH_PROFILE_CONTRACT_VERSION };
+    const results = await extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction).toEqual(extraction());
+  });
+
+  it("should reject a declared v4 contract version with a named violation", async () => {
+    const declared = { ...compactExtraction(), contract_version: "immo-pv-extraction-v4" };
+    await expect(extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("contract_version_mismatch");
+  });
+
+  it("should accept absent v4 version while replacing five false identity fields", async () => {
+    const modelExcerpt = `Adoption ${oracle.bylawNumber}`;
+    const legacy = extraction();
+    legacy.nodes[0]!.citations = [{ source_file: "wrong.pdf", rawRef: "wrong-raw",
+      docSha: "f".repeat(64), sourceUrl: "https://invalid.example/wrong.pdf", modality: "html",
+      page: oracle.page, excerpt: modelExcerpt }] as unknown as
+      NonNullable<Extraction["nodes"][number]["citations"]>;
+    const results = await extractRefreshProfile([chunk(undefined,
+      `[PDF PAGE 3]\n${oracle.excerpt}\n${modelExcerpt}`)], { context,
+      textClient: client([{ text: JSON.stringify(legacy) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.nodes[0]!.citations![0]).toEqual({
+      source_file: oracle.originalKey, rawRef: oracle.originalKey, docSha: oracle.docSha,
+      sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page, excerpt: modelExcerpt,
+    });
+  });
+
   it("should reject a compact citation without its required page", async () => {
     const invalid = compactExtraction();
     delete (invalid.nodes[0]!.citations![0] as { page?: number }).page;
