@@ -133,6 +133,26 @@ test("the frozen v11 contract cap applies without a diagnostic override", () => 
   assert.throws(() => resolveOutputCap("16384", context, 65_536), /restricted to the Valcourt/);
 });
 
+test("v13 freezes one 64 000 cap for both arms and needs no override", () => {
+  for (const variantName of ["gemini-low", "sonnet-cloudcode", "sonnet-direct"]) {
+    const context = { campaign: "v13", documentId: "waterloo-2026-08-18", variantName };
+    assert.equal(resolveOutputCap(undefined, context, CLOUD_CODE_SONNET_OUTPUT_CAP),
+      CLOUD_CODE_SONNET_OUTPUT_CAP);
+    assert.throws(() => resolveOutputCap("65536", context, CLOUD_CODE_SONNET_OUTPUT_CAP),
+      /restricted to the Valcourt/);
+  }
+  assert.deepEqual(inspectWireBody(variants["gemini-low"], {
+    model: "gemini-3.8-flash-tiered", request: { generationConfig: {
+      maxOutputTokens: 64_000, thinkingConfig: { thinkingLevel: "LOW" },
+    } },
+  }, CLOUD_CODE_SONNET_OUTPUT_CAP), { model: "gemini-3.8-flash-tiered", effort: "low",
+    providerEffort: "LOW", maxOutputTokens: 64_000 });
+  assert.deepEqual(inspectWireBody(variants["sonnet-direct"], {
+    model: "claude-sonnet-4-6", max_tokens: 64_000,
+  }, CLOUD_CODE_SONNET_OUTPUT_CAP), { model: "claude-sonnet-4-6", effort: null,
+    providerEffort: null, maxOutputTokens: 64_000 });
+});
+
 test("terminal Cloud Code SSE evidence retains only closure metadata", () => {
   const transcript = [
     'data: {"response":{"candidates":[{"content":{"parts":[{"text":"secret body"}]}}]}}',

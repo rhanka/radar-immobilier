@@ -63,4 +63,7 @@ test("all live variants use the frozen adapter boundary and execution budget", (
   assert.equal(outputTokenCapForCampaign("v10"), 65_536);
   assert.equal(outputTokenCapForCampaign("v11"), 65_536);
   assert.equal(outputTokenCapForCampaign("v12"), 65_536);
+  // v13 drops to the highest cap Cloud Code accepts, so both arms share one ceiling.
+  assert.equal(outputTokenCapForCampaign("v13"), 64_000);
+  assert.equal(outputTokenCapForCampaign("v14"), 16_384);
 });
