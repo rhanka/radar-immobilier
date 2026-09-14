@@ -16,6 +16,8 @@ accept() { jq -e --arg digest "$digest" -f "$filter" <<<"$1" >/dev/null; }
 reject() { ! accept "$1"; }
 
 accept "$receipt"
+accept "$(jq '.sourceObservedAt |= sub("Z$"; ".123Z") |
+  .targetObservedAt |= sub("Z$"; ".456Z") | .completedAt |= sub("Z$"; ".789Z")' <<<"$receipt")"
 reject "$(jq '.sourceObservedAt=((now-172980)|todateiso8601) |
   .targetObservedAt=((now-172920)|todateiso8601) | .completedAt=((now-172830)|todateiso8601)' <<<"$receipt")"
 reject "$(jq '.targetObservedAt=((.sourceObservedAt|fromdateiso8601)-1|todateiso8601)' <<<"$receipt")"
