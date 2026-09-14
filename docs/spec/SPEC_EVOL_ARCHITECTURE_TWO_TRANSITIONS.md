@@ -212,25 +212,25 @@ flowchart LR
   B_CORPUS -.-> B_EXTRACT
   B_IDENTITY -.-> B_EXTRACT
   B_EXTRACT -.-> B_MODEL["Subscription model · to ratify through M1"]
-  B_VALIDATE -.-> B_GRAPH[("OVH canonical graph · validated publication")]
+  B_VALIDATE -.-> B_GRAPH[("Canonical graph · validated publication")]
   B_GRAPH -.-> B_PROJECT
   B_UI -->|"immo.sent-tech.ca"| B_USER["Navigateur utilisateur"]
   B_TEM["Transverse exception · SCW TEM retained until validated replacement · outside PV extraction"]
 ```
 
-[FACT/JUDGMENT: S9] Mandatory separate annotation: `Preproduction accepted: real Luna high Waterloo Signal/PDF, immutable release replay, controller-created Job at 22:21Z. Production promotion remains pending; dashed refresh paths describe the integrated dormant implementation.` The annotation is not a preprod resource subgraph. Existing API/UI/DB serving is distinct from the dormant new writer. A successful replay without additional model calls proves idempotence, not a new benchmark result. Administrator enrollment is not a per-cycle extraction dependency.
+[FACT/JUDGMENT: S9] Mandatory separate annotation: `Preproduction accepted: real Luna high Waterloo Signal/PDF, immutable release replay, controller-created Job at 22:21Z. Production promotion remains pending; dashed refresh paths describe the integrated dormant implementation.` The annotation is not a preprod resource subgraph. Existing API/UI/DB serving is distinct from the dormant new writer. A successful replay without additional model calls proves idempotence, not a new benchmark result. Administrator enrollment is not a per-cycle extraction dependency. Corpus and graph labels remain provider-neutral in this pair; their September physical storage is explained only by pair A and its evidence state.
 
 ## D6 — M1: benchmark-backed extraction-model decision
 
-[FACT: OWNER] M1 is a separate decision below the two architecture pairs. The owner requests three options: effective Sonnet, Luna low and Gemini 3.8 at its lowest supported effort. No model is selected by this design. The existing Luna high acceptance run is evidence of that trial, not evidence for Luna low or a three-model ranking [S9,S11].
+[FACT: OWNER] M1 is a separate decision below the two architecture pairs. The owner requests three options: comparable effective Sonnet, Luna low and Gemini 3.8 at its lowest supported effort. No model is selected by this design. The existing Luna high acceptance run is evidence of that trial, not evidence for Luna low or a three-model ranking [S9,S11].
 
 ### M1.1 Decision asked
 
-Which of `sonnet-effective`, `luna-low`, or `gemini38-lowest` should be ratified for production PV extraction after the matched M1 benchmark and independent judging? Scope: the extraction model and its exact qualified runtime configuration, not production promotion, storage retirement or invoicing.
+Which of `sonnet-comparable`, `luna-low`, or `gemini38-lowest` should be ratified for production PV extraction after the matched M1 benchmark and independent judging? Scope: the extraction model and its exact qualified runtime configuration, not production promotion, storage retirement or invoicing.
 
 ### M1.2 Context and unknowns
 
-[FACT] Existing historical CLI/CAS campaigns and the September 13 Sol-medium v3 diagnostic use different configurations and have disclosed quality/protocol limitations [S11]. [UNKNOWN] Matched outputs, native identities/efforts, attributable usage, judge verdicts and the winner for these three requested options are not available in this design. Keep each missing cell visibly `not measured` or `not qualified`, never zero or green. Model aliases are display labels until enrollment/preflight records the exact effective provider/model/effort.
+[FACT] Existing historical CLI/CAS campaigns and the September 13 Sol-medium v3 diagnostic use different configurations and have disclosed quality/protocol limitations [S11]. A later side-branch v4 report records five Luna-low responses, no comparable Sonnet call and no full Gemini output; it is bounded evidence from exact revision `ece2beb551e24cd6694434ea2f6464c8493aae5d`, not part of the August baseline or of inspected documentary main [S13]. [UNKNOWN] A complete three-candidate matched bundle, fully qualified judge panel and winner are not available. Keep each missing cell visibly `not measured`, `not classifiable` or `not qualified`, never zero or green. Model aliases are display labels until enrollment/preflight records the exact effective provider/model/effort.
 
 ### M1.3 Stakes
 
@@ -240,11 +240,13 @@ Which of `sonnet-effective`, `luna-low`, or `gemini38-lowest` should be ratified
 
 | ID | Requested option | Strongest case for evaluation | Strongest limitation | Cost / reversibility | What would make it win |
 | --- | --- | --- | --- | --- | --- |
-| `sonnet-effective` | Sonnet, exact effective identity/effort recorded | Closest reference to the operator's existing semantic process | Historical outputs cannot establish quality on the newly frozen common contract | Usage unmeasured; configuration reversible, published findings require audit | Best qualified quality/latency/usage tradeoff on the same oracle |
+| `sonnet-comparable` | Sonnet, exact effective identity/effort recorded; same frozen Graphify request, source bytes, prompt, schema, retry policy and 16,384-token cap | Tests Sonnet on the common contract rather than treating the legacy pipeline as its proxy | Historical outputs are context only; comparable execution remains pending on the cited branch | Usage unmeasured; configuration reversible, published findings require audit | Best qualified quality/latency/usage tradeoff on the same oracle |
 | `luna-low` | Luna, explicit native low effort | Tests whether a lower-effort configuration meets the extraction contract | The successful high-effort trial is not a low-effort result | Usage unmeasured; same rollback boundary | Best qualified quality/latency/usage tradeoff on the same oracle |
 | `gemini38-lowest` | Gemini 3.8, lowest natively supported effort | Tests a separate provider/configuration against the same requirements | Enrollment and faithful effective effort must be attested first | Usage unmeasured; same rollback boundary | Best qualified quality/latency/usage tradeoff on the same oracle |
 
-Unsupported low effort or missing model enrollment yields `not qualified`; never silently substitute another effort, provider or model. Keep all three rows visible even when one cannot run. No invented preflight call, zero-call proof or API-paid fallback counts as a completed candidate.
+Unsupported low effort or missing model enrollment yields `not qualified`; never silently substitute another effort, provider or model. Keep all three rows visible even when one cannot run. No invented preflight call, zero-call proof or API-paid fallback counts as a completed candidate. Sonnet is a first-class comparable candidate only through the same frozen end-to-end contract: its historical outputs may be shown in a separately labelled context column but cannot fill the comparable row.
+
+Candidate credentials are runtime inputs, never benchmark artifacts. Any Sonnet credential must remain in an owner-controlled store outside this repository, be mounted read-only only for the isolated call, and be absent from command arguments, stdout/stderr, receipts, diffs, commits and the PDF. Artifacts retain only a one-way account pseudonym and sanitized requested/effective identity. A credential-bearing log or committed file invalidates the run and requires revocation handling outside this document.
 
 ### M1.5 Recommendation and anti-bias requirements
 
@@ -252,15 +254,15 @@ Unsupported low effort or missing model enrollment yields `not qualified`; never
 
 ### M1.6 Reversibility and cost
 
-[JUDGMENT] Changing the configured model is reversible; provider usage already consumed is not recoverable, and changing future configuration does not retract previously published findings. Freeze inputs/oracle/prompt/schema/tool versions, effective budgets and retry policy before matched calls. Record wall time, per-attempt failures and attributable usage; a shared-account quota delta is not per-model cost. This design authorizes no calls, tariff changes or report-cost recalculation.
+[JUDGMENT] Changing the configured model is reversible; provider usage already consumed is not recoverable, and changing future configuration does not retract previously published findings. Freeze inputs/oracle/prompt/schema/tool versions, effective budgets and retry policy before matched calls. Record wall time, per-attempt failures and attributable usage; a shared-account quota delta is not per-model cost. A request that returns no candidate output is transport/execution evidence only: it has no quality, latency-to-valid-output or semantic score, cannot enter a ranking denominator and cannot be described as a candidate result. This design authorizes no calls, tariff changes or report-cost recalculation.
 
 ### M1.7 Required results, judges and owner criteria
 
 | Required panel content | Evidence / acceptance rule | Initial state |
 | --- | --- | --- |
-| Three candidate rows | Same public PDFs/oracle, source hashes, prompt/schema/runtime freeze; exact effective route/effort and actual wire budgets | Pending M1 |
+| Three candidate rows | Same public PDFs/oracle, source hashes, prompt/schema/runtime freeze; exact effective route/effort and actual wire budgets | Incomplete: Luna-low responses exist on a side branch; comparable Sonnet and classifiable Gemini output remain pending |
 | Outcome and quality | Attempt state, typed findings, source/page/excerpt grounding, stage/outcome accuracy, unsupported claims and coverage; preserve refusals and agenda modality | Not measured |
-| Runtime/usage | Successful and failed attempts, latency, replay behavior, attributable tokens/usage; unavailable values remain null | Not measured |
+| Runtime/usage | Successful and failed attempts, latency, replay behavior, attributable tokens/usage; unavailable values remain null; no-output attempts stay outside candidate-result aggregates | Partial, branch-scoped; no cross-candidate comparison |
 | Independent judges | Two separately frozen qualified judge identities/efforts; blinded candidate identities; own verdict/evidence before reconciliation | Pending; no verdict invented |
 | Disagreements | Both original judge assessments plus reconciliation; no silent averaging of regulatory or evidence disagreements | Pending |
 | Owner choice | Named option or explicit deferral plus optional comment; no default selection or silent adoption from a trial | Unratified |
@@ -271,19 +273,105 @@ The intended independent judge roles are Sol xhigh and Fable 5 xhigh, subject to
 
 Present the question, context, option table, measured results and judge findings before choice controls. While evidence or the two design reviews are incomplete, mark the dossier `Incomplete` and permit commentary/explicit deferral without advertising a justified model winner. The UI captures a user-selected option or deferral and free text; it exports the same structured record through the existing comment/JSON clipboard pattern. It does not deploy, send a message, mutate Track or claim signed comprehension. Conductor recording is a separate authorized step.
 
-Illustrative initial payload (a schema example, not a recorded decision):
+The finite attempt state machine is:
+
+| `attemptState` | Only legal `classification` | Output / metrics / rank |
+| --- | --- | --- |
+| `not-launched` | `not-measured` | output, quality, latency-to-valid-output and rank are null/false |
+| `transport-failed` | `not-classifiable` | output, quality, latency-to-valid-output and rank are null/false |
+| `no-output` | `not-classifiable` | output, quality, latency-to-valid-output and rank are null/false |
+| `completed-invalid` | `output-invalid` | output and validator evidence required; quality ranking remains false |
+| `completed-valid` | `classifiable` | output and validator evidence required; rank is still false until identity/freeze/judges qualify it |
+
+The exact option set is `sonnet-comparable,luna-low,gemini38-lowest`. `candidateAttempts` is the canonical three-row benchmark summary: it contains exactly one stable `attemptId` for each option, no duplicate/extra option and no transport retry as a candidate row. Each launched row points to a content-hashed `transportLedgerRef` whose immutable ledger retains every case call and retry with option ID, case ID, retry index, state and receipt; a retry stays under the same canonical option row and cannot create or replace a candidate silently. The row's terminal state is derived from that ledger under the frozen retry policy. A not-launched row has a null ledger reference.
+
+The implementation publishes and validates `docs/architecture/focus/m1-decision.schema.json` as JSON Schema 2020-12. A candidate attempt owns `requestedIdentity`, nullable `effectiveIdentity`, `sourceFreezeHash`, `inputRef`, `transportLedgerRef`, `attemptState`, `classification`, nullable `outputRef`, nullable `validationRef`, nullable `usage`, nullable `missingReason`, nullable quality/latency-to-valid-output fields and `rankEligible`. A result owns only `attemptId`, `optionId`, the same `outputRef`/`validationRef`, quality metrics, `judgeRefs` and rank status; identity/freeze/usage are resolved from its attempt.
+
+The mapping is bijective over output-bearing candidate attempts: the set of `attemptId` values whose state is `completed-invalid` or `completed-valid` equals the set of result `attemptId` values. Each such attempt has exactly one result; each result refers to exactly one distinct output-bearing attempt; no two results share an attempt ID or output reference; and result option/output/validation values equal their attempt. `rankEligible:true` requires `completed-valid` + `classifiable`, non-null qualified requested/effective provider/model/effort, source-freeze hash, input/output/validation/transport-ledger references and two qualified independent judge references. Ratification additionally requires the set of rank-eligible result option IDs to equal the exact three-option set. Non-classifiable attempts require null output, quality, latency-to-valid-output and `rankEligible:false` regardless of transport latency. Invalid fixtures cover Gemini no-output promoted to results, detached results, missing results for output-bearing attempts, duplicate result attempt/output references, mismatched option/output/validation, duplicate/omitted/extra candidate options, three results from one option, a retry promoted to a candidate row, duplicate attempt IDs, illegal state/classification pairs and no-output with metrics or rank eligibility.
+
+Illustrative pending payload (a copiable schema example, not a recorded decision):
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "decisionId": "M1",
   "status": "awaiting-benchmark",
   "selectedOption": null,
   "comment": "",
-  "options": ["sonnet-effective", "luna-low", "gemini38-lowest"],
+  "options": ["sonnet-comparable", "luna-low", "gemini38-lowest"],
   "benchmarkRef": null,
   "sourceFreezeHash": null,
-  "candidateResults": [],
+  "candidateAttempts": [
+    {
+      "attemptId": "sonnet-comparable-pending",
+      "optionId": "sonnet-comparable",
+      "requestedIdentity": { "provider": "anthropic", "model": "claude-sonnet-4-6", "effort": "effective-to-attest" },
+      "effectiveIdentity": null,
+      "sourceFreezeHash": null,
+      "inputRef": null,
+      "transportLedgerRef": null,
+      "attemptState": "not-launched",
+      "classification": "not-measured",
+      "outputRef": null,
+      "validationRef": null,
+      "usage": null,
+      "missingReason": "supported comparable runtime pending",
+      "qualityMetrics": null,
+      "latencyToValidOutputMs": null,
+      "rankEligible": false,
+      "evidenceRef": "S13"
+    },
+    {
+      "attemptId": "gemini38-side-branch-no-output",
+      "optionId": "gemini38-lowest",
+      "requestedIdentity": { "provider": "google", "model": "gemini-3.8-flash", "effort": "LOW" },
+      "effectiveIdentity": null,
+      "sourceFreezeHash": null,
+      "inputRef": "S13#frozen-five-document-input",
+      "transportLedgerRef": "S13#gemini-transport-ledger",
+      "attemptState": "no-output",
+      "classification": "not-classifiable",
+      "outputRef": null,
+      "validationRef": null,
+      "usage": null,
+      "missingReason": "official gateway execution pending",
+      "qualityMetrics": null,
+      "latencyToValidOutputMs": null,
+      "rankEligible": false,
+      "evidenceRef": "S13"
+    },
+    {
+      "attemptId": "luna-low-side-branch",
+      "optionId": "luna-low",
+      "requestedIdentity": { "provider": "codex-subscription", "model": "gpt-5.6-luna", "effort": "low" },
+      "effectiveIdentity": { "provider": "codex-subscription", "model": "gpt-5.6-luna", "effort": "low" },
+      "sourceFreezeHash": null,
+      "inputRef": "S13#frozen-five-document-input",
+      "transportLedgerRef": "S13#luna-low-transport-ledger",
+      "attemptState": "completed-invalid",
+      "classification": "output-invalid",
+      "outputRef": "S13#luna-low-outputs",
+      "validationRef": "S13#five-validator-failures",
+      "usage": "S13#luna-low-usage",
+      "missingReason": "branch-scoped output failed the current validator",
+      "qualityMetrics": null,
+      "latencyToValidOutputMs": null,
+      "rankEligible": false,
+      "evidenceRef": "S13"
+    }
+  ],
+  "candidateResults": [
+    {
+      "attemptId": "luna-low-side-branch",
+      "optionId": "luna-low",
+      "outputRef": "S13#luna-low-outputs",
+      "validationRef": "S13#five-validator-failures",
+      "qualityMetrics": null,
+      "judgeRefs": [],
+      "rankEligible": false,
+      "evidenceRef": "S13"
+    }
+  ],
   "judgeAssessments": [],
   "reconciliationRef": null,
   "recordedAt": null,
@@ -291,11 +379,11 @@ Illustrative initial payload (a schema example, not a recorded decision):
 }
 ```
 
-Actual `candidateResults` retain option ID, requested/effective provider/model/effort, attempt state, input/output references, metrics and missing-data reasons. Judge entries retain exact identity/effort, frozen rubric, independent verdict references and candidate blinding. Validate selected option membership and legal states (`awaiting-benchmark`, `deferred`, `ratified`); a ratified export requires evidence references and an explicit owner choice. Free text is escaped safely in HTML/PDF and round-trips literal newlines in JSON. Never infer `decisionActor` from the relay agent or mark an exported browser choice as cryptographically signed.
+`candidateAttempts` retains every launched, blocked or failed execution without converting absence into quality. `candidateResults` references only output-bearing attempts; Gemini's cited no-output attempt therefore cannot appear there. Records retain requested/effective provider/model/effort, evidence scope, input/output references, usage and missing-data reasons where applicable. Judge entries retain exact identity/effort, frozen rubric, independent verdict references and candidate blinding. Validate all finite-state invariants and legal decision states (`awaiting-benchmark`, `deferred`, `ratified`). A ratified export requires three classifiable matched results, evidence references and an explicit owner choice. Free text is escaped safely in HTML/PDF and round-trips literal newlines in JSON. Never infer `decisionActor` from the relay agent or mark an exported browser choice as cryptographically signed.
 
 ## Source register and freshness handoff
 
-Sources below are immutable commit/path/line anchors. References to runtime receipts are versioned operator observations, not fresh live checks performed for this design. The implementation must preserve their timestamps and evidence class; a newer acceptance may update September state only with a new cited receipt and regenerated source hashes.
+Sources below are pinned commit/blob references. Line numbers are navigation hints within those exact blobs, not durable identifiers across revisions. References to runtime receipts are versioned operator observations, not fresh live checks performed for this design. A Git commit date alone does not establish runtime state, and a side-branch report is not main history. The implementation must preserve timestamps, reachability qualification and evidence class; a newer acceptance may update September state only with a new cited receipt and regenerated source hashes.
 
 | Ref | Repository / revision / anchor | What it establishes and limits |
 | --- | --- | --- |
@@ -311,5 +399,7 @@ Sources below are immutable commit/path/line anchors. References to runtime rece
 | S10 | Immo `26caa4d9`, `deploy/k8s/60-ingress.yaml:35`, `50-ui.yaml:56,76`, `80-auth.yaml:11`, `api/src/routes/graph-signals.ts:4`; Immo `4d5cb8f7`, `docs/architecture.md:47` | User URL, UI/API/Geo routes, OIDC and graph-node serving; later public URL/SSO observations |
 | S11 | Immo `4d5cb8f7`, `docs/reviews/refresh-018/extraction-baseline-audit.md:9,82,90`; local benchmark `b98aa6cf`, `docs/reviews/refresh-benchmark/v3/report.md:3,12,66,73` | Historical campaigns are not August baseline or matched M1 ranking; Sol-medium diagnostic has fairness limits; judge plan is not completed judging |
 | S12 | Immo `4d5cb8f7`, `docs/architecture/focus/style.css:43,47`, `ServiceNode.svelte:33`, `Subflow.svelte:17`, `scenes.js:18`; owner amendment after initial design handoff | Frozen D8 card/type/layout values; owner requires roughly half-height cards, twice-size visible type, exact French user label and visible TEM in every graph. These frontend filenames are relative to the same `docs/architecture/focus/` directory |
+| S13 | Immo side branch `feat/t1-model-benchmark-real`, exact revision `ece2beb551e24cd6694434ea2f6464c8493aae5d`, `docs/reviews/refresh-benchmark/v4/protocol.md` and `report.md` | Branch-scoped v4 evidence: Luna-low produced five responses; comparable Sonnet made no call; Gemini direct-runner diagnostics produced no full output and do not qualify the operational gateway. This revision is not an ancestor of the architecture branch and is not represented as documentary main, a three-way result or an architecture transition receipt |
+| S14 | Immo historical revision `72b966664523801ea00cfcb704e0285ee765c136`, `docs/spec/reports/study-2026-08/report.pdf`; identical current blob SHA-256 `86ae37810016bca61cc897105121cfcbcd1951426fc889616ae1efe37ae29528` | Preceding report to attach intact; the historical revision is a source locator, not claimed main ancestry and not a commit to replay into this branch |
 
 [UNKNOWN] No fresh August 9 per-pod environment/image inventory, successful GHCR mirror inventory, exact-day manual extraction receipts or matched three-option M1 verdict exists among these inspected sources. [JUDGMENT] These gaps limit claims; they do not authorize replacing August with a later preproduction snapshot.
