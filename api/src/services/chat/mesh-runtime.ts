@@ -50,6 +50,21 @@ type ProviderMeta = {
 };
 
 /**
+ * The five providers radar's demo chat supports today. This subtype is a
+ * COMPILE ADAPTER consequent to the bump to `@sentropic/llm-mesh` 0.19, whose
+ * `ProviderId` widened from 5 to 7 (it adds `gcp` and `local`). It exists only
+ * to keep the provider maps below total over the set the chat actually serves,
+ * and deliberately does NOT adopt `gcp`/`local`: adopting them (their catalog
+ * and auth discriminants) is the chat llm-mesh migration lot, not this
+ * dependency bump. If more than this typing is ever needed, it is no longer a
+ * shim.
+ */
+type ChatProviderId = Extract<
+  ProviderId,
+  "anthropic" | "cohere" | "gemini" | "mistral" | "openai"
+>;
+
+/**
  * Provider metadata. Labels are neutral and no provider is favored; default
  * models are broadly available, current, and comparable across providers.
  * The `gemini` entry accepts both common key names (sentropic uses
@@ -106,7 +121,7 @@ const PROVIDER_META = {
     ],
     envVars: ["OPENAI_API_KEY"],
   },
-} satisfies Record<ProviderId, ProviderMeta>;
+} satisfies Record<ChatProviderId, ProviderMeta>;
 
 /** Providers exposed by the demo chat, in neutral alphabetical order. */
 export const CHAT_PROVIDER_IDS = [
@@ -115,17 +130,17 @@ export const CHAT_PROVIDER_IDS = [
   "gemini",
   "mistral",
   "openai",
-] as const satisfies readonly ProviderId[];
+] as const satisfies readonly ChatProviderId[];
 
 export type ProviderConfig = {
-  providerId: ProviderId;
+  providerId: ChatProviderId;
   label: string;
   defaultModel: string;
   models: readonly ModelChoice[];
 };
 
 const readApiKey = (
-  providerId: ProviderId,
+  providerId: ChatProviderId,
   env: NodeJS.ProcessEnv,
 ): string | undefined => {
   for (const name of PROVIDER_META[providerId].envVars) {
@@ -153,11 +168,11 @@ export const listConfiguredProviders = (
 export const isConfiguredProvider = (
   providerId: string,
   env: NodeJS.ProcessEnv = process.env,
-): providerId is ProviderId =>
+): providerId is ChatProviderId =>
   (CHAT_PROVIDER_IDS as readonly string[]).includes(providerId) &&
-  readApiKey(providerId as ProviderId, env) !== undefined;
+  readApiKey(providerId as ChatProviderId, env) !== undefined;
 
-export const defaultModelFor = (providerId: ProviderId): string =>
+export const defaultModelFor = (providerId: ChatProviderId): string =>
   PROVIDER_META[providerId].defaultModel;
 
 type TextPart = { type: "text"; text: string };
@@ -273,7 +288,7 @@ class RadarProviderMeshClient implements ProviderAdapterClient {
     request: GenerateRequest,
     context?: ProviderRuntimeContext,
   ): Promise<GenerateResponse> {
-    const providerId = (request.providerId ?? "openai") as ProviderId;
+    const providerId = (request.providerId ?? "openai") as ChatProviderId;
     const modelId = request.modelId ?? defaultModelFor(providerId);
     let text = "";
     for await (const event of await this.stream(
@@ -299,7 +314,7 @@ class RadarProviderMeshClient implements ProviderAdapterClient {
     request: StreamRequest,
     _context?: ProviderRuntimeContext,
   ): Promise<StreamResult> {
-    const providerId = (request.providerId ?? "openai") as ProviderId;
+    const providerId = (request.providerId ?? "openai") as ChatProviderId;
     const modelId = request.modelId ?? defaultModelFor(providerId);
     const credential = extractCredential(request);
     if (!credential) {
@@ -781,7 +796,7 @@ const radarProviderClient = new RadarProviderMeshClient();
  * the provider's capability matrix from the catalog. `reasoningTier` is
  * conservative ("none") since the demo chat does not drive reasoning.
  */
-const modelProfilesFor = (providerId: ProviderId): ModelProfile[] =>
+const modelProfilesFor = (providerId: ChatProviderId): ModelProfile[] =>
   PROVIDER_META[providerId].models.map(
     (choice) =>
       ({
@@ -846,7 +861,7 @@ export const buildStreamRequest = (input: {
 });
 
 export const apiKeyFor = (
-  providerId: ProviderId,
+  providerId: ChatProviderId,
   env: NodeJS.ProcessEnv = process.env,
 ): string | undefined => readApiKey(providerId, env);
 

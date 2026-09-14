@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "protocol": "sentropic-16",
+  "case": "negative",
+  "completedAt": "2026-09-14T10:36:07.385Z",
+  "installedPackage": {
+    "name": "@sentropic/llm-mesh",
+    "version": "0.19.2"
+  },
+  "account": {
+    "pseudonym": "acct-59dca62565",
+    "providerId": "cloud-code",
+    "tier": "g1-pro-tier"
+  },
+  "request": {
+    "logicalModelId": "gemini-9.9-nonexistent",
+    "effort": "low",
+    "maxOutputTokens": 64,
+    "threadIdProvided": false
+  },
+  "outcome": {
+    "rejected": true,
+    "rejectedBeforeStream": true,
+    "modelNetworkCallsBefore": 2,
+    "modelNetworkCallsAfter": 2,
+    "modelNetworkCallsDelta": 0,
+    "streamCallsBefore": 1,
+    "streamCallsAfter": 1,
+    "streamCallsDelta": 0
+  },
+  "error": {
+    "name": "Error",
+    "message": "Cloud Code model gemini-9.9-nonexistent with effort low is not available in this account's catalogue"
+  },
+  "redaction": {
+    "bearer": "[REDACTED]",
+    "project": "[REDACTED]",
+    "secretsIncluded": false
+  }
+}

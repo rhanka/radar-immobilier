@@ -9,6 +9,9 @@
 # Source des candidats : tmp/graphify-v23-v23a-publish-20260619T005818Z/workers/<city>/latest.v23.json
 set -euo pipefail
 
+echo '[object-storage] retired: legacy graphify LLM runner disabled after the OVH cutover' >&2
+exit 1
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="${PWD}"
 

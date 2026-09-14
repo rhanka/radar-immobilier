@@ -98,6 +98,24 @@ render-prod:
 	  | sed "s#$(PLACEHOLDER)#$(IMAGE_REF)#g" > "$(RENDER_OUT)"
 	@! grep -q 'PINNED-BY-CI\|radar-api:latest' "$(RENDER_OUT)"
 
+.PHONY: verify-renders
+verify-renders:
+	@set -euo pipefail; tmp="$$(mktemp -d)"; trap 'rm -rf "$$tmp"' EXIT; \
+	  image='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000'; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-preprod IMAGE_REF="$$image" RENDER_OUT="$$tmp/preprod.yaml" ENV=$(ENV); \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$$image" RENDER_OUT="$$tmp/prod.yaml" ENV=$(ENV); \
+	  for render in "$$tmp/preprod.yaml" "$$tmp/prod.yaml"; do \
+	    test -s "$$render" || { echo "empty refresh render: $$render" >&2; exit 1; }; \
+	    awk 'BEGIN{RS="\n---\n"} /[^[:space:]]/ { if ($$0 !~ /apiVersion:/ || $$0 !~ /kind:/) { print "missing apiVersion/kind in refresh render" > "/dev/stderr"; bad=1 } } END{ exit bad }' "$$render"; \
+	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 3 \
+	      || { echo "refresh render must contain exactly three CronJobs: $$render" >&2; exit 1; }; \
+	    awk 'function flush(){if(active && literal && reference){print "mixed value/valueFrom: " name > "/dev/stderr"; bad=1} literal=0; reference=0} \
+	      /^[[:space:]]*- name:/ {flush(); active=1; name=$$0; next} \
+	      active && /^[[:space:]]+value:[[:space:]]/ {literal=1} \
+	      active && /^[[:space:]]+valueFrom:[[:space:]]*$$/ {reference=1} \
+	      END {flush(); exit bad}' "$$render"; \
+	  done
+
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
 	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }
