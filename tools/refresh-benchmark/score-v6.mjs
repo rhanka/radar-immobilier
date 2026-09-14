@@ -6,13 +6,16 @@ const required = (name) => process.env[name] || (() => { throw new Error(`${name
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
 const resultRoot = required("BENCHMARK_RESULT_ROOT");
 const outputPath = required("BENCHMARK_SCORE_OUTPUT");
+const campaign = process.env.BENCHMARK_CAMPAIGN ?? "v6";
 delete process.env.BENCHMARK_SCORE_OUTPUT;
 const { scoreValid } = await import("./score-v3.mjs");
 const { citationHealth } = await import("./score-v4.mjs");
 const readJson = async (path) => JSON.parse(await readFile(path, "utf8"));
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
-const manifest = await readJson(resolve(repositoryRoot, "docs/reviews/refresh-benchmark/v6/manifest.json"));
-const oracle = await readJson(resolve(repositoryRoot, "docs/reviews/refresh-benchmark/v6/manual-oracle.json"));
+const campaignRoot = resolve(repositoryRoot, `docs/reviews/refresh-benchmark/${campaign}`);
+const manifest = await readJson(resolve(campaignRoot, "manifest.json"));
+const oracle = await readJson(resolve(campaignRoot, "manual-oracle.json"));
+const promptFreeze = await readJson(resolve(campaignRoot, "prompt-freeze.json"));
 const cases = [];
 for (const document of manifest.documents) {
   const stem = `${document.id}--gemini-low`;
@@ -37,10 +40,16 @@ for (const document of manifest.documents) {
     citations: output ? citationHealth(output, document, pages) : null });
 }
 const accepted = cases.filter(({ state }) => state === "completed_valid").length;
-const result = { schemaVersion: 1, campaign: "v6", model: "gemini-3.8-flash-tiered",
-  effort: "LOW", maxOutputTokens: 16_384, cases,
+const launched = cases.filter(({ state }) => state !== "not_launched").length;
+const campaignStopped = launched < manifest.documents.length;
+const blockingCase = cases.find(({ httpStatus, terminalFinishReason }) =>
+  httpStatus === 429 || terminalFinishReason === "MAX_TOKENS");
+const stopReason = !campaignStopped ? null : blockingCase
+  ? `${blockingCase.documentId} returned ${blockingCase.httpStatus === 429 ? "HTTP 429" : "MAX_TOKENS"}`
+  : "campaign incomplete";
+const result = { schemaVersion: 1, campaign, model: "gemini-3.8-flash-tiered",
+  effort: "LOW", maxOutputTokens: promptFreeze.maxOutputTokens, cases,
   totals: { launched: cases.filter(({ state }) => state !== "not_launched").length,
-    accepted, planned: manifest.documents.length }, campaignStopped: true,
-  stopReason: "saint-etienne-de-bolton-2026-08-04 returned MAX_TOKENS and incomplete JSON" };
+    accepted, planned: manifest.documents.length }, campaignStopped, stopReason };
 await writeFile(outputPath, JSON.stringify(result), { flag: "wx" });
 console.log(JSON.stringify({ launched: result.totals.launched, accepted, planned: result.totals.planned }));

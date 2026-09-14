@@ -35,6 +35,7 @@ test("prompt contract covers each input once and is tied to corrected T1", async
   assert.equal(prompts.meshVersion, ["v5", "v6", "v7"].includes(campaign) ? "0.19.1" : "0.19.0");
   assert.equal(prompts.t1Commit,
     process.env.BENCHMARK_T1_COMMIT ?? "f9b311da536bda2e1442d154a05599c35b482518");
+  assert.equal(prompts.maxOutputTokens, campaign === "v7" ? 65_536 : 16_384);
   assert.equal(sha256(prompts.systemPrompt), prompts.systemPromptSha256);
   assert.deepEqual(prompts.documents.map(({ id }) => id).sort(),
     manifest.documents.map(({ id }) => id).sort());

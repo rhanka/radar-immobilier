@@ -38,7 +38,7 @@ GEMINI_ENDPOINT ?= mesh
 GEMINI_EFFORT ?= low
 GEMINI_MODEL ?= gemini-3.8-flash-tiered
 
-.PHONY: test test-v3 test-v4 test-v5 test-v6 test-v7 test-diagnosis-v4 test-integration-contract-v4 install-v4-integration-deps check-v4-integration-ready preflight-v4-integration run-v4-integration run-v4-real provider-availability test-score-v3 test-score-v4 score-v3 score-v4 score-v6 freeze-blind-v3 freeze-blind-v4 freeze-blind-v6 runtime-text freeze-v3 freeze-v5 freeze-v6 freeze-v7 prepare-prompts-v3 prepare-prompts-v5 prepare-prompts-v6 prepare-prompts-v7 run-v3 run-v4 run-v5-control run-v5-cap run-v5-real run-v6-control run-v6-real run-v7-control run-v7-real requalify-v6-control preflight-v3 gemini-diagnostic gemini-catalogue-probe gemini-catalogue-probe-check run-v3-sol-normal run-v4-all quota inspect-validation
+.PHONY: test test-v3 test-v4 test-v5 test-v6 test-v7 test-diagnosis-v4 test-integration-contract-v4 install-v4-integration-deps check-v4-integration-ready preflight-v4-integration run-v4-integration run-v4-real provider-availability test-score-v3 test-score-v4 score-v3 score-v4 score-v6 score-v7 freeze-blind-v3 freeze-blind-v4 freeze-blind-v6 freeze-blind-v7 runtime-text freeze-v3 freeze-v5 freeze-v6 freeze-v7 prepare-prompts-v3 prepare-prompts-v5 prepare-prompts-v6 prepare-prompts-v7 run-v3 run-v4 run-v5-control run-v5-cap run-v5-real run-v6-control run-v6-real run-v7-control run-v7-real requalify-v6-control requalify-v7-receipts preflight-v3 gemini-diagnostic gemini-catalogue-probe gemini-catalogue-probe-check run-v3-sol-normal run-v4-all quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -141,6 +141,8 @@ test-integration-contract-v4:
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/requalify-v6.mjs
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/requalify-v7-receipts.mjs
+	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/freeze-blind-v6.mjs
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -w /src $(NODE_IMAGE) node --check tools/refresh-benchmark/score-v6.mjs
@@ -220,6 +222,15 @@ score-v6:
 	  -e BENCHMARK_SCORE_OUTPUT=/results/comparison.json -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
 	  node tools/refresh-benchmark/score-v6.mjs
 
+score-v7:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V7_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v7 \
+	  -e BENCHMARK_RESULT_ROOT=/results/campaign-real \
+	  -e BENCHMARK_SCORE_OUTPUT=/results/comparison.json -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/score-v6.mjs
+
 score-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
 	docker run --rm --network none \
@@ -249,6 +260,14 @@ freeze-blind-v6:
 	  --mount type=bind,source=$(V6_RESULTS),target=/results \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_BUNDLE_ROOT=/results \
 	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/freeze-blind-v6.mjs
+
+freeze-blind-v7:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V7_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v7 \
+	  -e BENCHMARK_BUNDLE_ROOT=/results -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/freeze-blind-v6.mjs
 
 freeze-v3: runtime-text
 	test "$(ENV)" = "test-refresh-benchmark"
@@ -406,6 +425,17 @@ requalify-v6-control:
 	  -e BENCHMARK_RESULT_ROOT=/results -e BENCHMARK_DOCUMENT=valcourt-2026-06-01-agenda \
 	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V6) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
 	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/requalify-v6.mjs'
+
+requalify-v7-receipts:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V7_REAL_RESULTS),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=/workspace/t1 \
+	  -e BENCHMARK_RESULT_ROOT=/results -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
+	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/requalify-v7-receipts.mjs'
 
 run-v4-all:
 	test "$(ENV)" = "test-t1-model-benchmark"
