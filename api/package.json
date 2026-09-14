@@ -25,7 +25,7 @@
     "@sentropic/geo-sources-americas": "^0.1.1",
     "@sentropic/graphify": "0.18.0",
     "@sentropic/h2a": "^0.26.1",
-    "@sentropic/llm-mesh": "^0.1.2",
+    "@sentropic/llm-mesh": "0.19.1",
     "@sentropic/llm-mesh-refresh": "npm:@sentropic/llm-mesh@0.19.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.5.0",
