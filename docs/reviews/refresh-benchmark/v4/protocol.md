@@ -31,6 +31,17 @@ frozen 16,384 tokens. One retry is allowed only after a transport failure.
 - Candidate G: `gemini/gemini-3.8-flash`, explicit reasoning effort `low`,
   Cloud Code account transport, through llm-mesh. The installed adapter maps
   this to Cloud Code `thinkingLevel: LOW`.
+- Comparable S: `anthropic/claude-sonnet-4-6`, same frozen Graphify request,
+  schema, prompt, and 16,384-token cap. `ANTHROPIC_API_KEY` may only enter the
+  isolated runtime from `/home/antoinefa/src/sentropic/.env`; its value must
+  never be read into logs, copied, or committed. This is distinct from the
+  historical baseline.
+
+Comparable S is blocked before provider contact in the installed runtime:
+llm-mesh exports `AnthropicAdapter`, but no `AnthropicRuntimeClient` or Claude
+Code runtime client, and the benchmark volume has no Anthropic SDK. A custom
+HTTP client would be an unfrozen transport implementation, so the campaign
+waits for a supported path from s-conductor rather than fabricating one.
 
 Accounts are identified only by one-way pseudonyms. No secret or auth material
 may enter an artifact. Quota snapshots are retained before and after when the
