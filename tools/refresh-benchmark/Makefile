@@ -22,6 +22,9 @@ V8_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v8
 V8_CONTROL_RESULTS := $(V8_RESULTS)/control
 V8_REAL_RESULTS := $(V8_RESULTS)/campaign-real
 V8_T1_ROOT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/t1-v8-f96356e9
+V9_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v9
+V9_REAL_RESULTS := $(V9_RESULTS)/campaign-real
+V9_T1_ROOT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/t1-v9-f96356e9
 RUNTIME_TEXT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/runtime-text
 CAS_ROOT := $(MAIN_ROOT)/.lanes/conductor/tmp/graphify-cas/run-dryrun2-final-20260911T215911Z
 NODE_IMAGE := node:22-bookworm-slim
@@ -34,6 +37,7 @@ T1_COMMIT_V5 := 5f227929ee71747cc7f3dc8245167b7d7f42c69d
 T1_COMMIT_V6 := f96356e90a76b14b32ef0e913a82eb5805a9a413
 T1_COMMIT_V7 := f96356e90a76b14b32ef0e913a82eb5805a9a413
 T1_COMMIT_V8 := f96356e90a76b14b32ef0e913a82eb5805a9a413
+T1_COMMIT_V9 := f96356e90a76b14b32ef0e913a82eb5805a9a413
 KEYRING_SOURCE := /home/antoinefa/.sentropic/llm-mesh-keyring
 BASELINE_GOLD := $(MAIN_ROOT)/.lanes/conductor/tmp/bench-llm/bench/v2/gold.json
 PREFLIGHT_FILE ?= preflight-before.json
@@ -43,7 +47,7 @@ GEMINI_ENDPOINT ?= mesh
 GEMINI_EFFORT ?= low
 GEMINI_MODEL ?= gemini-3.8-flash-tiered
 
-.PHONY: test test-v3 test-v4 test-v5 test-v6 test-v7 test-v8 test-diagnosis-v4 test-integration-contract-v4 install-v4-integration-deps check-v4-integration-ready preflight-v4-integration run-v4-integration run-v4-real provider-availability test-score-v3 test-score-v4 score-v3 score-v4 score-v6 score-v7 score-v8 freeze-blind-v3 freeze-blind-v4 freeze-blind-v6 freeze-blind-v7 freeze-blind-v8 runtime-text t1-v8-snapshot freeze-v3 freeze-v5 freeze-v6 freeze-v7 freeze-v8 prepare-prompts-v3 prepare-prompts-v5 prepare-prompts-v6 prepare-prompts-v7 prepare-prompts-v8 run-v3 run-v4 run-v5-control run-v5-cap run-v5-real run-v6-control run-v6-real run-v7-control run-v7-real run-v8-control run-v8-real requalify-v6-control requalify-v7-receipts requalify-v8-receipts sonnet-env-status preflight-v3 gemini-diagnostic gemini-catalogue-probe gemini-catalogue-probe-check run-v3-sol-normal run-v4-all quota inspect-validation
+.PHONY: test test-v3 test-v4 test-v5 test-v6 test-v7 test-v8 test-v9 test-diagnosis-v4 test-integration-contract-v4 install-v4-integration-deps check-v4-integration-ready preflight-v4-integration run-v4-integration run-v4-real provider-availability test-score-v3 test-score-v4 score-v3 score-v4 score-v6 score-v7 score-v8 score-v9 freeze-blind-v3 freeze-blind-v4 freeze-blind-v6 freeze-blind-v7 freeze-blind-v8 runtime-text t1-v8-snapshot t1-v9-snapshot freeze-v3 freeze-v5 freeze-v6 freeze-v7 freeze-v8 replay-v9-freeze prepare-prompts-v3 prepare-prompts-v5 prepare-prompts-v6 prepare-prompts-v7 prepare-prompts-v8 run-v3 run-v4 run-v5-control run-v5-cap run-v5-real run-v6-control run-v6-real run-v7-control run-v7-real run-v8-control run-v8-real run-v9-real requalify-v6-control requalify-v7-receipts requalify-v8-receipts requalify-v9-receipts sonnet-env-status preflight-v3 gemini-diagnostic gemini-catalogue-probe gemini-catalogue-probe-check run-v3-sol-normal run-v4-all quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -61,6 +65,11 @@ t1-v8-snapshot:
 	test "$(ENV)" = "test-t1-model-benchmark"
 	mkdir -p $(V8_T1_ROOT)
 	git -C $(BENCHMARK_ROOT) archive $(T1_COMMIT_V8) | tar -x -C $(V8_T1_ROOT)
+
+t1-v9-snapshot:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	mkdir -p $(V9_T1_ROOT)
+	git -C $(BENCHMARK_ROOT) archive $(T1_COMMIT_V9) | tar -x -C $(V9_T1_ROOT)
 
 $(RUNTIME_TEXT)/$(WATERLOO_18).txt:
 	mkdir -p $(RUNTIME_TEXT)
@@ -137,6 +146,15 @@ test-v8: runtime-text
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v8 \
 	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V8) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
 	  node --test tools/refresh-benchmark/benchmark.test.mjs tools/refresh-benchmark/runtime-config.test.mjs
+
+test-v9: runtime-text
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v9 \
+	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V9) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node --test tools/refresh-benchmark/benchmark.test.mjs \
+	    tools/refresh-benchmark/integration-contract.test.mjs \
+	    tools/refresh-benchmark/runtime-config.test.mjs
 
 test-diagnosis-v4:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -257,6 +275,15 @@ score-v8:
 	  -e BENCHMARK_SCORE_OUTPUT=/results/comparison.json -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
 	  node tools/refresh-benchmark/score-v6.mjs
 
+score-v9:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V9_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v9 \
+	  -e BENCHMARK_VARIANT=gemini-low -e BENCHMARK_RESULT_ROOT=/results/campaign-real \
+	  -e BENCHMARK_SCORE_OUTPUT=/results/comparison.json -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/score-v6.mjs
+
 score-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
 	docker run --rm --network none \
@@ -357,6 +384,15 @@ freeze-v8: runtime-text t1-v8-snapshot
 	  -e BENCHMARK_CAS_ROOT=$(CAS_ROOT) -e BENCHMARK_BASELINE_GOLD=$(BASELINE_GOLD) \
 	  -e BENCHMARK_T1_ROOT=$(V8_T1_ROOT) -e BENCHMARK_OUTPUT_DIR=/results \
 	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/freeze-v3.mjs
+
+replay-v9-freeze:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test ! -e $(V9_RESULTS)/manifest.json
+	mkdir -p $(V9_RESULTS)
+	cp $(V7_RESULTS)/manifest.json $(V9_RESULTS)/manifest.json
+	cp $(V7_RESULTS)/prompt-freeze.json $(V9_RESULTS)/prompt-freeze.json
+	cp $(V7_RESULTS)/manual-oracle.json $(V9_RESULTS)/manual-oracle.json
+	sed -i 's/"campaign":"v7"/"campaign":"v9"/' $(V9_RESULTS)/manifest.json $(V9_RESULTS)/prompt-freeze.json
 
 prepare-prompts-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
@@ -485,6 +521,13 @@ run-v8-real: check-v4-integration-ready t1-v8-snapshot
 	  T1_CAMPAIGN_ROOT=$(V8_T1_ROOT) ATTEMPT=$(ATTEMPT) \
 	  RETRY_REASON='$(RETRY_REASON)' ENV=$(ENV)
 
+run-v9-real: check-v4-integration-ready t1-v9-snapshot
+	test -f $(V9_RESULTS)/manifest.json -a -f $(V9_RESULTS)/prompt-freeze.json
+	mkdir -p $(V9_REAL_RESULTS)
+	$(MAKE) run-case DOC=$(DOC) VARIANT=gemini-low CAMPAIGN=v9 \
+	  CAMPAIGN_RESULTS=$(V9_REAL_RESULTS) T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V9) \
+	  T1_CAMPAIGN_ROOT=$(V9_T1_ROOT) ENV=$(ENV)
+
 requalify-v6-control:
 	test "$(ENV)" = "test-t1-model-benchmark"
 	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
@@ -517,6 +560,18 @@ requalify-v8-receipts: t1-v8-snapshot
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=/workspace/t1 \
 	  -e BENCHMARK_CAMPAIGN=v8 -e BENCHMARK_VARIANT=gemini-high \
+	  -e BENCHMARK_RESULT_ROOT=/results -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
+	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/requalify-v7-receipts.mjs'
+
+requalify-v9-receipts: t1-v9-snapshot
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V9_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V9_REAL_RESULTS),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_T1_ROOT=/workspace/t1 \
+	  -e BENCHMARK_CAMPAIGN=v9 -e BENCHMARK_VARIANT=gemini-low \
 	  -e BENCHMARK_RESULT_ROOT=/results -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
 	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx tools/refresh-benchmark/requalify-v7-receipts.mjs'
 
