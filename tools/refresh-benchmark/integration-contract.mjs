@@ -6,12 +6,12 @@ export const releaseAnchor = Object.freeze({
 
 export const frozenInputs = Object.freeze({
   manifest: Object.freeze({
-    path: "docs/reviews/refresh-benchmark/v3/manifest.json",
-    sha256: "a9310deb5589aebb10502a40caf651af0f60db98cc7a818bec56f7a6b56c29f1",
+    path: "docs/reviews/refresh-benchmark/v5/manifest.json",
+    sha256: "e3c6976f2b1143a60faa09cb94a6a512d7c0cc071c60273adc841075217398f7",
   }),
   prompts: Object.freeze({
-    path: "docs/reviews/refresh-benchmark/v3/prompt-freeze.json",
-    sha256: "0685fc9e08408d3a88248493d29ed471a944ce8ac932d1022e82f7b24c32b5b0",
+    path: "docs/reviews/refresh-benchmark/v5/prompt-freeze.json",
+    sha256: "c0bb9d11835be0cbc5d3819efbf220e0edb304d11016ffcbfa5efc362ea152c8",
   }),
   documents: Object.freeze([
     ["lac-des-seize-iles-2026-09-agenda", "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96"],

@@ -60,7 +60,7 @@ for (const document of manifest.documents) {
 }
 const result = { schemaVersion: 1, frozenAt: new Date().toISOString(), campaign: campaign ?? "v1",
   t1Commit, profileModuleSha256, corpusModuleSha256, graphifyVersion: "0.18.0",
-  meshVersion: "0.19.0", maxOutputTokens, systemPrompt,
+  meshVersion: "0.19.1", maxOutputTokens, systemPrompt,
   systemPromptSha256: sha256(systemPrompt), documents };
 if (process.env.BENCHMARK_FREEZE_OUTPUT) {
   await writeFile(process.env.BENCHMARK_FREEZE_OUTPUT, JSON.stringify(result), { flag: "wx" });
