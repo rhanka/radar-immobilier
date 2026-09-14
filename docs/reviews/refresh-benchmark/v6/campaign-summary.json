@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "campaign": "v6",
+  "decision": "gemini_conditional_not_promotable",
+  "control": {
+    "documentId": "valcourt-2026-06-01-agenda",
+    "profileValid": true,
+    "provenanceValid": true,
+    "accepted": true,
+    "httpStatus": 200,
+    "latencyMs": 23629,
+    "inputTokens": 7263,
+    "outputTokens": 7747,
+    "totalTokens": 15010
+  },
+  "requests": {
+    "geminiUsedTotal": 4,
+    "geminiCeiling": 8,
+    "capDiagnosticUsed": 1,
+    "controlUsed": 1,
+    "campaignExecuted": 2,
+    "campaignPlanned": 5,
+    "campaignAccepted": 1,
+    "anthropicUsed": 0
+  },
+  "campaignStopped": true,
+  "campaignStopReason": "saint-etienne-de-bolton-2026-08-04 returned terminal MAX_TOKENS at 15057 visible output tokens and incomplete JSON",
+  "anthropicProcessEnvironment": "absent",
+  "judgesRun": false,
+  "judgesReason": "h2a_run rejected the benchmark worktree because it is outside the MCP startup workspace",
+  "t1Commit": "f96356e90a76b14b32ef0e913a82eb5805a9a413",
+  "profileModuleSha256": "b1d3989bc826e0691fb644b0b2857099f2c957a44f054bf0b3746adc526dab3f",
+  "manifestSha256": "6fea56a246c3d4f361bd64c2c61616cbab6d77458f8fe5deb69a31eaf910c18a",
+  "promptFreezeSha256": "acb3de708e206828e6b4d3a9db9bcacf5a6e147147e0ae4ec40643123e77ea0b"
+}
