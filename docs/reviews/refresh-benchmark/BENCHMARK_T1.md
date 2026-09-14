@@ -367,3 +367,108 @@ qui est établi, c'est que la correction n'introduit aucune classe de refus et n
 durcit rien ; ce qui ne l'est pas, c'est le taux d'acceptation du nouveau schéma.
 
 Détail, reçus et SHA : [v16/report.md](v16/report.md).
+
+## Campagne v100
+
+[FAIT] **Même contrat que v16 (`93994e45`, `immo-pv-extraction-v9`), même modèle
+Gemini 3.8 Flash LOW, même effort, même plafond 64 000, même transport.** Une seule
+variable bouge : **le corpus passe de 5 à 100 PV**, sur **100 villes distinctes**,
+tous datés 2026, tirés du corpus radar local. Objet : mesurer une **distribution**
+d'acceptation, de refus, de latence et de tokens, non plus un tirage à 5.
+
+[FAIT] **Sélection stratifiée et déterministe.** Univers mesuré : 1 332 PDF de PV
+distincts (sha256 du fichier = son nom) sur 252 villes, dont 1 315 exploitables en un
+seul chunk T1, dont 578 datés 2026 sur 236 villes. Après plancher de 2 000 octets de
+texte : **536 documents d'univers**. Tirage par terciles de tokens estimés (coupures
+4 432 / 9 873), quota 32 · 32 · 31, **une ville par document**, ordre par sha256 de
+l'identifiant. Plus **5 ancres de continuité** : les cinq documents du gel v13→v16,
+repris octet pour octet. **`manual-oracle: N-A` pour les 95 nouveaux documents** — la
+campagne ne calcule pas de F1.
+
+### Agrégats
+
+| Agrégat | v14 | v15 | v16 | **v100** |
+| --- | ---: | ---: | ---: | ---: |
+| Documents | 5 | 5 | 5 | **100** (100 villes) |
+| Acceptés | 5/5 | 5/5 | 3/5 | **87/100 — 87,0 %**, IC 95 % Wilson [79,0 ; 92,2] |
+| Classes de refus | aucune | aucune | 1 | **3** |
+| Fins de flux SSE | `STOP` 5/5 | `STOP` 5/5 | `STOP` 5/5 | **`STOP` 100/100** |
+| Réponses HTTP 200 | 5/5 | 5/5 | 5/5 | **100/100**, 0 relance |
+| Tokens entrée / sortie | 70 080 / 42 920 | 70 080 / 39 225 | 69 630 / 55 882 | **1 646 755 / 679 330** |
+| Sortie maximale (plafond 64 000) | — | — | — | **17 424** — marge 46 576 |
+| Latence moy. · p50 · p95 · max | 27 030 · — · 52 710 · — | 25 470 · — · — · 32 174 | 40 773 · — · — · 69 539 | **19 172 · 16 703 · 39 494 · 59 371 ms** |
+| Citations ancrées | 103/103 | 94/94 | 132/132 | **2 087 / 2 119 — 98,49 %** |
+| Citations sous les planchers (20 bruts, 12 normalisés) | 0 | 0 | 0 | **0** |
+| Requalification hors ligne = en ligne | 5/5 | 5/5 | 5/5 | **100/100** |
+
+### Les trois classes de refus
+
+| Classe | PV | Enregistrements | Déjà vue ? |
+| --- | :-: | :-: | --- |
+| `ungrounded_pdf_excerpt` | 6 | 32 | oui (v9, v13, v16) |
+| `missing_evidence_ref` | 5 | 5 | oui (v9 ×3), absente de v13 → v16 |
+| `inferred_relation_disallowed` | 2 | 2 | **inédite** |
+
+[FAIT] **Neuf refus sur treize tiennent à un seul enregistrement fautif**, soit 2,7 %
+à 5,3 % des citations de leur propre document. Sur les 13 refusés : 39 enregistrements
+fautifs sur 332 cités, 11,7 %.
+
+[FAIT] **Les six refus d'ancrage ont tous la même cause, mesurée au caractère près** :
+la mise en page du PDF insère des caractères au milieu du passage dans la sortie de
+`pdftotext` — colonnes entrelacées (Contrecœur, Potton ×3, Coteau-du-Lac), pied de
+page intercalé (Berthier-sur-Mer), numéro parasite (Wentworth-Nord), phrase qui
+déborde sur la page suivante (Sainte-Angèle-de-Monnoir ×2) — là où le modèle cite la
+phrase telle qu'un lecteur la lit. **Aucun refus d'ancrage ne vient d'une page fausse
+ou d'un texte inventé**, contrairement aux deux refus de v16.
+
+[FAIT] Exemple : Coteau-du-Lac, page 3. Le modèle cite `8.3. Demande d'un PPCMOI` puis
+`a) Approbation. Demande d'un PPCMOI pour le 25, rue des Chutes…` ; la page porte, dans
+l'ordre de `pdftotext`, un **`9.`** intercalé entre les deux — le numéro de la section
+suivante, placé là par effet de colonne. La normalisation retire la ponctuation et
+**garde le chiffre**, qui casse la sous-chaîne. Préfixe commun : 18 caractères
+normalisés sur 91.
+
+### Les cinq ancres — le 3/5 de v16 n'était pas un durcissement
+
+| Document | v14 | v15 | v16 | **v100** |
+| --- | :-: | :-: | :-: | :-: |
+| Lac-des-Seize-Îles · Saint-Étienne · Valcourt | ✓✓✓ | ✓✓✓ | ✓✓✓ | **✓✓✓** |
+| Saint-Barthélemy | ✓ | ✓ | ✗ | **✓** |
+| Waterloo | ✓ | ✓ | ✗ | **✓** |
+| **Total** | **5/5** | **5/5** | **3/5** | **5/5** |
+
+[FAIT] Quatre observations par document sur ces cinq PV, à gel identique :
+**18 acceptations sur 20**. [JUGEMENT] Le seuil B « ≥ 4/5 sur deux runs » est
+réétabli pour le schéma d'après-revue, et le 3/5 de v16 se lit comme un tirage.
+
+### Juges aveugles, 25 documents
+
+[FAIT] Paquet `v100/judge/blind-bundle.json`, SHA-256 `3a5d475bc420…` : 20 sorties
+acceptées stratifiées + 5 refusées stratifiées par classe, alias opaques, sans
+identifiant de document ni verdict de validateur. Deux juges, deux passes séparées :
+**OpenAI `gpt-5.6-sol`** (25 appels API, 409 453 tokens d'entrée, 48 127 de sortie) et
+**Claude Opus 5**.
+
+| Mesure | Valeur |
+| --- | ---: |
+| Utilité moyenne — OpenAI / Opus | **2,96 / 3,60** |
+| Pearson · Spearman | **0,474 · 0,281** |
+| Accord exact · à ±1 point | **7/25 · 21/25** |
+| κ de Cohen, notes exactes · binarisé « ≥ 4 » | **−0,018 · −0,183** |
+| Défauts de citation relevés | 49 (19 PV) / 13 (8 PV) |
+
+[FAIT] **Aucun des deux juges ne note les documents refusés plus bas que les
+acceptés** : OpenAI 3,00 contre 2,95 ; Opus 3,80 contre 3,55.
+
+[JUGEMENT] Les deux juges s'accordent à ±1 point sur 21 documents sur 25 et pas
+au-delà du hasard sur la note exacte : **un écart d'un point ne discrimine rien ici**.
+Ce qu'ils disent ensemble : les citations sont littérales et bien paginées, les actes
+de zonage sont extraits avec leur substance (codes de zone, lots, étapes, arêtes
+`amends` / `defines` / `rezones`), et deux familles manquent — **les listes longues de
+dossiers PIIA individuels**, repliées en un événement agrégé sans adresse ni lot, et
+**les transactions immobilières**.
+
+[FAIT] **Coût monétaire : `N-A`, source manquante** — aucun tarif par token dans le
+dépôt, ni Google, ni Anthropic, ni OpenAI.
+
+Détail, reçus, diagnostics et SHA : [v100/report.md](v100/report.md).
