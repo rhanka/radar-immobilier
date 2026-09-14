@@ -46,3 +46,18 @@ configMapGenerator:
     behavior: replace
     files:
       - default.conf=nginx/default.conf
+
+patches:
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: radar
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/name
+        value: keda-http-interceptor
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/port
+        value:
+          number: 8080
