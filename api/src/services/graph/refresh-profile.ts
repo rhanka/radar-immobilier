@@ -45,7 +45,7 @@ export interface RefreshProfileChunk {
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
 }
-export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v5";
+export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v6";
 export function loadRefreshProfileContext(options: LoadRefreshProfileContextOptions): RefreshProfileContext {
   if (options.unregisteredOnly) {
     if (!options.profilePath) throw new Error("Unregistered-only refresh requires an explicit profile path");
@@ -73,9 +73,14 @@ function pdfIdentityFor(chunk: RefreshCorpusChunk): Record<string, string> {
 }
 function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): string {
   const allowed = new Set(allowedNodeTypes(context));
+  const statuses = [...context.profile.hardening.statuses];
   const properties = Object.fromEntries(Object.entries(context.profile.node_types)
-    .filter(([type]) => allowed.has(type)).map(([type, spec]) =>
-      [type, (spec as unknown as Record<string, unknown>).properties ?? {}]));
+    .filter(([type]) => allowed.has(type)).map(([type, spec]) => {
+      const nodeProperties = (spec as unknown as Record<string, unknown>).properties as
+        Record<string, unknown> | undefined;
+      return [type, { ...nodeProperties, status: { type: "string", enum: statuses,
+        description: "Exact node status accepted by the product validator." } }];
+    }));
   const evidenceRelations = new Set(context.profile.evidence_policy.relation_types);
   const relations = Object.fromEntries(Object.entries(context.profile.relation_types).flatMap(([type, spec]) => {
     const sourceNodeTypes = spec.source_types.filter((nodeType) => allowed.has(nodeType));
@@ -105,7 +110,7 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
       evidence_refs: { type: "array", items: { type: "string", references: "evidence[].id" },
         minItems: context.profile.evidence_policy.min_refs,
         required_for_node_types: context.profile.evidence_policy.node_types,
-        required_for_relation_types: context.profile.evidence_policy.relation_types },
+        required_for_relation_types: Object.keys(relations), required_for: ["every edge"] },
       entity_citations: { node_field: "nodes[].citations", edge_field: "edges[].citations",
         required_for: ["every node", "every edge"], type: "array", minItems: 1, items: citation,
         description: "Emit only page and excerpt; the profile injects the constant PDF identity." },
@@ -276,12 +281,17 @@ export async function extractRefreshProfile(
         prompt: `Contract ${REFRESH_PROFILE_CONTRACT_VERSION}. Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
 Every node file_type must be "document" for this PDF. Edge confidence, when present, must be
 "AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.
+Node status is type-specific: use only ontology.node_properties.<node_type>.status.enum. These enums
+are generated from, and exactly align with, the allowed_statuses list below.
 Every entity must use the exact PDF identity in the schema. Evidence refs are
 non-empty arrays of string IDs from evidence[].id, never embedded objects. Evidence refs do not replace citations.
+Every edge must carry at least one evidence_refs ID that exists in evidence[]. Minimal example:
+{"edges":[{"evidence_refs":["ev-1"]}],"evidence":[{"id":"ev-1"}]}.
 Every node and every edge must include a non-empty citations array. Each citation must contain only page
 and excerpt (at most 200 characters). Do not repeat the document identity inside citations; the profile
-injects it before validation. Follow the relation source/target signatures exactly. Every excerpt must be
-non-empty verbatim text on its claimed physical PDF page.
+injects it before validation. Follow the relation source/target signatures exactly. Copy every excerpt
+exactly as it appears in the PDF text, including mistakes, spacing, and typography; correct nothing.
+Contrastive example: if the PDF text says "YvesMalouin", keep "YvesMalouin"; never "Yves-Malouin".
 If no supported fact is grounded in the PDF, return empty nodes, edges, and evidence.\n\n${buildProfileChunkPrompt(options.context, {
           filePath: chunk.originalKey, fileType: "document", text: chunk.text,
         })}`,
