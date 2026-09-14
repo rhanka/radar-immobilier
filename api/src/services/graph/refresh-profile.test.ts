@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { performance } from "node:perf_hooks";
@@ -24,12 +25,14 @@ const v13CasesPath = new URL("../../../tests/fixtures/refresh-018/v13-citation-c
 const profilePath = fileURLToPath(new URL("../../../../radar/ontology/ontology-profile.yaml", import.meta.url));
 interface Oracle { meetingDate: string; sourceUrl: string; docSha: string; originalKey: string; page: number;
   resolution: string; bylawNumber: string; stage: string; excerpt: string; forbiddenProperties: string[] }
-interface V11Case { caseId: string; path: string; page: number; codePoints: number; excerpt: string;
-  pageText: string; refusedAs: string }
-interface V11Cases { overlongExcerpt: V11Case; shortLabelExcerpt: V11Case }
+interface V11Case { caseId: string; path: string; page: number; codePoints: number;
+  normalizedCodePoints: number; excerpt: string; pageText: string; refusedAsUnderV7: string }
+interface V11Cases { overlongExcerpt: V11Case & { handledUnderV9: string };
+  shortLabelExcerpt: V11Case & { refusedAsUnderV9: string } }
 interface V13Case { excerpt: string; page: number; codePoints: number }
 interface V13Cases { zoneLabelExcerpt: V13Case & { refusedAsUnderV9: string };
-  decisionExcerpt: V13Case; pageText: string }
+  decisionExcerpt: V13Case; pageText: string;
+  provenance: { manifestPageTextSha256: string; pageTextSha256: string } }
 let oracle!: Oracle;
 let v11Cases!: V11Cases;
 let v13Cases!: V13Cases;
@@ -299,9 +302,21 @@ describe("refresh profile extraction", () => {
         .toHaveLength(Math.min(codePointCount, 200));
     });
 
+  it("should certify the frozen v13 page text by the hash the fixture declares", () => {
+    // The manifest hash cannot be recomputed from the repository: the campaign manifest is not
+    // versioned here. This one is computed on the string this file delivers, so an edit to the
+    // page text below fails here instead of silently invalidating the frozen contrastive pair.
+    expect(createHash("sha256").update(v13Cases.pageText, "utf8").digest("hex"))
+      .toBe(v13Cases.provenance.pageTextSha256);
+    expect(v13Cases.provenance.manifestPageTextSha256)
+      .not.toBe(v13Cases.provenance.pageTextSha256);
+  });
+
   it("should accept the real v11 excerpt refused as too long, truncated to its verbatim prefix", async () => {
     const measured = v11Cases.overlongExcerpt;
     expect(measured.codePoints).toBe(203);
+    expect(measured.refusedAsUnderV7).toBe("entity_citation_excerpt_too_long");
+    expect(measured.handledUnderV9).toBe("truncated_to_a_200_code_point_verbatim_prefix");
     const value = compactExtraction();
     value.nodes[0]!.citations![0]!.excerpt = measured.excerpt;
     const results = await extractRefreshProfile([chunk(undefined,
@@ -319,11 +334,14 @@ describe("refresh profile extraction", () => {
     // failure, which named the wrong cause; v9 names the excerpt floor and never reaches the anchor,
     // whose own 12-normalized-character floor is left untouched.
     expect(measured.pageText).toContain(measured.excerpt);
+    expect(measured.refusedAsUnderV7).toBe("ungrounded_pdf_excerpt");
+    expect(measured.refusedAsUnderV9).toBe("entity_citation_excerpt_too_short");
+    expect(measured.normalizedCodePoints).toBe(8);
     const value = compactExtraction();
     value.nodes[0]!.citations![0]!.excerpt = measured.excerpt;
     await expect(extractRefreshProfile([chunk(undefined, `[PDF PAGE 3]\n${measured.pageText}`)], { context,
       textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
-    })).rejects.toThrow("entity_citation_excerpt_too_short");
+    })).rejects.toThrow(measured.refusedAsUnderV9);
   });
 
   it("should refuse the real v13 zone label and accept the decision sentence of the same page",

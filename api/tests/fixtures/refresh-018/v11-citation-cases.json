@@ -14,7 +14,10 @@
     "codePoints": 203,
     "excerpt": "Le conseil donne son accord de principe à l'implantation d'une\ntour de télécommunications d'une hauteur maximale de 40\nmètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre\ndu Québec dans le secte",
     "pageText": "é par monsieur Pierre Brien\net résolu à l'unanimité que:\n1. Le conseil donne son accord de principe à l'implantation d'une\ntour de télécommunications d'une hauteur maximale de 40\nmètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre\ndu Québec dans le secteur du 6400, rue Foster,\nconditionnellement à ce que Bell réalise son processus\nd",
-    "refusedAs": "entity_citation_excerpt_too_long"
+    "normalizedCodePoints": 163,
+    "refusedAsUnderV7": "entity_citation_excerpt_too_long",
+    "handledUnderV9": "truncated_to_a_200_code_point_verbatim_prefix",
+    "cause": "Verbatim prefix on the cited page, 3 code points over the declared 200-code-point bound: v7 refused it, v8 and v9 truncate it to its 200-code-point verbatim prefix and keep the anchor."
   },
   "shortLabelExcerpt": {
     "caseId": "saint-etienne-de-bolton-2026-08-04--gemini-low",
@@ -23,7 +26,9 @@
     "codePoints": 12,
     "excerpt": "Zone : COM-1",
     "pageText": "enne-de-Bolton\nAdresse : 12, rue Principale\nLot : 5 191 695\nZone : COM-1\n\n11\n\n",
-    "refusedAs": "ungrounded_pdf_excerpt",
-    "cause": "Verbatim on the cited page, but 8 normalized code points, under the 12-code-point anchor floor."
+    "normalizedCodePoints": 8,
+    "refusedAsUnderV7": "ungrounded_pdf_excerpt",
+    "refusedAsUnderV9": "entity_citation_excerpt_too_short",
+    "cause": "Verbatim on the cited page, but a field label: 12 code points before anchoring and 8 after normalization, under both the 20-code-point excerpt floor and the 12-code-point anchor floor. v7 named the anchor, which stated a cause that is false; v9 names the excerpt floor, before the anchor."
   }
 }
