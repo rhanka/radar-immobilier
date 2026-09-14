@@ -1,0 +1,65 @@
+{
+  "alias": "doc-f018068aab4c",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_012ec605d3f1d176006aa87bfb871887d2b273e00795ad892d",
+  "usage": {
+    "input_tokens": 7180,
+    "input_tokens_details": {
+      "cache_write_tokens": 7177,
+      "cached_tokens": 0
+    },
+    "output_tokens": 445,
+    "output_tokens_details": {
+      "reasoning_tokens": 116
+    },
+    "total_tokens": 7625
+  },
+  "latencyMs": 11067,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-f018068aab4c",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Demande de PIIA 2026-002 visant le 959, 3e Rue, lot 6 659 704",
+        "page": 16,
+        "supported": true,
+        "evidenceInExtraction": "event-piia-2026-002"
+      },
+      {
+        "id": "u2",
+        "summary": "Demande de PIIA 2026-003 visant le 418, 3e Rue, lot 3 867 144",
+        "page": 17,
+        "supported": true,
+        "evidenceInExtraction": "event-piia-2026-003"
+      },
+      {
+        "id": "u3",
+        "summary": "Demande de dérogation mineure 2026-003 visant le 170, rue Joe-Mann, lot 3 868 446",
+        "page": 18,
+        "supported": true,
+        "evidenceInExtraction": "event-dm-2026-003"
+      },
+      {
+        "id": "u4",
+        "summary": "Demande de dérogation mineure 2026-004 visant le 516, 4e Rue, lot 3 866 957",
+        "page": 19,
+        "supported": true,
+        "evidenceInExtraction": "event-dm-2026-004"
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3",
+      "u4"
+    ],
+    "missedUnitIds": [],
+    "unsupportedClaims": [],
+    "citationDefects": [],
+    "usefulness": 5,
+    "notes": "Les quatre actes d’urbanisme attestés sont recensés correctement, avec des pages et des extraits verbatim exacts."
+  }
+}

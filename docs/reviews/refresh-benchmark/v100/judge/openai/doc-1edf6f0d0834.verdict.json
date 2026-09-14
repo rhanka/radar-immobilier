@@ -1,0 +1,114 @@
+{
+  "alias": "doc-1edf6f0d0834",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0fbf280e7dbb5100006aa877dc930087d281c94395a52169b1",
+  "usage": {
+    "input_tokens": 19566,
+    "input_tokens_details": {
+      "cache_write_tokens": 19563,
+      "cached_tokens": 0
+    },
+    "output_tokens": 2320,
+    "output_tokens_details": {
+      "reasoning_tokens": 1181
+    },
+    "total_tokens": 21886
+  },
+  "latencyMs": 40742,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-1edf6f0d0834",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Avis de motion donné le 7 juillet 2026 pour le règlement 738-26 modifiant le règlement de zonage 288-90.",
+        "page": 3,
+        "supported": false,
+        "evidenceInExtraction": "Mentionné dans le texte source, mais non recensé comme acte distinct dans l’extraction."
+      },
+      {
+        "id": "u2",
+        "summary": "Consultation publique tenue le 22 juillet 2026 concernant le règlement 738-26.",
+        "page": 4,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ni événement de consultation publique dans l’extraction."
+      },
+      {
+        "id": "u3",
+        "summary": "Adoption du règlement 738-26 modifiant le règlement de zonage 288-90 pour permettre des constructions et aménagements accessoires en cour avant sur les propriétés en bordure d’un lac.",
+        "page": 4,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-738-26, stage « adoption », résolution 2026-09-189."
+      },
+      {
+        "id": "u4",
+        "summary": "Avis de motion pour un projet modifiant le règlement de zonage 288-90 afin de permettre des immeubles à logements dans les zones R-7 et R-8.",
+        "page": 4,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-avis-motion-739-26, étape « avis_motion », résolution 2026-09-190."
+      },
+      {
+        "id": "u5",
+        "summary": "Adoption du premier projet de règlement 739-26 modifiant le règlement de zonage 288-90 afin de permettre des immeubles à logements dans les zones R-7 et R-8.",
+        "page": 5,
+        "supported": true,
+        "evidenceInExtraction": "Nœuds bylaw-739-26 et event-adoption-projet-739-26, résolution 2026-09-191."
+      },
+      {
+        "id": "u6",
+        "summary": "Acquisition par la Municipalité de la portion de la Montée du Lac-Robert identifiée par le matricule 2723-93-7328, une voie carrossable utilisée par plusieurs citoyens.",
+        "page": 7,
+        "supported": false,
+        "evidenceInExtraction": "Aucun acte de cession ou d’acquisition de rue n’est recensé dans l’extraction."
+      }
+    ],
+    "supportedUnitIds": [
+      "u3",
+      "u4",
+      "u5"
+    ],
+    "missedUnitIds": [
+      "u1",
+      "u2",
+      "u6"
+    ],
+    "unsupportedClaims": [
+      {
+        "summary": "L’avis de motion de la résolution 2026-09-190 porte le numéro de règlement 739-26.",
+        "page": 4,
+        "reason": "Le texte de l’avis de motion ne donne aucun numéro au projet; le numéro 739-26 apparaît seulement dans la section suivante consacrée au premier projet."
+      },
+      {
+        "summary": "L’avis de motion constitue une décision « approuvée ».",
+        "page": 4,
+        "reason": "Le procès-verbal atteste qu’un avis de motion est donné, sans vote ni décision d’approbation pour cet avis."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 4,
+        "excerpt": "QUE\n\nle règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le\nrèglement de zonage numéro 288-90 afin de permettre les constructions accessoires\nen cour avant pour les propriétés en ",
+        "defect": "L’extrait est tronqué avant la fin du titre et avant les mots « soit et est adopté »; il ne soutient donc pas à lui seul le stade d’adoption ni l’objet complet."
+      },
+      {
+        "page": 5,
+        "excerpt": "QUE\n\nle premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R",
+        "defect": "L’extrait est tronqué avant « R-8 » et avant « soit et est adopté »; il ne soutient pas intégralement les zones ciblées ni l’adoption du premier projet."
+      },
+      {
+        "page": 4,
+        "excerpt": "Un avis de motion est donné par Monsieur le conseiller François Bertrand à l'effet qu'un\nmembre du conseil pourra déposer et présenter, séance tenante ou ultérieure, un premier\nprojet de règlement am",
+        "defect": "L’extrait est tronqué avant l’objet de la modification et ne mentionne ni les zones R-7 et R-8 ni le numéro 739-26; il ne soutient pas les relations targets_zone ni le numéro attribué à l’avis."
+      },
+      {
+        "page": 5,
+        "excerpt": "La grille de spécification, constituant l’annexe I du règlement de zonage numéro 28890 de la municipalité de Saint-Barthélemy, est modifiée tel qu’il apparait à l’annexe I",
+        "defect": "Cette citation ne mentionne pas les zones R-7 ou R-8 et ne soutient donc pas spécifiquement les relations governed_by rattachées à ces deux zones."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "L’extraction saisit correctement les trois actes principaux de la séance, mais omet l’avis de motion antérieur et la consultation publique attestés dans les considérants du règlement 738-26, ainsi que l’acquisition d’une portion de voie. Plusieurs citations sont trop tronquées pour soutenir toutes les propriétés ou relations auxquelles elles sont rattachées."
+  }
+}

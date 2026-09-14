@@ -1,0 +1,55 @@
+{
+  "alias": "doc-c7f5f9b28bc4",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_06c146fc96b9b1a6006aa87bd6c47887d2baa6db2d8642f018",
+  "usage": {
+    "input_tokens": 17175,
+    "input_tokens_details": {
+      "cache_write_tokens": 17172,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1293,
+    "output_tokens_details": {
+      "reasoning_tokens": 811
+    },
+    "total_tokens": 18468
+  },
+  "latencyMs": 36644,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-c7f5f9b28bc4",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Approbation de la dérogation mineure no 2026-175 pour régulariser l’implantation trop rapprochée de la ligne latérale du garage attenant sur le lot 3 601 426, au 304, avenue du Ruisseau, zone 03-H.",
+        "page": 10,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-dm-2026-175 avec décision « approuvé », résolution 045-02-2026 et citation verbatim de l’approbation à la page 10."
+      },
+      {
+        "id": "u2",
+        "summary": "Adoption d’un projet de résolution de PPCMOI no 2026-157 visant à autoriser l’usage de vente de remorques sur le lot 4 341 331, au 1646, route 277, zone 58-A/ILOT.",
+        "page": 10,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-ppcmoi-2026-157 et signal-ppcmoi-2026-157 décrivant l’usage visé, le lot et la zone; l’extraction représente toutefois l’acte comme une approbation sans préciser qu’il s’agit d’un projet de résolution."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2"
+    ],
+    "missedUnitIds": [],
+    "unsupportedClaims": [
+      {
+        "summary": "Le PPCMOI no 2026-157 aurait fait l’objet d’une approbation définitive.",
+        "page": 10,
+        "reason": "Le procès-verbal atteste l’adoption d’un projet de résolution relatif au PPCMOI. Le champ « decision: approuvé » et la description « Autorisation d'un PPCMOI » omettent cette étape procédurale et peuvent être interprétés à tort comme une décision définitive."
+      }
+    ],
+    "citationDefects": [],
+    "usefulness": 3,
+    "notes": "Les deux actes d’urbanisme sont repérés avec les bons lots, zones et résolutions. La dérogation mineure est correctement extraite. Le PPCMOI exige une relecture afin de rétablir l’étape exacte d’adoption d’un projet de résolution plutôt qu’une approbation définitive."
+  }
+}

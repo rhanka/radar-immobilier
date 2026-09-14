@@ -1,0 +1,186 @@
+{
+  "alias": "doc-62130f4ec984",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_066eb7dac1ef29e6006aa879324c2c87d2911df2adae5b5f45",
+  "usage": {
+    "input_tokens": 40764,
+    "input_tokens_details": {
+      "cache_write_tokens": 40761,
+      "cached_tokens": 0
+    },
+    "output_tokens": 3161,
+    "output_tokens_details": {
+      "reasoning_tokens": 1342
+    },
+    "total_tokens": 43925
+  },
+  "latencyMs": 83262,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-62130f4ec984",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Avis de motion du règlement 1571-08-2026 modifiant le règlement relatif aux PIIA.",
+        "page": 10,
+        "supported": false,
+        "evidenceInExtraction": "Le règlement et son projet adopté sont extraits, mais l’avis de motion de la résolution 255-05-2026 ne constitue pas un acte distinct dans l’extraction."
+      },
+      {
+        "id": "u2",
+        "summary": "Adoption du projet de règlement 1571-08-2026 relatif aux PIIA.",
+        "page": 11,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-1571-08-2026, stade « projet », résolution 256-05-2026, avec citation à la page 11."
+      },
+      {
+        "id": "u3",
+        "summary": "Décision de tenir le 20 mai 2026 une assemblée publique de consultation sur le projet 1571-08-2026.",
+        "page": 11,
+        "supported": false,
+        "evidenceInExtraction": "Aucun événement de consultation publique n’est extrait."
+      },
+      {
+        "id": "u4",
+        "summary": "Avis de motion du règlement de zonage 1841-53-2026 concernant notamment les zones Rc-23, Cga-1, Cbb-1 et Ib-1.",
+        "page": 11,
+        "supported": true,
+        "evidenceInExtraction": "L’avis figure dans les citations des nœuds de zones Rc-23, Cga-1, Cbb-1 et Ib-1, bien que ces citations soient insuffisantes pour soutenir les codes et secteurs associés."
+      },
+      {
+        "id": "u5",
+        "summary": "Adoption du premier projet de règlement de zonage 1841-53-2026.",
+        "page": 12,
+        "supported": true,
+        "evidenceInExtraction": "Nœuds bylaw-1841-53-2026 et event-258-05-2026, avec preuve ev-1841-53-2026."
+      },
+      {
+        "id": "u6",
+        "summary": "Décision de tenir le 20 mai 2026 une assemblée publique de consultation sur le projet de zonage 1841-53-2026.",
+        "page": 12,
+        "supported": false,
+        "evidenceInExtraction": "Aucun événement de consultation publique n’est extrait."
+      },
+      {
+        "id": "u7",
+        "summary": "Avis de motion du règlement de lotissement 1842-06-2026.",
+        "page": 12,
+        "supported": false,
+        "evidenceInExtraction": "Le projet adopté est extrait, mais l’avis de motion de la résolution 259-05-2026 ne constitue pas un acte distinct dans l’extraction."
+      },
+      {
+        "id": "u8",
+        "summary": "Adoption du projet de règlement de lotissement 1842-06-2026.",
+        "page": 13,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-1842-06-2026, stade « projet », résolution 260-05-2026, avec citation à la page 13."
+      },
+      {
+        "id": "u9",
+        "summary": "Décision de tenir le 20 mai 2026 une assemblée publique de consultation sur le projet de lotissement 1842-06-2026.",
+        "page": 13,
+        "supported": false,
+        "evidenceInExtraction": "Aucun événement de consultation publique n’est extrait."
+      },
+      {
+        "id": "u10",
+        "summary": "Approbation de la dérogation mineure 2026-006 au 518, rue Principale.",
+        "page": 14,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-262-05-2026, décision « approuvé », résolution 262-05-2026."
+      },
+      {
+        "id": "u11",
+        "summary": "Approbation de la dérogation mineure 2026-034 au 111, rue du Muscadet.",
+        "page": 15,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-263-05-2026, décision « approuvé », résolution 263-05-2026."
+      },
+      {
+        "id": "u12",
+        "summary": "Approbation conditionnelle du PIIA 2026-003 au 518, rue Principale.",
+        "page": 16,
+        "supported": false,
+        "evidenceInExtraction": "Aucun événement correspondant au PIIA 2026-003 n’est extrait."
+      },
+      {
+        "id": "u13",
+        "summary": "Approbation du PIIA 2025-087 au 1529, rue du Sud.",
+        "page": 16,
+        "supported": false,
+        "evidenceInExtraction": "Aucun événement correspondant au PIIA 2025-087 n’est extrait."
+      },
+      {
+        "id": "u14",
+        "summary": "Refus du PIIA 2026-029 au 295, rue d’Ontario.",
+        "page": 17,
+        "supported": false,
+        "evidenceInExtraction": "Aucun événement correspondant au PIIA 2026-029 n’est extrait."
+      },
+      {
+        "id": "u15",
+        "summary": "Adoption du second projet de PPCMOI 2026-032 au 245, rue Principale pour quatre logements en location de courte durée et des dérogations relatives au stationnement.",
+        "page": 42,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-315-05-2026 et preuve ev-315-05-2026, résolution 315-05-2026."
+      }
+    ],
+    "supportedUnitIds": [
+      "u2",
+      "u4",
+      "u5",
+      "u8",
+      "u10",
+      "u11",
+      "u15"
+    ],
+    "missedUnitIds": [
+      "u1",
+      "u3",
+      "u6",
+      "u7",
+      "u9",
+      "u12",
+      "u13",
+      "u14"
+    ],
+    "unsupportedClaims": [
+      {
+        "summary": "Le PPCMOI 2026-032 est classé comme un « rezonage ».",
+        "page": 42,
+        "reason": "Le texte atteste l’adoption d’un second projet de PPCMOI, et non l’adoption d’un règlement de changement de zonage."
+      },
+      {
+        "summary": "Le signal relatif au règlement 1841-53-2026 fixe un minimum de 26 unités (« nb_unites_min » : 26).",
+        "page": 12,
+        "reason": "Le texte permet des habitations comptant 26 logements; il ne présente pas 26 comme un seuil minimal."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 11,
+        "excerpt": "Madame la conseillère Nathalie Haman, donne avis de motion qu’à une\nprochaine séance de ce conseil, il sera adopté le Règlement numéro 1841-532026 modifiant le règlement de zonage numéro 1841 afin de ",
+        "defect": "Citation tronquée réutilisée pour les nœuds Rc-23, Cga-1, Cbb-1 et Ib-1; elle ne contient aucun de ces codes ni les secteurs attribués."
+      },
+      {
+        "page": 42,
+        "excerpt": "D’adopter le second projet de PPCMOI numéro 2026-032, afin d’autoriser, sur\nl’immeuble situé au 245, rue Principale (lot 3 357 427 du cadastre du Québec)\nl'ajout d'une unité de logement pour l'héberge",
+        "defect": "Citation tronquée au milieu d’un mot; elle ne soutient pas la description complète concernant la résidence de tourisme, les quatre logements et le stationnement."
+      },
+      {
+        "page": 14,
+        "excerpt": "D'approuver la demande de dérogation mineure 2026-006 relative à la\npropriété sise au 518 rue Principale, lot 3 355 762 du cadastre du Québec, afin\nde permettre :",
+        "defect": "La citation ne contient pas les dérogations précises résumées dans l’extraction, soit la distance de 0,5 mètre et le panneau menu rétroéclairé."
+      },
+      {
+        "page": 15,
+        "excerpt": "D'approuver la demande de dérogation mineure 2026-034 relative à la\npropriété sise au 111 rue du Muscadet, lot 4 445 225 du cadastre du Québec,\nafin de permettre que la superficie des bâtiments",
+        "defect": "La citation est tronquée avant les superficies de 82,6 m² et 78,91 m² affirmées dans la description."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "L’extraction repère correctement les trois projets réglementaires principaux, les deux dérogations mineures et le second projet de PPCMOI, mais omet les consultations, plusieurs avis de motion et la quasi-totalité des décisions de PIIA. La limite de 15 unités empêche d’énumérer ici tous les autres actes attestés, notamment les nombreux PIIA des résolutions 267 à 280, la contribution liée au permis de lotissement de la résolution 282 et la consultation publique antérieure du PPCMOI mentionnée à la page 42."
+  }
+}

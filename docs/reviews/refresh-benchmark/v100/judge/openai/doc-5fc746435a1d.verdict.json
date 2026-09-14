@@ -1,0 +1,82 @@
+{
+  "alias": "doc-5fc746435a1d",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_059bec830365d735006aa878e8855887d2a1f53823c5348242",
+  "usage": {
+    "input_tokens": 17692,
+    "input_tokens_details": {
+      "cache_write_tokens": 17689,
+      "cached_tokens": 0
+    },
+    "output_tokens": 2171,
+    "output_tokens_details": {
+      "reasoning_tokens": 1411
+    },
+    "total_tokens": 19863
+  },
+  "latencyMs": 73633,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-5fc746435a1d",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Consultation publique tenue le 16 mars 2026, dont le procès-verbal est approuvé par le conseil.",
+        "page": 1,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ni événement ne recense cette consultation publique."
+      },
+      {
+        "id": "u2",
+        "summary": "Avis de motion et dépôt du projet de règlement 471-09 modifiant le règlement de zonage numéro 471 pour assurer sa concordance au schéma d’aménagement et de développement.",
+        "page": 9,
+        "supported": true,
+        "evidenceInExtraction": "Nœuds bylaw-471-09 et designation-event-2026-04-192; preuve ev-bylaw-471-09."
+      },
+      {
+        "id": "u3",
+        "summary": "Avis de motion et dépôt du projet de règlement 470-04 modifiant le plan d’urbanisme numéro 470 pour assurer sa concordance au schéma d’aménagement et de développement.",
+        "page": 9,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-470-04 et preuve ev-bylaw-470-04, sans événement de désignation distinct."
+      },
+      {
+        "id": "u4",
+        "summary": "Avis de motion et dépôt du projet de règlement 472-04 modifiant le règlement de lotissement numéro 472 pour assurer sa concordance au schéma d’aménagement et de développement.",
+        "page": 9,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-472-04 et preuve ev-bylaw-472-04, sans événement de désignation distinct."
+      }
+    ],
+    "supportedUnitIds": [
+      "u2",
+      "u3",
+      "u4"
+    ],
+    "missedUnitIds": [
+      "u1"
+    ],
+    "unsupportedClaims": [],
+    "citationDefects": [
+      {
+        "page": 9,
+        "excerpt": "Avis de motion est par la présente donné par ROBERT ARCOITE conseiller, qu’à une séance\nultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47109 modifiant le règlement de ",
+        "defect": "Extrait tronqué : il ne soutient ni le dépôt du projet ni l’objet complet relatif à la concordance au schéma d’aménagement."
+      },
+      {
+        "page": 9,
+        "excerpt": "Avis de motion est par la présente donné par MARCEL TREMBLAY conseiller, qu’à une\nséance ultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47004 relatif au schéma d’aména",
+        "defect": "Extrait tronqué : il ne soutient ni le dépôt du projet ni l’affirmation complète selon laquelle le règlement modifie le plan d’urbanisme numéro 470 pour assurer la concordance."
+      },
+      {
+        "page": 9,
+        "excerpt": "Avis de motion est par la présente donné par FRANÇOIS BARBEAU conseiller, qu’à une\nséance ultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47204 modifiant le règlement d",
+        "defect": "Extrait tronqué : il ne soutient ni le dépôt du projet ni l’objet complet concernant la modification du règlement de lotissement et la concordance."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "Les trois dossiers réglementaires d’urbanisme de la page 9 sont repérés, mais la consultation publique attestée à la page 1 est omise. Seul le règlement 471-09 possède un événement procédural distinct; les règlements 470-04 et 472-04 sont représentés uniquement comme règlements au stade de projet. Les éléments relatifs à la CPTAQ sont textuellement étayés, mais ne constituent pas une unité parmi les catégories d’actes demandées."
+  }
+}

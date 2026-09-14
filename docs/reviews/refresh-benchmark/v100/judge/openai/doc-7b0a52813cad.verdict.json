@@ -1,0 +1,79 @@
+{
+  "alias": "doc-7b0a52813cad",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0a2e1cc845d98741006aa8798586f487d2a7cbc5a4300db552",
+  "usage": {
+    "input_tokens": 6614,
+    "input_tokens_details": {
+      "cache_write_tokens": 6611,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1663,
+    "output_tokens_details": {
+      "reasoning_tokens": 1027
+    },
+    "total_tokens": 8277
+  },
+  "latencyMs": 35411,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-7b0a52813cad",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Adoption inscrite du règlement 2026-489 sur la gestion quantitative des eaux pluviales",
+        "page": 1,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-2026-489, stage adoption, avec citation verbatim complète à la page 1."
+      },
+      {
+        "id": "u2",
+        "summary": "Avis de motion inscrit pour le règlement 2026-402-6 modifiant le règlement 2012-402 concernant la réserve financière pour l’égout et l’aqueduc",
+        "page": 1,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-2026-402-6 avec stage avis_motion; la citation est toutefois tronquée avant les mots « avis de motion »."
+      },
+      {
+        "id": "u3",
+        "summary": "Dérogation mineure inscrite pour le lot 4 390 294, rang de la Rivière Ouest",
+        "page": 1,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-derogation-lot-4390294 avec citation verbatim complète à la page 1."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3"
+    ],
+    "missedUnitIds": [],
+    "unsupportedClaims": [
+      {
+        "summary": "Le règlement 2012-402 constitue un acte distinct dans ce document",
+        "page": 1,
+        "reason": "Le texte ne fait que désigner le règlement 2012-402 comme règlement modifié par le règlement 2026-402-6; aucun acte autonome visant le règlement 2012-402 n’est inscrit."
+      },
+      {
+        "summary": "Le document est un procès-verbal",
+        "page": 1,
+        "reason": "Le titre indique explicitement qu’il s’agit d’un ordre du jour, et non d’un procès-verbal relatant des décisions accomplies."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 1,
+        "excerpt": "5.2 Règlement 2026-402-6 Règlement modifiant le règlement 2012-402 concernant la",
+        "defect": "Extrait verbatim mais incomplet : il ne contient ni la fin du titre ni les mots « avis de motion » et ne soutient donc pas à lui seul le stage avis_motion et le titre complet."
+      },
+      {
+        "page": 1,
+        "excerpt": "6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet",
+        "defect": "Extrait verbatim mais tronqué avant « éolien : demande de prolongation à la CPTAQ »; il ne soutient pas la description complète du signal."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "Les trois unités pertinentes inscrites à l’ordre du jour sont extraites. Une relecture demeure nécessaire en raison des citations tronquées, de la création d’un nœud autonome pour le règlement 2012-402 et de la qualification erronée du document comme procès-verbal. L’ordre du jour atteste que les actes étaient inscrits, mais non qu’ils ont effectivement été accomplis."
+  }
+}

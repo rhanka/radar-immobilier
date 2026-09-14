@@ -1,0 +1,111 @@
+{
+  "alias": "doc-a98a84c82e60",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0a09f1f7a448bfe2006aa87b5a02c887d2ab74972a457bbcfe",
+  "usage": {
+    "input_tokens": 24961,
+    "input_tokens_details": {
+      "cache_write_tokens": 24958,
+      "cached_tokens": 0
+    },
+    "output_tokens": 2892,
+    "output_tokens_details": {
+      "reasoning_tokens": 1808
+    },
+    "total_tokens": 27853
+  },
+  "latencyMs": 78176,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-a98a84c82e60",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Approbation conditionnelle de 16 PIIA par la résolution 2026-128.",
+        "page": 16,
+        "supported": true,
+        "evidenceInExtraction": "Nœud designation-event-2026-128 et preuve ev-2026-128."
+      },
+      {
+        "id": "u2",
+        "summary": "Refus de trois PIIA par la résolution 2026-129.",
+        "page": 17,
+        "supported": true,
+        "evidenceInExtraction": "Nœud designation-event-2026-129 et preuve ev-2026-129."
+      },
+      {
+        "id": "u3",
+        "summary": "Adoption du Règlement numéro 1230-7 modifiant le plan d’urbanisme durable pour concordance au schéma d’aménagement révisé.",
+        "page": 18,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-1230-7 et preuve ev-1230-7."
+      },
+      {
+        "id": "u4",
+        "summary": "Avis de motion du Règlement numéro 1230-8 modifiant le plan d’urbanisme durable en réponse à une nouvelle orientation gouvernementale en matière d’habitation.",
+        "page": 18,
+        "supported": false,
+        "evidenceInExtraction": "Aucun nœud ne représente l’avis de motion; le nœud bylaw-1230-8 représente seulement l’adoption du projet."
+      },
+      {
+        "id": "u5",
+        "summary": "Adoption du projet de Règlement numéro 1230-8 modifiant le plan d’urbanisme durable en réponse à une nouvelle orientation gouvernementale en matière d’habitation.",
+        "page": 18,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-1230-8, signal-1230-8 et preuve ev-1230-8."
+      },
+      {
+        "id": "u6",
+        "summary": "Adoption du second projet de Règlement numéro 1235-34 modifiant les limites de quatre zones dans le secteur de la rue des Vétérans.",
+        "page": 19,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-1235-34 et preuve ev-1235-34."
+      },
+      {
+        "id": "u7",
+        "summary": "Adoption du Règlement numéro 1235-35 modifiant le règlement de zonage pour concordance au schéma d’aménagement révisé.",
+        "page": 19,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-1235-35 et preuve ev-1235-35."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3",
+      "u5",
+      "u6",
+      "u7"
+    ],
+    "missedUnitIds": [
+      "u4"
+    ],
+    "unsupportedClaims": [],
+    "citationDefects": [
+      {
+        "page": 18,
+        "excerpt": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la",
+        "defect": "La citation tronquée associée au nœud et à l’arête ne contient pas la décision d’adoption; la preuve ev-1230-7 fournit toutefois une citation complète et valide."
+      },
+      {
+        "page": 18,
+        "excerpt": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement du Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé, en réponse à",
+        "defect": "La citation tronquée associée aux nœuds et aux arêtes ne contient pas la décision d’adoption; la preuve ev-1230-8 fournit toutefois une citation complète et valide."
+      },
+      {
+        "page": 19,
+        "excerpt": "Que le second projet de Règlement numéro 1235-34, intitulé : « Règlement amendant le Règlement de zonage numéro 1235 afin de modifier les limites de quatre zones dans le secteur de la rue des Vétérans",
+        "defect": "La citation tronquée associée au nœud et à l’arête ne contient pas la décision d’adoption; la preuve ev-1235-34 fournit toutefois une citation complète et valide."
+      },
+      {
+        "page": 19,
+        "excerpt": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement de zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la modification des",
+        "defect": "La citation tronquée associée au nœud et à l’arête ne contient pas la décision d’adoption; la preuve ev-1235-35 fournit toutefois une citation complète et valide."
+      }
+    ],
+    "usefulness": 4,
+    "notes": "L’extraction couvre les deux décisions de PIIA et les quatre adoptions de règlements ou projets, avec des preuves complètes valides. Elle omet l’avis de motion distinct du Règlement 1230-8. Le signal 1230-8 duplique l’acte d’adoption du projet plutôt que de constituer une unité supplémentaire."
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "alias": "doc-3c69d1923ad4",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0405443c58227ed2006aa87890e50087d289de54a2dc153ab8",
+  "usage": {
+    "input_tokens": 6785,
+    "input_tokens_details": {
+      "cache_write_tokens": 6782,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1979,
+    "output_tokens_details": {
+      "reasoning_tokens": 1391
+    },
+    "total_tokens": 8764
+  },
+  "latencyMs": 40670,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-3c69d1923ad4",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Avis de motion inscrit à l’ordre du jour pour le projet de règlement 2026-08 régissant l’occupation du domaine public municipal",
+        "page": 1,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-2026-08, stage avis_motion, avec citation exacte du point 3.6."
+      },
+      {
+        "id": "u2",
+        "summary": "Dérogation mineure inscrite à l’ordre du jour pour le 252, chemin du Village, dossier DDM2026-058",
+        "page": 1,
+        "supported": true,
+        "evidenceInExtraction": "Nœud event-ddm2026-058 avec citation exacte du point 5.4."
+      },
+      {
+        "id": "u3",
+        "summary": "Adoption inscrite à l’ordre du jour du règlement 2026-102-01 modifiant le règlement de lotissement 2019-102 concernant la contribution pour parcs, terrains de jeux ou espaces naturels",
+        "page": 1,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-2026-102-01, stage adoption, relation amends vers bylaw-2019-102 et preuve ev-amends-102."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3"
+    ],
+    "missedUnitIds": [],
+    "unsupportedClaims": [
+      {
+        "summary": "Le document est un procès-verbal attestant la réalisation des actes à la date de la séance",
+        "page": 1,
+        "reason": "Le texte est explicitement un ordre du jour. Il atteste que les sujets étaient prévus, mais ne confirme ni la tenue de la séance ni l’accomplissement effectif de l’avis de motion, de la dérogation ou de l’adoption."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 1,
+        "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\nlotissement numéro 2019-102 concernant les règles de calcul de la\ncontribution pour fins de parcs, de terrains de jeux ou d’e",
+        "defect": "Plusieurs citations associées aux nœuds et aux arêtes sont tronquées au milieu du mot « d’espaces » et ne soutiennent donc pas intégralement le titre reproduit; seule la preuve ev-amends-102 contient l’extrait complet."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "Les trois points pertinents sont recensés, mais l’extraction traite des inscriptions à un ordre du jour comme des étapes réalisées et classe la source comme un PV. Le dépôt du projet de règlement 2026-08 au point 3.7 n’est pas compté séparément, car il ne s’agit ni d’un second projet ni d’une autre catégorie d’acte prévue."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "alias": "doc-3b8ebeaa48d7",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0c62b07a56ed5736006aa87874c6b887d28112944c23351a9e",
+  "usage": {
+    "input_tokens": 4495,
+    "input_tokens_details": {
+      "cache_write_tokens": 4492,
+      "cached_tokens": 0
+    },
+    "output_tokens": 830,
+    "output_tokens_details": {
+      "reasoning_tokens": 436
+    },
+    "total_tokens": 5325
+  },
+  "latencyMs": 15668,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-3b8ebeaa48d7",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Assemblée de consultation prévue concernant le Règlement no 741-26 sur l’occupation et l’entretien des bâtiments",
+        "page": 1,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud « bylaw-741-26 » cite le point 7.2, qui mentionne explicitement l’« assemblée de consultation »."
+      },
+      {
+        "id": "u2",
+        "summary": "Adoption prévue du Règlement no 741-26 sur l’occupation et l’entretien des bâtiments",
+        "page": 1,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud « bylaw-741-26 » et sa citation reproduisent le point 7.2, incluant explicitement l’« adoption du Règlement no 741-26 »."
+      },
+      {
+        "id": "u3",
+        "summary": "Demande de dérogation mineure au 1096, chemin du Trait-Carré, lot 2 360 482",
+        "page": 2,
+        "supported": true,
+        "evidenceInExtraction": "Le nœud « event-derogation-1096-trait-carre » identifie la dérogation mineure, l’adresse et le lot, avec une citation de la page 2."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3"
+    ],
+    "missedUnitIds": [],
+    "unsupportedClaims": [],
+    "citationDefects": [],
+    "usefulness": 4,
+    "notes": "Les trois actes d’urbanisme inscrits au projet d’ordre du jour sont couverts. La consultation et l’adoption du règlement no 741-26 sont toutefois regroupées dans un seul nœud plutôt que représentées comme deux actes distincts. Le document est un projet d’ordre du jour et atteste donc leur inscription prévue, non leur réalisation effective."
+  }
+}

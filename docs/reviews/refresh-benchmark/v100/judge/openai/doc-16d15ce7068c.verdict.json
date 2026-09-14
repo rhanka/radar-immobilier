@@ -1,0 +1,111 @@
+{
+  "alias": "doc-16d15ce7068c",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0378026b06e57f04006aa877bdbf1887d289d509e0f7131d02",
+  "usage": {
+    "input_tokens": 20537,
+    "input_tokens_details": {
+      "cache_write_tokens": 20534,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1905,
+    "output_tokens_details": {
+      "reasoning_tokens": 794
+    },
+    "total_tokens": 22442
+  },
+  "latencyMs": 30891,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-16d15ce7068c",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Dérogation mineure accordée au 4, rue de Souilly, lot 2 323 270, afin d'autoriser une marge de recul avant de 6,39 m au lieu de 7,6 m.",
+        "page": 3,
+        "supported": true,
+        "evidenceInExtraction": "Nœuds event-2026-01-4 et signal-2026-01-4."
+      },
+      {
+        "id": "u2",
+        "summary": "Consultation des intéressés sur la dérogation mineure du 4, rue de Souilly; aucun commentaire n'a été émis.",
+        "page": 3,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u3",
+        "summary": "Dérogation mineure accordée au 12, place de Liverdun, lot 5 061 778, afin d'autoriser une largeur de stationnement de 15,21 m au lieu de 8,50 m.",
+        "page": 3,
+        "supported": true,
+        "evidenceInExtraction": "Nœuds event-2026-01-5 et signal-2026-01-5."
+      },
+      {
+        "id": "u4",
+        "summary": "Consultation des intéressés sur la dérogation mineure du 12, place de Liverdun; aucun commentaire n'a été émis.",
+        "page": 3,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u5",
+        "summary": "Dérogation mineure accordée au 9, place de Charmois, lot 2 323 185, afin d'autoriser des marges de recul avant de 6,72 m et de 7,33 m au lieu de 7,6 m.",
+        "page": 4,
+        "supported": true,
+        "evidenceInExtraction": "Nœuds event-2026-01-6 et signal-2026-01-6."
+      },
+      {
+        "id": "u6",
+        "summary": "Consultation des intéressés sur la dérogation mineure du 9, place de Charmois; aucun commentaire n'a été émis.",
+        "page": 4,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u7",
+        "summary": "PIIA approuvé pour la demande d'agrandissement résidentiel numéro 2025-0069 au 9, place de Charmois, consistant à construire un deuxième étage habitable au-dessus du garage existant.",
+        "page": 5,
+        "supported": true,
+        "evidenceInExtraction": "Nœuds event-2026-01-7 et signal-2026-01-7, avec référence au Règlement URB-08."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u3",
+      "u5",
+      "u7"
+    ],
+    "missedUnitIds": [
+      "u2",
+      "u4",
+      "u6"
+    ],
+    "unsupportedClaims": [],
+    "citationDefects": [
+      {
+        "page": 3,
+        "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\nSouilly, lot 2 323 270, cadastre du Québec, circonscription foncière de Terrebonne, ayant pour effet de permettre que la m",
+        "defect": "Citation tronquée avant les dimensions; elle ne soutient pas la description affirmant une marge de 6,39 m au lieu de 7,6 m."
+      },
+      {
+        "page": 3,
+        "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\nde Liverdun, lot numéro 5 061 778, cadastre du Québec, circonscription foncière de\nTerrebonne, ayant pour effet de permett",
+        "defect": "Citation tronquée avant les dimensions; elle ne soutient pas la description affirmant une largeur de stationnement de 15,21 m au lieu de 8,50 m."
+      },
+      {
+        "page": 4,
+        "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\nde Charmois, lot numéro 2 323 185, cadastre du Québec, circonscription foncière de\nTerrebonne, ayant pour effet de permett",
+        "defect": "Citation tronquée avant les dimensions; elle ne soutient pas la description affirmant des marges de 6,72 m et de 7,33 m."
+      },
+      {
+        "page": 5,
+        "excerpt": "D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\n2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction\nréalisépar Mélissa Picard Allard",
+        "defect": "La citation soutient l'approbation de l'agrandissement, mais ne mentionne pas son assujettissement au PIIA ni le Règlement URB-08; elle ne suffit donc pas seule à soutenir la qualification de PIIA."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "Les quatre décisions principales d'urbanisme sont correctement recensées et décrites. Les trois consultations tenues avant les décisions sur les dérogations mineures ne sont pas représentées comme actes distincts. Plusieurs citations d'événements sont coupées avant les éléments précis portés par les descriptions, ce qui impose une relecture du PV."
+  }
+}

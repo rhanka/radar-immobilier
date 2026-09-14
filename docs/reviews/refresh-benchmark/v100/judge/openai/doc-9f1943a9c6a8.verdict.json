@@ -1,0 +1,120 @@
+{
+  "alias": "doc-9f1943a9c6a8",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0ba5cfd7a7848b36006aa87ac189a087d296603ae9812e6a18",
+  "usage": {
+    "input_tokens": 34539,
+    "input_tokens_details": {
+      "cache_write_tokens": 34536,
+      "cached_tokens": 0
+    },
+    "output_tokens": 2357,
+    "output_tokens_details": {
+      "reasoning_tokens": 1355
+    },
+    "total_tokens": 36896
+  },
+  "latencyMs": 60798,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-9f1943a9c6a8",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Adoption du second projet de règlement SP-2026-14 modifiant le règlement de zonage 1297-2020, notamment le plan de zonage et la grille de la zone CH-217.",
+        "page": 12,
+        "supported": true,
+        "evidenceInExtraction": "Présent comme « bylaw-sp-2026-14 », avec le stade « 2e_projet » et des citations aux pages 1 et 12."
+      },
+      {
+        "id": "u2",
+        "summary": "Adoption du second projet de règlement SP-2026-15 modifiant la grille des spécifications de la zone V-802.",
+        "page": 15,
+        "supported": true,
+        "evidenceInExtraction": "Présent comme « bylaw-sp-2026-15 », avec le stade « 2e_projet » et des citations aux pages 1 et 15."
+      },
+      {
+        "id": "u3",
+        "summary": "Adoption du règlement 1470-2026 modifiant le plan d’urbanisme 1296-2020 pour assurer sa conformité au schéma d’aménagement révisé.",
+        "page": 16,
+        "supported": true,
+        "evidenceInExtraction": "Présent comme « bylaw-1470-2026 », au stade « adoption », avec une citation à la page 16."
+      },
+      {
+        "id": "u4",
+        "summary": "Adoption du règlement 1471-2026 modifiant le règlement de zonage 1297-2020, notamment les affectations, zones, usages et normes.",
+        "page": 22,
+        "supported": true,
+        "evidenceInExtraction": "Présent comme « bylaw-1471-2026 », au stade « adoption »; l’extraction recense aussi plusieurs zones créées ou remplacées et la contrainte du lot 4 545 697."
+      },
+      {
+        "id": "u5",
+        "summary": "Adoption du règlement 1472-2026 modifiant le règlement sur les permis et certificats 1299-2020 relativement aux zones de niveau sonore élevé.",
+        "page": 41,
+        "supported": true,
+        "evidenceInExtraction": "Présent comme « bylaw-1472-2026 », au stade « adoption », avec une citation à la page 41."
+      },
+      {
+        "id": "u6",
+        "summary": "Adoption du règlement 1473-2026 modifiant le règlement sur les PIIA 1300-2020 pour retirer certaines dispositions relatives aux zones de niveau sonore élevé.",
+        "page": 42,
+        "supported": true,
+        "evidenceInExtraction": "Présent comme « bylaw-1473-2026 », au stade « adoption », avec une citation à la page 42."
+      },
+      {
+        "id": "u7",
+        "summary": "Demande de prolongation de délai pour la mise en conformité aux normes de lotissement en zone agricole découlant du règlement 399-25.",
+        "page": 2,
+        "supported": true,
+        "evidenceInExtraction": "Aucun nœud ni événement correspondant dans l’extraction."
+      },
+      {
+        "id": "u8",
+        "summary": "Demande de PIIA visant le 799, rue de New Glasgow.",
+        "page": 3,
+        "supported": true,
+        "evidenceInExtraction": "Aucun nœud ni événement correspondant dans l’extraction."
+      },
+      {
+        "id": "u9",
+        "summary": "Dérogation mineure visant le 537, chemin de l’Achigan Ouest.",
+        "page": 3,
+        "supported": true,
+        "evidenceInExtraction": "Aucun nœud ni événement correspondant dans l’extraction."
+      },
+      {
+        "id": "u10",
+        "summary": "Dérogation mineure visant le 318-318 A, chemin Abercrombie.",
+        "page": 3,
+        "supported": true,
+        "evidenceInExtraction": "Aucun nœud ni événement correspondant dans l’extraction."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3",
+      "u4",
+      "u5",
+      "u6"
+    ],
+    "missedUnitIds": [
+      "u7",
+      "u8",
+      "u9",
+      "u10"
+    ],
+    "unsupportedClaims": [
+      {
+        "summary": "Le document est qualifié de procès-verbal par le champ « sourceKind » ayant la valeur « pv ».",
+        "page": 1,
+        "reason": "Le document se présente explicitement comme un ordre du jour, et non comme un procès-verbal relatant les décisions effectivement prises."
+      }
+    ],
+    "citationDefects": [],
+    "usefulness": 3,
+    "notes": "Les six actes réglementaires d’urbanisme principaux sont bien extraits et correctement cités, avec des détails substantiels sur le règlement 1471-2026. L’extraction omet toutefois la demande de lotissement, la demande de PIIA et les deux dérogations mineures des pages 2 et 3. Une relecture demeure nécessaire, notamment parce que la source est un ordre du jour et que plusieurs mentions d’adoption comportent encore des numéros de résolution provisoires."
+  }
+}

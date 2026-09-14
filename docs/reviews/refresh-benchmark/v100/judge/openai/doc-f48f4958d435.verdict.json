@@ -1,0 +1,68 @@
+{
+  "alias": "doc-f48f4958d435",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0094a8fc39d9b273006aa87c0674e487d2b40b9a197c729b70",
+  "usage": {
+    "input_tokens": 8344,
+    "input_tokens_details": {
+      "cache_write_tokens": 8341,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1374,
+    "output_tokens_details": {
+      "reasoning_tokens": 870
+    },
+    "total_tokens": 9718
+  },
+  "latencyMs": 40039,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-f48f4958d435",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Projet d’adoption de la résolution finale du PPCMOI-001-2026 visant le 1050, rue Dubois",
+        "page": 2,
+        "supported": true,
+        "evidenceInExtraction": "L’événement event-ppcmoi-001-2026 reprend l’item 18.1 et fournit une citation exacte à la page 2."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1"
+    ],
+    "missedUnitIds": [],
+    "unsupportedClaims": [
+      {
+        "summary": "Le document est qualifié de procès-verbal par sourceKind « pv »",
+        "page": 1,
+        "reason": "Le document se présente explicitement comme un « PROJET D’ORDRE DU JOUR », et non comme un procès-verbal."
+      },
+      {
+        "summary": "Les demandes concernant Ferme Guilmette Inc. et Daniel Laroche sont qualifiées de contraintes CPTAQ",
+        "page": 2,
+        "reason": "Le texte atteste seulement des résolutions relatives à des demandes présentées à la CPTAQ; il n’établit aucune contrainte."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 1,
+        "excerpt": "VILLE D’ACTON VALE\nPROJET D’ORDRE DU JOUR\nSÉANCE ORDINAIRE DU 16 MARS 2026",
+        "defect": "Cette citation contredit plutôt qu’elle ne soutient la qualification sourceKind « pv »."
+      },
+      {
+        "page": 2,
+        "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.).",
+        "defect": "La citation ne soutient pas la qualification de « Contrainte CPTAQ »."
+      },
+      {
+        "page": 2,
+        "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche).",
+        "defect": "La citation ne soutient pas la qualification de « Contrainte CPTAQ »."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "Le PPCMOI est correctement repéré et cité. Toutefois, il s’agit d’un projet d’ordre du jour, qui annonce une adoption sans attester qu’elle a effectivement eu lieu. Les deux demandes à la CPTAQ sont citées fidèlement, mais ne constituent pas des unités parmi les catégories d’actes demandées et leur transformation en contraintes est excessive."
+  }
+}

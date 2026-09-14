@@ -1,0 +1,126 @@
+{
+  "alias": "doc-9de4114e4eaa",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0ae9956663eda644006aa87a6caa2087d29cf80e7b29712e97",
+  "usage": {
+    "input_tokens": 28863,
+    "input_tokens_details": {
+      "cache_write_tokens": 28860,
+      "cached_tokens": 0
+    },
+    "output_tokens": 3491,
+    "output_tokens_details": {
+      "reasoning_tokens": 2344
+    },
+    "total_tokens": 32354
+  },
+  "latencyMs": 84716,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-9de4114e4eaa",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Dérogation mineure accordée au 30, chemin Albert-Labelle, lot 4 455 724, pour permettre un bâtiment accessoire détaché.",
+        "page": 8,
+        "supported": true,
+        "evidenceInExtraction": "Nœud de-6a-derogation-albert-labelle et preuve ev-1."
+      },
+      {
+        "id": "u2",
+        "summary": "Dérogation mineure accordée au 14, chemin Guertin, lot 2 685 566, pour permettre un bâtiment accessoire détaché.",
+        "page": 8,
+        "supported": true,
+        "evidenceInExtraction": "Nœud de-6b-derogation-guertin et preuve ev-2."
+      },
+      {
+        "id": "u3",
+        "summary": "Usage conditionnel accordé au 75, chemin du Lac-Chip, lot 3 390 978, pour un hébergement touristique de type établissement de résidence principale.",
+        "page": 9,
+        "supported": true,
+        "evidenceInExtraction": "Nœud de-6c-usage-conditionnel-lac-chip et preuve ev-3."
+      },
+      {
+        "id": "u4",
+        "summary": "Usage conditionnel accordé au 5, chemin Vaillant, lot 3 390 175, pour un hébergement touristique de type établissement de résidence principale.",
+        "page": 10,
+        "supported": true,
+        "evidenceInExtraction": "Nœud de-6d-usage-conditionnel-vaillant et preuve ev-4."
+      },
+      {
+        "id": "u5",
+        "summary": "Adoption du projet de règlement numéro 26-866 relatif au bon fonctionnement des installations septiques.",
+        "page": 14,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-26-866 et preuve ev-5."
+      },
+      {
+        "id": "u6",
+        "summary": "Adoption du projet de règlement numéro 26-867 créant un programme d’aide financière pour la mise aux normes des installations septiques.",
+        "page": 15,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-26-867 et preuve ev-6."
+      },
+      {
+        "id": "u7",
+        "summary": "Adoption du projet de règlement numéro 26-868 autorisant une dépense et un emprunt de 5 737 912 $ pour financer le programme de mise aux normes des installations septiques.",
+        "page": 16,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-26-868 et preuve ev-7."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3",
+      "u4",
+      "u5",
+      "u6",
+      "u7"
+    ],
+    "missedUnitIds": [],
+    "unsupportedClaims": [
+      {
+        "summary": "Le nœud relatif au 75, chemin du Lac-Chip classe l’acte sous le champ kind comme une dérogation.",
+        "page": 9,
+        "reason": "Le texte atteste un usage conditionnel, non une dérogation mineure."
+      },
+      {
+        "summary": "Le nœud relatif au 5, chemin Vaillant classe l’acte sous le champ kind comme une dérogation.",
+        "page": 10,
+        "reason": "Le texte atteste un usage conditionnel, non une dérogation mineure."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 8,
+        "excerpt": "ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité consultatif d’urbanisme et accorde la demande d’une dérogation mineure au Règlement de zonage 113-2025 pour la propriété sise au 30, chemin AlbertLabelle",
+        "defect": "La citation soutient l’octroi général, mais pas les deux paramètres chiffrés décrits dans l’extraction, lesquels figurent à la page 7."
+      },
+      {
+        "page": 8,
+        "excerpt": "ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité consultatif d’urbanisme et accorde la demande d’une dérogation mineure au Règlement de zonage 113-2025 pour la propriété sise au 14, chemin Guertin",
+        "defect": "La citation soutient l’octroi général, mais pas la réduction chiffrée de la marge de 10 m à 5 m affirmée dans la description."
+      },
+      {
+        "page": 14,
+        "excerpt": "ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26866 relatif au bon fonctionnement des installations septiques",
+        "defect": "L’extrait n’est pas verbatim : le texte porte « numéro 26-866 », avec un trait d’union."
+      },
+      {
+        "page": 15,
+        "excerpt": "ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26867 relatif à la création d’un programme d’aide financière",
+        "defect": "L’extrait n’est pas verbatim : le texte porte « numéro 26-867 », avec un trait d’union."
+      },
+      {
+        "page": 16,
+        "excerpt": "ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26868 autorisant une dépense de 5 737 912 $",
+        "defect": "L’extrait n’est pas verbatim : le texte porte « numéro 26-868 », avec un trait d’union."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "Les sept actes principaux sont recensés et leurs pages sont justes. Une relecture demeure nécessaire pour corriger le type des deux usages conditionnels, compléter les citations des dérogations chiffrées et rétablir les traits d’union dans les trois numéros de règlement."
+  }
+}

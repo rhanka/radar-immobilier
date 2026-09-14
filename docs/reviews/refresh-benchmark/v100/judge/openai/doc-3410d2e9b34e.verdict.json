@@ -1,0 +1,114 @@
+{
+  "alias": "doc-3410d2e9b34e",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_077eb00f696343ff006aa8781e88fc87d293a3f9aa4f954506",
+  "usage": {
+    "input_tokens": 26209,
+    "input_tokens_details": {
+      "cache_write_tokens": 26206,
+      "cached_tokens": 0
+    },
+    "output_tokens": 2570,
+    "output_tokens_details": {
+      "reasoning_tokens": 1477
+    },
+    "total_tokens": 28779
+  },
+  "latencyMs": 82626,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-3410d2e9b34e",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Avis de motion du règlement #760-2026 modifiant le plan d'urbanisme #387-2007, donné le 23 avril 2026.",
+        "page": 8,
+        "supported": false,
+        "evidenceInExtraction": "Absent comme acte distinct; le nœud bylaw-760-2026 mentionne seulement l'adoption."
+      },
+      {
+        "id": "u2",
+        "summary": "Assemblée publique de consultation tenue le 23 avril 2026 sur le projet de règlement #760-2026.",
+        "page": 8,
+        "supported": false,
+        "evidenceInExtraction": "Absente comme acte distinct."
+      },
+      {
+        "id": "u3",
+        "summary": "Adoption du règlement #760-2026 modifiant le plan d'urbanisme #387-2007 relativement aux grandes affectations.",
+        "page": 9,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-760-2026 et relation bylaw-760-2026 amends bylaw-387-2007."
+      },
+      {
+        "id": "u4",
+        "summary": "Avis de motion du règlement #761-2026 modifiant le règlement de zonage #389-2007, donné le 23 avril 2026.",
+        "page": 9,
+        "supported": false,
+        "evidenceInExtraction": "Absent comme acte distinct; le nœud bylaw-761-2026 mentionne seulement l'adoption."
+      },
+      {
+        "id": "u5",
+        "summary": "Assemblée publique de consultation tenue le 23 avril 2026 sur le projet de règlement #761-2026.",
+        "page": 9,
+        "supported": false,
+        "evidenceInExtraction": "Absente comme acte distinct."
+      },
+      {
+        "id": "u6",
+        "summary": "Adoption du règlement #761-2026 changeant les usages permis dans la zone 14-I et créant la zone 21-H.",
+        "page": 9,
+        "supported": true,
+        "evidenceInExtraction": "Nœuds bylaw-761-2026, event-119-2026, zone-14-i et zone-21-h, avec les relations correspondantes."
+      },
+      {
+        "id": "u7",
+        "summary": "Approbation du plan de développement et de lotissement du lot 3 592 103, prévoyant le prolongement de la rue Thibodeau et des habitations unifamiliales.",
+        "page": 10,
+        "supported": true,
+        "evidenceInExtraction": "Nœuds event-120-2026 et signal-lot-3592103."
+      },
+      {
+        "id": "u8",
+        "summary": "Approbation des plans et devis préliminaires du développement du lot 3 592 103, sous réserve d'une analyse finale et de la conformité aux exigences applicables.",
+        "page": 17,
+        "supported": false,
+        "evidenceInExtraction": "Absente; la résolution 126-2026 n'est pas extraite."
+      }
+    ],
+    "supportedUnitIds": [
+      "u3",
+      "u6",
+      "u7"
+    ],
+    "missedUnitIds": [
+      "u1",
+      "u2",
+      "u4",
+      "u5",
+      "u8"
+    ],
+    "unsupportedClaims": [],
+    "citationDefects": [
+      {
+        "page": 9,
+        "excerpt": "EN CONSÉQUENCE il est proposé par Monsieur le conseiller Marc-Olivier Habel,\nappuyé par Monsieur le conseiller Alex Papineau, et résolu à l'unanimité des\nconseillers :\n• QUE le règlement #761-2026",
+        "defect": "La citation du nœud event-119-2026 est tronquée avant le titre, les zones visées et la formule d'adoption; elle ne soutient donc pas à elle seule la description ni la décision « approuvé »."
+      },
+      {
+        "page": 10,
+        "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur le conseiller Marc-Olivier Habel,\nappuyé par Madame la conseillère Mylène Neault, et résolu à l'unanimité:\n• D'APPROUVER le plan d'aménagement",
+        "defect": "La citation du nœud event-120-2026 soutient l'approbation générale, mais pas les précisions de sa description concernant Giroux Arpentage, le lot 3 592 103, le prolongement de la rue Thibodeau et les habitations unifamiliales."
+      },
+      {
+        "page": 14,
+        "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur le conseiller Marc-Olivier Habel,\nappuyé par Madame la conseillère Ariane Gaudreault, et résolu à l'unanimité des\nconseillers :\n• QUE les attendus",
+        "defect": "La citation du nœud event-121-2026 est tronquée avant la recommandation favorable à la CPTAQ et ne soutient pas la décision ou la description portée."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "L'extraction saisit les trois principaux actes d'urbanisme décidés à cette séance, mais omet les avis de motion et consultations antérieurs attestés dans le PV ainsi que l'approbation distincte des plans et devis du lot 3 592 103. La recommandation à la CPTAQ est correctement présente dans le document et n'est pas une affirmation non soutenue, mais elle ne constitue pas une unité selon la typologie fournie."
+  }
+}

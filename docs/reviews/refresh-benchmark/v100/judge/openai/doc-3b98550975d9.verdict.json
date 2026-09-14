@@ -1,0 +1,41 @@
+{
+  "alias": "doc-3b98550975d9",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_09cc71a4364ea5b5006aa87884378c87d2b0d8dabbc0f21051",
+  "usage": {
+    "input_tokens": 1791,
+    "input_tokens_details": {
+      "cache_write_tokens": 1788,
+      "cached_tokens": 0
+    },
+    "output_tokens": 362,
+    "output_tokens_details": {
+      "reasoning_tokens": 219
+    },
+    "total_tokens": 2153
+  },
+  "latencyMs": 12655,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-3b98550975d9",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Avis de motion et présentation du projet de règlement relatif aux animaux domestiques",
+        "page": 2,
+        "supported": false,
+        "evidenceInExtraction": ""
+      }
+    ],
+    "supportedUnitIds": [],
+    "missedUnitIds": [
+      "u1"
+    ],
+    "unsupportedClaims": [],
+    "citationDefects": [],
+    "usefulness": 1,
+    "notes": "L’extraction ne recense aucun acte d’urbanisme et omet l’avis de motion inscrit au point 10.3. La seule citation, à la page 1, est verbatim mais ne documente pas cet acte."
+  }
+}

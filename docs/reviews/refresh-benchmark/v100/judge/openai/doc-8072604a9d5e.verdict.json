@@ -1,0 +1,87 @@
+{
+  "alias": "doc-8072604a9d5e",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_06250bce85fbf4c3006aa879ac689487d2816c909a41be10bc",
+  "usage": {
+    "input_tokens": 7459,
+    "input_tokens_details": {
+      "cache_write_tokens": 7456,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1770,
+    "output_tokens_details": {
+      "reasoning_tokens": 1034
+    },
+    "total_tokens": 9229
+  },
+  "latencyMs": 46981,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-8072604a9d5e",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Avis de motion et dépôt du premier projet de règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199.",
+        "page": 2,
+        "supported": true,
+        "evidenceInExtraction": "Événement event-50-1-avis-motion-r-2026-199-1 et preuve ev-50-1."
+      },
+      {
+        "id": "u2",
+        "summary": "Adoption du premier projet de règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199.",
+        "page": 2,
+        "supported": true,
+        "evidenceInExtraction": "Événement event-50-2-adoption-1er-projet-r-2026-199-1, signal signal-50-2-r-2026-199-1 et preuve ev-50-2."
+      },
+      {
+        "id": "u3",
+        "summary": "Avis de motion et dépôt du projet de règlement R-2026-084-1 sur l’utilisation des égouts et la rétention des eaux de ruissellement.",
+        "page": 2,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-r-2026-084-1, relation amends vers bylaw-r-2014-084 et preuve ev-50-3; aucun événement distinct n’a toutefois été créé."
+      },
+      {
+        "id": "u4",
+        "summary": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux.",
+        "page": 2,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-r-2026-216 avec stage adoption et preuve ev-50-4; aucun événement distinct n’a toutefois été créé."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u2",
+      "u3",
+      "u4"
+    ],
+    "missedUnitIds": [],
+    "unsupportedClaims": [
+      {
+        "summary": "L’approbation des recommandations du comité consultatif d’urbanisme constitue un acte de type PIIA.",
+        "page": 2,
+        "reason": "Le texte mentionne seulement des recommandations génériques du comité consultatif d’urbanisme; il ne mentionne aucun PIIA."
+      },
+      {
+        "summary": "La modification de zonage R-2026-199-1 a une portée locale.",
+        "page": 2,
+        "reason": "Le texte parle de divers ajustements, clarifications, améliorations et corrections sans préciser une portée géographique locale."
+      }
+    ],
+    "citationDefects": [
+      {
+        "page": 2,
+        "excerpt": "Approbation des recommandations du comité consultatif d’urbanisme (SD2025-4002736)",
+        "defect": "L’extrait est verbatim, mais ne soutient pas la qualification « piia » attribuée à event-60-1-ccu."
+      },
+      {
+        "page": 2,
+        "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux",
+        "defect": "Cette citation ne soutient pas à elle seule la relation lifecycle_predecessor entre l’adoption du premier projet et l’avis de motion, car elle ne cite pas l’adoption."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "Les quatre actes réglementaires d’urbanisme sont repérés, mais deux ne sont représentés que par des nœuds de règlement plutôt que par des événements. La qualification PIIA du point 60.1 est une fausse précision nécessitant une correction."
+  }
+}

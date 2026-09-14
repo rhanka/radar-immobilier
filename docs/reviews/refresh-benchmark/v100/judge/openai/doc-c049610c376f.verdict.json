@@ -1,0 +1,80 @@
+{
+  "alias": "doc-c049610c376f",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "status": "completed",
+  "responseId": "resp_0ae7e0d66c8fc368006aa87ba7df9887d2b324e42e93dd67cb",
+  "usage": {
+    "input_tokens": 23097,
+    "input_tokens_details": {
+      "cache_write_tokens": 23094,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1636,
+    "output_tokens_details": {
+      "reasoning_tokens": 1034
+    },
+    "total_tokens": 24733
+  },
+  "latencyMs": 47022,
+  "parseError": null,
+  "verdict": {
+    "alias": "doc-c049610c376f",
+    "units": [
+      {
+        "id": "u1",
+        "summary": "Adoption du règlement 437-2025 modifiant le plan d’urbanisme 392-2021, résolution 5-01-2026",
+        "page": 3,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-437-2025, étape « adoption », résolution 5-01-2026, avec citations aux pages 3 et 4."
+      },
+      {
+        "id": "u2",
+        "summary": "Avis de motion du règlement 437-2025 donné lors de la séance du 10 novembre 2025",
+        "page": 4,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u3",
+        "summary": "Avis de motion du règlement 438-2025 donné lors de la séance du 10 novembre 2025",
+        "page": 4,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u4",
+        "summary": "Adoption d’un premier projet du règlement 438-2025 lors de la séance du 10 novembre 2025",
+        "page": 4,
+        "supported": false,
+        "evidenceInExtraction": ""
+      },
+      {
+        "id": "u5",
+        "summary": "Adoption du règlement 438-2025 modifiant le règlement de zonage 394-2021 afin d’agrandir la zone M-77 par inclusion de la zone Rm-93, laquelle est abrogée, résolution 6-01-2026",
+        "page": 4,
+        "supported": true,
+        "evidenceInExtraction": "Nœud bylaw-438-2025 et événement designation-event-merger-m-77-rm-93, avec citations aux pages 4 et 5."
+      }
+    ],
+    "supportedUnitIds": [
+      "u1",
+      "u5"
+    ],
+    "missedUnitIds": [
+      "u2",
+      "u3",
+      "u4"
+    ],
+    "unsupportedClaims": [],
+    "citationDefects": [
+      {
+        "page": 23,
+        "excerpt": "La directrice générale informe les membres du conseil que les résultats\ndes premiers tests de pompage du puits démontrent une capacité suffisante\npermettant d’envisager un changement de zonage dans le",
+        "defect": "Citation tronquée dans le nœud et l’arête associés au signal de rezonage : elle ne contient pas « secteur de la rue des Cerisiers » et ne soutient donc pas à elle seule la localisation affirmée, même si une autre entrée d’évidence fournit l’extrait complet."
+      }
+    ],
+    "usefulness": 3,
+    "notes": "L’extraction saisit correctement les deux adoptions principales et le contenu du changement de zonage, mais omet les avis de motion antérieurs ainsi que l’adoption du premier projet du règlement 438-2025. Les assemblées de consultation annoncées au futur et le changement de zonage seulement envisagé rue des Cerisiers ne constituent pas des actes accomplis attestés par ce procès-verbal."
+  }
+}
