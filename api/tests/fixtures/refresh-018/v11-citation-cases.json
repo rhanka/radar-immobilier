@@ -1,0 +1,29 @@
+{
+  "provenance": {
+    "campaign": "v11",
+    "model": "gemini-3.8-flash-tiered",
+    "effort": "low",
+    "contractVersion": "immo-pv-extraction-v7",
+    "t1Commit": "5068dda38bffe8659a85c2e51f566fb9c6ad4584",
+    "note": "Real refused v11 citations, copied verbatim from the frozen campaign output."
+  },
+  "overlongExcerpt": {
+    "caseId": "waterloo-2026-08-18--gemini-low",
+    "path": "nodes[15].citations[0]",
+    "page": 9,
+    "codePoints": 203,
+    "excerpt": "Le conseil donne son accord de principe à l'implantation d'une\ntour de télécommunications d'une hauteur maximale de 40\nmètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre\ndu Québec dans le secte",
+    "pageText": "é par monsieur Pierre Brien\net résolu à l'unanimité que:\n1. Le conseil donne son accord de principe à l'implantation d'une\ntour de télécommunications d'une hauteur maximale de 40\nmètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre\ndu Québec dans le secteur du 6400, rue Foster,\nconditionnellement à ce que Bell réalise son processus\nd",
+    "refusedAs": "entity_citation_excerpt_too_long"
+  },
+  "shortLabelExcerpt": {
+    "caseId": "saint-etienne-de-bolton-2026-08-04--gemini-low",
+    "path": "nodes[3].citations[0]",
+    "page": 11,
+    "codePoints": 12,
+    "excerpt": "Zone : COM-1",
+    "pageText": "enne-de-Bolton\nAdresse : 12, rue Principale\nLot : 5 191 695\nZone : COM-1\n\n11\n\n",
+    "refusedAs": "ungrounded_pdf_excerpt",
+    "cause": "Verbatim on the cited page, but 8 normalized code points, under the 12-code-point anchor floor."
+  }
+}
