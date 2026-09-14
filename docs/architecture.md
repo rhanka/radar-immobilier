@@ -1,3 +1,146 @@
+# Architecture de référence — deux transitions datées
+
+Source canonique des quatre scènes Focus et rapport. Les états Git documentent
+des déclarations; seuls les reçus datés sont qualifiés comme observations.
+
+## Paire A — stockage et registre de production
+
+### `storage-before-20260809` — 9 août 2026
+
+```mermaid
+flowchart LR
+  A_USER["Navigateur utilisateur"] -.->|"Declared public route"| A_URL["immo.sent-tech.ca · declared"]
+  subgraph A_CLOUD["OVH BHS5 · production topology · declared"]
+    A_EDGE["Shared ingress / TLS · declared"]
+    subgraph A_IMMO["Immo · radar-immobilier · declared"]
+      A_UI["radar-ui · declared"] -.->|"Declared /api"| A_API["radar-api · declared"]
+      A_API -.->|"Declared SQL"| A_DB[("PostgreSQL / PostGIS · declared")]
+      A_API -.->|"Declared API object binding"| A_MINIO[("MinIO + PVC · raw / derived docs · declared")]
+      A_CLIENTS["Graph/scrape storage clients · declared"]
+    end
+    A_SSO["Sentropic SSO · auth.sent-tech.ca · declared"]
+    A_GEO["Geo OGC API · declared dependency"]
+    A_CAPACITY["Observed platform note · two b3-8 by August 9 · capacity only"]
+    A_EDGE -.->|"Declared ingress"| A_UI
+    A_EDGE -.->|"Declared ingress"| A_SSO
+    A_UI -.->|"Declared OGC collections"| A_GEO
+    A_API -.->|"Declared OIDC / JWKS"| A_SSO
+  end
+  A_URL -.->|"Declared ingress route"| A_EDGE
+  A_USER -.->|"Declared login redirects"| A_SSO
+  A_GEO -.->|"Declared client binding"| A_GEOS3[("OVH sentropic-geo · declared")]
+  A_CLIENTS -.->|"Declared graph binding; suspended"| A_SCWGRAPH[("SCW docs-pocs · graph · declared")]
+  A_CLIENTS -.->|"Declared scrape contract; secret not audited"| A_SCWDOCS[("SCW docs · raw / parsed · declared")]
+  A_SCWREG["SCW application registry · declared"] -.->|"Declared image source"| A_API
+  A_SCWREG -.->|"Declared image source"| A_UI
+  A_SCWREG -.->|"Declared best-effort mirror; success unknown"| A_GHCR["GHCR mirror · declared"]
+  A_API -.->|"Transactional email · declared"| A_TEM["SCW TEM · declared residual until validated replacement"]
+```
+
+Reconstruction documentaire: pointillés = `declared`, pas trafic observé.
+
+### `storage-after-20260913` — 13 septembre 2026
+
+```mermaid
+flowchart LR
+  A_USER["Navigateur utilisateur"] --> A_URL["immo.sent-tech.ca"]
+  subgraph A_CLOUD["OVH BHS5 · production · no one-node cutover claimed"]
+    A_EDGE["Shared ingress / TLS"]
+    subgraph A_IMMO["Immo · radar-immobilier"]
+      A_UI["radar-ui"] -->|"/api"| A_API["radar-api"]
+      A_API -->|"SQL"| A_DB[("PostgreSQL / PostGIS")]
+      A_CLIENTS["Graph/scrape storage clients · OVH bindings"]
+    end
+    A_SSO["Sentropic SSO · auth.sent-tech.ca"]
+    A_GEO["Geo OGC API · stable dependency"]
+    A_EDGE --> A_UI
+    A_EDGE --> A_SSO
+    A_UI -->|"OGC collections"| A_GEO
+    A_API <-->|"OIDC / JWKS"| A_SSO
+  end
+  A_URL --> A_EDGE
+  A_USER <-->|"Login redirects"| A_SSO
+  A_GEO --> A_GEOS3[("OVH sentropic-geo · unchanged")]
+  A_API -->|"Dedicated S3 binding; rolled out"| A_DOCS[("OVH radar-immobilier-docs · canonical store")]
+  A_CLIENTS -->|"GRAPH / SCRAPE coordinates observed"| A_DOCS
+  A_GHCR["GHCR application registry"] -->|"Integrated image source"| A_API
+  A_GHCR -->|"Integrated image source"| A_UI
+  A_API -->|"Transactional email · retained"| A_TEM["SCW TEM · authorized residual until validated replacement"]
+```
+
+Cutover runtime observé à 23:39Z; parité finale et balayage global restent
+ouverts. SCW TEM demeure l'exception résiduelle jusqu'à remplacement validé.
+
+## Paire B — rafraîchissement PV vers Signal
+
+### `refresh-before-20260809` — 9 août 2026
+
+```mermaid
+flowchart LR
+  B_CITY["Municipal PV sources"] --> B_COLLECT["Immo collect / parse tools · manual invocation"]
+  B_COLLECT --> B_CORPUS[("PV corpus · CAS / parsed / manifests")]
+  subgraph B_WORKSTATION["Operator workstation · manual agent orchestration"]
+    B_OPERATOR["Operator"] --> B_EXTRACT["Graphify agents · model/effort not historically attested"]
+  end
+  B_CORPUS -->|"Read source evidence"| B_EXTRACT
+  B_EXTRACT -->|"Validated graph output"| B_GRAPH[("Published graph contract · city/latest.json")]
+  subgraph B_CLOUD["OVH · production Immo"]
+    B_PROJECT["Projection Job · manual"] -->|"Atomic upsert"| B_DB[("PostgreSQL graph")]
+    B_SCHEDULE["Scrape / projection CronJobs · SUSPENDED"]
+    B_DB --> B_API["radar-api"]
+    B_API --> B_UI["radar-ui"]
+  end
+  B_GRAPH --> B_PROJECT
+  B_OPERATOR -.->|"Manual launch; no scheduled success inferred"| B_PROJECT
+  B_SCHEDULE -.->|"Declared only"| B_COLLECT
+  B_SCHEDULE -.->|"Declared only"| B_PROJECT
+  B_UI -->|"immo.sent-tech.ca"| B_USER["Navigateur utilisateur"]
+  B_TEM["Transverse exception · SCW TEM retained until validated replacement · outside PV extraction"]
+```
+
+Placement de collecte inconnu; corpus et graphe restent neutres fournisseur.
+
+### `refresh-after-20260913` — 13 septembre 2026
+
+```mermaid
+flowchart LR
+  B_CITY["Municipal PV sources"]
+  B_CORPUS[("Durable PV corpus / checkpoints")]
+  subgraph B_WORKSTATION["Administrator workstation · not an extraction worker"]
+    B_OPERATOR["Operator · enrollment / configuration only"]
+  end
+  B_OPERATOR -.-> B_IDENTITY["Workload enrollment / durable keyring"]
+  subgraph B_CLOUD["OVH · production Immo"]
+    subgraph B_REFRESH["New refresh workload · PRODUCTION DORMANT until promotion"]
+      B_CRON["radar-refresh-pv · gated CronJob"] -.-> B_DRIVER["Causal refresh run"]
+      B_COLLECT["Immo collect / parse"]
+      B_DRIVER -.-> B_EXTRACT["Graphify 0.18.0 + llm-mesh · in-process libraries"]
+      B_EXTRACT -.-> B_VALIDATE["Typed Signal / exact PDF validation"]
+      B_PROJECT["Atomic projection · same causal run"]
+    end
+    B_PROJECT -.-> B_DB[("PostgreSQL graph")]
+    B_DB --> B_API["radar-api"]
+    B_API --> B_UI["radar-ui"]
+  end
+  B_CITY -.-> B_COLLECT
+  B_COLLECT -.-> B_CORPUS
+  B_DRIVER -.-> B_COLLECT
+  B_CORPUS -.-> B_EXTRACT
+  B_IDENTITY -.-> B_EXTRACT
+  B_EXTRACT -.-> B_MODEL["Subscription model · to ratify through M1"]
+  B_VALIDATE -.-> B_GRAPH[("Canonical graph · validated publication")]
+  B_GRAPH -.-> B_PROJECT
+  B_UI -->|"immo.sent-tech.ca"| B_USER["Navigateur utilisateur"]
+  B_TEM["Transverse exception · SCW TEM retained until validated replacement · outside PV extraction"]
+```
+
+Préproduction acceptée sur trial Luna high et rejeu exact. Production dormante
+jusqu'à promotion; modèle à ratifier par M1. TEM est hors chemin d'extraction.
+
+---
+
+## Annexe historique D8 — remplacée pour les rendus courants
+
 # Immo, Geo and Kubernetes architecture
 
 **BEFORE baseline.** Snapshot captured on **2026-09-13** against remote **main
