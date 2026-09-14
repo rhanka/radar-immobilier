@@ -1,0 +1,1783 @@
+{
+ "schemaVersion": 1,
+ "generatedAt": "2026-09-14T13:44:11.692Z",
+ "network": "none",
+ "oracleV1Sha256": "4d50a26c869283199c58dcb75cf4055bccb39f988a9c700c026ddd0a1ef87130",
+ "oracleV2Sha256": "be5e21a69a09b9deed21bb4fa757d4847d63bc9b9e376655e2b08d153caf1bcb",
+ "oracleUnits": 36,
+ "addedUnits": 0,
+ "addedSites": 10,
+ "rules": {
+  "R1": "agenda item numbering stripped from anchor and candidate",
+  "R2": "Bylaw admitted as an eligible candidate node type",
+  "R3": "unit alternate citation sites, each with page and verbatim provenance"
+ },
+ "macroExcludes": "waterloo-2026-08-18 (partial oracle by construction)",
+ "arms": [
+  {
+   "campaign": "v9",
+   "variant": "gemini-low",
+   "directory": "campaign-real",
+   "contract": "immo-pv-extraction-v5",
+   "cases": [
+    {
+     "documentId": "lac-des-seize-iles-2026-09-agenda",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 4,
+      "candidateGroups": 1,
+      "matchedIds": [
+       "L54"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1,
+      "recall": 0.25,
+      "f1": 0.4,
+      "partialOracle": false,
+      "unmatchedGroups": 0,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 4,
+      "candidateGroups": 1,
+      "matchedIds": [
+       "L54"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1,
+      "recall": 0.25,
+      "f1": 0.4,
+      "partialOracle": false,
+      "unmatchedGroups": 0,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 4,
+      "candidateGroups": 4,
+      "matchedIds": [
+       "L55",
+       "L54"
+      ],
+      "tp": 2,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1": 0.5,
+      "partialOracle": false,
+      "unmatchedGroups": 2,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 4,
+      "candidateGroups": 4,
+      "matchedIds": [
+       "L55",
+       "L54"
+      ],
+      "tp": 2,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1": 0.5,
+      "partialOracle": false,
+      "unmatchedGroups": 2,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "saint-etienne-de-bolton-2026-08-04",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 17,
+      "candidateGroups": 5,
+      "matchedIds": [
+       "B154",
+       "B155",
+       "B156",
+       "B157"
+      ],
+      "tp": 4,
+      "fp": 1,
+      "fn": 13,
+      "precision": 0.8,
+      "recall": 0.23529411764705882,
+      "f1": 0.36363636363636365,
+      "partialOracle": false,
+      "unmatchedGroups": 1,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 17,
+      "candidateGroups": 5,
+      "matchedIds": [
+       "B154",
+       "B155",
+       "B156",
+       "B157"
+      ],
+      "tp": 4,
+      "fp": 1,
+      "fn": 13,
+      "precision": 0.8,
+      "recall": 0.23529411764705882,
+      "f1": 0.36363636363636365,
+      "partialOracle": false,
+      "unmatchedGroups": 1,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 17,
+      "candidateGroups": 8,
+      "matchedIds": [
+       "B14",
+       "B154",
+       "B155",
+       "B156",
+       "B157"
+      ],
+      "tp": 5,
+      "fp": 3,
+      "fn": 12,
+      "precision": 0.625,
+      "recall": 0.29411764705882354,
+      "f1": 0.4,
+      "partialOracle": false,
+      "unmatchedGroups": 3,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 17,
+      "candidateGroups": 8,
+      "matchedIds": [
+       "B05",
+       "B14",
+       "B154",
+       "B155",
+       "B156",
+       "B157",
+       "B158"
+      ],
+      "tp": 7,
+      "fp": 1,
+      "fn": 10,
+      "precision": 0.875,
+      "recall": 0.4117647058823529,
+      "f1": 0.56,
+      "partialOracle": false,
+      "unmatchedGroups": 1,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "valcourt-2026-06-01-agenda",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 6,
+      "candidateGroups": 5,
+      "matchedIds": [
+       "V75",
+       "V71",
+       "V72",
+       "V73",
+       "V74"
+      ],
+      "tp": 5,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1,
+      "recall": 0.8333333333333334,
+      "f1": 0.9090909090909091,
+      "partialOracle": false,
+      "unmatchedGroups": 0,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 6,
+      "candidateGroups": 5,
+      "matchedIds": [
+       "V75",
+       "V71",
+       "V72",
+       "V73",
+       "V74"
+      ],
+      "tp": 5,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1,
+      "recall": 0.8333333333333334,
+      "f1": 0.9090909090909091,
+      "partialOracle": false,
+      "unmatchedGroups": 0,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 6,
+      "candidateGroups": 7,
+      "matchedIds": [
+       "V75",
+       "V71",
+       "V72",
+       "V73",
+       "V74"
+      ],
+      "tp": 5,
+      "fp": 2,
+      "fn": 1,
+      "precision": 0.7142857142857143,
+      "recall": 0.8333333333333334,
+      "f1": 0.7692307692307693,
+      "partialOracle": false,
+      "unmatchedGroups": 2,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 6,
+      "candidateGroups": 7,
+      "matchedIds": [
+       "V75",
+       "V71",
+       "V72",
+       "V73",
+       "V74"
+      ],
+      "tp": 5,
+      "fp": 2,
+      "fn": 1,
+      "precision": 0.7142857142857143,
+      "recall": 0.8333333333333334,
+      "f1": 0.7692307692307693,
+      "partialOracle": false,
+      "unmatchedGroups": 2,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "saint-barthelemy-2026-09-08",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 8,
+      "candidateGroups": 3,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 3,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 3,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 8,
+      "candidateGroups": 3,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 3,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 3,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 8,
+      "candidateGroups": 6,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 6,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 6,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 8,
+      "candidateGroups": 6,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 6,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 6,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "waterloo-2026-08-18",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": true,
+     "v1": {
+      "oracleUnits": 1,
+      "candidateGroups": 8,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 8,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 1,
+      "candidateGroups": 8,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 8,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 1,
+      "candidateGroups": 10,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 10,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 1,
+      "candidateGroups": 10,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 10,
+      "duplicateMatches": 0
+     }
+    }
+   ],
+   "totals": {
+    "planned": 5,
+    "launched": 5,
+    "accepted": 3
+   },
+   "macroAccepted": {
+    "v1": 0.5575757575757576,
+    "v2": 0.6097435897435898,
+    "precisionV1": 0.9333333333333332,
+    "precisionV2": 0.6964285714285715,
+    "recallV1": 0.4395424836601307,
+    "recallV2": 0.5816993464052288
+   },
+   "macroFixed": {
+    "v1": 0.4181818181818182,
+    "r1": 0.4181818181818182,
+    "r2": 0.4173076923076923,
+    "v2": 0.4573076923076923,
+    "precisionV1": 0.7,
+    "precisionV2": 0.5223214285714286,
+    "recallV1": 0.32965686274509803,
+    "recallV2": 0.4362745098039216
+   }
+  },
+  {
+   "campaign": "v12",
+   "variant": "sonnet-cloudcode",
+   "directory": "campaign-cloudcode",
+   "contract": "immo-pv-extraction-v5",
+   "cases": [
+    {
+     "documentId": "lac-des-seize-iles-2026-09-agenda",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 4,
+      "candidateGroups": 1,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 1,
+      "fn": 4,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 1,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 4,
+      "candidateGroups": 1,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 1,
+      "fn": 4,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 1,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 4,
+      "candidateGroups": 4,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 4,
+      "fn": 4,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 4,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 4,
+      "candidateGroups": 4,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 4,
+      "fn": 4,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 4,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "saint-etienne-de-bolton-2026-08-04",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 17,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 17,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 17,
+      "candidateGroups": 25,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 25,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 25,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 17,
+      "candidateGroups": 25,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 25,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 25,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "valcourt-2026-06-01-agenda",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 6,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 6,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 6,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 6,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 6,
+      "candidateGroups": 7,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 7,
+      "fn": 6,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 7,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 6,
+      "candidateGroups": 7,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 7,
+      "fn": 6,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 7,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "saint-barthelemy-2026-09-08",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 8,
+      "candidateGroups": 3,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 3,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 3,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 8,
+      "candidateGroups": 3,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 3,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 3,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 8,
+      "candidateGroups": 6,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 6,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 6,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 8,
+      "candidateGroups": 6,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 6,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 6,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "waterloo-2026-08-18",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": true,
+     "v1": {
+      "oracleUnits": 1,
+      "candidateGroups": 9,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 9,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 1,
+      "candidateGroups": 9,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 9,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 1,
+      "candidateGroups": 11,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 11,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 1,
+      "candidateGroups": 11,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 11,
+      "duplicateMatches": 0
+     }
+    }
+   ],
+   "totals": {
+    "planned": 5,
+    "launched": 5,
+    "accepted": 0
+   },
+   "macroAccepted": {
+    "v1": null,
+    "v2": null,
+    "precisionV1": null,
+    "precisionV2": null,
+    "recallV1": null,
+    "recallV2": null
+   },
+   "macroFixed": {
+    "v1": 0,
+    "r1": 0,
+    "r2": 0,
+    "v2": 0,
+    "precisionV1": 0,
+    "precisionV2": 0,
+    "recallV1": 0,
+    "recallV2": 0
+   }
+  },
+  {
+   "campaign": "v12",
+   "variant": "sonnet-direct",
+   "directory": "campaign-direct",
+   "contract": "immo-pv-extraction-v5",
+   "cases": [
+    {
+     "documentId": "lac-des-seize-iles-2026-09-agenda",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 4,
+      "candidateGroups": 1,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 1,
+      "fn": 4,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 1,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 4,
+      "candidateGroups": 1,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 1,
+      "fn": 4,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 1,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 4,
+      "candidateGroups": 4,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 4,
+      "fn": 4,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 4,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 4,
+      "candidateGroups": 4,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 4,
+      "fn": 4,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 4,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "saint-etienne-de-bolton-2026-08-04",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 17,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 17,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 17,
+      "candidateGroups": 18,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 18,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 18,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 17,
+      "candidateGroups": 18,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 18,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 18,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "valcourt-2026-06-01-agenda",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 6,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 6,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 6,
+      "candidateGroups": 5,
+      "matchedIds": [
+       "V71",
+       "V72",
+       "V73",
+       "V74"
+      ],
+      "tp": 4,
+      "fp": 1,
+      "fn": 2,
+      "precision": 0.8,
+      "recall": 0.6666666666666666,
+      "f1": 0.7272727272727273,
+      "partialOracle": false,
+      "unmatchedGroups": 1,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 6,
+      "candidateGroups": 7,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 7,
+      "fn": 6,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 7,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 6,
+      "candidateGroups": 7,
+      "matchedIds": [
+       "V71",
+       "V72",
+       "V73",
+       "V74"
+      ],
+      "tp": 4,
+      "fp": 3,
+      "fn": 2,
+      "precision": 0.5714285714285714,
+      "recall": 0.6666666666666666,
+      "f1": 0.6153846153846154,
+      "partialOracle": false,
+      "unmatchedGroups": 3,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "saint-barthelemy-2026-09-08",
+     "state": "not_launched"
+    },
+    {
+     "documentId": "waterloo-2026-08-18",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": true,
+     "v1": {
+      "oracleUnits": 1,
+      "candidateGroups": 10,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 10,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 1,
+      "candidateGroups": 10,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 10,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 1,
+      "candidateGroups": 12,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 12,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 1,
+      "candidateGroups": 12,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 12,
+      "duplicateMatches": 0
+     }
+    }
+   ],
+   "totals": {
+    "planned": 5,
+    "launched": 4,
+    "accepted": 0
+   },
+   "macroAccepted": {
+    "v1": null,
+    "v2": null,
+    "precisionV1": null,
+    "precisionV2": null,
+    "recallV1": null,
+    "recallV2": null
+   },
+   "macroFixed": {
+    "v1": 0,
+    "r1": 0.24242424242424243,
+    "r2": 0,
+    "v2": 0.20512820512820515,
+    "precisionV1": 0,
+    "precisionV2": 0.19047619047619047,
+    "recallV1": 0,
+    "recallV2": 0.2222222222222222
+   }
+  },
+  {
+   "campaign": "v13",
+   "variant": "gemini-low",
+   "directory": "campaign-gemini",
+   "contract": "immo-pv-extraction-v8",
+   "cases": [
+    {
+     "documentId": "lac-des-seize-iles-2026-09-agenda",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 4,
+      "candidateGroups": 1,
+      "matchedIds": [
+       "L54"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1,
+      "recall": 0.25,
+      "f1": 0.4,
+      "partialOracle": false,
+      "unmatchedGroups": 0,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 4,
+      "candidateGroups": 1,
+      "matchedIds": [
+       "L54"
+      ],
+      "tp": 1,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1,
+      "recall": 0.25,
+      "f1": 0.4,
+      "partialOracle": false,
+      "unmatchedGroups": 0,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 4,
+      "candidateGroups": 4,
+      "matchedIds": [
+       "L55",
+       "L54"
+      ],
+      "tp": 2,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1": 0.5,
+      "partialOracle": false,
+      "unmatchedGroups": 2,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 4,
+      "candidateGroups": 4,
+      "matchedIds": [
+       "L55",
+       "L54"
+      ],
+      "tp": 2,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1": 0.5,
+      "partialOracle": false,
+      "unmatchedGroups": 2,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "saint-etienne-de-bolton-2026-08-04",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 17,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 17,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 17,
+      "candidateGroups": 15,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 15,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 15,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 17,
+      "candidateGroups": 15,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 15,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 15,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "valcourt-2026-06-01-agenda",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 6,
+      "candidateGroups": 4,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 4,
+      "fn": 6,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 4,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 6,
+      "candidateGroups": 4,
+      "matchedIds": [
+       "V71",
+       "V72",
+       "V73",
+       "V74"
+      ],
+      "tp": 4,
+      "fp": 0,
+      "fn": 2,
+      "precision": 1,
+      "recall": 0.6666666666666666,
+      "f1": 0.8,
+      "partialOracle": false,
+      "unmatchedGroups": 0,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 6,
+      "candidateGroups": 6,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 6,
+      "fn": 6,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 6,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 6,
+      "candidateGroups": 6,
+      "matchedIds": [
+       "V71",
+       "V72",
+       "V73",
+       "V74"
+      ],
+      "tp": 4,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6666666666666666,
+      "recall": 0.6666666666666666,
+      "f1": 0.6666666666666666,
+      "partialOracle": false,
+      "unmatchedGroups": 2,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "saint-barthelemy-2026-09-08",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 8,
+      "candidateGroups": 3,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 3,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 3,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 8,
+      "candidateGroups": 3,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 3,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 3,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 8,
+      "candidateGroups": 6,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 6,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 6,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 8,
+      "candidateGroups": 6,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 6,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 6,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "waterloo-2026-08-18",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": true,
+     "v1": {
+      "oracleUnits": 1,
+      "candidateGroups": 9,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 9,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 1,
+      "candidateGroups": 9,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 9,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 1,
+      "candidateGroups": 13,
+      "matchedIds": [
+       "W001"
+      ],
+      "tp": 1,
+      "fp": null,
+      "fn": 0,
+      "precision": null,
+      "recall": 1,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 12,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 1,
+      "candidateGroups": 13,
+      "matchedIds": [
+       "W001"
+      ],
+      "tp": 1,
+      "fp": null,
+      "fn": 0,
+      "precision": null,
+      "recall": 1,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 12,
+      "duplicateMatches": 0
+     }
+    }
+   ],
+   "totals": {
+    "planned": 5,
+    "launched": 5,
+    "accepted": 4
+   },
+   "macroAccepted": {
+    "v1": 0.13333333333333333,
+    "v2": 0.38888888888888884,
+    "precisionV1": 0.3333333333333333,
+    "precisionV2": 0.38888888888888884,
+    "recallV1": 0.08333333333333333,
+    "recallV2": 0.38888888888888884
+   },
+   "macroFixed": {
+    "v1": 0.1,
+    "r1": 0.30000000000000004,
+    "r2": 0.125,
+    "v2": 0.29166666666666663,
+    "precisionV1": 0.25,
+    "precisionV2": 0.29166666666666663,
+    "recallV1": 0.0625,
+    "recallV2": 0.29166666666666663
+   }
+  },
+  {
+   "campaign": "v13",
+   "variant": "sonnet-cloudcode",
+   "directory": "campaign-cloudcode",
+   "contract": "immo-pv-extraction-v8",
+   "cases": [
+    {
+     "documentId": "lac-des-seize-iles-2026-09-agenda",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 4,
+      "candidateGroups": 1,
+      "matchedIds": [
+       "L36",
+       "L54"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 2,
+      "precision": 1,
+      "recall": 0.5,
+      "f1": 0.6666666666666666,
+      "partialOracle": false,
+      "unmatchedGroups": 0,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 4,
+      "candidateGroups": 1,
+      "matchedIds": [
+       "L36",
+       "L54"
+      ],
+      "tp": 2,
+      "fp": 0,
+      "fn": 2,
+      "precision": 1,
+      "recall": 0.5,
+      "f1": 0.6666666666666666,
+      "partialOracle": false,
+      "unmatchedGroups": 0,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 4,
+      "candidateGroups": 4,
+      "matchedIds": [
+       "L55",
+       "L36",
+       "L54"
+      ],
+      "tp": 3,
+      "fp": 2,
+      "fn": 1,
+      "precision": 0.6,
+      "recall": 0.75,
+      "f1": 0.6666666666666666,
+      "partialOracle": false,
+      "unmatchedGroups": 2,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 4,
+      "candidateGroups": 4,
+      "matchedIds": [
+       "L55",
+       "L36",
+       "L54"
+      ],
+      "tp": 3,
+      "fp": 2,
+      "fn": 1,
+      "precision": 0.6,
+      "recall": 0.75,
+      "f1": 0.6666666666666666,
+      "partialOracle": false,
+      "unmatchedGroups": 2,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "saint-etienne-de-bolton-2026-08-04",
+     "accepted": false,
+     "state": "completed_invalid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 17,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 17,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 17,
+      "candidateGroups": 24,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 24,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 24,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 17,
+      "candidateGroups": 24,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 24,
+      "fn": 17,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 24,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "valcourt-2026-06-01-agenda",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 6,
+      "candidateGroups": 4,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 4,
+      "fn": 6,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 4,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 6,
+      "candidateGroups": 4,
+      "matchedIds": [
+       "V71",
+       "V75",
+       "V72",
+       "V73",
+       "V74"
+      ],
+      "tp": 5,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1,
+      "recall": 0.8333333333333334,
+      "f1": 0.9090909090909091,
+      "partialOracle": false,
+      "unmatchedGroups": 0,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 6,
+      "candidateGroups": 6,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 6,
+      "fn": 6,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 6,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 6,
+      "candidateGroups": 6,
+      "matchedIds": [
+       "V75",
+       "V71",
+       "V72",
+       "V73",
+       "V74"
+      ],
+      "tp": 5,
+      "fp": 2,
+      "fn": 1,
+      "precision": 0.7142857142857143,
+      "recall": 0.8333333333333334,
+      "f1": 0.7692307692307693,
+      "partialOracle": false,
+      "unmatchedGroups": 1,
+      "duplicateMatches": 1
+     }
+    },
+    {
+     "documentId": "saint-barthelemy-2026-09-08",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": false,
+     "v1": {
+      "oracleUnits": 8,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 8,
+      "candidateGroups": 5,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 5,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 5,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 8,
+      "candidateGroups": 8,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 8,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 8,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 8,
+      "candidateGroups": 8,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": 8,
+      "fn": 8,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "partialOracle": false,
+      "unmatchedGroups": 8,
+      "duplicateMatches": 0
+     }
+    },
+    {
+     "documentId": "waterloo-2026-08-18",
+     "accepted": true,
+     "state": "completed_valid",
+     "partialOracle": true,
+     "v1": {
+      "oracleUnits": 1,
+      "candidateGroups": 9,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 9,
+      "duplicateMatches": 0
+     },
+     "r1": {
+      "oracleUnits": 1,
+      "candidateGroups": 9,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 9,
+      "duplicateMatches": 0
+     },
+     "r2": {
+      "oracleUnits": 1,
+      "candidateGroups": 11,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 11,
+      "duplicateMatches": 0
+     },
+     "v2": {
+      "oracleUnits": 1,
+      "candidateGroups": 11,
+      "matchedIds": [],
+      "tp": 0,
+      "fp": null,
+      "fn": 1,
+      "precision": null,
+      "recall": 0,
+      "f1": null,
+      "partialOracle": true,
+      "unmatchedGroups": 11,
+      "duplicateMatches": 0
+     }
+    }
+   ],
+   "totals": {
+    "planned": 5,
+    "launched": 5,
+    "accepted": 4
+   },
+   "macroAccepted": {
+    "v1": 0.2222222222222222,
+    "v2": 0.47863247863247865,
+    "precisionV1": 0.3333333333333333,
+    "precisionV2": 0.4380952380952381,
+    "recallV1": 0.16666666666666666,
+    "recallV2": 0.5277777777777778
+   },
+   "macroFixed": {
+    "v1": 0.16666666666666666,
+    "r1": 0.3939393939393939,
+    "r2": 0.16666666666666666,
+    "v2": 0.358974358974359,
+    "precisionV1": 0.25,
+    "precisionV2": 0.32857142857142857,
+    "recallV1": 0.125,
+    "recallV2": 0.39583333333333337
+   }
+  }
+ ]
+}

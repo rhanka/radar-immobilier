@@ -47,6 +47,7 @@ V13_T1_ROOT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/t1-v13-19d0d8b2
 # The v13 arm is selected by VARIANT alone: one campaign, one contract, one cap.
 V13_ARM_DIR = $(if $(filter gemini-low,$(VARIANT)),campaign-gemini,$(if $(filter sonnet-direct,$(VARIANT)),campaign-direct,campaign-cloudcode))
 V13_ARM_RESULTS = $(V13_RESULTS)/$(V13_ARM_DIR)
+ORACLE_V2_ROOT := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark
 RUNTIME_TEXT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/runtime-text
 CAS_ROOT := $(MAIN_ROOT)/.lanes/conductor/tmp/graphify-cas/run-dryrun2-final-20260911T215911Z
 NODE_IMAGE := node:22-bookworm-slim
@@ -76,6 +77,7 @@ GEMINI_MODEL ?= gemini-3.8-flash-tiered
 .PHONY: test test-v3 test-v4 test-v5 test-v6 test-v7 test-v8 test-v9 test-v10 test-diagnosis-v4 test-integration-contract-v4 install-v4-integration-deps check-v4-integration-ready preflight-v4-integration run-v4-integration run-v4-real provider-availability test-score-v3 test-score-v4 score-v3 score-v4 score-v6 score-v7 score-v8 score-v9 score-v10 freeze-blind-v3 freeze-blind-v4 freeze-blind-v6 freeze-blind-v7 freeze-blind-v8 runtime-text t1-v8-snapshot t1-v9-snapshot t1-v10-snapshot freeze-v3 freeze-v5 freeze-v6 freeze-v7 freeze-v8 replay-v9-freeze replay-v10-freeze prepare-prompts-v3 prepare-prompts-v5 prepare-prompts-v6 prepare-prompts-v7 prepare-prompts-v8 prepare-prompts-v10 run-v3 run-v4 run-v5-control run-v5-cap run-v5-real run-v6-control run-v6-real run-v7-control run-v7-real run-v8-control run-v8-real run-v9-real run-v10-control run-v10-real requalify-v6-control requalify-v7-receipts requalify-v8-receipts requalify-v9-receipts requalify-v10-receipts sonnet-env-status preflight-v3 gemini-diagnostic gemini-catalogue-probe gemini-catalogue-probe-check run-v3-sol-normal run-v4-all quota inspect-validation
 .PHONY: test-v11 score-v11 t1-v11-snapshot replay-v11-freeze prepare-prompts-v11 run-v11-control run-v11-real requalify-v11-receipts
 .PHONY: probe-v12-cloudcode check-v12-ping ping-v12-direct ping-v12-cloudcode replay-v12-freeze run-v12-real requalify-v12-receipts score-v12 test-v12 freeze-blind-v12
+.PHONY: build-oracle-v2 test-oracle-v2 compare-oracle-v1-v2
 .PHONY: t1-v13-snapshot replay-v13-freeze prepare-prompts-v13 run-v13-control run-v13-real requalify-v13-receipts score-v13 test-v13 freeze-blind-v13
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
@@ -1048,3 +1050,34 @@ test-v13: runtime-text
 	  -w /src $(NODE_IMAGE) sh -c 'node --check tools/refresh-benchmark/sonnet-runtime.mjs \
 	    && node --check tools/refresh-benchmark/requalify-v13-receipts.mjs \
 	    && node --check tools/refresh-benchmark/freeze-blind-v13.mjs'
+
+# ── Oracle v2 (realigned scorer) ──────────────────────────────────────────────
+# The frozen v1 oracle and score-v3.mjs are never touched: v2 lives beside them so both
+# can be read on the same receipts. Every target runs with --network none.
+build-oracle-v2:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(ORACLE_V2_ROOT),target=/out \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_ORACLE_V2_OUTPUT=/out/manual-oracle-v2.json \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/build-manual-oracle-v2.mjs
+
+test-oracle-v2:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
+	  node --test tools/refresh-benchmark/score-oracle-v2.test.mjs
+	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) sh -c 'node --check tools/refresh-benchmark/score-oracle-v2.mjs \
+	    && node --check tools/refresh-benchmark/build-manual-oracle-v2.mjs \
+	    && node --check tools/refresh-benchmark/compare-oracle-v1-v2.mjs'
+
+compare-oracle-v1-v2:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(ORACLE_V2_ROOT),target=/out \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) \
+	  -e BENCHMARK_COMPARISON_ARMS='$(COMPARISON_ARMS)' \
+	  -e BENCHMARK_COMPARISON_OUTPUT=/out/$(or $(COMPARISON_FILE),oracle-v2-comparison.json) \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/compare-oracle-v1-v2.mjs
