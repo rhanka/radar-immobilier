@@ -177,7 +177,11 @@ function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
   }
   for (const entity of entities) {
     for (const citation of entity.citations ?? []) {
-      validatePdfRecord(citation as unknown as Record<string, unknown>, chunk, pageTexts);
+      const record = citation as unknown as Record<string, unknown>;
+      if (typeof record["excerpt"] === "string" && record["excerpt"].length > 200) {
+        throw new Error(`Model output violates entity_citation_excerpt_too_long for chunk ${chunk.id}`);
+      }
+      validatePdfRecord(record, chunk, pageTexts);
     }
   }
   for (const evidence of extraction.evidence ?? []) {

@@ -59,6 +59,21 @@ function compactExtraction(page = oracle.page): Extraction {
   return value;
 }
 
+function compactEdgeExtraction(): Extraction {
+  const value = compactExtraction();
+  value.nodes.unshift({ id: "source-waterloo-pv", label: "Waterloo PV", file_type: "document",
+    source_file: oracle.originalKey, node_type: "Source",
+    citations: [{ page: oracle.page, excerpt: oracle.excerpt }] } as Extraction["nodes"][number]);
+  value.edges = [{ source: "source-waterloo-pv", target: "signal-waterloo-26-956-2",
+    relation: "supports", confidence: "EXTRACTED", source_file: oracle.originalKey,
+    evidence_refs: ["ev-1"], citations: [{ page: oracle.page, excerpt: oracle.excerpt }] } as
+    unknown as Extraction["edges"][number]];
+  value.evidence = [{ id: "ev-1", source_file: oracle.originalKey, rawRef: oracle.originalKey,
+    docSha: oracle.docSha, sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page,
+    excerpt: oracle.excerpt }];
+  return value;
+}
+
 async function captureExtractionError(text: string): Promise<Error> {
   try {
     await extractRefreshProfile([chunk()], {
@@ -166,6 +181,48 @@ describe("refresh profile extraction", () => {
     await expect(extractRefreshProfile([chunk()], { context,
       textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
     })).rejects.toThrow("ungrounded PDF excerpt");
+  });
+
+  it("should expand a compact edge citation with the exact PDF identity", async () => {
+    const results = await extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(compactEdgeExtraction()) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.edges[0]!.citations![0]).toEqual({
+      source_file: oracle.originalKey, rawRef: oracle.originalKey, docSha: oracle.docSha,
+      sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page, excerpt: oracle.excerpt,
+    });
+  });
+
+  it.each(["page", "excerpt"] as const)("should reject a compact edge citation without %s", async (field) => {
+    const invalid = compactEdgeExtraction();
+    delete (invalid.edges[0]!.citations![0] as unknown as Record<string, unknown>)[field];
+    await expect(extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow(field === "page" ? "missing_citation_page" : "ungrounded PDF excerpt");
+  });
+
+  it.each(["node", "edge"] as const)("should reject a 201-character %s citation excerpt", async (kind) => {
+    const longExcerpt = "é".repeat(201);
+    const invalid = kind === "node" ? compactExtraction() : compactEdgeExtraction();
+    const citation = kind === "node" ? invalid.nodes[0]!.citations![0]! : invalid.edges[0]!.citations![0]!;
+    citation.excerpt = longExcerpt;
+    await expect(extractRefreshProfile([chunk(undefined,
+      `[PDF PAGE 3]\n${oracle.excerpt}\n${longExcerpt}`)], { context,
+      textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("entity_citation_excerpt_too_long");
+  });
+
+  it("should preserve the distinct unbounded evidence excerpt contract", async () => {
+    const longExcerpt = "é".repeat(201);
+    const value = extraction();
+    value.evidence = [{ id: "ev-long", source_file: oracle.originalKey, rawRef: oracle.originalKey,
+      docSha: oracle.docSha, sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page,
+      excerpt: longExcerpt }];
+    const results = await extractRefreshProfile([chunk(undefined,
+      `[PDF PAGE 3]\n${oracle.excerpt}\n${longExcerpt}`)], { context,
+      textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.evidence![0]!.excerpt).toHaveLength(201);
   });
 
   it("should load an unregistered PV profile and refuse registry-backed output", async () => {
