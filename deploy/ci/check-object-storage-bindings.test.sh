@@ -22,8 +22,8 @@ FILES=(
   deploy/k8s/34-refresh-cronjob.yaml
   deploy/k8s/refresh-cronjobs-prod/kustomization.yaml
   deploy/k8s/10-rbac.yaml deploy/k8s/11-ci-deployer-preprod-rbac.yaml
-  deploy/k8s/object-storage-docs-prod/copy-job.yaml
-  deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml deploy/k8s/secrets.example.yaml
+  deploy/k8s/object-storage-docs-prod/kustomization.yaml
+  deploy/k8s/object-storage-inventory-preprod/kustomization.yaml deploy/k8s/secrets.example.yaml
   deploy/k8s/README.md
   .github/workflows/run-job.yaml
 )
@@ -105,6 +105,12 @@ run_bad "$CASE_ROOT" 'rejects a restored legacy mount'; rm -rf "$CASE_ROOT"
 
 fixture; touch "$CASE_ROOT/deploy/k8s/25-minio.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored PROD MinIO manifest'; rm -rf "$CASE_ROOT"
+
+fixture; touch "$CASE_ROOT/deploy/k8s/object-storage-docs-prod/copy-job.yaml"
+run_bad "$CASE_ROOT" 'rejects a restored PROD migration Job'; rm -rf "$CASE_ROOT"
+
+fixture; touch "$CASE_ROOT/deploy/k8s/object-storage-inventory-preprod/job.yaml"
+run_bad "$CASE_ROOT" 'rejects a restored preprod MinIO inventory Job'; rm -rf "$CASE_ROOT"
 
 fixture; sed -i 's/S3_BUCKET=radar-immobilier-raw/S3_BUCKET=changed/' "$CASE_ROOT/.env.example"
 run_bad "$CASE_ROOT" 'protects local development settings'; rm -rf "$CASE_ROOT"

@@ -5,6 +5,10 @@ object-storage-migration-test: ## Run the hermetic object-storage migration cont
 	  deploy/ci/migrate-object-storage.hermetic.test.sh
 	@bash deploy/ci/migrate-object-storage.hermetic.test.sh
 
+.PHONY: object-storage-bindings-test
+object-storage-bindings-test: ## Verify released bindings and reject retired storage entrypoints
+	@bash deploy/ci/check-object-storage-bindings.test.sh
+
 .PHONY: object-storage-docs-prod-provision
 object-storage-docs-prod-provision: ## Verify or provision the dedicated PROD DOCS identity and Secret
 	@if [ "$(ENV)" != "prod" ] || [ -z "$$KUBECONFIG" ] || \
