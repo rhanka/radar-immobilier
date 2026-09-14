@@ -1,0 +1,39 @@
+{
+  "provenance": {
+    "campaign": "v13",
+    "contractVersion": "immo-pv-extraction-v8",
+    "t1Commit": "19d0d8b2edc6900180780478c6b8b4a9feeb5b52",
+    "document": "saint-etienne-de-bolton-2026-08-04",
+    "documentSha256": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+    "page": 12,
+    "pageTextSha256": "7f51a8824f1e94507d4294981b3333a9236ca523d08eac69a7e645dda1fea157",
+    "note": "Real v13 contrastive pair, item h of the 4 August 2026 Saint-Etienne-de-Bolton minutes: both strings are verbatim on page 12, only the second states the decision."
+  },
+  "zoneLabelExcerpt": {
+    "excerpt": "Zone : RUR-12",
+    "page": 12,
+    "codePoints": 13,
+    "normalizedCodePoints": 9,
+    "emittedBy": {
+      "gemini-low": [
+        "nodes[12].citations[0]"
+      ],
+      "sonnet-cloudcode": [
+        "nodes[21].citations[0]",
+        "edges[24].citations[0]",
+        "edges[28].citations[0]"
+      ]
+    },
+    "refusedAsUnderV8": "ungrounded_pdf_excerpt",
+    "refusedAsUnderV9": "entity_citation_excerpt_too_short",
+    "cause": "Verbatim on the cited page, but a field label: 13 code points before anchoring and 9 after normalization, under both the 20-code-point excerpt floor and the 12-code-point anchor floor."
+  },
+  "decisionExcerpt": {
+    "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,",
+    "page": 12,
+    "codePoints": 61,
+    "resolution": "2026-08-155",
+    "note": "The resolution sentence that concerns the same zone label, on the same page: accepted under v9."
+  },
+  "pageText": "h. Autorisation pour démolir l’abri automobile\nexistant et le remplacer par un garage au 24, Allée\ndes Sommets.\nAdresse : 24, Allée des Sommets\nLot : 5 662 886\nZone : RUR-12\nNature de la demande : Garage attaché à la résidence à la place\nde l’abri existant.\nAnnée de construction : 2016\nSuperficie du terrain : 5 749,2 m2\nCONSIDÉRANT QUE le requérant souhaite démolir l’abri\nautomobile existant et le remplacer par un garage ;\nCONSIDÉRANT\nQUE\nl’ajout\ndu\ngarage\ns’intègre\nharmonieusement à la résidence existante en utilisant le même\nrevêtement de bois noir et la même apparence architecturale ;\nCONSIDÉRANT QUE les critères du PIIA ont été étudiés ;\n2026-08-155 Il est proposé par Harry Bird\nappuyé par Jocelyn Brasseur\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886, conformément aux documents et au plan\npréparé par Daniel Laflamme, architecte et daté du 19 juin 2026\nsoumis à l’appui de la demande.\nADOPTÉE"
+}
