@@ -178,8 +178,10 @@ function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
   for (const entity of entities) {
     for (const citation of entity.citations ?? []) {
       const record = citation as unknown as Record<string, unknown>;
-      if (typeof record["excerpt"] === "string" && record["excerpt"].length > 200) {
-        throw new Error(`Model output violates entity_citation_excerpt_too_long for chunk ${chunk.id}`);
+      // Entity citation length is measured in Unicode code points, not UTF-16 code units.
+      if (typeof record["excerpt"] === "string" && Array.from(record["excerpt"]).length > 200) {
+        throw new Error("Model output violates entity_citation_excerpt_too_long: "
+          + `maximum 200 Unicode code points for chunk ${chunk.id}`);
       }
       validatePdfRecord(record, chunk, pageTexts);
     }
@@ -189,9 +191,9 @@ function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
   }
 }
 
-function strictJsonCandidate(text: string): string {
+export function parseStrictJsonResponse(text: string): unknown {
   const trimmed = text.trim();
-  if (!trimmed.startsWith("```")) return trimmed;
+  if (!trimmed.startsWith("```")) return JSON.parse(trimmed);
   const firstLineEnd = trimmed.indexOf("\n");
   if (firstLineEnd < 0) throw new SyntaxError("Invalid JSON fence: missing body line");
   const rawLabel = trimmed.slice(3, firstLineEnd);
@@ -203,7 +205,7 @@ function strictJsonCandidate(text: string): string {
   if (closingLineStart === firstLineEnd || trimmed.slice(closingLineStart + 1) !== "```") {
     throw new SyntaxError("Invalid JSON fence: missing final closing fence");
   }
-  return trimmed.slice(firstLineEnd + 1, closingLineStart).trim();
+  return JSON.parse(trimmed.slice(firstLineEnd + 1, closingLineStart).trim());
 }
 
 function validateDeclaredContractVersion(value: unknown, chunk: RefreshCorpusChunk): void {
@@ -224,7 +226,7 @@ function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: R
   pageTexts: ReadonlyMap<number, string>): Extraction {
   let parsed: unknown;
   try {
-    parsed = JSON.parse(strictJsonCandidate(text));
+    parsed = parseStrictJsonResponse(text);
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new Error(`Invalid JSON for chunk ${chunk.id}: ${error.message}`, { cause: error });

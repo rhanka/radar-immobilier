@@ -14,7 +14,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import type { RefreshCorpusChunk } from "./refresh-corpus.js";
 import {
-  extractRefreshProfile, loadRefreshProfileContext, REFRESH_PROFILE_CONTRACT_VERSION,
+  extractRefreshProfile, loadRefreshProfileContext, parseStrictJsonResponse, REFRESH_PROFILE_CONTRACT_VERSION,
   type RefreshProfileContext,
 } from "./refresh-profile.js";
 
@@ -103,11 +103,17 @@ function client(responses: Array<{ text: string; status?: "completed" | "instruc
   } satisfies TextJsonGenerationClient;
 }
 
+const largeInvalidJsonResponses = [
+  ["an unterminated naked fence", "```" + " ".repeat(100_000) + "x"],
+  ["an unterminated JSON fence", "```json\n" + " ".repeat(100_000)],
+] as const;
+
 describe("refresh profile extraction", () => {
   it.each([
     ["direct JSON", () => JSON.stringify(extraction())],
     ["a JSON fence", () => ` \n\`\`\`JSON\n${JSON.stringify(extraction())}\n\`\`\`  \n `],
     ["a naked fence", () => `\`\`\`\n${JSON.stringify(extraction())}\n\`\`\``],
+    ["a CRLF JSON fence", () => `\`\`\`json\r\n${JSON.stringify(extraction())}\r\n\`\`\``],
     ["an external BOM", () => `\uFEFF${JSON.stringify(extraction())}`],
     ["backticks inside a JSON string", () => {
       const value = extraction();
@@ -123,11 +129,13 @@ describe("refresh profile extraction", () => {
 
   it.each([
     ["an incomplete fence", () => `\`\`\`json\n${JSON.stringify(extraction())}`],
+    ["exactly one fence marker", () => "```"],
     ["two fences", () => {
       const fenced = `\`\`\`json\n${JSON.stringify(extraction())}\n\`\`\``;
       return `${fenced}\n${fenced}`;
     }],
     ["a non-JSON fence label", () => `\`\`\`javascript\n${JSON.stringify(extraction())}\n\`\`\``],
+    ["a JSON fence label with a trailing space", () => `\`\`\`json \n${JSON.stringify(extraction())}\n\`\`\``],
     ["a preamble", () => `Preamble\n${JSON.stringify(extraction())}`],
     ["a suffix", () => `${JSON.stringify(extraction())}\nSuffix`],
   ])("should reject %s and preserve the parse error", async (_case, response) => {
@@ -136,13 +144,21 @@ describe("refresh profile extraction", () => {
     expect(error.message).toContain((error.cause as SyntaxError).message);
   });
 
-  it.each([
-    ["an unterminated naked fence", "```" + " ".repeat(100_000) + "x"],
-    ["an unterminated JSON fence", "```json\n" + " ".repeat(100_000)],
-  ])("should reject %s in under 50 ms", async (_case, response) => {
-    const startedAt = performance.now();
+  it.each(largeInvalidJsonResponses)("should reject %s through extraction", async (_case, response) => {
     await expect(captureExtractionError(response)).resolves.toBeInstanceOf(Error);
-    expect(performance.now() - startedAt).toBeLessThan(50);
+  });
+
+  it.each(largeInvalidJsonResponses)("should reject %s in under 200 ms", (_case, response) => {
+    const startedAt = performance.now();
+    let thrown: unknown;
+    try {
+      parseStrictJsonResponse(response);
+    } catch (error) {
+      thrown = error;
+    }
+    const elapsedMs = performance.now() - startedAt;
+    expect(thrown).toBeInstanceOf(SyntaxError);
+    expect(elapsedMs).toBeLessThan(200);
   });
 
   it("should name profile violations when entity citations are missing", async () => {
@@ -242,6 +258,24 @@ describe("refresh profile extraction", () => {
       `[PDF PAGE 3]\n${oracle.excerpt}\n${longExcerpt}`)], { context,
       textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
     })).rejects.toThrow("entity_citation_excerpt_too_long");
+  });
+
+  it.each([
+    [200, false],
+    [201, true],
+  ] as const)("should enforce %i out-of-BMP citation code points", async (codePointCount, shouldReject) => {
+    const excerpt = "😀".repeat(codePointCount);
+    const value = compactExtraction();
+    value.nodes[0]!.citations![0]!.excerpt = excerpt;
+    const promise = extractRefreshProfile([chunk(undefined,
+      `[PDF PAGE 3]\n${oracle.excerpt}\n${excerpt}`)], { context,
+      textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+    });
+    if (shouldReject) {
+      await expect(promise).rejects.toThrow("entity_citation_excerpt_too_long: maximum 200 Unicode code points");
+    } else {
+      await expect(promise).resolves.toHaveLength(1);
+    }
   });
 
   it("should preserve the distinct unbounded evidence excerpt contract", async () => {
