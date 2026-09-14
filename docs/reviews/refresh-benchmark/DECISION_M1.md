@@ -1,6 +1,6 @@
-recommandation : B · Gemini v8 4/5 · Sonnet v8 4/5 · juges v13 : égalité · reste : `ungrounded_pdf_excerpt` (libellés de zone courts, Saint-Étienne, sur les deux modèles)
+recommandation : A puis C′ · v100 : 87/100 acceptés (IC95 79-92 %) sur 100 villes · refus : ungrounded_pdf_excerpt 6, missing_evidence_ref 5, inferred_relation_disallowed 2 · 9 refus sur 13 pour un seul enregistrement · juges OpenAI/Opus : accord ±1 pt 21/25, κ −0,018, utilité 2,96/3,60, refusés notés aussi haut que les acceptés
 
-# Dossier de décision M1 (v2) — quel modèle pour le CronJob `radar-refresh-pv`
+# Dossier de décision M1 (v3) — quel modèle pour le CronJob `radar-refresh-pv`
 
 Public : l'owner. Chaque notion mesurée est introduite par une phrase simple, puis
 illustrée par un extrait réel tiré des reçus de campagne. `[FAIT]` = mesuré, avec
@@ -25,22 +25,28 @@ dans ce CronJob**, et **maintenant ou après un tour de correction supplémentai
 
 ### La réponse recommandée
 
-[JUGEMENT] **Option B** : corriger d'abord une dernière cause mesurée (le modèle
-cite le libellé de zone au lieu de la phrase de décision), réaligner l'oracle de
-mesure, puis exiger deux campagnes à au moins 4/5 avant de promouvoir. Gemini
-3.8 Flash LOW reste le candidat de tête pour la promotion qui suivra.
+[JUGEMENT] **Option A, puis C′.** Promouvoir **Gemini 3.8 Flash LOW, contrat v9
+`93994e45`, plafond 64 000**, tel quel : sur 100 PV de 100 villes il accepte 87 % des
+documents et ancre 98,49 % de ses citations, sans relâcher aucune garantie. Puis
+instruire **C′** — écarter l'enregistrement fautif au lieu de refuser le document —
+qui récupère neuf refus sur treize contre un compteur à publier.
+
+[JUGEMENT] Ceci **retourne la recommandation de la version 2**, qui était B. Les deux
+motifs de B sont tombés : le critère « 4 PV sur 5 » est remplacé par un taux estimé
+avec intervalle sur 100 villes, et la classe de refus qui restait ouverte — le libellé
+de zone court — a disparu (0 citation sous les planchers sur 2 119 enregistrements).
 
 ### Les trois chiffres qui comptent
 
 | Chiffre | Ce qu'il dit | Source |
 | --- | --- | --- |
-| **4/5 et 4/5** | Sous le contrat v8, Gemini LOW et Sonnet 4.6 Cloud Code font passer chacun 4 PDF sur 5 à travers toutes les validations. Le seuil qui avait été posé (« au moins 4 sur 5 ») est atteint par les deux. | `v13/report.md`, agrégats |
-| **0 unité sur 8** | Saint-Barthélemy est **accepté** par les deux modèles et n'apparie **aucune** des 8 unités attendues par l'oracle : les pages citées (4–5 et 3–5) ne couvrent pas les pages 4 à 8 et 10 de l'oracle. Autrement dit : « accepté » ne veut pas dire « utile ». | `v13/report.md`, cause 2 |
-| **Égalité 2–2, confiance faible** | Le juge aveugle B ne départage pas les deux modèles : 2 documents chacun, 13 unités contre 12 sur 19, utilité cumulée 13 contre 13. | `v13/judges/verdict-judge-b.json` |
+| **87 %, IC 95 % [79 ; 92]** | Sur 100 PV de 100 villes différentes, le contrat v9 fait passer 87 documents à travers les six couches de validation. C'est la première estimation avec intervalle de la lane ; les campagnes précédentes donnaient un ratio sur cinq documents. | `v100/report.md`, §3 |
+| **9 refus sur 13 pour un enregistrement** | Neuf des treize documents refusés le sont pour **un seul** enregistrement fautif, soit 2,7 % à 5,3 % des citations de leur propre document. Sur toute la campagne : 2 087 citations ancrées sur 2 119, **98,49 %**. | `v100/report.md`, §4.4 |
+| **Les refusés notés aussi haut que les acceptés** | Deux juges aveugles indépendants notent les documents refusés par le validateur **3,00 et 3,80** sur 5, contre 2,95 et 3,55 pour les acceptés. La porte d'acceptation mesure la provenance, pas la valeur. | `v100/judge/agreement.json` |
 
-[FAIT] Quatrième chiffre utile : Gemini LOW répond en **30,5 s** de moyenne,
-Sonnet Cloud Code en **121,8 s**, soit 4,0 fois plus, pour la même acceptation
-4/5 (`v13/report.md`, agrégats).
+[FAIT] Quatrième chiffre utile : la sortie la plus longue de la campagne fait
+**17 424 tokens** contre un plafond de 64 000, et les 100 réponses se terminent par
+`STOP`. Le plafond est surdimensionné d'un facteur 3,7 (`v100/report.md`, §5).
 
 ---
 
@@ -536,132 +542,244 @@ supplémentaire. Il n'est retenu dans aucune option.
 
 ---
 
+### La campagne v100 — 100 PV, 100 villes, contrat v9 d'après-revue
+
+[FAIT] Depuis la version 2 de ce dossier, trois campagnes ont tourné sur le contrat
+v9 : v14 et v15 (5/5 chacune, contrat `d93f5c93`), v16 (3/5, contrat d'après-revue
+`93994e45`), puis **v100** — **même contrat que v16, même modèle, même effort, même
+plafond, corpus porté de 5 à 100 PV sur 100 villes**, tous datés 2026.
+
+| Agrégat | v14 | v15 | v16 | **v100** |
+| --- | ---: | ---: | ---: | ---: |
+| Documents · villes | 5 · 5 | 5 · 5 | 5 · 5 | **100 · 100** |
+| Acceptés | 5/5 | 5/5 | 3/5 | **87/100 — 87,0 %** |
+| Intervalle de confiance 95 % | — | — | — | **[79,0 ; 92,2] %** |
+| Classes de refus | 0 | 0 | 1 | **3** |
+| Fins de flux `STOP` | 5/5 | 5/5 | 5/5 | **100/100** |
+| Citations ancrées | 103/103 | 94/94 | 132/132 | **2 087 / 2 119 — 98,49 %** |
+| Latence moyenne · p95 | 27,0 s · 52,7 s | 25,5 s · — | 40,8 s · — | **19,2 s · 39,5 s** |
+| Tokens entrée / sortie | 70 080 / 42 920 | 70 080 / 39 225 | 69 630 / 55 882 | **1 646 755 / 679 330** |
+
+[FAIT] **Le taux d'acceptation attendu en production est de 87 %, avec un intervalle
+de confiance à 95 % de 79 % à 92 %**, sur un corpus de 100 villes différentes où
+aucune ville ne pèse plus de 1 %. C'est la première fois que la lane produit un
+intervalle plutôt qu'un ratio sur cinq documents.
+
+[FAIT] **Les cinq documents du gel v13→v16 repassent 5/5** sous v100 — mêmes octets,
+même contrat que v16. Sur quatre campagnes, ces cinq PV totalisent **18 acceptations
+sur 20**. [JUGEMENT] Le 3/5 de v16 se lit donc comme un tirage, pas comme un
+durcissement du validateur : la réserve ouverte par `FIX_PR688_V9_V16.md` est levée.
+
+[FAIT] **Trois classes de refus, 13 documents sur 100 :**
+
+| Classe | PV | Enregistrements fautifs | Cause mesurée |
+| --- | :-: | :-: | --- |
+| `ungrounded_pdf_excerpt` | 6 | 32 | La mise en page du PDF insère des caractères au milieu du passage dans la sortie de `pdftotext` : colonnes entrelacées, pied de page, numéro parasite, phrase qui déborde sur la page suivante. |
+| `missing_evidence_ref` | 5 | 5 | Un nœud sur une vingtaine oublie son renvoi de preuve. |
+| `inferred_relation_disallowed` | 2 | 2 | Une arête `lifecycle_predecessor` est déclarée `INFERRED` ; le contrat n'admet que l'extrait. |
+
+[FAIT] **Neuf refus sur treize tiennent à un seul enregistrement fautif**, qui
+représente 2,7 % à 5,3 % des citations de son propre document. Sur les 13 refusés :
+39 enregistrements fautifs sur 332 cités, **11,7 %**.
+
+[FAIT] **Aucun des six refus d'ancrage ne vient d'une page fausse ni d'un texte
+inventé.** Exemple, Coteau-du-Lac page 3 : le modèle cite « 8.3. Demande d'un PPCMOI »
+puis « a) Approbation. Demande d'un PPCMOI pour le 25, rue des Chutes… » ; la page
+porte, dans l'ordre rendu par `pdftotext`, un **« 9. »** intercalé entre les deux — le
+numéro de la section suivante, placé là par effet de colonne. La normalisation retire
+la ponctuation mais **garde le chiffre**, qui casse la sous-chaîne. Préfixe commun :
+18 caractères normalisés sur 91.
+
+[JUGEMENT] C'est un changement de nature par rapport à v16, où les deux refus étaient
+des **erreurs de page du modèle**. Sur 100 documents, la cause dominante n'est plus le
+modèle : c'est **l'écart entre « verbatim tel qu'on le lit » et « verbatim dans
+l'ordre des octets de `pdftotext` »**.
+
+[FAIT] **Le plafond de 64 000 tokens de sortie est surdimensionné d'un facteur 3,7** :
+la sortie la plus longue de la campagne fait **17 424 tokens**, et aucune des
+100 réponses ne porte `MAX_TOKENS`.
+
+### Les juges aveugles sur v100
+
+[FAIT] Paquet gelé de **25 documents** — 20 sorties acceptées stratifiées par taille
+et 5 sorties refusées stratifiées par classe de refus — avec alias opaques, sans
+identifiant de document ni verdict de validateur. Deux juges, deux passes séparées :
+**OpenAI `gpt-5.6-sol`** par API (25 appels, 409 453 tokens d'entrée) et **Claude
+Opus 5**.
+
+| Mesure | Valeur |
+| --- | ---: |
+| Utilité moyenne sur 5 — OpenAI / Opus | **2,96 / 3,60** |
+| Corrélation de Pearson · de Spearman | **0,474 · 0,281** |
+| Accord exact · à ±1 point | **7/25 · 21/25** |
+| κ de Cohen, notes exactes · binarisé « utile ≥ 4 » | **−0,018 · −0,183** |
+| Utilité moyenne des PV **acceptés** — OpenAI / Opus | 2,95 / 3,55 |
+| Utilité moyenne des PV **refusés** — OpenAI / Opus | **3,00 / 3,80** |
+
+[JUGEMENT] **Les deux juges s'accordent sur l'ordre de grandeur et pas au-delà du
+hasard sur la note exacte** : 21 documents sur 25 sont d'accord à un point près, le κ
+est nul ou négatif. Conséquence pratique, identique à celle du juge v13 : **un écart
+d'un point d'utilité ne départage rien**.
+
+[FAIT] **Ni l'un ni l'autre juge ne note les documents refusés plus bas que les
+acceptés.** [JUGEMENT] C'est la mesure la plus directe de ce que la version 2 de ce
+dossier avançait sur Saint-Barthélemy : **la porte d'acceptation mesure la provenance,
+pas la valeur**. Un PV refusé parce qu'un nœud sur vingt-deux oublie son renvoi de
+preuve reste jugé exploitable par les deux juges.
+
+[JUGEMENT] Ce que les deux passes disent ensemble du contenu : les citations sont
+littérales et bien paginées ; les actes de zonage sont extraits avec leur substance
+(codes de zone créés, agrandis ou abrogés, numéros de lot, étapes, arêtes `amends`,
+`defines`, `rezones`) ; et deux familles manquent — **les listes longues de dossiers
+PIIA individuels**, repliées en un événement agrégé sans adresse ni lot
+(Mont-Saint-Hilaire : 19 dossiers → 2 événements ; Cowansville : 18 dossiers sur 20
+absents), et **les transactions immobilières** (Saint-Barthélemy : cinq résolutions de
+transaction et un transfert grevé d'un droit de préemption, absents).
+
+[FAIT] **Coût monétaire : toujours `N-A`, source manquante.** Le dépôt ne porte aucun
+tarif par token, ni Google, ni Anthropic, ni OpenAI. Les tokens sont mesurés ; aucun
+montant n'est fabriqué.
+
 ## 5. Ce qui reste ouvert
 
-[FAIT] **Une seule classe de refus subsiste** : `ungrounded_pdf_excerpt` sur
-Saint-Étienne, ×4 côté Gemini et ×17 côté Sonnet, causée par les libellés de zone
-courts (`Zone : COM-1`) qui tombent sous le plancher d'ancrage de 12 caractères
-normalisés. Elle touche **les deux modèles**, ce qui exclut une explication par la
-compétence d'un modèle particulier. Le plancher de 20 caractères demandé par le
-prompt v8 n'est appliqué par aucun des deux.
+[FAIT] **Refermé par v100.**
+1. *« Le taux d'acceptation du schéma d'après-revue n'est pas établi »* (réserve de
+   `FIX_PR688_V9_V16.md`) : il l'est — **87 %, IC 95 % [79,0 ; 92,2]** sur 100 PV et
+   100 villes, et les cinq documents du gel repassent 5/5.
+2. *« Le corpus de 5 ne borne pas un risque »* : la distribution existe désormais sur
+   100 documents, 100 villes, 1 à 77 pages.
+3. *« Le plafond de 64 000 est-il suffisant ? »* : la sortie maximale sur 100 documents
+   fait **17 424 tokens**, 100 fins `STOP`, aucune troncature.
+4. *« Le validateur d'après-revue durcit-il quelque chose ? »* : non — les 100 reçus
+   requalifiés hors ligne rendent le verdict en ligne, 100 fois sur 100.
 
-[FAIT] **Deux voies existent pour la traiter**, et les deux sont des arbitrages de
-garantie produit qui reviennent à l'owner : abaisser le plancher d'ancrage de 12,
-ou traiter le libellé court côté code (`v13/report.md`, point 2 pour le
-conducteur).
+[FAIT] **Ouvert, et mesuré comme tel.**
 
-[FAIT] **L'oracle est à réaligner** sur trois points mesurés : la convention de
-numérotation d'ordre du jour (Valcourt), l'exclusion des nœuds `Bylaw` du
-numérateur (Saint-Étienne), et le fait que la macro ne porte que sur les sorties
-acceptées. Le corpus et l'oracle sont gelés depuis v9 et n'ont pas été touchés.
+[FAIT] **1. La variance à corpus v100 fixe n'est pas mesurée.** Une seule observation
+par document sur les 95 nouveaux ; le plafond de 100 requêtes de la lane est consommé.
+La seule variance disponible reste celle des cinq ancres : 18 acceptations sur 20 en
+quatre runs.
 
-[FAIT] **Le coût unitaire est `N-A` — source manquante.** Le dépôt ne porte aucun
-tarif par token, ni Anthropic ni Google. Les seuls tarifs présents
-(`docs/reports/architecture-monthly/token-audit.mjs`, `docs/reports/couts-*.md`)
-sont des forfaits au siège, sans dénominateur en tokens. Aucune estimation n'a été
-fabriquée.
+[FAIT] **2. La couverture n'est toujours pas mesurée à l'échelle.**
+`manual-oracle: N-A` sur 95 documents sur 100. Les juges donnent une lecture d'utilité
+sur 25 documents, pas un rappel sur 100. Les deux juges pointent le même déficit —
+listes de dossiers PIIA repliées, transactions immobilières absentes — sans que sa
+fréquence soit chiffrée sur l'ensemble du corpus.
 
-[FAIT] **La variance n'est pas mesurée** sur v13 : une seule observation par
-document et par bras.
+[FAIT] **3. Trois classes de refus subsistent, dont une inédite.**
+`inferred_relation_disallowed` n'était apparue dans aucune campagne v9 → v16 : elle
+sort à 2 % sur 100 documents. C'est la démonstration que **cinq documents ne
+suffisaient pas à énumérer les classes**.
 
-[FAIT] **Le juge A v13 est en attente** (configuration Gemini). Aucun jugement
-aveugle complet n'existe donc sur la campagne v13.
+[FAIT] **4. La cause dominante d'ancrage n'est pas dans le modèle mais dans la chaîne
+de texte.** Les six refus d'ancrage viennent tous d'un artefact de mise en page rendu
+par `pdftotext`. Aucune correction de prompt n'y changerait rien.
 
-[FAIT] **Les correctifs sont prêts mais non fusionnés.** PR
-[#687](https://github.com/rhanka/radar-immobilier/pull/687) (JSON strict et
-citations) et PR [#688](https://github.com/rhanka/radar-immobilier/pull/688)
-(contrat v8) sont ouvertes vers `main`, `mergeStateStatus=CLEAN`, checks `Enforce
-repo policy` et `Quality gates` en `SUCCESS`. #688 dépend de #687. Aucune des deux
-n'est fusionnée (`gh pr view`).
+[FAIT] **5. L'accord inter-juges ne dépasse pas le hasard** sur la note exacte
+(κ = −0,018 ; κ binarisé = −0,183), pour 21 accords sur 25 à un point près.
 
-[FAIT] **Codex est hors quota jusqu'au 20/09** (source : brief du conducteur
-i-cond ; non attesté par un artefact du dépôt).
+[FAIT] **6. Le coût unitaire est `N-A` — source manquante.** Inchangé depuis la
+version 2 : aucun tarif par token dans le dépôt.
 
-[FAIT] **La revue externe multi-agent prévue par le harness est `N-A`** sur
-plusieurs lanes : la politique d'exécution n'autorise pas le partage du dépôt
-privé. Les validations disponibles sont les tests locaux et les checks CI
-(`LANE_T1_V6_CONTRACT.md`, § limite de revue).
+[FAIT] **7. Aucun bras comparatif sur v100.** Ni Sonnet, ni effort HIGH. La
+comparaison Gemini/Sonnet reste celle de v13, sur 5 documents et sous le contrat v8.
+
+[FAIT] **8. Rien n'est fusionné.** #687 et #688 restent ouvertes ; l'ordre de fusion
+appartient à l'owner.
 
 ---
 
 ## 6. Les options
 
+[JUGEMENT] Les quatre options de la version 2 portaient sur un choix de modèle à
+5 documents. v100 déplace la question : **le modèle n'est plus l'inconnue**. Gemini
+3.8 Flash LOW sous contrat v9 accepte 87 % d'un corpus réel de 100 villes, ancre
+98,49 % de ses citations, ne sature jamais le plafond et répond en 19 s de moyenne.
+L'inconnue est **ce qu'on fait des 13 % refusés**, dont neuf documents sur treize
+tiennent à un enregistrement unique.
+
 | id | choix | pour | contre | coût | réversibilité | ce qui le ferait gagner |
 | --- | --- | --- | --- | --- | --- | --- |
-| **A** | [JUGEMENT] Promouvoir **Gemini LOW, contrat v8, plafond 64 000, maintenant** : fusionner #687 puis #688, les reporter dans #682, et journaliser l'échec par PV via `recordOutcome`. | [FAIT] 4/5 acceptés, seuil atteint. [FAIT] Les deux juges v7 préféraient déjà Gemini au Sonnet historique. [FAIT] 30,5 s par PV, le plus rapide des candidats. [JUGEMENT] La couverture démarre tout de suite sur 4 PV sur 5. | [FAIT] Saint-Barthélemy est accepté avec **0 unité appariée sur 8** : la porte d'acceptation ne mesure pas la couverture. [FAIT] À population fixe, Gemini v8 (0,267) est **en retrait de Gemini v5** (0,383). [FAIT] Saint-Étienne reste muet à chaque run. [FAIT] Juge A absent, variance non mesurée. | [FAIT] Un appel modèle par PV et par run ; montant `N-A`, source manquante. | [JUGEMENT] Forte : retour au réglage antérieur, le CronJob n'étant pas destructif. | [JUGEMENT] Si l'owner accepte explicitement qu'un PV sur cinq reste sans signal **et** qu'un PV accepté puisse n'apporter aucune unité attendue, contre une mise en service immédiate. |
-| **B** | [JUGEMENT] **Contrat v9 d'abord** : faire citer la phrase de décision plutôt que le libellé de zone, réaligner l'oracle (numérotation d'ordre du jour, nœuds `Bylaw`), puis exiger **deux runs à ≥ 4/5** avec un critère de couverture en plus de l'acceptation. | [FAIT] Vise la **seule** classe de refus restante, dont la cause est mesurée au caractère près sur deux modèles. [FAIT] Corrige les trois limites d'oracle mesurées, sans lesquelles les campagnes suivantes resteront illisibles. [JUGEMENT] Pose un seuil reproductible avant un job sans surveillance. | [FAIT] Le durcissement par consigne a **déjà échoué une fois** : le plancher de 20 caractères du prompt v8 n'est appliqué par aucun des deux modèles. [JUGEMENT] Retarde la valeur, sans garantie qu'un tour de plus suffise. | [FAIT] Travail de contrat hors de cette lane, puis au moins 10 appels de qualification ; montant `N-A`. | [JUGEMENT] Forte : le seuil et le contrat restent remplaçables par une décision suivante. | [JUGEMENT] Si la priorité est qu'un signal publié sans relecture humaine soit fiable, et que la mesure qui l'atteste soit lisible. |
-| **C** | [JUGEMENT] Promouvoir **Sonnet 4.6 Cloud Code, contrat v8**, à la place de Gemini. | [FAIT] Même acceptation 4/5. [FAIT] Meilleur F1 macro v13 (0,222 contre 0,133) et meilleur score à population fixe des deux bras v13 (0,359 contre 0,267). [FAIT] Le juge B lui crédite 13 unités contre 12. | [FAIT] **4,0× plus lent** : 121,8 s contre 30,5 s en moyenne, 209,7 s contre 58,3 s en p95. [FAIT] Consomme 70 046 tokens de sortie contre 47 161. [FAIT] Le juge B ne le déclare pas vainqueur : `tie`, confiance `low`. [FAIT] Retouche ses extraits : citations non littérales sur les 4 documents. | [FAIT] Un appel par PV, quatre fois plus long ; montant `N-A`. | [JUGEMENT] Forte : le bras est isolé et interchangeable. | [JUGEMENT] Si la latence du CronJob est sans importance et que l'écart de correspondance à l'oracle est jugé décisif malgré l'égalité prononcée par le juge. |
-| **D** | [JUGEMENT] Ne rien promouvoir et **rejouer v13 à l'identique deux fois**, pour mesurer la variance avant tout autre changement. | [FAIT] v13 n'a qu'une observation par cellule ; le rejeu v7→v9 avait déjà montré un F1 bougeant de +0,364 sur un document à gel identique. [JUGEMENT] Sépare le bruit d'échantillonnage des effets de contrat. | [FAIT] Ne corrige aucune cause connue : Saint-Étienne resterait refusé. [JUGEMENT] Deux observations de plus ne suffisent toujours pas à estimer une probabilité. | [FAIT] 20 appels supplémentaires ; montant et quota causal `N-A`. | [JUGEMENT] Totale : collecte seule, aucun acte produit. | [JUGEMENT] Si l'owner estime que l'écart Gemini/Sonnet doit être départagé avant de retoucher le contrat. |
+| **A** | [JUGEMENT] **Promouvoir tel quel** : Gemini LOW, contrat v9 `93994e45`, plafond 64 000, et journaliser l'échec par PV via `recordOutcome`. | [FAIT] 87 % acceptés, IC 95 % [79 ; 92] sur 100 villes. [FAIT] 98,49 % des citations ancrées. [FAIT] 100 fins `STOP`, 0 troncature, 0 relance. [FAIT] 19,2 s de moyenne, p95 39,5 s. [JUGEMENT] La garantie de provenance n'est relâchée nulle part. | [FAIT] 13 PV sur 100 n'entrent pas au graphe, dont neuf pour **un seul** enregistrement. [FAIT] Les deux juges notent les refusés **aussi haut** que les acceptés : la porte jette de la valeur. [FAIT] Couverture `N-A` sur 95 documents. | [FAIT] Un appel par PV ; montant `N-A`. | [JUGEMENT] Forte : le CronJob n'est pas destructif. | [JUGEMENT] Si l'owner accepte que 13 PV sur 100 restent muets, contre une garantie de provenance intacte et une mise en service immédiate. |
+| **B′** | [JUGEMENT] **Corriger l'ancrage avant de promouvoir** : tolérer les insertions de mise en page (appariement dans l'ordre avec budget borné d'insertions, ou nettoyage des pieds de page et numéros avant ancrage), et autoriser la page citée **et la suivante** pour un extrait qui déborde. | [FAIT] Vise **les six refus d'ancrage, tous de cause identique et diagnostiquée au caractère près**. [FAIT] Plafond mesuré : **87 → 93 %**. [JUGEMENT] La garantie « le passage est sur la page » survit ; c'est la définition de « sous-chaîne » qui s'assouplit. | [FAIT] Relâche une garantie : l'extrait cesse d'être une sous-chaîne exacte de la page. [JUGEMENT] Un appariement tolérant peut accepter un extrait recollé à tort — risque non mesuré. [JUGEMENT] Retarde la mise en service d'un tour de contrat. | [FAIT] Travail de contrat hors de cette lane, puis une campagne de requalification ; montant `N-A`. | [JUGEMENT] Forte : le seuil de tolérance reste un paramètre. | [JUGEMENT] Si l'owner veut récupérer les six PV d'ancrage **et** accepte de qualifier le risque de faux ancrage sur un corpus de contrôle. |
+| **C′** | [JUGEMENT] **Écarter l'enregistrement fautif au lieu de refuser le document**, avec le compte des enregistrements écartés reporté dans le reçu et dans `recordOutcome`. | [FAIT] Vise **neuf refus sur treize**, chacun pour un enregistrement représentant 2,7 % à 5,3 % des citations du document. [FAIT] Plafond mesuré : **87 → 96 %**. [FAIT] Les deux juges jugent ces documents exploitables. | [FAIT] Relâche une garantie : un document entre au graphe avec un enregistrement écarté. [JUGEMENT] Le graphe devient partiellement silencieux sur ce qu'il a jeté, sauf à publier le compteur. | [FAIT] Modification de validateur hors de cette lane ; montant `N-A`. | [JUGEMENT] Forte : le seuil d'écartement reste un paramètre. | [JUGEMENT] Si l'owner juge qu'un PV utile à 96 % vaut mieux qu'un PV absent, **et** que le compteur d'écartements est publié. |
+| **D′** | [JUGEMENT] **Rejouer v100 à l'identique** avant tout choix, pour mesurer la variance à corpus fixe. | [FAIT] Une seule observation par document sur 95 ; v16 a déjà montré qu'un tirage de 5 peut afficher 3/5 là où deux autres runs affichent 5/5. [JUGEMENT] Sépare le bruit de l'effet de contrat sur les 13 refus. | [FAIT] Ne corrige aucune cause. [FAIT] Coûte 100 requêtes de plus. [JUGEMENT] À 87 % et IC [79 ; 92], un second run déplacera l'estimation de quelques points, pas la décision. | [FAIT] 100 appels ; montant `N-A`. | [JUGEMENT] Totale : collecte seule. | [JUGEMENT] Si l'owner estime qu'aucune promotion ne se décide sur une observation par document. |
 
-### Recommandation : B
+### Recommandation : A, puis C′
 
-[JUGEMENT] **La raison décisive.** Le critère qui avait été posé — « au moins 4 PV
-sur 5 acceptés » — ne mesure pas ce que l'owner veut. Saint-Barthélemy le montre :
-[FAIT] il est accepté par les deux modèles et n'apparie **aucune** des 8 unités
-attendues, parce que les pages citées (4–5 et 3–5) ne couvrent pas les pages 4 à 8
-et 10 de l'oracle. [JUGEMENT] La porte d'acceptation vérifie la **provenance**
-(« ce passage est bien à cette page »), jamais la **couverture** (« tu as bien tout
-trouvé »). Promouvoir sur ce seul critère, pour un job sans surveillance,
-reviendrait à retenir un réglage dont la mesure ne sait pas distinguer une bonne
-extraction d'une extraction maigre.
+[JUGEMENT] **Promouvoir maintenant (A), et instruire C′ ensuite.**
 
-[JUGEMENT] Deuxième raison, plus faible mais convergente : à population fixe,
-Gemini v8 (0,267) est en retrait de Gemini v5 (0,383), et la cause est identifiée
-au caractère près — c'est le même libellé de zone qui provoque le refus de
-Saint-Étienne. Une cause, deux effets, une correction.
+[JUGEMENT] **La raison décisive a changé.** La version 2 recommandait B parce que le
+critère d'alors — « au moins 4 PV sur 5 » — ne mesurait rien d'utile sur cinq
+documents, et parce qu'une classe de refus restait ouverte sur les deux modèles.
+Les deux motifs sont tombés : [FAIT] le taux est désormais estimé avec un intervalle
+sur 100 villes, et [FAIT] la classe de refus de v13 — le libellé de zone court — a
+**disparu** : 0 citation sous les planchers sur 2 119 enregistrements.
 
-[JUGEMENT] **Le cas le plus fort contre B.** Les deux bras atteignent le seuil, les
-deux PR sont vertes et fusionnables, le juge aveugle crédite des utilités de 3 et 4
-sur 5 sur les quatre documents comparables, et une partie de la baisse de F1 est un
-**artefact mesuré** du scoreur, pas une perte de contenu : Valcourt remonte de
-0,000 à 0,667 dès qu'on prive l'ancre de sa numérotation. Surtout : [FAIT] le
-durcissement par consigne a déjà échoué une fois — le plancher de 20 caractères du
-prompt v8 n'a été appliqué par aucun des deux modèles. [JUGEMENT] B peut donc
-consommer un tour de plus pour revenir au même point, pendant que 4 PV sur 5
-auraient pu produire de la valeur.
+[JUGEMENT] **Pourquoi A plutôt que B′ tout de suite.** Le correctif d'ancrage relâche
+la garantie la plus centrale du produit — « ce passage est bien à cette page, mot pour
+mot ». Sur 100 documents, cette garantie tient à **98,49 %** et ne coûte que 6 PV.
+[JUGEMENT] Assouplir la définition de la sous-chaîne pour récupérer six documents,
+avant d'avoir mesuré le taux de faux ancrage que cet assouplissement introduit,
+échange une garantie prouvée contre un gain non qualifié.
 
-[JUGEMENT] **Ce qui renverserait la recommandation.** A devient le bon choix si
-l'owner accepte explicitement la double perte mesurée — un PV muet par run, et des
-PV acceptés à faible couverture — contre une mise en service immédiate, la
-réversibilité étant forte. C devient le bon choix si la latence du CronJob est sans
-importance et que le verdict du juge A, à sa réception, tranche pour Sonnet.
-D devient le bon choix si l'owner considère qu'aucun écart ne peut être lu tant que
-la variance n'est pas mesurée. B bascule vers une promotion dès que le contrat
-corrigé atteint 4/5 sur deux runs **sans** nouvelle classe de refus et **avec** une
-couverture non nulle sur chaque PV accepté.
+[JUGEMENT] **Pourquoi C′ ensuite plutôt que jamais.** Neuf documents sur cent sont
+refusés pour un enregistrement sur vingt à trente-sept. [FAIT] Les deux juges
+aveugles notent ces documents **aussi haut ou plus haut** que les acceptés. [JUGEMENT]
+Jeter trente-six citations ancrées parce que la trente-septième ne l'est pas n'achète
+aucune garantie supplémentaire, dès lors que le reçu publie ce qui a été écarté. C'est
+la piste au meilleur rapport entre valeur récupérée et garantie relâchée : **+9 PV
+pour un compteur à publier**.
 
-[JUGEMENT] **Pré-mortem.** Supposons B choisi et M1 encore bloqué dans trois
-semaines. Le scénario le plus vraisemblable au vu des mesures : la consigne de citer
-la phrase de décision n'est pas mieux suivie que le plancher de 20 caractères, les
-refus se déplacent vers une nouvelle classe — c'est exactement ce qui s'est produit
-de v9 à v10 puis v11, où chaque correction a déplacé le refus sans réduire le total
-— et le seuil « deux runs à 4/5 » retarde le CronJob sans borne de temps. Les
-premiers signaux d'alerte : une classe de refus inédite en v14, un désaccord qui
-persiste entre F1 et juges, ou deux runs consécutifs à 3/5. La parade : traiter le
-libellé court **côté code** plutôt que par la consigne — la troncature côté code a
-fonctionné là où la consigne « coupe à 200 » avait échoué —, fixer d'emblée une
-borne de temps à B, et revenir à l'owner plutôt qu'élargir le périmètre.
+[JUGEMENT] **Le cas le plus fort contre A.** Le rappel n'est toujours pas mesuré :
+`manual-oracle: N-A` sur 95 documents. Les deux juges pointent une omission
+systématique et concordante — listes de PIIA repliées, transactions immobilières
+absentes — qui touche des documents **acceptés**. [JUGEMENT] Promouvoir à 87 %
+d'acceptation n'est pas promouvoir à 87 % de couverture, et rien dans v100 ne dit ce
+que vaut la seconde. Si l'owner considère que la valeur du CronJob est la couverture
+et non la traçabilité, alors A est prématuré et il faut d'abord construire un oracle à
+l'échelle — ce qu'aucune option ci-dessus ne fait.
 
-[JUGEMENT] **Mon intérêt de présentateur.** Recommander B réduit mon risque d'avoir
-conseillé un comportement dont je n'ai pas la preuve, et me fait sous-pondérer la
-valeur d'une mise en service partielle rapide. Je note aussi que c'était déjà la
-recommandation de la version 1 de ce dossier, sur des données différentes : à lire
-comme un biais de constance.
+[JUGEMENT] **Ce qui renverserait la recommandation.** D′ devient le bon choix si
+l'owner refuse de décider sur une observation par document. B′ passe devant C′ si un
+corpus de contrôle montre qu'un appariement tolérant n'introduit **aucun** faux
+ancrage. C′ tombe si l'owner juge qu'un document partiellement amputé, même compté,
+n'a pas sa place dans un graphe publié sans relecture.
+
+[JUGEMENT] **Pré-mortem.** Supposons A choisi et le CronJob en service depuis trois
+mois. Le scénario d'échec le plus vraisemblable au vu des mesures n'est pas le taux
+d'acceptation — il est stable et borné — mais **la couverture silencieuse** : le
+graphe se remplit de PV acceptés dont les listes de dossiers PIIA et les transactions
+immobilières manquent, sans que rien ne le signale, parce que la seule porte mesure la
+provenance. Signaux d'alerte : un volume de `DesignationEvent` par PV qui stagne alors
+que le corpus grossit, des villes à forte activité de CCU qui ne produisent qu'un
+événement agrégé par séance, des utilisateurs qui signalent un dossier absent d'un PV
+présent. Parade : instrumenter dès la promotion un **compteur d'actes par PV** comparé
+au nombre de points d'ordre du jour, et construire l'oracle à l'échelle en parallèle
+plutôt qu'avant.
+
+[JUGEMENT] **Mon intérêt de présentateur.** J'ai conduit la campagne v100 et j'ai été
+l'un des deux juges : je suis juge et partie sur la qualité de la mesure que
+j'utilise pour recommander. Je note aussi que je retourne la recommandation de la
+version 2, ce qui me donne un intérêt à faire valoir que les données ont changé
+plutôt qu'à reconnaître que B était déjà discutable. Le lecteur est fondé à peser
+plus lourdement les chiffres que mes qualificatifs.
 
 [JUGEMENT] **L'intérêt de l'owner**, tel que je le comprends : obtenir des signaux
 municipaux exploitables et traçables, avec assez de continuité pour être utiles, un
 coût maîtrisable, et la possibilité de revenir en arrière. Les deux termes qui
-s'opposent ici sont la vitesse de mise en service et la fiabilité d'un signal publié
-sans relecture humaine.
+s'opposent ici ne sont plus la vitesse contre la fiabilité : ce sont la **traçabilité
+garantie** et la **couverture**.
 
 ---
 
 ## 7. Ce qu'on demande à l'owner
 
-[JUGEMENT] Répondre par **A**, **B**, **C** ou **D**.
+[JUGEMENT] Répondre par **A**, **B′**, **C′** ou **D′**.
 
 Cette réponse n'autorise, par elle-même, ni acte de production, ni fusion de #682,
-#687 ou #688, ni modification de contrat dans la présente lane.
+#687 ou #688, ni modification de contrat, de prompt, de schéma ou de validateur dans
+la présente lane.
 
 ---
 
