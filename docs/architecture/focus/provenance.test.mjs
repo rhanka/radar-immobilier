@@ -13,7 +13,11 @@ test('provenance and closed states are exhaustive without fallbacks', () => {
     assert.equal(Object.keys(metadata.nodes).length, graph.nodes.length + graph.groups.length);
     assert.equal(Object.keys(metadata.edges).length, graph.edges.length);
     for (const [id, item] of Object.entries(metadata.nodes)) {
-      assert.ok(item.kind, id); assert.ok(item.role, id); assert.ok(item.icon, id);
+      assert.ok(item.kind, id); assert.ok(item.icon, id);
+      // Every card carries a code, a role title, a name and one business detail;
+      // a container carries neither role nor detail.
+      if (item.card !== 'box') { assert.ok(item.code, id); assert.ok(item.role, id); assert.ok(item.name, id); assert.ok(item.detail, id); }
+      else assert.equal(item.role, '', id);
       assert.ok(Array.isArray(item.repo) && item.repo.length > 0, id);
       assert.ok(evidence.has(item.evidenceClass), id); assert.ok(runtime.has(item.runtimeState), id);
     }

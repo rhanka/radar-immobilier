@@ -50,12 +50,13 @@ export function extractCanonicalDiagrams(markdown) {
   const head = markdown.split('## Annexe historique D8')[0];
   const matches = [...head.matchAll(/### `([^`]+)` — ([^\n]+)\n\n```mermaid\n([\s\S]*?)```/g)];
   const expected = [
-    ['storage-before-20260809', 'Paire A · production AVANT', 'A', '2026-08-09'],
-    ['storage-after-20260913', 'Paire A · production APRÈS', 'A', '2026-09-13'],
-    ['refresh-before-20260809', 'Paire B · refresh AVANT', 'B', '2026-08-09'],
-    ['refresh-after-20260913', 'Paire B · refresh APRÈS', 'B', '2026-09-13'],
+    ['hosting-july-2026', 'Série A · hébergement JUILLET', 'A', '2026-07'],
+    ['hosting-august-20260810', 'Série A · hébergement AU 10 AOÛT', 'A', '2026-08-10'],
+    ['hosting-today-20260913', "Série A · hébergement AUJOURD'HUI", 'A', '2026-09-13'],
+    ['pipeline-before-20260810', 'Série B · pipeline AVANT', 'B', '2026-08-10'],
+    ['pipeline-after-20260913', 'Série B · pipeline APRÈS', 'B', '2026-09-13'],
   ];
-  if (matches.length !== expected.length) throw Error(`canonical Mermaid count ${matches.length}, expected 4`);
+  if (matches.length !== expected.length) throw Error(`canonical Mermaid count ${matches.length}, expected 5`);
   return matches.map((match, index) => {
     const [sceneId, title, pair, date] = expected[index];
     if (match[1] !== sceneId) throw Error(`scene order mismatch: ${match[1]} != ${sceneId}`);

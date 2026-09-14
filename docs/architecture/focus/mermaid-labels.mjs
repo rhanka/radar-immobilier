@@ -7,10 +7,13 @@ export function missingMermaidLabels(svg, graph) {
     .replace(/\s+/g, '');
   const missing = [];
   const nodes = [...svg.querySelectorAll('g.node')];
-  for (const [index, item] of graph.nodes.entries()) {
+  const nodeCaptions = nodes.map(element => compact(element.textContent));
+  for (const item of graph.nodes) {
     const candidates = nodes.filter(element => element.id === item.id || element.id.startsWith(`flowchart-${item.id}-`));
-    const actual = candidates.map(element => element.textContent ?? '').find(Boolean) ?? nodes[index]?.textContent ?? '';
-    if (compact(actual) !== compact(item.label)) missing.push({ id: item.id, expected: item.label, actual });
+    const direct = candidates.map(element => element.textContent ?? '').find(text => compact(text) === compact(item.label));
+    const index = nodeCaptions.indexOf(compact(item.label));
+    if (!direct && index < 0) missing.push({ id: item.id, expected: item.label, actual: '(node caption missing)' });
+    else if (index >= 0) nodeCaptions.splice(index, 1);
   }
   const clusterCaptions = [...svg.querySelectorAll('g.cluster')].map(element => compact(element.textContent));
   for (const item of graph.groups) {

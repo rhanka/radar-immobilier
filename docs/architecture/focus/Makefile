@@ -1,10 +1,11 @@
 SHELL := /bin/bash
 FOCUS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+KIT_ROOT ?= /home/antoinefa/src/sentropic/.tmp/focus-cluster-mesh-decision-kit
 NODE_IMAGE ?= node:24-bookworm-slim
 CHROME ?= /home/antoinefa/.cache/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-linux64/chrome-headless-shell
 ENV ?= test-architecture
 PORT ?= 5188
-RUN = docker run --rm --network none --cpus=1.5 --memory=1536m --pids-limit=256 --user "$$(id -u):$$(id -g)" -e NODE_OPTIONS=--max-old-space-size=1100 -v $(FOCUS_DIR)/../..:/docs -w /docs/architecture/focus $(NODE_IMAGE) node
+RUN = docker run --rm --network none --cpus=1.5 --memory=1536m --pids-limit=256 --user "$$(id -u):$$(id -g)" -e NODE_OPTIONS=--max-old-space-size=1100 -v $(FOCUS_DIR)/../..:/docs -v $(KIT_ROOT):/kit:ro -w /docs/architecture/focus $(NODE_IMAGE) node
 .PHONY: deps dependency-versions build map mermaid test browser clipboard inspect-live reset-live-zoom clean-live tokens report-check serve-run chrome-run audit
 dependency-versions:
 	docker run --rm --network host $(NODE_IMAGE) npm view @xyflow/svelte@1.6.6 version
@@ -42,24 +43,43 @@ reset-live-zoom:
 clean-live:
 	$(RM) $(FOCUS_DIR)/live-before.png $(FOCUS_DIR)/live-after.png $(FOCUS_DIR)/live-summary.png $(FOCUS_DIR)/live-inspection.json
 report-check:
-	test -s $(FOCUS_DIR)/../../reports/architecture-monthly/report-through-2026-09-13.pdf
-	pdfinfo $(FOCUS_DIR)/../../reports/architecture-monthly/report-through-2026-09-13.pdf
-	test "$$(pdfdetach -list $(FOCUS_DIR)/../../reports/architecture-monthly/report-through-2026-09-13.pdf | rg -c 'study-2026-08-report.pdf')" -eq 1
+	test -s $(FOCUS_DIR)/../../reports/rapport-mois-2026-08-10_2026-09-13.pdf
+	test -s $(FOCUS_DIR)/../../reports/couts-2026-08-10_2026-09-13.pdf
+	test -s $(FOCUS_DIR)/../../reports/rapport-mois-2026-07-13_2026-08-09.pdf
+	pdfinfo $(FOCUS_DIR)/../../reports/rapport-mois-2026-08-10_2026-09-13.pdf
+	pdfinfo $(FOCUS_DIR)/../../reports/couts-2026-08-10_2026-09-13.pdf
+	test "$$(pdfdetach -list $(FOCUS_DIR)/../../reports/rapport-mois-2026-08-10_2026-09-13.pdf | rg -c 'rapport-mois-2026-07-13_2026-08-09.pdf' || echo 0)" -eq 0
 	test "$$(rg -c '\"sceneId\":' $(FOCUS_DIR)/../../reports/architecture-monthly/evidence-manifest-2026-09-13.json)" -ge 8
 	rg -q '\"scale\": 1' $(FOCUS_DIR)/.generated/report-render.json
 	rg -q '\"printScale\": 1' $(FOCUS_DIR)/../../reports/architecture-monthly/evidence-manifest-2026-09-13.json
-	rg -q '\"extractedAttachmentSha256\": \"86ae37810016bca61cc897105121cfcbcd1951426fc889616ae1efe37ae29528\"' $(FOCUS_DIR)/../../reports/architecture-monthly/evidence-manifest-2026-09-13.json
-	pdftotext $(FOCUS_DIR)/../../reports/architecture-monthly/report-through-2026-09-13.pdf $(FOCUS_DIR)/.generated/report.txt
+	rg -q '\"embedded\": false' $(FOCUS_DIR)/../../reports/architecture-monthly/evidence-manifest-2026-09-13.json
+	rg -q '\"annexMode\": \"whole scene, no split\"' $(FOCUS_DIR)/.generated/report-render.json
+	pdftotext $(FOCUS_DIR)/../../reports/rapport-mois-2026-08-10_2026-09-13.pdf $(FOCUS_DIR)/.generated/report.txt
+	! rg -q "Rapport d.étude" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "rapport-mois-2026-07-13_2026-08-09.pdf" $(FOCUS_DIR)/.generated/report.txt
+	for annex in A1 A2 A3 B1 B2; do rg -q "Annexe $$annex" $(FOCUS_DIR)/.generated/report.txt; done
+	rg -q "De A1 à A2" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "De A2 à A3" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "De B1 à B2" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "scène entière, sans découpe" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "10 août" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "septembre" $(FOCUS_DIR)/.generated/report.txt
-	rg -q "35 jours / 840 heures" $(FOCUS_DIR)/.generated/report.txt
 	rg -q "dormante" $(FOCUS_DIR)/.generated/report.txt
-	rg -q "promotion" $(FOCUS_DIR)/.generated/report.txt
-	rg -q "modèle" $(FOCUS_DIR)/.generated/report.txt
-	rg -q "non classable" $(FOCUS_DIR)/.generated/report.txt
-	rg -q "SCW TEM explicitement conservé" $(FOCUS_DIR)/.generated/report.txt
-	rg -q "320.095438" $(FOCUS_DIR)/.generated/report.txt
-	for scene in storage-before-20260809 storage-after-20260913 refresh-before-20260809 refresh-after-20260913; do rg -q "$$scene" $(FOCUS_DIR)/.generated/report.txt; test -s $(FOCUS_DIR)/.generated/report-graph-$$scene.png; done
-	pdftoppm -f 1 -l 1 -singlefile -png -r 110 $(FOCUS_DIR)/../../reports/architecture-monthly/report-through-2026-09-13.pdf $(FOCUS_DIR)/.generated/report-preview
+	rg -q "PR #682" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "Scaleway pur" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "59 017 objets" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "satellite 2D" $(FOCUS_DIR)/.generated/report.txt
+	rg -q "panneaux gauche et droit" $(FOCUS_DIR)/.generated/report.txt
+	! rg -q "QC281819|254,72 CAD|Crédit consommé" $(FOCUS_DIR)/.generated/report.txt
+	for scene in hosting-july-2026 hosting-august-20260810 hosting-today-20260913 pipeline-before-20260810 pipeline-after-20260913; do rg -q "$$scene" $(FOCUS_DIR)/.generated/report.txt; test -s $(FOCUS_DIR)/.generated/report-graph-$$scene.png; done
+	pdftotext $(FOCUS_DIR)/../../reports/couts-2026-08-10_2026-09-13.pdf $(FOCUS_DIR)/.generated/costs.txt
+	rg -q "179,58 CAD" $(FOCUS_DIR)/.generated/costs.txt
+	rg -q "58,58 CAD" $(FOCUS_DIR)/.generated/costs.txt
+	rg -q "254,72 CAD" $(FOCUS_DIR)/.generated/costs.txt
+	rg -q "16 009 fichiers" $(FOCUS_DIR)/.generated/costs.txt
+	rg -q "provisoire, non critique et non finale" $(FOCUS_DIR)/.generated/costs.txt
+	rg -Fq "+18,6 %" $(FOCUS_DIR)/.generated/costs.txt
+	pdftoppm -f 1 -l 1 -singlefile -png -r 110 $(FOCUS_DIR)/../../reports/rapport-mois-2026-08-10_2026-09-13.pdf $(FOCUS_DIR)/.generated/report-preview
+	pdftoppm -f 1 -l 1 -singlefile -png -r 110 $(FOCUS_DIR)/../../reports/couts-2026-08-10_2026-09-13.pdf $(FOCUS_DIR)/.generated/cost-preview
 serve-run: map
 	docker run --rm --network host --cpus=1.5 --memory=1536m --user "$$(id -u):$$(id -g)" -v $(FOCUS_DIR)/../..:/docs -w /docs/architecture/focus $(NODE_IMAGE) node node_modules/vite/bin/vite.js --host 127.0.0.1 --port $(PORT) --strictPort --config vite.config.js --configLoader runner
