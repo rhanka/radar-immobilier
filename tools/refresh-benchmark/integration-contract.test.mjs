@@ -68,5 +68,7 @@ test("all live variants use the frozen adapter boundary and execution budget", (
   // v14 keeps that ceiling so the contract is the only moving part, and v15 replays v14 exactly.
   assert.equal(outputTokenCapForCampaign("v14"), 64_000);
   assert.equal(outputTokenCapForCampaign("v15"), 64_000);
+  // v16 keeps it once more: the contract snapshot is again the only moving part.
+  assert.equal(outputTokenCapForCampaign("v16"), 64_000);
   assert.equal(outputTokenCapForCampaign("v99"), 16_384);
 });

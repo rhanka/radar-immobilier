@@ -23,6 +23,19 @@ const profileSource = await readFile(profileModulePath, "utf8");
 const { loadRefreshProfileContext, parseStrictJsonResponse,
   REFRESH_PROFILE_CONTRACT_VERSION } = await import(pathToFileURL(profileModulePath));
 const { containsNormalizedPdfExcerpt } = await import(pathToFileURL(corpusModulePath));
+// Snapshots taken after the v9 review name the anchor floor instead of reporting a short but
+// verbatim excerpt as ungrounded, and check the entity citation floor in both units. Older
+// snapshots do not, and their archived campaigns must stay requalifiable under the rule they
+// actually ran: the mirror follows the snapshot instead of imposing one rule on every campaign.
+const corpusSource = await readFile(corpusModulePath, "utf8");
+const anchorFloorIsNamed = profileSource.includes("excerpt_below_anchor_floor");
+const MIN_ANCHOR_NORMALIZED_CODE_POINTS = 12;
+if (anchorFloorIsNamed && !corpusSource
+  .includes(`MIN_ANCHOR_NORMALIZED_CODE_POINTS = ${MIN_ANCHOR_NORMALIZED_CODE_POINTS}`)) {
+  throw new Error("Offline anchor floor no longer mirrors the corpus module");
+}
+const normalizePdfExcerpt = (value) => value.normalize("NFKC").normalize("NFD")
+  .replace(/\p{M}/gu, "").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 
 // normalizeEntityCitations and its bounds are module-private, so the offline mirror below
 // restates them. Both constants are asserted against the module source: if the production
@@ -91,9 +104,19 @@ function provenanceViolations(extraction, document, pages) {
       || record.modality !== "pdf") violations.push({ path, code: "invalid_pdf_identity" });
     if (!Number.isInteger(record.page) || record.page < 1 || record.page > pages.length) {
       violations.push({ path, code: "invalid_pdf_page" });
-    } else if (typeof record.excerpt !== "string"
-      || !containsNormalizedPdfExcerpt(pages[record.page - 1], record.excerpt)) {
+      return;
+    }
+    if (typeof record.excerpt !== "string") {
       violations.push({ path, code: "ungrounded_pdf_excerpt" });
+      return;
+    }
+    const normalizedCodePoints = [...normalizePdfExcerpt(record.excerpt)].length;
+    if (anchorFloorIsNamed && normalizedCodePoints < MIN_ANCHOR_NORMALIZED_CODE_POINTS) {
+      violations.push({ path, code: "excerpt_below_anchor_floor", normalizedCodePoints });
+      return;
+    }
+    if (!containsNormalizedPdfExcerpt(pages[record.page - 1], record.excerpt)) {
+      violations.push({ path, code: "ungrounded_pdf_excerpt", normalizedCodePoints });
     }
   };
   extraction.nodes.forEach((node, index) => {
@@ -106,11 +129,16 @@ function provenanceViolations(extraction, document, pages) {
       }
       (entity.citations ?? []).forEach((citation, citationIndex) => {
         const path = `${collectionName}[${entityIndex}].citations[${citationIndex}]`;
-        if (typeof citation.excerpt === "string"
-          && [...citation.excerpt].length < MIN_CITATION_EXCERPT_CODE_POINTS) {
-          violations.push({ path, code: "entity_citation_excerpt_too_short",
-            codePoints: [...citation.excerpt].length });
-          return;
+        if (typeof citation.excerpt === "string") {
+          const codePoints = [...citation.excerpt].length;
+          const normalizedCodePoints = [...normalizePdfExcerpt(citation.excerpt)].length;
+          // One name, two units: 20 raw code points and, since the v9 review, 12 normalized ones.
+          if (codePoints < MIN_CITATION_EXCERPT_CODE_POINTS || (anchorFloorIsNamed
+            && normalizedCodePoints < MIN_ANCHOR_NORMALIZED_CODE_POINTS)) {
+            violations.push({ path, code: "entity_citation_excerpt_too_short",
+              codePoints, normalizedCodePoints });
+            return;
+          }
         }
         inspect(citation, path);
       });

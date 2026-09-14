@@ -42,9 +42,10 @@ export const executionContract = Object.freeze({
 // v13 lowers the frozen cap to 64 000 so both arms share one ceiling: Cloud Code answers
 // INVALID_ARGUMENT above 64 000 (v12 probes), and comparability requires an identical cap.
 // v14 keeps that same 64 000 cap so the only moving part is the contract, and v15 replays v14
-// exactly: same cap, same corpus, same freeze, one more observation per document.
+// exactly: same cap, same corpus, same freeze, one more observation per document. v16 keeps the
+// cap again and moves the contract snapshot alone, to re-measure the two v9 review majors.
 const campaignOutputTokenCaps = Object.freeze({ v7: 65_536, v8: 65_536, v9: 65_536,
-  v10: 65_536, v11: 65_536, v12: 65_536, v13: 64_000, v14: 64_000, v15: 64_000 });
+  v10: 65_536, v11: 65_536, v12: 65_536, v13: 64_000, v14: 64_000, v15: 64_000, v16: 64_000 });
 
 export function outputTokenCapForCampaign(campaign) {
   return campaignOutputTokenCaps[campaign] ?? executionContract.maxOutputTokens;
