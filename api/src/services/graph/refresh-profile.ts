@@ -45,10 +45,10 @@ export interface RefreshProfileChunk {
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
 }
-export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v8";
+export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v9";
 // Entity citation excerpts are bounded by truncation, in Unicode code points rather than UTF-16 units.
 const MAX_CITATION_EXCERPT_CODE_POINTS = 200;
-const MIN_CITATION_EXCERPT_CHARACTERS = 20;
+const MIN_CITATION_EXCERPT_CODE_POINTS = 20;
 export function loadRefreshProfileContext(options: LoadRefreshProfileContextOptions): RefreshProfileContext {
   if (options.unregisteredOnly) {
     if (!options.profilePath) throw new Error("Unregistered-only refresh requires an explicit profile path");
@@ -98,11 +98,13 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
     .map(([key, value]) => [key, { const: value }]));
   const citation = { type: "object", required: ["page", "excerpt"],
     properties: { page: { enum: chunk.pages },
-      excerpt: { type: "string", minLength: MIN_CITATION_EXCERPT_CHARACTERS,
+      excerpt: { type: "string", minLength: MIN_CITATION_EXCERPT_CODE_POINTS,
         maxLength: MAX_CITATION_EXCERPT_CODE_POINTS,
-        description: "Exact beginning of the cited passage, 20 to 200 characters, "
-          + "copied verbatim and never completed or corrected." } },
-    description: "The profile injects the constant PDF identity and bounds the excerpt before validation." };
+        description: "Exact beginning of the decision sentence, 20 to 200 characters, "
+          + "copied verbatim and never completed or corrected. A field label such as "
+          + "\"Zone : RUR-12\" is a property, never an excerpt." } },
+    description: "The profile injects the constant PDF identity and bounds the excerpt before validation; "
+      + "an entity citation excerpt under 20 code points is refused as entity_citation_excerpt_too_short." };
   return JSON.stringify({
     contract_version: REFRESH_PROFILE_CONTRACT_VERSION,
     type: "Graphify Extraction",
@@ -188,6 +190,18 @@ function validatePdfRecord(value: Record<string, unknown>, chunk: RefreshCorpusC
     throw new Error(`Model output has ungrounded PDF excerpt for chunk ${chunk.id}`);
   }
 }
+function validateEntityCitationExcerpt(value: Record<string, unknown>, chunk: RefreshCorpusChunk): void {
+  const excerpt = value["excerpt"];
+  // A missing or non-string excerpt carries no text to measure: it stays an anchoring refusal, unchanged.
+  if (typeof excerpt !== "string") return;
+  const codePoints = Array.from(excerpt).length;
+  if (codePoints < MIN_CITATION_EXCERPT_CODE_POINTS) {
+    throw new Error(`Model output violates entity_citation_excerpt_too_short for chunk ${chunk.id}: `
+      + `an entity citation excerpt carries ${codePoints} code points, under the ${
+        MIN_CITATION_EXCERPT_CODE_POINTS} the schema declares. A field label such as "Zone : RUR-12" `
+      + "belongs to the node properties, never to excerpt; cite the decision sentence instead.");
+  }
+}
 function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
   pageTexts: ReadonlyMap<number, string>): void {
   const entities = [...extraction.nodes, ...extraction.edges];
@@ -196,10 +210,16 @@ function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
     if (entity.source_file !== chunk.originalKey) throw new Error(`Invalid source_file for chunk ${chunk.id}`);
   }
   for (const entity of entities) {
-    // The excerpt bound is already enforced by truncation in normalizeEntityCitations, so no
-    // overlong entity citation can reach this anchor; only page grounding remains to be proven.
+    // The upper bound is already enforced by truncation in normalizeEntityCitations, so no overlong
+    // entity citation can reach this point. The lower bound the schema has declared since v8 is
+    // enforced here instead, by name and before the anchor: measured on the ten v13 receipts, the
+    // 17 entity citation excerpts under 20 code points were all zone labels, all already refused by
+    // the 12-normalized-character anchor floor under the unrelated name ungrounded_pdf_excerpt, and
+    // none of the 331 entity citations had an excerpt under 20 code points that did anchor.
     for (const citation of entity.citations ?? []) {
-      validatePdfRecord(citation as unknown as Record<string, unknown>, chunk, pageTexts);
+      const record = citation as unknown as Record<string, unknown>;
+      validateEntityCitationExcerpt(record, chunk);
+      validatePdfRecord(record, chunk, pageTexts);
     }
   }
   for (const evidence of extraction.evidence ?? []) {
@@ -301,8 +321,15 @@ Every edge must carry at least one evidence_refs ID that exists in evidence[]. M
 Every node and every edge must include a non-empty citations array. Each citation must contain only page
 and excerpt. The excerpt is the exact beginning of the cited passage, between 20 and 200 characters;
 never complete or correct it.
-A short label is not an excerpt on its own: when the text you cite is under 20 characters, keep copying
-the page from that point until you pass 20 characters, without inventing the continuation.
+The excerpt is the sentence that states the decision, never a field label. A zone code, a lot number or
+an address is a property: put the zone code in the node property (Zone.code, or zone_ref on Signal and
+DesignationEvent) and cite the resolution, adoption or refusal sentence that concerns it.
+Contrastive example, both lines taken from the same real PV page:
+excerpt "Zone : RUR-12" is refused; excerpt
+"QUE le conseil municipal autorise, sur recommandation du CCU," is correct.
+Any entity citation excerpt under 20 characters is refused as entity_citation_excerpt_too_short, before
+the page anchor is even checked: keep copying the page verbatim from that point
+until you pass 20 characters, without inventing the continuation.
 Do not repeat the document identity inside citations; the profile
 injects it before validation. Follow the relation source/target signatures exactly. Copy every excerpt
 exactly as it appears in the PDF text, including mistakes, spacing, and typography; correct nothing.

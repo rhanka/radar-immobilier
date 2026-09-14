@@ -20,19 +20,25 @@ import {
 
 const oraclePath = new URL("../../../tests/fixtures/refresh-018/oracle.json", import.meta.url);
 const v11CasesPath = new URL("../../../tests/fixtures/refresh-018/v11-citation-cases.json", import.meta.url);
+const v13CasesPath = new URL("../../../tests/fixtures/refresh-018/v13-citation-cases.json", import.meta.url);
 const profilePath = fileURLToPath(new URL("../../../../radar/ontology/ontology-profile.yaml", import.meta.url));
 interface Oracle { meetingDate: string; sourceUrl: string; docSha: string; originalKey: string; page: number;
   resolution: string; bylawNumber: string; stage: string; excerpt: string; forbiddenProperties: string[] }
 interface V11Case { caseId: string; path: string; page: number; codePoints: number; excerpt: string;
   pageText: string; refusedAs: string }
 interface V11Cases { overlongExcerpt: V11Case; shortLabelExcerpt: V11Case }
+interface V13Case { excerpt: string; page: number; codePoints: number }
+interface V13Cases { zoneLabelExcerpt: V13Case & { refusedAsUnderV9: string };
+  decisionExcerpt: V13Case; pageText: string }
 let oracle!: Oracle;
 let v11Cases!: V11Cases;
+let v13Cases!: V13Cases;
 let context!: RefreshProfileContext;
 
 beforeAll(async () => {
   oracle = JSON.parse(await readFile(oraclePath, "utf8"));
   v11Cases = JSON.parse(await readFile(v11CasesPath, "utf8"));
+  v13Cases = JSON.parse(await readFile(v13CasesPath, "utf8"));
   const profile = loadOntologyProfile(profilePath);
   const registries = Object.fromEntries(Object.keys(profile.registries).map((id) => [id, []]));
   context = { profile, registries, registryExtraction: registryRecordsToExtraction(registries, profile) };
@@ -193,7 +199,7 @@ describe("refresh profile extraction", () => {
     expect(results[0]!.extraction).toEqual(extraction());
   });
 
-  it("should accept the exact declared v8 contract version", async () => {
+  it("should accept the exact declared v9 contract version", async () => {
     const declared = { ...compactExtraction(), contract_version: REFRESH_PROFILE_CONTRACT_VERSION };
     const results = await extractRefreshProfile([chunk()], { context,
       textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
@@ -201,7 +207,8 @@ describe("refresh profile extraction", () => {
     expect(results[0]!.extraction).toEqual(extraction());
   });
 
-  it.each(["immo-pv-extraction-v7", "immo-pv-extraction-v6", "immo-pv-extraction-v5"])(
+  it.each(["immo-pv-extraction-v8", "immo-pv-extraction-v7", "immo-pv-extraction-v6",
+    "immo-pv-extraction-v5"])(
     "should reject declared legacy contract version %s with a named violation", async (contractVersion) => {
       const declared = { ...compactExtraction(), contract_version: contractVersion };
       await expect(extractRefreshProfile([chunk()], { context,
@@ -210,7 +217,8 @@ describe("refresh profile extraction", () => {
     });
 
   it("should accept absent v4 version while replacing five false identity fields", async () => {
-    const modelExcerpt = `Adoption ${oracle.bylawNumber}`;
+    // Over the v9 excerpt floor: this case proves identity replacement, not the excerpt bound.
+    const modelExcerpt = `Adoption du règlement ${oracle.bylawNumber}`;
     const legacy = extraction();
     legacy.nodes[0]!.citations = [{ source_file: "wrong.pdf", rawRef: "wrong-raw",
       docSha: "f".repeat(64), sourceUrl: "https://invalid.example/wrong.pdf", modality: "html",
@@ -305,16 +313,88 @@ describe("refresh profile extraction", () => {
     expect(measured.pageText).toContain(excerpt);
   });
 
-  it("should still refuse the real v11 short-label excerpt under the anchor floor", async () => {
+  it("should refuse the real v11 short-label excerpt by name before anchoring", async () => {
     const measured = v11Cases.shortLabelExcerpt;
-    // Verbatim on its page, but 8 normalized code points: the 12-code-point floor is a deliberate
-    // guarantee against accidental matches and is left untouched by v8.
+    // Verbatim on its page, 12 code points and 8 once normalized. v8 refused it as an anchoring
+    // failure, which named the wrong cause; v9 names the excerpt floor and never reaches the anchor,
+    // whose own 12-normalized-character floor is left untouched.
     expect(measured.pageText).toContain(measured.excerpt);
     const value = compactExtraction();
     value.nodes[0]!.citations![0]!.excerpt = measured.excerpt;
     await expect(extractRefreshProfile([chunk(undefined, `[PDF PAGE 3]\n${measured.pageText}`)], { context,
       textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
-    })).rejects.toThrow("ungrounded PDF excerpt");
+    })).rejects.toThrow("entity_citation_excerpt_too_short");
+  });
+
+  it("should refuse the real v13 zone label and accept the decision sentence of the same page",
+    async () => {
+      const { zoneLabelExcerpt, decisionExcerpt, pageText } = v13Cases;
+      // Both strings are verbatim on page 12 of the frozen Saint-Etienne minutes; only the second
+      // states the decision. This is the contrastive pair the v9 prompt now shows the model.
+      expect(pageText).toContain(zoneLabelExcerpt.excerpt);
+      expect(pageText).toContain(decisionExcerpt.excerpt);
+      expect(zoneLabelExcerpt.codePoints).toBe(13);
+      expect(zoneLabelExcerpt.refusedAsUnderV9).toBe("entity_citation_excerpt_too_short");
+      const refused = compactExtraction();
+      refused.nodes[0]!.citations![0]!.excerpt = zoneLabelExcerpt.excerpt;
+      await expect(extractRefreshProfile([chunk(undefined, `[PDF PAGE 3]\n${pageText}`)], { context,
+        textClient: client([{ text: JSON.stringify(refused) }], []), maxOutputTokens: 512,
+      })).rejects.toThrow("entity_citation_excerpt_too_short");
+      const accepted = compactExtraction();
+      accepted.nodes[0]!.citations![0]!.excerpt = decisionExcerpt.excerpt;
+      const results = await extractRefreshProfile([chunk(undefined, `[PDF PAGE 3]\n${pageText}`)], {
+        context, textClient: client([{ text: JSON.stringify(accepted) }], []), maxOutputTokens: 512,
+      });
+      expect(results[0]!.extraction.nodes[0]!.citations![0]!.excerpt).toBe(decisionExcerpt.excerpt);
+    });
+
+  it.each([["refuse", 19], ["accept", 20]] as const)(
+    "should %s an entity citation excerpt of exactly %i code points", async (outcome, codePoints) => {
+      // The floor counts code points, like the upper bound, and is checked before the page anchor.
+      const excerpt = [...`${oracle.excerpt}`].slice(0, codePoints).join("");
+      expect([...excerpt]).toHaveLength(codePoints);
+      const value = compactExtraction();
+      value.nodes[0]!.citations![0]!.excerpt = excerpt;
+      const run = () => extractRefreshProfile([chunk()], { context,
+        textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512 });
+      if (outcome === "refuse") {
+        await expect(run()).rejects.toThrow("entity_citation_excerpt_too_short");
+      } else {
+        expect((await run())[0]!.extraction.nodes[0]!.citations![0]!.excerpt).toBe(excerpt);
+      }
+    });
+
+  it("should refuse a short entity citation excerpt before its page anchor is even checked", async () => {
+    // Under v8 this citation was refused as ungrounded_pdf_excerpt on a page it does not appear on;
+    // v9 names the excerpt floor instead, so the refusal states the cause the model can act on.
+    const value = compactExtraction();
+    value.nodes[0]!.citations![0]!.excerpt = "Zone : COM-1";
+    const error = await captureExtractionError(JSON.stringify(value));
+    expect(error.message).toContain("entity_citation_excerpt_too_short");
+    expect(error.message).not.toContain("ungrounded PDF excerpt");
+  });
+
+  it("should leave out-of-BMP short excerpts measured in code points, not UTF-16 units", async () => {
+    // 19 astral characters are 38 UTF-16 units: counting units would wrongly accept them.
+    const value = compactExtraction();
+    value.nodes[0]!.citations![0]!.excerpt = "𐐀".repeat(19);
+    await expect(extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("entity_citation_excerpt_too_short");
+  });
+
+  it("should keep evidence excerpts out of the entity citation floor", async () => {
+    // evidence[] declares minLength 1 and carries its own contract: the v9 floor is an entity
+    // citation rule only. This 19-code-point excerpt anchors, so it stays accepted.
+    const shortExcerpt = [...oracle.excerpt].slice(0, 19).join("");
+    const value = extraction();
+    value.evidence = [{ id: "ev-short", source_file: oracle.originalKey, rawRef: oracle.originalKey,
+      docSha: oracle.docSha, sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page,
+      excerpt: shortExcerpt }];
+    const results = await extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.evidence![0]!.excerpt).toHaveLength(19);
   });
 
   it("should preserve the distinct unbounded evidence excerpt contract", async () => {
@@ -373,7 +453,7 @@ describe("refresh profile extraction", () => {
     expect(results[1]).toMatchObject({ chunk: { originalKey: oracle.originalKey },
       extraction: { nodes: [], edges: [] } });
     const schema = JSON.parse(seen[0]!.schema);
-    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v8");
+    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v9");
     expect(schema.contract_version).toBe(REFRESH_PROFILE_CONTRACT_VERSION);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
     const nodeStatuses = ["candidate", "attached", "needs_review", "validated", "rejected", "superseded"];
@@ -405,9 +485,12 @@ describe("refresh profile extraction", () => {
     expect(schema.graph_contract.entity_citations.items.required).toEqual(["page", "excerpt"]);
     expect(schema.graph_contract.entity_citations.items.properties).toEqual({
       page: { enum: [3] }, excerpt: { type: "string", minLength: 20, maxLength: 200,
-        description: "Exact beginning of the cited passage, 20 to 200 characters, "
-          + "copied verbatim and never completed or corrected." },
+        description: "Exact beginning of the decision sentence, 20 to 200 characters, "
+          + "copied verbatim and never completed or corrected. A field label such as "
+          + "\"Zone : RUR-12\" is a property, never an excerpt." },
     });
+    expect(schema.graph_contract.entity_citations.items.description)
+      .toContain("entity_citation_excerpt_too_short");
     expect(schema.evidence.pdf_identity).toMatchObject({ docSha: oracle.docSha, rawRef: oracle.originalKey });
     expect(schema.evidence.citation.required).toEqual(["page", "excerpt"]);
     expect(schema.evidence.evidence_item.required).toContain("modality");
@@ -429,7 +512,14 @@ describe("refresh profile extraction", () => {
     expect(seen[0]!.prompt).toContain("Do not repeat the document identity inside citations");
     expect(seen[0]!.prompt).toContain("exact beginning of the cited passage, between 20 and 200 characters");
     expect(seen[0]!.prompt).toContain("never complete or correct it");
-    expect(seen[0]!.prompt).toContain("A short label is not an excerpt on its own");
+    expect(seen[0]!.prompt).toContain("The excerpt is the sentence that states the decision, never a field label");
+    expect(seen[0]!.prompt).toContain("put the zone code in the node property (Zone.code, or zone_ref");
+    // The contrastive pair is the measured v13 one, both strings verbatim on the same real PV page.
+    expect(seen[0]!.prompt).toContain(`excerpt "${v13Cases.zoneLabelExcerpt.excerpt}" is refused`);
+    expect(seen[0]!.prompt).toContain(`"${v13Cases.decisionExcerpt.excerpt}" is correct`);
+    expect(v13Cases.pageText).toContain(v13Cases.zoneLabelExcerpt.excerpt);
+    expect(v13Cases.pageText).toContain(v13Cases.decisionExcerpt.excerpt);
+    expect(seen[0]!.prompt).toContain("refused as entity_citation_excerpt_too_short, before");
     expect(seen[0]!.prompt).toContain("until you pass 20 characters, without inventing the continuation");
     // The v7 mid-word cut instruction is gone: measured v11 output obeys it and still overshoots.
     expect(seen[0]!.prompt).not.toContain("cut it off");
@@ -446,7 +536,7 @@ describe("refresh profile extraction", () => {
   });
 
   it("should enforce both physical page boundaries in a multi-page chunk", async () => {
-    const firstExcerpt = "First-page finding.";
+    const firstExcerpt = "First-page regulatory finding.";
     const multiPage = { ...chunk(undefined,
       `[PDF PAGE 1]\n${firstExcerpt}\n\n[PDF PAGE 3]\n${oracle.excerpt}`), pages: [1, 3] };
     const attributedToFirst = extraction(1);
@@ -492,7 +582,9 @@ describe("refresh profile extraction", () => {
     await reject((value) => { value.evidence = [{ id: "ev-1", source_file: oracle.originalKey,
       rawRef: oracle.originalKey, docSha: "f".repeat(64), sourceUrl: oracle.sourceUrl,
       modality: "pdf", page: oracle.page, excerpt: oracle.excerpt }]; }, "invalid original PDF identity");
-    await reject((value) => { value.nodes[0]!.citations![0]!.excerpt = ""; }, "ungrounded PDF excerpt");
+    // An empty excerpt is a string of zero code points: v9 names the floor it violates.
+    await reject((value) => { value.nodes[0]!.citations![0]!.excerpt = ""; },
+      "entity_citation_excerpt_too_short");
     await reject((value) => { const citation = value.nodes[0]!.citations![0]!;
       delete (citation as { excerpt?: string }).excerpt; citation.quote = oracle.excerpt; }, "ungrounded PDF excerpt");
     await reject((value) => { delete (value.nodes[0]! as { source_file?: string }).source_file; },
