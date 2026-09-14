@@ -5,13 +5,15 @@ import { resolve } from "node:path";
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
 const bundleRoot = required("BENCHMARK_BUNDLE_ROOT");
+const campaign = process.env.BENCHMARK_CAMPAIGN ?? "v6";
 const readJson = async (path) => JSON.parse(await readFile(path, "utf8"));
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
-const manifest = await readJson(resolve(repositoryRoot, "docs/reviews/refresh-benchmark/v6/manifest.json"));
-const oracle = await readJson(resolve(repositoryRoot, "docs/reviews/refresh-benchmark/v6/manual-oracle.json"));
+const campaignRoot = resolve(repositoryRoot, `docs/reviews/refresh-benchmark/${campaign}`);
+const manifest = await readJson(resolve(campaignRoot, "manifest.json"));
+const oracle = await readJson(resolve(campaignRoot, "manual-oracle.json"));
 const aliases = {
-  baseline: `system-${sha256("v6:historical-baseline").slice(0, 12)}`,
-  candidate: `system-${sha256("v6:compact-citation-candidate").slice(0, 12)}`,
+  baseline: `system-${sha256(`${campaign}:historical-baseline`).slice(0, 12)}`,
+  candidate: `system-${sha256(`${campaign}:compact-citation-candidate`).slice(0, 12)}`,
 };
 const entries = [];
 const mapping = [];
@@ -49,7 +51,8 @@ const judgeInstructions = [
   "Do not infer or name model identities.",
   "Return JSON only: {perDocument:[{documentId,systems:[{system,supported,missed,unsupported,citationDefects,usefulness,notes}]}],overall:{ranking,reason,confidence,limitations}}.",
 ];
-const bundleBytes = JSON.stringify({ schemaVersion: 1, campaign: "v6-partial",
+const bundleBytes = JSON.stringify({ schemaVersion: 1,
+  campaign: `${campaign}${entries.length / 2 < manifest.documents.length ? "-partial" : ""}`,
   judgeInstructions, entries });
 await writeFile(resolve(bundleRoot, "blind-bundle.json"), bundleBytes, { flag: "wx" });
 await writeFile(resolve(bundleRoot, "blind-map.json"), JSON.stringify({ schemaVersion: 1, mapping,
