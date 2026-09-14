@@ -36,3 +36,7 @@ export const executionContract = Object.freeze({
   maxAttempts: 2,
   retryOnlyAfter: "transport_failure",
 });
+
+export function outputTokenCapForCampaign(campaign) {
+  return campaign === "v7" ? 65_536 : executionContract.maxOutputTokens;
+}

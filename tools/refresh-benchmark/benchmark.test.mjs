@@ -32,7 +32,7 @@ test("the five immutable PDFs and page texts match the manifest", async () => {
 
 test("prompt contract covers each input once and is tied to corrected T1", async () => {
   assert.equal(prompts.graphifyVersion, "0.18.0");
-  assert.equal(prompts.meshVersion, campaign === "v5" || campaign === "v6" ? "0.19.1" : "0.19.0");
+  assert.equal(prompts.meshVersion, ["v5", "v6", "v7"].includes(campaign) ? "0.19.1" : "0.19.0");
   assert.equal(prompts.t1Commit,
     process.env.BENCHMARK_T1_COMMIT ?? "f9b311da536bda2e1442d154a05599c35b482518");
   assert.equal(sha256(prompts.systemPrompt), prompts.systemPromptSha256);
@@ -47,7 +47,7 @@ test("prompt contract covers each input once and is tied to corrected T1", async
 });
 
 test("controls keep their regulatory meaning", () => {
-  if (campaign === "v3" || campaign === "v5" || campaign === "v6") {
+  if (["v3", "v5", "v6", "v7"].includes(campaign)) {
     assert.equal(manifest.documents.some(({ selectionRationale }) =>
       /agenda/.test(selectionRationale) && /not adoption/.test(selectionRationale)), true);
     return;

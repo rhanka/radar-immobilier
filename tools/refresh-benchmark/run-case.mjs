@@ -10,7 +10,7 @@ import { CloudCodeRuntimeClient, CodexRuntimeClient, GeminiAdapter, getModelProf
   OpenAIAdapter } from "/workspace/node_modules/@sentropic/llm-mesh/dist/index.js";
 import { createLlmMeshFacade } from "/workspace/node_modules/@sentropic/llm-mesh/dist/service/facade.js";
 import { EncryptedFileKeyring } from "/workspace/node_modules/@sentropic/llm-mesh/dist/node/index.js";
-import { executionContract } from "./integration-contract.mjs";
+import { executionContract, outputTokenCapForCampaign } from "./integration-contract.mjs";
 import { createPinnedWirePlanner } from "./pinned-wire-planner.mjs";
 import { createAdapterSet, inspectCloudCodeSse, inspectWireBody, resolveOutputCap,
   selectAccount, validateRetry, variants } from
@@ -121,13 +121,14 @@ const t1Root = required("BENCHMARK_T1_ROOT");
 const t1Commit = required("BENCHMARK_T1_COMMIT");
 const ownerScopeRef = required("BENCHMARK_OWNER_SCOPE");
 const outputDir = required("BENCHMARK_OUTPUT_DIR");
+const frozenOutputCap = outputTokenCapForCampaign(campaign);
 const manifest = JSON.parse(await readFile(resolve(repositoryRoot,
   `docs/reviews/refresh-benchmark/${fixtureCampaign ? `${fixtureCampaign}/` : ""}manifest.json`), "utf8"));
 const frozen = JSON.parse(await readFile(resolve(repositoryRoot,
   `docs/reviews/refresh-benchmark/${fixtureCampaign ? `${fixtureCampaign}/` : ""}prompt-freeze.json`), "utf8"));
 if (frozen.graphifyVersion !== executionContract.graphify.version
   || frozen.systemPromptSha256 !== executionContract.systemPromptSha256
-  || frozen.maxOutputTokens !== executionContract.maxOutputTokens) {
+  || frozen.maxOutputTokens !== frozenOutputCap) {
   throw new Error("Frozen Graphify prompt contract differs from the integration contract");
 }
 const document = manifest.documents.find(({ id }) => id === caseDocument);
