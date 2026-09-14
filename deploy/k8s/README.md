@@ -37,7 +37,6 @@ and extended with the sentropic-app integration.
 | `00-namespace.yaml` | tenant Namespace + workspace/part-of labels (operator owns the live copy + RQ/LimitRange/NetPol) |
 | `10-rbac.yaml` | `radar-app` ServiceAccount; public GHCR and Docker Hub images require no pull secret |
 | `20-postgres-postgis.yaml` | Postgres 16 + PostGIS StatefulSet + headless Service + 5Gi PVC |
-| `25-minio.yaml` | in-cluster MinIO (S3) StatefulSet + Service for raw-document storage |
 | `30-api.yaml` | radar API (Hono) Deployment + Service + non-secret ConfigMap (incl. OIDC RP env) |
 | `35-obscura.yaml` | headless-browser CDP service for scraping — upstream public `docker.io/h4ckf0r0day/obscura:0.1.5@sha256:…` (nothing built in-house, no registry credential), dormant `replicas: 0` |
 | `40-maildev.yaml` | SMTP sink (POC) |
@@ -46,61 +45,18 @@ and extended with the sentropic-app integration.
 | `70-networkpolicy.yaml` | tenant-side additive NetworkPolicy: Traefik → `radar-ui`:8080 (see "Ingress reaches the UI pod, not the api") |
 | `80-auth.yaml` | declarative record of the sentropic OIDC delegation (`radar-sentropic-auth` ConfigMap) |
 
-### RAW preprod read-only inventory Job
+### Object-storage post-cutover state
 
-`object-storage-inventory-preprod/` is a separate operator bundle; it is not in
-the application kustomization. It mounts the reviewed migration scripts from a
-ConfigMap but hard-codes the `inventory` operation. Source coordinates come
-from the deployed `radar-api` ConfigMap and `radar-s3-credentials`; destination
-coordinates come only from `radar-raw-s3-credentials`. The Job cannot select a
-copy mode and no target below deletes a Job, PVC, object, or report.
+The preproduction and production migration Jobs are retired after accepted
+parity receipts. Their launch targets remain as fail-closed compatibility
+stubs, and the environment overlays no longer package migration tools. The
+checkpoint PVCs remain for evidence custody; the final-status targets verify
+OVH bindings, MinIO absence, rollout health, and the retained TEM exception.
 
-Validate offline, then create one bounded attempt with explicit preprod cluster
-authority:
-
-```text
-make object-storage-inventory-preprod-validate \
-  API_PORT=8882 UI_PORT=5382 MAILDEV_UI_PORT=1182 ENV=test-scw-final
-KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-start \
-  OBJECT_STORAGE_INVENTORY_CONFIRM=1 ENV=preprod
-```
-
-The start target applies only the generated tool ConfigMap, 1 Gi checkpoint
-PVC, and selector-scoped MinIO ingress policy, then creates a new generated-name
-Job. A non-zero bounded attempt keeps its checkpoint on the PVC; repeat the
-same start command to resume automatically. Inspect status without logs and
-fetch receipts into a fresh ignored/local directory without printing their
-contents. Fetch while the Pod is Ready during its five-minute collection
-window; completed Pods cannot serve exec-based collection. The target streams
-only allowlisted evidence paths and does not require `tar` in the image:
-
-```text
-KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-status \
-  OBJECT_STORAGE_INVENTORY_JOB=<job-name> ENV=preprod
-KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-fetch \
-  OBJECT_STORAGE_INVENTORY_JOB=<job-name> \
-  OBJECT_STORAGE_INVENTORY_EVIDENCE_DIR=tmp/object-storage-inventory/<job-name> \
-  ENV=preprod
-```
-
-Fetch writes `SHA256SUMS` locally. The checkpoint and reports contain object
-keys, so retain them under operator custody. This path is RAW-only; DOCS remains
-fail-closed until its exact OVH destination and identity are approved.
-
-After provisional parity is independently validated, roll only the API's six
-RAW settings to the dedicated OVH Secret without changing the shared ConfigMap.
-Once the old Pod is gone, record that no remaining writer targets MinIO RAW and
-start the same Job again. The new attempt sees the non-empty mounted fence
-record and builds the distinct fenced chain:
-
-```text
-KUBECONFIG=<preprod-kubeconfig> make object-storage-raw-preprod-rebind \
-  OBJECT_STORAGE_REBIND_CONFIRM=1 ENV=preprod
-KUBECONFIG=<preprod-kubeconfig> make object-storage-raw-preprod-fence \
-  OBJECT_STORAGE_FENCE_CONFIRM=1 ENV=preprod
-KUBECONFIG=<preprod-kubeconfig> make object-storage-inventory-preprod-start \
-  OBJECT_STORAGE_INVENTORY_CONFIRM=1 ENV=preprod
-```
+Migration implementations remain in `deploy/ci/` only for hermetic regression
+tests and historical receipt validation. They are not rendered into a deployed
+environment. Restoring any retired Job manifest is rejected by the
+object-storage binding gate.
 | `kustomization.yaml` | bundles the resources; stamps the `sentropic` part-of + workspace labels |
 | `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / TEM credentials |
 

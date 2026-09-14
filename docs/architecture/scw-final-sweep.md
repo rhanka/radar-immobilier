@@ -48,9 +48,19 @@ DOCS/GRAPH/SCRAPE bindings, API rollout and TEM preservation. The live
 transition receipt records both the restricted-principal denial and the
 successful final status without object keys or Secret values.
 
-The branch plan records the earlier preproduction transition separately. This
-freshness pass did not re-observe preproduction and therefore makes no newer
-runtime claim for that namespace.
+The final live gate re-observed preproduction on the same OVH API server. It
+found no MinIO StatefulSet, Service, data PVC, active PVC consumer, or legacy
+ingress policy. The API's six S3 bindings use the dedicated RAW OVH Secret; the
+refresh workloads use their dedicated OVH coordinates and credentials. The API
+rollout settled after restoring those references and the explicit TEM API base
+URL. No Secret value was printed or recorded.
+
+The environment-specific inventory, proof, and copy Job manifests used during
+the transition are now removed. Their Make launch targets fail closed, the
+kustomizations no longer package migration tool ConfigMaps, and the binding
+gate rejects restoration of any of the nine retired manifests. Generic
+migration code remains only as a hermetic regression and receipt-validation
+surface. Read-only status and evidence custody paths remain available.
 
 ## Historical audit baseline
 
