@@ -28,6 +28,18 @@ RETIRED_MIGRATION_JOBS=(
   deploy/k8s/object-storage-inventory-preprod/docs-copy-job.yaml
   deploy/k8s/object-storage-inventory-preprod/docs-canonical-copy-job.yaml
 )
+RETIRED_LAUNCHERS=(
+  'Makefile|object-storage-inventory-preprod-start'
+  'Makefile|object-storage-docs-preprod-start'
+  'Makefile|object-storage-docs-preprod-retry-never-started'
+  'Makefile|object-storage-docs-preprod-prove-conditional-write'
+  'Makefile|object-storage-docs-preprod-copy'
+  'Makefile|object-storage-docs-preprod-copy-canonical'
+  'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-fast-start'
+  'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-proof'
+  'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-copy'
+  'deploy/ci/object-storage-prod.mk|object-storage-docs-prod-start'
+)
 FAIL=0
 fail() { echo "FAIL: $*" >&2; FAIL=$((FAIL + 1)); }
 
@@ -96,6 +108,18 @@ for rel in "${PUBLIC_IMAGE_FILES[@]}"; do
 done
 for rel in "${RETIRED_MIGRATION_JOBS[@]}"; do
   [ ! -e "$ROOT/$rel" ] || fail "$rel must remain retired after the OVH cutover"
+done
+for entry in "${RETIRED_LAUNCHERS[@]}"; do
+  rel="${entry%%|*}"
+  target="${entry#*|}"
+  body="$(awk -v target="$target:" '
+    $0 ~ "^" target { found=1; next }
+    found && $0 !~ /^\t/ && $0 !~ /^$/ { exit }
+    found { print }
+  ' "$ROOT/$rel")"
+  grep -Fq 'retired:' <<<"$body" || fail "$rel target $target is not fail-closed"
+  grep -Eq 'KUBECTL|kubectl|[[:space:]](apply|create|delete)[[:space:]]' <<<"$body" &&
+    fail "$rel target $target retains a cluster mutation"
 done
 grep -Eiq 'radar-registry-pull|SCW[[:space:]]+(Container[[:space:]]+)?registry' \
   "$ROOT/deploy/k8s/README.md" && fail 'deploy/k8s/README.md retains legacy registry guidance'

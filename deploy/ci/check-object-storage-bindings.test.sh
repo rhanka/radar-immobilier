@@ -11,7 +11,8 @@ run_ok() { bash "$CHECK" "$1" >/dev/null 2>&1 && ok "$2" || bad "$2"; }
 run_bad() { bash "$CHECK" "$1" >/dev/null 2>&1 && bad "$2" || ok "$2"; }
 
 FILES=(
-  .env.example .github/workflows/build-push-images.yml
+  Makefile .env.example .github/workflows/build-push-images.yml
+  deploy/ci/object-storage-prod.mk
   deploy/k8s/30-api.yaml
   deploy/k8s/kustomization.yaml deploy/k8s/70-networkpolicy.yaml
   deploy/k8s/31-graph-projection-job.yaml deploy/k8s/32-graph-projection-only-job.yaml
@@ -111,6 +112,10 @@ run_bad "$CASE_ROOT" 'rejects a restored PROD migration Job'; rm -rf "$CASE_ROOT
 
 fixture; touch "$CASE_ROOT/deploy/k8s/object-storage-inventory-preprod/job.yaml"
 run_bad "$CASE_ROOT" 'rejects a restored preprod MinIO inventory Job'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i '/object-storage-docs-prod-start:/,/^$$/s/retired: no legacy PROD inventory can be started/kubectl create -f inventory-job.yaml/' \
+  "$CASE_ROOT/deploy/ci/object-storage-prod.mk"
+run_bad "$CASE_ROOT" 'rejects a rearmed PROD migration launcher'; rm -rf "$CASE_ROOT"
 
 fixture; sed -i 's/S3_BUCKET=radar-immobilier-raw/S3_BUCKET=changed/' "$CASE_ROOT/.env.example"
 run_bad "$CASE_ROOT" 'protects local development settings'; rm -rf "$CASE_ROOT"
