@@ -7,9 +7,13 @@ export const variants = Object.freeze({
 });
 
 export function createAdapterSet(constructors, observedFetch) {
-  const { CloudCodeRuntimeClient, CodexRuntimeClient, GeminiAdapter, OpenAIAdapter } = constructors;
+  const { CloudCodeRuntimeClient, CodexRuntimeClient, GeminiAdapter, OpenAIAdapter,
+    getModelProfile } = constructors;
+  const baseGemini = getModelProfile("gemini", "gemini-3.8-flash");
+  if (!baseGemini) throw new Error("Gemini 3.8 base profile is unavailable");
   return Object.freeze({
-    gemini: new GeminiAdapter({ client: new CloudCodeRuntimeClient(observedFetch) }),
+    gemini: new GeminiAdapter({ client: new CloudCodeRuntimeClient(observedFetch),
+      models: [{ ...baseGemini, modelId: variants["gemini-low"].model }] }),
     openai: new OpenAIAdapter({ client: new CodexRuntimeClient({ fetch: observedFetch }) }),
   });
 }

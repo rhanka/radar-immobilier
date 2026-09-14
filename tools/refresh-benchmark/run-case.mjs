@@ -4,11 +4,12 @@ import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { createGraphifyMesh } from "/workspace/node_modules/@sentropic/graphify/dist/llm-mesh.js";
-import { CloudCodeRuntimeClient, CodexRuntimeClient, GeminiAdapter,
+import { CloudCodeRuntimeClient, CodexRuntimeClient, GeminiAdapter, getModelProfile,
   OpenAIAdapter } from "/workspace/node_modules/@sentropic/llm-mesh/dist/index.js";
 import { createLlmMeshFacade } from "/workspace/node_modules/@sentropic/llm-mesh/dist/service/facade.js";
 import { EncryptedFileKeyring } from "/workspace/node_modules/@sentropic/llm-mesh/dist/node/index.js";
 import { executionContract } from "./integration-contract.mjs";
+import { createPinnedWirePlanner } from "./pinned-wire-planner.mjs";
 import { createAdapterSet, inspectWireBody, selectAccount, validateRetry, variants } from
   "./runtime-config.mjs";
 
@@ -98,6 +99,7 @@ let wire;
 let generated;
 let generationStarted;
 let inputHashes;
+const routeOutcomes = [];
 const observedFetch = async (url, init) => {
   const fetchStarted = Date.now();
   const bodyText = String(init?.body ?? "");
@@ -113,8 +115,14 @@ const observedFetch = async (url, init) => {
 const mesh = createGraphifyMesh({
   routingSubject: { principalRef: "principal:refresh-benchmark", ownerScopeRef },
   adapters: createAdapterSet({ CloudCodeRuntimeClient, CodexRuntimeClient,
-    GeminiAdapter, OpenAIAdapter }, observedFetch),
-  createRoutePlanner: (runtime) => facade.createRoutePlanner(runtime),
+    GeminiAdapter, OpenAIAdapter, getModelProfile }, observedFetch),
+  // 0.19.1 forwards this catalog wire ID but cannot plan it statically;
+  // remove the pinned route when llm-mesh 0.19.2 supplies the catalog mapping.
+  createRoutePlanner: (runtime) => variant.provider === "gemini"
+    ? createPinnedWirePlanner({ runtime, facade, account, variant,
+      routingSubject: { principalRef: "principal:refresh-benchmark", ownerScopeRef },
+      affinityKey: document.id, outcomes: routeOutcomes })
+    : facade.createRoutePlanner(runtime),
 });
 const textClient = { mode: "mesh", provider: variant.provider, model: variant.model,
   async generateJson(input) {
@@ -169,7 +177,8 @@ const receipt = { schemaVersion: 1, campaign: campaign ?? "v1", caseId, status, 
   actual: generated ? { responseId: generated.id, providerId: generated.providerId,
     modelId: generated.modelId, finishReason: generated.finishReason,
     responseTextSha256: sha256(generated.text ?? ""), usage: generated.usage } : null,
-  validation: { jsonValid: responseJsonValid, extractionAccepted: Boolean(extraction) },
+  validation: { jsonValid: responseJsonValid, extractionAccepted: Boolean(extraction),
+    routeOutcomes, fallbackAvailable: false },
   hashes: inputHashes, timing: { startedAt: new Date(started).toISOString(),
     completedAt: new Date(completed).toISOString(), totalMs: completed - started,
     queueMs: wire && generationStarted ? Date.parse(wire.fetchStartedAt) - generationStarted : null,

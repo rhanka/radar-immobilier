@@ -6,6 +6,7 @@ T1_ROOT := $(abspath $(BENCHMARK_ROOT)/../refresh-018)
 RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/candidates
 V3_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v3
 V4_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v4
+V4_REAL_RESULTS := $(V4_RESULTS)/campaign-real
 RUNTIME_TEXT := $(BENCHMARK_ROOT)/scratchtmp/refresh-benchmark/runtime-text
 CAS_ROOT := $(MAIN_ROOT)/.lanes/conductor/tmp/graphify-cas/run-dryrun2-final-20260911T215911Z
 NODE_IMAGE := node:22-bookworm-slim
@@ -23,7 +24,7 @@ GEMINI_ENDPOINT ?= mesh
 GEMINI_EFFORT ?= low
 GEMINI_MODEL ?= gemini-3.8-flash-tiered
 
-.PHONY: test test-v3 test-v4 test-diagnosis-v4 test-integration-contract-v4 install-v4-integration-deps check-v4-integration-ready preflight-v4-integration run-v4-integration provider-availability test-score-v3 test-score-v4 score-v3 score-v4 freeze-blind-v3 freeze-blind-v4 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 gemini-diagnostic gemini-catalogue-probe gemini-catalogue-probe-check run-v3-sol-normal run-v4-all quota inspect-validation
+.PHONY: test test-v3 test-v4 test-diagnosis-v4 test-integration-contract-v4 install-v4-integration-deps check-v4-integration-ready preflight-v4-integration run-v4-integration run-v4-real provider-availability test-score-v3 test-score-v4 score-v3 score-v4 freeze-blind-v3 freeze-blind-v4 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 gemini-diagnostic gemini-catalogue-probe gemini-catalogue-probe-check run-v3-sol-normal run-v4-all quota inspect-validation
 
 WATERLOO_18 := c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd
 WICKHAM := 7d17c277199e3664a1c49ddd92f34f490f269578194d504a97380905826c0fa0
@@ -97,6 +98,7 @@ test-integration-contract-v4:
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -w /src $(NODE_IMAGE) \
 	  node --test tools/refresh-benchmark/integration-contract.test.mjs \
 	    tools/refresh-benchmark/gemini-diagnostic.test.mjs \
+	    tools/refresh-benchmark/pinned-wire-planner.test.mjs \
 	    tools/refresh-benchmark/release-readiness.test.mjs \
 	    tools/refresh-benchmark/runtime-config.test.mjs
 	docker run --rm --network none --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
@@ -129,6 +131,13 @@ preflight-v4-integration: check-v4-integration-ready
 run-v4-integration: check-v4-integration-ready
 	$(MAKE) run-v4 DOC=$(DOC) VARIANT=$(VARIANT) ATTEMPT=$(ATTEMPT) \
 	  RETRY_REASON='$(RETRY_REASON)' ROOT_MODULES=$(INTEGRATION_MODULES) ENV=$(ENV)
+
+run-v4-real: check-v4-integration-ready
+	mkdir -p $(V4_REAL_RESULTS)
+	$(MAKE) run-case DOC=$(DOC) VARIANT=$(VARIANT) CAMPAIGN=v4 \
+	  CAMPAIGN_RESULTS=$(V4_REAL_RESULTS) T1_CAMPAIGN_COMMIT=$(T1_COMMIT_V3) \
+	  ROOT_MODULES=$(INTEGRATION_MODULES) ATTEMPT=$(ATTEMPT) \
+	  RETRY_REASON='$(RETRY_REASON)' ENV=$(ENV)
 
 provider-availability:
 	test "$(ENV)" = "test-t1-model-benchmark"

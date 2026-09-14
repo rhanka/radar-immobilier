@@ -43,13 +43,15 @@ test("outgoing wire evidence proves provider model, effort, and cap", () => {
 
 test("adapter construction is identical across the frozen Graphify boundary", () => {
   class Client { constructor(options) { this.options = options; } }
-  class Adapter { constructor({ client }) { this.client = client; } }
+  class Adapter { constructor(options) { Object.assign(this, options); } }
   const observedFetch = () => undefined;
   const adapters = createAdapterSet({
     CloudCodeRuntimeClient: Client, CodexRuntimeClient: Client,
     GeminiAdapter: Adapter, OpenAIAdapter: Adapter,
+    getModelProfile: () => ({ providerId: "gemini", modelId: "gemini-3.8-flash" }),
   }, observedFetch);
   assert.equal(adapters.gemini.client.options, observedFetch);
+  assert.equal(adapters.gemini.models[0].modelId, "gemini-3.8-flash-tiered");
   assert.deepEqual(adapters.openai.client.options, { fetch: observedFetch });
 });
 
