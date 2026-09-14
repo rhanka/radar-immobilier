@@ -6,9 +6,9 @@ No current candidate is qualified for T1. The effective historical Sonnet 4.6
 artifacts retain materially more municipal signal than the real Luna-low
 outputs, but they were produced through an older Graphify/prompt path. Luna
 failed the frozen extraction validator on all five PDFs. Gemini 3.8 is not yet
-included in the quality ranking: the v4 runner used a direct Cloud Code client
-instead of the operational gateway, so its 404/429 diagnostics do not qualify
-a gateway run. A byte-comparable Sonnet 4.6 run is also still blocked
+included in the quality ranking: llm-mesh 0.19's `daily` Cloud Code endpoint
+returns 404, while the standard host reaches the quota layer and returns 429.
+A byte-comparable Sonnet 4.6 run is also still blocked
 before contact by the absence of a supported Anthropic runtime client.
 
 ## Executed systems
@@ -17,7 +17,7 @@ before contact by the absence of a supported Anthropic runtime client.
 |---|---:|---|---|
 | Historical Sonnet | 0 reruns; 5 retained outputs | `claude-sonnet-4-6` receipt | historical reference only |
 | Luna low | 5 | `gpt-5.6-luna`, `low`, Codex account | 5 responses; 0/5 validator acceptance |
-| Gemini low | 5 initial + 3 small probes | `gemini-3.8-flash`, `LOW`, direct client | gateway run pending; no full output |
+| Gemini low | 5 initial + 3 small probes | `gemini-3.8-flash`, `LOW`, Cloud Code account | endpoint fix and quota pending; no full output |
 | Comparable Sonnet | 0 | requested `claude-sonnet-4-6` | supported client unavailable |
 
 The five immutable inputs and frozen prompt/schema/oracle hashes are listed in
@@ -58,10 +58,11 @@ The exact llm-mesh 0.19 probe to `daily-cloudcode-pa` returned whitelisted 404
 `NOT_FOUND` / “Requested entity was not found.” Changing only the hostname to
 the AGY-compatible `cloudcode-pa` route changed the result to 429
 `RESOURCE_EXHAUSTED`; model, `LOW`, cap, and envelope fields stayed fixed.
-This proves only that the direct runner paths differ; it does not identify a
-gateway defect or a supported solution. See `gemini-transport-diagnosis.md`
-and its three redacted receipts. No PDF output from those bypass probes is
-included in the comparison.
+This proves the 0.19 `daily` endpoint causes the 404 and that effort is not
+causal. The 429 is a distinct quota boundary. The runner already injects
+`CloudCodeRuntimeClient` through `GeminiAdapter`; Graphify 0.18 owns no
+endpoint. See `gemini-transport-diagnosis.md` and its three redacted receipts.
+No PDF output from the manual-host probes is included in the comparison.
 
 ## Judge identity boundary
 
@@ -79,9 +80,10 @@ identified; Astra supplied the second independent path.
   Make targets with the enrolled keyring mounted read-only and copied into an
   ephemeral `/run` filesystem.
 
-The decision boundary is: call the existing gateway through its official
-enrolled contract, then require a green one-PDF preflight before the five
-Gemini cases. Use the same gateway for comparable Sonnet if it exposes that
-provider; otherwise obtain a supported comparable Anthropic client before
-the five Sonnet cases. Re-freeze a three-system blind bundle only after those
-real outputs exist; do not assign failed transports a quality score of zero.
+The decision boundary is: consume the exact published llm-mesh correction,
+then require available quota and a green one-PDF preflight before the five
+Gemini cases. No external gateway is required. Obtain a supported comparable
+Anthropic client before the five Sonnet cases. Keep Graphify 0.18 unless an
+ABI or lock incompatibility is demonstrated. Re-freeze a three-system blind
+bundle only after those real outputs exist; do not assign failed transports a
+quality score of zero.

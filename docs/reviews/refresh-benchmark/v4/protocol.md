@@ -43,7 +43,7 @@ Code runtime client, and the benchmark volume has no Anthropic SDK. A custom
 HTTP client would be an unfrozen transport implementation, so the campaign
 waits for a supported path from s-conductor rather than fabricating one.
 
-## Amended Gemini gateway diagnosis
+## Frozen Gemini transport diagnosis
 
 The five initial Candidate G requests returned HTTP 404 without preserving the
 provider body. This is not evidence that Gemini 3.8 or `LOW` is unavailable:
@@ -52,21 +52,24 @@ an earlier native AGY run produced `PING_OK` with effective model
 a time and retain only whitelisted Google error `code`, `status`, and redacted
 `message` fields.
 
-The original runner instantiated `CloudCodeRuntimeClient` directly; it did not
-prove use of the already-operational gateway. The two direct-host probes are
-retained as diagnostics only. A manual host substitution is not a supported
-solution and makes no claim about gateway correctness.
+The runner injects `CloudCodeRuntimeClient` through `GeminiAdapter` into
+Graphify, which is the supported Graphify 0.18 boundary. Graphify has no
+provider endpoint. The probes prove that llm-mesh 0.19's `daily` URL returns
+404 while the standard host reaches the quota layer and returns 429 with the
+same model, `LOW`, cap, and envelope. Effort is not causal. The manual host
+substitution remains diagnostic evidence, not a committed runtime fix.
 
 The corrected diagnostic order is:
 
-1. identify the official enrolled-gateway call contract without modifying
-   llm-mesh or sentropic;
-2. obtain a gateway `gemini-3.8-flash` ping with identity, effort, usage, and
-   sanitized transport evidence;
-3. adapt only the radar runner to that gateway contract;
+1. wait for s-conductor to publish the corrected llm-mesh release;
+2. populate the empty release anchor with that exact published version and
+   verify the installed package/export contract;
+3. obtain a standard-host `gemini-3.8-flash` ping with identity, effort, usage,
+   and sanitized transport evidence;
 4. run one frozen Lac case, then all five cases only if it is green.
 
-Only a green full Lac case authorizes the five-document Candidate G campaign. The
+No external gateway is part of this path. Only a green full Lac case authorizes
+the five-document Candidate G campaign. The
 installed package version/static model profile, account public model allowlist
 (or its absence), endpoint, envelope shape, requested/effective model, and
 provider error whitelist are recorded without credentials or response headers.
