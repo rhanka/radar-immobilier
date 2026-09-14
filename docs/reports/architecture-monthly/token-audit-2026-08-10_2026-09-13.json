@@ -1,6 +1,6 @@
 {
   "schema": "immo-geo-token-allocation-audit/v1",
-  "generatedAt": "2026-09-13T21:09:35.483Z",
+  "generatedAt": "2026-09-14T04:57:42.751Z",
   "period": {
     "timezone": "America/Toronto",
     "startInclusive": "2026-08-10T00:00:00-04:00",
@@ -47,44 +47,44 @@
   "products": {
     "immo": {
       "tokens": {
-        "claude": 14009998961,
-        "codex": 1426882082
+        "claude": 14153024311,
+        "codex": 2197150625
       },
-      "prorataUsd": 88.44032524896879,
-      "prorataCad": 121.16324559108725,
-      "facturableCad": 139.33773242975033
+      "prorataUsd": 90.43780999476206,
+      "prorataCad": 123.89979969282403,
+      "facturableCad": 142.48476964674762
     },
     "geo": {
       "tokens": {
-        "claude": 11194704885,
+        "claude": 11231142644,
         "codex": 1376664354
       },
-      "prorataUsd": 71.01092049931265,
-      "prorataCad": 97.28496108405834,
-      "facturableCad": 111.87770524666708
+      "prorataUsd": 71.23556417174177,
+      "prorataCad": 97.59272291528623,
+      "facturableCad": 112.23163135257916
     }
   },
   "totals": {
     "tokens": {
-      "claude": 25204703846,
-      "codex": 2803546436
+      "claude": 25384166955,
+      "codex": 3573814979
     },
-    "facturableCad": 251.21543767641742
+    "facturableCad": 254.71640099932677
   },
   "scan": {
     "claude": {
-      "files": 375,
-      "bytes": 3513040154,
-      "lines": 1497639,
-      "records": 208146,
-      "uniqueMessages": 84338,
-      "duplicates": 123808,
+      "files": 380,
+      "bytes": 3519985322,
+      "lines": 1500286,
+      "records": 210157,
+      "uniqueMessages": 85139,
+      "duplicates": 125018,
       "inconsistent": 20,
       "malformed": 4
     },
     "codex": {
-      "sessions": 1249,
-      "turns": 94062,
+      "sessions": 1314,
+      "turns": 100696,
       "duplicates": 75
     }
   },
