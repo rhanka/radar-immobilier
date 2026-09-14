@@ -512,8 +512,12 @@ describe("refresh profile extraction", () => {
     expect(seen[0]!.prompt).toContain("Do not repeat the document identity inside citations");
     expect(seen[0]!.prompt).toContain("exact beginning of the cited passage, between 20 and 200 characters");
     expect(seen[0]!.prompt).toContain("never complete or correct it");
-    expect(seen[0]!.prompt).toContain("The excerpt is the sentence that states the decision, never a field label");
-    expect(seen[0]!.prompt).toContain("put the zone code in the node property (Zone.code, or zone_ref");
+    expect(seen[0]!.prompt).toContain("The excerpt carries the act, never a bare field label");
+    expect(seen[0]!.prompt).toContain("put the zone code in the node property (Zone.code,");
+    // Measured on the v14 Valcourt control: the first v9 wording collapsed an agenda to an empty
+    // extraction, 56 output tokens against 6 173 under v8 on the same document and cap.
+    expect(seen[0]!.prompt).toContain("the listed item is the act itself");
+    expect(seen[0]!.prompt).toContain("Never return an empty extraction merely because");
     // The contrastive pair is the measured v13 one, both strings verbatim on the same real PV page.
     expect(seen[0]!.prompt).toContain(`excerpt "${v13Cases.zoneLabelExcerpt.excerpt}" is refused`);
     expect(seen[0]!.prompt).toContain(`"${v13Cases.decisionExcerpt.excerpt}" is correct`);

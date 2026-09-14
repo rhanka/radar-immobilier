@@ -321,12 +321,15 @@ Every edge must carry at least one evidence_refs ID that exists in evidence[]. M
 Every node and every edge must include a non-empty citations array. Each citation must contain only page
 and excerpt. The excerpt is the exact beginning of the cited passage, between 20 and 200 characters;
 never complete or correct it.
-The excerpt is the sentence that states the decision, never a field label. A zone code, a lot number or
-an address is a property: put the zone code in the node property (Zone.code, or zone_ref on Signal and
-DesignationEvent) and cite the resolution, adoption or refusal sentence that concerns it.
+The excerpt carries the act, never a bare field label. A line that is only a label and a code, such as
+"Zone : RUR-12" or "Lot : 5 662 886", is a property: put the zone code in the node property (Zone.code,
+or zone_ref on Signal and DesignationEvent) and cite the sentence that states the act instead.
 Contrastive example, both lines taken from the same real PV page:
 excerpt "Zone : RUR-12" is refused; excerpt
 "QUE le conseil municipal autorise, sur recommandation du CCU," is correct.
+On an agenda, which lists planned items rather than decisions taken, the listed item is the act itself:
+cite that agenda line. Never return an empty extraction merely because the document carries no
+decision sentence.
 Any entity citation excerpt under 20 characters is refused as entity_citation_excerpt_too_short, before
 the page anchor is even checked: keep copying the page verbatim from that point
 until you pass 20 characters, without inventing the continuation.
