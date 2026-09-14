@@ -261,3 +261,64 @@ convention d'ancre de l'oracle, qui fait dépendre le score de la présence d'un
 numérotation en tête d'extrait.
 
 Détail, reçus et SHA : [v13/report.md](v13/report.md).
+
+## Campagnes v14 et v15 — contrat v9, Gemini LOW, oracle réaligné
+
+[FAIT] **Seuil B « ≥ 4/5 sur deux runs » : atteint.** v14 et v15 font chacune
+**5/5 accepté**, sur les mêmes cinq PV, au même plafond 64 000, avec le même
+contrat `immo-pv-extraction-v9` (`d93f5c93`). **Aucune classe de refus ne subsiste**
+sur les dix reçus : ni profil, ni extraction, ni provenance.
+
+| Agrégat | Gemini v5 (v9) | Gemini v8 (v13) | Sonnet v8 (v13) | **v9 (v14)** | **v9 (v15)** |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Acceptés | 3/5 | 4/5 | 4/5 | **5/5** | **5/5** |
+| Classes de refus restantes | 2 | 1 | 1 | **0** | **0** |
+| Macro F1, oracle v1 | 0,558 | 0,133 | 0,222 | **0,282** | **0,468** |
+| Macro F1, oracle v2 | 0,610 | 0,389 | 0,479 | **0,576** | **0,582** |
+| Latence moyenne | 30 703 ms | 30 537 ms | 121 790 ms | **27 030 ms** | **25 470 ms** |
+| Tokens entrée / sortie | 66 930 / 50 075 | 68 680 / 47 161 | 77 144 / 70 046 | **70 080 / 42 920** | **70 080 / 39 225** |
+| Coût unitaire | `N-A` | `N-A` | `N-A` | `N-A` | `N-A` |
+
+[FAIT] **Le contrôle à une requête a servi.** La première rédaction du prompt v9
+(`ac99728f`) a rendu Valcourt **accepté et vide** : 56 tokens de sortie contre
+6 173 sous v8, sur le même document et le même plafond, une seule variable changée.
+Valcourt est un ordre du jour, sans phrase de décision. La règle corrigée
+(`d93f5c93`) dit que sur un ordre du jour le point listé est l'acte, et interdit
+l'extraction vide au seul motif qu'aucune décision n'est énoncée. Reçu et gel de la
+première rédaction conservés dans `v14/`.
+
+[FAIT] **Le plancher de 20 points de code est tenu** : 0 citation d'entité sous
+20 points de code sur les 197 des deux campagnes, contre 17 sur 331 en v13, toutes
+refusées. La consigne v8 ne l'obtenait sur aucun modèle ; la règle v9, nommée
+`entity_citation_excerpt_too_short` et appliquée par le validateur avant l'ancrage,
+l'obtient. Le plancher d'ancrage de 12 caractères normalisés est inchangé.
+
+[FAIT] **Oracle réaligné, sans réécrire le gelé.** `manual-oracle-v2.json` dérive
+du `4d50a26c…` gelé depuis v9, garde ses **36 unités champ par champ**, ajoute
+**0 unité** et **10 sites de citation**, chacun vérifié verbatim contre le texte de
+page gelé avant écriture. Trois règles : numérotation de point retirée de l'ancre
+comme du candidat ; `Bylaw` admis comme type de nœud candidat ; sites alternatifs
+avec provenance. Le scoreur v1 (`score-v3.mjs`) est conservé intact.
+
+[FAIT] **Le réalignement ne gonfle pas.** Admettre `Bylaw` élargit aussi le
+dénominateur de précision : Valcourt v9 **baisse** de 0,909 à 0,769, et les deux
+bras v12 restent à 0,000 sous les deux scoreurs. Les gains se concentrent là où la
+cause était nommée : Valcourt (numérotation) et Saint-Étienne v9 (`Bylaw` et page
+de décision).
+
+[FAIT] **Variance v14 ↔ v15, oracle v2** : écart nul sur trois documents notés sur
+quatre, **+0,022** sur Saint-Barthélemy, et **nombre d'unités appariées identique
+sur les cinq documents**. Sous l'oracle v1, la même paire de runs fait bouger
+Valcourt de 0,000 à 0,909. [JUGEMENT] L'instabilité que v1 mesurait sur ce document
+était une instabilité de convention d'ancre, pas du modèle.
+
+[FAIT] **Limites non couvertes.** Deux observations par cellule ne bornent pas un
+risque. Quatre unités d'oracle de stage `inconnu` restent inappariables par
+construction. Sur Saint-Étienne, sept ancres d'énumération et le contrat v9
+demandent deux choses opposées — l'élément de liste contre la phrase de résolution :
+arbitrage d'oracle à faire avant de lire ces sept unités comme un déficit de
+couverture. Aucun juge lancé; le bundle aveugle v14 (`d7d3daec…`) est à système
+unique, donc non comparatif. Coût unitaire `N-A`, source manquante.
+
+Détail, reçus et SHA : [v14/report.md](v14/report.md) et [v15/report.md](v15/report.md).
+Comparaison v1 contre v2 par PV et par bras : [oracle-v2-comparison.json](oracle-v2-comparison.json).
