@@ -1,5 +1,19 @@
 # Benchmark T1 — décision M1
 
+## Campagne v8
+
+À contrat identique sauf `thinkingLevel=HIGH`, Gemini conserve 3/5 sorties
+acceptées mais le F1 macro calculable baisse de 0,436 à 0,200 et le rappel
+macro des acceptés de 0,361 à 0,083. La latence moyenne passe de 25,7 s à
+81,8 s (×3,18) et l'usage fournisseur de 108 970 à 207 201 tokens (×1,90),
+dont 76 833 tokens de pensée désormais déclarés. LOW demeure donc la M1
+provisoire sans promotion. Waterloo possède un oracle partiel : sa précision
+et son F1 HIGH sont `N-A`.
+
+Le [rapport v8](v8/report.md), le [bundle aveugle](v8/blind-bundle.json) et la
+[consigne juge](v8/judge-prompt.md) portent le détail. Aucun juge v8 n'a été
+lancé; les juges v7 en cours ne sont pas lus ni modifiés par cette campagne.
+
 ## Campagne v7
 
 Le plafond commun de 65 536 a permis d'exécuter le contrôle Valcourt puis les
