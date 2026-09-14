@@ -40,6 +40,8 @@ test("the five PDFs and prompt-schema contract remain frozen", async () => {
 
 test("all live variants use the frozen adapter boundary and execution budget", () => {
   assert.deepEqual(adapterBindings, {
+    anthropic: { adapter: "Graphify text client",
+      client: "Anthropic Messages API or CloudCodeRuntimeClient" },
     gemini: { adapter: "GeminiAdapter", client: "CloudCodeRuntimeClient" },
     openai: { adapter: "OpenAIAdapter", client: "CodexRuntimeClient" },
   });
@@ -60,4 +62,5 @@ test("all live variants use the frozen adapter boundary and execution budget", (
   assert.equal(outputTokenCapForCampaign("v9"), 65_536);
   assert.equal(outputTokenCapForCampaign("v10"), 65_536);
   assert.equal(outputTokenCapForCampaign("v11"), 65_536);
+  assert.equal(outputTokenCapForCampaign("v12"), 65_536);
 });

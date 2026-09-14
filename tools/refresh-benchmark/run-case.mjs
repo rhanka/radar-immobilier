@@ -12,6 +12,7 @@ import { createLlmMeshFacade } from "/workspace/node_modules/@sentropic/llm-mesh
 import { EncryptedFileKeyring } from "/workspace/node_modules/@sentropic/llm-mesh/dist/node/index.js";
 import { executionContract, outputTokenCapForCampaign } from "./integration-contract.mjs";
 import { createPinnedWirePlanner } from "./pinned-wire-planner.mjs";
+import { generateSonnet } from "./sonnet-runtime.mjs";
 import { createAdapterSet, inspectCloudCodeSse, inspectWireBody, resolveOutputCap,
   selectAccount, validateRetry, variants } from
   "./runtime-config.mjs";
@@ -28,8 +29,10 @@ function parseErrorDetails(error, source) {
   return { name: error.name, message: error.message, position };
 }
 function errorDetails(error) {
-  if (!(error instanceof Error)) return { message: String(error) };
-  return { name: error.name, message: error.message,
+  const redact = (value) => String(value).replace(/sk-ant-[A-Za-z0-9_-]+/gu, "[REDACTED]")
+    .replace(/(Bearer\s+)\S+/giu, "$1[REDACTED]");
+  if (!(error instanceof Error)) return { message: redact(error) };
+  return { name: error.name, message: redact(error.message),
     ...(error.cause instanceof Error ? { cause: errorDetails(error.cause) } : {}) };
 }
 function strictJsonCandidate(text) {
@@ -186,8 +189,10 @@ const context = loadRefreshProfileContext({ root: t1Root,
 const facade = createLlmMeshFacade({ mode: "cli",
   configResolver: { async resolveConfig() { return {}; } },
   keyring: new EncryptedFileKeyring("/run/benchmark-keyring") });
-const account = selectAccount(await facade.listAccounts({ ownerScope: ownerScopeRef }), variant);
-const accountPseudonym = `acct-${sha256(account.accountId).slice(0, 10)}`;
+const account = variant.transport === "anthropic-direct" ? null
+  : selectAccount(await facade.listAccounts({ ownerScope: ownerScopeRef }), variant);
+const accountPseudonym = account
+  ? `acct-${sha256(account.accountId).slice(0, 10)}` : "env:ANTHROPIC_API_KEY";
 let wire;
 let generated;
 let generationStarted;
@@ -207,7 +212,7 @@ const observedFetch = async (url, init) => {
   const observed = inspectWireBody(variant, body, requestedMaxOutputTokens);
   const signal = init?.signal ? AbortSignal.any([init.signal, controller.signal]) : controller.signal;
   const response = await fetch(url, { ...init, signal });
-  const terminalSse = variant.provider === "gemini" && response.body
+  const terminalSse = variant.transport === "cloud-code" && response.body
     ? inspectCloudCodeSse(await response.clone().text()) : null;
   wire = { fetchStartedAt: new Date(fetchStarted).toISOString(), httpStatus: response.status,
     requestBodySha256: sha256(bodyText), ...observed, inputBytes: Buffer.byteLength(bodyText),
@@ -234,11 +239,11 @@ const textClient = { mode: "mesh", provider: variant.provider, model: variant.mo
     if (inputHashes.schemaSha256 !== expected.schemaSha256
       || inputHashes.promptSha256 !== expected.promptSha256) throw new Error("Prompt/schema hash mismatch");
     const request = { providerId: variant.provider, modelId: variant.model,
-      reasoning: { effort: variant.effort },
+      ...(variant.effort ? { reasoning: { effort: variant.effort } } : {}),
       messages: [{ role: "system", content: frozen.systemPrompt }, { role: "user",
         content: `Schema: ${input.schema}\n\n${input.prompt}` }], responseFormat: { type: "json-object" },
       maxOutputTokens: input.maxOutputTokens, signal: controller.signal };
-    generated = await mesh.generateValidated(request, async (response) => {
+    const validateGenerated = async (response) => {
       generated = response;
       const responseText = response.text ?? "";
       await writeFile(rawPath, responseText, "utf8");
@@ -247,7 +252,21 @@ const textClient = { mode: "mesh", provider: variant.provider, model: variant.mo
       responseValidation = inspected.validation;
       normalizedResponse = inspected.parsed;
       await input.validateResponse(responseText);
-    });
+    };
+    if (variant.provider === "anthropic") {
+      generated = await generateSonnet({ variant, request, observedFetch, facade, account,
+        ownerScope: ownerScopeRef, affinityKey: document.id });
+      try {
+        await validateGenerated(generated);
+        routeOutcomes.push({ status: "completed", usage: generated.usage ?? null });
+      } catch (caught) {
+        routeOutcomes.push({ status: "failed", outcome: errorDetails(caught),
+          usage: generated.usage ?? null });
+        throw caught;
+      }
+    } else {
+      generated = await mesh.generateValidated(request, validateGenerated);
+    }
     await writeFile(input.outputPath, generated.text ?? "", "utf8");
     return { status: "completed", provider: variant.provider, mode: "mesh", model: variant.model,
       outputPath: input.outputPath, audit: { mesh: true, providerId: variant.provider, modelId: variant.model } };

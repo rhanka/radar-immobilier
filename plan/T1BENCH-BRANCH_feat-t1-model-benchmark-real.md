@@ -18,7 +18,7 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
   `docs/reviews/refresh-benchmark/v5/**`, `docs/reviews/refresh-benchmark/v6/**`,
   `docs/reviews/refresh-benchmark/v7/**`, `docs/reviews/refresh-benchmark/v8/**`,
   `docs/reviews/refresh-benchmark/v9/**`, `docs/reviews/refresh-benchmark/v10/**`,
-  `docs/reviews/refresh-benchmark/v11/**`,
+  `docs/reviews/refresh-benchmark/v11/**`, `docs/reviews/refresh-benchmark/v12/**`,
   `docs/reviews/refresh-benchmark/{BENCHMARK_T1,DECISION_M1}.md`, this plan.
 - **Forbidden**: application/runtime code, `Makefile`, `rules/**`, `.track/**`, sentropic repositories, secrets.
 
@@ -44,6 +44,7 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 - [x] Lot 17 — Present the M1 owner decision dossier.
 - [x] Lot 18 — Freeze and execute the v10 LOW campaign against extraction contract v6.
 - [x] Lot 19 — Freeze and execute the v11 LOW campaign against extraction contract v7.
+- [ ] Lot 20 — Execute the owner-ratified comparable Sonnet 4.6 v12 campaign.
 
 ## Gates
 

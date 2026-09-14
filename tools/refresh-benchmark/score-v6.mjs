@@ -19,12 +19,14 @@ const oracle = await readJson(resolve(campaignRoot, "manual-oracle.json"));
 const promptFreeze = await readJson(resolve(campaignRoot, "prompt-freeze.json"));
 const cases = [];
 const efforts = new Set();
+const models = new Set();
 for (const document of manifest.documents) {
   const stem = `${document.id}--${variant}`;
   let receipt;
   try { receipt = await readJson(resolve(resultRoot, `${stem}.receipt.json`)); }
   catch (error) { if (error.code !== "ENOENT") throw error; }
   if (receipt?.requested?.effort) efforts.add(receipt.requested.effort.toUpperCase());
+  if (receipt?.requested?.modelId) models.add(receipt.requested.modelId);
   let raw;
   let output;
   if (receipt) raw = await readFile(resolve(resultRoot, `${stem}.raw.txt`), "utf8");
@@ -52,7 +54,8 @@ const stopReason = !campaignStopped ? null : blockingCase
   : "campaign incomplete";
 if (efforts.size > 1) throw new Error("Campaign receipts do not share one effort");
 const effort = [...efforts][0] ?? null;
-const result = { schemaVersion: 1, campaign, model: "gemini-3.8-flash-tiered",
+if (models.size > 1) throw new Error("Campaign receipts do not share one model");
+const result = { schemaVersion: 1, campaign, model: [...models][0] ?? null,
   effort, maxOutputTokens: promptFreeze.maxOutputTokens, cases,
   totals: { launched: cases.filter(({ state }) => state !== "not_launched").length,
     accepted, planned: manifest.documents.length }, campaignStopped, stopReason };
