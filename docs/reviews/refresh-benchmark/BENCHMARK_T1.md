@@ -1,5 +1,17 @@
 # Benchmark T1 — décision M1
 
+## Campagne v5 — décision actuelle
+
+Le contrôle préalable Valcourt du contrat corrigé a reçu HTTP 200, puis a
+échoué au parse strict : la réponse possède un fence ouvrant et un JSON
+incomplet. La validation profil n'a pas été atteinte. Le garde a arrêté la
+campagne après 1 requête Gemini sur 8; 0/5 sorties de campagne sont acceptées.
+Sonnet et les juges sont `N-A`.
+
+**Décision actuelle : ne promouvoir aucun modèle en M1.** Le tableau complet,
+les limites de la mesure, les SHA du gel et les chemins des preuves sont dans
+[`v5/report.md`](v5/report.md). La campagne v4 ci-dessous demeure historique.
+
 ## Campagne v4
 
 ### Ping G et couture 0.19.1
