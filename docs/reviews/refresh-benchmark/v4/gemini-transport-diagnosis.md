@@ -22,6 +22,7 @@ bodies, or sentropic repository changes.
 |---|---|---|
 | `gemini-debug-01-mesh-low.json` | baseline 0.19 route | 404 `NOT_FOUND`: “Requested entity was not found.” |
 | `gemini-debug-02-agy-host-low.json` | host: remove `daily-` | 429 `RESOURCE_EXHAUSTED`: “Resource has been exhausted (e.g. check quota).” |
+| `gemini-debug-03-agy-host-low-retry.json` | transport retry, no setting change | 429 `RESOURCE_EXHAUSTED` again |
 
 Both probes requested `gemini-3.8-flash`, `LOW`, 64 output tokens and retained
 the same llm-mesh envelope fields. Error evidence was parsed from
