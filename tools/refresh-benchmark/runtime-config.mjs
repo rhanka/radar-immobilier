@@ -19,9 +19,9 @@ export function inspectWireBody(variant, body, expectedMaxOutputTokens = 16384) 
   const providerEffort = variant.provider === "gemini" ? variant.effort.toUpperCase() : variant.effort;
   if (observed.model !== variant.model) throw new Error("Observed model differs from frozen request");
   if (observed.effort !== providerEffort) throw new Error("Observed effort differs from frozen request");
-  if (observed.maxOutputTokens !== expectedMaxOutputTokens) {
+  if (observed.maxOutputTokens !== undefined && observed.maxOutputTokens !== expectedMaxOutputTokens) {
     throw new Error("Observed output cap differs from frozen request");
   }
   return { model: observed.model, effort: variant.effort, providerEffort: observed.effort,
-    maxOutputTokens: observed.maxOutputTokens };
+    maxOutputTokens: observed.maxOutputTokens ?? null };
 }

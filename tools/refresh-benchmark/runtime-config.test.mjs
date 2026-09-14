@@ -25,6 +25,9 @@ test("outgoing wire evidence proves provider model, effort, and cap", () => {
   assert.deepEqual(inspectWireBody(variants["luna-low"], {
     model: "gpt-5.6-luna", reasoning: { effort: "low" }, max_output_tokens: 16384,
   }), { model: "gpt-5.6-luna", effort: "low", providerEffort: "low", maxOutputTokens: 16384 });
+  assert.deepEqual(inspectWireBody(variants["luna-low"], {
+    model: "gpt-5.6-luna", reasoning: { effort: "low" },
+  }), { model: "gpt-5.6-luna", effort: "low", providerEffort: "low", maxOutputTokens: null });
   assert.deepEqual(inspectWireBody(variants["gemini-low"], {
     model: "gemini-3.8-flash", request: { generationConfig: {
       maxOutputTokens: 16384, thinkingConfig: { thinkingLevel: "LOW" },
