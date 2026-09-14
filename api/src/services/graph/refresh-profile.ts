@@ -45,7 +45,7 @@ export interface RefreshProfileChunk {
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
 }
-export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v3";
+export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v4";
 export function loadRefreshProfileContext(options: LoadRefreshProfileContextOptions): RefreshProfileContext {
   if (options.unregisteredOnly) {
     if (!options.profilePath) throw new Error("Unregistered-only refresh requires an explicit profile path");
@@ -85,6 +85,10 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
     docSha: chunk.docSha, sourceUrl: chunk.sourceUrl, modality: "pdf" };
   const pdfIdentityProperties = Object.fromEntries(Object.entries(pdfIdentity)
     .map(([key, value]) => [key, { const: value }]));
+  const citation = { type: "object",
+    required: ["source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"],
+    properties: { ...pdfIdentityProperties, page: { enum: chunk.pages },
+      excerpt: { type: "string", minLength: 1, description: "verbatim text from the cited page" } } };
   return JSON.stringify({
     contract_version: REFRESH_PROFILE_CONTRACT_VERSION,
     type: "Graphify Extraction",
@@ -99,12 +103,12 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
         minItems: context.profile.evidence_policy.min_refs,
         required_for_node_types: context.profile.evidence_policy.node_types,
         required_for_relation_types: context.profile.evidence_policy.relation_types },
+      entity_citations: { node_field: "nodes[].citations", edge_field: "edges[].citations",
+        required_for: ["every node", "every edge"], type: "array", minItems: 1, items: citation,
+        description: "Evidence refs do not replace page-level citations on each node and edge." },
     },
     evidence: { pdf_identity: pdfIdentity, allowedPages: chunk.pages,
-      citation: { type: "object",
-        required: ["source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"],
-        properties: { ...pdfIdentityProperties, page: { enum: chunk.pages },
-          excerpt: { type: "string", minLength: 1, description: "verbatim text from the cited page" } } },
+      citation,
       evidence_item: { type: "object",
         required: ["id", "source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"],
         properties: { id: { type: "string", minLength: 1 }, ...pdfIdentityProperties,
@@ -164,7 +168,18 @@ function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
 function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: RefreshProfileContext,
   pageTexts: ReadonlyMap<number, string>): Extraction {
   let parsed: unknown;
-  try { parsed = JSON.parse(text); } catch { throw new Error(`Invalid JSON for chunk ${chunk.id}`); }
+  // Match Graphify's strict whole-response fence rule until gr-conductor exports its parser.
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/iu);
+  const candidate = fenced ? fenced[1]!.trim() : trimmed;
+  try {
+    parsed = JSON.parse(candidate);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(`Invalid JSON for chunk ${chunk.id}: ${error.message}`, { cause: error });
+    }
+    throw error;
+  }
   const baseErrors = validateExtraction(parsed);
   if (baseErrors.length > 0) throw new Error(`Invalid Graphify extraction for chunk ${chunk.id}: ${baseErrors.join("; ")}`);
   for (const node of (parsed as Extraction).nodes) {
@@ -207,8 +222,10 @@ export async function extractRefreshProfile(
 Every node file_type must be "document" for this PDF. Edge confidence, when present, must be
 "AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.
 Every entity and nested citation must use the exact PDF identity in the schema. Evidence refs are
-non-empty arrays of string IDs from evidence[].id, never embedded objects. Follow the relation source/target
-signatures exactly. Every excerpt must be non-empty verbatim text on its claimed physical PDF page.
+non-empty arrays of string IDs from evidence[].id, never embedded objects. Evidence refs do not replace citations.
+Every node and every edge must include a non-empty citations array whose objects use the complete
+citation shape in the schema, including source_file and page. Follow the relation source/target signatures
+exactly. Every excerpt must be non-empty verbatim text on its claimed physical PDF page.
 If no supported fact is grounded in the PDF, return empty nodes, edges, and evidence.\n\n${buildProfileChunkPrompt(options.context, {
           filePath: chunk.originalKey, fileType: "document", text: chunk.text,
         })}`,
