@@ -1,0 +1,10 @@
+```json
+{
+  "nodes": [],
+  "edges": [],
+  "hyperedges": [],
+  "evidence": [],
+  "input_tokens": 1250,
+  "output_tokens": 25
+}
+```
