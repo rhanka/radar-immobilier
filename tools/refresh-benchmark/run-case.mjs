@@ -122,7 +122,8 @@ const textClient = { mode: "mesh", provider: variant.provider, model: variant.mo
     inputHashes = { schemaSha256: sha256(input.schema), promptSha256: sha256(input.prompt) };
     if (inputHashes.schemaSha256 !== expected.schemaSha256
       || inputHashes.promptSha256 !== expected.promptSha256) throw new Error("Prompt/schema hash mismatch");
-    const request = { providerId: variant.provider, modelId: variant.model, reasoning: { effort: variant.effort },
+    const request = { providerId: variant.provider, modelId: variant.model,
+      reasoning: { effort: variant.effort },
       messages: [{ role: "system", content: frozen.systemPrompt }, { role: "user",
         content: `Schema: ${input.schema}\n\n${input.prompt}` }], responseFormat: { type: "json-object" },
       maxOutputTokens: input.maxOutputTokens, signal: controller.signal };
@@ -148,7 +149,17 @@ try {
   error = caught instanceof Error ? { name: caught.name, message: caught.message } : { message: String(caught) };
 } finally { clearTimeout(timeout); }
 const completed = Date.now();
-if (generated?.text) await writeFile(outputPath, JSON.stringify(JSON.parse(generated.text)), "utf8");
+let responseJsonValid = null;
+if (generated?.text) {
+  try {
+    await writeFile(outputPath, JSON.stringify(JSON.parse(generated.text)), "utf8");
+    responseJsonValid = true;
+  } catch (parseError) {
+    responseJsonValid = false;
+    status = "failed";
+    error ??= { name: "SyntaxError", message: "Model response is not valid JSON" };
+  }
+}
 const receipt = { schemaVersion: 1, campaign: campaign ?? "v1", caseId, status, t1Commit, profileModuleSha256,
   documentId: document.id, input: { pdfSha256: document.sha256, textSha256: document.textSha256 },
   requested: { providerId: variant.provider, transportProviderId: variant.transport,
@@ -158,6 +169,7 @@ const receipt = { schemaVersion: 1, campaign: campaign ?? "v1", caseId, status, 
   actual: generated ? { responseId: generated.id, providerId: generated.providerId,
     modelId: generated.modelId, finishReason: generated.finishReason,
     responseTextSha256: sha256(generated.text ?? ""), usage: generated.usage } : null,
+  validation: { jsonValid: responseJsonValid, extractionAccepted: Boolean(extraction) },
   hashes: inputHashes, timing: { startedAt: new Date(started).toISOString(),
     completedAt: new Date(completed).toISOString(), totalMs: completed - started,
     queueMs: wire && generationStarted ? Date.parse(wire.fetchStartedAt) - generationStarted : null,
