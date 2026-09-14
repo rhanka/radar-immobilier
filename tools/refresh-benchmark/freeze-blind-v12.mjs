@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+
+import { executionContract } from "./integration-contract.mjs";
 
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
@@ -33,7 +35,11 @@ for (const document of manifest.documents) {
   const pages = text.split("\f"); if (pages.at(-1) === "") pages.pop();
   const accepted = [];
   for (const source of sources) {
-    const stem = `${document.id}--${source.system}`;
+    // The contract allows one retry after a transport failure: attempt 2 is then the terminal attempt.
+    const baseStem = `${document.id}--${source.system}`;
+    const retriedStem = `${baseStem}.attempt-${executionContract.maxAttempts}`;
+    const stem = await access(resolve(source.root, `${retriedStem}.receipt.json`))
+      .then(() => retriedStem, () => baseStem);
     let receipt;
     try { receipt = await readJson(resolve(source.root, `${stem}.receipt.json`)); }
     catch (error) { if (error.code === "ENOENT") continue; throw error; }
