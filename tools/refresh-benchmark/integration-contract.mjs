@@ -39,7 +39,11 @@ export const executionContract = Object.freeze({
   retryOnlyAfter: "transport_failure",
 });
 
+// v13 lowers the frozen cap to 64 000 so both arms share one ceiling: Cloud Code answers
+// INVALID_ARGUMENT above 64 000 (v12 probes), and comparability requires an identical cap.
+const campaignOutputTokenCaps = Object.freeze({ v7: 65_536, v8: 65_536, v9: 65_536,
+  v10: 65_536, v11: 65_536, v12: 65_536, v13: 64_000 });
+
 export function outputTokenCapForCampaign(campaign) {
-  return ["v7", "v8", "v9", "v10", "v11", "v12"].includes(campaign)
-    ? 65_536 : executionContract.maxOutputTokens;
+  return campaignOutputTokenCaps[campaign] ?? executionContract.maxOutputTokens;
 }

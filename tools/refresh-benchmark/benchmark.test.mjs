@@ -32,12 +32,13 @@ test("the five immutable PDFs and page texts match the manifest", async () => {
 
 test("prompt contract covers each input once and is tied to corrected T1", async () => {
   assert.equal(prompts.graphifyVersion, "0.18.0");
-  assert.equal(prompts.meshVersion, ["v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12"].includes(campaign)
-    ? "0.19.1" : "0.19.0");
+  assert.equal(prompts.meshVersion,
+    ["v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13"].includes(campaign)
+      ? "0.19.1" : "0.19.0");
   assert.equal(prompts.t1Commit,
     process.env.BENCHMARK_T1_COMMIT ?? "f9b311da536bda2e1442d154a05599c35b482518");
-  assert.equal(prompts.maxOutputTokens, ["v7", "v8", "v9", "v10", "v11", "v12"].includes(campaign)
-    ? 65_536 : 16_384);
+  assert.equal(prompts.maxOutputTokens, campaign === "v13" ? 64_000
+    : ["v7", "v8", "v9", "v10", "v11", "v12"].includes(campaign) ? 65_536 : 16_384);
   assert.equal(sha256(prompts.systemPrompt), prompts.systemPromptSha256);
   assert.deepEqual(prompts.documents.map(({ id }) => id).sort(),
     manifest.documents.map(({ id }) => id).sort());
@@ -50,7 +51,7 @@ test("prompt contract covers each input once and is tied to corrected T1", async
 });
 
 test("controls keep their regulatory meaning", () => {
-  if (["v3", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12"].includes(campaign)) {
+  if (["v3", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13"].includes(campaign)) {
     assert.equal(manifest.documents.some(({ selectionRationale }) =>
       /agenda/.test(selectionRationale) && /not adoption/.test(selectionRationale)), true);
     return;
@@ -85,6 +86,35 @@ test("v11 keeps v10 frozen except for the v7 profile-derived prompt contract", a
     assert.notEqual(document.schemaSha256, previous.schemaSha256);
     assert.notEqual(document.promptSha256, previous.promptSha256);
   }
+});
+
+test("v13 keeps the v9 corpus and oracle frozen, and moves only the profile and the cap", async () => {
+  if (campaign !== "v13") return;
+  const v9Root = resolve(root, "docs/reviews/refresh-benchmark/v9");
+  const v9Manifest = JSON.parse(await readFile(resolve(v9Root, "manifest.json"), "utf8"));
+  const v9Prompts = JSON.parse(await readFile(resolve(v9Root, "prompt-freeze.json"), "utf8"));
+  const { campaign: _v13Campaign, ...v13Manifest } = manifest;
+  const { campaign: _v9Campaign, ...baseManifest } = v9Manifest;
+  assert.deepEqual(v13Manifest, baseManifest);
+  assert.deepEqual(await readFile(resolve(root, `${campaignRoot}manual-oracle.json`)),
+    await readFile(resolve(v9Root, "manual-oracle.json")));
+  const stablePrompt = ({ campaign: _campaign, frozenAt: _time, t1Commit: _commit,
+    profileModuleSha256: _profile, corpusModuleSha256: _corpus, maxOutputTokens: _cap,
+    documents, ...stable }) => ({ ...stable,
+    documents: documents.map(({ schemaSha256: _schema, promptSha256: _prompt,
+      schemaBytes: _schemaBytes, promptBytes: _promptBytes, ...document }) => document) });
+  assert.deepEqual(stablePrompt(prompts), stablePrompt(v9Prompts));
+  // The contract moves from v5 to v8: the profile module, the prompt and the schema all change.
+  assert.notEqual(prompts.t1Commit, v9Prompts.t1Commit);
+  assert.notEqual(prompts.profileModuleSha256, v9Prompts.profileModuleSha256);
+  for (const document of prompts.documents) {
+    const previous = v9Prompts.documents.find(({ id }) => id === document.id);
+    assert.notEqual(document.schemaSha256, previous.schemaSha256);
+    assert.notEqual(document.promptSha256, previous.promptSha256);
+  }
+  // One cap for both arms, at the highest value Cloud Code accepts (v12 probes).
+  assert.equal(prompts.maxOutputTokens, 64_000);
+  assert.equal(v9Prompts.maxOutputTokens, 65_536);
 });
 
 test("v10 keeps v9 frozen except for the v6 profile-derived prompt contract", async () => {
