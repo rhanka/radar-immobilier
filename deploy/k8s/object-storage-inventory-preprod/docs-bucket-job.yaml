@@ -1,0 +1,68 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: radar-object-storage-docs-bucket-
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: object-storage-inventory
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 180
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: object-storage-inventory
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: provision
+          image: amazon/aws-cli:2.34.53@sha256:cf53765c0de54ad3a8ea21818f1c4c845a8cf7ca87831c078a00fef244031493
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/bash", "-ceu", "--"]
+          args:
+            - |
+              common=(--no-cli-pager --output json --endpoint-url "$DOCS_S3_ENDPOINT" --region "$DOCS_S3_REGION")
+              if ! aws "${common[@]}" s3api head-bucket --bucket "$DOCS_S3_BUCKET" >/dev/null 2>&1; then
+                aws "${common[@]}" s3api create-bucket --bucket "$DOCS_S3_BUCKET" \
+                  --create-bucket-configuration "LocationConstraint=$DOCS_S3_REGION" >/dev/null
+              fi
+              aws "${common[@]}" s3api head-bucket --bucket "$DOCS_S3_BUCKET" >/dev/null
+              aws "${common[@]}" s3api list-objects-v2 --bucket "$DOCS_S3_BUCKET" \
+                --max-keys 1 >/dev/null
+              echo '[object-storage-docs] exact BHS bucket is head/list accessible'
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
+            - name: AWS_EC2_METADATA_DISABLED
+              value: "true"
+            - name: DOCS_S3_ENDPOINT
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ENDPOINT } }
+            - name: DOCS_S3_REGION
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_REGION } }
+            - name: DOCS_S3_BUCKET
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_BUCKET } }
+          resources:
+            requests: { cpu: 25m, memory: 64Mi, ephemeral-storage: 32Mi }
+            limits: { cpu: 100m, memory: 128Mi, ephemeral-storage: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 64Mi }

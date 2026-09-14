@@ -18,6 +18,9 @@
 
 set -euo pipefail
 
+echo '[object-storage] retired: legacy grounding worker disabled after the OVH cutover' >&2
+exit 1
+
 CITY="${1:?city requis}"
 CANDIDATE="${2:?candidate_json requis}"
 OUT_JSON="${3:?out_json requis}"

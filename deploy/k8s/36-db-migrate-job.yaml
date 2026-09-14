@@ -55,7 +55,3 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
-            - name: S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
-            - name: S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }

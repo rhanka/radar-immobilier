@@ -98,34 +98,19 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
-            - name: S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
-            - name: S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            # Complete required GRAPH_S3 bindings prevent resolver fallbacks.
             - name: GRAPH_S3_ENDPOINT
-              value: "https://s3.fr-par.scw.cloud"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_ENDPOINT } }
             - name: GRAPH_S3_BUCKET
-              value: "radar-immobilier-docs-pocs"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_BUCKET } }
             - name: GRAPH_S3_REGION
-              value: "fr-par"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_REGION } }
             - name: GRAPH_S3_FORCE_PATH_STYLE
-              value: "false"
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_FORCE_PATH_STYLE } }
             - name: GRAPH_S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_ACCESS_KEY } }
             - name: GRAPH_S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
-            - name: SCRAPE_S3_ENDPOINT
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ENDPOINT, optional: true } }
-            - name: SCRAPE_S3_BUCKET
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_BUCKET, optional: true } }
-            - name: SCRAPE_S3_REGION
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_REGION, optional: true } }
-            - name: SCRAPE_S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY, optional: true } }
-            - name: SCRAPE_S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY, optional: true } }
-            - name: SCRAPE_S3_FORCE_PATH_STYLE
-              value: "false"
+              valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_SECRET_KEY } }
           resources:
             requests: { cpu: 100m, memory: 128Mi }
             limits: { cpu: 500m, memory: 512Mi }

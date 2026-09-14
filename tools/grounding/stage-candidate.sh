@@ -11,6 +11,8 @@
 # Env (docs-pocs RW): SCRAPE_S3_ENDPOINT SCRAPE_S3_BUCKET SCRAPE_S3_ACCESS_KEY SCRAPE_S3_SECRET_KEY
 #      (sources ./.env if present). Optional EXPECTED_SHA to assert the staged bytes == what recette got.
 set -euo pipefail
+echo '[object-storage] retired: legacy grounding staging disabled after the OVH cutover' >&2
+exit 1
 CITY="${1:?city requis}"
 CAND="${2:?local candidate json requis}"
 [ -s "$CAND" ] || { echo "stage-candidate: FAIL — candidat vide/absent: $CAND" >&2; exit 2; }

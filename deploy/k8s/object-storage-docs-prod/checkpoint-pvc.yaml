@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: radar-object-storage-docs-prod-checkpoint
+  namespace: radar-immobilier
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: block-standard
+  resources:
+    requests:
+      storage: 1Gi

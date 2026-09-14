@@ -45,7 +45,7 @@ export interface RefreshProfileChunk {
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
 }
-export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v3";
+export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v5";
 export function loadRefreshProfileContext(options: LoadRefreshProfileContextOptions): RefreshProfileContext {
   if (options.unregisteredOnly) {
     if (!options.profilePath) throw new Error("Unregistered-only refresh requires an explicit profile path");
@@ -67,6 +67,10 @@ function allowedNodeTypes(context: RefreshProfileContext): string[] {
     return !registry || registry in context.registries;
   }).map(([type]) => type);
 }
+function pdfIdentityFor(chunk: RefreshCorpusChunk): Record<string, string> {
+  return { source_file: chunk.originalKey, rawRef: chunk.originalKey,
+    docSha: chunk.docSha, sourceUrl: chunk.sourceUrl, modality: "pdf" };
+}
 function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): string {
   const allowed = new Set(allowedNodeTypes(context));
   const properties = Object.fromEntries(Object.entries(context.profile.node_types)
@@ -81,10 +85,13 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
       requires_evidence_refs: spec.requires_evidence || evidenceRelations.has(type),
     }]] : [];
   }));
-  const pdfIdentity = { source_file: chunk.originalKey, rawRef: chunk.originalKey,
-    docSha: chunk.docSha, sourceUrl: chunk.sourceUrl, modality: "pdf" };
+  const pdfIdentity = pdfIdentityFor(chunk);
   const pdfIdentityProperties = Object.fromEntries(Object.entries(pdfIdentity)
     .map(([key, value]) => [key, { const: value }]));
+  const citation = { type: "object", required: ["page", "excerpt"],
+    properties: { page: { enum: chunk.pages }, excerpt: { type: "string", minLength: 1,
+      maxLength: 200, description: "short verbatim text from the cited page" } },
+    description: "The profile injects the constant PDF identity before validation." };
   return JSON.stringify({
     contract_version: REFRESH_PROFILE_CONTRACT_VERSION,
     type: "Graphify Extraction",
@@ -99,12 +106,12 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
         minItems: context.profile.evidence_policy.min_refs,
         required_for_node_types: context.profile.evidence_policy.node_types,
         required_for_relation_types: context.profile.evidence_policy.relation_types },
+      entity_citations: { node_field: "nodes[].citations", edge_field: "edges[].citations",
+        required_for: ["every node", "every edge"], type: "array", minItems: 1, items: citation,
+        description: "Emit only page and excerpt; the profile injects the constant PDF identity." },
     },
     evidence: { pdf_identity: pdfIdentity, allowedPages: chunk.pages,
-      citation: { type: "object",
-        required: ["source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"],
-        properties: { ...pdfIdentityProperties, page: { enum: chunk.pages },
-          excerpt: { type: "string", minLength: 1, description: "verbatim text from the cited page" } } },
+      citation,
       evidence_item: { type: "object",
         required: ["id", "source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"],
         properties: { id: { type: "string", minLength: 1 }, ...pdfIdentityProperties,
@@ -113,6 +120,23 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
     constraints: ["Omit facts absent from the chunk, including in-force status and residential unit counts.",
       "An empty nodes/edges/evidence extraction is valid; the enclosing chunk retains the verified PDF identity."],
   });
+}
+function injectCitationIdentity(value: unknown, chunk: RefreshCorpusChunk): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const root = value as Record<string, unknown>;
+  const identity = pdfIdentityFor(chunk);
+  for (const collection of [root["nodes"], root["edges"]]) {
+    if (!Array.isArray(collection)) continue;
+    for (const entity of collection) {
+      if (!entity || typeof entity !== "object" || Array.isArray(entity)) continue;
+      const record = entity as Record<string, unknown>;
+      if (!Array.isArray(record["citations"])) continue;
+      record["citations"] = record["citations"].map((citation) =>
+        citation && typeof citation === "object" && !Array.isArray(citation)
+          ? { ...(citation as Record<string, unknown>), ...identity } : citation);
+    }
+  }
+  return value;
 }
 function physicalPageTexts(chunk: RefreshCorpusChunk): ReadonlyMap<number, string> {
   const markers = [...chunk.text.matchAll(/^\[PDF PAGE ([1-9]\d*)\]\n/gm)];
@@ -153,7 +177,13 @@ function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
   }
   for (const entity of entities) {
     for (const citation of entity.citations ?? []) {
-      validatePdfRecord(citation as unknown as Record<string, unknown>, chunk, pageTexts);
+      const record = citation as unknown as Record<string, unknown>;
+      // Entity citation length is measured in Unicode code points, not UTF-16 code units.
+      if (typeof record["excerpt"] === "string" && Array.from(record["excerpt"]).length > 200) {
+        throw new Error("Model output violates entity_citation_excerpt_too_long: "
+          + `maximum 200 Unicode code points for chunk ${chunk.id}`);
+      }
+      validatePdfRecord(record, chunk, pageTexts);
     }
   }
   for (const evidence of extraction.evidence ?? []) {
@@ -161,10 +191,50 @@ function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
   }
 }
 
+export function parseStrictJsonResponse(text: string): unknown {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("```")) return JSON.parse(trimmed);
+  const firstLineEnd = trimmed.indexOf("\n");
+  if (firstLineEnd < 0) throw new SyntaxError("Invalid JSON fence: missing body line");
+  const rawLabel = trimmed.slice(3, firstLineEnd);
+  const label = rawLabel.endsWith("\r") ? rawLabel.slice(0, -1) : rawLabel;
+  if (label !== "" && label.toLowerCase() !== "json") {
+    throw new SyntaxError("Invalid JSON fence: expected an empty or json label");
+  }
+  const closingLineStart = trimmed.lastIndexOf("\n");
+  if (closingLineStart === firstLineEnd || trimmed.slice(closingLineStart + 1) !== "```") {
+    throw new SyntaxError("Invalid JSON fence: missing final closing fence");
+  }
+  return JSON.parse(trimmed.slice(firstLineEnd + 1, closingLineStart).trim());
+}
+
+function validateDeclaredContractVersion(value: unknown, chunk: RefreshCorpusChunk): void {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return;
+  const root = value as Record<string, unknown>;
+  if (!("contract_version" in root)) {
+    // Missing version intentionally preserves v4 compatibility: its seven-field citations are
+    // accepted while all five identity fields are overwritten from the chunk (covered by test).
+    return;
+  }
+  if (root["contract_version"] !== REFRESH_PROFILE_CONTRACT_VERSION) {
+    throw new Error(`Model output violates contract_version_mismatch for chunk ${chunk.id}`);
+  }
+  delete root["contract_version"];
+}
+
 function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: RefreshProfileContext,
   pageTexts: ReadonlyMap<number, string>): Extraction {
   let parsed: unknown;
-  try { parsed = JSON.parse(text); } catch { throw new Error(`Invalid JSON for chunk ${chunk.id}`); }
+  try {
+    parsed = parseStrictJsonResponse(text);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(`Invalid JSON for chunk ${chunk.id}: ${error.message}`, { cause: error });
+    }
+    throw error;
+  }
+  validateDeclaredContractVersion(parsed, chunk);
+  parsed = injectCitationIdentity(parsed, chunk);
   const baseErrors = validateExtraction(parsed);
   if (baseErrors.length > 0) throw new Error(`Invalid Graphify extraction for chunk ${chunk.id}: ${baseErrors.join("; ")}`);
   for (const node of (parsed as Extraction).nodes) {
@@ -206,9 +276,12 @@ export async function extractRefreshProfile(
         prompt: `Contract ${REFRESH_PROFILE_CONTRACT_VERSION}. Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
 Every node file_type must be "document" for this PDF. Edge confidence, when present, must be
 "AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.
-Every entity and nested citation must use the exact PDF identity in the schema. Evidence refs are
-non-empty arrays of string IDs from evidence[].id, never embedded objects. Follow the relation source/target
-signatures exactly. Every excerpt must be non-empty verbatim text on its claimed physical PDF page.
+Every entity must use the exact PDF identity in the schema. Evidence refs are
+non-empty arrays of string IDs from evidence[].id, never embedded objects. Evidence refs do not replace citations.
+Every node and every edge must include a non-empty citations array. Each citation must contain only page
+and excerpt (at most 200 characters). Do not repeat the document identity inside citations; the profile
+injects it before validation. Follow the relation source/target signatures exactly. Every excerpt must be
+non-empty verbatim text on its claimed physical PDF page.
 If no supported fact is grounded in the PDF, return empty nodes, edges, and evidence.\n\n${buildProfileChunkPrompt(options.context, {
           filePath: chunk.originalKey, fileType: "document", text: chunk.text,
         })}`,

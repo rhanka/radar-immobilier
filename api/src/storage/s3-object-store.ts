@@ -108,8 +108,8 @@ export class S3ObjectStore implements ObjectStore {
    * as a conditional `If-Match` / `If-None-Match` header so the backend
    * rejects the write if another writer moved the object in between.
    *
-   * LIMIT, declared: conditional writes on PUT are honoured by AWS S3 and by
-   * MinIO, but Scaleway's Object Storage support is not verified here. The
+   * LIMIT, declared: conditional writes on PUT are honoured by the supported
+   * S3 backends, but the application does not assume that is universal. The
    * caller therefore ALSO performs a HEAD re-check immediately before this
    * call (`canonical-graph-writer.ts`). That pair narrows the race to the few
    * milliseconds between HEAD and PUT when the header is ignored; it does not
@@ -314,8 +314,8 @@ export function createScrapeS3Client(scrapeConfig: ScrapeS3Config): S3Client {
 
 /**
  * Build the dedicated scraping-document store from a full AppConfig.
- * In production (SCRAPE_S3_* set to SCW), this targets `radar-immobilier-docs`
- * on `https://s3.fr-par.scw.cloud`. Locally (no SCRAPE_S3_* set), it falls back
+ * In production (SCRAPE_S3_* set to OVH), this targets `radar-immobilier-docs`
+ * in BHS. Locally (no SCRAPE_S3_* set), it falls back
  * to the same MinIO instance as the main store, using the `radar-immobilier-docs`
  * bucket name (which ensureBucket will create on first use).
  */

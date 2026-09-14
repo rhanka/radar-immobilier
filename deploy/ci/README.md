@@ -137,6 +137,90 @@ debugging, but this is **best-effort and voie-dependent**:
 | `kfilter.py` | Manifest filter used by the reconcile step. |
 | `*.test.sh` | Shell tests for the runners above. |
 
+## Resumable whole-bucket inventory
+
+Long MinIO inventories use a durable checkpoint while every attempt writes a
+fresh report directory:
+
+```text
+migrate-object-storage.sh inventory <coordinates and classifications> \
+  --report-dir report-01 --checkpoint-dir checkpoint \
+  --page-size 100 --time-budget-seconds 300
+migrate-object-storage.sh inventory <same arguments> \
+  --report-dir report-02 --checkpoint-dir checkpoint \
+  --page-size 100 --time-budget-seconds 300 --resume
+```
+
+Receipts cover the bucket root; prefixes classify keys but never limit listing.
+Pages and body-evidence shards are hash-bound, atomically committed, and resumed
+with exclusive `StartAfter` boundaries. Coordinates, identity fingerprints,
+classification and limits are bound by `configDigest`. No credential or opaque
+continuation token is persisted. Object keys are persisted, so checkpoint
+custody is an operator responsibility.
+
+After the provisional chain completes, repeat the same resumable inventory with
+the validated writer-fence file. This builds a separate `fenced/` chain and
+emits `final-inventory.json` only if both complete bucket observations are
+stable. `toolComplete:true` never means the fence was validated:
+`fenceValidated:false` remains explicit.
+
+Every executed copy requires that final artifact and the same fence:
+
+```text
+migrate-object-storage.sh copy <same coordinates and classifications> \
+  --report-dir copy-report --execute-copy \
+  --fence-record writer-fence.txt \
+  --inventory-proof checkpoint/final-inventory.json \
+  --conditional-write-proof conditional-write-proof.json
+```
+
+The copy consumes the frozen manifests instead of relisting either bucket and
+re-hashes each source body immediately before its conditional PUT. Source
+versions and delete markers outside the current `ListObjectsV2` view remain out
+of scope. The final inventory proof has no tool-enforced maximum age. Its
+freshness therefore remains under conductor custody: retain the exact matching
+fence evidence, independently confirm that the fence is still continuously
+valid, and regenerate both inventory phases if custody or fence continuity is
+uncertain. A structurally valid old proof is not fresh evidence by itself.
+
+## Object-storage conditional-write gate
+
+`migrate-object-storage.sh copy --execute-copy` requires
+`--conditional-write-proof FILE`. The operator creates this JSON evidence from
+a disposable-key probe against the exact destination, using the same migration
+identity. The probe must prove both that a duplicate `If-None-Match: *` create
+is rejected and that an update with a stale `If-Match` ETag is rejected:
+
+```json
+{
+  "schemaVersion": 1,
+  "provider": "provider implementation",
+  "providerVersion": "observed version or release",
+  "destination": {
+    "endpoint": "https://s3.example.net",
+    "region": "region",
+    "bucket": "destination-bucket",
+    "pathStyle": false
+  },
+  "identityFingerprint": "sha256-of-access-key-id",
+  "observedAt": "2026-09-13T12:00:00Z",
+  "expiresAt": "2026-09-14T12:00:00Z",
+  "transcriptSha256": "64-lowercase-hex-characters",
+  "capabilities": {"ifNoneMatchCreate": true, "ifMatchUpdate": true}
+}
+```
+
+The tool validates the schema, exact destination tuple, identity fingerprint,
+and a validity window of at most 48 hours before any destination write. It
+records the proof digest and
+`providerEnforcementValidated:false`: custody and validation of the probe
+transcript remain conductor responsibilities. Missing, expired or mismatched
+evidence is a `missingProof` and prevents every PUT.
+
+The inventory covers current objects returned by `ListObjectsV2`. It does not
+migrate source version history or delete markers; that boundary requires owner
+acceptance before a real copy.
+
 ## Rollback
 
 `rollback-release.sh` rolls the **image** back. A migration that must also be

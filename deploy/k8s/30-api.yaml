@@ -1,7 +1,7 @@
 # radar API (Hono) Deployment + Service. Brought in from draft PR #8
 # (deploy/k8s/api.yaml) and extended for the sentropic-app model:
 #   - runs under the radar-app ServiceAccount;
-#   - object storage points at the in-cluster MinIO (25-minio.yaml);
+#   - object storage uses dedicated OVH bucket-scoped credentials;
 #   - the SENTROPIC_* / OAUTH_* / AUTH_* env wires human auth to the shared
 #     sentropic IdP (OIDC, see 80-auth.yaml + README "Auth delegation").
 #     The api is the OIDC *relying party*: it runs the authorization-code +
@@ -28,12 +28,16 @@ data:
   NODE_OPTIONS: "--dns-result-order=ipv4first --max-old-space-size=512"
   POSTGRES_HOST: "radar-postgres"
   POSTGRES_PORT: "5432"
-  # In-cluster MinIO (25-minio.yaml). Replace with an external SCW S3 endpoint
-  # if the operator provisions a managed bucket.
-  S3_ENDPOINT: "http://radar-minio:9000"
-  S3_REGION: "fr-par"
-  S3_BUCKET: "radar-immobilier-raw"
-  S3_FORCE_PATH_STYLE: "true"
+  # Dedicated OVH BHS DOCS coordinates. Credentials are bound per workload
+  # through radar-graph-s3-credentials and radar-scrape-s3-credentials.
+  GRAPH_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
+  GRAPH_S3_REGION: "bhs"
+  GRAPH_S3_BUCKET: "radar-immobilier-docs"
+  GRAPH_S3_FORCE_PATH_STYLE: "false"
+  SCRAPE_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
+  SCRAPE_S3_REGION: "bhs"
+  SCRAPE_S3_BUCKET: "radar-immobilier-docs"
+  SCRAPE_S3_FORCE_PATH_STYLE: "false"
   OBSCURA_CDP_URL: "http://radar-obscura:9222"
   # ── Scaleway TEM outbound (invitation / enrolment mail) ───────────────────
   # SMTP egress (:587) is BLOCKED at the Kapsule platform level (BR-37b), so the
@@ -91,7 +95,7 @@ spec:
   # (e.g. a transient quota pinch) the old pod is NOT torn down first, so the
   # service never drops to 0. maxUnavailable:0 = never below 1 running; maxSurge:1
   # = at most 1 extra pod (needs quota headroom for the surge). radar-api is
-  # stateless (network to postgres/minio, no RWO PVC / hostPort) so two versions
+  # stateless (network to postgres/object storage, no RWO PVC / hostPort) so two versions
   # may briefly coexist. (Was Recreate — a conservative single-replica default.)
   strategy:
     type: RollingUpdate
@@ -145,10 +149,20 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            # Complete OVH canonical DOCS binding. Coordinates and credentials come from
+            # one bucket-scoped Secret; no ConfigMap or generic-key fallback.
+            - name: S3_ENDPOINT
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ENDPOINT } }
+            - name: S3_REGION
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_REGION } }
+            - name: S3_BUCKET
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_BUCKET } }
+            - name: S3_FORCE_PATH_STYLE
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_FORCE_PATH_STYLE } }
             - name: S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
             - name: S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
             # OIDC RP client secret for the sentropic IdP token exchange
             # (confidential client). Seeded with the client row at the IdP.
             - name: SENTROPIC_OAUTH_CLIENT_SECRET

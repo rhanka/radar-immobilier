@@ -4,6 +4,9 @@
 # Exit 0 si tout OK, 1 avec détail si KO
 set -euo pipefail
 
+echo '[object-storage] retired: legacy graphify preflight disabled after the OVH cutover' >&2
+exit 1
+
 ROOT="${1:?root_dir requis}"
 DRY_RUN="${2:-}"
 

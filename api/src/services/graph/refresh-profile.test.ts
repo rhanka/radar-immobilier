@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -13,7 +14,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import type { RefreshCorpusChunk } from "./refresh-corpus.js";
 import {
-  extractRefreshProfile, loadRefreshProfileContext, REFRESH_PROFILE_CONTRACT_VERSION,
+  extractRefreshProfile, loadRefreshProfileContext, parseStrictJsonResponse, REFRESH_PROFILE_CONTRACT_VERSION,
   type RefreshProfileContext,
 } from "./refresh-profile.js";
 
@@ -51,6 +52,39 @@ function extraction(page = oracle.page): Extraction {
   };
 }
 
+function compactExtraction(page = oracle.page): Extraction {
+  const value = extraction(page);
+  value.nodes[0]!.citations = [{ page, excerpt: oracle.excerpt } as
+    unknown as NonNullable<Extraction["nodes"][number]["citations"]>[number]];
+  return value;
+}
+
+function compactEdgeExtraction(): Extraction {
+  const value = compactExtraction();
+  value.nodes.unshift({ id: "source-waterloo-pv", label: "Waterloo PV", file_type: "document",
+    source_file: oracle.originalKey, node_type: "Source",
+    citations: [{ page: oracle.page, excerpt: oracle.excerpt }] } as Extraction["nodes"][number]);
+  value.edges = [{ source: "source-waterloo-pv", target: "signal-waterloo-26-956-2",
+    relation: "supports", confidence: "EXTRACTED", source_file: oracle.originalKey,
+    evidence_refs: ["ev-1"], citations: [{ page: oracle.page, excerpt: oracle.excerpt }] } as
+    unknown as Extraction["edges"][number]];
+  value.evidence = [{ id: "ev-1", source_file: oracle.originalKey, rawRef: oracle.originalKey,
+    docSha: oracle.docSha, sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page,
+    excerpt: oracle.excerpt }];
+  return value;
+}
+
+async function captureExtractionError(text: string): Promise<Error> {
+  try {
+    await extractRefreshProfile([chunk()], {
+      context, textClient: client([{ text }], []), maxOutputTokens: 512,
+    });
+  } catch (error) {
+    if (error instanceof Error) return error;
+  }
+  throw new Error("Expected extraction to fail");
+}
+
 function client(responses: Array<{ text: string; status?: "completed" | "instructions_written" }>, seen: TextJsonGenerationInput[]) {
   return {
     mode: "mesh", provider: "test", model: "test-model",
@@ -69,7 +103,194 @@ function client(responses: Array<{ text: string; status?: "completed" | "instruc
   } satisfies TextJsonGenerationClient;
 }
 
+const largeInvalidJsonResponses = [
+  ["an unterminated naked fence", "```" + " ".repeat(100_000) + "x"],
+  ["an unterminated JSON fence", "```json\n" + " ".repeat(100_000)],
+] as const;
+
 describe("refresh profile extraction", () => {
+  it.each([
+    ["direct JSON", () => JSON.stringify(extraction())],
+    ["a JSON fence", () => ` \n\`\`\`JSON\n${JSON.stringify(extraction())}\n\`\`\`  \n `],
+    ["a naked fence", () => `\`\`\`\n${JSON.stringify(extraction())}\n\`\`\``],
+    ["a CRLF JSON fence", () => `\`\`\`json\r\n${JSON.stringify(extraction())}\r\n\`\`\``],
+    ["an external BOM", () => `\uFEFF${JSON.stringify(extraction())}`],
+    ["backticks inside a JSON string", () => {
+      const value = extraction();
+      value.nodes[0]!.label = "Label containing ``` inside JSON";
+      return JSON.stringify(value);
+    }],
+  ])("should accept %s as one strict JSON response", async (_case, response) => {
+    const results = await extractRefreshProfile([chunk()], {
+      context, textClient: client([{ text: response() }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.nodes[0]!.id).toBe("signal-waterloo-26-956-2");
+  });
+
+  it.each([
+    ["an incomplete fence", () => `\`\`\`json\n${JSON.stringify(extraction())}`],
+    ["exactly one fence marker", () => "```"],
+    ["two fences", () => {
+      const fenced = `\`\`\`json\n${JSON.stringify(extraction())}\n\`\`\``;
+      return `${fenced}\n${fenced}`;
+    }],
+    ["a non-JSON fence label", () => `\`\`\`javascript\n${JSON.stringify(extraction())}\n\`\`\``],
+    ["a JSON fence label with a trailing space", () => `\`\`\`json \n${JSON.stringify(extraction())}\n\`\`\``],
+    ["a preamble", () => `Preamble\n${JSON.stringify(extraction())}`],
+    ["a suffix", () => `${JSON.stringify(extraction())}\nSuffix`],
+  ])("should reject %s and preserve the parse error", async (_case, response) => {
+    const error = await captureExtractionError(response());
+    expect(error.cause).toBeInstanceOf(SyntaxError);
+    expect(error.message).toContain((error.cause as SyntaxError).message);
+  });
+
+  it.each(largeInvalidJsonResponses)("should reject %s through extraction", async (_case, response) => {
+    await expect(captureExtractionError(response)).resolves.toBeInstanceOf(Error);
+  });
+
+  it.each(largeInvalidJsonResponses)("should reject %s in under 200 ms", (_case, response) => {
+    const startedAt = performance.now();
+    let thrown: unknown;
+    try {
+      parseStrictJsonResponse(response);
+    } catch (error) {
+      thrown = error;
+    }
+    const elapsedMs = performance.now() - startedAt;
+    expect(thrown).toBeInstanceOf(SyntaxError);
+    expect(elapsedMs).toBeLessThan(200);
+  });
+
+  it("should name profile violations when entity citations are missing", async () => {
+    const invalid = extraction();
+    delete invalid.nodes[0]!.citations;
+    const error = await captureExtractionError(JSON.stringify(invalid));
+    expect(error.message).toContain("missing_citation_source_file");
+    expect(error.message).toContain("missing_citation_page");
+  });
+
+  it("should accept output with profile-compliant entity citations", async () => {
+    const results = await extractRefreshProfile([chunk()], {
+      context, textClient: client([{ text: JSON.stringify(extraction()) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction).toEqual(extraction());
+  });
+
+  it("should expand compact model citations with the exact PDF identity", async () => {
+    const results = await extractRefreshProfile([chunk()], {
+      context, textClient: client([{ text: JSON.stringify(compactExtraction()) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction).toEqual(extraction());
+  });
+
+  it("should accept the exact declared v5 contract version", async () => {
+    const declared = { ...compactExtraction(), contract_version: REFRESH_PROFILE_CONTRACT_VERSION };
+    const results = await extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction).toEqual(extraction());
+  });
+
+  it("should reject a declared v4 contract version with a named violation", async () => {
+    const declared = { ...compactExtraction(), contract_version: "immo-pv-extraction-v4" };
+    await expect(extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(declared) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("contract_version_mismatch");
+  });
+
+  it("should accept absent v4 version while replacing five false identity fields", async () => {
+    const modelExcerpt = `Adoption ${oracle.bylawNumber}`;
+    const legacy = extraction();
+    legacy.nodes[0]!.citations = [{ source_file: "wrong.pdf", rawRef: "wrong-raw",
+      docSha: "f".repeat(64), sourceUrl: "https://invalid.example/wrong.pdf", modality: "html",
+      page: oracle.page, excerpt: modelExcerpt }] as unknown as
+      NonNullable<Extraction["nodes"][number]["citations"]>;
+    const results = await extractRefreshProfile([chunk(undefined,
+      `[PDF PAGE 3]\n${oracle.excerpt}\n${modelExcerpt}`)], { context,
+      textClient: client([{ text: JSON.stringify(legacy) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.nodes[0]!.citations![0]).toEqual({
+      source_file: oracle.originalKey, rawRef: oracle.originalKey, docSha: oracle.docSha,
+      sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page, excerpt: modelExcerpt,
+    });
+  });
+
+  it("should reject a compact citation without its required page", async () => {
+    const invalid = compactExtraction();
+    delete (invalid.nodes[0]!.citations![0] as { page?: number }).page;
+    await expect(extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("missing_citation_page");
+  });
+
+  it("should reject a compact citation without its required excerpt", async () => {
+    const invalid = compactExtraction();
+    delete (invalid.nodes[0]!.citations![0] as { excerpt?: string }).excerpt;
+    await expect(extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("ungrounded PDF excerpt");
+  });
+
+  it("should expand a compact edge citation with the exact PDF identity", async () => {
+    const results = await extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(compactEdgeExtraction()) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.edges[0]!.citations![0]).toEqual({
+      source_file: oracle.originalKey, rawRef: oracle.originalKey, docSha: oracle.docSha,
+      sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page, excerpt: oracle.excerpt,
+    });
+  });
+
+  it.each(["page", "excerpt"] as const)("should reject a compact edge citation without %s", async (field) => {
+    const invalid = compactEdgeExtraction();
+    delete (invalid.edges[0]!.citations![0] as unknown as Record<string, unknown>)[field];
+    await expect(extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow(field === "page" ? "missing_citation_page" : "ungrounded PDF excerpt");
+  });
+
+  it.each(["node", "edge"] as const)("should reject a 201-character %s citation excerpt", async (kind) => {
+    const longExcerpt = "é".repeat(201);
+    const invalid = kind === "node" ? compactExtraction() : compactEdgeExtraction();
+    const citation = kind === "node" ? invalid.nodes[0]!.citations![0]! : invalid.edges[0]!.citations![0]!;
+    citation.excerpt = longExcerpt;
+    await expect(extractRefreshProfile([chunk(undefined,
+      `[PDF PAGE 3]\n${oracle.excerpt}\n${longExcerpt}`)], { context,
+      textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
+    })).rejects.toThrow("entity_citation_excerpt_too_long");
+  });
+
+  it.each([
+    [200, false],
+    [201, true],
+  ] as const)("should enforce %i out-of-BMP citation code points", async (codePointCount, shouldReject) => {
+    const excerpt = "😀".repeat(codePointCount);
+    const value = compactExtraction();
+    value.nodes[0]!.citations![0]!.excerpt = excerpt;
+    const promise = extractRefreshProfile([chunk(undefined,
+      `[PDF PAGE 3]\n${oracle.excerpt}\n${excerpt}`)], { context,
+      textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+    });
+    if (shouldReject) {
+      await expect(promise).rejects.toThrow("entity_citation_excerpt_too_long: maximum 200 Unicode code points");
+    } else {
+      await expect(promise).resolves.toHaveLength(1);
+    }
+  });
+
+  it("should preserve the distinct unbounded evidence excerpt contract", async () => {
+    const longExcerpt = "é".repeat(201);
+    const value = extraction();
+    value.evidence = [{ id: "ev-long", source_file: oracle.originalKey, rawRef: oracle.originalKey,
+      docSha: oracle.docSha, sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page,
+      excerpt: longExcerpt }];
+    const results = await extractRefreshProfile([chunk(undefined,
+      `[PDF PAGE 3]\n${oracle.excerpt}\n${longExcerpt}`)], { context,
+      textClient: client([{ text: JSON.stringify(value) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.evidence![0]!.excerpt).toHaveLength(201);
+  });
+
   it("should load an unregistered PV profile and refuse registry-backed output", async () => {
     const pvContext = loadRefreshProfileContext({ root: "/unused", profilePath, unregisteredOnly: true });
     expect(pvContext.registries).toEqual({});
@@ -102,7 +323,7 @@ describe("refresh profile extraction", () => {
     expect(results[1]).toMatchObject({ chunk: { originalKey: oracle.originalKey },
       extraction: { nodes: [], edges: [] } });
     const schema = JSON.parse(seen[0]!.schema);
-    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v3");
+    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v5");
     expect(schema.contract_version).toBe(REFRESH_PROFILE_CONTRACT_VERSION);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
     expect(schema.ontology.relation_signatures.supports).toMatchObject({
@@ -118,12 +339,20 @@ describe("refresh profile extraction", () => {
     expect(schema.graph_contract.evidence_refs).toMatchObject({
       type: "array", items: { type: "string", references: "evidence[].id" }, minItems: 1,
     });
+    expect(schema.graph_contract.entity_citations).toMatchObject({
+      node_field: "nodes[].citations", edge_field: "edges[].citations",
+      required_for: ["every node", "every edge"], minItems: 1,
+    });
+    expect(schema.graph_contract.entity_citations.items.required).toEqual(["page", "excerpt"]);
+    expect(schema.graph_contract.entity_citations.items.properties).toEqual({
+      page: { enum: [3] }, excerpt: { type: "string", minLength: 1, maxLength: 200,
+        description: "short verbatim text from the cited page" },
+    });
     expect(schema.evidence.pdf_identity).toMatchObject({ docSha: oracle.docSha, rawRef: oracle.originalKey });
-    expect(schema.evidence.citation.required).toContain("source_file");
-    expect(schema.evidence.citation.required).toContain("modality");
+    expect(schema.evidence.citation.required).toEqual(["page", "excerpt"]);
     expect(schema.evidence.evidence_item.required).toContain("modality");
-    expect(schema.evidence.citation.properties.source_file).toEqual({ const: oracle.originalKey });
-    expect(schema.evidence.citation.properties.modality).toEqual({ const: "pdf" });
+    expect(schema.evidence.citation.properties).not.toHaveProperty("source_file");
+    expect(schema.evidence.citation.properties).not.toHaveProperty("modality");
     expect(schema.evidence.citation.properties.excerpt.minLength).toBe(1);
     expect(schema.evidence.allowedPages).toEqual([3]);
     expect(seen[0]).toMatchObject({ maxOutputTokens: 512 });
@@ -131,6 +360,9 @@ describe("refresh profile extraction", () => {
     expect(seen[0]!.prompt).toContain('Every node file_type must be "document"');
     expect(seen[0]!.prompt).toContain("never emit a numeric confidence");
     expect(seen[0]!.prompt).toContain("arrays of string IDs from evidence[].id");
+    expect(seen[0]!.prompt).toContain("Evidence refs do not replace citations");
+    expect(seen[0]!.prompt).toContain("Every node and every edge must include a non-empty citations array");
+    expect(seen[0]!.prompt).toContain("Do not repeat the document identity inside citations");
     expect(seen[0]!.prompt).toContain("non-empty verbatim text on its claimed physical PDF page");
   });
 
@@ -178,7 +410,7 @@ describe("refresh profile extraction", () => {
     expect(seen).toHaveLength(2);
   });
 
-  it("should reject incomplete PDF identity, evidence identity, aliases and missing entity source files", async () => {
+  it("should reject invalid evidence identity, aliases and missing entity source files", async () => {
     const reject = async (mutate: (value: Extraction) => void, message: string) => {
       const invalid = extraction();
       mutate(invalid);
@@ -186,8 +418,6 @@ describe("refresh profile extraction", () => {
         textClient: client([{ text: JSON.stringify(invalid) }], []), maxOutputTokens: 512,
       })).rejects.toThrow(message);
     };
-    await reject((value) => { value.nodes[0]!.citations![0]!.rawRef = "raw/wrong.pdf"; }, "invalid original PDF identity");
-    await reject((value) => { delete value.nodes[0]!.citations![0]!.modality; }, "invalid original PDF identity");
     await reject((value) => { value.evidence = [{ id: "ev-1", source_file: oracle.originalKey,
       rawRef: oracle.originalKey, docSha: "f".repeat(64), sourceUrl: oracle.sourceUrl,
       modality: "pdf", page: oracle.page, excerpt: oracle.excerpt }]; }, "invalid original PDF identity");

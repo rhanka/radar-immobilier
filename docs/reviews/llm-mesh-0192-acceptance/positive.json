@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "protocol": "sentropic-16",
+  "case": "positive",
+  "completedAt": "2026-09-14T10:36:07.384Z",
+  "durationMs": 1750,
+  "installedPackage": {
+    "name": "@sentropic/llm-mesh",
+    "version": "0.19.2"
+  },
+  "account": {
+    "pseudonym": "acct-59dca62565",
+    "providerId": "cloud-code",
+    "tier": "g1-pro-tier"
+  },
+  "request": {
+    "logicalModelId": "gemini-3.8-flash",
+    "effort": "low",
+    "maxOutputTokens": 64,
+    "prompt": "Reply with PING_OK only.",
+    "threadIdProvided": false
+  },
+  "transport": {
+    "catalogueHttpStatus": 200,
+    "httpStatus": 200,
+    "resolvedModelId": "gemini-3.8-flash-tiered",
+    "thinkingLevel": "LOW",
+    "calls": [
+      {
+        "ordinal": 1,
+        "case": "positive",
+        "operation": "fetchAvailableModels",
+        "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels",
+        "method": "POST",
+        "resolvedModelId": null,
+        "thinkingLevel": null,
+        "maxOutputTokens": null,
+        "projectRedacted": true,
+        "httpStatus": 200,
+        "durationMs": 433
+      },
+      {
+        "ordinal": 2,
+        "case": "positive",
+        "operation": "streamGenerateContent",
+        "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse",
+        "method": "POST",
+        "resolvedModelId": "gemini-3.8-flash-tiered",
+        "thinkingLevel": "LOW",
+        "maxOutputTokens": 64,
+        "projectRedacted": true,
+        "httpStatus": 200,
+        "durationMs": 1243
+      }
+    ]
+  },
+  "actual": {
+    "providerId": "gemini",
+    "responseModelId": "gemini-3.8-flash",
+    "messageExact": "PING_OK",
+    "pingExact": true,
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 9,
+      "outputTokens": 3,
+      "totalTokens": 12
+    }
+  },
+  "error": null,
+  "redaction": {
+    "bearer": "[REDACTED]",
+    "project": "[REDACTED]",
+    "secretsIncluded": false
+  }
+}

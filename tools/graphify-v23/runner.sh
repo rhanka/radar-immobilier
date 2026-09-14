@@ -14,6 +14,9 @@
 #   5. Rapport final
 set -euo pipefail
 
+echo '[object-storage] retired: legacy graphify runner disabled after the OVH cutover' >&2
+exit 1
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # ROOT : répertoire d'invocation du script (PWD), ou --root <path> si fourni.
 # Cela permet d'appeler: cd /repo && bash tools/graphify-v23/runner.sh
