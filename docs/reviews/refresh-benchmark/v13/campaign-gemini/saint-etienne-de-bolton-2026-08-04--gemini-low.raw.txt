@@ -1,0 +1,897 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "label": "Procès-verbal du conseil municipal - 4 août 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "date": "2026-08-04",
+      "municipality": "saint-etienne-de-bolton",
+      "url": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Une séance ordinaire du conseil de la Municipalité de SaintÉtienne-de-Bolton, tenue le 4 août 2026 à 19 h 00, au bureau\nmunicipal de la municipalité située au 9, rue de la Montagne,\nSaint-Étienne-de-Bolton."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-04",
+      "label": "Règlement 2026-04",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2026-04",
+      "title": "modifiant le Règlement de plan d’urbanisme 2014-04",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;"
+        },
+        {
+          "page": 10,
+          "excerpt": "2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés.\nADOPTÉE"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-05",
+      "label": "Règlement 2026-05",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2026-05",
+      "title": "modifiant le Règlement de zonage 2014-05",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+        },
+        {
+          "page": 10,
+          "excerpt": "2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés.\nADOPTÉE"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-06",
+      "label": "Règlement 2026-06",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2026-06",
+      "title": "modifiant le règlement de lotissement 2014-06",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-06 modifiant le règlement de lotissement 2014-06 ;"
+        },
+        {
+          "page": 10,
+          "excerpt": "2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés.\nADOPTÉE"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-07",
+      "label": "Règlement 2026-07",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2026-07",
+      "title": "modifiant le règlement de construction 2014-08",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-07 modifiant le règlement de construction 2014-08;"
+        },
+        {
+          "page": 10,
+          "excerpt": "2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés.\nADOPTÉE"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-08",
+      "label": "Règlement 2026-08",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2026-08",
+      "title": "modifiant le règlement de PIIA 2014-09",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-08 modifiant le règlement de PIIA 2014-09 ;"
+        },
+        {
+          "page": 10,
+          "excerpt": "2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés.\nADOPTÉE"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-09",
+      "label": "Règlement 2026-09",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2026-09",
+      "title": "modifiant le règlement de permis et certificats 2014-10",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-09 modifiant le règlement de permis et certificats\n2014-10 ;"
+        },
+        {
+          "page": 10,
+          "excerpt": "2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés.\nADOPTÉE"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-10",
+      "label": "Règlement 2026-10",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2026-10",
+      "title": "modifiant le règlement de dérogation mineure 2008-06",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-150",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;"
+        },
+        {
+          "page": 10,
+          "excerpt": "2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés.\nADOPTÉE"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2025-11",
+      "label": "Règlement 2025-11",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2025-11",
+      "title": "créant le Règlement sur l’occupation et l’entretien des bâtiments",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-151",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-08-151 Il est proposé par Harry Bird\nappuyé par Jocelyn Brasseur\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte le Règlement 2025-11 créant le\nRèglement sur l’occupa"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-14",
+      "label": "Règlement 2026-14",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2026-14",
+      "title": "modifiant le règlement 2008-04 sur les usages conditionnels",
+      "date": "2026-08-04",
+      "stage": "adoption",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-152",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "2026-08-152 Il est proposé par Alexandre Berger\nappuyé par Robert Bergeron\net résolu à l’unanimité des conseillers présents\nQUE le conseil adopte le Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-15",
+      "label": "Règlement 2026-15",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2026-15",
+      "title": "abrogeant le règlement 2022-09 et modifiant le règlement 2015-14 sur la sécurité incendie",
+      "date": "2026-08-04",
+      "stage": "projet",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "AVIS DE MOTION est donné est donné par la mairesse, Diane\nDesjardins, qu’à une prochaine séance du conseil sera adopté le\nRèglement 2026-15 abrogeant le règlement 2022-09 et modifiant\nle règlement 2015-14"
+        }
+      ]
+    },
+    {
+      "id": "zone-COM-1",
+      "label": "Zone COM-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "COM-1",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Zone : COM-1"
+        }
+      ]
+    },
+    {
+      "id": "zone-RUR-12",
+      "label": "Zone RUR-12",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "RUR-12",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Zone : RUR-12"
+        }
+      ]
+    },
+    {
+      "id": "zone-RUR-8",
+      "label": "Zone RUR-8",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "RUR-8",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Zone : RUR-8"
+        }
+      ]
+    },
+    {
+      "id": "zone-VIL-2",
+      "label": "Zone VIL-2",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "VIL-2",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "meetingDate": "2026-08-04",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "Zone : VIL-2"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-08-154",
+      "label": "PIIA - 12, rue Principale (Chambre froide)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-154",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "demandeur_corporate": "Coopérative de solidarité de St-Étienne-de-Bolton",
+      "zone_ref": "COM-1",
+      "no_lot": "5191695",
+      "etape": "piia",
+      "etape_date": "2026-08-04",
+      "description": "Autorisation pour l’émission d’un permis pour l’installation à l’arrière du bâtiment de la Coop du Grand-Bois d’une chambre froide extérieure.",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "g. Autorisation pour l’émission d’un permis pour\nl’installation à l’arrière du bâtiment de la Coop du\nGrand-Bois d’une chambre froide extérieure.\nDemandeur : Coopérative de solidarité de St-Étienne-de-Bolton"
+        },
+        {
+          "page": 12,
+          "excerpt": "2026-08-154 Il est proposé par Vincent Jarry\nappuyé par Christine Boutin\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-08-155",
+      "label": "PIIA - 24, Allée des Sommets (Garage)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-155",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "zone_ref": "RUR-12",
+      "no_lot": "5662886",
+      "superficie_m2": 5749.2,
+      "etape": "piia",
+      "etape_date": "2026-08-04",
+      "description": "Autorisation pour démolir l’abri automobile existant et le remplacer par un garage au 24, Allée des Sommets.",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "h. Autorisation pour démolir l’abri automobile\nexistant et le remplacer par un garage au 24, Allée\ndes Sommets.\nAdresse : 24, Allée des Sommets\nLot : 5 662 886\nZone : RUR-12"
+        },
+        {
+          "page": 12,
+          "excerpt": "2026-08-155 Il est proposé par Harry Bird\nappuyé par Jocelyn Brasseur\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage"
+        }
+      ]
+    },
+    {
+      "id": "event-derogation-2026-08-156",
+      "label": "Dérogation mineure refusée - 135, rue de la Serpentine",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "derogation",
+      "decision": "refusé",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-156",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "zone_ref": "RUR-8",
+      "no_lot": "6380011",
+      "superficie_m2": 14689.8,
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-04",
+      "description": "Refus de la demande de dérogation mineure de réduire la distance entre une piscine creusée et la limite latérale à 2,4 mètres au lieu de 3 mètres au 135, rue de la Serpentine.",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "i. Refus de la demande de dérogation mineure de\nréduire la distance entre une piscine creusée et la\n12"
+        },
+        {
+          "page": 13,
+          "excerpt": "2026-08-156\n\nIl est proposé par Jocelyn Brasseur\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation"
+        }
+      ]
+    },
+    {
+      "id": "event-derogation-2026-08-157",
+      "label": "Dérogation mineure refusée - lot 5 191 546",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "derogation",
+      "decision": "refusé",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-157",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "zone_ref": "RUR-12",
+      "no_lot": "5191546",
+      "reglement_number": "2014-05",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-04",
+      "description": "Refus de la demande de dérogation mineure visant à permettre l’abattage d’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la période de gel.",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "j. Refus de la demande de dérogation mineure visant\nà permettre l’abattage d’arbre sur le lot 5 191 546\ndu chemin de la Tour en dehors de la période de\ngel.\nAdresse : de la Tour\nLot : 5 191 546\nZone : RUR-12"
+        },
+        {
+          "page": 14,
+          "excerpt": "2026-08-157\n\nIl est proposé par Vincent Jarry\nappuyé par Alexandre Berger\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-08-158",
+      "label": "PIIA - 572, 1er Rang (Toiture)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "piia",
+      "decision": "approuvé",
+      "date": "2026-08-04",
+      "meetingDate": "2026-08-04",
+      "resolution": "2026-08-158",
+      "municipality": "saint-etienne-de-bolton",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "zone_ref": "VIL-2",
+      "no_lot": "5191952",
+      "etape": "piia",
+      "etape_date": "2026-08-04",
+      "description": "Autorisation pour le remplacement du revêtement de la toiture de la résidence située au 572, 1er Rang.",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "k. Autorisation pour le remplacement du revêtement\nde la toiture de la résidence située au 572, 1er Rang.\nAdresse : 572, 1er Rang\nLot : 5 191 952\nZone : VIL-2"
+        },
+        {
+          "page": 14,
+          "excerpt": "2026-08-158 Il est proposé par Robert Bergeron\nappuyé par Christine Boutin\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-04",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-04"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;"
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-05",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-05"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-06",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-06"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-06 modifiant le règlement de lotissement 2014-06 ;"
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-07",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-07"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-07 modifiant le règlement de construction 2014-08;"
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-08",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-08"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-08 modifiant le règlement de PIIA 2014-09 ;"
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-09",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-09"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-09 modifiant le règlement de permis et certificats\n2014-10 ;"
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-10",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-10"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;"
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2025-11",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2025-11"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "d. Adoption du Règlement 2025-11 créant le\nRèglement sur l’occupation et l’entretien des\nbâtiments."
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-14",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-14"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "e. Adoption du Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels."
+        }
+      ]
+    },
+    {
+      "source": "source-27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "target": "bylaw-2026-15",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-15"
+      ],
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "b. Avis de motion et dépôt du nouveau projet de\nRèglement 2026-15 abrogeant le Règlement\n2022-08 et modifiant le règlement 2015-14 sur la\nsécurité incendie."
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-08-154",
+      "target": "zone-COM-1",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-154"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Lot : 5 191 695\nZone : COM-1"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-08-155",
+      "target": "zone-RUR-12",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-155"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Lot : 5 662 886\nZone : RUR-12"
+        }
+      ]
+    },
+    {
+      "source": "event-derogation-2026-08-156",
+      "target": "zone-RUR-8",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-156"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Lot : 6 380 011\nZone : RUR-8"
+        }
+      ]
+    },
+    {
+      "source": "event-derogation-2026-08-157",
+      "target": "zone-RUR-12",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-157"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Lot : 5 191 546\nZone : RUR-12"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-08-158",
+      "target": "zone-VIL-2",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "evidence_refs": [
+        "ev-event-158"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "Lot : 5 191 952\nZone : VIL-2"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-bylaw-2026-04",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;"
+    },
+    {
+      "id": "ev-bylaw-2026-05",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "2026-05 modifiant le Règlement de zonage 2014-05 ;"
+    },
+    {
+      "id": "ev-bylaw-2026-06",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "2026-06 modifiant le règlement de lotissement 2014-06 ;"
+    },
+    {
+      "id": "ev-bylaw-2026-07",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "2026-07 modifiant le règlement de construction 2014-08;"
+    },
+    {
+      "id": "ev-bylaw-2026-08",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "2026-08 modifiant le règlement de PIIA 2014-09 ;"
+    },
+    {
+      "id": "ev-bylaw-2026-09",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "2026-09 modifiant le règlement de permis et certificats\n2014-10 ;"
+    },
+    {
+      "id": "ev-bylaw-2026-10",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;"
+    },
+    {
+      "id": "ev-bylaw-2025-11",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "d. Adoption du Règlement 2025-11 créant le\nRèglement sur l’occupation et l’entretien des\nbâtiments."
+    },
+    {
+      "id": "ev-bylaw-2026-14",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "e. Adoption du Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels."
+    },
+    {
+      "id": "ev-bylaw-2026-15",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 17,
+      "excerpt": "b. Avis de motion et dépôt du nouveau projet de\nRèglement 2026-15 abrogeant le Règlement\n2022-08 et modifiant le règlement 2015-14 sur la\nsécurité incendie."
+    },
+    {
+      "id": "ev-event-154",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Lot : 5 191 695\nZone : COM-1"
+    },
+    {
+      "id": "ev-event-155",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "Lot : 5 662 886\nZone : RUR-12"
+    },
+    {
+      "id": "ev-event-156",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "Lot : 6 380 011\nZone : RUR-8"
+    },
+    {
+      "id": "ev-event-157",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "Lot : 5 191 546\nZone : RUR-12"
+    },
+    {
+      "id": "ev-event-158",
+      "source_file": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "rawRef": "raw/proces-verbaux-saint-etienne-de-bolton/cas/27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.pdf",
+      "docSha": "27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d",
+      "sourceUrl": "https://sedb.qc.ca/wp-content/uploads/2026/08/PV_4-AOUT-2026-1.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "Lot : 5 191 952\nZone : VIL-2"
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 5820,
+  "output_tokens": 4200
+}
+```
