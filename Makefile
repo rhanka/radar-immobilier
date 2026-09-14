@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 -include .env
+-include deploy/ci/object-storage-prod.mk
 
 # ── Environment / project ─────────────────────────────────────────────
 ENV ?= dev
@@ -41,6 +42,12 @@ export UI_IMAGE ?= $(REGISTRY)/radar-ui
 KUBECTL              ?= kubectl
 K8S_MANIFEST_DIR     ?= deploy/k8s
 K8S_NAMESPACE        ?= radar-immobilier
+OBJECT_STORAGE_INVENTORY_DIR := deploy/k8s/object-storage-inventory-preprod
+OBJECT_STORAGE_INVENTORY_NAMESPACE := radar-immobilier-preprod
+OBJECT_STORAGE_OVH_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
+OBJECT_STORAGE_RAW_REBIND_PATCH := $(OBJECT_STORAGE_INVENTORY_DIR)/raw-api-rebind-patch.yaml
+OBJECT_STORAGE_DOCS_BUCKET_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-bucket-job.yaml
+override OBJECT_STORAGE_DOCS_OFFICIAL_DIGEST := 52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425
 # Set to 1 only when a real KUBECONFIG is present to additionally run a
 # server-side dry-run. Offline render works with no cluster.
 K8S_VALIDATE_WITH_CLUSTER ?= 0
@@ -242,7 +249,7 @@ db-status: ## Check DB readiness
 	  pg_isready -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 # ─────────────────────────────────────────────────────────────────────
-# Object storage (MinIO local, Scaleway in prod)
+# Object storage (MinIO local, OVH S3 in deployed environments)
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: s3-init
@@ -399,6 +406,311 @@ deploy-k8s: ## Validate manifests; apply ONLY with K8S_DEPLOY_CONFIRM=1 + KUBECO
 	  echo "  Human deploy step (with cluster creds):"; \
 	  echo "    KUBECONFIG=<path> make deploy-k8s K8S_DEPLOY_CONFIRM=1 ENV=poc"; \
 	fi
+
+.PHONY: object-storage-inventory-preprod-validate
+object-storage-inventory-preprod-validate: ## Render post-cutover support and assert the RAW inventory Job is retired
+	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[object-storage-inventory] kubectl not found"; exit 1; }
+	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
+	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
+	@$(KUBECTL) create --dry-run=client --validate=false \
+	  -f $(OBJECT_STORAGE_RAW_REBIND_PATCH) -o name >/dev/null
+	@test ! -e $(OBJECT_STORAGE_INVENTORY_DIR)/job.yaml
+
+.PHONY: object-storage-inventory-preprod-start
+object-storage-inventory-preprod-start: ## Retired after the OVH cutover
+	@echo '[object-storage-inventory] retired: no MinIO inventory can be started'; exit 1
+
+.PHONY: object-storage-docs-preprod-validate
+object-storage-docs-preprod-validate: ## Validate post-cutover support and retired migration Jobs offline
+	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[object-storage-docs] kubectl not found"; exit 1; }
+	@jq -n -f deploy/ci/docs-secret-from-raw.jq >/dev/null
+	@jq -n -f deploy/ci/validate-docs-secret.jq >/dev/null
+	@jq -n '{items:[]}' | jq -f deploy/ci/docs-zero-writer-bindings.jq >/dev/null
+	@jq -n '[]' | jq -f deploy/ci/docs-canonical-manifest.jq >/dev/null
+	@jq -n '{items:[]}' | jq -e -f deploy/ci/minio-removal-resources.jq >/dev/null
+	@jq -n '{items:[]}' | jq -e -f deploy/ci/minio-removal-pods.jq >/dev/null
+	@jq -n '{items:[]}' | jq --arg observedAt 2026-09-13T00:00:00Z \
+	  -f deploy/ci/minio-removal-receipt.jq >/dev/null
+	@bash -n deploy/ci/prove-docs-conditional-writes.sh \
+	  deploy/ci/build-docs-expected-manifest.sh deploy/ci/copy-canonical-docs.sh \
+	  deploy/ci/copy-canonical-docs.hermetic.test.sh deploy/ci/copy-canonical-docs-progress.sh
+	@node --check deploy/ci/copy-canonical-docs.mjs
+	@bash deploy/ci/minio-removal-idempotent.hermetic.test.sh
+	@set -o pipefail; $(MAKE) --no-print-directory -n object-storage-minio-preprod-remove \
+	  OBJECT_STORAGE_MINIO_REMOVE_CONFIRM=DESTROY_NONCANONICAL_PREPROD_MINIO \
+	  OBJECT_STORAGE_DOCS_PARITY_JOB=radar-object-storage-copy-canonical-docs-hermetic \
+	  OBJECT_STORAGE_DOCS_CANONICAL_DIGEST=52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425 \
+	  KUBECONFIG=/nonsecret/hermetic.kubeconfig ENV=preprod | bash -n
+	@bash deploy/ci/copy-canonical-docs.hermetic.test.sh
+	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
+	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
+	@$(KUBECTL) create --dry-run=client --validate=false \
+	  -f $(OBJECT_STORAGE_DOCS_BUCKET_JOB) -o name >/dev/null
+	@for manifest in job.yaml docs-inventory-job.yaml docs-conditional-proof-job.yaml \
+	  docs-copy-job.yaml docs-canonical-copy-job.yaml; do \
+	  test ! -e "$(OBJECT_STORAGE_INVENTORY_DIR)/$$manifest"; \
+	done
+
+.PHONY: object-storage-docs-preprod-provision
+object-storage-docs-preprod-provision: ## Create the concern-specific Secret and exact BHS DOCS bucket
+	@if [ "$(OBJECT_STORAGE_DOCS_PROVISION_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ]; then \
+	  echo "[object-storage-docs] refused: require KUBECONFIG, OBJECT_STORAGE_DOCS_PROVISION_CONFIRM=1, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@$(MAKE) object-storage-docs-preprod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  $(KUBECTL) -n "$$namespace" get secret radar-raw-s3-credentials -o json | \
+	    jq -e -f deploy/ci/docs-secret-from-raw.jq | \
+	    $(KUBECTL) apply -f - >/dev/null; \
+	  job_ref="$$( $(KUBECTL) create -f $(OBJECT_STORAGE_DOCS_BUCKET_JOB) -o name )"; \
+	  $(KUBECTL) -n "$$namespace" wait --for=condition=complete "$$job_ref" --timeout=180s >/dev/null; \
+	  echo "[object-storage-docs] provision verified by $$job_ref"
+
+.PHONY: object-storage-docs-preprod-start
+object-storage-docs-preprod-start: ## Retired after the OVH cutover
+	@echo '[object-storage-docs] retired: no legacy DOCS inventory can be started'; exit 1
+
+.PHONY: object-storage-docs-preprod-retry-never-started
+object-storage-docs-preprod-retry-never-started: ## Retired after the OVH cutover
+	@echo '[object-storage-docs] retired: no legacy DOCS inventory can be retried'; exit 1
+
+.PHONY: object-storage-docs-preprod-prove-conditional-write
+object-storage-docs-preprod-prove-conditional-write: ## Retired after the OVH cutover
+	@echo '[object-storage-docs] retired: conditional-write migration proof is closed'; exit 1
+
+.PHONY: object-storage-docs-preprod-fence
+object-storage-docs-preprod-fence: ## Record zero live MinIO DOCS writers after validated provisional evidence
+	@if [ "$(OBJECT_STORAGE_DOCS_FENCE_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ] || ! [[ "$(OBJECT_STORAGE_DOCS_PROVISIONAL_DIGEST)" =~ ^[0-9a-f]{64}$$ ]]; then \
+	  echo "[object-storage-docs] refused: require KUBECONFIG, provisional digest, confirmation, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  api="$$(mktemp)"; cron="$$(mktemp)"; pods="$$(mktemp)"; trap 'rm -f "$$api" "$$cron" "$$pods"' EXIT; \
+	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json >"$$api"; \
+	  $(KUBECTL) -n "$$namespace" get cronjobs/radar-refresh-scrape cronjobs/radar-refresh-projection -o json >"$$cron"; \
+	  $(KUBECTL) -n "$$namespace" get pods -o json >"$$pods"; \
+	  jq -e -f deploy/ci/raw-api-ovh-binding.jq "$$api" >/dev/null; \
+	  jq -e -f deploy/ci/docs-zero-writer-bindings.jq "$$cron" >/dev/null; \
+	  jq -e '[.items[] | select(.status.phase == "Running" or .status.phase == "Pending") | select(any(.metadata.ownerReferences[]?; .kind == "Job")) | select(.metadata.labels["app.kubernetes.io/component"] != "object-storage-inventory")] | length == 0' "$$pods" >/dev/null; \
+	  stamp="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
+	  payload="$$(printf 'schemaVersion=1\nenvironment=preprod\nplane=DOCS\ncanonicalSource=prod-scw-docs-pocs\nprovisionalDigest=%s\nminioDocsWriters=0\nobservedAt=%s\n' "$(OBJECT_STORAGE_DOCS_PROVISIONAL_DIGEST)" "$$stamp")"; \
+	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-docs-fence \
+	    --from-literal="fence.txt=$$payload" --dry-run=client -o yaml | \
+	    $(KUBECTL) apply -f - >/dev/null; \
+	  echo '[object-storage-docs] zero MinIO DOCS writers recorded'
+
+.PHONY: object-storage-docs-preprod-copy
+object-storage-docs-preprod-copy: ## Retired after the OVH cutover
+	@echo '[object-storage-docs] retired: no legacy full-prefix copy can be started'; exit 1
+
+.PHONY: object-storage-docs-preprod-copy-canonical
+object-storage-docs-preprod-copy-canonical: ## Retired after the OVH cutover
+	@echo '[object-storage-docs] retired: canonical migration is closed by its final receipt'; exit 1
+
+.PHONY: object-storage-docs-preprod-copy-progress
+object-storage-docs-preprod-copy-progress: ## Report canonical copy progress without object keys
+	@if [ -z "$$KUBECONFIG" ] || [[ "$(OBJECT_STORAGE_DOCS_CANONICAL_JOB)" != radar-object-storage-copy-canonical-docs-* ]]; then \
+	  echo '[object-storage-docs] require KUBECONFIG and exact canonical copy Job'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; job="$(OBJECT_STORAGE_DOCS_CANONICAL_JOB)"; \
+	  started="$$( $(KUBECTL) -n "$$namespace" get "job/$$job" -o jsonpath='{.metadata.creationTimestamp}' )"; \
+	  elapsed="$$(( $$(date +%s) - $$(date -d "$$started" +%s) ))"; \
+	  pod="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  [ -n "$$pod" ] || { echo '[object-storage-docs] canonical copy Pod is absent'; exit 1; }; \
+	  uid="$$( $(KUBECTL) -n "$$namespace" get "pod/$$pod" -o jsonpath='{.metadata.uid}' )"; \
+	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- env REPORT_DIR="/evidence/reports/$$uid" \
+	    ELAPSED_SECONDS="$$elapsed" /bin/bash /tool/copy-canonical-docs-progress.sh
+
+.PHONY: object-storage-minio-preprod-remove
+object-storage-minio-preprod-remove: ## Irreversibly remove exact preprod MinIO resources after canonical parity
+	@if [ "$(OBJECT_STORAGE_MINIO_REMOVE_CONFIRM)" != "DESTROY_NONCANONICAL_PREPROD_MINIO" ] || \
+	  [ "$(ENV)" != "preprod" ] || [ -z "$$KUBECONFIG" ] || \
+	  [[ "$(OBJECT_STORAGE_DOCS_PARITY_JOB)" != radar-object-storage-copy-canonical-docs-* ]] || \
+	  [ "$(OBJECT_STORAGE_DOCS_CANONICAL_DIGEST)" != "$(OBJECT_STORAGE_DOCS_OFFICIAL_DIGEST)" ]; then \
+	  echo '[object-storage-minio] refused: require exact parity Job/digest, destruction phrase, KUBECONFIG, ENV=preprod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  job="$(OBJECT_STORAGE_DOCS_PARITY_JOB)"; expected_digest="$(OBJECT_STORAGE_DOCS_CANONICAL_DIGEST)"; \
+	  server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
+	  context_namespace="$$( $(KUBECTL) config view --minify -o jsonpath='{.contexts[0].context.namespace}' )"; \
+	  [ "$$server" = "$(OBJECT_STORAGE_OVH_SERVER)" ] && [ "$$context_namespace" = "$$namespace" ] || \
+	    { echo '[object-storage-minio] refused: exact OVH preprod context is unproved'; exit 1; }; \
+	  work="$$(mktemp -d)"; trap 'rm -rf "$$work"' EXIT; \
+	  pod="$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  [ -n "$$pod" ] || { echo '[object-storage-minio] parity evidence Pod is absent'; exit 1; }; \
+	  uid="$$( $(KUBECTL) -n "$$namespace" get "pod/$$pod" -o jsonpath='{.metadata.uid}' )"; \
+	  $(KUBECTL) -n "$$namespace" exec "$$pod" -- cat "/evidence/reports/$$uid/summary.json" >"$$work/parity.json"; \
+	  jq -e --arg digest "$$expected_digest" -f deploy/ci/docs-parity-receipt.jq \
+	    "$$work/parity.json" >/dev/null; \
+	  parity_digest="$$(sha256sum "$$work/parity.json" | awk '{print $$1}')"; \
+	  [[ "$$parity_digest" =~ ^[0-9a-f]{64}$$ ]] || { echo '[object-storage-minio] parity receipt is invalid'; exit 1; }; \
+	  $(KUBECTL) -n "$$namespace" get statefulset/radar-minio service/radar-minio \
+	    pvc/minio-data-radar-minio-0 networkpolicy/allow-api-to-minio \
+	    networkpolicy/allow-graph-projection-to-minio networkpolicy/allow-grounding-to-minio \
+	    networkpolicy/allow-object-storage-inventory-to-minio networkpolicy/allow-scrape-to-minio \
+	    networkpolicy/allow-snapshot-dump-to-minio --ignore-not-found -o json >"$$work/resources.json"; \
+	  jq -e -f deploy/ci/minio-removal-resources.jq "$$work/resources.json" >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get pods -o json >"$$work/pods.json"; \
+	  jq -e -f deploy/ci/minio-removal-pods.jq "$$work/pods.json" >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | \
+	    jq -e -f deploy/ci/raw-api-ovh-binding.jq >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get cronjobs/radar-refresh-scrape cronjobs/radar-refresh-projection -o json | \
+	    jq -e -f deploy/ci/docs-zero-writer-bindings.jq >/dev/null; \
+	  observed="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
+	  jq --arg observedAt "$$observed" -f deploy/ci/minio-removal-receipt.jq \
+	    "$$work/resources.json" >"$$work/before.json"; \
+	  before_digest="$$(sha256sum "$$work/before.json" | awk '{print $$1}')"; \
+	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-minio-removal \
+	    --from-file=receipt.json="$$work/before.json" --dry-run=client -o yaml | $(KUBECTL) apply -f - >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" delete statefulset/radar-minio --ignore-not-found \
+	    --cascade=foreground --wait=true >/dev/null; \
+	  if $(KUBECTL) -n "$$namespace" get pod/radar-minio-0 >/dev/null 2>&1; then \
+	    $(KUBECTL) -n "$$namespace" wait --for=delete pod/radar-minio-0 --timeout=180s >/dev/null; \
+	  fi; \
+	  $(KUBECTL) -n "$$namespace" delete service/radar-minio \
+	    networkpolicy/allow-api-to-minio networkpolicy/allow-graph-projection-to-minio \
+	    networkpolicy/allow-grounding-to-minio networkpolicy/allow-object-storage-inventory-to-minio \
+	    networkpolicy/allow-scrape-to-minio networkpolicy/allow-snapshot-dump-to-minio \
+	    --ignore-not-found --wait=true >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" delete pvc/minio-data-radar-minio-0 \
+	    --ignore-not-found --wait=true >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get statefulset/radar-minio service/radar-minio \
+	    pvc/minio-data-radar-minio-0 networkpolicy/allow-api-to-minio \
+	    networkpolicy/allow-graph-projection-to-minio networkpolicy/allow-grounding-to-minio \
+	    networkpolicy/allow-object-storage-inventory-to-minio networkpolicy/allow-scrape-to-minio \
+	    networkpolicy/allow-snapshot-dump-to-minio --ignore-not-found -o json >"$$work/resources-after.json"; \
+	  [ "$$(jq '.items | length' "$$work/resources-after.json")" = 0 ]; \
+	  removed="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
+	  jq --arg observedAt "$$removed" -f deploy/ci/minio-removal-receipt.jq \
+	    "$$work/resources-after.json" | jq --arg removedAt "$$removed" \
+	    --arg beforeDigest "$$before_digest" --arg parityDigest "$$parity_digest" \
+	    '. + {removed:true,removedAt:$$removedAt,beforeDigest:$$beforeDigest,parityReceiptDigest:$$parityDigest,nonRecoverablePvcData:true}' >"$$work/after.json"; \
+	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-minio-removal \
+	    --from-file=receipt.json="$$work/after.json" --dry-run=client -o yaml | $(KUBECTL) apply -f - >/dev/null; \
+	  echo "[object-storage-minio] removed StatefulSet/radar-minio Service/radar-minio PVC/minio-data-radar-minio-0 and six ingress policies; receipt=$$(sha256sum "$$work/after.json" | awk '{print $$1}')"
+
+.PHONY: object-storage-raw-preprod-rebind
+object-storage-raw-preprod-rebind: ## Roll radar-api RAW bindings to OVH without changing the shared ConfigMap
+	@if [ "$(OBJECT_STORAGE_REBIND_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ]; then \
+	  echo "[object-storage-rebind] refused: require KUBECONFIG, OBJECT_STORAGE_REBIND_CONFIRM=1, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  $(KUBECTL) -n "$$namespace" patch deployment/radar-api --type=strategic \
+	    --patch-file $(OBJECT_STORAGE_RAW_REBIND_PATCH) >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" rollout status deployment/radar-api --timeout=180s; \
+	  settled=false; \
+	  for ((attempt=1; attempt<=60; attempt++)); do \
+	    pods="$$( $(KUBECTL) -n "$$namespace" get pods \
+	      -l 'app.kubernetes.io/name=radar-immobilier,app.kubernetes.io/component=api' -o json )"; \
+	    if jq -e '.items | length == 1 and all(.[]; .metadata.deletionTimestamp == null and any(.status.conditions[]?; .type == "Ready" and .status == "True"))' \
+	      <<<"$$pods" >/dev/null; then settled=true; break; fi; \
+	    sleep 2; \
+	  done; \
+	  $$settled || { echo "[object-storage-rebind] old API Pod did not terminate"; exit 1; }; \
+	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | \
+	    jq -e -f deploy/ci/raw-api-ovh-binding.jq >/dev/null || \
+	    { echo "[object-storage-rebind] dedicated RAW references are unproved"; exit 1; }; \
+	  echo "[object-storage-rebind] radar-api rolled to dedicated RAW references"
+
+.PHONY: object-storage-raw-preprod-fence
+object-storage-raw-preprod-fence: ## Record that the rolled API leaves no MinIO RAW writer
+	@if [ "$(OBJECT_STORAGE_FENCE_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ]; then \
+	  echo "[object-storage-fence] refused: require KUBECONFIG, OBJECT_STORAGE_FENCE_CONFIRM=1, ENV=preprod"; \
+	  exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  deployment="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json )"; \
+	  jq -e -f deploy/ci/raw-api-ovh-binding.jq <<<"$$deployment" >/dev/null || \
+	    { echo "[object-storage-fence] RAW rebind is unproved"; exit 1; }; \
+	  pods="$$( $(KUBECTL) -n "$$namespace" get pods \
+	    -l 'app.kubernetes.io/name=radar-immobilier,app.kubernetes.io/component=api' -o json )"; \
+	  jq -e '.items | length == 1 and all(.[]; .metadata.deletionTimestamp == null and any(.status.conditions[]?; .type == "Ready" and .status == "True"))' \
+	    <<<"$$pods" >/dev/null || { echo "[object-storage-fence] API rollout is unsettled"; exit 1; }; \
+	  pod_uid="$$(jq -r '.items[0].metadata.uid' <<<"$$pods")"; \
+	  generation="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
+	    -o jsonpath='{.metadata.generation}' )"; \
+	  observed="$$( $(KUBECTL) -n "$$namespace" get deployment/radar-api \
+	    -o jsonpath='{.status.observedGeneration}' )"; \
+	  stamp="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
+	  payload="$$(printf 'schemaVersion=1\nenvironment=preprod\nplane=RAW\nsourceWriter=deployment/radar-api\nsourceBindingSecret=radar-raw-s3-credentials\nsourcePodUid=%s\ngeneration=%s\nobservedGeneration=%s\nminioRawWriters=0\nobservedAt=%s\n' \
+	    "$$pod_uid" "$$generation" "$$observed" "$$stamp")"; \
+	  $(KUBECTL) -n "$$namespace" create configmap radar-object-storage-inventory-fence \
+	    --from-literal="fence.txt=$$payload" --dry-run=client -o yaml | \
+	    $(KUBECTL) apply -f - >/dev/null; \
+	  echo "[object-storage-fence] rolled API leaves zero MinIO RAW writers; evidence recorded"
+
+.PHONY: object-storage-inventory-preprod-status
+object-storage-inventory-preprod-status: ## Read one inventory Job and Pod status (OBJECT_STORAGE_INVENTORY_JOB=...)
+	@if [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_INVENTORY_JOB)" ]; then \
+	  echo "[object-storage-inventory] require KUBECONFIG and OBJECT_STORAGE_INVENTORY_JOB"; exit 1; \
+	fi
+	@$(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get \
+	  "job/$(OBJECT_STORAGE_INVENTORY_JOB)" -o wide
+	@$(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pods \
+	  -l "job-name=$(OBJECT_STORAGE_INVENTORY_JOB)" -o wide
+
+.PHONY: object-storage-docs-preprod-stop-secondary-inventory
+object-storage-docs-preprod-stop-secondary-inventory: ## Stop only the superseded v2 DOCS inventory Job; preserve its PVC
+	@if [ "$(OBJECT_STORAGE_DOCS_STOP_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
+	  [ -z "$$KUBECONFIG" ] || [[ "$(OBJECT_STORAGE_DOCS_STOP_JOB)" != radar-object-storage-inventory-docs-* ]]; then \
+	  echo '[object-storage-docs] refused: require exact DOCS Job, confirmation, KUBECONFIG, ENV=preprod'; exit 1; \
+	fi
+	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
+	  job="$(OBJECT_STORAGE_DOCS_STOP_JOB)"; \
+	  jq -n -f deploy/ci/docs-secondary-inventory-stop.jq >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" get "job/$$job" -o json | \
+	    jq -e -f deploy/ci/docs-secondary-inventory-stop.jq >/dev/null; \
+	  $(KUBECTL) -n "$$namespace" delete "job/$$job" --cascade=foreground --wait=true >/dev/null; \
+	  [ "$$( $(KUBECTL) -n "$$namespace" get pods -l "job-name=$$job" -o json | jq '.items|length' )" = 0 ]; \
+	  [ "$$( $(KUBECTL) -n "$$namespace" get pvc/radar-object-storage-inventory-checkpoint \
+	    -o jsonpath='{.status.phase}' )" = Bound ]; \
+	  echo '[object-storage-docs] secondary inventory stopped; checkpoint PVC preserved'
+
+.PHONY: object-storage-docs-preprod-progress
+object-storage-docs-preprod-progress: ## Aggregate DOCS checkpoint pages without printing object keys
+	@if [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_INVENTORY_JOB)" ]; then \
+	  echo "[object-storage-docs] require KUBECONFIG and OBJECT_STORAGE_INVENTORY_JOB"; exit 1; \
+	fi
+	@set -euo pipefail; pod="$$( $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pods \
+	  -l "job-name=$(OBJECT_STORAGE_INVENTORY_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  [ -n "$$pod" ] || { echo "[object-storage-docs] Job Pod is absent"; exit 1; }; \
+	  $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) exec "$$pod" -- /bin/bash -ceu 'shopt -s nullglob; for phase in provisional fenced; do for side in source destination; do files=(/evidence/docs-checkpoint-v2/$$phase/$$side/index-receipt-*.json); if [ "$${#files[@]}" -gt 0 ]; then jq -s --arg phase "$$phase" --arg side "$$side" '\''{phase:$$phase,side:$$side,pages:length,objects:(map(.objects)|add//0),bytes:(map(.bytes)|add//0)}'\'' "$${files[@]}"; fi; done; done'
+
+.PHONY: object-storage-inventory-preprod-fetch
+object-storage-inventory-preprod-fetch: ## Fetch receipts without printing them (requires JOB and EVIDENCE_DIR)
+	@if [ -z "$$KUBECONFIG" ] || [ -z "$(OBJECT_STORAGE_INVENTORY_JOB)" ] || \
+	  [ -z "$(OBJECT_STORAGE_INVENTORY_EVIDENCE_DIR)" ]; then \
+	  echo "[object-storage-inventory] require KUBECONFIG, OBJECT_STORAGE_INVENTORY_JOB and OBJECT_STORAGE_INVENTORY_EVIDENCE_DIR"; \
+	  exit 1; \
+	fi
+	@set -euo pipefail; destination="$(OBJECT_STORAGE_INVENTORY_EVIDENCE_DIR)"; \
+	  [ ! -e "$$destination" ] || { echo "[object-storage-inventory] evidence destination already exists"; exit 1; }; \
+	  pod="$$( $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pods \
+	    -l "job-name=$(OBJECT_STORAGE_INVENTORY_JOB)" -o jsonpath='{.items[0].metadata.name}' )"; \
+	  [ -n "$$pod" ] || { echo "[object-storage-inventory] Job Pod is absent"; exit 1; }; \
+	  ready="$$( $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) get pod "$$pod" \
+	    -o jsonpath='{.status.containerStatuses[0].ready}' )"; \
+	  [ "$$ready" = true ] || { echo "[object-storage-inventory] evidence is not ready"; exit 1; }; \
+	  mkdir -p "$$destination"; \
+	  while IFS= read -r remote; do \
+	    relative="$${remote#/evidence/}"; \
+	    case "$$relative" in raw-checkpoint/*|docs-checkpoint/*|docs-checkpoint-v2/*|docs-companion-empty/*|docs-conditional-write-proof.json|docs-expected-manifest.json|reports/*|export-ready/*) ;; \
+	      *) echo "[object-storage-inventory] refused unexpected evidence path"; exit 1 ;; \
+	    esac; \
+	    mkdir -p "$$destination/$$(dirname "$$relative")"; \
+	    $(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) exec "$$pod" -- \
+	      cat "$$remote" >"$$destination/$$relative"; \
+	  done < <($(KUBECTL) -n $(OBJECT_STORAGE_INVENTORY_NAMESPACE) exec "$$pod" -- \
+	    find /evidence -type f -print); \
+	  cd "$$destination"; \
+	  find . -type f ! -name SHA256SUMS -print0 | LC_ALL=C sort -z | \
+	    xargs -0 -r sha256sum >SHA256SUMS; \
+	  echo "[object-storage-inventory] evidence fetched and hashed at $$destination"
 
 .PHONY: deploy-db-migrate-k8s
 deploy-db-migrate-k8s: ## Run the one-shot DB migrator Job in the live namespace
