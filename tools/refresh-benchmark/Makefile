@@ -16,6 +16,7 @@ T1_COMMIT_V3 := 8f10ba1690a67e223851a467508f06e59d2ec668
 KEYRING_SOURCE := /home/antoinefa/.sentropic/llm-mesh-keyring
 BASELINE_GOLD := $(MAIN_ROOT)/.lanes/conductor/tmp/bench-llm/bench/v2/gold.json
 PREFLIGHT_FILE ?= preflight-before.json
+PREFLIGHT_MODEL ?= gpt-5.6-sol
 
 .PHONY: test test-v3 test-v4 test-score-v3 score-v3 freeze-blind-v3 runtime-text freeze-v3 prepare-prompts-v3 run-v3 run-v4 preflight-v3 run-v3-sol-normal run-v4-all quota inspect-validation
 
@@ -136,14 +137,14 @@ run-v4-all:
 	  '$(MAKE) run-v4 DOC="$$1" VARIANT="$(VARIANT)" ENV=test-t1-model-benchmark' _
 
 preflight-v3:
-	test "$(ENV)" = "test-refresh-benchmark"
+	test "$(ENV)" = "test-refresh-benchmark" -o "$(ENV)" = "test-t1-model-benchmark"
 	docker run --rm --tmpfs /workspace --tmpfs /run \
 	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  --mount type=bind,source=$(V3_RESULTS),target=/results \
 	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
 	  -e BENCHMARK_PREFLIGHT_OUTPUT=/results/$(PREFLIGHT_FILE) \
-	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_MODEL=gpt-5.6-sol \
+	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_MODEL=$(PREFLIGHT_MODEL) \
 	  -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec node tools/refresh-benchmark/codex-preflight.mjs'
 
@@ -187,7 +188,7 @@ quota:
 	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
-	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_MODEL=gpt-5.6-sol \
+	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) -e BENCHMARK_MODEL=$(PREFLIGHT_MODEL) \
 	  -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring && exec node tools/refresh-benchmark/codex-preflight.mjs'
 
