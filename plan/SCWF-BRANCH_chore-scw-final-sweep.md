@@ -119,7 +119,7 @@
     - [x] PREPROD final live gate: MinIO resources and consumers absent; API and refresh bindings resolve only to dedicated OVH coordinates and credentials; TEM retained.
   - [x] PREPROD MinIO StatefulSet, Service, 40Gi PVC and six ingress policies are absent; its non-secret before/after receipt remains on the checkpoint PVC.
   - [x] PROD MinIO resources are absent; the 1Gi checkpoint PVC and canonical recovery evidence remain available.
-- [x] Lot 5: retire nine environment-specific migration Job manifests, fail-close their launch targets, unship their tool ConfigMaps, and enforce non-restoration in the binding gate.
+- [x] Lot 5: retire nine environment-specific migration Job manifests, fail-close their ten Make launch targets and eight direct legacy graphify/grounding tools, unship their tool ConfigMaps, and enforce non-restoration in the binding gate.
 
 Audit checkpoint: inventory, file map, and acceptance gates are recorded in
 `docs/architecture/scw-final-sweep.md`. Strengthened PROD Job `vz8kd` records

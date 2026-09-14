@@ -60,11 +60,13 @@ rollout settled after restoring those references and the explicit TEM API base
 URL. No Secret value was printed or recorded.
 
 The environment-specific inventory, proof, and copy Job manifests used during
-the transition are now removed. Their Make launch targets fail closed, the
-kustomizations no longer package migration tool ConfigMaps, and the binding
-gate rejects restoration of any of the nine retired manifests. Generic
-migration code remains only as a hermetic regression and receipt-validation
-surface. Read-only status and evidence custody paths remain available.
+the transition are now removed. Their Make launch targets fail closed, as do
+the eight direct legacy graphify/grounding tools that could bypass those
+targets. The kustomizations no longer package migration tool ConfigMaps, and
+the binding gate rejects restoration or rearming of these paths and their old
+launch instructions. Generic migration code remains only as a hermetic
+regression and receipt-validation surface. Read-only status and evidence
+custody paths remain available.
 
 ## Historical audit baseline
 
