@@ -1,0 +1,383 @@
+```json
+{
+  "contract_version": "immo-pv-extraction-v8",
+  "type": "Graphify Extraction",
+  "nodes": [
+    {
+      "id": "src-001",
+      "label": "Projet d'ordre du jour – Séance ordinaire 14 septembre 2026 – Lac-des-Seize-Îles",
+      "file_type": "document",
+      "node_type": "Source",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "status": "candidate",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "sha256": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "date": "2026-09-14",
+      "municipality": "lac-des-seize-iles",
+      "citySlug": "lac-des-seize-iles",
+      "url": "https://www.lac-des-seize-iles.com/fichiersUpload/fichiers/20260911113130-projet-odj-septembre-2026.pdf",
+      "sourceUrl": "https://www.lac-des-seize-iles.com/fichiersUpload/fichiers/20260911113130-projet-odj-septembre-2026.pdf",
+      "pdfPath": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "sourceKind": "pv",
+      "sourceType": "pv",
+      "format": "pdf",
+      "slug": "odj-septembre-2026-lac-des-seize-iles",
+      "rawRef": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Séance ordinaire du conseil de la Municipalité de Lac-des-Seize-Îles\nLundi 14 septembre 2026 à 18 h"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-08",
+      "label": "Règlement numéro 2026-08 régissant l'occupation du domaine public municipal",
+      "file_type": "document",
+      "node_type": "Bylaw",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "status": "candidate",
+      "numero": "2026-08",
+      "bylawNumber": "2026-08",
+      "number": "2026-08",
+      "title": "Règlement régissant l'occupation du domaine public municipal",
+      "titre": "Règlement régissant l'occupation du domaine public municipal",
+      "municipality": "lac-des-seize-iles",
+      "citySlug": "lac-des-seize-iles",
+      "meetingDate": "2026-09-14",
+      "stage": "1er_projet",
+      "stade": "1er_projet",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l'occupation du domaine public municipal"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-102-01",
+      "label": "Règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102",
+      "file_type": "document",
+      "node_type": "Bylaw",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "status": "candidate",
+      "numero": "2026-102-01",
+      "bylawNumber": "2026-102-01",
+      "number": "2026-102-01",
+      "title": "Règlement modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la contribution pour fins de parcs, de terrains de jeux ou d'espaces naturels",
+      "titre": "Règlement modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la contribution pour fins de parcs, de terrains de jeux ou d'espaces naturels",
+      "municipality": "lac-des-seize-iles",
+      "citySlug": "lac-des-seize-iles",
+      "meetingDate": "2026-09-14",
+      "stage": "adoption",
+      "stade": "adoption",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2019-102",
+      "label": "Règlement sur le lotissement numéro 2019-102",
+      "file_type": "document",
+      "node_type": "Bylaw",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "status": "candidate",
+      "numero": "2019-102",
+      "bylawNumber": "2019-102",
+      "number": "2019-102",
+      "title": "Règlement sur le lotissement",
+      "titre": "Règlement sur le lotissement",
+      "municipality": "lac-des-seize-iles",
+      "citySlug": "lac-des-seize-iles",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la"
+        }
+      ]
+    },
+    {
+      "id": "derog-ddm2026-058",
+      "label": "Dérogation mineure – 252, chemin du Village (DDM2026-058)",
+      "file_type": "document",
+      "node_type": "DesignationEvent",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "status": "candidate",
+      "kind": "derogation",
+      "eventType": "derogation",
+      "type_evenement": "derogation",
+      "dossier": "DDM2026-058",
+      "numeroDossier": "DDM2026-058",
+      "municipality": "lac-des-seize-iles",
+      "citySlug": "lac-des-seize-iles",
+      "meetingDate": "2026-09-14",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-09-14",
+      "description": "Dérogation mineure concernant le 252, chemin du Village",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)"
+        }
+      ]
+    },
+    {
+      "id": "signal-avis-motion-2026-08",
+      "label": "Avis de motion – Projet de règlement 2026-08 – occupation du domaine public",
+      "file_type": "document",
+      "node_type": "Signal",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "status": "candidate",
+      "category": "reglementation",
+      "categorie": "reglementation",
+      "kind": "avis_motion",
+      "meetingDate": "2026-09-14",
+      "date": "2026-09-14",
+      "etape": "avis_motion",
+      "etape_date": "2026-09-14",
+      "description": "Avis de motion pour le projet de règlement numéro 2026-08 régissant l'occupation du domaine public municipal",
+      "municipality": "lac-des-seize-iles",
+      "citySlug": "lac-des-seize-iles",
+      "reglement_number": "2026-08",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l'occupation du domaine public municipal"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "src-001",
+      "target": "bylaw-2026-08",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-001"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l'occupation du domaine public municipal"
+        }
+      ]
+    },
+    {
+      "source": "src-001",
+      "target": "bylaw-2026-102-01",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-002"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la"
+        }
+      ]
+    },
+    {
+      "source": "src-001",
+      "target": "bylaw-2019-102",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-002"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la"
+        }
+      ]
+    },
+    {
+      "source": "src-001",
+      "target": "derog-ddm2026-058",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-003"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)"
+        }
+      ]
+    },
+    {
+      "source": "src-001",
+      "target": "signal-avis-motion-2026-08",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-001"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l'occupation du domaine public municipal"
+        }
+      ]
+    },
+    {
+      "source": "src-001",
+      "target": "bylaw-2026-08",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-004"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3.7 Dépôt du projet de règlement numéro 2026-08 régissant l'occupation du domaine public municipal"
+        }
+      ]
+    },
+    {
+      "source": "src-001",
+      "target": "bylaw-2026-102-01",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-002"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la"
+        }
+      ]
+    },
+    {
+      "source": "src-001",
+      "target": "derog-ddm2026-058",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-003"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2026-102-01",
+      "target": "bylaw-2019-102",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-002"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la"
+        }
+      ]
+    },
+    {
+      "source": "derog-ddm2026-058",
+      "target": "signal-avis-motion-2026-08",
+      "relation": "raises_signal",
+      "confidence": "AMBIGUOUS",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-001"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l'occupation du domaine public municipal"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2026-102-01",
+      "target": "src-001",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-002"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la"
+        }
+      ]
+    },
+    {
+      "source": "derog-ddm2026-058",
+      "target": "src-001",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "evidence_refs": ["ev-003"],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-001",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "rawRef": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "sourceUrl": "https://www.lac-des-seize-iles.com/fichiersUpload/fichiers/20260911113130-projet-odj-septembre-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l'occupation du domaine public municipal"
+    },
+    {
+      "id": "ev-002",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "rawRef": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "sourceUrl": "https://www.lac-des-seize-iles.com/fichiersUpload/fichiers/20260911113130-projet-odj-septembre-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la contribution pour fins de parcs, de terrains de jeux ou d'espaces naturels"
+    },
+    {
+      "id": "ev-003",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "rawRef": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "sourceUrl": "https://www.lac-des-seize-iles.com/fichiersUpload/fichiers/20260911113130-projet-odj-septembre-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)"
+    },
+    {
+      "id": "ev-004",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "rawRef": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "sourceUrl": "https://www.lac-des-seize-iles.com/fichiersUpload/fichiers/20260911113130-projet-odj-septembre-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "3.7 Dépôt du projet de règlement numéro 2026-08 régissant l'occupation du domaine public municipal"
+    },
+    {
+      "id": "ev-005",
+      "source_file": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "rawRef": "raw/proces-verbaux-lac-des-seize-iles/cas/6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96.pdf",
+      "docSha": "6bfd190a0aff3ea2679edf5bdf7e727161d24052ce08c0c385427b0ec3c07a96",
+      "sourceUrl": "https://www.lac-des-seize-iles.com/fichiersUpload/fichiers/20260911113130-projet-odj-septembre-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "Séance ordinaire du conseil de la Municipalité de Lac-des-Seize-Îles\nLundi 14 septembre 2026 à 18 h"
+    }
+  ],
+  "input_tokens": 3100,
+  "output_tokens": 1850
+}
+```
