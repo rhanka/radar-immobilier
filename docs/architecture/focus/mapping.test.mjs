@@ -1,17 +1,33 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { sceneFor } from './scenes.js';
+import { sceneFor, CARD } from './scenes.js';
 
 const { graphs, manifest } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
-const order = ['storage-before-20260809', 'storage-after-20260913', 'refresh-before-20260809', 'refresh-after-20260913'];
+const order = ['hosting-july-2026', 'hosting-august-20260810', 'hosting-today-20260913', 'pipeline-before-20260810', 'pipeline-after-20260913'];
 
-test('four canonical Mermaid graphs map bijectively to four native scenes', () => {
+test('five canonical Mermaid graphs map bijectively to five native scenes', () => {
   assert.deepEqual(graphs.map(graph => graph.id), order);
   assert.deepEqual(manifest.graphOrder, order);
-  assert.equal(new Set(graphs.map(graph => graph.sceneHash)).size, 4);
+  assert.equal(new Set(graphs.map(graph => graph.sceneHash)).size, 5);
   for (const graph of graphs) {
     const scene = sceneFor(graph);
+    // Baseline orientation is LR, so every scene stays wider than tall. v11: an
+    // annex page prints the whole scene on one A4 portrait page, fitted to the
+    // page width exactly as the body figure is. Nothing is split any more, so
+    // the only geometric requirement is that the width — not the height — sets
+    // the scale, otherwise the annex would show the scene smaller than the
+    // half-page figure it is supposed to complete.
+    assert.ok(scene.canvas.width > scene.canvas.height,
+      `${graph.id}: ${scene.canvas.width}x${scene.canvas.height} is not landscape`);
+    const annexImageWidthPx = (210 - 2 * 10) * 96 / 25.4 - 2;
+    const annexImageHeightPx = (297 - 2 * 10) * 96 / 25.4 - 54 - 168 - 2;
+    assert.ok(scene.canvas.width / scene.canvas.height >= annexImageWidthPx / annexImageHeightPx,
+      `${graph.id}: ${scene.canvas.width}x${scene.canvas.height} would be height-bound on a portrait annex page`);
+    for (const node of scene.nodes.filter(item => !item.data.group)) {
+      assert.deepEqual({ width: node.width, height: node.height }, CARD[node.data.card],
+        `${graph.id}/${node.id}: card box differs from template ${node.data.card}`);
+    }
     assert.equal(scene.nodes.length, graph.nodes.length + graph.groups.length);
     assert.equal(scene.edges.length, graph.edges.length);
     assert.deepEqual(new Set(scene.nodes.map(node => node.id)), new Set([...graph.nodes, ...graph.groups].map(node => node.id)));
@@ -60,6 +76,6 @@ test('canonical projection retains exact identity, containment and relationships
     const expectedNodes = [...graph.nodes, ...graph.groups].map(item => ({ id: item.id, parentId: item.parent,
       evidenceClass: item.metadata.evidenceClass, runtimeState: item.metadata.runtimeState, repo: item.metadata.repo })).sort((a, b) => a.id.localeCompare(b.id));
     assert.deepEqual(projectedNodes, expectedNodes);
-    assert.deepEqual(graph.projection.edges.map(edge => edge.id), graph.edges.map(edge => edge.id).sort());
+    assert.deepEqual(graph.projection.edges.map(edge => edge.id), graph.edges.map(edge => edge.id).sort((a, b) => a.localeCompare(b)));
   }
 });

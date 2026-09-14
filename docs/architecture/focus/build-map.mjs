@@ -29,14 +29,14 @@ for (const name of ['decision-dossier', 'transitions', 'transitions-target', 'co
 docs.architecture = architecture; docs.proposal = proposal; docs['transitions-target'] = transitionTargets;
 const presentation = await readFile('presentation-fr.js', 'utf8');
 const choices = await readFile('choices.js', 'utf8');
-const rendererSources = Object.fromEntries(await Promise.all(['ServiceNode.svelte', 'ServiceIcon.svelte', 'service-icons.js', 'Subflow.svelte', 'scenes.js', 'style.css', 'render-mermaid.mjs', 'mermaid-labels.mjs'].map(async name => [name, await readFile(name, 'utf8')])));
+const rendererSources = Object.fromEntries(await Promise.all(['Flow.svelte', 'RoutedEdge.svelte', 'ServiceNode.svelte', 'ServiceIcon.svelte', 'service-icons.js', 'Subflow.svelte', 'scenes.js', 'style.css', 'render-mermaid.mjs', 'mermaid-labels.mjs'].map(async name => [name, await readFile(name, 'utf8')])));
 const manifest = { schema: 'immo-focus-mermaid-map/v3', architectureHash: sha256(architecture),
   proposalHash: sha256(proposal), transitionTargetsHash: sha256(transitionTargets), dossierHash: sha256(docs['decision-dossier']),
-  reference: 'docs/architecture.md / two dated transitions',
+  reference: 'Reference Focus layout restored from tmp/architecture-preprod-transition; twin artifact checked in tmp/architecture-platform',
   serviceRendererHash: sha256(JSON.stringify(rendererSources)),
   presentationHash: sha256(presentation), choicesHash: sha256(choices), artifactInputHash: sha256(JSON.stringify({ docs, graphs, presentation, choices, rendererSources })),
-  mapping: 'Four complete canonical Mermaid graphs produce four native SvelteFlow scenes; subgraphs retain parentId.',
-  geometry: 'Native scenes render at scale(1); Chromium verifies compact cards, readable text and complete inventory.',
+  mapping: 'Five complete canonical Mermaid graphs produce five native SvelteFlow scenes; subgraphs retain parentId.',
+  geometry: 'Recursive Dagre graph placement and the reference Focus orthogonal router; Chromium verifies node-clear routes and labels, compact cards, readable text and complete inventory.',
   graphOrder: graphs.map(graph => graph.id),
   graphs: graphs.map(g => ({ id: g.id, pair: g.pair, date: g.date, sceneHash: g.sceneHash,
     projection: g.projection, nodes: g.nodes.length, edges: g.edges.length, subflows: g.groups.length })) };

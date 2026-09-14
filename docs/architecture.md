@@ -1,141 +1,333 @@
-# Architecture de référence — deux transitions datées
+# Architecture de référence — hébergement et pipeline
 
-Source canonique des quatre scènes Focus et rapport. Les états Git documentent
-des déclarations; seuls les reçus datés sont qualifiés comme observations.
+Source canonique des cinq scènes Focus et du rapport. Les cinq scènes dérivent
+du diagramme du dossier de décision `codex-13-sept`
+(`tmp/architecture-preprod-transition/docs/architecture/decision-focus.html`,
+vue « Architecture AVANT ») : même orientation `LR`, mêmes conteneurs
+(cluster Kubernetes, namespaces, Traefik/TLS, SSO sentropic, Geo, stockage
+objet, poste opérateur), mêmes composants. Les différences par scène sont
+datées et documentées dans `.remote/RAPPORT_V8_DIAGRAMMES.md`.
 
-## Paire A — stockage et registre de production
+## Série A — hébergement en trois états
 
-### `storage-before-20260809` — 9 août 2026
-
-```mermaid
-flowchart LR
-  A_USER["Navigateur utilisateur"] -.->|"Declared public route"| A_URL["immo.sent-tech.ca · declared"]
-  subgraph A_CLOUD["OVH BHS5 · production topology · declared"]
-    A_EDGE["Shared ingress / TLS · declared"]
-    subgraph A_IMMO["Immo · radar-immobilier · declared"]
-      A_UI["radar-ui · declared"] -.->|"Declared /api"| A_API["radar-api · declared"]
-      A_API -.->|"Declared SQL"| A_DB[("PostgreSQL / PostGIS · declared")]
-      A_API -.->|"Declared API object binding"| A_MINIO[("MinIO + PVC · raw / derived docs · declared")]
-      A_CLIENTS["Graph/scrape storage clients · declared"]
-    end
-    A_SSO["Sentropic SSO · auth.sent-tech.ca · declared"]
-    A_GEO["Geo OGC API · declared dependency"]
-    A_CAPACITY["Observed platform note · two b3-8 by August 9 · capacity only"]
-    A_EDGE -.->|"Declared ingress"| A_UI
-    A_EDGE -.->|"Declared ingress"| A_SSO
-    A_UI -.->|"Declared OGC collections"| A_GEO
-    A_API -.->|"Declared OIDC / JWKS"| A_SSO
-  end
-  A_URL -.->|"Declared ingress route"| A_EDGE
-  A_USER -.->|"Declared login redirects"| A_SSO
-  A_GEO -.->|"Declared client binding"| A_GEOS3[("OVH sentropic-geo · declared")]
-  A_CLIENTS -.->|"Declared graph binding; suspended"| A_SCWGRAPH[("SCW docs-pocs · graph · declared")]
-  A_CLIENTS -.->|"Declared scrape contract; secret not audited"| A_SCWDOCS[("SCW docs · raw / parsed · declared")]
-  A_SCWREG["SCW application registry · declared"] -.->|"Declared image source"| A_API
-  A_SCWREG -.->|"Declared image source"| A_UI
-  A_SCWREG -.->|"Declared best-effort mirror; success unknown"| A_GHCR["GHCR mirror · declared"]
-  A_API -.->|"Transactional email · declared"| A_TEM["SCW TEM · declared residual until validated replacement"]
-```
-
-Reconstruction documentaire: pointillés = `declared`, pas trafic observé.
-
-### `storage-after-20260913` — 13 septembre 2026
+### `hosting-july-2026` — juillet 2026
 
 ```mermaid
 flowchart LR
-  A_USER["Navigateur utilisateur"] --> A_URL["immo.sent-tech.ca"]
-  subgraph A_CLOUD["OVH BHS5 · production · no one-node cutover claimed"]
-    A_EDGE["Shared ingress / TLS"]
-    subgraph A_IMMO["Immo · radar-immobilier"]
-      A_UI["radar-ui"] -->|"/api"| A_API["radar-api"]
-      A_API -->|"SQL"| A_DB[("PostgreSQL / PostGIS")]
-      A_CLIENTS["Graph/scrape storage clients · OVH bindings"]
+  A_USER["Navigateur utilisateur"]
+  A_URL["immo.sent-tech.ca"]
+  subgraph A_SCW["Scaleway · cluster Kubernetes"]
+    A_EDGE["Load balancer → Traefik / TLS"]
+    subgraph A_PROD["PRODUCTION · namespaces"]
+      A_MINIO["[MINIO] radar-minio · PVC"]
+      A_RAW[("[RAW] radar-immobilier-raw")]
+      A_DOCS[("[DOCS] radar-immobilier-docs")]
+      A_UI["[UI] radar-ui"]
+      A_API["[API] radar-api"]
+      A_DB[("[DB] radar-postgres")]
+      A_SCRAPE["[SCRAPE] radar-refresh-scrape"]
+      A_PROJECT["[PROJECT] refresh-projection"]
+      A_SSO["sentropic · auth-idp"]
+      A_SSO_DB[("[SSO-DB] PostgreSQL SSO")]
+      A_GEO["[GEO-API] geo-api · geo"]
+      A_GEO_DB[("[GEO-DB] geo / postgis")]
     end
-    A_SSO["Sentropic SSO · auth.sent-tech.ca"]
-    A_GEO["Geo OGC API · stable dependency"]
-    A_EDGE --> A_UI
-    A_EDGE --> A_SSO
-    A_UI -->|"OGC collections"| A_GEO
-    A_API <-->|"OIDC / JWKS"| A_SSO
   end
+  A_SCWREG["[SCW-REG] registre Scaleway"]
+  A_GRAPH_S3[("[GRAPH] radar-immobilier-graph")]
+  A_DOCS_S3[("[DOCS-POCS] docs-pocs")]
+  A_GEO_S3[("[GEO-S3] sentropic-geo")]
+  A_WS["[WS-IMMO] poste opérateur"]
+  A_TEM["[SCW-TEM] Scaleway TEM"]
+  A_USER --> A_URL
   A_URL --> A_EDGE
-  A_USER <-->|"Login redirects"| A_SSO
-  A_GEO --> A_GEOS3[("OVH sentropic-geo · unchanged")]
-  A_API -->|"Dedicated S3 binding; rolled out"| A_DOCS[("OVH radar-immobilier-docs · canonical store")]
-  A_CLIENTS -->|"GRAPH / SCRAPE coordinates observed"| A_DOCS
-  A_GHCR["GHCR application registry"] -->|"Integrated image source"| A_API
-  A_GHCR -->|"Integrated image source"| A_UI
-  A_API -->|"Transactional email · retained"| A_TEM["SCW TEM · authorized residual until validated replacement"]
+  A_USER <-->|"Redirection login"| A_SSO
+  A_EDGE --> A_UI
+  A_UI -->|"/api"| A_API
+  A_API -->|"SQL"| A_DB
+  A_API -->|"objets RAW"| A_RAW
+  A_API -->|"documents dérivés"| A_DOCS
+  A_SCRAPE -->|"étapes 1 et 2"| A_RAW
+  A_SCRAPE -->|"corpus et graphe"| A_GRAPH_S3
+  A_GRAPH_S3 --> A_PROJECT
+  A_PROJECT -->|"étape 4 · upsert"| A_DB
+  A_WS -->|"étape 3 · Graphify local"| A_GRAPH_S3
+  A_API -->|"lecture PDF source"| A_DOCS_S3
+  A_API <-->|"OIDC / JWKS"| A_SSO
+  A_SSO -->|"sessions"| A_SSO_DB
+  A_UI -->|"OGC"| A_GEO
+  A_GEO -->|"SQL"| A_GEO_DB
+  A_GEO -->|"lecture produits"| A_GEO_S3
+  A_MINIO -->|"bucket sur PVC"| A_RAW
+  A_MINIO -->|"bucket sur PVC"| A_DOCS
+  A_SCWREG -->|"images"| A_API
+  A_SCWREG -->|"images"| A_UI
+  A_SCWREG -->|"images"| A_GEO
+  A_API -->|"courriel transactionnel"| A_TEM
 ```
 
-Cutover runtime observé à 23:39Z; parité finale et balayage global restent
-ouverts. SCW TEM demeure l'exception résiduelle jusqu'à remplacement validé.
+Point de départ owner : Scaleway pur, avant la décision de migrer vers OVH;
+rien n'était engagé vers OVH. Aucune préproduction n'existe encore : la scène
+est le diagramme de référence privé de son conteneur `PRÉPRODUCTION`.
 
-## Paire B — rafraîchissement PV vers Signal
-
-### `refresh-before-20260809` — 9 août 2026
+### `hosting-august-20260810` — 10 août 2026
 
 ```mermaid
 flowchart LR
-  B_CITY["Municipal PV sources"] --> B_COLLECT["Immo collect / parse tools · manual invocation"]
-  B_COLLECT --> B_CORPUS[("PV corpus · CAS / parsed / manifests")]
-  subgraph B_WORKSTATION["Operator workstation · manual agent orchestration"]
-    B_OPERATOR["Operator"] --> B_EXTRACT["Graphify agents · model/effort not historically attested"]
-  end
-  B_CORPUS -->|"Read source evidence"| B_EXTRACT
-  B_EXTRACT -->|"Validated graph output"| B_GRAPH[("Published graph contract · city/latest.json")]
-  subgraph B_CLOUD["OVH · production Immo"]
-    B_PROJECT["Projection Job · manual"] -->|"Atomic upsert"| B_DB[("PostgreSQL graph")]
-    B_SCHEDULE["Scrape / projection CronJobs · SUSPENDED"]
-    B_DB --> B_API["radar-api"]
-    B_API --> B_UI["radar-ui"]
-  end
-  B_GRAPH --> B_PROJECT
-  B_OPERATOR -.->|"Manual launch; no scheduled success inferred"| B_PROJECT
-  B_SCHEDULE -.->|"Declared only"| B_COLLECT
-  B_SCHEDULE -.->|"Declared only"| B_PROJECT
-  B_UI -->|"immo.sent-tech.ca"| B_USER["Navigateur utilisateur"]
-  B_TEM["Transverse exception · SCW TEM retained until validated replacement · outside PV extraction"]
-```
-
-Placement de collecte inconnu; corpus et graphe restent neutres fournisseur.
-
-### `refresh-after-20260913` — 13 septembre 2026
-
-```mermaid
-flowchart LR
-  B_CITY["Municipal PV sources"]
-  B_CORPUS[("Durable PV corpus / checkpoints")]
-  subgraph B_WORKSTATION["Administrator workstation · not an extraction worker"]
-    B_OPERATOR["Operator · enrollment / configuration only"]
-  end
-  B_OPERATOR -.-> B_IDENTITY["Workload enrollment / durable keyring"]
-  subgraph B_CLOUD["OVH · production Immo"]
-    subgraph B_REFRESH["New refresh workload · PRODUCTION DORMANT until promotion"]
-      B_CRON["radar-refresh-pv · gated CronJob"] -.-> B_DRIVER["Causal refresh run"]
-      B_COLLECT["Immo collect / parse"]
-      B_DRIVER -.-> B_EXTRACT["Graphify 0.18.0 + llm-mesh · in-process libraries"]
-      B_EXTRACT -.-> B_VALIDATE["Typed Signal / exact PDF validation"]
-      B_PROJECT["Atomic projection · same causal run"]
+  A_USER["Navigateur utilisateur"]
+  A_URL["immo.sent-tech.ca"]
+  subgraph A_OVH["OVHcloud BHS · cluster poc-ca"]
+    A_EDGE["Load balancer → Traefik / TLS"]
+    subgraph A_PROD["PRODUCTION · namespaces"]
+      A_MINIO["[MINIO] radar-minio · PVC"]
+      A_RAW[("[RAW] radar-immobilier-raw")]
+      A_DOCS[("[DOCS] radar-immobilier-docs")]
+      A_UI["[UI] radar-ui"]
+      A_API["[API] radar-api"]
+      A_DB[("[DB] radar-postgres")]
+      A_SCRAPE["[SCRAPE] radar-refresh-scrape"]
+      A_PROJECT["[PROJECT] refresh-projection"]
+      A_SSO["sentropic · auth-idp"]
+      A_SSO_DB[("[SSO-DB] PostgreSQL SSO")]
+      A_GEO["[GEO-API] geo-api · geo"]
+      A_GEO_DB[("[GEO-DB] geo / postgis")]
     end
-    B_PROJECT -.-> B_DB[("PostgreSQL graph")]
-    B_DB --> B_API["radar-api"]
-    B_API --> B_UI["radar-ui"]
   end
-  B_CITY -.-> B_COLLECT
-  B_COLLECT -.-> B_CORPUS
-  B_DRIVER -.-> B_COLLECT
-  B_CORPUS -.-> B_EXTRACT
-  B_IDENTITY -.-> B_EXTRACT
-  B_EXTRACT -.-> B_MODEL["Subscription model · to ratify through M1"]
-  B_VALIDATE -.-> B_GRAPH[("Canonical graph · validated publication")]
-  B_GRAPH -.-> B_PROJECT
-  B_UI -->|"immo.sent-tech.ca"| B_USER["Navigateur utilisateur"]
-  B_TEM["Transverse exception · SCW TEM retained until validated replacement · outside PV extraction"]
+  A_REG["[REG] registre applicatif"]
+  A_GRAPH_S3[("[GRAPH] radar-immobilier-graph")]
+  A_DOCS_S3[("[DOCS-POCS] docs-pocs")]
+  A_GEO_S3[("[GEO-S3] sentropic-geo")]
+  A_WS["[WS-IMMO] poste opérateur"]
+  A_TEM["[SCW-TEM] Scaleway TEM"]
+  A_USER --> A_URL
+  A_URL --> A_EDGE
+  A_USER <-->|"Redirection login"| A_SSO
+  A_EDGE --> A_UI
+  A_UI -->|"/api"| A_API
+  A_API -->|"SQL"| A_DB
+  A_API -->|"objets RAW"| A_RAW
+  A_API -->|"documents dérivés"| A_DOCS
+  A_SCRAPE -->|"étapes 1 et 2"| A_RAW
+  A_SCRAPE -->|"corpus et graphe"| A_GRAPH_S3
+  A_GRAPH_S3 --> A_PROJECT
+  A_PROJECT -->|"étape 4 · upsert"| A_DB
+  A_WS -->|"étape 3 · Graphify local"| A_GRAPH_S3
+  A_API -->|"lecture PDF source"| A_DOCS_S3
+  A_API <-->|"OIDC / JWKS"| A_SSO
+  A_SSO -->|"sessions"| A_SSO_DB
+  A_UI -->|"OGC"| A_GEO
+  A_GEO -->|"SQL"| A_GEO_DB
+  A_GEO -->|"lecture produits"| A_GEO_S3
+  A_MINIO -->|"bucket sur PVC"| A_RAW
+  A_MINIO -->|"bucket sur PVC"| A_DOCS
+  A_REG -.->|"images"| A_API
+  A_REG -.->|"images"| A_UI
+  A_REG -.->|"images"| A_GEO
+  A_API -->|"courriel transactionnel"| A_TEM
 ```
 
-Préproduction acceptée sur trial Luna high et rejeu exact. Production dormante
-jusqu'à promotion; modèle à ratifier par M1. TEM est hors chemin d'extraction.
+État owner au 10 août : OVH accueille l'essentiel, mais le stockage objet
+applicatif passe encore par MinIO. Le registre applicatif est en bascule
+Scaleway → GHCR; la date exacte de bascule reste non-vérifiée à cette date, d'où
+les arêtes d'images en pointillés. Le bucket `docs-pocs` est encore sur Scaleway.
+
+### `hosting-today-20260913` — 13 septembre 2026
+
+```mermaid
+flowchart LR
+  A_USER["Navigateur utilisateur"]
+  A_PP_URL["preprod.immo.sent-tech.ca"]
+  A_URL["immo.sent-tech.ca"]
+  subgraph A_OVH["OVHcloud BHS · cluster poc-ca"]
+    A_EDGE["Load balancer → Traefik / TLS"]
+    subgraph A_PREPROD["PRÉPRODUCTION · sans MinIO"]
+      A_PP_UI["[PP-UI] radar-ui"]
+      A_PP_API["[PP-API] radar-api"]
+      A_PP_DB[("[PP-DB] radar-postgres")]
+      A_PP_SCRAPE["[PP-SCRAPE] refresh-scrape"]
+      A_PP_PROJECT["[PP-PROJECT] refresh-projection"]
+      A_PP_SSO["sentropic-preprod · auth-idp"]
+      A_PP_SSO_DB[("[PP-SSO-DB] PostgreSQL SSO")]
+      A_PP_GEO["[PP-GEO] geo-api · geo-preprod"]
+    end
+    subgraph A_PROD["PRODUCTION · sans MinIO"]
+      A_PR_UI["[PR-UI] radar-ui"]
+      A_PR_API["[PR-API] radar-api"]
+      A_PR_DB[("[PR-DB] radar-postgres")]
+      A_PR_REFRESH["[PR-REFRESH] refresh production"]
+      A_SSO["sentropic · auth-idp"]
+      A_SSO_DB[("[PR-SSO-DB] PostgreSQL SSO")]
+      A_GEO["[GEO-API] geo-api · geo"]
+      A_GEO_DB[("[GEO-DB] geo / postgis")]
+    end
+  end
+  A_GHCR["[GHCR] registres applicatifs"]
+  A_PP_RAW[("[PP-RAW-OVH] raw préprod")]
+  A_PP_S3[("[PP-DOCS-OVH] docs préprod")]
+  A_PP_GRAPH[("[PP-GRAPH] graph-preprod")]
+  A_PR_RAW[("[PR-RAW-OVH] raw production")]
+  A_PR_S3[("[PR-DOCS-OVH] docs production")]
+  A_PP_GEO_S3[("[PP-GEO-S3] geo-preprod")]
+  A_GEO_S3[("[GEO-S3] sentropic-geo")]
+  A_WS["[WS-ADMIN] poste opérateur"]
+  A_TEM["[SCW-TEM] Scaleway TEM"]
+  A_USER --> A_PP_URL
+  A_USER --> A_URL
+  A_PP_URL --> A_EDGE
+  A_URL --> A_EDGE
+  A_USER <-->|"Redirection login"| A_SSO
+  A_EDGE --> A_PP_UI
+  A_EDGE --> A_PR_UI
+  A_PP_UI -->|"/api"| A_PP_API
+  A_PP_API -->|"SQL"| A_PP_DB
+  A_PP_API -->|"objets RAW"| A_PP_RAW
+  A_PP_API -->|"documents canoniques"| A_PP_S3
+  A_PP_SCRAPE -->|"étapes 1 et 2"| A_PP_GRAPH
+  A_PP_GRAPH --> A_PP_PROJECT
+  A_PP_PROJECT -->|"étape 4 · upsert"| A_PP_DB
+  A_PP_API <-->|"OIDC / JWKS"| A_PP_SSO
+  A_PP_SSO -->|"sessions"| A_PP_SSO_DB
+  A_PP_UI -->|"OGC"| A_PP_GEO
+  A_PP_GEO -->|"lecture produits"| A_PP_GEO_S3
+  A_PR_UI -->|"/api"| A_PR_API
+  A_PR_API -->|"SQL"| A_PR_DB
+  A_PR_API -->|"objets RAW"| A_PR_RAW
+  A_PR_API -->|"documents canoniques"| A_PR_S3
+  A_PR_REFRESH -->|"étapes 1 à 4"| A_PR_DB
+  A_PR_API <-->|"OIDC / JWKS"| A_SSO
+  A_SSO -->|"sessions"| A_SSO_DB
+  A_PR_UI -->|"OGC"| A_GEO
+  A_GEO -->|"SQL"| A_GEO_DB
+  A_GEO -->|"lecture produits"| A_GEO_S3
+  A_GHCR -->|"images"| A_PP_API
+  A_GHCR -->|"images"| A_PR_API
+  A_GHCR -->|"images"| A_GEO
+  A_WS -.->|"administration"| A_PP_API
+  A_PR_API -->|"courriel transactionnel"| A_TEM
+```
+
+MinIO, son Service et ses PVC sont absents en préproduction et production.
+API, graphe et scrape utilisent OVH S3. TEM demeure l'unique exception
+Scaleway du périmètre radar. Le poste opérateur reste présent mais sans
+exécution LLM de routine.
+
+## Série B — pipeline PV → Signaux, avant/après intégration au cluster
+
+### `pipeline-before-20260810` — avant intégration
+
+```mermaid
+flowchart LR
+  B_CITY["Sources municipales · PV"]
+  subgraph B_WORKSTATION["Poste opérateur · hors cluster"]
+    B_OPS["[WS-OPS] poste opérateur"]
+    B_OPERATOR["Opérateur"]
+    B_EXTRACT["Étape 3 · Graphify 2.3 local"]
+    B_KEYS["Clés LLM hors cluster"]
+  end
+  subgraph B_OVH["OVHcloud BHS · cluster poc-ca"]
+    B_EDGE["Load balancer → Traefik / TLS"]
+    subgraph B_PROD["PRODUCTION · namespaces"]
+      B_COLLECT["Étape 1 · collecte"]
+      B_PARSE["Étape 2 · parse / exploit"]
+      B_PROJECT["Étape 4 · projection manuelle"]
+      B_DB[("[DB] PostgreSQL graphe")]
+      B_API["[API] radar-api"]
+      B_UI["[UI] radar-ui"]
+    end
+  end
+  B_CORPUS[("Corpus PV · CAS / parsed")]
+  B_GRAPH[("Contrat de graphe publié")]
+  B_PROVIDERS["Fournisseurs LLM"]
+  B_SCHEDULE["Automatisation impossible"]
+  B_USER["Navigateur utilisateur"]
+  B_TEM["[SCW-TEM] Scaleway TEM"]
+  B_CITY --> B_COLLECT
+  B_COLLECT --> B_PARSE
+  B_PARSE --> B_CORPUS
+  B_OPERATOR -->|"pilotage"| B_OPS
+  B_OPS -->|"étape 3 sur le poste"| B_EXTRACT
+  B_CORPUS -->|"lecture des preuves"| B_EXTRACT
+  B_KEYS --> B_EXTRACT
+  B_EXTRACT -->|"appels depuis le poste"| B_PROVIDERS
+  B_EXTRACT -->|"graphe validé"| B_GRAPH
+  B_GRAPH --> B_PROJECT
+  B_OPS -.->|"lancement manuel"| B_COLLECT
+  B_OPS -.->|"lancement manuel"| B_PROJECT
+  B_PROJECT -->|"upsert atomique"| B_DB
+  B_DB --> B_API
+  B_API --> B_UI
+  B_EDGE --> B_UI
+  B_UI -->|"immo.sent-tech.ca"| B_USER
+  B_SCHEDULE -.->|"déclaré seulement"| B_COLLECT
+  B_SCHEDULE -.->|"déclaré seulement"| B_PROJECT
+```
+
+Les quatre étapes ratifiées sont visibles : 1 collecte, 2 parse/exploit,
+3 extraction LLM, 4 projection. Le **poste opérateur** est un conteneur explicite
+`WS-OPS` : on y voit ce qui s'y exécutait — l'étape 3 avec Graphify 2.3 en local
+et les clés fournisseur du poste — et ce qu'il pilotait à la main dans le cluster,
+la collecte (étape 1) puis la projection (étape 4). L'orchestration manuelle
+empêchait toute automatisation autonome de bout en bout.
+
+### `pipeline-after-20260913` — après intégration
+
+```mermaid
+flowchart LR
+  B_CITY["Sources municipales · PV"]
+  subgraph B_OVH["OVHcloud BHS · cluster poc-ca"]
+    B_EDGE["Load balancer → Traefik / TLS"]
+    subgraph B_PREPROD["PRÉPRODUCTION · acceptée"]
+      B_CRON["CronJob radar-refresh-pv"]
+      B_DRIVER["Run autonome in-cluster"]
+      B_COLLECT["Étape 1 · collecte intégrée"]
+      B_PARSE["Étape 2 · parse / exploit"]
+      B_GRAPHIFY["Étape 3 · Graphify 0.18.0"]
+      B_MESH["llm-mesh 0.19.1 in-process"]
+      B_VALIDATE["Validation Signal / PDF"]
+      B_PROJECT["Étape 4 · projection atomique"]
+      B_KEYRING["Keyring radar chiffré"]
+      B_DB[("[DB] PostgreSQL graphe")]
+      B_API["[API] radar-api"]
+      B_UI["[UI] radar-ui"]
+    end
+    subgraph B_PROD["PRODUCTION · DORMANTE"]
+      B_PROMOTION["PR #682 · non promue"]
+      B_PROD_CRON["CronJob production dormant"]
+    end
+  end
+  B_CORPUS[("Corpus PV durable")]
+  B_GRAPH[("Graphe canonique publié")]
+  B_PROVIDERS["Fournisseurs LLM"]
+  B_WS["[WS-ADMIN] poste opérateur"]
+  B_USER["Navigateur utilisateur"]
+  B_TEM["[SCW-TEM] Scaleway TEM"]
+  B_CRON --> B_DRIVER
+  B_DRIVER --> B_COLLECT
+  B_CITY --> B_COLLECT
+  B_COLLECT --> B_PARSE
+  B_PARSE --> B_CORPUS
+  B_DRIVER --> B_GRAPHIFY
+  B_CORPUS -->|"lecture des preuves"| B_GRAPHIFY
+  B_GRAPHIFY --> B_MESH
+  B_KEYRING --> B_MESH
+  B_MESH -->|"appels in-cluster"| B_PROVIDERS
+  B_MESH --> B_VALIDATE
+  B_VALIDATE -->|"graphe validé"| B_GRAPH
+  B_GRAPH --> B_PROJECT
+  B_PROJECT -->|"upsert atomique"| B_DB
+  B_DB --> B_API
+  B_API --> B_UI
+  B_EDGE --> B_UI
+  B_UI -->|"immo.sent-tech.ca"| B_USER
+  B_PROMOTION -.->|"promotion non effectuée"| B_PROD_CRON
+  B_WS -.->|"enrôlement seulement"| B_KEYRING
+```
+
+Les mêmes quatre étapes sont désormais **toutes in-cluster** : le CronJob
+autonome `radar-refresh-pv` est accepté en préproduction, Graphify est consommé
+comme bibliothèque, llm-mesh s'exécute dans le processus et le keyring est
+chiffré côté radar. La production reste **dormante** jusqu'à promotion de la
+PR #682.
 
 ---
 
