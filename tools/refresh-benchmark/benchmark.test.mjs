@@ -32,7 +32,7 @@ test("the five immutable PDFs and page texts match the manifest", async () => {
 
 test("prompt contract covers each input once and is tied to corrected T1", async () => {
   assert.equal(prompts.graphifyVersion, "0.18.0");
-  assert.equal(prompts.meshVersion, campaign === "v5" ? "0.19.1" : "0.19.0");
+  assert.equal(prompts.meshVersion, campaign === "v5" || campaign === "v6" ? "0.19.1" : "0.19.0");
   assert.equal(prompts.t1Commit,
     process.env.BENCHMARK_T1_COMMIT ?? "f9b311da536bda2e1442d154a05599c35b482518");
   assert.equal(sha256(prompts.systemPrompt), prompts.systemPromptSha256);
@@ -47,7 +47,7 @@ test("prompt contract covers each input once and is tied to corrected T1", async
 });
 
 test("controls keep their regulatory meaning", () => {
-  if (campaign === "v3" || campaign === "v5") {
+  if (campaign === "v3" || campaign === "v5" || campaign === "v6") {
     assert.equal(manifest.documents.some(({ selectionRationale }) =>
       /agenda/.test(selectionRationale) && /not adoption/.test(selectionRationale)), true);
     return;
@@ -69,5 +69,5 @@ test("the live runner binds the wall timeout to the actual fetch", async () => {
     < runner.indexOf("await input.validateResponse(responseText)"), true);
   for (const field of ["jsonValidRaw", "wrapperNormalized", "jsonValidAfterNormalize",
     "extractionValid", "profileValid", "profileViolations", "provenanceValid",
-    "nativeParseError"]) assert.match(runner, new RegExp(field));
+    "preExpansionProfileValid", "nativeParseError"]) assert.match(runner, new RegExp(field));
 });

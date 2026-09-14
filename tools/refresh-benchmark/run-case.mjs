@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { createGraphifyMesh } from "/workspace/node_modules/@sentropic/graphify/dist/llm-mesh.js";
@@ -12,7 +12,8 @@ import { createLlmMeshFacade } from "/workspace/node_modules/@sentropic/llm-mesh
 import { EncryptedFileKeyring } from "/workspace/node_modules/@sentropic/llm-mesh/dist/node/index.js";
 import { executionContract } from "./integration-contract.mjs";
 import { createPinnedWirePlanner } from "./pinned-wire-planner.mjs";
-import { createAdapterSet, inspectWireBody, selectAccount, validateRetry, variants } from
+import { createAdapterSet, inspectCloudCodeSse, inspectWireBody, resolveOutputCap,
+  selectAccount, validateRetry, variants } from
   "./runtime-config.mjs";
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
@@ -85,6 +86,7 @@ function inspectResponse(text, context, chunk, containsNormalizedPdfExcerpt) {
     jsonValidAfterNormalize: normalizedParseError === null,
     extractionValid: null, extractionViolations: [], profileValid: null,
     profileViolations: [], provenanceValid: null, provenanceViolations: [],
+    preExpansionProfileValid: null, preExpansionProfileViolations: [],
     nativeParseError: normalizedParseError ?? rawParseError,
     parseErrors: { raw: rawParseError, afterNormalize: normalizedParseError } };
   if (normalizedParseError) return { validation, parsed: undefined };
@@ -93,6 +95,8 @@ function inspectResponse(text, context, chunk, containsNormalizedPdfExcerpt) {
   if (!validation.extractionValid) return { validation, parsed };
   const profile = validateProfileExtraction(parsed, { profile: context.profile,
     registryExtraction: context.registryExtraction });
+  validation.preExpansionProfileValid = profile.valid;
+  validation.preExpansionProfileViolations = profile.issues;
   validation.profileValid = profile.valid;
   validation.profileViolations = profile.issues;
   if (!profile.valid) return { validation, parsed };
@@ -128,6 +132,8 @@ if (frozen.graphifyVersion !== executionContract.graphify.version
 }
 const document = manifest.documents.find(({ id }) => id === caseDocument);
 if (!document) throw new Error(`Unknown frozen document: ${caseDocument}`);
+const requestedMaxOutputTokens = resolveOutputCap(process.env.BENCHMARK_MAX_OUTPUT_TOKENS,
+  { campaign, documentId: document.id, variantName }, frozen.maxOutputTokens);
 if (frozen.t1Commit !== t1Commit) throw new Error("T1 prompt commit differs from frozen contract");
 const expected = frozen.documents.find(({ id }) => id === document.id);
 if (!expected) throw new Error("Document is absent from the frozen prompt contract");
@@ -189,19 +195,23 @@ let normalizedResponse;
 let responseValidation = { jsonValidRaw: null, wrapperNormalized: null,
   jsonValidAfterNormalize: null, extractionValid: null, extractionViolations: [],
   profileValid: null, profileViolations: [], provenanceValid: null,
-  provenanceViolations: [], nativeParseError: null,
+  provenanceViolations: [], preExpansionProfileValid: null,
+  preExpansionProfileViolations: [], nativeParseError: null,
   parseErrors: { raw: null, afterNormalize: null } };
 const routeOutcomes = [];
 const observedFetch = async (url, init) => {
   const fetchStarted = Date.now();
   const bodyText = String(init?.body ?? "");
   const body = JSON.parse(bodyText);
-  const observed = inspectWireBody(variant, body, frozen.maxOutputTokens);
+  const observed = inspectWireBody(variant, body, requestedMaxOutputTokens);
   const signal = init?.signal ? AbortSignal.any([init.signal, controller.signal]) : controller.signal;
   const response = await fetch(url, { ...init, signal });
+  const terminalSse = variant.provider === "gemini" && response.body
+    ? inspectCloudCodeSse(await response.clone().text()) : null;
   wire = { fetchStartedAt: new Date(fetchStarted).toISOString(), httpStatus: response.status,
     requestBodySha256: sha256(bodyText), ...observed, inputBytes: Buffer.byteLength(bodyText),
-    requestId: response.headers.get("x-request-id") ?? response.headers.get("openai-request-id") };
+    requestId: response.headers.get("x-request-id") ?? response.headers.get("openai-request-id"),
+    terminalSse };
   return response;
 };
 const mesh = createGraphifyMesh({
@@ -249,11 +259,18 @@ const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), executionContract.transportTimeoutMs);
 try {
   extraction = (await extractRefreshProfile(corpus.chunks, { textClient, context,
-    maxOutputTokens: frozen.maxOutputTokens }))[0]?.extraction;
+    maxOutputTokens: requestedMaxOutputTokens }))[0]?.extraction;
 } catch (caught) {
   status = "failed";
   error = errorDetails(caught);
 } finally { clearTimeout(timeout); }
+if (extraction) {
+  normalizedResponse = extraction;
+  responseValidation.profileValid = true;
+  responseValidation.profileViolations = [];
+  responseValidation.provenanceValid = true;
+  responseValidation.provenanceViolations = [];
+}
 const completed = Date.now();
 if (responseValidation.jsonValidAfterNormalize) {
   await writeFile(outputPath, JSON.stringify(normalizedResponse), "utf8");
@@ -262,7 +279,7 @@ const receipt = { schemaVersion: 2, campaign: campaign ?? "v1", caseId, status, 
   documentId: document.id, input: { pdfSha256: document.sha256, textSha256: document.textSha256 },
   requested: { providerId: variant.provider, transportProviderId: variant.transport,
     modelId: variant.model, effort: variant.effort,
-    maxOutputTokens: frozen.maxOutputTokens,
+    maxOutputTokens: requestedMaxOutputTokens,
     transportTimeoutMs: executionContract.transportTimeoutMs }, accountPseudonym, wire,
   actual: generated ? { responseId: generated.id, providerId: generated.providerId,
     modelId: generated.modelId, finishReason: generated.finishReason,
