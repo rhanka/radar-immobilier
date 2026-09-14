@@ -1,24 +1,26 @@
 {
-  "schema": "immo-architecture-monthly-evidence/v5",
-  "revision": "D8",
-  "generatedAt": "2026-09-13T22:55:05.016Z",
+  "schema": "immo-architecture-monthly-evidence/v6",
+  "revision": "D9",
+  "generatedAt": "2026-09-14T02:35:06.384Z",
   "period": {
     "timezone": "America/Toronto",
     "startInclusive": "2026-08-10T00:00:00-04:00",
     "endExclusive": "2026-09-14T00:00:00-04:00",
     "days": 35,
     "hours": 840,
-    "joinEvidence": "last cost report merged on origin/main ends 2026-08-09",
+    "inclusiveLabel": "10 août → 13 septembre 2026",
+    "joinEvidence": "preceding report is located at historical revision 72b966664523801ea00cfcb704e0285ee765c136 without claiming main ancestry",
     "externalInvoiceIdentityVerified": false,
     "tokenCaptureCutoff": "2026-09-13T21:09:35.483Z",
     "september13TokensAfterCutoffIncluded": false
   },
   "transitionState": {
-    "t1": {
+    "refresh": {
       "graphify": "0.18.0",
-      "model": "Luna high",
-      "firstKubernetesRun": "failed before LLM because input was .html, PDF required",
-      "accepted": false
+      "preproduction": "accepted with Luna high trial",
+      "production": "dormant-pending-promotion",
+      "selectedProductionModel": null,
+      "m1": "awaiting matched three-candidate benchmark and owner ratification"
     },
     "t2": {
       "rawParityAndOvhRebind": true,
@@ -69,8 +71,13 @@
         }
       },
       "production": {
-        "status": "in-progress",
-        "accepted": false
+        "status": "runtime-cutover-observed",
+        "accepted": false,
+        "open": [
+          "destination attribute parity",
+          "final source rescan",
+          "global legacy dependency sweep"
+        ]
       }
     },
     "t3": {
@@ -81,18 +88,1463 @@
   },
   "focus": {
     "html": "architecture-before-after-2026-09-13.html",
-    "htmlSha256": "f59ff8166aa9113f1fc1e9f3eb66c494dd1ed292dfeb9548207dc0bb98b008c7",
-    "artifactInputHash": "e8e3eaa3b6e272bb8ba37dd7cd76cc1877fa03e9bb1c90712d90b3e0da014bcd",
-    "architectureHash": "85759954afba141dace08405ed3382833350b472889e3ea786bdb32cb841b4fd",
+    "htmlSha256": "ea54aae9a26a4f2483b9f73abd63c55c2efd67e9045288e01d88d1cc8f791375",
+    "artifactInputHash": "e72b30f7e2b12d87df2c5f9155500bc97b8f86fa4c11440f33dcb80baa897653",
+    "architectureHash": "e469c485ab0fe24886c2b60ce538379a7fe18b156c3136262bb34c4d9ce26110",
     "transitionTargetsHash": "ca590533cede86b1713edfb0fbfbe95da25e1e6fc95eab2672d36dfd31384a81",
     "dossierHash": "e032da5a8cae6483bf3988eb7a84af5d550adbda2fcda6e14cfc05d25d8a4714",
-    "presentationHash": "0d1a618c5e308ac15838b5ad95781c42c7913dd5db9bdab6eb854231a010186f",
-    "choicesHash": "2aaa5fbaa2420b356127215f14e60f611c30cd49e8a9317b6f1289947a234cb8",
+    "presentationHash": "eb385a9626b633ec4ed501f18ea3b2ef656228aa9c808cdd9c25b77e3750ad3d",
+    "choicesHash": "794689f03c0ce71ea0389dab8f16ac93c6e0e588b18f06e625d9afbfe01113a1",
     "nativeNestedSvelteFlow": true,
-    "renderedMermaidCount": 2,
-    "primaryArchitectureViews": [
-      "asis-1",
-      "target-3"
+    "renderedMermaidCount": 4,
+    "graphOrder": [
+      "storage-before-20260809",
+      "storage-after-20260913",
+      "refresh-before-20260809",
+      "refresh-after-20260913"
+    ],
+    "canonicalScenes": [
+      {
+        "id": "storage-before-20260809",
+        "pair": "A",
+        "date": "2026-08-09",
+        "sceneHash": "51d42a42bd5ffc1d6c1ce6684a4a86a40a65bed8ff7ca38f3ecd38b728afa618",
+        "projection": {
+          "sceneId": "storage-before-20260809",
+          "pair": "A",
+          "date": "2026-08-09",
+          "nodes": [
+            {
+              "id": "A_API",
+              "kind": "service",
+              "label": "radar-api · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": "A_IMMO",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_CAPACITY",
+              "kind": "note",
+              "label": "Observed platform note · two b3-8 by August 9 · capacity only",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_CLOUD",
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_CLIENTS",
+              "kind": "service",
+              "label": "Graph/scrape storage clients · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "suspended",
+              "parentId": "A_IMMO",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_CLOUD",
+              "kind": "cluster",
+              "label": "OVH BHS5 · production topology · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": null,
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_DB",
+              "kind": "store",
+              "label": "PostgreSQL / PostGIS · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": "A_IMMO",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_EDGE",
+              "kind": "network",
+              "label": "Shared ingress / TLS · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": "A_CLOUD",
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_GEO",
+              "kind": "service",
+              "label": "Geo OGC API · declared dependency",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": "A_CLOUD",
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GEOS3",
+              "kind": "store",
+              "label": "OVH sentropic-geo · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": null,
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GHCR",
+              "kind": "registry",
+              "label": "GHCR mirror · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_IMMO",
+              "kind": "cluster",
+              "label": "Immo · radar-immobilier · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": "A_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_MINIO",
+              "kind": "store",
+              "label": "MinIO + PVC · raw / derived docs · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": "A_IMMO",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SCWDOCS",
+              "kind": "store",
+              "label": "SCW docs · raw / parsed · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SCWGRAPH",
+              "kind": "store",
+              "label": "SCW docs-pocs · graph · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "suspended",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SCWREG",
+              "kind": "registry",
+              "label": "SCW application registry · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SSO",
+              "kind": "service",
+              "label": "Sentropic SSO · auth.sent-tech.ca · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": "A_CLOUD",
+              "repo": [
+                "sentropic"
+              ]
+            },
+            {
+              "id": "A_TEM",
+              "kind": "exception",
+              "label": "SCW TEM · declared residual until validated replacement",
+              "evidenceClass": "declared",
+              "runtimeState": "retained",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_UI",
+              "kind": "service",
+              "label": "radar-ui · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": "A_IMMO",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_URL",
+              "kind": "endpoint",
+              "label": "immo.sent-tech.ca · declared",
+              "evidenceClass": "declared",
+              "runtimeState": "unknown",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_USER",
+              "kind": "actor",
+              "label": "Navigateur utilisateur",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "A_API__A_DB__4e439f4f59d1",
+              "source": "A_API",
+              "target": "A_DB",
+              "label": "Declared SQL",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_API__A_MINIO__4f5b19dfe790",
+              "source": "A_API",
+              "target": "A_MINIO",
+              "label": "Declared API object binding",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_API__A_SSO__4f73661e9af9",
+              "source": "A_API",
+              "target": "A_SSO",
+              "label": "Declared OIDC / JWKS",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_API__A_TEM__2330f9507eeb",
+              "source": "A_API",
+              "target": "A_TEM",
+              "label": "Transactional email · declared",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "retained"
+            },
+            {
+              "id": "A_CLIENTS__A_SCWDOCS__210b7d67d414",
+              "source": "A_CLIENTS",
+              "target": "A_SCWDOCS",
+              "label": "Declared scrape contract; secret not audited",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_CLIENTS__A_SCWGRAPH__83cbf6b756c4",
+              "source": "A_CLIENTS",
+              "target": "A_SCWGRAPH",
+              "label": "Declared graph binding; suspended",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "suspended"
+            },
+            {
+              "id": "A_EDGE__A_SSO__ef8eb8e81f09",
+              "source": "A_EDGE",
+              "target": "A_SSO",
+              "label": "Declared ingress",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_EDGE__A_UI__ef8eb8e81f09",
+              "source": "A_EDGE",
+              "target": "A_UI",
+              "label": "Declared ingress",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_GEO__A_GEOS3__4d30e5e3d274",
+              "source": "A_GEO",
+              "target": "A_GEOS3",
+              "label": "Declared client binding",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_SCWREG__A_API__1c55c1f9cd51",
+              "source": "A_SCWREG",
+              "target": "A_API",
+              "label": "Declared image source",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_SCWREG__A_GHCR__67e1a6ca5e0a",
+              "source": "A_SCWREG",
+              "target": "A_GHCR",
+              "label": "Declared best-effort mirror; success unknown",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_SCWREG__A_UI__1c55c1f9cd51",
+              "source": "A_SCWREG",
+              "target": "A_UI",
+              "label": "Declared image source",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_UI__A_API__4e91198257c0",
+              "source": "A_UI",
+              "target": "A_API",
+              "label": "Declared /api",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_UI__A_GEO__06084f572223",
+              "source": "A_UI",
+              "target": "A_GEO",
+              "label": "Declared OGC collections",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_URL__A_EDGE__bc4b62622190",
+              "source": "A_URL",
+              "target": "A_EDGE",
+              "label": "Declared ingress route",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_USER__A_SSO__49c5ce96c0e2",
+              "source": "A_USER",
+              "target": "A_SSO",
+              "label": "Declared login redirects",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "A_USER__A_URL__307e0ee86819",
+              "source": "A_USER",
+              "target": "A_URL",
+              "label": "Declared public route",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "unknown"
+            }
+          ]
+        },
+        "nodes": 17,
+        "edges": 17,
+        "subflows": 2
+      },
+      {
+        "id": "storage-after-20260913",
+        "pair": "A",
+        "date": "2026-09-13",
+        "sceneHash": "0e5865dd99179d49b4fed32f56ec56b51c82e7858092c008d03493b85cb3dc99",
+        "projection": {
+          "sceneId": "storage-after-20260913",
+          "pair": "A",
+          "date": "2026-09-13",
+          "nodes": [
+            {
+              "id": "A_API",
+              "kind": "service",
+              "label": "radar-api",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_IMMO",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_CLIENTS",
+              "kind": "service",
+              "label": "Graph/scrape storage clients · OVH bindings",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_IMMO",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_CLOUD",
+              "kind": "cluster",
+              "label": "OVH BHS5 · production · no one-node cutover claimed",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_DB",
+              "kind": "store",
+              "label": "PostgreSQL / PostGIS",
+              "evidenceClass": "declared",
+              "runtimeState": "active",
+              "parentId": "A_IMMO",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_DOCS",
+              "kind": "store",
+              "label": "OVH radar-immobilier-docs · canonical store",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_EDGE",
+              "kind": "network",
+              "label": "Shared ingress / TLS",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_CLOUD",
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "A_GEO",
+              "kind": "service",
+              "label": "Geo OGC API · stable dependency",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_CLOUD",
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GEOS3",
+              "kind": "store",
+              "label": "OVH sentropic-geo · unchanged",
+              "evidenceClass": "historical",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "geo"
+              ]
+            },
+            {
+              "id": "A_GHCR",
+              "kind": "registry",
+              "label": "GHCR application registry",
+              "evidenceClass": "declared",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_IMMO",
+              "kind": "cluster",
+              "label": "Immo · radar-immobilier",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_SSO",
+              "kind": "service",
+              "label": "Sentropic SSO · auth.sent-tech.ca",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_CLOUD",
+              "repo": [
+                "sentropic"
+              ]
+            },
+            {
+              "id": "A_TEM",
+              "kind": "exception",
+              "label": "SCW TEM · authorized residual until validated replacement",
+              "evidenceClass": "observed",
+              "runtimeState": "retained",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_UI",
+              "kind": "service",
+              "label": "radar-ui",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": "A_IMMO",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_URL",
+              "kind": "endpoint",
+              "label": "immo.sent-tech.ca",
+              "evidenceClass": "observed",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "A_USER",
+              "kind": "actor",
+              "label": "Navigateur utilisateur",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "A_API__A_DB__a7056a455639",
+              "source": "A_API",
+              "target": "A_DB",
+              "label": "SQL",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_DOCS__bd917aa0735d",
+              "source": "A_API",
+              "target": "A_DOCS",
+              "label": "Dedicated S3 binding; rolled out",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_SSO__d3792b8bf3a6",
+              "source": "A_API",
+              "target": "A_SSO",
+              "label": "OIDC / JWKS",
+              "dashed": false,
+              "both": true,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_API__A_TEM__69a40f64f571",
+              "source": "A_API",
+              "target": "A_TEM",
+              "label": "Transactional email · retained",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "retained"
+            },
+            {
+              "id": "A_CLIENTS__A_DOCS__6d06e0bfe9bc",
+              "source": "A_CLIENTS",
+              "target": "A_DOCS",
+              "label": "GRAPH / SCRAPE coordinates observed",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_EDGE__A_SSO__e3b0c44298fc",
+              "source": "A_EDGE",
+              "target": "A_SSO",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_EDGE__A_UI__e3b0c44298fc",
+              "source": "A_EDGE",
+              "target": "A_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GEO__A_GEOS3__e3b0c44298fc",
+              "source": "A_GEO",
+              "target": "A_GEOS3",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GHCR__A_API__de90976a861d",
+              "source": "A_GHCR",
+              "target": "A_API",
+              "label": "Integrated image source",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_GHCR__A_UI__de90976a861d",
+              "source": "A_GHCR",
+              "target": "A_UI",
+              "label": "Integrated image source",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_UI__A_API__702acf7c08d3",
+              "source": "A_UI",
+              "target": "A_API",
+              "label": "/api",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_UI__A_GEO__9e38fbb09347",
+              "source": "A_UI",
+              "target": "A_GEO",
+              "label": "OGC collections",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_URL__A_EDGE__e3b0c44298fc",
+              "source": "A_URL",
+              "target": "A_EDGE",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_USER__A_SSO__eb4181271466",
+              "source": "A_USER",
+              "target": "A_SSO",
+              "label": "Login redirects",
+              "dashed": false,
+              "both": true,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            },
+            {
+              "id": "A_USER__A_URL__e3b0c44298fc",
+              "source": "A_USER",
+              "target": "A_URL",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "observed",
+              "runtimeState": "active"
+            }
+          ]
+        },
+        "nodes": 13,
+        "edges": 15,
+        "subflows": 2
+      },
+      {
+        "id": "refresh-before-20260809",
+        "pair": "B",
+        "date": "2026-08-09",
+        "sceneHash": "872c44c3d86983d621dfcbebd3e87faa096cec0bd55f9c01ca58e8d19dc86f0a",
+        "projection": {
+          "sceneId": "refresh-before-20260809",
+          "pair": "B",
+          "date": "2026-08-09",
+          "nodes": [
+            {
+              "id": "B_API",
+              "kind": "service",
+              "label": "radar-api",
+              "evidenceClass": "declared",
+              "runtimeState": "active",
+              "parentId": "B_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_CITY",
+              "kind": "source",
+              "label": "Municipal PV sources",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_CLOUD",
+              "kind": "cluster",
+              "label": "OVH · production Immo",
+              "evidenceClass": "declared",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "B_COLLECT",
+              "kind": "process",
+              "label": "Immo collect / parse tools · manual invocation",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_CORPUS",
+              "kind": "store",
+              "label": "PV corpus · CAS / parsed / manifests",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_DB",
+              "kind": "store",
+              "label": "PostgreSQL graph",
+              "evidenceClass": "declared",
+              "runtimeState": "active",
+              "parentId": "B_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_EXTRACT",
+              "kind": "process",
+              "label": "Graphify agents · model/effort not historically attested",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": "B_WORKSTATION",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_GRAPH",
+              "kind": "store",
+              "label": "Published graph contract · city/latest.json",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_OPERATOR",
+              "kind": "actor",
+              "label": "Operator",
+              "evidenceClass": "external",
+              "runtimeState": "manual",
+              "parentId": "B_WORKSTATION",
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_PROJECT",
+              "kind": "process",
+              "label": "Projection Job · manual",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": "B_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_SCHEDULE",
+              "kind": "schedule",
+              "label": "Scrape / projection CronJobs · SUSPENDED",
+              "evidenceClass": "declared",
+              "runtimeState": "suspended",
+              "parentId": "B_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_TEM",
+              "kind": "exception",
+              "label": "Transverse exception · SCW TEM retained until validated replacement · outside PV extraction",
+              "evidenceClass": "historical",
+              "runtimeState": "retained",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_UI",
+              "kind": "service",
+              "label": "radar-ui",
+              "evidenceClass": "declared",
+              "runtimeState": "active",
+              "parentId": "B_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_USER",
+              "kind": "actor",
+              "label": "Navigateur utilisateur",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_WORKSTATION",
+              "kind": "cluster",
+              "label": "Operator workstation · manual agent orchestration",
+              "evidenceClass": "historical",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "B_API__B_UI__e3b0c44298fc",
+              "source": "B_API",
+              "target": "B_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_CITY__B_COLLECT__e3b0c44298fc",
+              "source": "B_CITY",
+              "target": "B_COLLECT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_COLLECT__B_CORPUS__e3b0c44298fc",
+              "source": "B_COLLECT",
+              "target": "B_CORPUS",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_CORPUS__B_EXTRACT__b4d78c837caa",
+              "source": "B_CORPUS",
+              "target": "B_EXTRACT",
+              "label": "Read source evidence",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_DB__B_API__e3b0c44298fc",
+              "source": "B_DB",
+              "target": "B_API",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_EXTRACT__B_GRAPH__7cd7b7a8425d",
+              "source": "B_EXTRACT",
+              "target": "B_GRAPH",
+              "label": "Validated graph output",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_GRAPH__B_PROJECT__e3b0c44298fc",
+              "source": "B_GRAPH",
+              "target": "B_PROJECT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_OPERATOR__B_EXTRACT__e3b0c44298fc",
+              "source": "B_OPERATOR",
+              "target": "B_EXTRACT",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_OPERATOR__B_PROJECT__6367ce30c371",
+              "source": "B_OPERATOR",
+              "target": "B_PROJECT",
+              "label": "Manual launch; no scheduled success inferred",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_PROJECT__B_DB__871d8c1db9c7",
+              "source": "B_PROJECT",
+              "target": "B_DB",
+              "label": "Atomic upsert",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "historical",
+              "runtimeState": "manual"
+            },
+            {
+              "id": "B_SCHEDULE__B_COLLECT__b6db8592803a",
+              "source": "B_SCHEDULE",
+              "target": "B_COLLECT",
+              "label": "Declared only",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "suspended"
+            },
+            {
+              "id": "B_SCHEDULE__B_PROJECT__b6db8592803a",
+              "source": "B_SCHEDULE",
+              "target": "B_PROJECT",
+              "label": "Declared only",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "suspended"
+            },
+            {
+              "id": "B_UI__B_USER__68a175aa6596",
+              "source": "B_UI",
+              "target": "B_USER",
+              "label": "immo.sent-tech.ca",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "active"
+            }
+          ]
+        },
+        "nodes": 13,
+        "edges": 13,
+        "subflows": 2
+      },
+      {
+        "id": "refresh-after-20260913",
+        "pair": "B",
+        "date": "2026-09-13",
+        "sceneHash": "e69c7621f0a926d14d2b79e513bec22379d898406cdd1874302b2bec97cff729",
+        "projection": {
+          "sceneId": "refresh-after-20260913",
+          "pair": "B",
+          "date": "2026-09-13",
+          "nodes": [
+            {
+              "id": "B_API",
+              "kind": "service",
+              "label": "radar-api",
+              "evidenceClass": "declared",
+              "runtimeState": "active",
+              "parentId": "B_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_CITY",
+              "kind": "source",
+              "label": "Municipal PV sources",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_CLOUD",
+              "kind": "cluster",
+              "label": "OVH · production Immo",
+              "evidenceClass": "declared",
+              "runtimeState": "active",
+              "parentId": null,
+              "repo": [
+                "poc-k8s"
+              ]
+            },
+            {
+              "id": "B_COLLECT",
+              "kind": "process",
+              "label": "Immo collect / parse",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": "B_REFRESH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_CORPUS",
+              "kind": "store",
+              "label": "Durable PV corpus / checkpoints",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_CRON",
+              "kind": "schedule",
+              "label": "radar-refresh-pv · gated CronJob",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": "B_REFRESH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_DB",
+              "kind": "store",
+              "label": "PostgreSQL graph",
+              "evidenceClass": "declared",
+              "runtimeState": "active",
+              "parentId": "B_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_DRIVER",
+              "kind": "process",
+              "label": "Causal refresh run",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": "B_REFRESH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_EXTRACT",
+              "kind": "process",
+              "label": "Graphify 0.18.0 + llm-mesh · in-process libraries",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": "B_REFRESH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_GRAPH",
+              "kind": "store",
+              "label": "Canonical graph · validated publication",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_IDENTITY",
+              "kind": "identity",
+              "label": "Workload enrollment / durable keyring",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_MODEL",
+              "kind": "decision",
+              "label": "Subscription model · to ratify through M1",
+              "evidenceClass": "unknown",
+              "runtimeState": "unknown",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_OPERATOR",
+              "kind": "actor",
+              "label": "Operator · enrollment / configuration only",
+              "evidenceClass": "external",
+              "runtimeState": "manual",
+              "parentId": "B_WORKSTATION",
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_PROJECT",
+              "kind": "process",
+              "label": "Atomic projection · same causal run",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": "B_REFRESH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_REFRESH",
+              "kind": "cluster",
+              "label": "New refresh workload · PRODUCTION DORMANT until promotion",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": "B_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_TEM",
+              "kind": "exception",
+              "label": "Transverse exception · SCW TEM retained until validated replacement · outside PV extraction",
+              "evidenceClass": "observed",
+              "runtimeState": "retained",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_UI",
+              "kind": "service",
+              "label": "radar-ui",
+              "evidenceClass": "declared",
+              "runtimeState": "active",
+              "parentId": "B_CLOUD",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_USER",
+              "kind": "actor",
+              "label": "Navigateur utilisateur",
+              "evidenceClass": "external",
+              "runtimeState": "not-applicable",
+              "parentId": null,
+              "repo": [
+                "external"
+              ]
+            },
+            {
+              "id": "B_VALIDATE",
+              "kind": "process",
+              "label": "Typed Signal / exact PDF validation",
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant",
+              "parentId": "B_REFRESH",
+              "repo": [
+                "radar-immobilier"
+              ]
+            },
+            {
+              "id": "B_WORKSTATION",
+              "kind": "cluster",
+              "label": "Administrator workstation · not an extraction worker",
+              "evidenceClass": "observed",
+              "runtimeState": "manual",
+              "parentId": null,
+              "repo": [
+                "radar-immobilier"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "B_API__B_UI__e3b0c44298fc",
+              "source": "B_API",
+              "target": "B_UI",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_CITY__B_COLLECT__e3b0c44298fc",
+              "source": "B_CITY",
+              "target": "B_COLLECT",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_COLLECT__B_CORPUS__e3b0c44298fc",
+              "source": "B_COLLECT",
+              "target": "B_CORPUS",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_CORPUS__B_EXTRACT__e3b0c44298fc",
+              "source": "B_CORPUS",
+              "target": "B_EXTRACT",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_CRON__B_DRIVER__e3b0c44298fc",
+              "source": "B_CRON",
+              "target": "B_DRIVER",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_DB__B_API__e3b0c44298fc",
+              "source": "B_DB",
+              "target": "B_API",
+              "label": "",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_DRIVER__B_COLLECT__e3b0c44298fc",
+              "source": "B_DRIVER",
+              "target": "B_COLLECT",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_DRIVER__B_EXTRACT__e3b0c44298fc",
+              "source": "B_DRIVER",
+              "target": "B_EXTRACT",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_EXTRACT__B_MODEL__e3b0c44298fc",
+              "source": "B_EXTRACT",
+              "target": "B_MODEL",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "unknown",
+              "runtimeState": "unknown"
+            },
+            {
+              "id": "B_EXTRACT__B_VALIDATE__e3b0c44298fc",
+              "source": "B_EXTRACT",
+              "target": "B_VALIDATE",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_GRAPH__B_PROJECT__e3b0c44298fc",
+              "source": "B_GRAPH",
+              "target": "B_PROJECT",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_IDENTITY__B_EXTRACT__e3b0c44298fc",
+              "source": "B_IDENTITY",
+              "target": "B_EXTRACT",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_OPERATOR__B_IDENTITY__e3b0c44298fc",
+              "source": "B_OPERATOR",
+              "target": "B_IDENTITY",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_PROJECT__B_DB__e3b0c44298fc",
+              "source": "B_PROJECT",
+              "target": "B_DB",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            },
+            {
+              "id": "B_UI__B_USER__68a175aa6596",
+              "source": "B_UI",
+              "target": "B_USER",
+              "label": "immo.sent-tech.ca",
+              "dashed": false,
+              "both": false,
+              "evidenceClass": "declared",
+              "runtimeState": "active"
+            },
+            {
+              "id": "B_VALIDATE__B_GRAPH__e3b0c44298fc",
+              "source": "B_VALIDATE",
+              "target": "B_GRAPH",
+              "label": "",
+              "dashed": true,
+              "both": false,
+              "evidenceClass": "dormant",
+              "runtimeState": "dormant"
+            }
+          ]
+        },
+        "nodes": 17,
+        "edges": 16,
+        "subflows": 3
+      }
     ],
     "serviceIconsAndRepoProvenance": "required for every node and group"
   },
@@ -114,16 +1566,114 @@
     "indicativeTotalCad": 320.0954376764174
   },
   "claims": {
-    "deployment": "preproduction T2 accepted; production T2 in progress; complete AFTER is not deployed",
+    "deployment": "storage runtime cutover observed with final parity/sweep open; refresh preproduction accepted; refresh production dormant pending promotion",
     "invoice": "none",
-    "decisionOptions": "three explicit open questions; local drafts only; fixed owner decisions unchanged",
-    "llmRatification": "open-non-blocking"
+    "decisionOptions": "M1 has exactly three candidates; no winner; Gemini no-output is not classifiable and is not a result",
+    "llmRatification": "provisional-non-critical-non-final"
+  },
+  "previousReport": {
+    "path": "docs/spec/reports/study-2026-08/report.pdf",
+    "historicalRevision": "72b966664523801ea00cfcb704e0285ee765c136",
+    "sourceSha256": "86ae37810016bca61cc897105121cfcbcd1951426fc889616ae1efe37ae29528",
+    "sourcePages": 9,
+    "attachmentName": "study-2026-08-report.pdf",
+    "ancestryClaim": "none",
+    "currentReportEndPage": 7,
+    "graphPages": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "predecessorStartPage": 8,
+    "predecessorEndPage": 16,
+    "extractedAttachmentSha256": "86ae37810016bca61cc897105121cfcbcd1951426fc889616ae1efe37ae29528",
+    "renderer": "pdftoppm version 26.01.0",
+    "flags": "pdftoppm -png -r 144 -cropbox -singlefile",
+    "sourcePageHashes": [
+      "bb93846e313dffc35409f51b8b1c322c2f9e803006f6f1426c2173782284c799",
+      "6762d8d708f0cd166ce5a0a27bbac735bfdf9151c809d747f2762a6e1c83c8f4",
+      "237f0b853cfa23f02d356081eee685c205986cfb5a0dfa7de6908e2a9ca9ac33",
+      "117f227d83b46de316818419cdae70c0ece2e760824f1458ba9ca86aa2aa9324",
+      "e348613254f3aeec0122ecd70ea0aa7d96b527645134051fee0c8c4837e7e51a",
+      "00ddb3d8e4ebbbbc2feea5e2495f22a63f6a9f09c85b30728f8feb152758f765",
+      "75e14add537dd7eaaf0fd3c05f78cc00f09a83f727cd41d245cd678bf63b84b7",
+      "9f41211a49a56a50346b34755a702edd9e4c30753479d65ce23e863bfdbb3bb8",
+      "668452600acd7a08f75f682b4ed5232fb38a0dfdcf68682f318db7bd04f6c684"
+    ],
+    "appendixPageHashes": [
+      "bb93846e313dffc35409f51b8b1c322c2f9e803006f6f1426c2173782284c799",
+      "6762d8d708f0cd166ce5a0a27bbac735bfdf9151c809d747f2762a6e1c83c8f4",
+      "237f0b853cfa23f02d356081eee685c205986cfb5a0dfa7de6908e2a9ca9ac33",
+      "117f227d83b46de316818419cdae70c0ece2e760824f1458ba9ca86aa2aa9324",
+      "e348613254f3aeec0122ecd70ea0aa7d96b527645134051fee0c8c4837e7e51a",
+      "00ddb3d8e4ebbbbc2feea5e2495f22a63f6a9f09c85b30728f8feb152758f765",
+      "75e14add537dd7eaaf0fd3c05f78cc00f09a83f727cd41d245cd678bf63b84b7",
+      "9f41211a49a56a50346b34755a702edd9e4c30753479d65ce23e863bfdbb3bb8",
+      "668452600acd7a08f75f682b4ed5232fb38a0dfdcf68682f318db7bd04f6c684"
+    ],
+    "pageMap": [
+      {
+        "sourcePage": 1,
+        "finalPage": 8,
+        "sourcePngSha256": "bb93846e313dffc35409f51b8b1c322c2f9e803006f6f1426c2173782284c799",
+        "finalPngSha256": "bb93846e313dffc35409f51b8b1c322c2f9e803006f6f1426c2173782284c799"
+      },
+      {
+        "sourcePage": 2,
+        "finalPage": 9,
+        "sourcePngSha256": "6762d8d708f0cd166ce5a0a27bbac735bfdf9151c809d747f2762a6e1c83c8f4",
+        "finalPngSha256": "6762d8d708f0cd166ce5a0a27bbac735bfdf9151c809d747f2762a6e1c83c8f4"
+      },
+      {
+        "sourcePage": 3,
+        "finalPage": 10,
+        "sourcePngSha256": "237f0b853cfa23f02d356081eee685c205986cfb5a0dfa7de6908e2a9ca9ac33",
+        "finalPngSha256": "237f0b853cfa23f02d356081eee685c205986cfb5a0dfa7de6908e2a9ca9ac33"
+      },
+      {
+        "sourcePage": 4,
+        "finalPage": 11,
+        "sourcePngSha256": "117f227d83b46de316818419cdae70c0ece2e760824f1458ba9ca86aa2aa9324",
+        "finalPngSha256": "117f227d83b46de316818419cdae70c0ece2e760824f1458ba9ca86aa2aa9324"
+      },
+      {
+        "sourcePage": 5,
+        "finalPage": 12,
+        "sourcePngSha256": "e348613254f3aeec0122ecd70ea0aa7d96b527645134051fee0c8c4837e7e51a",
+        "finalPngSha256": "e348613254f3aeec0122ecd70ea0aa7d96b527645134051fee0c8c4837e7e51a"
+      },
+      {
+        "sourcePage": 6,
+        "finalPage": 13,
+        "sourcePngSha256": "00ddb3d8e4ebbbbc2feea5e2495f22a63f6a9f09c85b30728f8feb152758f765",
+        "finalPngSha256": "00ddb3d8e4ebbbbc2feea5e2495f22a63f6a9f09c85b30728f8feb152758f765"
+      },
+      {
+        "sourcePage": 7,
+        "finalPage": 14,
+        "sourcePngSha256": "75e14add537dd7eaaf0fd3c05f78cc00f09a83f727cd41d245cd678bf63b84b7",
+        "finalPngSha256": "75e14add537dd7eaaf0fd3c05f78cc00f09a83f727cd41d245cd678bf63b84b7"
+      },
+      {
+        "sourcePage": 8,
+        "finalPage": 15,
+        "sourcePngSha256": "9f41211a49a56a50346b34755a702edd9e4c30753479d65ce23e863bfdbb3bb8",
+        "finalPngSha256": "9f41211a49a56a50346b34755a702edd9e4c30753479d65ce23e863bfdbb3bb8"
+      },
+      {
+        "sourcePage": 9,
+        "finalPage": 16,
+        "sourcePngSha256": "668452600acd7a08f75f682b4ed5232fb38a0dfdcf68682f318db7bd04f6c684",
+        "finalPngSha256": "668452600acd7a08f75f682b4ed5232fb38a0dfdcf68682f318db7bd04f6c684"
+      }
+    ]
   },
   "sourceFiles": [
     {
       "path": "docs/architecture.md",
-      "role": "before-state",
-      "sha256": "85759954afba141dace08405ed3382833350b472889e3ea786bdb32cb841b4fd"
+      "role": "canonical-four-scene-source",
+      "sha256": "e469c485ab0fe24886c2b60ce538379a7fe18b156c3136262bb34c4d9ce26110"
     },
     {
       "path": "docs/architecture/transitions-target.md",
@@ -148,7 +1698,7 @@
     {
       "path": "docs/reports/architecture-monthly/report-through-2026-09-13.md",
       "role": "monthly-report",
-      "sha256": "a79bab5d8123a041b45eb6ed59989f69bb3be2d43af9e6345c2e3f03fd1c962b"
+      "sha256": "94079637a585a470b4bd52bd9d653bf2f8da06ce888a8adf6aafad3a146a5fea"
     },
     {
       "path": "docs/reports/architecture-monthly/token-audit-2026-08-10_2026-09-13.json",
@@ -156,75 +1706,107 @@
       "sha256": "1a6e47c6cba0c22eff6198461668ce2957064cf9ffcd475b366067c0cf1f0cba"
     },
     {
-      "path": "docs/reports/couts-2026-07-13_2026-08-09.md",
-      "role": "preceding-merged-report",
-      "sha256": "93b34620760c78dafa76cda071cc67d40d4e52a554827c8a5042a4d3b334f64b"
+      "path": "docs/spec/reports/study-2026-08/report.pdf",
+      "role": "preceding-report-exact-attachment",
+      "sha256": "86ae37810016bca61cc897105121cfcbcd1951426fc889616ae1efe37ae29528"
     }
   ],
-  "replay": "make -f docs/architecture/focus/Makefile tokens test build browser clipboard report-check ENV=test-architecture",
+  "replay": "make -f docs/architecture/focus/Makefile test build audit browser clipboard report-check PORT=5200 ENV=test-architecture-two-transitions",
   "report": {
     "markdown": "report-through-2026-09-13.md",
     "html": "report-through-2026-09-13.html",
     "pdf": "report-through-2026-09-13.pdf",
-    "markdownSha256": "a79bab5d8123a041b45eb6ed59989f69bb3be2d43af9e6345c2e3f03fd1c962b",
-    "htmlSha256": "fa5a6ca145860cd3adb291f8a44aee862d685ef804d759a1445023f6b6dce851",
-    "pdfSha256": "444963b8c262becf7bbaaba7b06e61cc9ef6bb371edd6dd9db79033cc58e31af",
-    "staticDiagrams": [
-      "asis-1",
-      "target-3"
-    ],
-    "nativeDiagramPages": [
+    "markdownSha256": "94079637a585a470b4bd52bd9d653bf2f8da06ce888a8adf6aafad3a146a5fea",
+    "htmlSha256": "aa0e0dd5be7b192599a86e6acd37f317fb8aec0798e9905dfe4527fc273a8ec7",
+    "pdfSha256": "7be5bb1afe36532fd52e4136f36b67c7d375ee4e861ce6958e530dfb3915aef3",
+    "currentReportPages": 7,
+    "totalPages": 16,
+    "chromium": {
+      "zoom": 1,
+      "deviceScaleFactor": 1
+    },
+    "diagramPage": {
+      "widthPx": 8328,
+      "heightPx": 1447,
+      "printScale": 1
+    },
+    "graphPages": [
       {
-        "title": "Architecture AVANT · schéma complet",
-        "graph": "asis-1",
-        "partition": null
+        "sceneId": "storage-before-20260809",
+        "pair": "A",
+        "date": "2026-08-09",
+        "sceneHash": "51d42a42bd5ffc1d6c1ce6684a4a86a40a65bed8ff7ca38f3ecd38b728afa618",
+        "page": 4,
+        "captureSha256": "8708096856bc8e8cdb9769f7aa3630a3d9f6d0bf4275c4fc0337e7b5e852c8e6",
+        "widthPx": 6552,
+        "heightPx": 1263,
+        "nativeScale": 1,
+        "deviceScaleFactor": 1,
+        "effectiveTypePt": {
+          "title": 24,
+          "edge": 18,
+          "repo": 18,
+          "status": 16.5
+        },
+        "renderedPagePngSha256": "05a3aa819d260e8d95be12a204b5ef28e3af55afba94f5d3554362340f3fd11d"
       },
       {
-        "title": "Architecture AVANT · partition · haut gauche",
-        "graph": "asis-1",
-        "partition": "haut gauche"
+        "sceneId": "storage-after-20260913",
+        "pair": "A",
+        "date": "2026-09-13",
+        "sceneHash": "0e5865dd99179d49b4fed32f56ec56b51c82e7858092c008d03493b85cb3dc99",
+        "page": 5,
+        "captureSha256": "af1125cfbbacb39b100c93e9da6b2d50aebc4326f56b1b3cdb5f31ca76bc3dac",
+        "widthPx": 6552,
+        "heightPx": 866,
+        "nativeScale": 1,
+        "deviceScaleFactor": 1,
+        "effectiveTypePt": {
+          "title": 24,
+          "edge": 18,
+          "repo": 18,
+          "status": 16.5
+        },
+        "renderedPagePngSha256": "ffd5f7307f96787548bb93a492241f36711ab258df97cca010045001a50fed76"
       },
       {
-        "title": "Architecture AVANT · partition · haut droite",
-        "graph": "asis-1",
-        "partition": "haut droite"
+        "sceneId": "refresh-before-20260809",
+        "pair": "B",
+        "date": "2026-08-09",
+        "sceneHash": "872c44c3d86983d621dfcbebd3e87faa096cec0bd55f9c01ca58e8d19dc86f0a",
+        "page": 6,
+        "captureSha256": "edd15f22e1f4ecb0a0314edc9aca4bc171d2b8e43d1aaa995a2a5a62c59b21c1",
+        "widthPx": 8192,
+        "heightPx": 836,
+        "nativeScale": 1,
+        "deviceScaleFactor": 1,
+        "effectiveTypePt": {
+          "title": 24,
+          "edge": 18,
+          "repo": 18,
+          "status": 16.5
+        },
+        "renderedPagePngSha256": "6bba0aab5c722b71a4a68f1efb17096c965cc4cddd1c45bb7a0e0aa4524f0c27"
       },
       {
-        "title": "Architecture AVANT · partition · bas gauche",
-        "graph": "asis-1",
-        "partition": "bas gauche"
-      },
-      {
-        "title": "Architecture AVANT · partition · bas droite",
-        "graph": "asis-1",
-        "partition": "bas droite"
-      },
-      {
-        "title": "Architecture APRÈS · schéma complet",
-        "graph": "target-3",
-        "partition": null
-      },
-      {
-        "title": "Architecture APRÈS · partition · haut gauche",
-        "graph": "target-3",
-        "partition": "haut gauche"
-      },
-      {
-        "title": "Architecture APRÈS · partition · haut droite",
-        "graph": "target-3",
-        "partition": "haut droite"
-      },
-      {
-        "title": "Architecture APRÈS · partition · bas gauche",
-        "graph": "target-3",
-        "partition": "bas gauche"
-      },
-      {
-        "title": "Architecture APRÈS · partition · bas droite",
-        "graph": "target-3",
-        "partition": "bas droite"
+        "sceneId": "refresh-after-20260913",
+        "pair": "B",
+        "date": "2026-09-13",
+        "sceneHash": "e69c7621f0a926d14d2b79e513bec22379d898406cdd1874302b2bec97cff729",
+        "page": 7,
+        "captureSha256": "676da356fb46a2642558b503555fdae747379d0c37c7e8f265d4513163bec2e6",
+        "widthPx": 8232,
+        "heightPx": 940,
+        "nativeScale": 1,
+        "deviceScaleFactor": 1,
+        "effectiveTypePt": {
+          "title": 24,
+          "edge": 18,
+          "repo": 18,
+          "status": 16.5
+        },
+        "renderedPagePngSha256": "e328fd986076d112d7ee2c338c08f22182e0a1ae5d2c90f5c934536988570c28"
       }
-    ],
-    "diagramPage": "A3 landscape"
+    ]
   }
 }
