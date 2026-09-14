@@ -1,0 +1,936 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "label": "Procès-verbal de la séance ordinaire du conseil municipal de la Ville de Waterloo - 18 août 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de la Ville de\nWaterloo, tenue le 18 août à 2026 19 h 00"
+        }
+      ],
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "date": "2026-08-18",
+      "municipality": "waterloo",
+      "url": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf"
+    },
+    {
+      "id": "bylaw-26-956-2",
+      "label": "Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Règlement 26-956-2 modifiant le\nrèglement de zonage afin de modifier l'encadrement des projets\nintégrés"
+        },
+        {
+          "page": 3,
+          "excerpt": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant\nle règlement de zonage afin de modifier l'encadrement des projets\nintégrés tel que soumis;"
+        }
+      ],
+      "numero": "26-956-2",
+      "title": "Règlement modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés",
+      "date": "2026-08-18",
+      "stage": "adoption",
+      "municipality": "waterloo",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "meetingDate": "2026-08-18",
+      "resolution": "26.08.22.1"
+    },
+    {
+      "id": "bylaw-26-957-1",
+      "label": "Règlement 26-957-1 sur le lotissement en lien avec certains sites patrimoniaux",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Adoption 26-957-1 - Règlement sur le lotissement en lien avec\ncertains sites patrimoniaux"
+        },
+        {
+          "page": 3,
+          "excerpt": "Que le conseil municipal adopte le Règlement 26-957-1 sur le\nlotissement en lien avec certains sites patrimoniaux tel que soumis;"
+        }
+      ],
+      "numero": "26-957-1",
+      "title": "Règlement sur le lotissement en lien avec certains sites patrimoniaux",
+      "date": "2026-08-18",
+      "stage": "adoption",
+      "municipality": "waterloo",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "meetingDate": "2026-08-18",
+      "resolution": "26.08.22.2"
+    },
+    {
+      "id": "bylaw-26-972",
+      "label": "Règlement parapluie 26-972",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Adoption - Règlement parapluie 26-972 décrétant des dépenses\net un emprunt de 1 360 000 $ pour le réaménagement et la mise\nà niveau des locaux du 415, rue de la Cour"
+        },
+        {
+          "page": 4,
+          "excerpt": "Que le Conseil municipal adopte le Règlement parapluie 26972 décrétant des dépenses et un emprunt de 1 360 000 $\npour le réaménagement et la mise à niveau des locaux du 415,\nrue de la Cour;"
+        }
+      ],
+      "numero": "26-972",
+      "title": "Règlement parapluie 26-972 décrétant des dépenses et un emprunt de 1 360 000 $ pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour",
+      "date": "2026-08-18",
+      "stage": "adoption",
+      "municipality": "waterloo",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "meetingDate": "2026-08-18",
+      "resolution": "26.08.22.3"
+    },
+    {
+      "id": "bylaw-26-970",
+      "label": "Règlement parapluie 26-970",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Modification du Règlement parapluie 26-970 décrétant des\ndépenses et un emprunt de 446 500 $ pour le remplacement de\nvéhicules"
+        },
+        {
+          "page": 4,
+          "excerpt": "Le conseil modifie le Règlement parapluie 26-970 décrétant des\ndépenses et un emprunt de 446 500 $ pour le remplacement de\nvéhicules"
+        }
+      ],
+      "numero": "26-970",
+      "title": "Règlement parapluie 26-970 décrétant des dépenses et un emprunt de 446 500 $ pour le remplacement de véhicules",
+      "date": "2026-08-18",
+      "stage": "adoption",
+      "municipality": "waterloo",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "meetingDate": "2026-08-18",
+      "resolution": "26.08.22.4"
+    },
+    {
+      "id": "zone-h-92",
+      "label": "Zone H-92",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "et devrait être\nmodifié par une future modification aux normes de la zone H-92."
+        },
+        {
+          "page": 12,
+          "excerpt": "et se verra corrigé par\nune future modification aux normes de la zone H-92;"
+        }
+      ],
+      "code": "H-92",
+      "municipality": "waterloo",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "meetingDate": "2026-08-18"
+    },
+    {
+      "id": "zone-r-37",
+      "label": "Zone R-37",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "l'implantation des bâtiments existants dans le secteur (ancienne zone\nR-37) et ne va pas créer de préjudice au voisinage."
+        }
+      ],
+      "code": "R-37",
+      "municipality": "waterloo",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "meetingDate": "2026-08-18"
+    },
+    {
+      "id": "event-26-08-26-2",
+      "label": "Dérogation mineure, implantation latérale et arrière, 80, rue Yves-Malouin (CCU 2026-107)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "26.08.26.2\n\nDérogation mineure, implantation latérale et arrière, 80, rue\nYves-Malouin (CCU 2026-107)"
+        },
+        {
+          "page": 11,
+          "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée,\nnotamment pour l'implantation et la marge arrière du 80, rue YvesMalouin.\nAdoptée"
+        }
+      ],
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "dossier": "CCU 2026-107",
+      "municipality": "waterloo",
+      "resolution": "26.08.26.2",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "description": "Dérogation mineure accordée pour l'implantation et la marge arrière du 80, rue Yves-Malouin.",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-18"
+    },
+    {
+      "id": "event-26-08-26-3",
+      "label": "Dérogation mineure, implantation latérale et arrière, 82, rue Yves-Malouin (CCU 2026-108)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "26.08.26.3\n\nDérogation mineure, implantation latérale et arrière, 82, rue\nYves-Malouin (CCU 2026-108)"
+        },
+        {
+          "page": 12,
+          "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée,\nnotamment pour l'implantation et la marge arrière du 82, rue YvesMalouin.\nAdoptée"
+        }
+      ],
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "dossier": "CCU 2026-108",
+      "municipality": "waterloo",
+      "resolution": "26.08.26.3",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "description": "Dérogation mineure accordée pour l'implantation et la marge arrière du 82, rue Yves-Malouin.",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-18",
+      "zone_ref": "R-37"
+    },
+    {
+      "id": "event-26-08-26-4",
+      "label": "Dérogation mineure, implantation, 153, rue du Manège (CCU 2026-110)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "26.08.26.4\n\nDérogation mineure, implantation, 153, rue du Manège (CCU\n2026-110)"
+        },
+        {
+          "page": 12,
+          "excerpt": "Que le Conseil, sur recommandation du CCU approuve la dérogation\nmineure pour le 153, rue du Manège, telle que demandée,..."
+        }
+      ],
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "dossier": "CCU 2026-110",
+      "municipality": "waterloo",
+      "resolution": "26.08.26.4",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "description": "Dérogation mineure pour le 153, rue du Manège pour l'implantation d'un nouveau bâtiment de type unifamiliale jumelée.",
+      "conditions": [
+        "condition d'obtenir l'aval du service des incendies concernant la distance entre l'aire de stationnement et la future borne-fontaine"
+      ],
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-18",
+      "zone_ref": "H-92"
+    },
+    {
+      "id": "event-26-08-26-5",
+      "label": "Dérogation mineure, implantation, 155, rue du Manège (CCU 2026-111)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "26.08.26.5\n\nDérogation mineure, implantation, 155, rue du Manège (CCU\n2026-111)"
+        },
+        {
+          "page": 13,
+          "excerpt": "Que le Conseil, sur recommandation du CCU approuve la dérogation\nmineure pour le 155, rue du Manège, telle que demandée,\nnotamment pour l'implantation d'un nouveau bâtiment de type\nunifamiliale jumelée."
+        }
+      ],
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "dossier": "CCU 2026-111",
+      "municipality": "waterloo",
+      "resolution": "26.08.26.5",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "description": "Dérogation mineure pour le 155, rue du Manège pour l'implantation d'un nouveau bâtiment de type unifamiliale jumelée.",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-08-18",
+      "zone_ref": "H-92"
+    },
+    {
+      "id": "event-26-08-26-6",
+      "label": "PIIA - Enseigne commerciale, 4906, rue Foster (CCU 2026-105)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "26.08.26.6\n\nPIIA - Enseigne commerciale, 4906, rue Foster (CCU 2026-105)"
+        },
+        {
+          "page": 13,
+          "excerpt": "Que le conseil approuve l'ajout de lettrage en façade, tel que\nprésenté, pour le 4906, rue Foster.\nAdoptée"
+        }
+      ],
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "decision": "approuvé",
+      "kind": "piia",
+      "dossier": "CCU 2026-105",
+      "municipality": "waterloo",
+      "resolution": "26.08.26.6",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "description": "Approbation de l'ajout de lettrage en façade sous PIIA pour le 4906, rue Foster.",
+      "etape": "piia",
+      "etape_date": "2026-08-18"
+    },
+    {
+      "id": "event-26-08-26-7",
+      "label": "PIIA - Rénovations extérieures, 5, rue Nord (CCU 2026-106)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "26.08.26.7\n\nPIIA - Rénovations extérieures, 5, rue Nord (CCU 2026-106)"
+        },
+        {
+          "page": 13,
+          "excerpt": "Que le Conseil approuve le projet de rénovation extérieure au 5 rue\nNord, tel que présenté.\nAdoptée"
+        }
+      ],
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "decision": "approuvé",
+      "kind": "piia",
+      "dossier": "CCU 2026-106",
+      "municipality": "waterloo",
+      "resolution": "26.08.26.7",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "description": "Approbation du projet de rénovation extérieure sous PIIA au 5 rue Nord.",
+      "etape": "piia",
+      "etape_date": "2026-08-18"
+    },
+    {
+      "id": "event-26-08-26-8",
+      "label": "PIIA - Construction neuve, 80-82, rue Yves-Malouin (CCU 2026-109)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "26.08.26.8\n\nPIIA - Construction neuve, 80-82, rue Yves-Malouin (CCU 2026109)"
+        },
+        {
+          "page": 14,
+          "excerpt": "1. Que le conseil municipal approuve la demande PIIA pour une\nconstruction neuve au 80-82, rue Yves-Malouin, tel que\ndemandé, avec la condition de présenter aux CCU les plans\nd'aménagement du terrain pour approbation à une date\nultérieure."
+        }
+      ],
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "decision": "approuvé",
+      "kind": "piia",
+      "dossier": "CCU 2026-109",
+      "municipality": "waterloo",
+      "resolution": "26.08.26.8",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "description": "Approbation PIIA pour une construction neuve au 80-82, rue Yves-Malouin.",
+      "conditions": [
+        "condition de présenter aux CCU les plans d'aménagement du terrain pour approbation à une date ultérieure"
+      ],
+      "etape": "piia",
+      "etape_date": "2026-08-18"
+    },
+    {
+      "id": "event-26-08-26-9",
+      "label": "PIIA - Construction neuve, 153 et 155, rue du Manège (CCU 2026-112)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "26.08.26.9\n\nPIIA - Construction neuve, 153 et 155, rue du Manège (CCU 2026112)"
+        },
+        {
+          "page": 14,
+          "excerpt": "Que le conseil approuve le projet de construction résidentielle neuve\nau 153 et 155, rue du Manège, tel que présenté.\nAdoptée"
+        }
+      ],
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "decision": "approuvé",
+      "kind": "piia",
+      "dossier": "CCU 2026-112",
+      "municipality": "waterloo",
+      "resolution": "26.08.26.9",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "description": "Approbation du projet de construction résidentielle neuve au 153 et 155, rue du Manège sous PIIA.",
+      "etape": "piia",
+      "etape_date": "2026-08-18"
+    },
+    {
+      "id": "event-26-08-25-5",
+      "label": "Tour de télécommunication de Bell Canada",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "26.08.25.5\n\nTour de télécommunication de Bell Canada"
+        },
+        {
+          "page": 9,
+          "excerpt": "1. Le conseil donne son accord de principe à l'implantation d'une\ntour de télécommunications d'une hauteur maximale de 40\nmètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre\ndu Québec dans le secteur du 6400, rue Foster"
+        },
+        {
+          "page": 10,
+          "excerpt": "3. Le conseil confirme que la réglementation d'urbanisme devra\nêtre modifiée en temps opportun pour permettre la réalisation\ndu projet;"
+        }
+      ],
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "demandeur_corporate": "Bell Canada",
+      "municipality": "waterloo",
+      "resolution": "26.08.25.5",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "description": "Accord de principe pour l'implantation d'une tour de télécommunications au fonds des lots 4 161 789 ou 6 098 789 secteur 6400, rue Foster, nécessitant modification future de la réglementation d'urbanisme.",
+      "conditions": [
+        "conditionnellement à ce que Bell réalise son processus d'information du public usuel",
+        "en autant que le propriétaire des lieux puisse négocier une entente avec Bell, avantageuse pour les deux parties"
+      ],
+      "etape": "inconnu",
+      "etape_date": "2026-08-18"
+    },
+    {
+      "id": "signal-tour-telecom",
+      "label": "Signal - Modification future réglementation pour tour de télécommunication",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "3. Le conseil confirme que la réglementation d'urbanisme devra\nêtre modifiée en temps opportun pour permettre la réalisation\ndu projet;"
+        }
+      ],
+      "category": "urbanisme",
+      "kind": "modification_reglementaire",
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "description": "La réglementation d'urbanisme devra être modifiée en temps opportun pour permettre l'implantation d'une tour de télécommunication (secteur 6400, rue Foster).",
+      "resolution": "26.08.25.5",
+      "scope": "local",
+      "municipality": "waterloo",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd"
+    },
+    {
+      "id": "signal-zone-h92",
+      "label": "Signal - Future modification aux normes de la zone H-92",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "ATTENDU QUE la demande respecte la demande antérieure (CCU\n2026-078) pour le même genre de construction et devrait être\nmodifié par une future modification aux normes de la zone H-92."
+        }
+      ],
+      "category": "zonage",
+      "kind": "modification_normes",
+      "date": "2026-08-18",
+      "meetingDate": "2026-08-18",
+      "description": "Future modification aux normes de la zone H-92 prévue pour encadrer les constructions unifamiliales jumelées.",
+      "resolution": "26.08.26.4",
+      "scope": "local",
+      "municipality": "waterloo",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "zone_ref": "H-92"
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "bylaw-26-956-2",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-956-2"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "1. Que le conseil municipal adopte le Règlement 26-956-2 modifiant\nle règlement de zonage afin de modifier l'encadrement des projets\nintégrés tel que soumis;"
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "bylaw-26-957-1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-957-1"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "1. Que le conseil municipal adopte le Règlement 26-957-1 sur le\nlotissement en lien avec certains sites patrimoniaux tel que soumis;"
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "bylaw-26-972",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-972"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "1. Que le Conseil municipal adopte le Règlement parapluie 26972 décrétant des dépenses et un emprunt de 1 360 000 $\npour le réaménagement et la mise à niveau des locaux du 415,\nrue de la Cour;"
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "bylaw-26-970",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-970"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Modification du Règlement parapluie 26-970 décrétant des\ndépenses et un emprunt de 446 500 $ pour le remplacement de\nvéhicules"
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-26-08-26-2",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-2"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée,\nnotamment pour l'implantation et la marge arrière du 80, rue YvesMalouin.\nAdoptée"
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-26-08-26-3",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-3"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée,\nnotamment pour l'implantation et la marge arrière du 82, rue YvesMalouin.\nAdoptée"
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-26-08-26-4",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-4"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Que le Conseil, sur recommandation du CCU approuve la dérogation\nmineure pour le 153, rue du Manège, telle que demandée,..."
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-26-08-26-5",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-5"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Que le Conseil, sur recommandation du CCU approuve la dérogation\nmineure pour le 155, rue du Manège, telle que demandée,\nnotamment pour l'implantation d'un nouveau bâtiment de type\nunifamiliale jumelée."
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-26-08-26-6",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-6"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Que le conseil approuve l'ajout de lettrage en façade, tel que\nprésenté, pour le 4906, rue Foster.\nAdoptée"
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-26-08-26-7",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-7"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Que le Conseil approuve le projet de rénovation extérieure au 5 rue\nNord, tel que présenté.\nAdoptée"
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-26-08-26-8",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-8"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "1. Que le conseil municipal approuve la demande PIIA pour une\nconstruction neuve au 80-82, rue Yves-Malouin, tel que\ndemandé, avec la condition de présenter aux CCU les plans\nd'aménagement du terrain pour approbation à une date\nultérieure."
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-26-08-26-9",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-9"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "Que le conseil approuve le projet de construction résidentielle neuve\nau 153 et 155, rue du Manège, tel que présenté.\nAdoptée"
+        }
+      ]
+    },
+    {
+      "source": "source-c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "target": "event-26-08-25-5",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-25-5"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "1. Le conseil donne son accord de principe à l'implantation d'une\ntour de télécommunications d'une hauteur maximale de 40\nmètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre\ndu Québec dans le secteur du 6400, rue Foster"
+        }
+      ]
+    },
+    {
+      "source": "event-26-08-26-3",
+      "target": "zone-r-37",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-3"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "l'implantation des bâtiments existants dans le secteur (ancienne zone\nR-37) et ne va pas créer de préjudice au voisinage."
+        }
+      ]
+    },
+    {
+      "source": "event-26-08-26-4",
+      "target": "zone-h-92",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-4"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "ATTENDU QUE la demande respecte la demande antérieure (CCU\n2026-078) pour le même genre de construction et devrait être\nmodifié par une future modification aux normes de la zone H-92."
+        }
+      ]
+    },
+    {
+      "source": "event-26-08-26-5",
+      "target": "zone-h-92",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-5"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "ATTENDU QUE la demande respecte la demande antérieure (CCU\n2026-078) pour le même genre de construction et se verra corrigé par\nune future modification aux normes de la zone H-92;"
+        }
+      ]
+    },
+    {
+      "source": "event-26-08-25-5",
+      "target": "signal-tour-telecom",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-25-5"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "3. Le conseil confirme que la réglementation d'urbanisme devra\nêtre modifiée en temps opportun pour permettre la réalisation\ndu projet;"
+        }
+      ]
+    },
+    {
+      "source": "event-26-08-26-4",
+      "target": "signal-zone-h92",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-4"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "ATTENDU QUE la demande respecte la demande antérieure (CCU\n2026-078) pour le même genre de construction et devrait être\nmodifié par une future modification aux normes de la zone H-92."
+        }
+      ]
+    },
+    {
+      "source": "signal-zone-h92",
+      "target": "zone-h-92",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "evidence_refs": [
+        "ev-event-26-08-26-4"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "et devrait être\nmodifié par une future modification aux normes de la zone H-92."
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-26-956-2",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "1. Que le conseil municipal adopte le Règlement 26-956-2 modifiant\nle règlement de zonage afin de modifier l'encadrement des projets\nintégrés tel que soumis;"
+    },
+    {
+      "id": "ev-bylaw-26-957-1",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "1. Que le conseil municipal adopte le Règlement 26-957-1 sur le\nlotissement en lien avec certains sites patrimoniaux tel que soumis;"
+    },
+    {
+      "id": "ev-bylaw-26-972",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "1. Que le Conseil municipal adopte le Règlement parapluie 26972 décrétant des dépenses et un emprunt de 1 360 000 $\npour le réaménagement et la mise à niveau des locaux du 415,\nrue de la Cour;"
+    },
+    {
+      "id": "ev-bylaw-26-970",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Modification du Règlement parapluie 26-970 décrétant des\ndépenses et un emprunt de 446 500 $ pour le remplacement de\nvéhicules"
+    },
+    {
+      "id": "ev-event-26-08-26-2",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée,\nnotamment pour l'implantation et la marge arrière du 80, rue YvesMalouin.\nAdoptée"
+    },
+    {
+      "id": "ev-event-26-08-26-3",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "ATTENDU QUE l'implantation proposée respecte généralement\nl'implantation des bâtiments existants dans le secteur (ancienne zone\nR-37) et ne va pas créer de préjudice au voisinage."
+    },
+    {
+      "id": "ev-event-26-08-26-4",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "ATTENDU QUE la demande respecte la demande antérieure (CCU\n2026-078) pour le même genre de construction et devrait être\nmodifié par une future modification aux normes de la zone H-92."
+    },
+    {
+      "id": "ev-event-26-08-26-5",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "ATTENDU QUE la demande respecte la demande antérieure (CCU\n2026-078) pour le même genre de construction et se verra corrigé par\nune future modification aux normes de la zone H-92;"
+    },
+    {
+      "id": "ev-event-26-08-26-6",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "Que le conseil approuve l'ajout de lettrage en façade, tel que\nprésenté, pour le 4906, rue Foster.\nAdoptée"
+    },
+    {
+      "id": "ev-event-26-08-26-7",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "Que le Conseil approuve le projet de rénovation extérieure au 5 rue\nNord, tel que présenté.\nAdoptée"
+    },
+    {
+      "id": "ev-event-26-08-26-8",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "1. Que le conseil municipal approuve la demande PIIA pour une\nconstruction neuve au 80-82, rue Yves-Malouin, tel que\ndemandé, avec la condition de présenter aux CCU les plans\nd'aménagement du terrain pour approbation à une date\nultérieure."
+    },
+    {
+      "id": "ev-event-26-08-26-9",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "Que le conseil approuve le projet de construction résidentielle neuve\nau 153 et 155, rue du Manège, tel que présenté.\nAdoptée"
+    },
+    {
+      "id": "ev-event-26-08-25-5",
+      "source_file": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "rawRef": "raw/proces-verbaux-waterloo/cas/c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd.pdf",
+      "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+      "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "3. Le conseil confirme que la réglementation d'urbanisme devra\nêtre modifiée en temps opportun pour permettre la réalisation\ndu projet;"
+    }
+  ],
+  "input_tokens": 4200,
+  "output_tokens": 1250
+}
+```
