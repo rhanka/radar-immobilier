@@ -15,9 +15,18 @@ FILES=("${GRAPH_FILES[@]}" "${SCRAPE_FILES[@]}" deploy/k8s/36-db-migrate-job.yam
 PUBLIC_IMAGE_FILES=(
   deploy/k8s/10-rbac.yaml
   deploy/k8s/11-ci-deployer-preprod-rbac.yaml
-  deploy/k8s/object-storage-docs-prod/copy-job.yaml
-  deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml
   deploy/k8s/secrets.example.yaml
+)
+RETIRED_MIGRATION_JOBS=(
+  deploy/k8s/object-storage-docs-prod/inventory-job.yaml
+  deploy/k8s/object-storage-docs-prod/fast-inventory-job.yaml
+  deploy/k8s/object-storage-docs-prod/conditional-proof-job.yaml
+  deploy/k8s/object-storage-docs-prod/copy-job.yaml
+  deploy/k8s/object-storage-inventory-preprod/job.yaml
+  deploy/k8s/object-storage-inventory-preprod/docs-inventory-job.yaml
+  deploy/k8s/object-storage-inventory-preprod/docs-conditional-proof-job.yaml
+  deploy/k8s/object-storage-inventory-preprod/docs-copy-job.yaml
+  deploy/k8s/object-storage-inventory-preprod/docs-canonical-copy-job.yaml
 )
 FAIL=0
 fail() { echo "FAIL: $*" >&2; FAIL=$((FAIL + 1)); }
@@ -84,6 +93,9 @@ grep -Fq 'name: radar-refresh-pv' "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" ||
 for rel in "${PUBLIC_IMAGE_FILES[@]}"; do
   grep -Eiq 'radar-registry-pull|rg\.fr-par\.scw\.cloud' "$ROOT/$rel" &&
     fail "$rel retains a legacy SCW registry reference"
+done
+for rel in "${RETIRED_MIGRATION_JOBS[@]}"; do
+  [ ! -e "$ROOT/$rel" ] || fail "$rel must remain retired after the OVH cutover"
 done
 grep -Eiq 'radar-registry-pull|SCW[[:space:]]+(Container[[:space:]]+)?registry' \
   "$ROOT/deploy/k8s/README.md" && fail 'deploy/k8s/README.md retains legacy registry guidance'
