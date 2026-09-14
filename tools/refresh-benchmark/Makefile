@@ -75,7 +75,8 @@ test-v4: runtime-text
 	docker run --rm --network none --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_CAMPAIGN=v3 \
 	  -e BENCHMARK_T1_COMMIT=$(T1_COMMIT_V3) -w $(BENCHMARK_ROOT) $(NODE_IMAGE) \
-	  node --test tools/refresh-benchmark/benchmark.test.mjs tools/refresh-benchmark/runtime-config.test.mjs
+	  node --test tools/refresh-benchmark/benchmark.test.mjs tools/refresh-benchmark/runtime-config.test.mjs \
+	    tools/refresh-benchmark/gemini-diagnostic.test.mjs
 
 test-score-v3:
 	test "$(ENV)" = "test-refresh-benchmark"
