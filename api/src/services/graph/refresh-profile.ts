@@ -20,6 +20,8 @@ import {
 
 import {
   containsNormalizedPdfExcerpt,
+  MIN_ANCHOR_NORMALIZED_CODE_POINTS,
+  normalizePdfExcerpt,
   type RefreshCorpusChunk,
 } from "./refresh-corpus.js";
 
@@ -104,7 +106,9 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
           + "copied verbatim and never completed or corrected. A field label such as "
           + "\"Zone : RUR-12\" is a property, never an excerpt." } },
     description: "The profile injects the constant PDF identity and bounds the excerpt before validation; "
-      + "an entity citation excerpt under 20 code points is refused as entity_citation_excerpt_too_short." };
+      + "an entity citation excerpt under 20 code points, or under "
+      + `${MIN_ANCHOR_NORMALIZED_CODE_POINTS} once normalized to letters and digits, `
+      + "is refused as entity_citation_excerpt_too_short." };
   return JSON.stringify({
     contract_version: REFRESH_PROFILE_CONTRACT_VERSION,
     type: "Graphify Extraction",
@@ -129,7 +133,12 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
         required: ["id", "source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"],
         properties: { id: { type: "string", minLength: 1 }, ...pdfIdentityProperties,
           page: { enum: chunk.pages },
-          excerpt: { type: "string", minLength: 1, description: "verbatim text from the cited page" } } } },
+          excerpt: { type: "string", minLength: MIN_ANCHOR_NORMALIZED_CODE_POINTS,
+            description: "Verbatim text from the cited page, at least "
+              + `${MIN_ANCHOR_NORMALIZED_CODE_POINTS} characters once normalized to letters and `
+              + "digits only, case and accents folded; a shorter excerpt is refused as "
+              + "excerpt_below_anchor_floor. Unlike an entity citation, an evidence item repeats "
+              + "the full PDF identity above and is never truncated." } } } },
     constraints: ["Omit facts absent from the chunk, including in-force status and residential unit counts.",
       "An empty nodes/edges/evidence extraction is valid; the enclosing chunk retains the verified PDF identity."],
   });
@@ -185,8 +194,22 @@ function validatePdfRecord(value: Record<string, unknown>, chunk: RefreshCorpusC
     throw new Error(`Model output has invalid original PDF page for chunk ${chunk.id}`);
   }
   const excerpt = value["excerpt"];
-  if (typeof excerpt !== "string"
-    || !containsNormalizedPdfExcerpt(pageTexts.get(page as number) ?? "", excerpt)) {
+  // A missing or non-string excerpt carries no text to anchor: it stays an anchoring refusal.
+  if (typeof excerpt !== "string") {
+    throw new Error(`Model output has ungrounded PDF excerpt for chunk ${chunk.id}`);
+  }
+  // Too short to anchor is not the same failure as not on the page: an excerpt under the anchor
+  // floor may well be verbatim on the cited page (measured: "ADOPTÉE", 7 normalized code points,
+  // last line of the frozen v13 page). Naming it ungrounded would state a cause that is false,
+  // in a CronJob nobody watches, so the floor gets its own refusal before the anchor is checked.
+  const normalizedCodePoints = [...normalizePdfExcerpt(excerpt)].length;
+  if (normalizedCodePoints < MIN_ANCHOR_NORMALIZED_CODE_POINTS) {
+    throw new Error(`Model output violates excerpt_below_anchor_floor for chunk ${chunk.id}: `
+      + `an excerpt normalizes to ${normalizedCodePoints} letters and digits, under the ${
+        MIN_ANCHOR_NORMALIZED_CODE_POINTS} the page anchor requires. The excerpt may be on the page; `
+      + "it is too short to prove it. Copy more of the same passage verbatim.");
+  }
+  if (!containsNormalizedPdfExcerpt(pageTexts.get(page as number) ?? "", excerpt)) {
     throw new Error(`Model output has ungrounded PDF excerpt for chunk ${chunk.id}`);
   }
 }
@@ -195,11 +218,20 @@ function validateEntityCitationExcerpt(value: Record<string, unknown>, chunk: Re
   // A missing or non-string excerpt carries no text to measure: it stays an anchoring refusal, unchanged.
   if (typeof excerpt !== "string") return;
   const codePoints = Array.from(excerpt).length;
-  if (codePoints < MIN_CITATION_EXCERPT_CODE_POINTS) {
+  // Two floors, two units, one named violation: the schema declares 20 raw code points, the page
+  // anchor requires 12 normalized ones (letters and digits only). Twenty raw can normalize under
+  // twelve — measured: "1 2 3 4 5 6 7 8 9 10" is 20 raw and 11 normalized — so an entity citation
+  // that clears the declared floor could still fall through to the anchor and be refused under a
+  // name that designates the wrong cause. Both are checked here, under the name the prompt teaches.
+  const normalizedCodePoints = [...normalizePdfExcerpt(excerpt)].length;
+  if (codePoints < MIN_CITATION_EXCERPT_CODE_POINTS
+    || normalizedCodePoints < MIN_ANCHOR_NORMALIZED_CODE_POINTS) {
     throw new Error(`Model output violates entity_citation_excerpt_too_short for chunk ${chunk.id}: `
-      + `an entity citation excerpt carries ${codePoints} code points, under the ${
-        MIN_CITATION_EXCERPT_CODE_POINTS} the schema declares. A field label such as "Zone : RUR-12" `
-      + "belongs to the node properties, never to excerpt; cite the decision sentence instead.");
+      + `an entity citation excerpt carries ${codePoints} code points and ${normalizedCodePoints} `
+      + `once normalized, under the ${MIN_CITATION_EXCERPT_CODE_POINTS} the schema declares or the ${
+        MIN_ANCHOR_NORMALIZED_CODE_POINTS} normalized the page anchor requires. A field label such as `
+      + "\"Zone : RUR-12\" belongs to the node properties, never to excerpt; cite the decision "
+      + "sentence instead.");
   }
 }
 function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
