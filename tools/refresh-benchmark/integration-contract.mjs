@@ -44,8 +44,11 @@ export const executionContract = Object.freeze({
 // v14 keeps that same 64 000 cap so the only moving part is the contract, and v15 replays v14
 // exactly: same cap, same corpus, same freeze, one more observation per document. v16 keeps the
 // cap again and moves the contract snapshot alone, to re-measure the two v9 review majors.
+// v100 garde le même plafond et le même instantané de contrat que v16, et ne déplace que le
+// corpus : 100 PV au lieu de 5, pour mesurer une distribution au lieu d'un tirage.
 const campaignOutputTokenCaps = Object.freeze({ v7: 65_536, v8: 65_536, v9: 65_536,
-  v10: 65_536, v11: 65_536, v12: 65_536, v13: 64_000, v14: 64_000, v15: 64_000, v16: 64_000 });
+  v10: 65_536, v11: 65_536, v12: 65_536, v13: 64_000, v14: 64_000, v15: 64_000, v16: 64_000,
+  v100: 64_000 });
 
 export function outputTokenCapForCampaign(campaign) {
   return campaignOutputTokenCaps[campaign] ?? executionContract.maxOutputTokens;
