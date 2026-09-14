@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createAdapterSet, inspectCloudCodeSse, inspectWireBody, resolveOutputCap,
-  selectAccount, validateRetry, variants } from
+import { CLOUD_CODE_SONNET_OUTPUT_CAP, createAdapterSet, inspectCloudCodeSse, inspectWireBody,
+  resolveOutputCap, selectAccount, validateRetry, variants } from
   "./runtime-config.mjs";
 
 test("v4 candidates use the lowest explicit effort on enrolled transports", () => {
@@ -41,6 +41,24 @@ test("v12 Sonnet paths keep one model and expose only Cloud Code LOW effort", ()
     } },
   }, 65_536), { model: "claude-sonnet-4-6", effort: "low",
     providerEffort: "LOW", maxOutputTokens: 65_536 });
+});
+
+test("v12 Cloud Code carries the 64 000 transport cap and nothing else", () => {
+  const cloudCode = { campaign: "v12", documentId: "waterloo-2026-08-18",
+    variantName: "sonnet-cloudcode" };
+  assert.equal(resolveOutputCap(undefined, cloudCode, 65_536), 65_536);
+  assert.equal(resolveOutputCap("64000", cloudCode, 65_536), CLOUD_CODE_SONNET_OUTPUT_CAP);
+  assert.throws(() => resolveOutputCap("32768", cloudCode, 65_536), /restricted to the Valcourt/);
+  assert.throws(() => resolveOutputCap("64000",
+    { ...cloudCode, variantName: "sonnet-direct" }, 65_536), /restricted to the Valcourt/);
+  assert.throws(() => resolveOutputCap("64000",
+    { ...cloudCode, campaign: "v9" }, 65_536), /restricted to the Valcourt/);
+  assert.deepEqual(inspectWireBody(variants["sonnet-cloudcode"], {
+    model: "claude-sonnet-4-6", request: { generationConfig: {
+      maxOutputTokens: 64_000, thinkingConfig: { thinkingLevel: "LOW" },
+    } },
+  }, CLOUD_CODE_SONNET_OUTPUT_CAP), { model: "claude-sonnet-4-6", effort: "low",
+    providerEffort: "LOW", maxOutputTokens: 64_000 });
 });
 
 test("account selection is owner-scoped by facade and transport-specific", () => {
