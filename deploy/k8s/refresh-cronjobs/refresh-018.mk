@@ -4,10 +4,15 @@ ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../../..)
 OVERLAY := $(ROOT)/deploy/k8s/refresh-cronjobs
 PROD_OVERLAY := $(ROOT)/deploy/k8s/refresh-cronjobs-prod
 NAMESPACE := radar-immobilier-preprod
+PROD_NAMESPACE := radar-immobilier
 EXPECTED_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 K := kubectl --kubeconfig "$(KUBECONFIG)" -n $(NAMESPACE)
+KP := kubectl --kubeconfig "$(KUBECONFIG)" -n $(PROD_NAMESPACE)
 PLACEHOLDER := ghcr.io/rhanka/radar-api:PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
 API_IMAGE := ghcr.io/rhanka/radar-api
+APPROVED_IMAGE := ghcr.io/rhanka/radar-api@sha256:d4a46b5615a7510fd5bf3384f65dea8b881cb75ae3226a3dc3751a7f9271119e
+OVH_S3_ENDPOINT := https://s3.bhs.io.cloud.ovh.net
+OVH_DOCS_BUCKET := radar-immobilier-docs
 
 .PHONY: guard-preprod
 guard-preprod:
@@ -32,6 +37,37 @@ inspect-preprod: guard-preprod
 	  $(K) get pvc radar-refresh-keyring --ignore-not-found \
 	    -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,CLASS:.spec.storageClassName,ACCESS:.spec.accessModes[*]; \
 	else echo 'PVC inventory: unavailable to this identity'; fi
+
+.PHONY: guard-prod
+guard-prod:
+	@test "$(ENV)" = "prod" || { echo "ENV=prod is required" >&2; exit 1; }
+	@test -n "$(KUBECONFIG)" -a -f "$(KUBECONFIG)" || { echo "KUBECONFIG file is required" >&2; exit 1; }
+	@server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"; \
+	  case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected API server" >&2; exit 1;; esac
+	@$(KP) get serviceaccount radar-app -o name >/dev/null
+
+.PHONY: inspect-prod
+inspect-prod: guard-prod
+	@kubectl --kubeconfig "$(KUBECONFIG)" auth whoami -o jsonpath='{.status.userInfo.username}{"\n"}'
+	@for check in 'get cronjobs.batch' 'create cronjobs.batch' 'patch cronjobs.batch' 'create jobs.batch' 'get secrets' 'create secrets' 'get persistentvolumeclaims' 'create persistentvolumeclaims'; do \
+	  set -- $$check; printf '%-34s %s\n' "$$1 $$2" "$$($(KP) auth can-i "$$1" "$$2")"; \
+	done
+	@$(KP) get cronjob radar-refresh-scrape radar-refresh-projection radar-refresh-pv --ignore-not-found \
+	  -o custom-columns=NAME:.metadata.name,SUSPEND:.spec.suspend,SCHEDULE:.spec.schedule,IMAGE:.spec.jobTemplate.spec.template.spec.containers[0].image
+	@$(KP) get configmap radar-api --ignore-not-found \
+	  -o custom-columns=NAME:.metadata.name,GRAPH_ENDPOINT:.data.GRAPH_S3_ENDPOINT,GRAPH_REGION:.data.GRAPH_S3_REGION,GRAPH_BUCKET:.data.GRAPH_S3_BUCKET,SCRAPE_ENDPOINT:.data.SCRAPE_S3_ENDPOINT,SCRAPE_REGION:.data.SCRAPE_S3_REGION,SCRAPE_BUCKET:.data.SCRAPE_S3_BUCKET
+	@if [ "$$($(KP) auth can-i get secrets)" = yes ]; then \
+	  $(KP) get secret radar-docs-s3-credentials radar-graph-s3-credentials radar-scrape-s3-credentials radar-refresh-keyring-bootstrap radar-refresh-runtime --ignore-not-found -o name; \
+	else echo 'secret inventory: unavailable to this identity'; fi
+	@if [ "$$($(KP) auth can-i get persistentvolumeclaims)" = yes ]; then \
+	  $(KP) get pvc radar-refresh-keyring --ignore-not-found \
+	    -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,CLASS:.spec.storageClassName,ACCESS:.spec.accessModes[*]; \
+	else echo 'PVC inventory: unavailable to this identity'; fi
+	@$(KP) get statefulset radar-minio --ignore-not-found -o name
+	@$(KP) get service radar-minio --ignore-not-found -o name
+	@$(KP) get pvc minio-data-radar-minio-0 --ignore-not-found -o name
+	@$(KP) get jobs -o custom-columns=NAME:.metadata.name,ACTIVE:.status.active,FAILED:.status.failed,SUCCEEDED:.status.succeeded --no-headers \
+	  | awk '$$1 ~ /(object-storage|docs|copy|inventory|proof)/ { print }'
 
 .PHONY: keyring-summary
 keyring-summary:
@@ -91,19 +127,216 @@ render-preprod:
 
 .PHONY: render-prod
 render-prod:
-	@[[ "$(IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
-	  || { echo "IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
+	@test "$(IMAGE_REF)" = "$(APPROVED_IMAGE)" \
+	  || { echo "IMAGE_REF must be the accepted Graphify 0.18 image" >&2; exit 1; }
 	@test -n "$(RENDER_OUT)" || { echo "RENDER_OUT is required" >&2; exit 1; }
 	@set -o pipefail; umask 077; kubectl kustomize --load-restrictor LoadRestrictionsNone "$(PROD_OVERLAY)" \
 	  | sed "s#$(PLACEHOLDER)#$(IMAGE_REF)#g" > "$(RENDER_OUT)"
 	@! grep -q 'PINNED-BY-CI\|radar-api:latest' "$(RENDER_OUT)"
 
+.PHONY: verify-render-prod
+verify-render-prod:
+	@set -e; tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp" ENV=test-refresh-prod-018; \
+	  ! grep -Eqi 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|SCW_' "$$tmp" \
+	    || { echo "production render retains forbidden SCW or MinIO storage" >&2; exit 1; }; \
+	  ! grep -q 'name: radar-s3-credentials' "$$tmp" \
+	    || { echo "production render retains generic storage credentials" >&2; exit 1; }; \
+	  grep -q 'name: radar-scrape-s3-credentials' "$$tmp"; \
+	  grep -q 'secretName: radar-refresh-keyring-bootstrap' "$$tmp"; \
+	  grep -q 'claimName: radar-refresh-keyring' "$$tmp"; \
+	  test "$$(grep -c "image: $(APPROVED_IMAGE)" "$$tmp")" -eq 4; \
+	  pv="$$(awk 'BEGIN { RS="---" } /kind: CronJob/ && /name: radar-refresh-pv/ { print }' "$$tmp")"; \
+	  test "$$(printf %s "$$pv" | grep -c 'name: radar-scrape-s3-credentials')" -eq 2; \
+	  test "$$(printf %s "$$pv" | grep -c 'name: radar-api')" -ge 4 \
+	    || { echo "radar-refresh-pv lacks complete provider-neutral DOCS bindings" >&2; exit 1; }; \
+	  awk '\
+	    /^kind: CronJob$$/ { kind="CronJob" } \
+	    kind == "CronJob" && /^  name: radar-refresh-/ { name=$$2 } \
+	    kind == "CronJob" && /^  suspend:/ { suspend[name]=$$2 } \
+	    END { \
+	      if (suspend["radar-refresh-pv"] != "false") exit 1; \
+	      if (suspend["radar-refresh-scrape"] != "true") exit 1; \
+	      if (suspend["radar-refresh-projection"] != "true") exit 1; \
+	      if (length(suspend) != 3) exit 1; \
+	    }' "$$tmp" \
+	    || { echo "production render must activate only radar-refresh-pv" >&2; exit 1; }
+
+.PHONY: storage-ready-prod
+storage-ready-prod: guard-prod verify-render-prod
+	@set -e; \
+	  graph="$$( $(KP) get configmap radar-api -o jsonpath='{.data.GRAPH_S3_ENDPOINT}|{.data.GRAPH_S3_REGION}|{.data.GRAPH_S3_BUCKET}|{.data.GRAPH_S3_FORCE_PATH_STYLE}' )"; \
+	  scrape="$$( $(KP) get configmap radar-api -o jsonpath='{.data.SCRAPE_S3_ENDPOINT}|{.data.SCRAPE_S3_REGION}|{.data.SCRAPE_S3_BUCKET}|{.data.SCRAPE_S3_FORCE_PATH_STYLE}' )"; \
+	  test "$$graph" = "$(OVH_S3_ENDPOINT)|bhs|$(OVH_DOCS_BUCKET)|false" \
+	    || { echo "live GRAPH binding is not the approved OVH DOCS store" >&2; exit 1; }; \
+	  test "$$scrape" = "$(OVH_S3_ENDPOINT)|bhs|$(OVH_DOCS_BUCKET)|false" \
+	    || { echo "live SCRAPE binding is not the approved OVH DOCS store" >&2; exit 1; }; \
+	  require_key() { \
+	    test -n "$$( $(KP) get secret "$$1" -o "jsonpath={.data.$$2}" )" \
+	      || { echo "missing required key $$1/$$2" >&2; exit 1; }; \
+	  }; \
+	  for item in \
+	    radar-docs-s3-credentials/DOCS_S3_ENDPOINT \
+	    radar-docs-s3-credentials/DOCS_S3_REGION \
+	    radar-docs-s3-credentials/DOCS_S3_BUCKET \
+	    radar-docs-s3-credentials/DOCS_S3_FORCE_PATH_STYLE \
+	    radar-docs-s3-credentials/DOCS_S3_ACCESS_KEY \
+	    radar-docs-s3-credentials/DOCS_S3_SECRET_KEY \
+	    radar-graph-s3-credentials/GRAPH_S3_ACCESS_KEY \
+	    radar-graph-s3-credentials/GRAPH_S3_SECRET_KEY \
+	    radar-scrape-s3-credentials/SCRAPE_S3_ACCESS_KEY \
+	    radar-scrape-s3-credentials/SCRAPE_S3_SECRET_KEY; do \
+	      require_key "$${item%/*}" "$${item#*/}"; \
+	  done; \
+	  expected_endpoint="$$(printf %s '$(OVH_S3_ENDPOINT)' | base64 | tr -d '\n')"; \
+	  expected_region="$$(printf %s bhs | base64 | tr -d '\n')"; \
+	  expected_bucket="$$(printf %s '$(OVH_DOCS_BUCKET)' | base64 | tr -d '\n')"; \
+	  expected_style="$$(printf %s false | base64 | tr -d '\n')"; \
+	  test "$$( $(KP) get secret radar-docs-s3-credentials -o jsonpath='{.data.DOCS_S3_ENDPOINT}' )" = "$$expected_endpoint"; \
+	  test "$$( $(KP) get secret radar-docs-s3-credentials -o jsonpath='{.data.DOCS_S3_REGION}' )" = "$$expected_region"; \
+	  test "$$( $(KP) get secret radar-docs-s3-credentials -o jsonpath='{.data.DOCS_S3_BUCKET}' )" = "$$expected_bucket"; \
+	  test "$$( $(KP) get secret radar-docs-s3-credentials -o jsonpath='{.data.DOCS_S3_FORCE_PATH_STYLE}' )" = "$$expected_style" \
+	    || { echo "live API binding is not the approved OVH DOCS store" >&2; exit 1; }; \
+	  refs="$$( $(KP) get deployment radar-api -o jsonpath='{range .spec.template.spec.containers[?(@.name=="api")].env[*]}{.name}={.valueFrom.secretKeyRef.name}/{.valueFrom.secretKeyRef.key}{"\n"}{end}' )"; \
+	  for ref in \
+	    S3_ENDPOINT=radar-docs-s3-credentials/DOCS_S3_ENDPOINT \
+	    S3_REGION=radar-docs-s3-credentials/DOCS_S3_REGION \
+	    S3_BUCKET=radar-docs-s3-credentials/DOCS_S3_BUCKET \
+	    S3_FORCE_PATH_STYLE=radar-docs-s3-credentials/DOCS_S3_FORCE_PATH_STYLE \
+	    S3_ACCESS_KEY=radar-docs-s3-credentials/DOCS_S3_ACCESS_KEY \
+	    S3_SECRET_KEY=radar-docs-s3-credentials/DOCS_S3_SECRET_KEY; do \
+	      printf '%s\n' "$$refs" | grep -Fxq "$$ref" \
+	        || { echo "live API lacks required canonical DOCS binding $$ref" >&2; exit 1; }; \
+	  done; \
+	  test -z "$$( $(KP) get statefulset radar-minio --ignore-not-found -o name )"; \
+	  test -z "$$( $(KP) get service radar-minio --ignore-not-found -o name )"; \
+	  test -z "$$( $(KP) get pvc minio-data-radar-minio-0 --ignore-not-found -o name )" \
+	    || { echo "production MinIO resources still exist" >&2; exit 1; }; \
+	  active="$$( $(KP) get jobs -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.active}{"\n"}{end}' \
+	    | awk '$$1 ~ /(object-storage|docs|copy|inventory|proof)/ && $$2 + 0 > 0 { print $$1 }' )"; \
+	  test -z "$$active" || { echo "active storage migration Job blocks promotion" >&2; exit 1; }
+
+.PHONY: validate-prod
+validate-prod: storage-ready-prod
+	@set -e; tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp" ENV=test-refresh-prod-018; \
+	  $(KP) apply --dry-run=server -f "$$tmp" >/dev/null
+
+.PHONY: seed-prod
+seed-prod: storage-ready-prod
+	@test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }
+	@test "$$($(K) get cronjob radar-refresh-pv -o jsonpath='{.spec.suspend}')" = "false"
+	@test "$$($(K) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')" = "$(APPROVED_IMAGE)" \
+	  || { echo "preproduction source route is not on the accepted image" >&2; exit 1; }
+	@test -n "$$($(K) get secret radar-refresh-keyring-bootstrap -o go-template='{{index .data ".key"}}')" \
+	  || { echo "accepted preproduction keyring bootstrap is missing" >&2; exit 1; }
+	@test -n "$$($(K) get secret radar-refresh-runtime -o jsonpath='{.data.REFRESH_OWNER_SCOPE_REF}')" \
+	  || { echo "accepted preproduction owner scope is missing" >&2; exit 1; }
+	@set -o pipefail; $(K) get secret radar-refresh-keyring-bootstrap -o json \
+	  | jq 'del(.metadata.annotations,.metadata.creationTimestamp,.metadata.managedFields,.metadata.resourceVersion,.metadata.uid) | .metadata.namespace="$(PROD_NAMESPACE)"' \
+	  | $(KP) apply -f - >/dev/null
+	@set -o pipefail; $(K) get secret radar-refresh-runtime -o json \
+	  | jq 'del(.metadata.annotations,.metadata.creationTimestamp,.metadata.managedFields,.metadata.resourceVersion,.metadata.uid) | .metadata.namespace="$(PROD_NAMESPACE)" | .data.REFRESH_PRINCIPAL_REF=("radar-refresh-pv-prod" | @base64)' \
+	  | $(KP) apply -f - >/dev/null
+
+.PHONY: runtime-ready-prod
+runtime-ready-prod: guard-prod
+	@test -n "$$($(KP) get secret radar-refresh-keyring-bootstrap -o go-template='{{index .data ".key"}}')" \
+	  || { echo "production keyring bootstrap is missing" >&2; exit 1; }
+	@test -n "$$($(KP) get secret radar-refresh-runtime -o jsonpath='{.data.REFRESH_PRINCIPAL_REF}')"
+	@test -n "$$($(KP) get secret radar-refresh-runtime -o jsonpath='{.data.REFRESH_OWNER_SCOPE_REF}')" \
+	  || { echo "production refresh runtime identity is incomplete" >&2; exit 1; }
+
+.PHONY: apply-prod
+apply-prod: $(if $(filter 1,$(PROD_CONFIRM)),storage-ready-prod runtime-ready-prod)
+	@test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }
+	@set -e; tmp="$$(mktemp)"; trap 'rm -f "$$tmp"' EXIT; \
+	  make -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp" ENV=test-refresh-prod-018; \
+	  $(KP) apply --dry-run=server -f "$$tmp" >/dev/null; \
+	  $(KP) apply -f "$$tmp" >/dev/null; \
+	  test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.suspend}')" = "false"; \
+	  test "$$($(KP) get cronjob radar-refresh-scrape -o jsonpath='{.spec.suspend}')" = "true"; \
+	  test "$$($(KP) get cronjob radar-refresh-projection -o jsonpath='{.spec.suspend}')" = "true"; \
+	  test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')" = "$(APPROVED_IMAGE)"
+
+.PHONY: suspend-prod
+suspend-prod: guard-prod
+	@test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }
+	@for cronjob in radar-refresh-pv radar-refresh-scrape radar-refresh-projection; do \
+	  $(KP) patch cronjob "$$cronjob" --type=merge -p '{"spec":{"suspend":true}}' >/dev/null; \
+	done
+
+.PHONY: live-ready-prod
+live-ready-prod: storage-ready-prod runtime-ready-prod
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.suspend}')" = "false"
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.schedule}')" = "17 5 * * *"
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')" = "$(APPROVED_IMAGE)"
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].env[?(@.name=="REFRESH_PROVIDER")].value}')" = "openai"
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].env[?(@.name=="REFRESH_MODEL")].value}')" = "gpt-5.6-luna"
+	@test "$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].env[?(@.name=="REFRESH_REASONING_EFFORT")].value}')" = "high"
+	@test "$$($(KP) get cronjob radar-refresh-scrape -o jsonpath='{.spec.suspend}')" = "true"
+	@test "$$($(KP) get cronjob radar-refresh-projection -o jsonpath='{.spec.suspend}')" = "true"
+	@phase="$$( $(KP) get pvc radar-refresh-keyring -o jsonpath='{.status.phase}' )"; \
+	  test "$$phase" = "Pending" -o "$$phase" = "Bound" \
+	    || { echo "production keyring PVC is unavailable" >&2; exit 1; }
+
+.PHONY: observe-scheduled-prod
+observe-scheduled-prod: live-ready-prod
+	@test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }
+	@set -o pipefail; old_schedule="$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.spec.schedule}')"; \
+	  before="$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.status.lastScheduleTime}')"; \
+	  restore() { $(KP) patch cronjob radar-refresh-pv --type=merge \
+	    -p "{\"spec\":{\"schedule\":\"$$old_schedule\"}}" >/dev/null; }; \
+	  trap restore EXIT; \
+	  $(KP) patch cronjob radar-refresh-pv --type=merge \
+	    -p '{"spec":{"schedule":"* * * * *"}}' >/dev/null; \
+	  current=""; \
+	  for attempt in $$(seq 1 24); do \
+	    current="$$($(KP) get cronjob radar-refresh-pv -o jsonpath='{.status.lastScheduleTime}')"; \
+	    test -n "$$current" -a "$$current" != "$$before" && break; \
+	    sleep 5; \
+	  done; \
+	  test -n "$$current" -a "$$current" != "$$before" \
+	    || { echo "production CronJob controller did not schedule within 120 seconds" >&2; exit 1; }; \
+	  if ! restore; then echo "failed to restore the production daily schedule" >&2; exit 1; fi; \
+	  trap - EXIT; \
+	  job="$$($(KP) get jobs \
+	    -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.ownerReferences[0].name}{"\t"}{.metadata.creationTimestamp}{"\n"}{end}' \
+	    | awk '$$2 == "radar-refresh-pv" { print }' | sort -k3 | tail -1 | cut -f1)"; \
+	  test -n "$$job" || { echo "production scheduled Job owner reference not found" >&2; exit 1; }; \
+	  terminal=""; \
+	  for attempt in $$(seq 1 240); do \
+	    complete="$$($(KP) get "job/$$job" -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}')"; \
+	    failed="$$($(KP) get "job/$$job" -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}')"; \
+	    if [ "$$complete" = "True" ]; then terminal=complete; break; fi; \
+	    if [ "$$failed" = "True" ]; then terminal=failed; break; fi; \
+	    sleep 5; \
+	  done; \
+	  $(KP) get "job/$$job" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,IMAGE:.spec.template.spec.containers[0].image,START:.status.startTime,END:.status.completionTime; \
+	  evidence="$$( $(KP) logs "job/$$job" --all-containers=true \
+	    | awk '/refresh-pv: (starting|model call (completed|failed)|completed)/' )"; \
+	  test -n "$$evidence" || { echo "production refresh emitted no safe receipt evidence" >&2; exit 1; }; \
+	  printf '%s\n' "$$evidence"; \
+	  test "$$terminal" = complete \
+	    || { echo "production scheduled Job did not complete successfully" >&2; exit 1; }
+
+.PHONY: status-prod logs-prod
+status-prod: guard-prod
+	@test -n "$(JOB_NAME)" || { echo "JOB_NAME is required" >&2; exit 1; }
+	@$(KP) get job "$(JOB_NAME)" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,ACTIVE:.status.active,SUCCEEDED:.status.succeeded,FAILED:.status.failed,START:.status.startTime,END:.status.completionTime,IMAGE:.spec.template.spec.containers[0].image
+
+logs-prod: guard-prod
+	@test -n "$(JOB_NAME)" || { echo "JOB_NAME is required" >&2; exit 1; }
+	@set -o pipefail; evidence="$$( $(KP) logs "job/$(JOB_NAME)" --all-containers=true \
+	  | awk '/refresh-pv: (starting|model call (completed|failed)|completed)/' )"; \
+	  test -n "$$evidence" || { echo "production refresh emitted no safe receipt evidence" >&2; exit 1; }; \
+	  printf '%s\n' "$$evidence"
 .PHONY: verify-renders
 verify-renders:
 	@set -euo pipefail; tmp="$$(mktemp -d)"; trap 'rm -rf "$$tmp"' EXIT; \
-	  image='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000'; \
-	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-preprod IMAGE_REF="$$image" RENDER_OUT="$$tmp/preprod.yaml" ENV=$(ENV); \
-	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$$image" RENDER_OUT="$$tmp/prod.yaml" ENV=$(ENV); \
+	  preprod_image='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000'; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-preprod IMAGE_REF="$$preprod_image" RENDER_OUT="$$tmp/preprod.yaml" ENV=$(ENV); \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-prod IMAGE_REF="$(APPROVED_IMAGE)" RENDER_OUT="$$tmp/prod.yaml" ENV=$(ENV); \
 	  for render in "$$tmp/preprod.yaml" "$$tmp/prod.yaml"; do \
 	    test -s "$$render" || { echo "empty refresh render: $$render" >&2; exit 1; }; \
 	    awk 'BEGIN{RS="\n---\n"} /[^[:space:]]/ { if ($$0 !~ /apiVersion:/ || $$0 !~ /kind:/) { print "missing apiVersion/kind in refresh render" > "/dev/stderr"; bad=1 } } END{ exit bad }' "$$render"; \
@@ -115,7 +348,6 @@ verify-renders:
 	      active && /^[[:space:]]+valueFrom:[[:space:]]*$$/ {reference=1} \
 	      END {flush(); exit bad}' "$$render"; \
 	  done
-
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
 	@test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }

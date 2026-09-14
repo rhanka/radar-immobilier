@@ -1,10 +1,9 @@
-# refresh-cronjobs-prod — deploys the three production refresh CronJobs, pins
-# them to the promoted release image, and un-suspends them. This is the
-# production twin of refresh-cronjobs; it carries no legacy in-cluster patch.
+# refresh-cronjobs-prod — deploys one causal production PV-to-Signal CronJob,
+# pins it to the accepted release image, and keeps both legacy schedules
+# suspended. This is the production twin of refresh-cronjobs.
 #
-# The schedules are inherited unchanged from 34-refresh-cronjob.yaml: scrape at
-# 03:17 UTC, then projection at 04:30 UTC. Keep both outside the release window:
-# neither refresh workload may overlap the release backup.
+# Production storage coordinates and dedicated credentials are owned by T2's
+# provider-neutral base. This overlay never overrides them or adds a fallback.
 #
 # Applied only by the gated promote-prod "Deploy refresh CronJobs (prod)" step.
 # The fail-loud image placeholder must be replaced by `kustomize edit set image`
@@ -16,6 +15,7 @@ namespace: radar-immobilier
 
 resources:
   - ../34-refresh-cronjob.yaml
+  - ../34-refresh-keyring-pvc.yaml
 
 images:
   - name: ghcr.io/rhanka/radar-api
@@ -24,15 +24,38 @@ images:
 patches:
   - target:
       kind: CronJob
-      name: radar-refresh-scrape
+      name: radar-refresh-pv
     patch: |
       - op: replace
         path: /spec/suspend
         value: false
+
+  # Keep the dormant legacy scrape workload structurally identical to the
+  # preproduction twin without activating it or overriding production storage.
   - target:
       kind: CronJob
-      name: radar-refresh-projection
+      name: radar-refresh-scrape
     patch: |
-      - op: replace
-        path: /spec/suspend
-        value: false
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: radar-refresh-scrape
+      spec:
+        jobTemplate:
+          spec:
+            backoffLimit: 1
+            activeDeadlineSeconds: 10800
+            template:
+              spec:
+                containers:
+                  - name: scrape
+                    env:
+                      - name: NODE_OPTIONS
+                        value: "--max-old-space-size=2560 --dns-result-order=ipv4first"
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 768Mi
+                      limits:
+                        cpu: 500m
+                        memory: 3Gi
