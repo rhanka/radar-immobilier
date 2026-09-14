@@ -2,7 +2,8 @@ import { executionContract } from "./integration-contract.mjs";
 
 export const variants = Object.freeze({
   "luna-low": { provider: "openai", transport: "codex", model: "gpt-5.6-luna", effort: "low" },
-  "gemini-low": { provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash", effort: "low" },
+  // Wire ID announced by fetchAvailableModels; replace with llm-mesh 0.19.2 mapping.
+  "gemini-low": { provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash-tiered", effort: "low" },
 });
 
 export function createAdapterSet(constructors, observedFetch) {

@@ -5,9 +5,9 @@ import { pathToFileURL } from "node:url";
 
 import { createGraphifyMesh } from "/workspace/node_modules/@sentropic/graphify/dist/llm-mesh.js";
 import { CloudCodeRuntimeClient, CodexRuntimeClient, GeminiAdapter,
-  OpenAIAdapter } from "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/index.js";
-import { createLlmMeshFacade } from "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/service/facade.js";
-import { EncryptedFileKeyring } from "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/node/index.js";
+  OpenAIAdapter } from "/workspace/node_modules/@sentropic/llm-mesh/dist/index.js";
+import { createLlmMeshFacade } from "/workspace/node_modules/@sentropic/llm-mesh/dist/service/facade.js";
+import { EncryptedFileKeyring } from "/workspace/node_modules/@sentropic/llm-mesh/dist/node/index.js";
 import { executionContract } from "./integration-contract.mjs";
 import { createAdapterSet, inspectWireBody, selectAccount, validateRetry, variants } from
   "./runtime-config.mjs";

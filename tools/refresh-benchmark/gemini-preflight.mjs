@@ -2,11 +2,11 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 
 import { CloudCodeRuntimeClient, getModelProfile } from
-  "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/index.js";
+  "/workspace/node_modules/@sentropic/llm-mesh/dist/index.js";
 import { createLlmMeshFacade } from
-  "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/service/facade.js";
+  "/workspace/node_modules/@sentropic/llm-mesh/dist/service/facade.js";
 import { EncryptedFileKeyring } from
-  "/workspace/node_modules/@sentropic/llm-mesh-refresh/dist/node/index.js";
+  "/workspace/node_modules/@sentropic/llm-mesh/dist/node/index.js";
 import {
   CLOUD_CODE_ENDPOINTS,
   buildProbeRequest,
@@ -19,7 +19,7 @@ const required = (name) => process.env[name]
   || (() => { throw new Error(`${name} is required`); })();
 const ownerScope = required("BENCHMARK_OWNER_SCOPE");
 const outputPath = required("BENCHMARK_PREFLIGHT_OUTPUT");
-const model = process.env.BENCHMARK_MODEL ?? "gemini-3.8-flash";
+const model = process.env.BENCHMARK_MODEL ?? "gemini-3.8-flash-tiered";
 const effortValue = process.env.BENCHMARK_EFFORT ?? "low";
 const effort = effortValue === "omit" ? undefined : effortValue;
 if (effort && !["low", "medium", "high"].includes(effort)) {
@@ -42,7 +42,7 @@ const account = eligible[0];
 const publicRaw = await keyring.getSecret(`sentropic-llm-mesh:${account.accountId}:public`);
 const publicRecord = publicRaw ? JSON.parse(publicRaw) : null;
 const packageData = JSON.parse(await readFile(
-  "/workspace/node_modules/@sentropic/llm-mesh-refresh/package.json", "utf8"));
+  "/workspace/node_modules/@sentropic/llm-mesh/package.json", "utf8"));
 const profile = getModelProfile("gemini", model);
 const acquisition = await facade.acquire({ accountId: account.accountId,
   ownerScopeRef: ownerScope, targetProviderId: "gemini", transportProviderId: "cloud-code",
@@ -101,10 +101,12 @@ const receipt = {
     version: packageData.version,
     staticModelProfilePresent: Boolean(profile),
   },
+  redaction: { bearer: "[REDACTED]", project: "[REDACTED]" },
   wire,
   actual: response ? {
     providerId: response.providerId,
     modelId: response.modelId,
+    messageExact: response.text?.trim() ?? "",
     outputSha256: sha256(response.text ?? ""),
     pingExact: response.text?.trim() === "PING_OK",
     usage: response.usage ?? null,

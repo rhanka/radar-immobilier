@@ -1,7 +1,7 @@
 export const releaseAnchor = Object.freeze({
   packageName: "@sentropic/llm-mesh",
-  version: null,
-  publicationEvidence: null,
+  version: "0.19.1",
+  publicationEvidence: "npm registry shasum 4ea47d90242c58dee638c25e1626b7c6265be511",
 });
 
 export const frozenInputs = Object.freeze({

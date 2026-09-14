@@ -12,9 +12,11 @@ const root = process.env.BENCHMARK_REPOSITORY_ROOT;
 if (!root) throw new Error("BENCHMARK_REPOSITORY_ROOT is required");
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 
-test("the llm-mesh release anchor remains empty until publication", () => {
+test("the llm-mesh release anchor identifies the published package", () => {
   assert.deepEqual(releaseAnchor, {
-    packageName: "@sentropic/llm-mesh", version: null, publicationEvidence: null,
+    packageName: "@sentropic/llm-mesh",
+    version: "0.19.1",
+    publicationEvidence: "npm registry shasum 4ea47d90242c58dee638c25e1626b7c6265be511",
   });
 });
 
