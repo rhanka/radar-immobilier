@@ -51,6 +51,17 @@ function extraction(page = oracle.page): Extraction {
   };
 }
 
+async function captureExtractionError(text: string): Promise<Error> {
+  try {
+    await extractRefreshProfile([chunk()], {
+      context, textClient: client([{ text }], []), maxOutputTokens: 512,
+    });
+  } catch (error) {
+    if (error instanceof Error) return error;
+  }
+  throw new Error("Expected extraction to fail");
+}
+
 function client(responses: Array<{ text: string; status?: "completed" | "instructions_written" }>, seen: TextJsonGenerationInput[]) {
   return {
     mode: "mesh", provider: "test", model: "test-model",
@@ -70,6 +81,38 @@ function client(responses: Array<{ text: string; status?: "completed" | "instruc
 }
 
 describe("refresh profile extraction", () => {
+  it("should accept direct JSON and one complete JSON fence", async () => {
+    for (const text of [JSON.stringify(extraction()), ` \n\`\`\`json\n${JSON.stringify(extraction())}\n\`\`\`\n `]) {
+      const results = await extractRefreshProfile([chunk()], {
+        context, textClient: client([{ text }], []), maxOutputTokens: 512,
+      });
+      expect(results[0]!.extraction.nodes[0]!.id).toBe("signal-waterloo-26-956-2");
+    }
+  });
+
+  it("should reject JSON with a preamble or suffix and preserve the native parse error", async () => {
+    for (const text of [`Preamble\n${JSON.stringify(extraction())}`, `${JSON.stringify(extraction())}\nSuffix`]) {
+      const error = await captureExtractionError(text);
+      expect(error.cause).toBeInstanceOf(SyntaxError);
+      expect(error.message).toContain((error.cause as SyntaxError).message);
+    }
+  });
+
+  it("should name profile violations when entity citations are missing", async () => {
+    const invalid = extraction();
+    delete invalid.nodes[0]!.citations;
+    const error = await captureExtractionError(JSON.stringify(invalid));
+    expect(error.message).toContain("missing_citation_source_file");
+    expect(error.message).toContain("missing_citation_page");
+  });
+
+  it("should accept output with profile-compliant entity citations", async () => {
+    const results = await extractRefreshProfile([chunk()], {
+      context, textClient: client([{ text: JSON.stringify(extraction()) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction).toEqual(extraction());
+  });
+
   it("should load an unregistered PV profile and refuse registry-backed output", async () => {
     const pvContext = loadRefreshProfileContext({ root: "/unused", profilePath, unregisteredOnly: true });
     expect(pvContext.registries).toEqual({});
@@ -102,7 +145,7 @@ describe("refresh profile extraction", () => {
     expect(results[1]).toMatchObject({ chunk: { originalKey: oracle.originalKey },
       extraction: { nodes: [], edges: [] } });
     const schema = JSON.parse(seen[0]!.schema);
-    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v3");
+    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v4");
     expect(schema.contract_version).toBe(REFRESH_PROFILE_CONTRACT_VERSION);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
     expect(schema.ontology.relation_signatures.supports).toMatchObject({
@@ -118,6 +161,13 @@ describe("refresh profile extraction", () => {
     expect(schema.graph_contract.evidence_refs).toMatchObject({
       type: "array", items: { type: "string", references: "evidence[].id" }, minItems: 1,
     });
+    expect(schema.graph_contract.entity_citations).toMatchObject({
+      node_field: "nodes[].citations", edge_field: "edges[].citations",
+      required_for: ["every node", "every edge"], minItems: 1,
+    });
+    expect(schema.graph_contract.entity_citations.items.required).toEqual(expect.arrayContaining([
+      "source_file", "page",
+    ]));
     expect(schema.evidence.pdf_identity).toMatchObject({ docSha: oracle.docSha, rawRef: oracle.originalKey });
     expect(schema.evidence.citation.required).toContain("source_file");
     expect(schema.evidence.citation.required).toContain("modality");
@@ -131,6 +181,8 @@ describe("refresh profile extraction", () => {
     expect(seen[0]!.prompt).toContain('Every node file_type must be "document"');
     expect(seen[0]!.prompt).toContain("never emit a numeric confidence");
     expect(seen[0]!.prompt).toContain("arrays of string IDs from evidence[].id");
+    expect(seen[0]!.prompt).toContain("Evidence refs do not replace citations");
+    expect(seen[0]!.prompt).toContain("Every node and every edge must include a non-empty citations array");
     expect(seen[0]!.prompt).toContain("non-empty verbatim text on its claimed physical PDF page");
   });
 
