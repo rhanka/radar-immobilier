@@ -115,6 +115,7 @@
 - [x] Lot 4: conductor completes final parity/freshness/recovery verification for the already-performed preprod and production cutovers; T1 gates only legacy grounding retirement.
   - [x] Reconfirm that the PROD OVH DOCS target matches the canonical bodies, attributes, object count, byte count and manifest digest.
     - [x] PROD strengthened final scan: four receipts green, 59,017 objects / 12,534,514,457 bytes, exact source and target attributes, canonical digest unchanged.
+    - [x] Commit the four raw non-secret checkpoint proofs with checksums and enforce receipt/predicate replay in the offline production gate.
     - [x] PREPROD final live gate: MinIO resources and consumers absent; API and refresh bindings resolve only to dedicated OVH coordinates and credentials; TEM retained.
   - [x] PREPROD MinIO StatefulSet, Service, 40Gi PVC and six ingress policies are absent; its non-secret before/after receipt remains on the checkpoint PVC.
   - [x] PROD MinIO resources are absent; the 1Gi checkpoint PVC and canonical recovery evidence remain available.
