@@ -47,10 +47,6 @@ OBJECT_STORAGE_INVENTORY_NAMESPACE := radar-immobilier-preprod
 OBJECT_STORAGE_OVH_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 OBJECT_STORAGE_RAW_REBIND_PATCH := $(OBJECT_STORAGE_INVENTORY_DIR)/raw-api-rebind-patch.yaml
 OBJECT_STORAGE_DOCS_BUCKET_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-bucket-job.yaml
-OBJECT_STORAGE_DOCS_INVENTORY_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-inventory-job.yaml
-OBJECT_STORAGE_DOCS_PROOF_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-conditional-proof-job.yaml
-OBJECT_STORAGE_DOCS_COPY_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-copy-job.yaml
-OBJECT_STORAGE_DOCS_CANONICAL_COPY_JOB := $(OBJECT_STORAGE_INVENTORY_DIR)/docs-canonical-copy-job.yaml
 override OBJECT_STORAGE_DOCS_OFFICIAL_DIGEST := 52646a7b56c16b912f889c9d8dec471ec0eadd0eb77de9b70056315c10ef0425
 # Set to 1 only when a real KUBECONFIG is present to additionally run a
 # server-side dry-run. Offline render works with no cluster.
@@ -412,26 +408,17 @@ deploy-k8s: ## Validate manifests; apply ONLY with K8S_DEPLOY_CONFIRM=1 + KUBECO
 	fi
 
 .PHONY: object-storage-inventory-preprod-validate
-object-storage-inventory-preprod-validate: ## Render the dedicated RAW inventory Job and support offline
+object-storage-inventory-preprod-validate: ## Render post-cutover support and assert the RAW inventory Job is retired
 	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[object-storage-inventory] kubectl not found"; exit 1; }
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	  $(OBJECT_STORAGE_INVENTORY_DIR) >/dev/null
 	@$(KUBECTL) create --dry-run=client --validate=false \
-	  -f $(OBJECT_STORAGE_INVENTORY_DIR)/job.yaml -o name >/dev/null
+	  -f $(OBJECT_STORAGE_RAW_REBIND_PATCH) -o name >/dev/null
+	@test ! -e $(OBJECT_STORAGE_INVENTORY_DIR)/job.yaml
 
 .PHONY: object-storage-inventory-preprod-start
-object-storage-inventory-preprod-start: ## Apply support and create one RAW read-only inventory Job
-	@if [ "$(OBJECT_STORAGE_INVENTORY_CONFIRM)" != "1" ] || [ "$(ENV)" != "preprod" ] || \
-	  [ -z "$$KUBECONFIG" ]; then \
-	  echo "[object-storage-inventory] refused: require KUBECONFIG, OBJECT_STORAGE_INVENTORY_CONFIRM=1, ENV=preprod"; \
-	  exit 1; \
-	fi
-	@$(MAKE) object-storage-inventory-preprod-validate KUBECTL="$(KUBECTL)" ENV=$(ENV)
-	@set -euo pipefail; render="$$(mktemp)"; trap 'rm -f "$$render"' EXIT; \
-	  $(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
-	    $(OBJECT_STORAGE_INVENTORY_DIR) >"$$render"; \
-	  $(KUBECTL) apply -f "$$render" >/dev/null; \
-	  $(KUBECTL) create -f $(OBJECT_STORAGE_INVENTORY_DIR)/job.yaml -o name
+object-storage-inventory-preprod-start: ## Retired after the OVH cutover
+	@echo '[object-storage-inventory] retired: no MinIO inventory can be started'; exit 1
 
 .PHONY: object-storage-docs-preprod-validate
 object-storage-docs-preprod-validate: ## Render support and validate the DOCS bucket/inventory Jobs offline
