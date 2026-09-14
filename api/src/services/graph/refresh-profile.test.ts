@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -88,21 +89,45 @@ function client(responses: Array<{ text: string; status?: "completed" | "instruc
 }
 
 describe("refresh profile extraction", () => {
-  it("should accept direct JSON and one complete JSON fence", async () => {
-    for (const text of [JSON.stringify(extraction()), ` \n\`\`\`json\n${JSON.stringify(extraction())}\n\`\`\`\n `]) {
-      const results = await extractRefreshProfile([chunk()], {
-        context, textClient: client([{ text }], []), maxOutputTokens: 512,
-      });
-      expect(results[0]!.extraction.nodes[0]!.id).toBe("signal-waterloo-26-956-2");
-    }
+  it.each([
+    ["direct JSON", () => JSON.stringify(extraction())],
+    ["a JSON fence", () => ` \n\`\`\`JSON\n${JSON.stringify(extraction())}\n\`\`\`  \n `],
+    ["a naked fence", () => `\`\`\`\n${JSON.stringify(extraction())}\n\`\`\``],
+    ["an external BOM", () => `\uFEFF${JSON.stringify(extraction())}`],
+    ["backticks inside a JSON string", () => {
+      const value = extraction();
+      value.nodes[0]!.label = "Label containing ``` inside JSON";
+      return JSON.stringify(value);
+    }],
+  ])("should accept %s as one strict JSON response", async (_case, response) => {
+    const results = await extractRefreshProfile([chunk()], {
+      context, textClient: client([{ text: response() }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.nodes[0]!.id).toBe("signal-waterloo-26-956-2");
   });
 
-  it("should reject JSON with a preamble or suffix and preserve the native parse error", async () => {
-    for (const text of [`Preamble\n${JSON.stringify(extraction())}`, `${JSON.stringify(extraction())}\nSuffix`]) {
-      const error = await captureExtractionError(text);
-      expect(error.cause).toBeInstanceOf(SyntaxError);
-      expect(error.message).toContain((error.cause as SyntaxError).message);
-    }
+  it.each([
+    ["an incomplete fence", () => `\`\`\`json\n${JSON.stringify(extraction())}`],
+    ["two fences", () => {
+      const fenced = `\`\`\`json\n${JSON.stringify(extraction())}\n\`\`\``;
+      return `${fenced}\n${fenced}`;
+    }],
+    ["a non-JSON fence label", () => `\`\`\`javascript\n${JSON.stringify(extraction())}\n\`\`\``],
+    ["a preamble", () => `Preamble\n${JSON.stringify(extraction())}`],
+    ["a suffix", () => `${JSON.stringify(extraction())}\nSuffix`],
+  ])("should reject %s and preserve the parse error", async (_case, response) => {
+    const error = await captureExtractionError(response());
+    expect(error.cause).toBeInstanceOf(SyntaxError);
+    expect(error.message).toContain((error.cause as SyntaxError).message);
+  });
+
+  it.each([
+    ["an unterminated naked fence", "```" + " ".repeat(100_000) + "x"],
+    ["an unterminated JSON fence", "```json\n" + " ".repeat(100_000)],
+  ])("should reject %s in under 50 ms", async (_case, response) => {
+    const startedAt = performance.now();
+    await expect(captureExtractionError(response)).resolves.toBeInstanceOf(Error);
+    expect(performance.now() - startedAt).toBeLessThan(50);
   });
 
   it("should name profile violations when entity citations are missing", async () => {
