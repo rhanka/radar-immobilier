@@ -98,7 +98,10 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
   const pdfIdentity = pdfIdentityFor(chunk);
   const pdfIdentityProperties = Object.fromEntries(Object.entries(pdfIdentity)
     .map(([key, value]) => [key, { const: value }]));
-  const citation = { type: "object", required: ["page", "excerpt"],
+  // Entity citation shape only. It is exposed once, under graph_contract.entity_citations.items:
+  // the compact form holds because the profile injects the PDF identity into nodes[].citations and
+  // edges[].citations, and nowhere else. evidence[] carries the full seven-field identity itself.
+  const entityCitation = { type: "object", required: ["page", "excerpt"],
     properties: { page: { enum: chunk.pages },
       excerpt: { type: "string", minLength: MIN_CITATION_EXCERPT_CODE_POINTS,
         maxLength: MAX_CITATION_EXCERPT_CODE_POINTS,
@@ -124,11 +127,10 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
         required_for_node_types: context.profile.evidence_policy.node_types,
         required_for_relation_types: Object.keys(relations), required_for: ["every edge"] },
       entity_citations: { node_field: "nodes[].citations", edge_field: "edges[].citations",
-        required_for: ["every node", "every edge"], type: "array", minItems: 1, items: citation,
+        required_for: ["every node", "every edge"], type: "array", minItems: 1, items: entityCitation,
         description: "Emit only page and excerpt; the profile injects the constant PDF identity." },
     },
     evidence: { pdf_identity: pdfIdentity, allowedPages: chunk.pages,
-      citation,
       evidence_item: { type: "object",
         required: ["id", "source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"],
         properties: { id: { type: "string", minLength: 1 }, ...pdfIdentityProperties,

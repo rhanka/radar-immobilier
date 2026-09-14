@@ -421,6 +421,25 @@ describe("refresh profile extraction", () => {
     })).resolves.toHaveLength(1);
   });
 
+  it("should refuse a compact evidence item and accept the full one on the same excerpt", async () => {
+    // The compact page/excerpt shape holds for entity citations only, because the profile injects
+    // the PDF identity there and nowhere else. The schema no longer announces it under evidence:
+    // emitted as an evidence item it is refused, on the identity the profile never injects.
+    const compact = extraction();
+    compact.evidence = [{ id: "ev-compact", page: oracle.page, excerpt: oracle.excerpt } as
+      unknown as NonNullable<Extraction["evidence"]>[number]];
+    const error = await captureExtractionError(JSON.stringify(compact));
+    expect(error.message).toContain("invalid original PDF identity");
+    const full = extraction();
+    full.evidence = [{ id: "ev-full", source_file: oracle.originalKey, rawRef: oracle.originalKey,
+      docSha: oracle.docSha, sourceUrl: oracle.sourceUrl, modality: "pdf", page: oracle.page,
+      excerpt: oracle.excerpt }];
+    const results = await extractRefreshProfile([chunk()], { context,
+      textClient: client([{ text: JSON.stringify(full) }], []), maxOutputTokens: 512,
+    });
+    expect(results[0]!.extraction.evidence![0]!.id).toBe("ev-full");
+  });
+
   it.each([
     ["the last line of the real v13 page", "ADOPTÉE", 7],
     ["a punctuated 20-code-point excerpt", "1 2 3 4 5 6 7 8 9 10", 11],
@@ -545,10 +564,11 @@ describe("refresh profile extraction", () => {
     expect(schema.graph_contract.entity_citations.items.description)
       .toContain("under 12 once normalized to letters and digits");
     expect(schema.evidence.pdf_identity).toMatchObject({ docSha: oracle.docSha, rawRef: oracle.originalKey });
-    expect(schema.evidence.citation.required).toEqual(["page", "excerpt"]);
-    expect(schema.evidence.citation.properties).not.toHaveProperty("source_file");
-    expect(schema.evidence.citation.properties).not.toHaveProperty("modality");
-    expect(schema.evidence.citation.properties.excerpt.minLength).toBe(20);
+    // The compact page/excerpt shape is announced once, where it holds: the profile injects the PDF
+    // identity into entity citations only. Announcing it under evidence too invited an evidence[]
+    // the validator refuses for a missing identity it never injects there.
+    expect(schema.evidence).not.toHaveProperty("citation");
+    expect(Object.keys(schema.evidence)).toEqual(["pdf_identity", "allowedPages", "evidence_item"]);
     expect(schema.evidence.evidence_item.required).toContain("modality");
     expect(schema.evidence.evidence_item.required).toEqual(
       ["id", "source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"]);
