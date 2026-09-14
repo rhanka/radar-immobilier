@@ -60,6 +60,21 @@ test("controls keep their regulatory meaning", () => {
   assert.match(agenda.selectionRationale, /no completed adoption/);
 });
 
+test("v8 keeps the v7 corpus and prompt contract byte-equivalent apart from metadata", async () => {
+  if (campaign !== "v8") return;
+  const v7Root = resolve(root, "docs/reviews/refresh-benchmark/v7");
+  const v7Manifest = JSON.parse(await readFile(resolve(v7Root, "manifest.json"), "utf8"));
+  const v7Prompts = JSON.parse(await readFile(resolve(v7Root, "prompt-freeze.json"), "utf8"));
+  const { campaign: _v8ManifestCampaign, frozenAt: _v8ManifestTime, ...v8Manifest } = manifest;
+  const { campaign: _v7ManifestCampaign, frozenAt: _v7ManifestTime, ...baseManifest } = v7Manifest;
+  const { campaign: _v8PromptCampaign, frozenAt: _v8PromptTime, ...v8Prompts } = prompts;
+  const { campaign: _v7PromptCampaign, frozenAt: _v7PromptTime, ...basePrompts } = v7Prompts;
+  assert.deepEqual(v8Manifest, baseManifest);
+  assert.deepEqual(v8Prompts, basePrompts);
+  assert.deepEqual(await readFile(resolve(campaignRoot, "manual-oracle.json")),
+    await readFile(resolve(v7Root, "manual-oracle.json")));
+});
+
 test("the live runner binds the wall timeout to the actual fetch", async () => {
   const runner = await readFile(resolve(root, "tools/refresh-benchmark/run-case.mjs"), "utf8");
   assert.match(runner, /AbortSignal\.any\(\[init\.signal, controller\.signal\]\)/);
