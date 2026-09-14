@@ -34,7 +34,7 @@ object-storage-docs-prod-api-status: ## Read only API storage references and rol
 	@$(KUBECTL) -n $(OBJECT_STORAGE_DOCS_PROD_NAMESPACE) rollout status deployment/radar-api --timeout=60s
 
 .PHONY: object-storage-docs-prod-validate
-object-storage-docs-prod-validate: ## Validate the PROD DOCS support and inventory Job offline
+object-storage-docs-prod-validate: ## Validate PROD post-cutover support and retired migration Jobs offline
 	@bash -n deploy/ci/migrate-object-storage.sh deploy/ci/object-storage-checkpoint.sh
 	@bash -n deploy/ci/docs-api-rebind-patch.hermetic.test.sh
 	@bash -n deploy/ci/docs-prod-parity-receipt.hermetic.test.sh
@@ -50,17 +50,11 @@ object-storage-docs-prod-validate: ## Validate the PROD DOCS support and invento
 	@$(KUBECTL) kustomize --load-restrictor LoadRestrictionsNone \
 	  $(OBJECT_STORAGE_DOCS_PROD_DIR) >/dev/null
 	@$(KUBECTL) create --dry-run=client --validate=false \
-	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/inventory-job.yaml -o name >/dev/null
-	@$(KUBECTL) create --dry-run=client --validate=false \
-	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/fast-inventory-job.yaml -o name >/dev/null
-	@$(KUBECTL) create --dry-run=client --validate=false \
-	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/conditional-proof-job.yaml -o name >/dev/null
-	@$(KUBECTL) create --dry-run=client --validate=false \
-	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml -o name >/dev/null
-	@$(KUBECTL) create --dry-run=client --validate=false \
 	  -f $(OBJECT_STORAGE_DOCS_PROD_DIR)/api-rebind-patch.yaml -o name >/dev/null
-	@! grep -Eq '(^|[[:space:]])jq([[:space:]]|$$)' \
-	  $(OBJECT_STORAGE_DOCS_PROD_DIR)/copy-job.yaml
+	@for manifest in inventory-job.yaml fast-inventory-job.yaml \
+	  conditional-proof-job.yaml copy-job.yaml; do \
+	  test ! -e "$(OBJECT_STORAGE_DOCS_PROD_DIR)/$$manifest"; \
+	done
 	@! grep -Rqs 'radar-registry-pull' $(OBJECT_STORAGE_DOCS_PROD_DIR)
 	@! grep -Eq '^object-storage-minio-prod-(scale-zero|remove):' deploy/ci/object-storage-prod.mk
 	@for target in object-storage-docs-prod-bind object-storage-docs-prod-api-rebind \
