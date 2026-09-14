@@ -249,7 +249,7 @@ db-status: ## Check DB readiness
 	  pg_isready -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 # ─────────────────────────────────────────────────────────────────────
-# Object storage (MinIO local, Scaleway in prod)
+# Object storage (MinIO local, OVH S3 in deployed environments)
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: s3-init

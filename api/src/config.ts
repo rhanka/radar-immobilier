@@ -28,25 +28,25 @@ const envSchema = z.object({
   S3_BUCKET: z.string().default("radar-immobilier-raw"),
   S3_ACCESS_KEY: z.string().default("minioadmin"),
   S3_SECRET_KEY: z.string().default("minioadmin"),
-  /** MinIO needs path-style addressing; Scaleway works with either. */
+  /** MinIO needs path-style addressing; deployed OVH S3 uses virtual-host style. */
   S3_FORCE_PATH_STYLE: z
     .enum(["true", "false"])
     .default("true")
     .transform((v) => v === "true"),
 
   /**
-   * Dedicated scraping-document store (Scaleway Object Storage `radar-immobilier-docs`
+   * Dedicated scraping-document store (OVH S3 `radar-immobilier-docs`
    * in production). Each variable falls back to its S3_* counterpart when absent, so
    * local dev keeps MinIO as the default store without any extra configuration.
-   * In production, set these to the SCW bucket credentials (Object Storage scoped
-   * keys for `radar-immobilier-docs`, region fr-par) — NEVER commit real secrets.
+   * In production, set these to the OVH bucket credentials (bucket-scoped keys
+   * for `radar-immobilier-docs`, region bhs) — NEVER commit real secrets.
    */
   SCRAPE_S3_ENDPOINT: z.string().url().optional(),
   SCRAPE_S3_REGION: z.string().optional(),
   SCRAPE_S3_BUCKET: z.string().optional(),
   SCRAPE_S3_ACCESS_KEY: z.string().optional(),
   SCRAPE_S3_SECRET_KEY: z.string().optional(),
-  /** When absent, inherits S3_FORCE_PATH_STYLE. Scaleway does not need path-style. */
+  /** When absent, inherits S3_FORCE_PATH_STYLE. OVH S3 does not need path-style. */
   SCRAPE_S3_FORCE_PATH_STYLE: z
     .enum(["true", "false"])
     .optional()
@@ -57,11 +57,11 @@ const envSchema = z.object({
     .default("info"),
 
   /**
-   * Graph object store — Scaleway bucket that holds graphify `graph/{city}/latest.json`
-   * outputs (radar-immobilier-docs-pocs in prod). Falls back to the SCRAPE_S3_*
+   * Graph object store — OVH bucket that holds graphify `graph/{city}/latest.json`
+   * outputs (`radar-immobilier-docs` in prod). Falls back to the SCRAPE_S3_*
    * values when absent; those in turn fall back to S3_* (MinIO locally).
    * In production, point these at the same bucket as SCRAPE_S3_* (both targets
-   * the `radar-immobilier-docs-pocs` bucket). NEVER commit real secrets.
+   * the `radar-immobilier-docs` bucket). NEVER commit real secrets.
    */
   GRAPH_S3_ENDPOINT: z.string().url().optional(),
   GRAPH_S3_REGION: z.string().optional(),
@@ -230,7 +230,7 @@ export interface ScrapeS3Config {
 
 /**
  * Derive the effective scraping-store config from a parsed AppConfig.
- * SCW production values (fr-par, radar-immobilier-docs) are the intended
+ * OVH production values (bhs, radar-immobilier-docs) are the intended
  * overrides; MinIO local defaults are inherited when SCRAPE_S3_* are absent.
  */
 export function resolveScrapeS3Config(config: AppConfig): ScrapeS3Config {
@@ -248,8 +248,8 @@ export function resolveScrapeS3Config(config: AppConfig): ScrapeS3Config {
 /**
  * Derive the effective graph object store config from a parsed AppConfig.
  * GRAPH_S3_* override SCRAPE_S3_* which override S3_*. In production the
- * graph snapshots (`graph/{city}/latest.json`) live in the same SCW bucket as
- * the scraped documents (`radar-immobilier-docs-pocs`), so the GRAPH_S3_*
+ * graph snapshots (`graph/{city}/latest.json`) live in the same OVH bucket as
+ * the scraped documents (`radar-immobilier-docs`), so the GRAPH_S3_*
  * vars can simply be left unset and the SCRAPE_S3_* fallback is correct.
  */
 export function resolveGraphS3Config(config: AppConfig): ScrapeS3Config {
