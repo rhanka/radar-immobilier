@@ -1,0 +1,51 @@
+flowchart LR
+  A_USER["Navigateur utilisateur"]
+  A_URL["immo.sent-tech.ca"]
+  subgraph A_SCW["Scaleway · cluster Kubernetes"]
+    A_EDGE["Load balancer → Traefik / TLS"]
+    subgraph A_PROD["PRODUCTION · namespaces"]
+      A_MINIO["[MINIO] radar-minio · PVC"]
+      A_RAW[("[RAW] radar-immobilier-raw")]
+      A_DOCS[("[DOCS] radar-immobilier-docs")]
+      A_UI["[UI] radar-ui"]
+      A_API["[API] radar-api"]
+      A_DB[("[DB] radar-postgres")]
+      A_SCRAPE["[SCRAPE] radar-refresh-scrape"]
+      A_PROJECT["[PROJECT] refresh-projection"]
+      A_SSO["sentropic · auth-idp"]
+      A_SSO_DB[("[SSO-DB] PostgreSQL SSO")]
+      A_GEO["[GEO-API] geo-api · geo"]
+      A_GEO_DB[("[GEO-DB] geo / postgis")]
+    end
+  end
+  A_SCWREG["[SCW-REG] registre Scaleway"]
+  A_GRAPH_S3[("[GRAPH] radar-immobilier-graph")]
+  A_DOCS_S3[("[DOCS-POCS] docs-pocs")]
+  A_GEO_S3[("[GEO-S3] sentropic-geo")]
+  A_WS["[WS-IMMO] poste opérateur"]
+  A_TEM["[SCW-TEM] Scaleway TEM"]
+  A_USER --> A_URL
+  A_URL --> A_EDGE
+  A_USER <-->|"Redirection login"| A_SSO
+  A_EDGE --> A_UI
+  A_UI -->|"/api"| A_API
+  A_API -->|"SQL"| A_DB
+  A_API -->|"objets RAW"| A_RAW
+  A_API -->|"documents dérivés"| A_DOCS
+  A_SCRAPE -->|"étapes 1 et 2"| A_RAW
+  A_SCRAPE -->|"corpus et graphe"| A_GRAPH_S3
+  A_GRAPH_S3 --> A_PROJECT
+  A_PROJECT -->|"étape 4 · upsert"| A_DB
+  A_WS -->|"étape 3 · Graphify local"| A_GRAPH_S3
+  A_API -->|"lecture PDF source"| A_DOCS_S3
+  A_API <-->|"OIDC / JWKS"| A_SSO
+  A_SSO -->|"sessions"| A_SSO_DB
+  A_UI -->|"OGC"| A_GEO
+  A_GEO -->|"SQL"| A_GEO_DB
+  A_GEO -->|"lecture produits"| A_GEO_S3
+  A_MINIO -->|"bucket sur PVC"| A_RAW
+  A_MINIO -->|"bucket sur PVC"| A_DOCS
+  A_SCWREG -->|"images"| A_API
+  A_SCWREG -->|"images"| A_UI
+  A_SCWREG -->|"images"| A_GEO
+  A_API -->|"courriel transactionnel"| A_TEM
