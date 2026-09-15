@@ -19,8 +19,10 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
   `docs/reviews/refresh-benchmark/v7/**`, `docs/reviews/refresh-benchmark/v8/**`,
   `docs/reviews/refresh-benchmark/v9/**`, `docs/reviews/refresh-benchmark/v10/**`,
   `docs/reviews/refresh-benchmark/v11/**`, `docs/reviews/refresh-benchmark/v12/**`,
+  `docs/reviews/refresh-benchmark/v101/**`,
   `docs/reviews/refresh-benchmark/{BENCHMARK_T1,DECISION_M1}.md`, this plan.
 - **Forbidden**: application/runtime code, `Makefile`, `rules/**`, `.track/**`, sentropic repositories, secrets.
+- **Conditional**: conductor delivery `.remote/BENCH_MULTI_DESIGN.md`, explicitly requested by the owner.
 
 ## Plan
 
@@ -45,9 +47,22 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 - [x] Lot 18 — Freeze and execute the v10 LOW campaign against extraction contract v6.
 - [x] Lot 19 — Freeze and execute the v11 LOW campaign against extraction contract v7.
 - [ ] Lot 20 — Execute the owner-ratified comparable Sonnet 4.6 v12 campaign.
+- [ ] Lot 21 — Freeze the v101 multi-model phase-1 design without running a campaign.
+  - [ ] Measure live catalogs and one 64-token ping per addressable model-effort arm.
+  - [ ] Freeze the 100-document corpus, v9 contract fingerprints, and common intended output cap.
+  - [ ] Measure strict and C-prime readings offline on the same v100 receipts.
+  - [ ] Specify provider lanes, retry/idempotence, costs, timing, blind judges, and launch gates.
+  - [ ] Gate: `make -C tools/refresh-benchmark check-v101-tools ENV=test-t1-model-benchmark`.
+  - [ ] Gate: zero secret signature under `docs/reviews/refresh-benchmark/v101`.
 
 ## Gates
 
 - `make test-v4 ENV=test-t1-model-benchmark`
 - `make check-v4-protocol ENV=test-t1-model-benchmark`
 - Selective commits of about 150 changed lines; merge commit only, never rebase/squash.
+
+## Feedback Loop
+
+- `T1BENCH-EX1` — owner-requested delivery outside the worktree at
+  `.lanes/conductor/.remote/BENCH_MULTI_DESIGN.md`; impact is one review-only Markdown file;
+  rollback is deletion of that generated delivery. No repository source is affected.
