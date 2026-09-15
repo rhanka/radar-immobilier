@@ -1296,7 +1296,9 @@ freeze-blind-v100:
 V101_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v101
 V101_MESH_VERSION := 0.19.2
 
-.PHONY: check-v101-tools test-v101 catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 compact-v101-json verify-v101
+.PHONY: check-v101-tools test-v101 catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 \
+	compact-v101-json verify-v101 gate-v101 run-v101-arm run-v101-lane score-v101 \
+	init-campaign-v101 gate-runner-v101
 
 check-v101-tools:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1305,12 +1307,22 @@ check-v101-tools:
 	  -w /src $(NODE_IMAGE) sh -c 'node --check tools/refresh-benchmark/v101-probe-lib.mjs \
 	    && node --check tools/refresh-benchmark/v101-direct-ping.mjs \
 	    && node --check tools/refresh-benchmark/v101-mesh-ping.mjs \
+	    && node --check tools/refresh-benchmark/v101-arms.mjs \
+	    && node --check tools/refresh-benchmark/v101-runner-state.mjs \
+	    && node --check tools/refresh-benchmark/v101-provider.mjs \
+	    && node --check tools/refresh-benchmark/v101-score-lib.mjs \
 	    && node --check tools/refresh-benchmark/catalog-v101.mjs \
 	    && node --check tools/refresh-benchmark/run-arm.mjs \
+	    && node --check tools/refresh-benchmark/v101-availability-run.mjs \
+	    && node --check tools/refresh-benchmark/v101-lane.mjs \
+	    && node --check tools/refresh-benchmark/score-v101.mjs \
+	    && node --check tools/refresh-benchmark/gate-v101.mjs \
+	    && node --check tools/refresh-benchmark/init-campaign-v101.mjs \
 	    && node --check tools/refresh-benchmark/measure-cprime-v101.mjs \
 	    && node --check tools/refresh-benchmark/freeze-v101.mjs \
 	    && node --check tools/refresh-benchmark/compact-v101-json.mjs \
-	    && node --check tools/refresh-benchmark/verify-v101.mjs'
+	    && node --check tools/refresh-benchmark/verify-v101.mjs \
+	    && sh -n tools/refresh-benchmark/run-campaign-v101.sh'
 
 test-v101:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1345,7 +1357,7 @@ ping-v101: check-v101-tools
 	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring \
 	    && cd /workspace && env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u MISTRAL_API_KEY \
 	      npm install --silent --ignore-scripts @sentropic/llm-mesh@$(V101_MESH_VERSION) >/dev/null \
-	    && cd /src && exec node tools/refresh-benchmark/run-arm.mjs $(ARM)'
+	    && cd /src && BENCHMARK_MODE=availability exec node tools/refresh-benchmark/run-arm.mjs $(ARM)'
 
 measure-cprime-v101: t1-v100-snapshot check-v101-tools
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1384,3 +1396,85 @@ verify-v101: check-v101-tools
 	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -e BENCHMARK_RESULT_ROOT=/results -w /src $(NODE_IMAGE) \
 	  node tools/refresh-benchmark/verify-v101.mjs
+
+gate-v101: check-v101-tools
+	test -n "$(GATE)"
+	mkdir -p $(V101_RESULTS)/gates
+	docker run --rm --tmpfs /workspace --tmpfs /run \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  -e BENCHMARK_RESULT_ROOT=/results -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
+	  -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring \
+	    && cd /workspace && npm install --silent --ignore-scripts \
+	      @sentropic/llm-mesh@$(V101_MESH_VERSION) >/dev/null \
+	    && cd /src && exec node tools/refresh-benchmark/gate-v101.mjs $(GATE)'
+
+run-v101-arm: t1-v100-snapshot check-v101-tools
+	test -n "$(ARM)"
+	mkdir -p $(V101_RESULTS)/campaign $(V101_RESULTS)/logs $(V101_RESULTS)/limits
+	docker run --rm --tmpfs /workspace --tmpfs /run --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V100_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
+	  -e BENCHMARK_EXECUTION_ROOT=$(or $(RUN_ROOT),/results) \
+	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
+	  -e BENCHMARK_SLICE='$(or $(SLICE),1-100)' -e BENCHMARK_CONCURRENCY=$(or $(CONCURRENCY),1) \
+	  -e OPENAI_API_KEY -e ANTHROPIC_API_KEY -e MISTRAL_API_KEY \
+	  -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring \
+	    && cp -a /t1-source /workspace/t1 && cd /workspace \
+	    && env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u MISTRAL_API_KEY \
+	      npm install --silent --ignore-scripts @sentropic/graphify@0.18.0 \
+	      @sentropic/llm-mesh@$(V101_MESH_VERSION) tsx@4.22.3 >/dev/null \
+	    && cd /src && exec /workspace/node_modules/.bin/tsx \
+	      tools/refresh-benchmark/run-arm.mjs $(ARM)'
+
+run-v101-lane: t1-v100-snapshot check-v101-tools
+	test -n "$(LANE)"
+	mkdir -p $(V101_RESULTS)/campaign $(V101_RESULTS)/logs $(V101_RESULTS)/limits $(V101_RESULTS)/scores
+	docker run --rm --tmpfs /workspace --tmpfs /run --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V100_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
+	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
+	  -e OPENAI_API_KEY -e ANTHROPIC_API_KEY -e MISTRAL_API_KEY \
+	  -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring \
+	    && cp -a /t1-source /workspace/t1 && cd /workspace \
+	    && env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u MISTRAL_API_KEY \
+	      npm install --silent --ignore-scripts @sentropic/graphify@0.18.0 \
+	      @sentropic/llm-mesh@$(V101_MESH_VERSION) tsx@4.22.3 >/dev/null \
+	    && cd /src && exec /workspace/node_modules/.bin/tsx \
+	      tools/refresh-benchmark/v101-lane.mjs $(LANE)'
+
+score-v101: t1-v100-snapshot check-v101-tools
+	test -n "$(ARM)"
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V100_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
+	  -e BENCHMARK_T1_ROOT=/workspace/t1 -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx \
+	    tools/refresh-benchmark/score-v101.mjs $(ARM)'
+
+gate-runner-v101:
+	$(MAKE) run-v101-arm ARM=mistral-small4 SLICE=1-2 \
+	  RUN_ROOT=/results/gates/runner ENV=$(ENV)
+
+init-campaign-v101: check-v101-tools
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  -e BENCHMARK_RESULT_ROOT=/results -w /src $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/init-campaign-v101.mjs
