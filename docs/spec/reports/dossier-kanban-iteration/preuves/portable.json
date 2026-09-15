@@ -1,0 +1,23 @@
+{
+  "output": "docs/spec/reports/dossier-kanban-iteration/decision-focus.html",
+  "bytes": 588728,
+  "htmlSha256": "6fafbacd5a8061def43d4fb567324b1095fd8417e6be60074467081a28f5131e",
+  "dossierHash": "f2bd4d00c649a82e89f1d223324a239a5fae77ead0c73fec056432add30dff1d",
+  "artifactInputHash": "9004174d34b00ae0cfa3e3ca6b2d663f6644b5bda1c888d3c431aa48a2605bd4",
+  "graphs": [
+    {
+      "id": "way-of-working",
+      "nodes": 45,
+      "edges": 8,
+      "subflows": 9,
+      "sceneHash": "4b53bcf7d1ae04b4065e21443c494551ca65885eaa34d57b226ed0db80f9828c"
+    },
+    {
+      "id": "iteration-15-jours",
+      "nodes": 12,
+      "edges": 7,
+      "subflows": 5,
+      "sceneHash": "5d492bf54c4947d4dd723f5a99891dbffe95b9cecad6d4156bb3c3cbd4800c69"
+    }
+  ]
+}
