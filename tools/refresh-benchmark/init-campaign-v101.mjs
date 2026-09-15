@@ -9,7 +9,7 @@ const root = process.env.BENCHMARK_RESULT_ROOT
 async function json(path) { return JSON.parse(await readFile(resolve(root, path), "utf8")); }
 const codex = await json("gates/codex-cap.json");
 const gemini = await Promise.all(["medium", "high"].map((effort) =>
-  json(`gates/gemini-${effort}-512.json`)));
+  json(`gates/gemini-${effort}-512-v2.json`)));
 const judges = await Promise.all(["gpt-5.6-terra", "gpt-oss-120b-medium"].map((name) =>
   json(`gates/judge-${name}.json`)));
 if (!gemini.every(({ proved }) => proved)) throw new Error("Gemini MEDIUM/HIGH gate is not proved");

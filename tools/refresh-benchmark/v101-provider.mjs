@@ -135,7 +135,8 @@ export async function createProvider(arm, { beforeRequest, timeoutMs }) {
     const bodyText = String(init.body ?? "");
     let body = null; try { body = JSON.parse(bodyText); } catch { /* recorded as null */ }
     const fields = wireFields(arm, body);
-    if (fields.maxOutputTokens !== 32_768) {
+    const generationRequest = !String(url).includes("fetchAvailableModels");
+    if (generationRequest && fields.maxOutputTokens !== 32_768) {
       throw new ProviderError("CAP_NOT_MATERIALIZED", { wire: fields });
     }
     const controller = AbortSignal.timeout(timeoutMs);
