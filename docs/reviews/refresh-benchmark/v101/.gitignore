@@ -1,0 +1,8 @@
+/campaign/
+/limits/
+/logs/
+/scores/
+/status.json
+/status.json.lock/
+/campaign.pid
+/campaign.nohup.log
