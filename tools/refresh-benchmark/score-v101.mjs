@@ -31,7 +31,8 @@ export async function scoreArm(armName) {
   const evidenceNodeTypes = new Set(context.profile.evidence_policy.node_types);
 
   async function documentMaterial(document) {
-    const workerRoot = resolve(manifest.corpus.sourceRunRoot, "workers", document.city);
+    const sourceRunRoot = resolve(repositoryRoot, manifest.corpus.sourceRunRelativePath);
+    const workerRoot = resolve(sourceRunRoot, "workers", document.city);
     const pdfPath = resolve(workerRoot, "corpus", `${document.sha256}.pdf`);
     const [pdf, text] = await Promise.all([readFile(pdfPath),
       readFile(resolve(repositoryRoot, document.runtimeTextRelativePath), "utf8")]);

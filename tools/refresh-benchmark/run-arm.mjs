@@ -44,7 +44,8 @@ function actualSummary(actual) {
 }
 
 async function frozenCorpus(document, manifest, repositoryRoot, materializeRefreshCorpus) {
-  const workerRoot = resolve(manifest.corpus.sourceRunRoot, "workers", document.city);
+  const sourceRunRoot = resolve(repositoryRoot, manifest.corpus.sourceRunRelativePath);
+  const workerRoot = resolve(sourceRunRoot, "workers", document.city);
   const pdfPath = resolve(workerRoot, "corpus", `${document.sha256}.pdf`);
   const parsedPath = resolve(repositoryRoot, document.runtimeTextRelativePath);
   const [pdf, parsedText] = await Promise.all([readFile(pdfPath), readFile(parsedPath, "utf8")]);
