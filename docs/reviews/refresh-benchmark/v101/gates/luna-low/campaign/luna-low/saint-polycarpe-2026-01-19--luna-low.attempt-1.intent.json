@@ -1,0 +1,1 @@
+{"schemaVersion":2,"state":"in-flight","startedAt":"2026-09-15T19:31:24.013Z","campaign":"v101","arm":"luna-low","documentId":"saint-polycarpe-2026-01-19","attempt":1,"requested":{"providerId":"openai","transportProviderId":"codex","modelId":"gpt-5.6-luna","effort":"low","maxOutputTokens":32768}}

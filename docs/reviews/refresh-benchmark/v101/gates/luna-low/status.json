@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "campaign": "v101",
+  "arms": {
+    "luna-low": {
+      "state": "running",
+      "total": 100,
+      "processed": 2,
+      "accepted": 2,
+      "errors": 0,
+      "lastReceipt": "/results/gates/luna-low/campaign/luna-low/saint-lin-laurentides-2026-06-09--luna-low.attempt-1.receipt.json",
+      "requests": 2,
+      "etaSeconds": 4392
+    }
+  },
+  "updatedAt": "2026-09-15T19:33:20.981Z"
+}
