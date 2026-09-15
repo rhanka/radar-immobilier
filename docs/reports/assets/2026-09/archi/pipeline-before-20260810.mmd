@@ -1,0 +1,44 @@
+flowchart LR
+  B_CITY["Sources municipales · PV"]
+  subgraph B_WORKSTATION["Poste opérateur · hors cluster"]
+    B_OPS["[WS-OPS] poste opérateur"]
+    B_OPERATOR["Opérateur"]
+    B_EXTRACT["Étape 3 · Graphify 2.3 local"]
+    B_KEYS["Clés LLM hors cluster"]
+  end
+  subgraph B_OVH["OVHcloud BHS · cluster poc-ca"]
+    B_EDGE["Load balancer → Traefik / TLS"]
+    subgraph B_PROD["PRODUCTION · namespaces"]
+      B_COLLECT["Étape 1 · collecte"]
+      B_PARSE["Étape 2 · parse / exploit"]
+      B_PROJECT["Étape 4 · projection manuelle"]
+      B_DB[("[DB] PostgreSQL graphe")]
+      B_API["[API] radar-api"]
+      B_UI["[UI] radar-ui"]
+    end
+  end
+  B_CORPUS[("Corpus PV · CAS / parsed")]
+  B_GRAPH[("Contrat de graphe publié")]
+  B_PROVIDERS["Fournisseurs LLM"]
+  B_SCHEDULE["Automatisation impossible"]
+  B_USER["Navigateur utilisateur"]
+  B_TEM["[SCW-TEM] Scaleway TEM"]
+  B_CITY --> B_COLLECT
+  B_COLLECT --> B_PARSE
+  B_PARSE --> B_CORPUS
+  B_OPERATOR -->|"pilotage"| B_OPS
+  B_OPS -->|"étape 3 sur le poste"| B_EXTRACT
+  B_CORPUS -->|"lecture des preuves"| B_EXTRACT
+  B_KEYS --> B_EXTRACT
+  B_EXTRACT -->|"appels depuis le poste"| B_PROVIDERS
+  B_EXTRACT -->|"graphe validé"| B_GRAPH
+  B_GRAPH --> B_PROJECT
+  B_OPS -.->|"lancement manuel"| B_COLLECT
+  B_OPS -.->|"lancement manuel"| B_PROJECT
+  B_PROJECT -->|"upsert atomique"| B_DB
+  B_DB --> B_API
+  B_API --> B_UI
+  B_EDGE --> B_UI
+  B_UI -->|"immo.sent-tech.ca"| B_USER
+  B_SCHEDULE -.->|"déclaré seulement"| B_COLLECT
+  B_SCHEDULE -.->|"déclaré seulement"| B_PROJECT

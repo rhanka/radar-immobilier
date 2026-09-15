@@ -1,0 +1,937 @@
+{
+  "schema": "immo-archi-scene-graph/v1",
+  "sceneId": "pipeline-before-20260810",
+  "title": "Série B · pipeline AVANT",
+  "pair": "B",
+  "date": "2026-08-10",
+  "sceneHash": "11da8420eb070a55d8c3598b970f24a5d807c8f4a61024299ef42d50ed4dffd6",
+  "source": {
+    "file": "docs/architecture.md",
+    "block": "### `pipeline-before-20260810`",
+    "mermaid": "pipeline-before-20260810.mmd"
+  },
+  "layout": {
+    "engine": "dagre-d3-es",
+    "rankdir": "LR",
+    "nodesep": 24,
+    "ranksep": 72,
+    "subflowHeaderSpace": 96,
+    "cardBox": {
+      "width": 460,
+      "height": 200
+    },
+    "units": "px, origine en haut à gauche ; position = relative au parent, absolutePosition = repère de la scène",
+    "canvas": {
+      "width": 5488,
+      "height": 1304
+    }
+  },
+  "counts": {
+    "containers": 3,
+    "nodes": 18,
+    "edges": 19
+  },
+  "containers": [
+    {
+      "id": "B_OVH",
+      "label": "OVHcloud BHS · cluster poc-ca",
+      "parentId": null,
+      "kind": "cluster",
+      "repo": [
+        "poc-k8s"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "active",
+      "mermaidLine": 9,
+      "size": {
+        "width": 2684,
+        "height": 712
+      },
+      "position": {
+        "x": 2224,
+        "y": 260
+      },
+      "absolutePosition": {
+        "x": 2224,
+        "y": 260
+      },
+      "card": "box",
+      "title": "OVHcloud BHS · cluster poc-ca"
+    },
+    {
+      "id": "B_PROD",
+      "label": "PRODUCTION · namespaces",
+      "parentId": "B_OVH",
+      "kind": "cluster",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "active",
+      "mermaidLine": 11,
+      "size": {
+        "width": 2104,
+        "height": 568
+      },
+      "position": {
+        "x": 556,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 2780,
+        "y": 380
+      },
+      "card": "box",
+      "title": "PRODUCTION · namespaces"
+    },
+    {
+      "id": "B_WORKSTATION",
+      "label": "Poste opérateur · hors cluster",
+      "parentId": null,
+      "kind": "cluster",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 3,
+      "size": {
+        "width": 1572,
+        "height": 568
+      },
+      "position": {
+        "x": 48,
+        "y": 464
+      },
+      "absolutePosition": {
+        "x": 48,
+        "y": 464
+      },
+      "card": "box",
+      "title": "Poste opérateur · hors cluster"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "B_API",
+      "label": "[API] radar-api",
+      "parentId": "B_PROD",
+      "kind": "service",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "active",
+      "mermaidLine": 16,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 344
+      },
+      "absolutePosition": {
+        "x": 3868,
+        "y": 724
+      },
+      "card": "A",
+      "icon": "api",
+      "code": "API",
+      "role": "API · production",
+      "name": "radar-api",
+      "detail": "sert le graphe à l’UI",
+      "store": false
+    },
+    {
+      "id": "B_CITY",
+      "label": "Sources municipales · PV",
+      "parentId": null,
+      "kind": "source",
+      "repo": [
+        "external"
+      ],
+      "evidenceClass": "external",
+      "runtimeState": "not-applicable",
+      "mermaidLine": 2,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1692,
+        "y": 943
+      },
+      "absolutePosition": {
+        "x": 1692,
+        "y": 943
+      },
+      "card": "A",
+      "icon": "document",
+      "code": "CITY",
+      "role": "Source · amont",
+      "name": "Sources municipales",
+      "detail": "PV publiés · amont",
+      "store": false
+    },
+    {
+      "id": "B_COLLECT",
+      "label": "Étape 1 · collecte",
+      "parentId": "B_PROD",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 12,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 2804,
+        "y": 500
+      },
+      "card": "A",
+      "icon": "document",
+      "code": "STEP-1",
+      "role": "Étape 1 · collecte",
+      "name": "collecte in-cluster",
+      "detail": "lancée depuis le poste",
+      "store": false
+    },
+    {
+      "id": "B_CORPUS",
+      "label": "Corpus PV · CAS / parsed",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 20,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 4980,
+        "y": 48
+      },
+      "absolutePosition": {
+        "x": 4980,
+        "y": 48
+      },
+      "card": "A",
+      "icon": "document",
+      "code": "CORPUS",
+      "role": "Corpus · preuves",
+      "name": "Corpus PV",
+      "detail": "CAS / parsed",
+      "store": true
+    },
+    {
+      "id": "B_DB",
+      "label": "[DB] PostgreSQL graphe",
+      "parentId": "B_PROD",
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "active",
+      "mermaidLine": 15,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 344
+      },
+      "absolutePosition": {
+        "x": 3336,
+        "y": 724
+      },
+      "card": "A",
+      "icon": "postgres",
+      "code": "DB",
+      "role": "Base · graphe",
+      "name": "PostgreSQL graphe",
+      "detail": "graphe servi",
+      "store": true
+    },
+    {
+      "id": "B_EDGE",
+      "label": "Load balancer → Traefik / TLS",
+      "parentId": "B_OVH",
+      "kind": "network",
+      "repo": [
+        "poc-k8s"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "active",
+      "mermaidLine": 10,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 304
+      },
+      "absolutePosition": {
+        "x": 2248,
+        "y": 564
+      },
+      "card": "A",
+      "icon": "network",
+      "code": "EDGE",
+      "role": "Réseau · entrée",
+      "name": "Load balancer → Traefik",
+      "detail": "TLS · routage des hôtes",
+      "store": false
+    },
+    {
+      "id": "B_EXTRACT",
+      "label": "Étape 3 · Graphify 2.3 local",
+      "parentId": "B_WORKSTATION",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 6,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 232
+      },
+      "absolutePosition": {
+        "x": 1136,
+        "y": 696
+      },
+      "card": "A",
+      "icon": "llm",
+      "code": "WS-EXTRACT",
+      "role": "Étape 3 · extraction",
+      "name": "Graphify 2.3 local",
+      "detail": "appels LLM du poste",
+      "store": false
+    },
+    {
+      "id": "B_GRAPH",
+      "label": "Contrat de graphe publié",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 21,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1692,
+        "y": 719
+      },
+      "absolutePosition": {
+        "x": 1692,
+        "y": 719
+      },
+      "card": "A",
+      "icon": "graph",
+      "code": "GRAPH",
+      "role": "Artefact · graphe",
+      "name": "Contrat de graphe",
+      "detail": "publié à l’étape 3",
+      "store": true
+    },
+    {
+      "id": "B_KEYS",
+      "label": "Clés LLM hors cluster",
+      "parentId": "B_WORKSTATION",
+      "kind": "identity",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 7,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 344
+      },
+      "absolutePosition": {
+        "x": 604,
+        "y": 808
+      },
+      "card": "A",
+      "icon": "identity",
+      "code": "WS-KEYS",
+      "role": "Secrets · locaux",
+      "name": "Clés LLM du poste",
+      "detail": "hors cluster · locales",
+      "store": false
+    },
+    {
+      "id": "B_OPERATOR",
+      "label": "Opérateur",
+      "parentId": "B_WORKSTATION",
+      "kind": "actor",
+      "repo": [
+        "external"
+      ],
+      "evidenceClass": "external",
+      "runtimeState": "manual",
+      "mermaidLine": 5,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 72,
+        "y": 584
+      },
+      "card": "A",
+      "icon": "user",
+      "code": "OPER",
+      "role": "Acteur · humain",
+      "name": "Opérateur",
+      "detail": "pilote à la main",
+      "store": false
+    },
+    {
+      "id": "B_OPS",
+      "label": "[WS-OPS] poste opérateur",
+      "parentId": "B_WORKSTATION",
+      "kind": "workstation",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 4,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 604,
+        "y": 584
+      },
+      "card": "A",
+      "icon": "workstation",
+      "code": "WS-OPS",
+      "role": "Poste · manuel",
+      "name": "Graphify 2.3 en local",
+      "detail": "collecte · extraction · projection",
+      "store": false
+    },
+    {
+      "id": "B_PARSE",
+      "label": "Étape 2 · parse / exploit",
+      "parentId": "B_PROD",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 13,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 3336,
+        "y": 500
+      },
+      "card": "A",
+      "icon": "document",
+      "code": "STEP-2",
+      "role": "Étape 2 · parse",
+      "name": "parse / exploit",
+      "detail": "in-cluster · enchaînée",
+      "store": false
+    },
+    {
+      "id": "B_PROJECT",
+      "label": "Étape 4 · projection manuelle",
+      "parentId": "B_PROD",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 14,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 344
+      },
+      "absolutePosition": {
+        "x": 2804,
+        "y": 724
+      },
+      "card": "A",
+      "icon": "graph",
+      "code": "STEP-4",
+      "role": "Étape 4 · projection",
+      "name": "projection manuelle",
+      "detail": "upsert lancé du poste",
+      "store": false
+    },
+    {
+      "id": "B_PROVIDERS",
+      "label": "Fournisseurs LLM",
+      "parentId": null,
+      "kind": "service",
+      "repo": [
+        "external"
+      ],
+      "evidenceClass": "external",
+      "runtimeState": "manual",
+      "mermaidLine": 22,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1692,
+        "y": 455
+      },
+      "absolutePosition": {
+        "x": 1692,
+        "y": 455
+      },
+      "card": "A",
+      "icon": "llm",
+      "code": "LLM",
+      "role": "Fournisseurs · LLM",
+      "name": "Fournisseurs de modèles",
+      "detail": "appelés du poste",
+      "store": false
+    },
+    {
+      "id": "B_SCHEDULE",
+      "label": "Automatisation impossible",
+      "parentId": null,
+      "kind": "schedule",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 23,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1692,
+        "y": 231
+      },
+      "absolutePosition": {
+        "x": 1692,
+        "y": 231
+      },
+      "card": "A",
+      "icon": "cronjob",
+      "code": "SCHED",
+      "role": "Planification · absente",
+      "name": "automatisation",
+      "detail": "déclarée · jamais lancée",
+      "store": false
+    },
+    {
+      "id": "B_TEM",
+      "label": "[SCW-TEM] Scaleway TEM",
+      "parentId": null,
+      "kind": "exception",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "retained",
+      "mermaidLine": 25,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 604,
+        "y": 1056
+      },
+      "absolutePosition": {
+        "x": 604,
+        "y": 1056
+      },
+      "card": "A",
+      "icon": "release",
+      "code": "SCW-TEM",
+      "role": "Courriel · exception",
+      "name": "Scaleway TEM",
+      "detail": "transactionnel · seule exception",
+      "store": false
+    },
+    {
+      "id": "B_UI",
+      "label": "[UI] radar-ui",
+      "parentId": "B_PROD",
+      "kind": "service",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "historical",
+      "runtimeState": "active",
+      "mermaidLine": 17,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1620,
+        "y": 344
+      },
+      "absolutePosition": {
+        "x": 4400,
+        "y": 724
+      },
+      "card": "A",
+      "icon": "web",
+      "code": "UI",
+      "role": "Interface · web",
+      "name": "radar-ui",
+      "detail": "route / · immo.sent-tech.ca",
+      "store": false
+    },
+    {
+      "id": "B_USER",
+      "label": "Navigateur utilisateur",
+      "parentId": null,
+      "kind": "actor",
+      "repo": [
+        "external"
+      ],
+      "evidenceClass": "external",
+      "runtimeState": "not-applicable",
+      "mermaidLine": 24,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 4980,
+        "y": 526
+      },
+      "absolutePosition": {
+        "x": 4980,
+        "y": 526
+      },
+      "card": "A",
+      "icon": "user",
+      "code": "USER",
+      "role": "Navigateur",
+      "name": "Navigateur utilisateur",
+      "detail": "accès web · hors cluster",
+      "store": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "B_API__B_UI__e3b0c44298fc",
+      "source": "B_API",
+      "target": "B_UI",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "active",
+      "mermaidLine": 40,
+      "labelPosition": null
+    },
+    {
+      "id": "B_CITY__B_COLLECT__e3b0c44298fc",
+      "source": "B_CITY",
+      "target": "B_COLLECT",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 26,
+      "labelPosition": null
+    },
+    {
+      "id": "B_COLLECT__B_PARSE__e3b0c44298fc",
+      "source": "B_COLLECT",
+      "target": "B_PARSE",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 27,
+      "labelPosition": null
+    },
+    {
+      "id": "B_CORPUS__B_EXTRACT__578eb8d4f908",
+      "source": "B_CORPUS",
+      "target": "B_EXTRACT",
+      "label": "lecture des preuves",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 31,
+      "labelPosition": {
+        "x": 3296,
+        "y": 160.27
+      }
+    },
+    {
+      "id": "B_DB__B_API__e3b0c44298fc",
+      "source": "B_DB",
+      "target": "B_API",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "active",
+      "mermaidLine": 39,
+      "labelPosition": null
+    },
+    {
+      "id": "B_EDGE__B_UI__e3b0c44298fc",
+      "source": "B_EDGE",
+      "target": "B_UI",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "active",
+      "mermaidLine": 41,
+      "labelPosition": null
+    },
+    {
+      "id": "B_EXTRACT__B_GRAPH__b59511071b0e",
+      "source": "B_EXTRACT",
+      "target": "B_GRAPH",
+      "label": "graphe validé",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 34,
+      "labelPosition": {
+        "x": 1636,
+        "y": 1242.27
+      }
+    },
+    {
+      "id": "B_EXTRACT__B_PROVIDERS__076a12428b1b",
+      "source": "B_EXTRACT",
+      "target": "B_PROVIDERS",
+      "label": "appels depuis le poste",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 33,
+      "labelPosition": {
+        "x": 1471,
+        "y": 666.41
+      }
+    },
+    {
+      "id": "B_GRAPH__B_PROJECT__e3b0c44298fc",
+      "source": "B_GRAPH",
+      "target": "B_PROJECT",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 35,
+      "labelPosition": null
+    },
+    {
+      "id": "B_KEYS__B_EXTRACT__e3b0c44298fc",
+      "source": "B_KEYS",
+      "target": "B_EXTRACT",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 32,
+      "labelPosition": null
+    },
+    {
+      "id": "B_OPERATOR__B_OPS__a40c53c45255",
+      "source": "B_OPERATOR",
+      "target": "B_OPS",
+      "label": "pilotage",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 29,
+      "labelPosition": {
+        "x": 560,
+        "y": 428.09
+      }
+    },
+    {
+      "id": "B_OPS__B_COLLECT__10fae9b7b77b",
+      "source": "B_OPS",
+      "target": "B_COLLECT",
+      "label": "lancement manuel",
+      "dashed": true,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 36,
+      "labelPosition": {
+        "x": 1367,
+        "y": 605.36
+      }
+    },
+    {
+      "id": "B_OPS__B_EXTRACT__61f0f15e3ae9",
+      "source": "B_OPS",
+      "target": "B_EXTRACT",
+      "label": "étape 3 sur le poste",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 30,
+      "labelPosition": {
+        "x": 1092,
+        "y": 374.27
+      }
+    },
+    {
+      "id": "B_OPS__B_PROJECT__10fae9b7b77b",
+      "source": "B_OPS",
+      "target": "B_PROJECT",
+      "label": "lancement manuel",
+      "dashed": true,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 37,
+      "labelPosition": {
+        "x": 1375,
+        "y": 409
+      }
+    },
+    {
+      "id": "B_PARSE__B_CORPUS__e3b0c44298fc",
+      "source": "B_PARSE",
+      "target": "B_CORPUS",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 28,
+      "labelPosition": null
+    },
+    {
+      "id": "B_PROJECT__B_DB__98b047b8f969",
+      "source": "B_PROJECT",
+      "target": "B_DB",
+      "label": "upsert atomique",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "manual",
+      "mermaidLine": 38,
+      "labelPosition": {
+        "x": 3292,
+        "y": 962.64
+      }
+    },
+    {
+      "id": "B_SCHEDULE__B_COLLECT__23084d71adaf",
+      "source": "B_SCHEDULE",
+      "target": "B_COLLECT",
+      "label": "déclaré seulement",
+      "dashed": true,
+      "bidirectional": false,
+      "evidenceClass": "declared",
+      "runtimeState": "manual",
+      "mermaidLine": 43,
+      "labelPosition": {
+        "x": 2470,
+        "y": 228.73
+      }
+    },
+    {
+      "id": "B_SCHEDULE__B_PROJECT__23084d71adaf",
+      "source": "B_SCHEDULE",
+      "target": "B_PROJECT",
+      "label": "déclaré seulement",
+      "dashed": true,
+      "bidirectional": false,
+      "evidenceClass": "declared",
+      "runtimeState": "manual",
+      "mermaidLine": 44,
+      "labelPosition": {
+        "x": 2467,
+        "y": 387.27
+      }
+    },
+    {
+      "id": "B_UI__B_USER__68a175aa6596",
+      "source": "B_UI",
+      "target": "B_USER",
+      "label": "immo.sent-tech.ca",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "historical",
+      "runtimeState": "active",
+      "mermaidLine": 42,
+      "labelPosition": {
+        "x": 4853,
+        "y": 689.6
+      }
+    }
+  ]
+}

@@ -110,6 +110,29 @@ rules:
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["get", "list", "create", "patch", "update"]
+  # PVC KEYRING REFRESH (2026-09-14, correctif du CD cassé) — CAUSE MESURÉE : le
+  # PVC `radar-refresh-keyring` (deploy/k8s/34-refresh-keyring-pvc.yaml, introduit
+  # par T2 #683/#685) a été ajouté aux `resources:` de l'overlay
+  # deploy/k8s/refresh-cronjobs/kustomization.yaml SANS que ce Role reçoive les
+  # verbes correspondants. Rendu mesuré de l'overlay (kubectl kustomize
+  # --load-restrictor LoadRestrictionsNone deploy/k8s/refresh-cronjobs) = 1
+  # PersistentVolumeClaim + 3 CronJob → le `kubectl apply` du step « Deploy refresh
+  # CronJobs (preprod) » touche un kind non couvert. Conséquence : 6 échecs
+  # consécutifs du job « Deploy to preprod cluster » depuis le 2026-09-13 23:00
+  # (runs 4d5cb8f7, 18144f1e, 1bb049c4, 8b035c7c, 788c4324, 873fa6bb) avec
+  #   persistentvolumeclaims "radar-refresh-keyring" is forbidden: User
+  #   "system:serviceaccount:radar-immobilier-preprod:radar-ci-deployer-preprod"
+  #   cannot get resource "persistentvolumeclaims"
+  # → la préprod ne converge plus par CD. Least-privilege : `kubectl apply` d'un
+  # PVC = get (lecture du live avant patch) + create (première pose) + patch/update
+  # (ré-apply idempotent) ; list/watch pour la lecture/diagnostic. PAS de `delete` —
+  # un PVC porte l'état keyring, sa suppression n'est PAS un acte CD (elle reste
+  # owner/poc-k8s). Toujours borné à CE namespace preprod (Role, pas ClusterRole),
+  # 0 wildcard. NB : appliquer CE manifest sur le cluster reste un acte cluster-admin
+  # (session k8s/poc-k8s sur GO owner) — le SA CI ne peut pas se l'auto-accorder.
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "patch", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

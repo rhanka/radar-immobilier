@@ -1,0 +1,49 @@
+flowchart LR
+  B_CITY["Sources municipales · PV"]
+  subgraph B_OVH["OVHcloud BHS · cluster poc-ca"]
+    B_EDGE["Load balancer → Traefik / TLS"]
+    subgraph B_PREPROD["PRÉPRODUCTION · acceptée"]
+      B_CRON["CronJob radar-refresh-pv"]
+      B_DRIVER["Run autonome in-cluster"]
+      B_COLLECT["Étape 1 · collecte intégrée"]
+      B_PARSE["Étape 2 · parse / exploit"]
+      B_GRAPHIFY["Étape 3 · Graphify 0.18.0"]
+      B_MESH["llm-mesh 0.19.1 in-process"]
+      B_VALIDATE["Validation Signal / PDF"]
+      B_PROJECT["Étape 4 · projection atomique"]
+      B_KEYRING["Keyring radar chiffré"]
+      B_DB[("[DB] PostgreSQL graphe")]
+      B_API["[API] radar-api"]
+      B_UI["[UI] radar-ui"]
+    end
+    subgraph B_PROD["PRODUCTION · DORMANTE"]
+      B_PROMOTION["PR #682 · non promue"]
+      B_PROD_CRON["CronJob production dormant"]
+    end
+  end
+  B_CORPUS[("Corpus PV durable")]
+  B_GRAPH[("Graphe canonique publié")]
+  B_PROVIDERS["Fournisseurs LLM"]
+  B_WS["[WS-ADMIN] poste opérateur"]
+  B_USER["Navigateur utilisateur"]
+  B_TEM["[SCW-TEM] Scaleway TEM"]
+  B_CRON --> B_DRIVER
+  B_DRIVER --> B_COLLECT
+  B_CITY --> B_COLLECT
+  B_COLLECT --> B_PARSE
+  B_PARSE --> B_CORPUS
+  B_DRIVER --> B_GRAPHIFY
+  B_CORPUS -->|"lecture des preuves"| B_GRAPHIFY
+  B_GRAPHIFY --> B_MESH
+  B_KEYRING --> B_MESH
+  B_MESH -->|"appels in-cluster"| B_PROVIDERS
+  B_MESH --> B_VALIDATE
+  B_VALIDATE -->|"graphe validé"| B_GRAPH
+  B_GRAPH --> B_PROJECT
+  B_PROJECT -->|"upsert atomique"| B_DB
+  B_DB --> B_API
+  B_API --> B_UI
+  B_EDGE --> B_UI
+  B_UI -->|"immo.sent-tech.ca"| B_USER
+  B_PROMOTION -.->|"promotion non effectuée"| B_PROD_CRON
+  B_WS -.->|"enrôlement seulement"| B_KEYRING

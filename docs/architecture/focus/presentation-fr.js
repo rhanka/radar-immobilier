@@ -1,58 +1,38 @@
-// French owner-facing D8 presentation; English repository sources remain embedded.
+// French owner-facing presentation; complete repository sources remain embedded.
 export const presentation = [
-`[ARCHITECTURE AVANT] Le premier schéma complet conserve la capture du 13
-septembre : accès prod/préprod et SSO, Immo, Geo, cluster Kubernetes, PostgreSQL,
-objets et poste LLM. L’API préprod utilise encore MinIO pour RAW/DOCS; le graphe
-de refresh est sur OVH et le traitement LLM dépend du poste.
-
-Toutes les boîtes et tous les composants sont visibles ensemble. Chaque élément
-porte une icône, sa provenance repo et son rôle. [Source AVANT](architecture.md).`,
-`[ARCHITECTURE APRÈS] Le second et dernier schéma complet montre la cible : RAW
-et DOCS sur OVH, refresh Immo autonome avec Graphify/llm-mesh, services Geo et
-tenants Immo/Geo sur un b3-8 existant. **SCW TEM reste présent** tant que son
-remplacement n’est pas validé.
-
-Cette cible n’est pas déployée. T3 reste NO-GO tant que T2, le rightsizing, les
-contraintes de placement et l’étape deux nœuds ne sont pas acceptés.
-[Source APRÈS](transitions-target.md).`,
-`[DELTA FACTUEL · PAS UN TROISIÈME GRAPHE] Graphify **0.18.0** est intégré et
-**Luna high** sélectionné. Le premier run Kubernetes a échoué avant l’appel LLM
-car l’entrée choisie était au format HTML, pas PDF. En préprod, RAW et DOCS sont
-actifs sur OVH. DOCS a une parité exacte de **59 017 objets / 12 534 514 457
-octets**, manifeste **52646a7b…0425**, **failed=0**. MinIO et son PVC data 40 Gi sont
-retirés; le PVC de migration/checkpoint reste. La production T2 est en cours.
-
-Ces faits expliquent l’écart AVANT/APRÈS sans créer une troisième architecture.`,
-`[GATES ET RETOUR ARRIÈRE] T1 : PDF valide → provider → Signal/PDF → rejeu →
-schedule. T2 : inventaire → copie conditionnelle → parité → restauration →
-fence → rebind, préproduction avant production. T3 : T2 complet → rightsizing →
-contraintes → deux nœuds vérifiés → essai un nœud.
-
-La suppression préprod est acceptée. La production doit franchir ses propres
-gates avant sa suppression MinIO; aucune réduction du pool n’est autorisée.`,
-`[DÉCISIONS DÉJÀ RATIFIÉES] L’ordre reste refresh T1 → objets T2 → un nœud T3.
-Le corpus DOCS canonique reste l’ensemble production SCW exact de **59 017
-keys+hashes**; le surplus préprod n’est pas migré. Le rollout reste préproduction
-puis production. Le pipeline PV reste sous responsabilité Immo et SCW TEM reste
-jusqu’à remplacement validé.
-
-Les questions de la section suivante ne rouvrent aucune de ces décisions.`,
+`[HÉBERGEMENT · TROIS ÉTATS] En juillet, avant la décision OVH, la plateforme
+est sur Scaleway et rien n'est engagé. Au 10 août, environ 90 % est migré vers
+OVH, mais le stockage objet passe encore par MinIO. Au 13 septembre,
+préproduction et production sont sur OVH S3 sans MinIO. Scaleway TEM reste la
+seule exception radar. [Source canonique](architecture.md).`,
+`[PIPELINE · AVANT/APRÈS] Avant l'intégration, Graphify 2.3 s'exécute localement
+sur le poste et l'orchestration manuelle empêche l'automatisation. Après,
+radar-refresh-pv est un CronJob autonome à 05:17 UTC; Graphify 0.18.0 est une
+bibliothèque, llm-mesh 0.19.1 s'exécute dans le processus et le keyring radar
+est chiffré. Préproduction acceptée; production dormante jusqu'à la promotion
+de la PR #682. [Source canonique](architecture.md).`,
+`[DELTA FACTUEL] MinIO, son Service, ses PVC et six règles nommées ont disparu
+de la préproduction et de la production. API, graphe et scrape utilisent OVH
+S3. La copie canonique compte 59 017 objets et 12 534 514 457 octets, sans
+nouvelle copie ni échec au contrôle final. Geo est à 100 % sur GHCR à
+l'exécution.`,
+`[GATES ET RETOUR ARRIÈRE] Le pipeline est accepté en préproduction mais sa
+production reste dormante. La PR #682 est le point de promotion; ce dossier ne
+l'affirme jamais effectuée. Le nœud r2-15 est créé et KEDA retiré, mais aucun
+b3-8 n'est drainé : la consolidation n'est pas terminée.`,
+`[DÉCISIONS DÉJÀ RATIFIÉES] OVH S3 remplace MinIO pour le runtime radar en
+préproduction et production. TEM est conservé. Lorsque l'infrastructure sera
+payable, la base est une seule r2-15 à 58,58 $ CAD/mois; le surcoût des trois
+b3-8 est une erreur d'opérateur et ne sera pas facturé.`,
 ``,
-`[PREUVES ET LIMITES] Les deux sources Mermaid sont rendues en SVG et en
-SvelteFlow natif complet. Les sous-flows utilisent **parentId**; chaque nœud et
-groupe doit avoir icône, rôle et provenance repo, avec échec fermé si un mapping
-manque. Les relations, libellés, zooms, rendu hors ligne et presse-papiers sont
-vérifiés.
-
-Limites : T1 n’a pas atteint le provider, T2 production reste en cours et T3 est
-gated. Préprod conserve le PVC de migration/checkpoint; API/MCP/UI restent 1/1.
-Les réponses Focus restent locales et non ratifiées.`,
-`[FACTURATION · EN DERNIER] La fenêtre jointe est **10 août → 13 septembre
-inclus**, 35 jours / 840 heures. La projection infrastructure ratifiée porte sur
-un b3-8 : 840 × 0,082 = **68,88 CAD**.
-
-L’audit local alloue 139,337732 CAD à immo et 111,877705 CAD à geo, soit
-**251,215438 CAD LLM** et une somme indicative de **320,095438 CAD**. Cette
-allocation LLM n’est pas une facture fournisseur et sa ratification reste une
-question **non critique** : l’absence de réponse ne bloque pas l’architecture.`,
+`[PREUVES ET LIMITES] Cinq sources Mermaid sont rendues en cinq SVG et cinq
+SvelteFlow natifs. Les sous-flows utilisent parentId; chaque nœud conserve son
+état et sa provenance. Chromium contrôle zoom 100 %, facteur de pixels 1,
+hauteur non nulle, nœuds dans la scène, arêtes tracées et ouverture file:// sans
+réseau. Le rapport précédent est joint byte pour byte.`,
+`[COÛTS] Payé à ce jour : 0,00 $ CAD. Les factures QC281819 et QC285954 sont à
+0 $. Le crédit de 270 $ a absorbé 179,23 $; 90,77 $ ont expiré le 12 août.
+Septembre représente environ 71,62 $ de valeur non facturée et le premier débit
+réel est attendu vers le 1er octobre. L'allocation LLM reste provisoire, non
+critique et non finale.`,
 ];

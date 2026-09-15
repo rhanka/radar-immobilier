@@ -32,13 +32,16 @@ const probe = `(() => {
     const element = document.querySelector(selector); if (!element) return null;
     const style = getComputedStyle(element), rect = element.getBoundingClientRect();
     return { rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }, display: style.display,
-      visibility: style.visibility, opacity: style.opacity, color: style.color, background: style.backgroundColor };
+      visibility: style.visibility, opacity: style.opacity, color: style.color, background: style.backgroundColor,
+      client: { width: element.clientWidth, height: element.clientHeight },
+      scroll: { width: element.scrollWidth, height: element.scrollHeight } };
   };
   return {
   viewport: { innerWidth, innerHeight, devicePixelRatio, scrollX, scrollY,
     visualWidth: visualViewport?.width, visualHeight: visualViewport?.height, visualScale: visualViewport?.scale },
   documentSize: { width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight },
-  samples: Object.fromEntries(['html', 'body', '#app', '.dossier', '.masthead'].map(selector => [selector, sample(selector)])),
+  samples: Object.fromEntries(['html', 'body', '#app', '.dossier', '.masthead', '.flow', '.svelte-flow__container',
+    '.svelte-flow__viewport', '.svelte-flow__node'].map(selector => [selector, sample(selector)])),
   topElement: document.elementFromPoint(innerWidth / 2, Math.min(innerHeight / 2, 500))?.outerHTML?.slice(0, 500) ?? null,
   url: location.href, readyState: document.readyState,
   title: document.title, bodyText: document.body?.innerText?.slice(0, 1000) ?? '',
@@ -62,8 +65,21 @@ const summary = await evaluate(`(() => {
 })()`);
 await new Promise(resolve => setTimeout(resolve, 250));
 await writeFile('/out/live-summary.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
+const flow = await evaluate(`(() => {
+  const element = document.querySelector('.flow');
+  if (!element) return { exists: false };
+  element.scrollIntoView({ block: 'start' });
+  const rect = element.getBoundingClientRect();
+  return { exists: true, rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+    containerHeight: document.querySelector('.svelte-flow__container')?.getBoundingClientRect().height ?? null,
+    viewportHeight: document.querySelector('.svelte-flow__viewport')?.getBoundingClientRect().height ?? null,
+    nodeCount: element.querySelectorAll('.svelte-flow__node').length,
+    edgeCount: element.querySelectorAll('.svelte-flow__edge').length };
+})()`);
+await new Promise(resolve => setTimeout(resolve, 250));
+await writeFile('/out/live-flow.png', Buffer.from((await call('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
 const layoutAfter = await call('Page.getLayoutMetrics');
-const evidence = { target: { id: target.id, url: target.url }, windowState, layoutBefore, layoutAfter, before, after, summary, events };
+const evidence = { target: { id: target.id, url: target.url }, windowState, layoutBefore, layoutAfter, before, after, summary, flow, events };
 await writeFile('/out/live-inspection.json', JSON.stringify(evidence, null, 2));
 console.log(JSON.stringify(evidence, null, 2));
 ws.close();

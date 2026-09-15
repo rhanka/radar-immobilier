@@ -1,0 +1,1522 @@
+{
+  "schema": "immo-archi-scene-graph/v1",
+  "sceneId": "hosting-today-20260913",
+  "title": "Série A · hébergement AUJOURD'HUI",
+  "pair": "A",
+  "date": "2026-09-13",
+  "sceneHash": "88dea090f286b59905db7c190bd2a2be9f330cf0a7d927cb4d70d489fed44f38",
+  "source": {
+    "file": "docs/architecture.md",
+    "block": "### `hosting-today-20260913`",
+    "mermaid": "hosting-today-20260913.mmd"
+  },
+  "layout": {
+    "engine": "dagre-d3-es",
+    "rankdir": "LR",
+    "nodesep": 24,
+    "ranksep": 72,
+    "subflowHeaderSpace": 96,
+    "cardBox": {
+      "width": 460,
+      "height": 200
+    },
+    "units": "px, origine en haut à gauche ; position = relative au parent, absolutePosition = repère de la scène",
+    "canvas": {
+      "width": 4376,
+      "height": 2039
+    }
+  },
+  "counts": {
+    "containers": 3,
+    "nodes": 30,
+    "edges": 33
+  },
+  "containers": [
+    {
+      "id": "A_OVH",
+      "label": "OVHcloud BHS · cluster poc-ca",
+      "parentId": null,
+      "kind": "cluster",
+      "repo": [
+        "poc-k8s"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 5,
+      "size": {
+        "width": 2684,
+        "height": 1894
+      },
+      "position": {
+        "x": 1112,
+        "y": 48
+      },
+      "absolutePosition": {
+        "x": 1112,
+        "y": 48
+      },
+      "card": "box",
+      "title": "OVHcloud BHS · cluster poc-ca"
+    },
+    {
+      "id": "A_PREPROD",
+      "label": "PRÉPRODUCTION · sans MinIO",
+      "parentId": "A_OVH",
+      "kind": "cluster",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 7,
+      "size": {
+        "width": 2104,
+        "height": 914
+      },
+      "position": {
+        "x": 556,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 1668,
+        "y": 168
+      },
+      "card": "box",
+      "title": "PRÉPRODUCTION · sans MinIO"
+    },
+    {
+      "id": "A_PROD",
+      "label": "PRODUCTION · sans MinIO",
+      "parentId": "A_OVH",
+      "kind": "cluster",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 17,
+      "size": {
+        "width": 2104,
+        "height": 812
+      },
+      "position": {
+        "x": 556,
+        "y": 1058
+      },
+      "absolutePosition": {
+        "x": 1668,
+        "y": 1106
+      },
+      "card": "box",
+      "title": "PRODUCTION · sans MinIO"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "A_EDGE",
+      "label": "Load balancer → Traefik / TLS",
+      "parentId": "A_OVH",
+      "kind": "network",
+      "repo": [
+        "poc-k8s"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 6,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 920.5
+      },
+      "absolutePosition": {
+        "x": 1136,
+        "y": 968.5
+      },
+      "card": "A",
+      "icon": "network",
+      "code": "EDGE",
+      "role": "Réseau · entrée",
+      "name": "Load balancer → Traefik",
+      "detail": "TLS · deux hôtes servis",
+      "store": false
+    },
+    {
+      "id": "A_GEO",
+      "label": "[GEO-API] geo-api · geo",
+      "parentId": "A_PROD",
+      "kind": "service",
+      "repo": [
+        "geo"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 24,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 588
+      },
+      "absolutePosition": {
+        "x": 2224,
+        "y": 1694
+      },
+      "card": "A",
+      "icon": "api",
+      "code": "GEO-API",
+      "role": "API · géographie",
+      "name": "geo-api · geo",
+      "detail": "OGC · couches et tuiles",
+      "store": false
+    },
+    {
+      "id": "A_GEO_DB",
+      "label": "[GEO-DB] geo / postgis",
+      "parentId": "A_PROD",
+      "kind": "store",
+      "repo": [
+        "geo"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 25,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 588
+      },
+      "absolutePosition": {
+        "x": 2756,
+        "y": 1694
+      },
+      "card": "A",
+      "icon": "postgres",
+      "code": "GEO-DB",
+      "role": "Base · géographie",
+      "name": "geo / postgis",
+      "detail": "PostgreSQL · PostGIS",
+      "store": true
+    },
+    {
+      "id": "A_GEO_S3",
+      "label": "[GEO-S3] sentropic-geo",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "geo"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 35,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 3868,
+        "y": 1567
+      },
+      "absolutePosition": {
+        "x": 3868,
+        "y": 1567
+      },
+      "card": "A",
+      "icon": "s3",
+      "code": "GEO-S3",
+      "role": "Bucket · géo",
+      "name": "sentropic-geo",
+      "detail": "OVH S3 · produits geo",
+      "store": true
+    },
+    {
+      "id": "A_GHCR",
+      "label": "[GHCR] registres applicatifs",
+      "parentId": null,
+      "kind": "registry",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 28,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 580,
+        "y": 1027
+      },
+      "absolutePosition": {
+        "x": 580,
+        "y": 1027
+      },
+      "card": "A",
+      "icon": "release",
+      "code": "GHCR",
+      "role": "Registre d'images",
+      "name": "registres applicatifs",
+      "detail": "images de conteneur",
+      "store": false
+    },
+    {
+      "id": "A_PP_API",
+      "label": "[PP-API] radar-api",
+      "parentId": "A_PREPROD",
+      "kind": "service",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 9,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 354
+      },
+      "absolutePosition": {
+        "x": 2224,
+        "y": 522
+      },
+      "card": "A",
+      "icon": "api",
+      "code": "PP-API",
+      "role": "API · préproduction",
+      "name": "radar-api",
+      "detail": "route /api · préprod",
+      "store": false
+    },
+    {
+      "id": "A_PP_DB",
+      "label": "[PP-DB] radar-postgres",
+      "parentId": "A_PREPROD",
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 10,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 130
+      },
+      "absolutePosition": {
+        "x": 2756,
+        "y": 298
+      },
+      "card": "A",
+      "icon": "postgres",
+      "code": "PP-DB",
+      "role": "Base · préprod",
+      "name": "radar-postgres",
+      "detail": "PostgreSQL · PostGIS",
+      "store": true
+    },
+    {
+      "id": "A_PP_GEO",
+      "label": "[PP-GEO] geo-api · geo-preprod",
+      "parentId": "A_PREPROD",
+      "kind": "service",
+      "repo": [
+        "geo"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 15,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 578
+      },
+      "absolutePosition": {
+        "x": 2224,
+        "y": 746
+      },
+      "card": "A",
+      "icon": "api",
+      "code": "PP-GEO",
+      "role": "API · géographie",
+      "name": "geo-api · geo-preprod",
+      "detail": "OGC · préproduction",
+      "store": false
+    },
+    {
+      "id": "A_PP_GEO_S3",
+      "label": "[PP-GEO-S3] geo-preprod",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "geo"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 34,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 3868,
+        "y": 895
+      },
+      "absolutePosition": {
+        "x": 3868,
+        "y": 895
+      },
+      "card": "A",
+      "icon": "s3",
+      "code": "PP-GEO-S3",
+      "role": "Bucket · géo",
+      "name": "geo-preprod",
+      "detail": "OVH S3 · copie service",
+      "store": true
+    },
+    {
+      "id": "A_PP_GRAPH",
+      "label": "[PP-GRAPH] graph-preprod",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 31,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 3868,
+        "y": 671
+      },
+      "absolutePosition": {
+        "x": 3868,
+        "y": 671
+      },
+      "card": "A",
+      "icon": "s3",
+      "code": "PP-GRAPH",
+      "role": "Bucket · graphe",
+      "name": "graph-preprod",
+      "detail": "OVH S3 · corpus graphe",
+      "store": true
+    },
+    {
+      "id": "A_PP_PROJECT",
+      "label": "[PP-PROJECT] refresh-projection",
+      "parentId": "A_PREPROD",
+      "kind": "schedule",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 12,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 2224,
+        "y": 288
+      },
+      "card": "A",
+      "icon": "cronjob",
+      "code": "PP-PROJECT",
+      "role": "CronJob · projection",
+      "name": "radar-refresh-projection",
+      "detail": "04:30 UTC · étape 4",
+      "store": false
+    },
+    {
+      "id": "A_PP_RAW",
+      "label": "[PP-RAW-OVH] raw préprod",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 29,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 3868,
+        "y": 223
+      },
+      "absolutePosition": {
+        "x": 3868,
+        "y": 223
+      },
+      "card": "A",
+      "icon": "s3",
+      "code": "PP-RAW-OVH",
+      "role": "Bucket · raw",
+      "name": "raw préprod",
+      "detail": "OVH S3 · objets bruts",
+      "store": true
+    },
+    {
+      "id": "A_PP_S3",
+      "label": "[PP-DOCS-OVH] docs préprod",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 30,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 3868,
+        "y": 447
+      },
+      "absolutePosition": {
+        "x": 3868,
+        "y": 447
+      },
+      "card": "A",
+      "icon": "s3",
+      "code": "PP-DOCS-OVH",
+      "role": "Bucket · documents",
+      "name": "docs préprod",
+      "detail": "OVH S3 · 59 017 clés",
+      "store": true
+    },
+    {
+      "id": "A_PP_SCRAPE",
+      "label": "[PP-SCRAPE] refresh-scrape",
+      "parentId": "A_PREPROD",
+      "kind": "schedule",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 11,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 690
+      },
+      "absolutePosition": {
+        "x": 1692,
+        "y": 858
+      },
+      "card": "A",
+      "icon": "cronjob",
+      "code": "PP-SCRAPE",
+      "role": "CronJob · collecte",
+      "name": "radar-refresh-scrape",
+      "detail": "03:17 UTC · étapes 1 et 2",
+      "store": false
+    },
+    {
+      "id": "A_PP_SSO",
+      "label": "sentropic-preprod · auth-idp",
+      "parentId": "A_PREPROD",
+      "kind": "service",
+      "repo": [
+        "sentropic"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 13,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 364
+      },
+      "absolutePosition": {
+        "x": 2756,
+        "y": 532
+      },
+      "card": "A",
+      "icon": "identity",
+      "code": "PP-IDP",
+      "role": "Identité · préprod",
+      "name": "sentropic-preprod · auth-idp",
+      "detail": "login et JWKS préprod",
+      "store": false
+    },
+    {
+      "id": "A_PP_SSO_DB",
+      "label": "[PP-SSO-DB] PostgreSQL SSO",
+      "parentId": "A_PREPROD",
+      "kind": "store",
+      "repo": [
+        "sentropic"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 14,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1620,
+        "y": 364
+      },
+      "absolutePosition": {
+        "x": 3288,
+        "y": 532
+      },
+      "card": "A",
+      "icon": "postgres",
+      "code": "PP-SSO-DB",
+      "role": "Base · SSO préprod",
+      "name": "PostgreSQL SSO",
+      "detail": "sessions préprod",
+      "store": true
+    },
+    {
+      "id": "A_PP_UI",
+      "label": "[PP-UI] radar-ui",
+      "parentId": "A_PREPROD",
+      "kind": "service",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 8,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 466
+      },
+      "absolutePosition": {
+        "x": 1692,
+        "y": 634
+      },
+      "card": "A",
+      "icon": "web",
+      "code": "PP-UI",
+      "role": "Interface · préprod",
+      "name": "radar-ui",
+      "detail": "route / · préproduction",
+      "store": false
+    },
+    {
+      "id": "A_PP_URL",
+      "label": "preprod.immo.sent-tech.ca",
+      "parentId": null,
+      "kind": "endpoint",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 3,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 580,
+        "y": 559
+      },
+      "absolutePosition": {
+        "x": 580,
+        "y": 559
+      },
+      "card": "A",
+      "icon": "url",
+      "code": "PP-URL",
+      "role": "Route · préprod",
+      "name": "preprod.immo.sent-tech.ca",
+      "detail": "route préprod · TLS",
+      "store": false
+    },
+    {
+      "id": "A_PR_API",
+      "label": "[PR-API] radar-api",
+      "parentId": "A_PROD",
+      "kind": "service",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 19,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 354
+      },
+      "absolutePosition": {
+        "x": 2224,
+        "y": 1460
+      },
+      "card": "A",
+      "icon": "api",
+      "code": "PR-API",
+      "role": "API · production",
+      "name": "radar-api",
+      "detail": "route /api · production",
+      "store": false
+    },
+    {
+      "id": "A_PR_DB",
+      "label": "[PR-DB] radar-postgres",
+      "parentId": "A_PROD",
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 20,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 130
+      },
+      "absolutePosition": {
+        "x": 2756,
+        "y": 1236
+      },
+      "card": "A",
+      "icon": "postgres",
+      "code": "PR-DB",
+      "role": "Base · production",
+      "name": "radar-postgres",
+      "detail": "PostgreSQL · PostGIS",
+      "store": true
+    },
+    {
+      "id": "A_PR_RAW",
+      "label": "[PR-RAW-OVH] raw production",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 32,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 3868,
+        "y": 1119
+      },
+      "absolutePosition": {
+        "x": 3868,
+        "y": 1119
+      },
+      "card": "A",
+      "icon": "s3",
+      "code": "PR-RAW-OVH",
+      "role": "Bucket · raw",
+      "name": "raw production",
+      "detail": "OVH S3 · objets bruts",
+      "store": true
+    },
+    {
+      "id": "A_PR_REFRESH",
+      "label": "[PR-REFRESH] refresh production",
+      "parentId": "A_PROD",
+      "kind": "schedule",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "declared",
+      "runtimeState": "dormant",
+      "mermaidLine": 21,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 2224,
+        "y": 1226
+      },
+      "card": "A",
+      "icon": "cronjob",
+      "code": "PR-REFRESH",
+      "role": "CronJob · production",
+      "name": "refresh production",
+      "detail": "dormant · gaté par PR #682",
+      "store": false
+    },
+    {
+      "id": "A_PR_S3",
+      "label": "[PR-DOCS-OVH] docs production",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 33,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 3868,
+        "y": 1343
+      },
+      "absolutePosition": {
+        "x": 3868,
+        "y": 1343
+      },
+      "card": "A",
+      "icon": "s3",
+      "code": "PR-DOCS-OVH",
+      "role": "Bucket S3 · docs prod",
+      "name": "docs production",
+      "detail": "OVH S3 · 59 017 clés",
+      "store": true
+    },
+    {
+      "id": "A_PR_UI",
+      "label": "[PR-UI] radar-ui",
+      "parentId": "A_PROD",
+      "kind": "service",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 18,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 466
+      },
+      "absolutePosition": {
+        "x": 1692,
+        "y": 1572
+      },
+      "card": "A",
+      "icon": "web",
+      "code": "PR-UI",
+      "role": "Interface · production",
+      "name": "radar-ui",
+      "detail": "route / · immo.sent-tech.ca",
+      "store": false
+    },
+    {
+      "id": "A_SSO",
+      "label": "sentropic · auth-idp",
+      "parentId": "A_PROD",
+      "kind": "service",
+      "repo": [
+        "sentropic"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 22,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 364
+      },
+      "absolutePosition": {
+        "x": 2756,
+        "y": 1470
+      },
+      "card": "A",
+      "icon": "identity",
+      "code": "IDP",
+      "role": "Identité · OIDC",
+      "name": "sentropic · auth-idp",
+      "detail": "redirection login · JWKS",
+      "store": false
+    },
+    {
+      "id": "A_SSO_DB",
+      "label": "[PR-SSO-DB] PostgreSQL SSO",
+      "parentId": "A_PROD",
+      "kind": "store",
+      "repo": [
+        "sentropic"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 23,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1620,
+        "y": 364
+      },
+      "absolutePosition": {
+        "x": 3288,
+        "y": 1470
+      },
+      "card": "A",
+      "icon": "postgres",
+      "code": "PR-SSO-DB",
+      "role": "Base · SSO prod",
+      "name": "PostgreSQL SSO",
+      "detail": "sessions production",
+      "store": true
+    },
+    {
+      "id": "A_TEM",
+      "label": "[SCW-TEM] Scaleway TEM",
+      "parentId": null,
+      "kind": "exception",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "retained",
+      "mermaidLine": 37,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 3868,
+        "y": 1791
+      },
+      "absolutePosition": {
+        "x": 3868,
+        "y": 1791
+      },
+      "card": "A",
+      "icon": "release",
+      "code": "SCW-TEM",
+      "role": "Courriel · exception",
+      "name": "Scaleway TEM",
+      "detail": "transactionnel · seule exception",
+      "store": false
+    },
+    {
+      "id": "A_URL",
+      "label": "immo.sent-tech.ca",
+      "parentId": null,
+      "kind": "endpoint",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 4,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 580,
+        "y": 783
+      },
+      "absolutePosition": {
+        "x": 580,
+        "y": 783
+      },
+      "card": "A",
+      "icon": "url",
+      "code": "URL",
+      "role": "Route · production",
+      "name": "immo.sent-tech.ca",
+      "detail": "route publique · TLS",
+      "store": false
+    },
+    {
+      "id": "A_USER",
+      "label": "Navigateur utilisateur",
+      "parentId": null,
+      "kind": "actor",
+      "repo": [
+        "external"
+      ],
+      "evidenceClass": "external",
+      "runtimeState": "not-applicable",
+      "mermaidLine": 2,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 48,
+        "y": 773
+      },
+      "absolutePosition": {
+        "x": 48,
+        "y": 773
+      },
+      "card": "A",
+      "icon": "user",
+      "code": "USER",
+      "role": "Navigateur",
+      "name": "Navigateur utilisateur",
+      "detail": "accès web · hors cluster",
+      "store": false
+    },
+    {
+      "id": "A_WS",
+      "label": "[WS-ADMIN] poste opérateur",
+      "parentId": null,
+      "kind": "workstation",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "manual",
+      "mermaidLine": 36,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 580,
+        "y": 1251
+      },
+      "absolutePosition": {
+        "x": 580,
+        "y": 1251
+      },
+      "card": "A",
+      "icon": "workstation",
+      "code": "WS-ADMIN",
+      "role": "Poste · administration",
+      "name": "poste opérateur",
+      "detail": "sans exécution LLM",
+      "store": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "A_EDGE__A_PP_UI__e3b0c44298fc",
+      "source": "A_EDGE",
+      "target": "A_PP_UI",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 43,
+      "labelPosition": null
+    },
+    {
+      "id": "A_EDGE__A_PR_UI__e3b0c44298fc",
+      "source": "A_EDGE",
+      "target": "A_PR_UI",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 44,
+      "labelPosition": null
+    },
+    {
+      "id": "A_GEO__A_GEO_DB__a7056a455639",
+      "source": "A_GEO",
+      "target": "A_GEO_DB",
+      "label": "SQL",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 64,
+      "labelPosition": {
+        "x": 2712,
+        "y": 1966.64
+      }
+    },
+    {
+      "id": "A_GEO__A_GEO_S3__d0c2db91c0a1",
+      "source": "A_GEO",
+      "target": "A_GEO_S3",
+      "label": "lecture produits",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 65,
+      "labelPosition": {
+        "x": 3273,
+        "y": 1991
+      }
+    },
+    {
+      "id": "A_GHCR__A_GEO__21b2eed1e328",
+      "source": "A_GHCR",
+      "target": "A_GEO",
+      "label": "images",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 68,
+      "labelPosition": {
+        "x": 1629,
+        "y": 1244
+      }
+    },
+    {
+      "id": "A_GHCR__A_PP_API__21b2eed1e328",
+      "source": "A_GHCR",
+      "target": "A_PP_API",
+      "label": "images",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 66,
+      "labelPosition": {
+        "x": 1661,
+        "y": 597
+      }
+    },
+    {
+      "id": "A_GHCR__A_PR_API__21b2eed1e328",
+      "source": "A_GHCR",
+      "target": "A_PR_API",
+      "label": "images",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 67,
+      "labelPosition": {
+        "x": 1669,
+        "y": 1463.18
+      }
+    },
+    {
+      "id": "A_PP_API__A_PP_DB__a7056a455639",
+      "source": "A_PP_API",
+      "target": "A_PP_DB",
+      "label": "SQL",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 46,
+      "labelPosition": {
+        "x": 3270,
+        "y": 500.91
+      }
+    },
+    {
+      "id": "A_PP_API__A_PP_RAW__7bbc36a7e539",
+      "source": "A_PP_API",
+      "target": "A_PP_RAW",
+      "label": "objets RAW",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 47,
+      "labelPosition": {
+        "x": 3293,
+        "y": 291
+      }
+    },
+    {
+      "id": "A_PP_API__A_PP_S3__5a8217ad6fe3",
+      "source": "A_PP_API",
+      "target": "A_PP_S3",
+      "label": "documents canoniques",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 48,
+      "labelPosition": {
+        "x": 3290,
+        "y": 769
+      }
+    },
+    {
+      "id": "A_PP_API__A_PP_SSO__d3792b8bf3a6",
+      "source": "A_PP_API",
+      "target": "A_PP_SSO",
+      "label": "OIDC / JWKS",
+      "dashed": false,
+      "bidirectional": true,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 52,
+      "labelPosition": {
+        "x": 2712,
+        "y": 968.09
+      }
+    },
+    {
+      "id": "A_PP_GEO__A_PP_GEO_S3__d0c2db91c0a1",
+      "source": "A_PP_GEO",
+      "target": "A_PP_GEO_S3",
+      "label": "lecture produits",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 55,
+      "labelPosition": {
+        "x": 3284,
+        "y": 989.09
+      }
+    },
+    {
+      "id": "A_PP_GRAPH__A_PP_PROJECT__e3b0c44298fc",
+      "source": "A_PP_GRAPH",
+      "target": "A_PP_PROJECT",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 50,
+      "labelPosition": null
+    },
+    {
+      "id": "A_PP_PROJECT__A_PP_DB__a45bd616013a",
+      "source": "A_PP_PROJECT",
+      "target": "A_PP_DB",
+      "label": "étape 4 · upsert",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 51,
+      "labelPosition": {
+        "x": 2712,
+        "y": 23.73
+      }
+    },
+    {
+      "id": "A_PP_SCRAPE__A_PP_GRAPH__902bf4477875",
+      "source": "A_PP_SCRAPE",
+      "target": "A_PP_GRAPH",
+      "label": "étapes 1 et 2",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 49,
+      "labelPosition": {
+        "x": 3301,
+        "y": 813.27
+      }
+    },
+    {
+      "id": "A_PP_SSO__A_PP_SSO_DB__1225ae6c1ae6",
+      "source": "A_PP_SSO",
+      "target": "A_PP_SSO_DB",
+      "label": "sessions",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 53,
+      "labelPosition": {
+        "x": 3244,
+        "y": 862.27
+      }
+    },
+    {
+      "id": "A_PP_UI__A_PP_API__702acf7c08d3",
+      "source": "A_PP_UI",
+      "target": "A_PP_API",
+      "label": "/api",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 45,
+      "labelPosition": {
+        "x": 2180,
+        "y": 613.55
+      }
+    },
+    {
+      "id": "A_PP_UI__A_PP_GEO__81fb168117fb",
+      "source": "A_PP_UI",
+      "target": "A_PP_GEO",
+      "label": "OGC",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 54,
+      "labelPosition": {
+        "x": 1632,
+        "y": 780.91
+      }
+    },
+    {
+      "id": "A_PP_URL__A_EDGE__e3b0c44298fc",
+      "source": "A_PP_URL",
+      "target": "A_EDGE",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 40,
+      "labelPosition": null
+    },
+    {
+      "id": "A_PR_API__A_PR_DB__a7056a455639",
+      "source": "A_PR_API",
+      "target": "A_PR_DB",
+      "label": "SQL",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 57,
+      "labelPosition": {
+        "x": 2164,
+        "y": 1490.36
+      }
+    },
+    {
+      "id": "A_PR_API__A_PR_RAW__7bbc36a7e539",
+      "source": "A_PR_API",
+      "target": "A_PR_RAW",
+      "label": "objets RAW",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 58,
+      "labelPosition": {
+        "x": 3293,
+        "y": 1229
+      }
+    },
+    {
+      "id": "A_PR_API__A_PR_S3__5a8217ad6fe3",
+      "source": "A_PR_API",
+      "target": "A_PR_S3",
+      "label": "documents canoniques",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 59,
+      "labelPosition": {
+        "x": 3290,
+        "y": 1063
+      }
+    },
+    {
+      "id": "A_PR_API__A_SSO__d3792b8bf3a6",
+      "source": "A_PR_API",
+      "target": "A_SSO",
+      "label": "OIDC / JWKS",
+      "dashed": false,
+      "bidirectional": true,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 61,
+      "labelPosition": {
+        "x": 2712,
+        "y": 1924.27
+      }
+    },
+    {
+      "id": "A_PR_API__A_TEM__0f9920188952",
+      "source": "A_PR_API",
+      "target": "A_TEM",
+      "label": "courriel transactionnel",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "retained",
+      "mermaidLine": 70,
+      "labelPosition": {
+        "x": 3293,
+        "y": 2025
+      }
+    },
+    {
+      "id": "A_PR_REFRESH__A_PR_DB__248e15a038f5",
+      "source": "A_PR_REFRESH",
+      "target": "A_PR_DB",
+      "label": "étapes 1 à 4",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "declared",
+      "runtimeState": "dormant",
+      "mermaidLine": 60,
+      "labelPosition": {
+        "x": 2712,
+        "y": 1070.09
+      }
+    },
+    {
+      "id": "A_PR_UI__A_GEO__81fb168117fb",
+      "source": "A_PR_UI",
+      "target": "A_GEO",
+      "label": "OGC",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 63,
+      "labelPosition": {
+        "x": 1570,
+        "y": 1769.36
+      }
+    },
+    {
+      "id": "A_PR_UI__A_PR_API__702acf7c08d3",
+      "source": "A_PR_UI",
+      "target": "A_PR_API",
+      "label": "/api",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 56,
+      "labelPosition": {
+        "x": 1632,
+        "y": 1643.27
+      }
+    },
+    {
+      "id": "A_SSO__A_SSO_DB__1225ae6c1ae6",
+      "source": "A_SSO",
+      "target": "A_SSO_DB",
+      "label": "sessions",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 62,
+      "labelPosition": {
+        "x": 3244,
+        "y": 1952.45
+      }
+    },
+    {
+      "id": "A_URL__A_EDGE__e3b0c44298fc",
+      "source": "A_URL",
+      "target": "A_EDGE",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 41,
+      "labelPosition": null
+    },
+    {
+      "id": "A_USER__A_PP_URL__e3b0c44298fc",
+      "source": "A_USER",
+      "target": "A_PP_URL",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 38,
+      "labelPosition": null
+    },
+    {
+      "id": "A_USER__A_SSO__3747cb0a027a",
+      "source": "A_USER",
+      "target": "A_SSO",
+      "label": "Redirection login",
+      "dashed": false,
+      "bidirectional": true,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 42,
+      "labelPosition": {
+        "x": 1924,
+        "y": 1233
+      }
+    },
+    {
+      "id": "A_USER__A_URL__e3b0c44298fc",
+      "source": "A_USER",
+      "target": "A_URL",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 39,
+      "labelPosition": null
+    },
+    {
+      "id": "A_WS__A_PP_API__512afb6c7631",
+      "source": "A_WS",
+      "target": "A_PP_API",
+      "label": "administration",
+      "dashed": true,
+      "bidirectional": false,
+      "evidenceClass": "declared",
+      "runtimeState": "manual",
+      "mermaidLine": 69,
+      "labelPosition": {
+        "x": 1621,
+        "y": 1345.09
+      }
+    }
+  ]
+}

@@ -29,6 +29,22 @@ rules:
   - apiGroups: ["batch"]
     resources: ["cronjobs"]
     verbs: ["get", "list", "create", "patch", "update"]
+  # PVC KEYRING REFRESH (2026-09-14, jumeau prod du correctif préprod) — CAUSE :
+  # le PVC `radar-refresh-keyring` (34-refresh-keyring-pvc.yaml, T2 #683/#685) a
+  # été ajouté à l'overlay préprod sans verbes PVC sur le Role, cassant 6 runs CD
+  # préprod d'affilée depuis le 2026-09-13 23:00. ÉTAT MESURÉ CÔTÉ PROD : le rendu
+  # de deploy/k8s/refresh-cronjobs-prod (kubectl kustomize --load-restrictor
+  # LoadRestrictionsNone) émet 3 CronJob et AUCUN PVC — le step « Deploy refresh
+  # CronJobs (prod) » n'applique donc pas encore de PVC et n'est PAS cassé
+  # aujourd'hui. Le grant est posé en JUMEAU pour que la promotion du keyring en
+  # prod (le CronJob `radar-refresh-pv` monte déjà claimName radar-refresh-keyring)
+  # ne reproduise pas la panne en fenêtre de promotion. Mêmes bornes qu'en préprod :
+  # get/list/watch/create/patch/update, PAS de `delete` (le PVC porte l'état
+  # keyring ; sa suppression reste un acte owner/poc-k8s), Role namespace-borné,
+  # 0 wildcard. L'APPLY sur le cluster est un acte cluster-admin (poc-k8s, GO owner).
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "patch", "update"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

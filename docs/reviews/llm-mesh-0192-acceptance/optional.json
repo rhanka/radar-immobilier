@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "protocol": "sentropic-16",
+  "case": "optional",
+  "completedAt": "2026-09-14T10:36:08.776Z",
+  "durationMs": 1391,
+  "installedPackage": {
+    "name": "@sentropic/llm-mesh",
+    "version": "0.19.2"
+  },
+  "account": {
+    "pseudonym": "acct-59dca62565",
+    "providerId": "cloud-code",
+    "tier": "g1-pro-tier"
+  },
+  "request": {
+    "logicalModelId": "claude-sonnet-4-6",
+    "effort": "low",
+    "maxOutputTokens": 64,
+    "prompt": "Reply with PING_OK only.",
+    "threadIdProvided": false
+  },
+  "transport": {
+    "httpStatus": 200,
+    "resolvedModelId": "claude-sonnet-4-6",
+    "thinkingLevel": "LOW",
+    "calls": [
+      {
+        "ordinal": 3,
+        "case": "optional",
+        "operation": "streamGenerateContent",
+        "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse",
+        "method": "POST",
+        "resolvedModelId": "claude-sonnet-4-6",
+        "thinkingLevel": "LOW",
+        "maxOutputTokens": 64,
+        "projectRedacted": true,
+        "httpStatus": 200,
+        "durationMs": 1302
+      }
+    ]
+  },
+  "actual": {
+    "providerId": "gemini",
+    "responseModelId": "claude-sonnet-4-6",
+    "messageExact": "PING_OK",
+    "pingExact": true,
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 15,
+      "outputTokens": 7,
+      "totalTokens": 22
+    }
+  },
+  "error": null,
+  "redaction": {
+    "bearer": "[REDACTED]",
+    "project": "[REDACTED]",
+    "secretsIncluded": false
+  }
+}
