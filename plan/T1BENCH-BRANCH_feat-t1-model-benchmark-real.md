@@ -54,6 +54,13 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
   - [x] Specify provider lanes, retry/idempotence, costs, timing, blind judges, and launch gates.
   - [x] Gate: `make -C tools/refresh-benchmark check-v101-tools ENV=test-t1-model-benchmark`.
   - [x] Gate: zero secret signature under `docs/reviews/refresh-benchmark/v101`.
+- [x] Lot 22 — Execute the owner-ratified v101 phase-2 campaign.
+  - [x] Implement immutable per-attempt receipts, transport-only retry, 429 suspension, and offline scoring.
+  - [x] Pass the two-document runner gate and Gemini MEDIUM/HIGH requalification.
+  - [x] Exclude Codex after the 32-token cap probe demonstrated that llm-mesh 0.19.2 does not transmit the cap.
+  - [x] Record judge preflight as 1/2 without repeating either generation request.
+  - [x] Prepare four runnable provider lanes after the Codex exclusion and atomic global status updates.
+  - [x] Launch the detached campaign and verify one receipt from each started provider lane after three minutes.
 
 ## Gates
 
@@ -66,6 +73,12 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 - `T1BENCH-EX1` — owner-requested delivery outside the worktree at
   `.lanes/conductor/.remote/BENCH_MULTI_DESIGN.md`; impact is one review-only Markdown file;
   rollback is deletion of that generated delivery. No repository source is affected.
-- `deferred` — consensus `harness-review` incomplet : les deux lancements Claude ont été refusés par
-  la barrière de divulgation du dépôt privé. Aucun contournement; les avis Codex locaux ne sont pas
-  comptés comme consensus. Owner : autoriser explicitement ou conserver le gate avant campagne.
+- `deferred` — the phase-2 consensus review is incomplete: both Claude launches were refused by the
+  private-repository workspace boundary. No workaround was attempted and no local Codex opinion is
+  counted as consensus. The owner subsequently instructed the conductor to launch phase 2 without a
+  further owner question; the failed review evidence remains recorded under `v101/review/`.
+- `T1BENCH-EX2` — the execution harness reaped Unix descendants during three preliminary detached
+  launch attempts while Docker continued independently. Thirteen uncertain intentions were stopped
+  and closed as immutable `operator-interrupted` terminal failures with unknown request counts and no
+  retry. The final launch is held by a user-systemd parent around the required secret subshell and
+  `setsid`/`nohup`; campaign artifacts remain ignored and uncommitted while the run is active.
