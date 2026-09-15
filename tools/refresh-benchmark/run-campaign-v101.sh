@@ -17,7 +17,8 @@ stop_children() {
 }
 trap stop_children TERM INT
 
-make -C "$ROOT/tools/refresh-benchmark" init-campaign-v101 ENV="$ENV_NAME"
+BENCHMARK_MARK_LAUNCHED=1 make -C "$ROOT/tools/refresh-benchmark" \
+  init-campaign-v101 ENV="$ENV_NAME"
 
 run_lane() {
   lane="$1"

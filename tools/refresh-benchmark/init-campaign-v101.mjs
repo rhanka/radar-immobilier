@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, rename, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { arms, laneArms } from "./v101-arms.mjs";
@@ -36,11 +36,26 @@ const launch = { schemaVersion: 1, capturedAt: new Date().toISOString(),
   selectedArms: selected.map(({ name }) => name),
   redaction: { allowlistedFieldsOnly: true, secretsIncluded: false } };
 await writeOnce(resolve(root, "gates/campaign-launch.json"), launch);
-const initial = { schemaVersion: 1, campaign: "v101", launchedAt: null,
+const statusPath = resolve(root, "status.json");
+const launchedAt = process.env.BENCHMARK_MARK_LAUNCHED === "1"
+  ? new Date().toISOString() : null;
+const initial = { schemaVersion: 1, campaign: "v101", launchedAt,
   codexIncluded, commonMaxOutputTokens: 32_768, files,
   arms: Object.fromEntries(selected.map(({ name }) => [name, { state: "queued", total: 100,
     processed: 0, accepted: 0, errors: 0, lastReceipt: null, requests: 0, etaSeconds: null }])) };
-try { await writeFile(resolve(root, "status.json"), `${JSON.stringify(initial, null, 2)}\n`, { flag: "wx" }); }
-catch (error) { if (error?.code !== "EEXIST") throw error; }
+try { await writeFile(statusPath, `${JSON.stringify(initial, null, 2)}\n`, { flag: "wx" }); }
+catch (error) {
+  if (error?.code !== "EEXIST") throw error;
+  if (launchedAt) {
+    const current = await json("status.json");
+    if (!current.launchedAt) {
+      current.launchedAt = launchedAt;
+      current.updatedAt = launchedAt;
+      const temporary = `${statusPath}.${process.pid}.tmp`;
+      await writeFile(temporary, `${JSON.stringify(current, null, 2)}\n`);
+      await rename(temporary, statusPath);
+    }
+  }
+}
 console.log(JSON.stringify({ arms: selected.length, codexIncluded, files,
   judges: launch.judgesPreflight, runnerRequests: launch.runnerGate.requests }));
