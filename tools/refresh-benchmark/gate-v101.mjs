@@ -49,17 +49,20 @@ if (gate === "codex-cap") {
     httpStatus: probe.httpStatus, finishReason: probe.finishReason, outputTokens, truncated, proved });
   console.log(JSON.stringify({ gate, requestCount: probe.requestCount, wireCap, truncated, proved }));
   if (!proved) process.exitCode = 1;
-} else if (gate === "gemini-efforts") {
+} else if (gate === "gemini-efforts-v2") {
   for (const effort of ["medium", "high"]) {
     const probe = await probeMesh({ transport: "cloud-code", model: "gemini-3.8-flash", effort,
-      maxOutputTokens: 512, requestLimit: 1, promptText: "Reply with PING_OK only." });
-    await save(`gemini-${effort}-512`, { gate, arm: `gemini-${effort}`,
+      maxOutputTokens: 512, requestLimit: 3, promptText: "Reply with PING_OK only." });
+    const generationRequestCount = probe.wire.filter(({ endpoint }) =>
+      endpoint.endsWith("streamGenerateContent")).length;
+    await save(`gemini-${effort}-512-v2`, { gate, arm: `gemini-${effort}`,
       requested: { maxOutputTokens: 512, effort }, requestCount: probe.requestCount,
+      generationRequestCount,
       httpStatus: probe.httpStatus, finishReason: probe.finishReason,
       outputSha256: probe.output ? (await import("node:crypto")).createHash("sha256")
         .update(probe.output).digest("hex") : null,
       pingExact: probe.output === "PING_OK", usage: probe.usage, wire: probe.wire,
-      proved: probe.httpStatus === 200 && probe.output === "PING_OK" });
+      proved: generationRequestCount === 1 && probe.httpStatus === 200 && probe.output === "PING_OK" });
     console.log(JSON.stringify({ gate, effort, requestCount: probe.requestCount,
       pingExact: probe.output === "PING_OK" }));
     if (probe.httpStatus !== 200 || probe.output !== "PING_OK") process.exitCode = 1;
@@ -70,7 +73,7 @@ if (gate === "codex-cap") {
     ["gpt-oss-120b-medium", { transport: "cloud-code", model: "gpt-oss-120b-medium", effort: null }],
   ];
   for (const [name, arm] of judges) {
-    const probe = await probeMesh({ ...arm, maxOutputTokens: 512, requestLimit: 1,
+    const probe = await probeMesh({ ...arm, maxOutputTokens: 512, requestLimit: 3,
       promptText: "Reply with PING_OK only." });
     const proved = probe.httpStatus === 200 && probe.output === "PING_OK";
     await save(`judge-${name}`, { gate, judge: name, requested: { maxOutputTokens: 512,
