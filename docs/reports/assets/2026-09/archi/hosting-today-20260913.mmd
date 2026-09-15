@@ -1,0 +1,70 @@
+flowchart LR
+  A_USER["Navigateur utilisateur"]
+  A_PP_URL["preprod.immo.sent-tech.ca"]
+  A_URL["immo.sent-tech.ca"]
+  subgraph A_OVH["OVHcloud BHS · cluster poc-ca"]
+    A_EDGE["Load balancer → Traefik / TLS"]
+    subgraph A_PREPROD["PRÉPRODUCTION · sans MinIO"]
+      A_PP_UI["[PP-UI] radar-ui"]
+      A_PP_API["[PP-API] radar-api"]
+      A_PP_DB[("[PP-DB] radar-postgres")]
+      A_PP_SCRAPE["[PP-SCRAPE] refresh-scrape"]
+      A_PP_PROJECT["[PP-PROJECT] refresh-projection"]
+      A_PP_SSO["sentropic-preprod · auth-idp"]
+      A_PP_SSO_DB[("[PP-SSO-DB] PostgreSQL SSO")]
+      A_PP_GEO["[PP-GEO] geo-api · geo-preprod"]
+    end
+    subgraph A_PROD["PRODUCTION · sans MinIO"]
+      A_PR_UI["[PR-UI] radar-ui"]
+      A_PR_API["[PR-API] radar-api"]
+      A_PR_DB[("[PR-DB] radar-postgres")]
+      A_PR_REFRESH["[PR-REFRESH] refresh production"]
+      A_SSO["sentropic · auth-idp"]
+      A_SSO_DB[("[PR-SSO-DB] PostgreSQL SSO")]
+      A_GEO["[GEO-API] geo-api · geo"]
+      A_GEO_DB[("[GEO-DB] geo / postgis")]
+    end
+  end
+  A_GHCR["[GHCR] registres applicatifs"]
+  A_PP_RAW[("[PP-RAW-OVH] raw préprod")]
+  A_PP_S3[("[PP-DOCS-OVH] docs préprod")]
+  A_PP_GRAPH[("[PP-GRAPH] graph-preprod")]
+  A_PR_RAW[("[PR-RAW-OVH] raw production")]
+  A_PR_S3[("[PR-DOCS-OVH] docs production")]
+  A_PP_GEO_S3[("[PP-GEO-S3] geo-preprod")]
+  A_GEO_S3[("[GEO-S3] sentropic-geo")]
+  A_WS["[WS-ADMIN] poste opérateur"]
+  A_TEM["[SCW-TEM] Scaleway TEM"]
+  A_USER --> A_PP_URL
+  A_USER --> A_URL
+  A_PP_URL --> A_EDGE
+  A_URL --> A_EDGE
+  A_USER <-->|"Redirection login"| A_SSO
+  A_EDGE --> A_PP_UI
+  A_EDGE --> A_PR_UI
+  A_PP_UI -->|"/api"| A_PP_API
+  A_PP_API -->|"SQL"| A_PP_DB
+  A_PP_API -->|"objets RAW"| A_PP_RAW
+  A_PP_API -->|"documents canoniques"| A_PP_S3
+  A_PP_SCRAPE -->|"étapes 1 et 2"| A_PP_GRAPH
+  A_PP_GRAPH --> A_PP_PROJECT
+  A_PP_PROJECT -->|"étape 4 · upsert"| A_PP_DB
+  A_PP_API <-->|"OIDC / JWKS"| A_PP_SSO
+  A_PP_SSO -->|"sessions"| A_PP_SSO_DB
+  A_PP_UI -->|"OGC"| A_PP_GEO
+  A_PP_GEO -->|"lecture produits"| A_PP_GEO_S3
+  A_PR_UI -->|"/api"| A_PR_API
+  A_PR_API -->|"SQL"| A_PR_DB
+  A_PR_API -->|"objets RAW"| A_PR_RAW
+  A_PR_API -->|"documents canoniques"| A_PR_S3
+  A_PR_REFRESH -->|"étapes 1 à 4"| A_PR_DB
+  A_PR_API <-->|"OIDC / JWKS"| A_SSO
+  A_SSO -->|"sessions"| A_SSO_DB
+  A_PR_UI -->|"OGC"| A_GEO
+  A_GEO -->|"SQL"| A_GEO_DB
+  A_GEO -->|"lecture produits"| A_GEO_S3
+  A_GHCR -->|"images"| A_PP_API
+  A_GHCR -->|"images"| A_PR_API
+  A_GHCR -->|"images"| A_GEO
+  A_WS -.->|"administration"| A_PP_API
+  A_PR_API -->|"courriel transactionnel"| A_TEM

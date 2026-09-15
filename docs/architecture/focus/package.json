@@ -1,5 +1,16 @@
 {
   "name": "immo-focus-decision-dossier",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@sveltejs/vite-plugin-svelte": "5.1.1",
+    "@xyflow/svelte": "1.6.6",
+    "dagre-d3-es": "7.0.14",
+    "dompurify": "3.4.14",
+    "marked": "16.4.2",
+    "mermaid": "11.17.2",
+    "svelte": "5.55.9",
+    "typescript": "5.9.3",
+    "vite": "6.4.3"
+  }
 }

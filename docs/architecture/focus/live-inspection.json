@@ -1,0 +1,573 @@
+{
+  "target": {
+    "id": "771FF310FBB80682D3B50FC4497123F5",
+    "url": "file:///home/antoinefa/src/radar-immobilier/tmp/architecture-two-transitions/docs/reports/architecture-monthly/architecture-before-after-2026-09-13.html"
+  },
+  "windowState": {
+    "windowId": 1,
+    "bounds": {
+      "left": 0,
+      "top": 0,
+      "width": 800,
+      "height": 600,
+      "windowState": "normal"
+    }
+  },
+  "layoutBefore": {
+    "layoutViewport": {
+      "pageX": 0,
+      "pageY": 4474,
+      "clientWidth": 785,
+      "clientHeight": 600
+    },
+    "visualViewport": {
+      "offsetX": 0,
+      "offsetY": 0,
+      "pageX": 0,
+      "pageY": 4474,
+      "clientWidth": 785,
+      "clientHeight": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    "contentSize": {
+      "x": 0,
+      "y": 0,
+      "width": 785,
+      "height": 6509
+    },
+    "cssLayoutViewport": {
+      "pageX": 0,
+      "pageY": 4474,
+      "clientWidth": 785,
+      "clientHeight": 600
+    },
+    "cssVisualViewport": {
+      "offsetX": 0,
+      "offsetY": 0,
+      "pageX": 0,
+      "pageY": 4474,
+      "clientWidth": 785,
+      "clientHeight": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    "cssContentSize": {
+      "x": 0,
+      "y": 0,
+      "width": 785,
+      "height": 6509
+    }
+  },
+  "layoutAfter": {
+    "layoutViewport": {
+      "pageX": 0,
+      "pageY": 789,
+      "clientWidth": 785,
+      "clientHeight": 600
+    },
+    "visualViewport": {
+      "offsetX": 0,
+      "offsetY": 0,
+      "pageX": 0,
+      "pageY": 789,
+      "clientWidth": 785,
+      "clientHeight": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    "contentSize": {
+      "x": 0,
+      "y": 0,
+      "width": 785,
+      "height": 6509
+    },
+    "cssLayoutViewport": {
+      "pageX": 0,
+      "pageY": 789,
+      "clientWidth": 785,
+      "clientHeight": 600
+    },
+    "cssVisualViewport": {
+      "offsetX": 0,
+      "offsetY": 0,
+      "pageX": 0,
+      "pageY": 789,
+      "clientWidth": 785,
+      "clientHeight": 600,
+      "scale": 1,
+      "zoom": 1
+    },
+    "cssContentSize": {
+      "x": 0,
+      "y": 0,
+      "width": 785,
+      "height": 6509
+    }
+  },
+  "before": {
+    "viewport": {
+      "innerWidth": 800,
+      "innerHeight": 600,
+      "devicePixelRatio": 1,
+      "scrollX": 0,
+      "scrollY": 4474,
+      "visualWidth": 785,
+      "visualHeight": 600,
+      "visualScale": 1
+    },
+    "documentSize": {
+      "width": 785,
+      "height": 6509
+    },
+    "samples": {
+      "html": {
+        "rect": {
+          "x": 0,
+          "y": -4474,
+          "width": 785,
+          "height": 6508.75
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(0, 0, 0)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 785,
+          "height": 600
+        },
+        "scroll": {
+          "width": 785,
+          "height": 6509
+        }
+      },
+      "body": {
+        "rect": {
+          "x": 0,
+          "y": -4474,
+          "width": 785,
+          "height": 6508.75
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(0, 0, 0)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 785,
+          "height": 6509
+        },
+        "scroll": {
+          "width": 785,
+          "height": 6509
+        }
+      },
+      "#app": {
+        "rect": {
+          "x": 0,
+          "y": -4474,
+          "width": 785,
+          "height": 6508.75
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(0, 0, 0)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 785,
+          "height": 6509
+        },
+        "scroll": {
+          "width": 785,
+          "height": 6509
+        }
+      },
+      ".dossier": {
+        "rect": {
+          "x": 0,
+          "y": -4474,
+          "width": 785,
+          "height": 6508.75
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 785,
+          "height": 6509
+        },
+        "scroll": {
+          "width": 785,
+          "height": 6509
+        }
+      },
+      ".masthead": {
+        "rect": {
+          "x": 16,
+          "y": -4454,
+          "width": 753,
+          "height": 539.34375
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 753,
+          "height": 539
+        },
+        "scroll": {
+          "width": 753,
+          "height": 539
+        }
+      },
+      ".flow": {
+        "rect": {
+          "x": 37,
+          "y": -3684.515625,
+          "width": 711,
+          "height": 520
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgb(238, 244, 245)",
+        "client": {
+          "width": 711,
+          "height": 520
+        },
+        "scroll": {
+          "width": 711,
+          "height": 520
+        }
+      },
+      ".svelte-flow__container": {
+        "rect": {
+          "x": 37,
+          "y": -3684.515625,
+          "width": 711,
+          "height": 520
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 711,
+          "height": 520
+        },
+        "scroll": {
+          "width": 6507,
+          "height": 1218
+        }
+      },
+      ".svelte-flow__viewport": {
+        "rect": {
+          "x": 61,
+          "y": -3660.515625,
+          "width": 711,
+          "height": 520
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 711,
+          "height": 520
+        },
+        "scroll": {
+          "width": 6483,
+          "height": 1194
+        }
+      },
+      ".svelte-flow__node": {
+        "rect": {
+          "x": 1721,
+          "y": -3640.515625,
+          "width": 4000,
+          "height": 942.5
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 4000,
+          "height": 943
+        },
+        "scroll": {
+          "width": 4000,
+          "height": 943
+        }
+      }
+    },
+    "topElement": "<p class=\"label svelte-3muuxr\">Infrastructure</p>",
+    "url": "file:///home/antoinefa/src/radar-immobilier/tmp/architecture-two-transitions/docs/reports/architecture-monthly/architecture-before-after-2026-09-13.html",
+    "readyState": "complete",
+    "title": "Immo · dossier de décision Focus",
+    "bodyText": "FOCUS · RAPPORT ARCHITECTURE · IMMO / GEO / KUBERNETES\n2 PAIRES · 4 SCÈNES · 13 SEPTEMBRE 2026\nDeux transitions datées,\nquatre vues vérifiables.\n\nLa production passe de MinIO/SCW à OVH S3/GHCR, avec TEM explicitement conservé. Le refresh passe du poste manuel au CronJob autonome intégré; la production demeure dormante et le modèle reste à ratifier.\n\n9 AOÛT · A\nMinIO + restes SCW/registre\n13 SEPT. · A\nOVH S3 + GHCR; TEM résiduel\n9 AOÛT · B\nrefresh manuel depuis le poste\n13 SEPT. · B\nCronJob; PROD dormante; modèle en attente\nTRANSITION AUTONOME\nPaire A · production\nStockage et registre\n2026-08-09\nAVANT\nMinIO + restes SCW/registre déclarés\n\nstorage-before-20260809 · 51d42a42bd5f…\n\nDeclared public route\nDeclared /api\nDeclared SQL\nDeclared API object binding\nDeclared ingress\nDeclared ingress\nDeclared OGC collections\nDeclared OIDC / JWKS\nDeclared ingress route\nDeclared login redirects\nDeclared client binding\nDeclared graph binding; suspended\nDeclared scrape contract; secret not audited\nDecla",
+    "bodyChildren": 1,
+    "appHtml": "<div data-st-theme=\"entropic\"><main class=\"dossier\"><header class=\"masthead\"><div class=\"flex-row\"><span class=\"eyebrow\">Focus · rapport architecture · Immo / Geo / Kubernetes</span> <span class=\"badge warning\">2 PAIRES · 4 SCÈNES · 13 SEPTEMBRE 2026</span></div> <h1>Deux transitions datées,<br>quatre vues vérifiables.</h1> <p class=\"lede\">La production passe de MinIO/SCW à OVH S3/GHCR, avec TEM explicitement conservé. Le refresh passe du poste manuel au CronJob autonome intégré; la production demeure dormante et le modèle reste à ratifier.</p> <div class=\"truth-strip\"><span><strong>9 AOÛT · A</strong> MinIO + restes SCW/registre</span><span><strong>13 SEPT. · A</strong> OVH S3 + GHCR; TEM résiduel</span><span><strong>9 AOÛT · B</strong> refresh manuel depuis le poste</span><span><strong>13 SEPT. · B</strong> CronJob; PROD dormante; modèle en attente</span></div></header> <section class=\"architecture-pairs svelte-4dfa67\" aria-label=\"Deux paires architecture avant après\"><section class=\"pair svelte-4dfa67\" data-pair=\"A\"><header class=\"pair-heading svelte-4dfa67\"><div><span class=\"eyebrow\">Transition autonome</span><h2 class=\"svelte-4dfa67\">Paire A · production</h2></div><span class=\"badge\">Stockage et registre</span></header> <div class=\"pair-grid svelte-4dfa67\"><article class=\"scene svelte-4dfa67\" data-scene=\"storage-before-20260809\" data-scene-hash=\"51d42a42bd5ffc1d6c1ce6684a4a86a40a65bed8ff7ca38f3ecd38b728afa618\"><header class=\"svelte-4dfa67\"><div><span class=\"date svelte-4dfa67\">2026-08-09</span><h3 class=\"svelte-4dfa67\">AVANT</h3></div> <span class=\"badge\">MinIO + restes SCW/registre déclarés</span></header> <p class=\"scene-id svelte-4dfa67\"><code>storage-before-20260809</code> · <code>51d42a42bd5f…</code></p> <div class=\"flow\" data-renderer=\"xyflow-svelte\" data-mode=\"complete-nested\" data-native-zoom=\"1\" data-graph=\"storage-before-20260809\" data-scene-hash=\"51d42a42bd5ffc1d6c1ce6684a4a86a40a65bed8ff7ca38f3ecd38b728afa618\"><div class=\"svelte-flow svelte-flow__co",
+    "scripts": [
+      {
+        "src": "",
+        "type": "module"
+      }
+    ],
+    "resources": []
+  },
+  "after": {
+    "viewport": {
+      "innerWidth": 800,
+      "innerHeight": 600,
+      "devicePixelRatio": 1,
+      "scrollX": 0,
+      "scrollY": 4474,
+      "visualWidth": 785,
+      "visualHeight": 600,
+      "visualScale": 1
+    },
+    "documentSize": {
+      "width": 785,
+      "height": 6509
+    },
+    "samples": {
+      "html": {
+        "rect": {
+          "x": 0,
+          "y": -4474,
+          "width": 785,
+          "height": 6508.75
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(0, 0, 0)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 785,
+          "height": 600
+        },
+        "scroll": {
+          "width": 785,
+          "height": 6509
+        }
+      },
+      "body": {
+        "rect": {
+          "x": 0,
+          "y": -4474,
+          "width": 785,
+          "height": 6508.75
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(0, 0, 0)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 785,
+          "height": 6509
+        },
+        "scroll": {
+          "width": 785,
+          "height": 6509
+        }
+      },
+      "#app": {
+        "rect": {
+          "x": 0,
+          "y": -4474,
+          "width": 785,
+          "height": 6508.75
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(0, 0, 0)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 785,
+          "height": 6509
+        },
+        "scroll": {
+          "width": 785,
+          "height": 6509
+        }
+      },
+      ".dossier": {
+        "rect": {
+          "x": 0,
+          "y": -4474,
+          "width": 785,
+          "height": 6508.75
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 785,
+          "height": 6509
+        },
+        "scroll": {
+          "width": 785,
+          "height": 6509
+        }
+      },
+      ".masthead": {
+        "rect": {
+          "x": 16,
+          "y": -4454,
+          "width": 753,
+          "height": 539.34375
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 753,
+          "height": 539
+        },
+        "scroll": {
+          "width": 753,
+          "height": 539
+        }
+      },
+      ".flow": {
+        "rect": {
+          "x": 37,
+          "y": -3684.515625,
+          "width": 711,
+          "height": 520
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgb(238, 244, 245)",
+        "client": {
+          "width": 711,
+          "height": 520
+        },
+        "scroll": {
+          "width": 711,
+          "height": 520
+        }
+      },
+      ".svelte-flow__container": {
+        "rect": {
+          "x": 37,
+          "y": -3684.515625,
+          "width": 711,
+          "height": 520
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 711,
+          "height": 520
+        },
+        "scroll": {
+          "width": 6507,
+          "height": 1218
+        }
+      },
+      ".svelte-flow__viewport": {
+        "rect": {
+          "x": 61,
+          "y": -3660.515625,
+          "width": 711,
+          "height": 520
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 711,
+          "height": 520
+        },
+        "scroll": {
+          "width": 6483,
+          "height": 1194
+        }
+      },
+      ".svelte-flow__node": {
+        "rect": {
+          "x": 1721,
+          "y": -3640.515625,
+          "width": 4000,
+          "height": 942.5
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "color": "rgb(23, 32, 51)",
+        "background": "rgba(0, 0, 0, 0)",
+        "client": {
+          "width": 4000,
+          "height": 943
+        },
+        "scroll": {
+          "width": 4000,
+          "height": 943
+        }
+      }
+    },
+    "topElement": "<p class=\"label svelte-3muuxr\">Infrastructure</p>",
+    "url": "file:///home/antoinefa/src/radar-immobilier/tmp/architecture-two-transitions/docs/reports/architecture-monthly/architecture-before-after-2026-09-13.html",
+    "readyState": "complete",
+    "title": "Immo · dossier de décision Focus",
+    "bodyText": "FOCUS · RAPPORT ARCHITECTURE · IMMO / GEO / KUBERNETES\n2 PAIRES · 4 SCÈNES · 13 SEPTEMBRE 2026\nDeux transitions datées,\nquatre vues vérifiables.\n\nLa production passe de MinIO/SCW à OVH S3/GHCR, avec TEM explicitement conservé. Le refresh passe du poste manuel au CronJob autonome intégré; la production demeure dormante et le modèle reste à ratifier.\n\n9 AOÛT · A\nMinIO + restes SCW/registre\n13 SEPT. · A\nOVH S3 + GHCR; TEM résiduel\n9 AOÛT · B\nrefresh manuel depuis le poste\n13 SEPT. · B\nCronJob; PROD dormante; modèle en attente\nTRANSITION AUTONOME\nPaire A · production\nStockage et registre\n2026-08-09\nAVANT\nMinIO + restes SCW/registre déclarés\n\nstorage-before-20260809 · 51d42a42bd5f…\n\nDeclared public route\nDeclared /api\nDeclared SQL\nDeclared API object binding\nDeclared ingress\nDeclared ingress\nDeclared OGC collections\nDeclared OIDC / JWKS\nDeclared ingress route\nDeclared login redirects\nDeclared client binding\nDeclared graph binding; suspended\nDeclared scrape contract; secret not audited\nDecla",
+    "bodyChildren": 1,
+    "appHtml": "<div data-st-theme=\"entropic\"><main class=\"dossier\"><header class=\"masthead\"><div class=\"flex-row\"><span class=\"eyebrow\">Focus · rapport architecture · Immo / Geo / Kubernetes</span> <span class=\"badge warning\">2 PAIRES · 4 SCÈNES · 13 SEPTEMBRE 2026</span></div> <h1>Deux transitions datées,<br>quatre vues vérifiables.</h1> <p class=\"lede\">La production passe de MinIO/SCW à OVH S3/GHCR, avec TEM explicitement conservé. Le refresh passe du poste manuel au CronJob autonome intégré; la production demeure dormante et le modèle reste à ratifier.</p> <div class=\"truth-strip\"><span><strong>9 AOÛT · A</strong> MinIO + restes SCW/registre</span><span><strong>13 SEPT. · A</strong> OVH S3 + GHCR; TEM résiduel</span><span><strong>9 AOÛT · B</strong> refresh manuel depuis le poste</span><span><strong>13 SEPT. · B</strong> CronJob; PROD dormante; modèle en attente</span></div></header> <section class=\"architecture-pairs svelte-4dfa67\" aria-label=\"Deux paires architecture avant après\"><section class=\"pair svelte-4dfa67\" data-pair=\"A\"><header class=\"pair-heading svelte-4dfa67\"><div><span class=\"eyebrow\">Transition autonome</span><h2 class=\"svelte-4dfa67\">Paire A · production</h2></div><span class=\"badge\">Stockage et registre</span></header> <div class=\"pair-grid svelte-4dfa67\"><article class=\"scene svelte-4dfa67\" data-scene=\"storage-before-20260809\" data-scene-hash=\"51d42a42bd5ffc1d6c1ce6684a4a86a40a65bed8ff7ca38f3ecd38b728afa618\"><header class=\"svelte-4dfa67\"><div><span class=\"date svelte-4dfa67\">2026-08-09</span><h3 class=\"svelte-4dfa67\">AVANT</h3></div> <span class=\"badge\">MinIO + restes SCW/registre déclarés</span></header> <p class=\"scene-id svelte-4dfa67\"><code>storage-before-20260809</code> · <code>51d42a42bd5f…</code></p> <div class=\"flow\" data-renderer=\"xyflow-svelte\" data-mode=\"complete-nested\" data-native-zoom=\"1\" data-graph=\"storage-before-20260809\" data-scene-hash=\"51d42a42bd5ffc1d6c1ce6684a4a86a40a65bed8ff7ca38f3ecd38b728afa618\"><div class=\"svelte-flow svelte-flow__co",
+    "scripts": [
+      {
+        "src": "",
+        "type": "module"
+      }
+    ],
+    "resources": []
+  },
+  "summary": {
+    "exists": true,
+    "text": "Après le dossier · données actualiséesRésumé du rapport mensuel 10 août → 13 septembre 2026 inclus Période35 jours · 840 hAmerica/Toronto, sans trou après le rapport terminé le 9 août. Infrastructure68,88 CADProjection de référence : un b3-8 à 0,082 CAD/h; pas un état runtime. Allocation LLM251,215438 CADMéthode et coût provisoires; statut non critique et non final. Total indicatif320,095438 CADInfra + allocation LLM; pas une facture fournisseur. État des transitions A · cutover observé partielOVH S3 et absence MinIO observés; GHCR intégré. Parité finale/balayage ouverts; TEM conservé.B · préprod acceptéeCronJob autonome accepté en préproduction. Production dormante jusqu’à promotion; modèle en attente M1.M1 · à ratifierSonnet comparable, Luna low, Gemini 3.8 lowest. Aucun gagnant; no-output Gemini non classable. Télécharger le rapport HTML Télécharger le rapport PDF Télécharger le rapport précédent joint Liens locaux : disponibles lorsque les artefacts mensuels sont présents à côté du dossier.",
+    "links": [
+      "file:///home/antoinefa/src/radar-immobilier/tmp/architecture-two-transitions/docs/reports/architecture-monthly/report-through-2026-09-13.html",
+      "file:///home/antoinefa/src/radar-immobilier/tmp/architecture-two-transitions/docs/reports/architecture-monthly/report-through-2026-09-13.pdf",
+      "file:///home/antoinefa/src/radar-immobilier/tmp/architecture-two-transitions/docs/spec/reports/study-2026-08/report.pdf"
+    ]
+  },
+  "flow": {
+    "exists": true,
+    "rect": {
+      "x": 37,
+      "y": 0.484375,
+      "width": 711,
+      "height": 520
+    },
+    "containerHeight": 520,
+    "viewportHeight": 520,
+    "nodeCount": 19,
+    "edgeCount": 17
+  },
+  "events": []
+}

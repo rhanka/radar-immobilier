@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "protocol": "sentropic-16",
+  "completedAt": "2026-09-14T10:36:08.777Z",
+  "installedPackage": {
+    "name": "@sentropic/llm-mesh",
+    "version": "0.19.2"
+  },
+  "account": {
+    "pseudonym": "acct-59dca62565",
+    "providerId": "cloud-code",
+    "tier": "g1-pro-tier"
+  },
+  "modelNetworkRequestBudget": 3,
+  "modelNetworkRequestsObserved": 3,
+  "operations": [
+    {
+      "ordinal": 1,
+      "case": "positive",
+      "operation": "fetchAvailableModels",
+      "httpStatus": 200
+    },
+    {
+      "ordinal": 2,
+      "case": "positive",
+      "operation": "streamGenerateContent",
+      "httpStatus": 200
+    },
+    {
+      "ordinal": 3,
+      "case": "optional",
+      "operation": "streamGenerateContent",
+      "httpStatus": 200
+    }
+  ],
+  "positive": {
+    "httpStatus": 200,
+    "resolvedModelId": "gemini-3.8-flash-tiered",
+    "thinkingLevel": "LOW",
+    "pingExact": true
+  },
+  "negative": {
+    "rejectedBeforeStream": true,
+    "modelNetworkCallsDelta": 0,
+    "streamCallsDelta": 0
+  },
+  "optional": {
+    "httpStatus": 200,
+    "resolvedModelId": "claude-sonnet-4-6",
+    "thinkingLevel": "LOW",
+    "messageExact": "PING_OK"
+  },
+  "redaction": {
+    "bearer": "[REDACTED]",
+    "project": "[REDACTED]",
+    "secretsIncluded": false
+  }
+}
