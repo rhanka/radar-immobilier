@@ -20,6 +20,8 @@ import {
 
 import {
   containsNormalizedPdfExcerpt,
+  MIN_ANCHOR_NORMALIZED_CODE_POINTS,
+  normalizePdfExcerpt,
   type RefreshCorpusChunk,
 } from "./refresh-corpus.js";
 
@@ -45,7 +47,10 @@ export interface RefreshProfileChunk {
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
 }
-export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v5";
+export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v9";
+// Entity citation excerpts are bounded by truncation, in Unicode code points rather than UTF-16 units.
+const MAX_CITATION_EXCERPT_CODE_POINTS = 200;
+const MIN_CITATION_EXCERPT_CODE_POINTS = 20;
 export function loadRefreshProfileContext(options: LoadRefreshProfileContextOptions): RefreshProfileContext {
   if (options.unregisteredOnly) {
     if (!options.profilePath) throw new Error("Unregistered-only refresh requires an explicit profile path");
@@ -73,9 +78,14 @@ function pdfIdentityFor(chunk: RefreshCorpusChunk): Record<string, string> {
 }
 function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): string {
   const allowed = new Set(allowedNodeTypes(context));
+  const statuses = [...context.profile.hardening.statuses];
   const properties = Object.fromEntries(Object.entries(context.profile.node_types)
-    .filter(([type]) => allowed.has(type)).map(([type, spec]) =>
-      [type, (spec as unknown as Record<string, unknown>).properties ?? {}]));
+    .filter(([type]) => allowed.has(type)).map(([type, spec]) => {
+      const nodeProperties = (spec as unknown as Record<string, unknown>).properties as
+        Record<string, unknown> | undefined;
+      return [type, { ...nodeProperties, status: { type: "string", enum: statuses,
+        description: "Exact node status accepted by the product validator." } }];
+    }));
   const evidenceRelations = new Set(context.profile.evidence_policy.relation_types);
   const relations = Object.fromEntries(Object.entries(context.profile.relation_types).flatMap(([type, spec]) => {
     const sourceNodeTypes = spec.source_types.filter((nodeType) => allowed.has(nodeType));
@@ -88,10 +98,20 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
   const pdfIdentity = pdfIdentityFor(chunk);
   const pdfIdentityProperties = Object.fromEntries(Object.entries(pdfIdentity)
     .map(([key, value]) => [key, { const: value }]));
-  const citation = { type: "object", required: ["page", "excerpt"],
-    properties: { page: { enum: chunk.pages }, excerpt: { type: "string", minLength: 1,
-      maxLength: 200, description: "short verbatim text from the cited page" } },
-    description: "The profile injects the constant PDF identity before validation." };
+  // Entity citation shape only. It is exposed once, under graph_contract.entity_citations.items:
+  // the compact form holds because the profile injects the PDF identity into nodes[].citations and
+  // edges[].citations, and nowhere else. evidence[] carries the full seven-field identity itself.
+  const entityCitation = { type: "object", required: ["page", "excerpt"],
+    properties: { page: { enum: chunk.pages },
+      excerpt: { type: "string", minLength: MIN_CITATION_EXCERPT_CODE_POINTS,
+        maxLength: MAX_CITATION_EXCERPT_CODE_POINTS,
+        description: "Exact beginning of the decision sentence, 20 to 200 characters, "
+          + "copied verbatim and never completed or corrected. A field label such as "
+          + "\"Zone : RUR-12\" is a property, never an excerpt." } },
+    description: "The profile injects the constant PDF identity and bounds the excerpt before validation; "
+      + "an entity citation excerpt under 20 code points, or under "
+      + `${MIN_ANCHOR_NORMALIZED_CODE_POINTS} once normalized to letters and digits, `
+      + "is refused as entity_citation_excerpt_too_short." };
   return JSON.stringify({
     contract_version: REFRESH_PROFILE_CONTRACT_VERSION,
     type: "Graphify Extraction",
@@ -105,23 +125,27 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
       evidence_refs: { type: "array", items: { type: "string", references: "evidence[].id" },
         minItems: context.profile.evidence_policy.min_refs,
         required_for_node_types: context.profile.evidence_policy.node_types,
-        required_for_relation_types: context.profile.evidence_policy.relation_types },
+        required_for_relation_types: Object.keys(relations), required_for: ["every edge"] },
       entity_citations: { node_field: "nodes[].citations", edge_field: "edges[].citations",
-        required_for: ["every node", "every edge"], type: "array", minItems: 1, items: citation,
+        required_for: ["every node", "every edge"], type: "array", minItems: 1, items: entityCitation,
         description: "Emit only page and excerpt; the profile injects the constant PDF identity." },
     },
     evidence: { pdf_identity: pdfIdentity, allowedPages: chunk.pages,
-      citation,
       evidence_item: { type: "object",
         required: ["id", "source_file", "rawRef", "docSha", "sourceUrl", "modality", "page", "excerpt"],
         properties: { id: { type: "string", minLength: 1 }, ...pdfIdentityProperties,
           page: { enum: chunk.pages },
-          excerpt: { type: "string", minLength: 1, description: "verbatim text from the cited page" } } } },
+          excerpt: { type: "string", minLength: MIN_ANCHOR_NORMALIZED_CODE_POINTS,
+            description: "Verbatim text from the cited page, at least "
+              + `${MIN_ANCHOR_NORMALIZED_CODE_POINTS} characters once normalized to letters and `
+              + "digits only, case and accents folded; a shorter excerpt is refused as "
+              + "excerpt_below_anchor_floor. Unlike an entity citation, an evidence item repeats "
+              + "the full PDF identity above and is never truncated." } } } },
     constraints: ["Omit facts absent from the chunk, including in-force status and residential unit counts.",
       "An empty nodes/edges/evidence extraction is valid; the enclosing chunk retains the verified PDF identity."],
   });
 }
-function injectCitationIdentity(value: unknown, chunk: RefreshCorpusChunk): unknown {
+function normalizeEntityCitations(value: unknown, chunk: RefreshCorpusChunk): unknown {
   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
   const root = value as Record<string, unknown>;
   const identity = pdfIdentityFor(chunk);
@@ -131,9 +155,18 @@ function injectCitationIdentity(value: unknown, chunk: RefreshCorpusChunk): unkn
       if (!entity || typeof entity !== "object" || Array.isArray(entity)) continue;
       const record = entity as Record<string, unknown>;
       if (!Array.isArray(record["citations"])) continue;
-      record["citations"] = record["citations"].map((citation) =>
-        citation && typeof citation === "object" && !Array.isArray(citation)
-          ? { ...(citation as Record<string, unknown>), ...identity } : citation);
+      record["citations"] = record["citations"].map((citation) => {
+        if (!citation || typeof citation !== "object" || Array.isArray(citation)) return citation;
+        const merged = { ...(citation as Record<string, unknown>), ...identity };
+        // The excerpt is bounded by truncation instead of rejection: measured v11 output overshoots the
+        // declared 200-character bound by 1 to 7 code points on excerpts that are otherwise verbatim
+        // prefixes anchored on the cited page. The kept prefix stays a verbatim prefix of that same
+        // passage, so the page anchor below still proves the passage is on the cited page.
+        if (typeof merged["excerpt"] === "string") {
+          merged["excerpt"] = Array.from(merged["excerpt"]).slice(0, MAX_CITATION_EXCERPT_CODE_POINTS).join("");
+        }
+        return merged;
+      });
     }
   }
   return value;
@@ -163,9 +196,44 @@ function validatePdfRecord(value: Record<string, unknown>, chunk: RefreshCorpusC
     throw new Error(`Model output has invalid original PDF page for chunk ${chunk.id}`);
   }
   const excerpt = value["excerpt"];
-  if (typeof excerpt !== "string"
-    || !containsNormalizedPdfExcerpt(pageTexts.get(page as number) ?? "", excerpt)) {
+  // A missing or non-string excerpt carries no text to anchor: it stays an anchoring refusal.
+  if (typeof excerpt !== "string") {
     throw new Error(`Model output has ungrounded PDF excerpt for chunk ${chunk.id}`);
+  }
+  // Too short to anchor is not the same failure as not on the page: an excerpt under the anchor
+  // floor may well be verbatim on the cited page (measured: "ADOPTÉE", 7 normalized code points,
+  // last line of the frozen v13 page). Naming it ungrounded would state a cause that is false,
+  // in a CronJob nobody watches, so the floor gets its own refusal before the anchor is checked.
+  const normalizedCodePoints = [...normalizePdfExcerpt(excerpt)].length;
+  if (normalizedCodePoints < MIN_ANCHOR_NORMALIZED_CODE_POINTS) {
+    throw new Error(`Model output violates excerpt_below_anchor_floor for chunk ${chunk.id}: `
+      + `an excerpt normalizes to ${normalizedCodePoints} letters and digits, under the ${
+        MIN_ANCHOR_NORMALIZED_CODE_POINTS} the page anchor requires. The excerpt may be on the page; `
+      + "it is too short to prove it. Copy more of the same passage verbatim.");
+  }
+  if (!containsNormalizedPdfExcerpt(pageTexts.get(page as number) ?? "", excerpt)) {
+    throw new Error(`Model output has ungrounded PDF excerpt for chunk ${chunk.id}`);
+  }
+}
+function validateEntityCitationExcerpt(value: Record<string, unknown>, chunk: RefreshCorpusChunk): void {
+  const excerpt = value["excerpt"];
+  // A missing or non-string excerpt carries no text to measure: it stays an anchoring refusal, unchanged.
+  if (typeof excerpt !== "string") return;
+  const codePoints = Array.from(excerpt).length;
+  // Two floors, two units, one named violation: the schema declares 20 raw code points, the page
+  // anchor requires 12 normalized ones (letters and digits only). Twenty raw can normalize under
+  // twelve — measured: "1 2 3 4 5 6 7 8 9 10" is 20 raw and 11 normalized — so an entity citation
+  // that clears the declared floor could still fall through to the anchor and be refused under a
+  // name that designates the wrong cause. Both are checked here, under the name the prompt teaches.
+  const normalizedCodePoints = [...normalizePdfExcerpt(excerpt)].length;
+  if (codePoints < MIN_CITATION_EXCERPT_CODE_POINTS
+    || normalizedCodePoints < MIN_ANCHOR_NORMALIZED_CODE_POINTS) {
+    throw new Error(`Model output violates entity_citation_excerpt_too_short for chunk ${chunk.id}: `
+      + `an entity citation excerpt carries ${codePoints} code points and ${normalizedCodePoints} `
+      + `once normalized, under the ${MIN_CITATION_EXCERPT_CODE_POINTS} the schema declares or the ${
+        MIN_ANCHOR_NORMALIZED_CODE_POINTS} normalized the page anchor requires. A field label such as `
+      + "\"Zone : RUR-12\" belongs to the node properties, never to excerpt; cite the decision "
+      + "sentence instead.");
   }
 }
 function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
@@ -176,13 +244,15 @@ function validateProvenance(extraction: Extraction, chunk: RefreshCorpusChunk,
     if (entity.source_file !== chunk.originalKey) throw new Error(`Invalid source_file for chunk ${chunk.id}`);
   }
   for (const entity of entities) {
+    // The upper bound is already enforced by truncation in normalizeEntityCitations, so no overlong
+    // entity citation can reach this point. The lower bound the schema has declared since v8 is
+    // enforced here instead, by name and before the anchor: measured on the ten v13 receipts, the
+    // 17 entity citation excerpts under 20 code points were all zone labels, all already refused by
+    // the 12-normalized-character anchor floor under the unrelated name ungrounded_pdf_excerpt, and
+    // none of the 331 entity citations had an excerpt under 20 code points that did anchor.
     for (const citation of entity.citations ?? []) {
       const record = citation as unknown as Record<string, unknown>;
-      // Entity citation length is measured in Unicode code points, not UTF-16 code units.
-      if (typeof record["excerpt"] === "string" && Array.from(record["excerpt"]).length > 200) {
-        throw new Error("Model output violates entity_citation_excerpt_too_long: "
-          + `maximum 200 Unicode code points for chunk ${chunk.id}`);
-      }
+      validateEntityCitationExcerpt(record, chunk);
       validatePdfRecord(record, chunk, pageTexts);
     }
   }
@@ -234,7 +304,7 @@ function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: R
     throw error;
   }
   validateDeclaredContractVersion(parsed, chunk);
-  parsed = injectCitationIdentity(parsed, chunk);
+  parsed = normalizeEntityCitations(parsed, chunk);
   const baseErrors = validateExtraction(parsed);
   if (baseErrors.length > 0) throw new Error(`Invalid Graphify extraction for chunk ${chunk.id}: ${baseErrors.join("; ")}`);
   for (const node of (parsed as Extraction).nodes) {
@@ -276,12 +346,31 @@ export async function extractRefreshProfile(
         prompt: `Contract ${REFRESH_PROFILE_CONTRACT_VERSION}. Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
 Every node file_type must be "document" for this PDF. Edge confidence, when present, must be
 "AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.
+Node status is type-specific: use only ontology.node_properties.<node_type>.status.enum. These enums
+are generated from, and exactly align with, the allowed_statuses list below.
 Every entity must use the exact PDF identity in the schema. Evidence refs are
 non-empty arrays of string IDs from evidence[].id, never embedded objects. Evidence refs do not replace citations.
+Every edge must carry at least one evidence_refs ID that exists in evidence[]. Minimal example:
+{"edges":[{"evidence_refs":["ev-1"]}],"evidence":[{"id":"ev-1"}]}.
 Every node and every edge must include a non-empty citations array. Each citation must contain only page
-and excerpt (at most 200 characters). Do not repeat the document identity inside citations; the profile
-injects it before validation. Follow the relation source/target signatures exactly. Every excerpt must be
-non-empty verbatim text on its claimed physical PDF page.
+and excerpt. The excerpt is the exact beginning of the cited passage, between 20 and 200 characters;
+never complete or correct it.
+The excerpt carries the act, never a bare field label. A line that is only a label and a code, such as
+"Zone : RUR-12" or "Lot : 5 662 886", is a property: put the zone code in the node property (Zone.code,
+or zone_ref on Signal and DesignationEvent) and cite the sentence that states the act instead.
+Contrastive example, both lines taken from the same real PV page:
+excerpt "Zone : RUR-12" is refused; excerpt
+"QUE le conseil municipal autorise, sur recommandation du CCU," is correct.
+On an agenda, which lists planned items rather than decisions taken, the listed item is the act itself:
+cite that agenda line. Never return an empty extraction merely because the document carries no
+decision sentence.
+Any entity citation excerpt under 20 characters is refused as entity_citation_excerpt_too_short, before
+the page anchor is even checked: keep copying the page verbatim from that point
+until you pass 20 characters, without inventing the continuation.
+Do not repeat the document identity inside citations; the profile
+injects it before validation. Follow the relation source/target signatures exactly. Copy every excerpt
+exactly as it appears in the PDF text, including mistakes, spacing, and typography; correct nothing.
+Contrastive example: if the PDF text says "YvesMalouin", keep "YvesMalouin"; never "Yves-Malouin".
 If no supported fact is grounded in the PDF, return empty nodes, edges, and evidence.\n\n${buildProfileChunkPrompt(options.context, {
           filePath: chunk.originalKey, fileType: "document", text: chunk.text,
         })}`,
