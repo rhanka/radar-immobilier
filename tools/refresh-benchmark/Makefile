@@ -1431,7 +1431,7 @@ run-v101-arm: t1-v100-snapshot check-v101-tools
 	    && env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u MISTRAL_API_KEY \
 	      npm install --silent --ignore-scripts @sentropic/graphify@0.18.0 \
 	      @sentropic/llm-mesh@$(V101_MESH_VERSION) tsx@4.22.3 >/dev/null \
-	    && cd /src && exec /workspace/node_modules/.bin/tsx \
+	    && cd /src && exec node /workspace/node_modules/tsx/dist/cli.mjs \
 	      tools/refresh-benchmark/run-arm.mjs $(ARM)'
 
 run-v101-lane: t1-v100-snapshot check-v101-tools
@@ -1452,7 +1452,7 @@ run-v101-lane: t1-v100-snapshot check-v101-tools
 	    && env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u MISTRAL_API_KEY \
 	      npm install --silent --ignore-scripts @sentropic/graphify@0.18.0 \
 	      @sentropic/llm-mesh@$(V101_MESH_VERSION) tsx@4.22.3 >/dev/null \
-	    && cd /src && exec /workspace/node_modules/.bin/tsx \
+	    && cd /src && exec node /workspace/node_modules/tsx/dist/cli.mjs \
 	      tools/refresh-benchmark/v101-lane.mjs $(LANE)'
 
 score-v101: t1-v100-snapshot check-v101-tools
