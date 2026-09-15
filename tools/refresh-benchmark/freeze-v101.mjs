@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { relative, resolve } from "node:path";
 
 const required = (name) => process.env[name]
   || (() => { throw new Error(`${name} is required`); })();
@@ -41,7 +41,7 @@ const manifest = {
     cityCount: new Set(source.value.documents.map(({ city }) => city)).size,
     wording: "documents municipaux; certains éléments sont des ordres du jour",
     sourceRun: source.value.sourceRun,
-    sourceRunRoot: source.value.sourceRunRoot,
+    sourceRunRelativePath: relative(repositoryRoot, source.value.sourceRunRoot),
     selection: source.value.selection,
   },
   contract: {
