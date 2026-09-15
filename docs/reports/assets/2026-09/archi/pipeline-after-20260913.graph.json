@@ -1,0 +1,1061 @@
+{
+  "schema": "immo-archi-scene-graph/v1",
+  "sceneId": "pipeline-after-20260913",
+  "title": "Série B · pipeline APRÈS",
+  "pair": "B",
+  "date": "2026-09-13",
+  "sceneHash": "9be9460fd6030f306148c2eb392aa56cd26021dc83047f94ed9d859b4fbdd2a7",
+  "source": {
+    "file": "docs/architecture.md",
+    "block": "### `pipeline-after-20260913`",
+    "mermaid": "pipeline-after-20260913.mmd"
+  },
+  "layout": {
+    "engine": "dagre-d3-es",
+    "rankdir": "LR",
+    "nodesep": 24,
+    "ranksep": 72,
+    "subflowHeaderSpace": 96,
+    "cardBox": {
+      "width": 460,
+      "height": 200
+    },
+    "units": "px, origine en haut à gauche ; position = relative au parent, absolutePosition = repère de la scène",
+    "canvas": {
+      "width": 4956,
+      "height": 1256
+    }
+  },
+  "counts": {
+    "containers": 3,
+    "nodes": 22,
+    "edges": 20
+  },
+  "containers": [
+    {
+      "id": "B_OVH",
+      "label": "OVHcloud BHS · cluster poc-ca",
+      "parentId": null,
+      "kind": "cluster",
+      "repo": [
+        "poc-k8s"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 3,
+      "size": {
+        "width": 3796,
+        "height": 1160
+      },
+      "position": {
+        "x": 580,
+        "y": 48
+      },
+      "absolutePosition": {
+        "x": 580,
+        "y": 48
+      },
+      "card": "box",
+      "title": "OVHcloud BHS · cluster poc-ca"
+    },
+    {
+      "id": "B_PREPROD",
+      "label": "PRÉPRODUCTION · acceptée",
+      "parentId": "B_OVH",
+      "kind": "cluster",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 5,
+      "size": {
+        "width": 2636,
+        "height": 1016
+      },
+      "position": {
+        "x": 1136,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 1716,
+        "y": 168
+      },
+      "card": "box",
+      "title": "PRÉPRODUCTION · acceptée"
+    },
+    {
+      "id": "B_PROD",
+      "label": "PRODUCTION · DORMANTE",
+      "parentId": "B_OVH",
+      "kind": "cluster",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "dormant",
+      "runtimeState": "dormant",
+      "mermaidLine": 19,
+      "size": {
+        "width": 1040,
+        "height": 344
+      },
+      "position": {
+        "x": 24,
+        "y": 160
+      },
+      "absolutePosition": {
+        "x": 604,
+        "y": 208
+      },
+      "card": "box",
+      "title": "PRODUCTION · DORMANTE"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "B_API",
+      "label": "[API] radar-api",
+      "parentId": "B_PREPROD",
+      "kind": "service",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 16,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 792
+      },
+      "absolutePosition": {
+        "x": 2804,
+        "y": 960
+      },
+      "card": "A",
+      "icon": "api",
+      "code": "API",
+      "role": "API · production",
+      "name": "radar-api",
+      "detail": "sert le graphe à l’UI",
+      "store": false
+    },
+    {
+      "id": "B_CITY",
+      "label": "Sources municipales · PV",
+      "parentId": null,
+      "kind": "source",
+      "repo": [
+        "external"
+      ],
+      "evidenceClass": "external",
+      "runtimeState": "not-applicable",
+      "mermaidLine": 2,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 48,
+        "y": 416
+      },
+      "absolutePosition": {
+        "x": 48,
+        "y": 416
+      },
+      "card": "A",
+      "icon": "document",
+      "code": "CITY",
+      "role": "Source · amont",
+      "name": "Sources municipales",
+      "detail": "PV publiés · amont",
+      "store": false
+    },
+    {
+      "id": "B_COLLECT",
+      "label": "Étape 1 · collecte intégrée",
+      "parentId": "B_PREPROD",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 8,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 2804,
+        "y": 288
+      },
+      "card": "A",
+      "icon": "document",
+      "code": "STEP-1",
+      "role": "Étape 1 · collecte",
+      "name": "collecte intégrée",
+      "detail": "déclenchée par le CronJob",
+      "store": false
+    },
+    {
+      "id": "B_CORPUS",
+      "label": "Corpus PV durable",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 24,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 4448,
+        "y": 202
+      },
+      "absolutePosition": {
+        "x": 4448,
+        "y": 202
+      },
+      "card": "A",
+      "icon": "document",
+      "code": "CORPUS",
+      "role": "Corpus · preuves",
+      "name": "Corpus PV durable",
+      "detail": "CAS / parsed",
+      "store": true
+    },
+    {
+      "id": "B_CRON",
+      "label": "CronJob radar-refresh-pv",
+      "parentId": "B_PREPROD",
+      "kind": "schedule",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 6,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 232
+      },
+      "absolutePosition": {
+        "x": 1740,
+        "y": 400
+      },
+      "card": "A",
+      "icon": "cronjob",
+      "code": "CRON",
+      "role": "CronJob · planifié",
+      "name": "radar-refresh-pv",
+      "detail": "05:17 UTC · étapes 1 à 4",
+      "store": false
+    },
+    {
+      "id": "B_DB",
+      "label": "[DB] PostgreSQL graphe",
+      "parentId": "B_PREPROD",
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 15,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 792
+      },
+      "absolutePosition": {
+        "x": 2272,
+        "y": 960
+      },
+      "card": "A",
+      "icon": "postgres",
+      "code": "DB",
+      "role": "Base · graphe",
+      "name": "PostgreSQL graphe",
+      "detail": "graphe servi",
+      "store": true
+    },
+    {
+      "id": "B_DRIVER",
+      "label": "Run autonome in-cluster",
+      "parentId": "B_PREPROD",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 7,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 232
+      },
+      "absolutePosition": {
+        "x": 2272,
+        "y": 400
+      },
+      "card": "A",
+      "icon": "cronjob",
+      "code": "DRIVER",
+      "role": "Pilote · autonome",
+      "name": "run in-cluster",
+      "detail": "enchaîne les 4 étapes",
+      "store": false
+    },
+    {
+      "id": "B_EDGE",
+      "label": "Load balancer → Traefik / TLS",
+      "parentId": "B_OVH",
+      "kind": "network",
+      "repo": [
+        "poc-k8s"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 4,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 314,
+        "y": 528
+      },
+      "absolutePosition": {
+        "x": 894,
+        "y": 576
+      },
+      "card": "A",
+      "icon": "network",
+      "code": "EDGE",
+      "role": "Réseau · entrée",
+      "name": "Load balancer → Traefik",
+      "detail": "TLS · routage des hôtes",
+      "store": false
+    },
+    {
+      "id": "B_GRAPH",
+      "label": "Graphe canonique publié",
+      "parentId": null,
+      "kind": "store",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 25,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 4448,
+        "y": 650
+      },
+      "absolutePosition": {
+        "x": 4448,
+        "y": 650
+      },
+      "card": "A",
+      "icon": "graph",
+      "code": "GRAPH",
+      "role": "Artefact · graphe",
+      "name": "Graphe canonique",
+      "detail": "publié après contrôle",
+      "store": true
+    },
+    {
+      "id": "B_GRAPHIFY",
+      "label": "Étape 3 · Graphify 0.18.0",
+      "parentId": "B_PREPROD",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 10,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 344
+      },
+      "absolutePosition": {
+        "x": 2804,
+        "y": 512
+      },
+      "card": "A",
+      "icon": "graph",
+      "code": "STEP-3",
+      "role": "Étape 3 · extraction",
+      "name": "Graphify 0.18.0",
+      "detail": "bibliothèque in-process",
+      "store": false
+    },
+    {
+      "id": "B_KEYRING",
+      "label": "Keyring radar chiffré",
+      "parentId": "B_PREPROD",
+      "kind": "identity",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 14,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1088,
+        "y": 568
+      },
+      "absolutePosition": {
+        "x": 2804,
+        "y": 736
+      },
+      "card": "A",
+      "icon": "identity",
+      "code": "KEYRING",
+      "role": "Secrets · cluster",
+      "name": "Keyring radar",
+      "detail": "secrets chiffrés",
+      "store": false
+    },
+    {
+      "id": "B_MESH",
+      "label": "llm-mesh 0.19.1 in-process",
+      "parentId": "B_PREPROD",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 11,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1620,
+        "y": 456
+      },
+      "absolutePosition": {
+        "x": 3336,
+        "y": 624
+      },
+      "card": "A",
+      "icon": "llm",
+      "code": "MESH",
+      "role": "Modèles · in-process",
+      "name": "llm-mesh 0.19.1",
+      "detail": "appels depuis le cluster",
+      "store": false
+    },
+    {
+      "id": "B_PARSE",
+      "label": "Étape 2 · parse / exploit",
+      "parentId": "B_PREPROD",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 9,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1620,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 3336,
+        "y": 288
+      },
+      "card": "A",
+      "icon": "document",
+      "code": "STEP-2",
+      "role": "Étape 2 · parse",
+      "name": "parse / exploit",
+      "detail": "in-cluster · enchaînée",
+      "store": false
+    },
+    {
+      "id": "B_PROD_CRON",
+      "label": "CronJob production dormant",
+      "parentId": "B_PROD",
+      "kind": "schedule",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "dormant",
+      "runtimeState": "dormant",
+      "mermaidLine": 21,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 556,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 1160,
+        "y": 328
+      },
+      "card": "A",
+      "icon": "cronjob",
+      "code": "PROD-CRON",
+      "role": "CronJob · production",
+      "name": "refresh production",
+      "detail": "dormant · gaté par PR #682",
+      "store": false
+    },
+    {
+      "id": "B_PROJECT",
+      "label": "Étape 4 · projection atomique",
+      "parentId": "B_PREPROD",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 13,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 792
+      },
+      "absolutePosition": {
+        "x": 1740,
+        "y": 960
+      },
+      "card": "A",
+      "icon": "graph",
+      "code": "STEP-4",
+      "role": "Étape 4 · projection",
+      "name": "projection atomique",
+      "detail": "upsert sans interruption",
+      "store": false
+    },
+    {
+      "id": "B_PROMOTION",
+      "label": "PR #682 · non promue",
+      "parentId": "B_PROD",
+      "kind": "decision",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "dormant",
+      "runtimeState": "dormant",
+      "mermaidLine": 20,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 24,
+        "y": 120
+      },
+      "absolutePosition": {
+        "x": 628,
+        "y": 328
+      },
+      "card": "A",
+      "icon": "check",
+      "code": "PROMO",
+      "role": "Décision · promotion",
+      "name": "PR #682",
+      "detail": "promotion non faite",
+      "store": false
+    },
+    {
+      "id": "B_PROVIDERS",
+      "label": "Fournisseurs LLM",
+      "parentId": null,
+      "kind": "service",
+      "repo": [
+        "external"
+      ],
+      "evidenceClass": "external",
+      "runtimeState": "active",
+      "mermaidLine": 26,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 4448,
+        "y": 426
+      },
+      "absolutePosition": {
+        "x": 4448,
+        "y": 426
+      },
+      "card": "A",
+      "icon": "llm",
+      "code": "LLM",
+      "role": "Fournisseurs · LLM",
+      "name": "Fournisseurs de modèles",
+      "detail": "appelés du cluster",
+      "store": false
+    },
+    {
+      "id": "B_TEM",
+      "label": "[SCW-TEM] Scaleway TEM",
+      "parentId": null,
+      "kind": "exception",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "retained",
+      "mermaidLine": 29,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 48,
+        "y": 864
+      },
+      "absolutePosition": {
+        "x": 48,
+        "y": 864
+      },
+      "card": "A",
+      "icon": "release",
+      "code": "SCW-TEM",
+      "role": "Courriel · exception",
+      "name": "Scaleway TEM",
+      "detail": "transactionnel · seule exception",
+      "store": false
+    },
+    {
+      "id": "B_UI",
+      "label": "[UI] radar-ui",
+      "parentId": "B_PREPROD",
+      "kind": "service",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 17,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 1620,
+        "y": 792
+      },
+      "absolutePosition": {
+        "x": 3336,
+        "y": 960
+      },
+      "card": "A",
+      "icon": "web",
+      "code": "UI",
+      "role": "Interface · web",
+      "name": "radar-ui",
+      "detail": "route / · immo.sent-tech.ca",
+      "store": false
+    },
+    {
+      "id": "B_USER",
+      "label": "Navigateur utilisateur",
+      "parentId": null,
+      "kind": "actor",
+      "repo": [
+        "external"
+      ],
+      "evidenceClass": "external",
+      "runtimeState": "not-applicable",
+      "mermaidLine": 28,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 4448,
+        "y": 874
+      },
+      "absolutePosition": {
+        "x": 4448,
+        "y": 874
+      },
+      "card": "A",
+      "icon": "user",
+      "code": "USER",
+      "role": "Navigateur",
+      "name": "Navigateur utilisateur",
+      "detail": "accès web · hors cluster",
+      "store": false
+    },
+    {
+      "id": "B_VALIDATE",
+      "label": "Validation Signal / PDF",
+      "parentId": "B_PREPROD",
+      "kind": "process",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 12,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 2152,
+        "y": 456
+      },
+      "absolutePosition": {
+        "x": 3868,
+        "y": 624
+      },
+      "card": "A",
+      "icon": "check",
+      "code": "CHECK",
+      "role": "Contrôle · qualité",
+      "name": "validation Signal / PDF",
+      "detail": "refus avant projection",
+      "store": false
+    },
+    {
+      "id": "B_WS",
+      "label": "[WS-ADMIN] poste opérateur",
+      "parentId": null,
+      "kind": "workstation",
+      "repo": [
+        "radar-immobilier"
+      ],
+      "evidenceClass": "observed",
+      "runtimeState": "manual",
+      "mermaidLine": 27,
+      "size": {
+        "width": 460,
+        "height": 200
+      },
+      "position": {
+        "x": 48,
+        "y": 640
+      },
+      "absolutePosition": {
+        "x": 48,
+        "y": 640
+      },
+      "card": "A",
+      "icon": "workstation",
+      "code": "WS-ADMIN",
+      "role": "Poste · administration",
+      "name": "poste opérateur",
+      "detail": "aucune étape · enrôlement",
+      "store": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "B_API__B_UI__e3b0c44298fc",
+      "source": "B_API",
+      "target": "B_UI",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 45,
+      "labelPosition": null
+    },
+    {
+      "id": "B_CITY__B_COLLECT__e3b0c44298fc",
+      "source": "B_CITY",
+      "target": "B_COLLECT",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 32,
+      "labelPosition": null
+    },
+    {
+      "id": "B_COLLECT__B_PARSE__e3b0c44298fc",
+      "source": "B_COLLECT",
+      "target": "B_PARSE",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 33,
+      "labelPosition": null
+    },
+    {
+      "id": "B_CORPUS__B_GRAPHIFY__578eb8d4f908",
+      "source": "B_CORPUS",
+      "target": "B_GRAPHIFY",
+      "label": "lecture des preuves",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 36,
+      "labelPosition": {
+        "x": 4133,
+        "y": 314.27
+      }
+    },
+    {
+      "id": "B_CRON__B_DRIVER__e3b0c44298fc",
+      "source": "B_CRON",
+      "target": "B_DRIVER",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 30,
+      "labelPosition": null
+    },
+    {
+      "id": "B_DB__B_API__e3b0c44298fc",
+      "source": "B_DB",
+      "target": "B_API",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 44,
+      "labelPosition": null
+    },
+    {
+      "id": "B_DRIVER__B_COLLECT__e3b0c44298fc",
+      "source": "B_DRIVER",
+      "target": "B_COLLECT",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 31,
+      "labelPosition": null
+    },
+    {
+      "id": "B_DRIVER__B_GRAPHIFY__e3b0c44298fc",
+      "source": "B_DRIVER",
+      "target": "B_GRAPHIFY",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 35,
+      "labelPosition": null
+    },
+    {
+      "id": "B_EDGE__B_UI__e3b0c44298fc",
+      "source": "B_EDGE",
+      "target": "B_UI",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 46,
+      "labelPosition": null
+    },
+    {
+      "id": "B_GRAPH__B_PROJECT__e3b0c44298fc",
+      "source": "B_GRAPH",
+      "target": "B_PROJECT",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 42,
+      "labelPosition": null
+    },
+    {
+      "id": "B_GRAPHIFY__B_MESH__e3b0c44298fc",
+      "source": "B_GRAPHIFY",
+      "target": "B_MESH",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 37,
+      "labelPosition": null
+    },
+    {
+      "id": "B_KEYRING__B_MESH__e3b0c44298fc",
+      "source": "B_KEYRING",
+      "target": "B_MESH",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 38,
+      "labelPosition": null
+    },
+    {
+      "id": "B_MESH__B_PROVIDERS__b050b07f9735",
+      "source": "B_MESH",
+      "target": "B_PROVIDERS",
+      "label": "appels in-cluster",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 39,
+      "labelPosition": {
+        "x": 4130,
+        "y": 520.09
+      }
+    },
+    {
+      "id": "B_MESH__B_VALIDATE__e3b0c44298fc",
+      "source": "B_MESH",
+      "target": "B_VALIDATE",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 40,
+      "labelPosition": null
+    },
+    {
+      "id": "B_PARSE__B_CORPUS__e3b0c44298fc",
+      "source": "B_PARSE",
+      "target": "B_CORPUS",
+      "label": "",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 34,
+      "labelPosition": null
+    },
+    {
+      "id": "B_PROJECT__B_DB__98b047b8f969",
+      "source": "B_PROJECT",
+      "target": "B_DB",
+      "label": "upsert atomique",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 43,
+      "labelPosition": {
+        "x": 2236,
+        "y": 1196.27
+      }
+    },
+    {
+      "id": "B_PROMOTION__B_PROD_CRON__494117023813",
+      "source": "B_PROMOTION",
+      "target": "B_PROD_CRON",
+      "label": "promotion non effectuée",
+      "dashed": true,
+      "bidirectional": false,
+      "evidenceClass": "dormant",
+      "runtimeState": "dormant",
+      "mermaidLine": 48,
+      "labelPosition": {
+        "x": 1124,
+        "y": 172.09
+      }
+    },
+    {
+      "id": "B_UI__B_USER__68a175aa6596",
+      "source": "B_UI",
+      "target": "B_USER",
+      "label": "immo.sent-tech.ca",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 47,
+      "labelPosition": {
+        "x": 4114,
+        "y": 1054.09
+      }
+    },
+    {
+      "id": "B_VALIDATE__B_GRAPH__b59511071b0e",
+      "source": "B_VALIDATE",
+      "target": "B_GRAPH",
+      "label": "graphe validé",
+      "dashed": false,
+      "bidirectional": false,
+      "evidenceClass": "observed",
+      "runtimeState": "active",
+      "mermaidLine": 41,
+      "labelPosition": {
+        "x": 4380,
+        "y": 1170.27
+      }
+    },
+    {
+      "id": "B_WS__B_KEYRING__cb4aac8f87b0",
+      "source": "B_WS",
+      "target": "B_KEYRING",
+      "label": "enrôlement seulement",
+      "dashed": true,
+      "bidirectional": false,
+      "evidenceClass": "declared",
+      "runtimeState": "manual",
+      "mermaidLine": 49,
+      "labelPosition": {
+        "x": 1656,
+        "y": 827
+      }
+    }
+  ]
+}
