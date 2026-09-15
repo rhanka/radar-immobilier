@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 import { describe, expect, it } from "vitest";
 
-import { materializeRefreshCorpus } from "./refresh-corpus.js";
+import { containsNormalizedPdfExcerpt, materializeRefreshCorpus } from "./refresh-corpus.js";
 
 const HEADER = "source_id\tcity_slug\tsha\trepresentation_key\tsidecar_key";
 const encoder = new TextEncoder();
@@ -44,6 +44,20 @@ async function materialize(input: ReturnType<typeof fixture>) {
 }
 
 describe("refresh corpus", () => {
+  it("should anchor excerpts after typographic normalization without allowing paraphrases", () => {
+    const page = "La demande de M. YvesMalouin vise la propriété désignée.";
+    expect(containsNormalizedPdfExcerpt(page, "YVES-MALOUÏN vise la propriété")).toBe(true);
+    expect(containsNormalizedPdfExcerpt(page, "Yves Malouin demande un changement de zonage")).toBe(false);
+  });
+
+  it("should keep excerpt anchors page-local and reject trivial normalized forms", () => {
+    const firstPage = "Le conseil autorise la construction de douze logements.";
+    const secondPage = "Le conseil reporte la demande au mois suivant.";
+    expect(containsNormalizedPdfExcerpt(firstPage, "autorise la construction")).toBe(true);
+    expect(containsNormalizedPdfExcerpt(secondPage, "autorise la construction")).toBe(false);
+    expect(containsNormalizedPdfExcerpt(firstPage, "construc")).toBe(false);
+  });
+
   it("should preserve original PDF identity and physical page mapping", async () => {
     const input = fixture(encoder.encode("pdf-a"));
     const corpus = await materialize(input);
