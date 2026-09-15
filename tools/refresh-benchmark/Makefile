@@ -1299,7 +1299,7 @@ V101_MESH_VERSION := 0.19.2
 .PHONY: check-v101-tools test-v101 catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 \
 	compact-v101-json verify-v101 gate-v101 run-v101-arm run-v101-lane score-v101 \
 	init-campaign-v101 gate-runner-v101 reconcile-interrupted-v101 status-v101-containers \
-	stop-v101-container
+	stop-v101-container check-v101-user-manager launch-v101-detached stop-v101-detached
 
 check-v101-tools:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1498,3 +1498,19 @@ stop-v101-container:
 	test "$(ENV)" = "test-t1-model-benchmark"
 	test -n "$(CONTAINER)"
 	docker stop --timeout 30 $(CONTAINER)
+
+check-v101-user-manager:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	systemctl --user is-active default.target
+
+launch-v101-detached: check-v101-user-manager
+	systemd-run --user --unit=radar-v101-campaign --collect \
+	  --property=WorkingDirectory=$(BENCHMARK_ROOT) /bin/bash -lc \
+	  '( set -a; . /home/antoinefa/src/sentropic/.env; set +a; \
+	    setsid --wait nohup tools/refresh-benchmark/run-campaign-v101.sh \
+	      > docs/reviews/refresh-benchmark/v101/campaign.nohup.log 2>&1 < /dev/null & \
+	    campaign_wait_pid=$$!; wait "$$campaign_wait_pid" )'
+
+stop-v101-detached:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	systemctl --user stop radar-v101-campaign.service
