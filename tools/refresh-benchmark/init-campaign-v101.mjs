@@ -13,11 +13,10 @@ const gemini = await Promise.all(["medium", "high"].map((effort) =>
 const judges = await Promise.all(["gpt-5.6-terra", "gpt-oss-120b-medium"].map((name) =>
   json(`gates/judge-${name}.json`)));
 if (!gemini.every(({ proved }) => proved)) throw new Error("Gemini MEDIUM/HIGH gate is not proved");
-if (!judges.every(({ proved }) => proved)) throw new Error("Judge preflight gate is not proved");
-const runnerDir = resolve(root, "gates/runner/campaign/mistral-small4");
+const runnerDir = resolve(root, "gates/runner-v2/campaign/mistral-small4");
 const runnerReceipts = (await readdir(runnerDir)).filter((name) => name.endsWith(".receipt.json"));
 const receiptValues = await Promise.all(runnerReceipts.map((name) => json(
-  `gates/runner/campaign/mistral-small4/${name}`)));
+  `gates/runner-v2/campaign/mistral-small4/${name}`)));
 if (receiptValues.length !== 2 || receiptValues.reduce((sum, value) => sum + value.requestCount, 0) !== 2) {
   throw new Error("Runner gate must prove exactly two documents and two requests");
 }

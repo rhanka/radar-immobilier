@@ -1465,12 +1465,12 @@ score-v101: t1-v100-snapshot check-v101-tools
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 -w /src $(NODE_IMAGE) sh -c \
-	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx \
+	  'cp -a /t1-source /workspace/t1 && exec node /workspace/node_modules/tsx/dist/cli.mjs \
 	    tools/refresh-benchmark/score-v101.mjs $(ARM)'
 
 gate-runner-v101:
 	$(MAKE) run-v101-arm ARM=mistral-small4 SLICE=1-2 \
-	  RUN_ROOT=/results/gates/runner ENV=$(ENV)
+	  RUN_ROOT=/results/gates/runner-v2 ENV=$(ENV)
 
 init-campaign-v101: check-v101-tools
 	docker run --rm --network none \
