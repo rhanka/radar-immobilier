@@ -81,6 +81,10 @@ Le proxy `latence ping × 100`, sans retry, donne : Cloud Code 0,65 h pour ses 4
 pour 12; OpenAI 0,16 h; Anthropic 0,23 h; Mistral 0,01 h. Les cinq lanes en parallèle donnent un
 plancher de 0,92 h; le plafond deux tentatives est 1,84 h hors attente quota. La calibration de charge
 v100 (19,172 s/doc) donne plutôt 6,39 h pour la lane Codex : cette fenêtre pilote l'exploitation.
+Par bras, en heures/100 : Gemini 0,503/0,867/0,543; Luna 0,039/0,041/0,038/0,037;
+GPT-4.1 0,165; Sonnet 4.6 0,046/0,044/0,056; Sonnet 5 0,031/0,030/0,029;
+Opus 5 0,044/0,048/0,044; Sol 0,053/0,072/0,044/0,077; Astra
+0,132/0,172/0,071/0,140; Mistral 0,011; Codex 5.3 N-A. L'ordre suit celui du tableau.
 
 ## Plan de lanes et ordre
 
