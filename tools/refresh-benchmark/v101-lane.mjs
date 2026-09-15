@@ -12,7 +12,7 @@ for (let block = 0; block < 5; block += 1) {
   const offset = block % names.length;
   const rotated = [...names.slice(offset), ...names.slice(0, offset)];
   for (const name of rotated) {
-    const concurrency = lane === "codex" && codexFirstTwentyClear && codexObserved >= 20 ? 2 : 1;
+    const concurrency = lane === "codex" && codexFirstTwentyClear ? 2 : 1;
     const result = await runArm(name, { slice: `${from}-${to}`, concurrency });
     if (lane === "codex" && codexObserved < 20) {
       codexObserved += result.requests;

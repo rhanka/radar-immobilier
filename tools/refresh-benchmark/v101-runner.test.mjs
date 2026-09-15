@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import test from "node:test";
 
-import { arms, laneArms, usageCostUsd } from "./v101-arms.mjs";
+import { arms, laneArms, receiptCap, usageCostUsd } from "./v101-arms.mjs";
 import { artifactPaths, classifyFailure, resumeDecision, retryAt, updateGlobalStatus,
   writeImmutable, writeIntent } from "./v101-runner-state.mjs";
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
@@ -18,6 +18,19 @@ test("should enumerate every addressable arm when Codex 5.3 is unavailable", () 
 test("should calculate metered cost from normalized usage", () => {
   assert.equal(usageCostUsd(arms.gpt41, { inputTokens: 2_000_000, outputTokens: 700_000 }), 9.6);
   assert.equal(usageCostUsd(arms["sol-low"], { inputTokens: 1, outputTokens: 1 }), null);
+});
+
+test("should disclose the unenforced Codex cap and classify oversized output", () => {
+  assert.deepEqual(receiptCap(arms["luna-low"], { outputTokens: 32_768 }), {
+    requested: 32_768,
+    enforced: false,
+    reason: "llm-mesh 0.19.2 dist/codex.js:53 strips max_output_tokens",
+    observedOutputTokens: 32_768,
+    classification: "within-observed-cap",
+  });
+  assert.equal(receiptCap(arms["astra-xhigh"], {
+    output_tokens: 32_769,
+  }).classification, "out-of-cap");
 });
 
 test("should retry only transport classes and suspend a 429", () => {

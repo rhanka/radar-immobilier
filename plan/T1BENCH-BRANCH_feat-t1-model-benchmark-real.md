@@ -61,6 +61,10 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
   - [x] Record judge preflight as 1/2 without repeating either generation request.
   - [x] Prepare four runnable provider lanes after the Codex exclusion and atomic global status updates.
   - [x] Launch the detached campaign and verify one receipt from each started provider lane after three minutes.
+- [ ] Lot 23 — Add the owner-requested Codex cohort under a documented cap exception.
+  - [x] Disclose the unenforced cap in every Codex receipt and classify observed output above 32,768 tokens out of cap.
+  - [ ] Pass the two-document `luna-low` gate and preflight `claude-opus-4-6-thinking` as the second judge.
+  - [ ] Launch the separate Codex lane at concurrency 2 and verify it after three minutes without restarting phase 2.
 
 ## Gates
 
@@ -82,3 +86,6 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
   and closed as immutable `operator-interrupted` terminal failures with unknown request counts and no
   retry. The final launch is held by a user-systemd parent around the required secret subshell and
   `setsid`/`nohup`; campaign artifacts remain ignored and uncommitted while the run is active.
+- `T1BENCH-EX3` — the owner explicitly requested the conductor delivery
+  `.lanes/conductor/.remote/BENCH_CODEX_ARMS.md`; impact is one review-only Markdown file outside this
+  worktree; rollback is deletion of that generated delivery. No repository source is affected.

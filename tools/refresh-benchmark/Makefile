@@ -1299,7 +1299,8 @@ V101_MESH_VERSION := 0.19.2
 .PHONY: check-v101-tools test-v101 catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 \
 	compact-v101-json verify-v101 gate-v101 run-v101-arm run-v101-lane score-v101 \
 	init-campaign-v101 gate-runner-v101 reconcile-interrupted-v101 status-v101-containers \
-	stop-v101-container check-v101-user-manager launch-v101-detached stop-v101-detached
+	stop-v101-container check-v101-user-manager launch-v101-detached stop-v101-detached \
+	enroll-codex-v101 launch-v101-codex-detached
 
 check-v101-tools:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1319,12 +1320,14 @@ check-v101-tools:
 	    && node --check tools/refresh-benchmark/score-v101.mjs \
 	    && node --check tools/refresh-benchmark/gate-v101.mjs \
 	    && node --check tools/refresh-benchmark/init-campaign-v101.mjs \
+	    && node --check tools/refresh-benchmark/enroll-codex-v101.mjs \
 	    && node --check tools/refresh-benchmark/reconcile-interrupted-v101.mjs \
 	    && node --check tools/refresh-benchmark/measure-cprime-v101.mjs \
 	    && node --check tools/refresh-benchmark/freeze-v101.mjs \
 	    && node --check tools/refresh-benchmark/compact-v101-json.mjs \
 	    && node --check tools/refresh-benchmark/verify-v101.mjs \
-	    && sh -n tools/refresh-benchmark/run-campaign-v101.sh'
+	    && sh -n tools/refresh-benchmark/run-campaign-v101.sh \
+	    && sh -n tools/refresh-benchmark/run-codex-v101.sh'
 
 test-v101:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1489,6 +1492,13 @@ reconcile-interrupted-v101: check-v101-tools
 	  -e BENCHMARK_RESULT_ROOT=/results -w /src $(NODE_IMAGE) \
 	  node tools/refresh-benchmark/reconcile-interrupted-v101.mjs
 
+enroll-codex-v101: check-v101-tools
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  -e BENCHMARK_RESULT_ROOT=/results -w /src $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/enroll-codex-v101.mjs
+
 status-v101-containers:
 	test "$(ENV)" = "test-t1-model-benchmark"
 	docker ps --filter ancestor=$(NODE_IMAGE) --no-trunc \
@@ -1510,6 +1520,14 @@ launch-v101-detached: check-v101-user-manager
 	    setsid --wait nohup tools/refresh-benchmark/run-campaign-v101.sh \
 	      > docs/reviews/refresh-benchmark/v101/campaign.nohup.log 2>&1 < /dev/null & \
 	    campaign_wait_pid=$$!; wait "$$campaign_wait_pid" )'
+
+launch-v101-codex-detached: check-v101-user-manager
+	systemd-run --user --unit=radar-v101-codex --collect \
+	  --property=WorkingDirectory=$(BENCHMARK_ROOT) /bin/bash -lc \
+	  '( set -a; . /home/antoinefa/src/sentropic/.env; set +a; \
+	    setsid --wait nohup tools/refresh-benchmark/run-codex-v101.sh \
+	      > docs/reviews/refresh-benchmark/v101/codex.nohup.log 2>&1 < /dev/null & \
+	    codex_wait_pid=$$!; wait "$$codex_wait_pid" )'
 
 stop-v101-detached:
 	test "$(ENV)" = "test-t1-model-benchmark"

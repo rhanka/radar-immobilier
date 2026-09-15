@@ -87,7 +87,7 @@ export function retryAt(headers, now = Date.now()) {
   return null;
 }
 
-export async function updateGlobalStatus(path, armName, mutate, clock = () => Date.now()) {
+export async function updateCampaignStatus(path, mutate, clock = () => Date.now()) {
   const lock = `${path}.lock`;
   await mkdir(dirname(path), { recursive: true });
   for (let count = 0;; count += 1) {
@@ -99,11 +99,19 @@ export async function updateGlobalStatus(path, armName, mutate, clock = () => Da
   }
   try {
     const status = await jsonIfPresent(path) ?? { schemaVersion: 1, campaign: "v101", arms: {} };
-    status.arms[armName] = mutate(status.arms[armName] ?? {});
-    status.updatedAt = new Date(clock()).toISOString();
+    const updated = mutate(status) ?? status;
+    updated.updatedAt = new Date(clock()).toISOString();
     const temporary = `${path}.${process.pid}.tmp`;
-    await writeFile(temporary, `${JSON.stringify(status, null, 2)}\n`);
+    await writeFile(temporary, `${JSON.stringify(updated, null, 2)}\n`);
     await rename(temporary, path);
-    return status.arms[armName];
+    return updated;
   } finally { await rm(lock, { recursive: true, force: true }); }
+}
+
+export async function updateGlobalStatus(path, armName, mutate, clock = () => Date.now()) {
+  const status = await updateCampaignStatus(path, (current) => {
+    current.arms[armName] = mutate(current.arms[armName] ?? {});
+    return current;
+  }, clock);
+  return status.arms[armName];
 }

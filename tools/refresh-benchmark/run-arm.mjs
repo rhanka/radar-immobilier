@@ -3,13 +3,12 @@ import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { arms, usageCostUsd } from "./v101-arms.mjs";
+import { arms, OUTPUT_CAP, receiptCap, usageCostUsd } from "./v101-arms.mjs";
 import { createProvider, ProviderError } from "./v101-provider.mjs";
 import { artifactPaths, classifyFailure, resumeDecision, retryAt, updateGlobalStatus,
   writeImmutable, writeIntent } from "./v101-runner-state.mjs";
 import { sanitize } from "./v101-probe-lib.mjs";
 
-const OUTPUT_CAP = 32_768;
 const MAX_REQUESTS = 200;
 const TIMEOUT_MS = 480_000;
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
@@ -222,6 +221,7 @@ export async function runArm(armName, options = {}) {
           actual: { responseId: actual.id, modelId: actual.modelId,
             finishReason: actual.finishReason, responseTextSha256: sha256(actual.text ?? ""),
             usage: actual.usage, costUsd: usageCostUsd(arm, actual.usage) },
+          cap: receiptCap(arm, actual.usage),
           validation: { layers: { transport: { accepted: true },
             terminalStream: { accepted: !wire?.terminalSse?.expected || wire.terminalSse.terminal },
             json: jsonLayer(actual.text), v9: { accepted, error: qualityError } }, accepted },
@@ -249,6 +249,7 @@ export async function runArm(armName, options = {}) {
             transportTimeoutMs: TIMEOUT_MS }, accountPseudonym: provider.accountPseudonym,
           wire: details.wire, terminalSse: details.wire?.terminalSse ?? null,
           actual: actualSummary(actual),
+          cap: receiptCap(arm, actual?.usage),
           validation: { layers: { transport: { accepted: false },
             terminalStream: { accepted: details.classified.category !== "stream-without-terminal" },
             json: actual ? jsonLayer(actual.text) : null, v9: { accepted: false, error: null } },
