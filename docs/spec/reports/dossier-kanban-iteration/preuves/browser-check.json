@@ -1,0 +1,200 @@
+{
+  "status": "pass",
+  "checkedAt": "2026-09-15T00:56:46.673Z",
+  "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-kanban-focus/docs/spec/reports/dossier-kanban-iteration/focus/../decision-focus.html",
+  "chromiumCdpPort": "9239",
+  "offline": {
+    "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-kanban-focus/docs/spec/reports/dossier-kanban-iteration/decision-focus.html",
+    "title": "Dossier de décision · Kanban GitHub et itération de 15 jours",
+    "external": 0,
+    "blockedExternal": true
+  },
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "scenes": [
+    {
+      "sceneId": "way-of-working",
+      "sceneHash": "4b53bcf7d1ae04b4065e21443c494551ca65885eaa34d57b226ed0db80f9828c",
+      "initialScale": 0.237796,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 45,
+      "edges": 8,
+      "groups": 9,
+      "edgeLabels": 8,
+      "panel": {
+        "left": 40,
+        "top": 1663.03125,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.9991076910461,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "iteration-15-jours",
+      "sceneHash": "5d492bf54c4947d4dd723f5a99891dbffe95b9cecad6d4156bb3c3cbd4800c69",
+      "initialScale": 0.394191,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 12,
+      "edges": 7,
+      "groups": 5,
+      "edgeLabels": 7,
+      "panel": {
+        "left": 40,
+        "top": 2946.71875,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99972530765542,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "scenesAt1920": [
+    {
+      "sceneId": "way-of-working",
+      "sceneHash": "4b53bcf7d1ae04b4065e21443c494551ca65885eaa34d57b226ed0db80f9828c",
+      "initialScale": 0.318078,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 45,
+      "edges": 8,
+      "groups": 9,
+      "edgeLabels": 8,
+      "panel": {
+        "left": 52.5,
+        "top": 1651.03125,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99975119113864,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "iteration-15-jours",
+      "sceneHash": "5d492bf54c4947d4dd723f5a99891dbffe95b9cecad6d4156bb3c3cbd4800c69",
+      "initialScale": 0.432573,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 12,
+      "edges": 7,
+      "groups": 5,
+      "edgeLabels": 7,
+      "panel": {
+        "left": 52.5,
+        "top": 3014.71875,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99924904293611,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "choices": {
+    "blocks": 7,
+    "single": 6,
+    "multi": 1,
+    "radio": 19,
+    "checkbox": 12,
+    "q1Selected": true,
+    "multiSelected": [
+      "O2",
+      "T12"
+    ],
+    "answered": [
+      "q1-way-of-working",
+      "q2-items",
+      "q3-creation"
+    ],
+    "q2Selection": [
+      "O2",
+      "T12"
+    ],
+    "schema": "immo-kanban-decision-owner-response/v1",
+    "status": "draft-not-ratified",
+    "persisted": [
+      "q1-way-of-working",
+      "q2-items",
+      "q3-creation"
+    ],
+    "options": 31
+  },
+  "oneToOne": [
+    {
+      "sceneId": "way-of-working",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 1651.03125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "iteration-15-jours",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 3014.71875,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "overview": [
+    {
+      "sceneId": "way-of-working",
+      "clip": {
+        "x": 52.5,
+        "y": 1651.03125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "iteration-15-jours",
+      "clip": {
+        "x": 52.5,
+        "y": 3014.71875,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "captures": [
+    ".generated/dossier-preview-1440x1000.png",
+    ".generated/dossier-preview-1920x1080.png",
+    ".generated/scene-1a1-way-of-working.png",
+    ".generated/scene-1a1-iteration-15-jours.png",
+    ".generated/scene-vue-ensemble-way-of-working.png",
+    ".generated/scene-vue-ensemble-iteration-15-jours.png"
+  ],
+  "consoleErrors": [],
+  "runtimeErrors": [],
+  "externalRequests": []
+}
