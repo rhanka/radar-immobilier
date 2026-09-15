@@ -7,6 +7,7 @@ import test from "node:test";
 import { arms, laneArms, usageCostUsd } from "./v101-arms.mjs";
 import { artifactPaths, classifyFailure, resumeDecision, retryAt, updateGlobalStatus,
   writeImmutable, writeIntent } from "./v101-runner-state.mjs";
+import { cascade, discardDirect } from "./v101-score-lib.mjs";
 
 test("should enumerate every addressable arm when Codex 5.3 is unavailable", () => {
   assert.equal(Object.keys(arms).length, 26);
@@ -26,6 +27,7 @@ test("should retry only transport classes and suspend a 429", () => {
   assert.equal(classifyFailure({ terminalSse: { expected: true, terminal: false } }).retry, true);
   assert.deepEqual(classifyFailure({ httpStatus: 429 }),
     { category: "rate-limit", retry: false, suspend: true });
+  assert.equal(classifyFailure({ code: "REQUEST_BUDGET_SUSPENDED" }).suspend, true);
   assert.equal(classifyFailure({ httpStatus: 400 }).retry, false);
   assert.equal(classifyFailure({ httpStatus: 200 }).retry, false);
 });
@@ -59,4 +61,15 @@ test("should update one global status file atomically", async () => {
     const status = JSON.parse(await readFile(path, "utf8"));
     assert.deepEqual(Object.keys(status.arms).sort(), ["gpt41", "mistral-small4"]);
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("should discard one direct C-prime target and clean dangling support", () => {
+  const extraction = { nodes: [
+    { id: "n1", node_type: "Signal", citations: [{ excerpt: "bad" }], evidence_refs: ["e1"] },
+    { id: "n2", node_type: "Zone", citations: [{ excerpt: "kept" }] }],
+  edges: [{ source: "n1", target: "n2", relation: "concerns", citations: [{ excerpt: "kept" }],
+    evidence_refs: ["e1"] }], evidence: [{ id: "e1" }] };
+  assert.equal(discardDirect(extraction, "evidence[0]").id, "e1");
+  assert.deepEqual(cascade(extraction, new Set(["Signal"])).map(({ kind }) => kind),
+    ["node", "edge"]);
 });
