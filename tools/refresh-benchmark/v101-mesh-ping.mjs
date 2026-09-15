@@ -15,7 +15,8 @@ function accountFor(accounts, providerId) {
   return eligible[0];
 }
 
-export async function pingMesh({ transport, model, effort }) {
+export async function probeMesh({ transport, model, effort, maxOutputTokens = 64,
+  promptText = prompt, requestLimit = 3 }) {
   const ownerScope = process.env.BENCHMARK_OWNER_SCOPE;
   if (!ownerScope) throw new Error("BENCHMARK_OWNER_SCOPE is required");
   const facade = createLlmMeshFacade({
@@ -36,7 +37,7 @@ export async function pingMesh({ transport, model, effort }) {
   });
   const wire = [];
   const observedFetch = async (url, init = {}) => {
-    if (wire.length >= 3) throw new Error("Phase-1 request ceiling reached");
+    if (wire.length >= requestLimit) throw new Error("Probe request ceiling reached");
     const started = Date.now();
     let body = null;
     try { body = JSON.parse(String(init.body ?? "")); } catch { body = null; }
@@ -65,9 +66,9 @@ export async function pingMesh({ transport, model, effort }) {
   try {
     const response = await client.generate({
       modelId: model,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content: promptText }],
       ...(effort ? { reasoning: { effort } } : {}),
-      maxOutputTokens: 64,
+      maxOutputTokens,
       signal: AbortSignal.timeout(60_000),
     }, { auth: acquisition.material });
     const output = String(response.text ?? "").trim();
@@ -105,4 +106,8 @@ export async function pingMesh({ transport, model, effort }) {
   } finally {
     await facade.release(acquisition);
   }
+}
+
+export async function pingMesh(arm) {
+  return probeMesh(arm);
 }
