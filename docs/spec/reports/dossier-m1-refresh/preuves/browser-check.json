@@ -1,0 +1,195 @@
+{
+  "status": "pass",
+  "checkedAt": "2026-09-15T01:24:29.843Z",
+  "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-kanban-focus/docs/spec/reports/dossier-m1-refresh/focus/../decision-focus.html",
+  "chromiumCdpPort": "9241",
+  "offline": {
+    "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-kanban-focus/docs/spec/reports/dossier-m1-refresh/decision-focus.html",
+    "title": "Dossier de décision M1 (v3) · CronJob radar-refresh-pv",
+    "external": 0,
+    "blockedExternal": true
+  },
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "scenes": [
+    {
+      "sceneId": "chaine-de-mesure",
+      "sceneHash": "8d1bb85d398e1ff33f9050dfdb019e36624d695a232edabd4c98131f69e5ee57",
+      "initialScale": 0.355879,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 18,
+      "edges": 5,
+      "groups": 6,
+      "edgeLabels": 5,
+      "panel": {
+        "left": 40,
+        "top": 1653.640625,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99991295759935,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "resultats-v4-v100",
+      "sceneHash": "61bc306e5d0d9974c1668a721252d8198d751cfeb0b6dfd6f8543d937e5617dd",
+      "initialScale": 0.355879,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 21,
+      "edges": 5,
+      "groups": 6,
+      "edgeLabels": 5,
+      "panel": {
+        "left": 40,
+        "top": 2937.328125,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99956994687801,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "scenesAt1920": [
+    {
+      "sceneId": "chaine-de-mesure",
+      "sceneHash": "8d1bb85d398e1ff33f9050dfdb019e36624d695a232edabd4c98131f69e5ee57",
+      "initialScale": 0.476027,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 18,
+      "edges": 5,
+      "groups": 6,
+      "edgeLabels": 5,
+      "panel": {
+        "left": 52.5,
+        "top": 1681.109375,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99976334062984,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "resultats-v4-v100",
+      "sceneHash": "61bc306e5d0d9974c1668a721252d8198d751cfeb0b6dfd6f8543d937e5617dd",
+      "initialScale": 0.476027,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 21,
+      "edges": 5,
+      "groups": 6,
+      "edgeLabels": 5,
+      "panel": {
+        "left": 52.5,
+        "top": 3044.796875,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99976334062984,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "choices": {
+    "blocks": 1,
+    "single": 1,
+    "radio": 4,
+    "selected": [
+      "A"
+    ],
+    "answered": [
+      "m1-option"
+    ],
+    "m1Selection": "A",
+    "m1Options": [
+      "A",
+      "B_PRIME",
+      "C_PRIME",
+      "D_PRIME"
+    ],
+    "schema": "immo-m1-decision-owner-response/v1",
+    "status": "draft-not-ratified",
+    "persisted": {
+      "m1-option": "A"
+    },
+    "options": 4
+  },
+  "oneToOne": [
+    {
+      "sceneId": "chaine-de-mesure",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 1681.109375,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "resultats-v4-v100",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 3044.796875,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "overview": [
+    {
+      "sceneId": "chaine-de-mesure",
+      "clip": {
+        "x": 52.5,
+        "y": 1681.109375,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "resultats-v4-v100",
+      "clip": {
+        "x": 52.5,
+        "y": 3044.796875,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "captures": [
+    ".generated/dossier-preview-1440x1000.png",
+    ".generated/dossier-preview-1920x1080.png",
+    ".generated/scene-1a1-chaine-de-mesure.png",
+    ".generated/scene-1a1-resultats-v4-v100.png",
+    ".generated/scene-vue-ensemble-chaine-de-mesure.png",
+    ".generated/scene-vue-ensemble-resultats-v4-v100.png"
+  ],
+  "consoleErrors": [],
+  "runtimeErrors": [],
+  "externalRequests": []
+}
