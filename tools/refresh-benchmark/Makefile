@@ -1476,5 +1476,6 @@ init-campaign-v101: check-v101-tools
 	docker run --rm --network none \
 	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  --mount type=bind,source=$(V101_RESULTS),target=/results \
-	  -e BENCHMARK_RESULT_ROOT=/results -w /src $(NODE_IMAGE) \
+	  -e BENCHMARK_RESULT_ROOT=/results -e BENCHMARK_MARK_LAUNCHED \
+	  -w /src $(NODE_IMAGE) \
 	  node tools/refresh-benchmark/init-campaign-v101.mjs
