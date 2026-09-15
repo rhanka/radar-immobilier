@@ -1296,7 +1296,7 @@ freeze-blind-v100:
 V101_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v101
 V101_MESH_VERSION := 0.19.2
 
-.PHONY: check-v101-tools catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 compact-v101-json
+.PHONY: check-v101-tools test-v101 catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 compact-v101-json verify-v101
 
 check-v101-tools:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1309,7 +1309,14 @@ check-v101-tools:
 	    && node --check tools/refresh-benchmark/run-arm.mjs \
 	    && node --check tools/refresh-benchmark/measure-cprime-v101.mjs \
 	    && node --check tools/refresh-benchmark/freeze-v101.mjs \
-	    && node --check tools/refresh-benchmark/compact-v101-json.mjs'
+	    && node --check tools/refresh-benchmark/compact-v101-json.mjs \
+	    && node --check tools/refresh-benchmark/verify-v101.mjs'
+
+test-v101:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node --test tools/refresh-benchmark/v101-runner.test.mjs
 
 catalog-v101: check-v101-tools
 	mkdir -p $(V101_RESULTS)/availability
@@ -1369,3 +1376,11 @@ compact-v101-json: check-v101-tools
 	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -e BENCHMARK_RESULT_ROOT=/results -w /src $(NODE_IMAGE) \
 	  node tools/refresh-benchmark/compact-v101-json.mjs
+
+verify-v101: check-v101-tools
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results,readonly \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -e BENCHMARK_RESULT_ROOT=/results -w /src $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/verify-v101.mjs
