@@ -1298,7 +1298,8 @@ V101_MESH_VERSION := 0.19.2
 
 .PHONY: check-v101-tools test-v101 catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 \
 	compact-v101-json verify-v101 gate-v101 run-v101-arm run-v101-lane score-v101 \
-	init-campaign-v101 gate-runner-v101
+	init-campaign-v101 gate-runner-v101 reconcile-interrupted-v101 status-v101-containers \
+	stop-v101-container
 
 check-v101-tools:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1318,6 +1319,7 @@ check-v101-tools:
 	    && node --check tools/refresh-benchmark/score-v101.mjs \
 	    && node --check tools/refresh-benchmark/gate-v101.mjs \
 	    && node --check tools/refresh-benchmark/init-campaign-v101.mjs \
+	    && node --check tools/refresh-benchmark/reconcile-interrupted-v101.mjs \
 	    && node --check tools/refresh-benchmark/measure-cprime-v101.mjs \
 	    && node --check tools/refresh-benchmark/freeze-v101.mjs \
 	    && node --check tools/refresh-benchmark/compact-v101-json.mjs \
@@ -1479,3 +1481,20 @@ init-campaign-v101: check-v101-tools
 	  -e BENCHMARK_RESULT_ROOT=/results -e BENCHMARK_MARK_LAUNCHED \
 	  -w /src $(NODE_IMAGE) \
 	  node tools/refresh-benchmark/init-campaign-v101.mjs
+
+reconcile-interrupted-v101: check-v101-tools
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  -e BENCHMARK_RESULT_ROOT=/results -w /src $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/reconcile-interrupted-v101.mjs
+
+status-v101-containers:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker ps --filter ancestor=$(NODE_IMAGE) --no-trunc \
+	  --format '{{.ID}}\t{{.RunningFor}}\t{{.Command}}'
+
+stop-v101-container:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test -n "$(CONTAINER)"
+	docker stop --timeout 30 $(CONTAINER)
