@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "documentedAt": "2026-09-15T19:34:54.570Z",
+  "decision": "include-requested-codex-cohort-without-wire-cap",
+  "arms": [
+    "luna-low", "luna-medium", "luna-high", "luna-xhigh",
+    "sol-low", "sol-medium", "sol-high", "sol-xhigh",
+    "astra-low", "astra-medium", "astra-high", "astra-xhigh"
+  ],
+  "cap": {
+    "requested": 32768,
+    "enforced": false,
+    "reason": "llm-mesh 0.19.2 dist/codex.js:53 strips max_output_tokens"
+  },
+  "comparability": {
+    "classification": "partial",
+    "posterioriControl": "observed output tokens",
+    "outOfCapWhen": "observedOutputTokens > 32768"
+  },
+  "launch": {
+    "lane": "codex",
+    "initialConcurrency": 2,
+    "fallbackConcurrency": 1,
+    "fallbackTrigger": "HTTP 429 observed in the first 20 requests"
+  },
+  "redaction": {
+    "allowlistedFieldsOnly": true,
+    "secretsIncluded": false
+  }
+}

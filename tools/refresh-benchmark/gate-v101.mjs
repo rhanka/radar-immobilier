@@ -83,4 +83,18 @@ if (gate === "codex-cap") {
     console.log(JSON.stringify({ gate, judge: name, requestCount: probe.requestCount, proved }));
     if (!proved) process.exitCode = 1;
   }
+} else if (gate === "judge-opus46-thinking") {
+  const judge = "claude-opus-4-6-thinking";
+  const probe = await probeMesh({ transport: "cloud-code", model: judge, effort: null,
+    maxOutputTokens: 512, requestLimit: 3, promptText: "Reply with PING_OK only." });
+  const generationRequestCount = probe.wire.filter(({ endpoint }) =>
+    endpoint.endsWith("streamGenerateContent")).length;
+  const proved = generationRequestCount === 1 && probe.httpStatus === 200
+    && probe.output === "PING_OK";
+  await save(`judge-${judge}`, { gate, judge, transport: "cloud-code",
+    requested: { maxOutputTokens: 512, effort: null }, requestCount: probe.requestCount,
+    generationRequestCount, httpStatus: probe.httpStatus, finishReason: probe.finishReason,
+    pingExact: probe.output === "PING_OK", usage: probe.usage, wire: probe.wire, proved });
+  console.log(JSON.stringify({ gate, judge, generationRequestCount, proved }));
+  if (!proved) process.exitCode = 1;
 } else throw new Error(`Unknown v101 gate: ${gate ?? "N-A"}`);
