@@ -1290,3 +1290,82 @@ freeze-blind-v100:
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_RESULT_ROOT=/results \
 	  -e BENCHMARK_JUDGE_SAMPLE=$(or $(JUDGE_SAMPLE),20) \
 	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/freeze-blind-v100.mjs
+
+# v101 phase 1: catalogue and 64-token pings only. Dependencies are installed in
+# container tmpfs so the worktree and shared historical dependency volume stay untouched.
+V101_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v101
+V101_MESH_VERSION := 0.19.2
+
+.PHONY: check-v101-tools catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 compact-v101-json
+
+check-v101-tools:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) sh -c 'node --check tools/refresh-benchmark/v101-probe-lib.mjs \
+	    && node --check tools/refresh-benchmark/v101-direct-ping.mjs \
+	    && node --check tools/refresh-benchmark/v101-mesh-ping.mjs \
+	    && node --check tools/refresh-benchmark/catalog-v101.mjs \
+	    && node --check tools/refresh-benchmark/run-arm.mjs \
+	    && node --check tools/refresh-benchmark/measure-cprime-v101.mjs \
+	    && node --check tools/refresh-benchmark/freeze-v101.mjs \
+	    && node --check tools/refresh-benchmark/compact-v101-json.mjs'
+
+catalog-v101: check-v101-tools
+	mkdir -p $(V101_RESULTS)/availability
+	docker run --rm --tmpfs /workspace --tmpfs /run \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  -e BENCHMARK_RESULT_ROOT=/results -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
+	  -e OPENAI_API_KEY -e ANTHROPIC_API_KEY -e MISTRAL_API_KEY \
+	  -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring \
+	    && cd /workspace && env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u MISTRAL_API_KEY \
+	      npm install --silent --ignore-scripts @sentropic/llm-mesh@$(V101_MESH_VERSION) >/dev/null \
+	    && cd /src && exec node tools/refresh-benchmark/catalog-v101.mjs'
+
+ping-v101: check-v101-tools
+	test -n "$(ARM)"
+	mkdir -p $(V101_RESULTS)/availability
+	docker run --rm --tmpfs /workspace --tmpfs /run \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  -e BENCHMARK_RESULT_ROOT=/results -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
+	  -e BENCHMARK_CODEX53_MODEL -e OPENAI_API_KEY -e ANTHROPIC_API_KEY -e MISTRAL_API_KEY \
+	  -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring \
+	    && cd /workspace && env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u MISTRAL_API_KEY \
+	      npm install --silent --ignore-scripts @sentropic/llm-mesh@$(V101_MESH_VERSION) >/dev/null \
+	    && cd /src && exec node tools/refresh-benchmark/run-arm.mjs $(ARM)'
+
+measure-cprime-v101: t1-v100-snapshot check-v101-tools
+	test "$(ENV)" = "test-t1-model-benchmark"
+	mkdir -p $(V101_RESULTS)
+	docker run --rm --network none --tmpfs /workspace --tmpfs /tmp \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V100_T1_ROOT),target=/t1-source,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_RESULT_ROOT=/results \
+	  -e BENCHMARK_T1_ROOT=/workspace/t1 -w $(BENCHMARK_ROOT) $(NODE_IMAGE) sh -c \
+	  'cp -a /t1-source /workspace/t1 && exec /workspace/node_modules/.bin/tsx \
+	    tools/refresh-benchmark/measure-cprime-v101.mjs'
+
+freeze-v101: check-v101-tools
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test -f $(V101_RESULTS)/availability/catalogs.json -a -f $(V101_RESULTS)/cprime-baseline.json
+	docker run --rm --network none \
+	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) -e BENCHMARK_RESULT_ROOT=/results \
+	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/freeze-v101.mjs
+
+compact-v101-json: check-v101-tools
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -e BENCHMARK_RESULT_ROOT=/results -w /src $(NODE_IMAGE) \
+	  node tools/refresh-benchmark/compact-v101-json.mjs
