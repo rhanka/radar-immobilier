@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "campaign": "v101",
+  "arms": {
+    "mistral-small4": {
+      "state": "running",
+      "total": 100,
+      "processed": 2,
+      "accepted": 2,
+      "errors": 0,
+      "lastReceipt": "/results/gates/runner-v2/campaign/mistral-small4/saint-lin-laurentides-2026-06-09--mistral-small4.attempt-1.receipt.json",
+      "requests": 2,
+      "etaSeconds": 417
+    }
+  },
+  "updatedAt": "2026-09-15T19:08:05.249Z"
+}
