@@ -1,81 +1,297 @@
-import { readFile } from "node:fs/promises";
+import { appendFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
-import { pingAnthropic, pingMistral, pingOpenAi } from "./v101-direct-ping.mjs";
-import { pingMesh } from "./v101-mesh-ping.mjs";
-import { claimOnce, completeClaim, prompt, writeOnce } from "./v101-probe-lib.mjs";
+import { arms, usageCostUsd } from "./v101-arms.mjs";
+import { createProvider, ProviderError } from "./v101-provider.mjs";
+import { artifactPaths, classifyFailure, resumeDecision, retryAt, updateGlobalStatus,
+  writeImmutable, writeIntent } from "./v101-runner-state.mjs";
+import { sanitize } from "./v101-probe-lib.mjs";
 
-const codexEfforts = ["low", "medium", "high", "xhigh"];
-const arms = Object.fromEntries([
-  ...["low", "medium", "high"].map((effort) =>
-    [`gemini-${effort}`, { transport: "cloud-code", model: "gemini-3.8-flash", effort }]),
-  ...codexEfforts.map((effort) =>
-    [`luna-${effort}`, { transport: "codex", model: "gpt-5.6-luna", effort }]),
-  ...codexEfforts.map((effort) =>
-    [`codex53-${effort}`, { transport: "codex", model: process.env.BENCHMARK_CODEX53_MODEL, effort }]),
-  ["gpt41", { transport: "openai-api", model: "gpt-4.1", effort: null }],
-  ...["off", "low", "high"].map((effort) =>
-    [`sonnet46-cloud-${effort}`, { transport: "cloud-code", model: "claude-sonnet-4-6",
-      effort: effort === "off" ? null : effort }]),
-  ...["off", "low", "high"].map((effort) =>
-    [`sonnet5-${effort}`, { transport: "anthropic-api", model: "claude-sonnet-5", effort }]),
-  ...["off", "low", "high"].map((effort) =>
-    [`opus5-${effort}`, { transport: "anthropic-api", model: "claude-opus-5", effort }]),
-  ...codexEfforts.map((effort) =>
-    [`sol-${effort}`, { transport: "codex", model: "gpt-5.6-sol", effort }]),
-  ...codexEfforts.map((effort) =>
-    [`astra-${effort}`, { transport: "codex", model: "gpt-6-astra", effort }]),
-  ["mistral-small4", { transport: "mistral-api", model: "mistral-small-2603", effort: null }],
-]);
+const OUTPUT_CAP = 32_768;
+const MAX_REQUESTS = 200;
+const TIMEOUT_MS = 480_000;
+const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+const required = (name) => process.env[name]
+  || (() => { throw new Error(`${name} is required`); })();
+const wait = (ms) => new Promise((done) => setTimeout(done, ms));
 
-const armName = process.argv[2];
-const arm = arms[armName];
-if (!arm) throw new Error(`Unknown v101 arm: ${armName ?? "N-A"}`);
-if (!arm.model) throw new Error("The live Codex 5.3 model id has not been resolved");
-
-const resultRoot = process.env.BENCHMARK_RESULT_ROOT;
-if (!resultRoot) throw new Error("BENCHMARK_RESULT_ROOT is required");
-const receiptPath = resolve(resultRoot, "availability", `ping-${armName}.json`);
-const lockPath = resolve(resultRoot, "availability", `ping-${armName}.lock.json`);
-if (!await claimOnce(lockPath, receiptPath)) process.exit(0);
-
-const meshTransport = ["codex", "cloud-code"].includes(arm.transport);
-const packageVersion = meshTransport ? JSON.parse(await readFile(
-  "/workspace/node_modules/@sentropic/llm-mesh/package.json", "utf8")).version : null;
-if (meshTransport && packageVersion !== "0.19.2") {
-  throw new Error(`llm-mesh 0.19.2 required, got ${packageVersion}`);
+function jsonLayer(text) {
+  const trimmed = String(text ?? "").trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/iu);
+  try { JSON.parse(fenced ? fenced[1] : trimmed); return { valid: true, fenced: Boolean(fenced) }; }
+  catch { return { valid: false, fenced: Boolean(fenced) }; }
 }
 
-let actual;
-try {
-  if (arm.transport === "openai-api") actual = await pingOpenAi(arm.model);
-  else if (arm.transport === "anthropic-api") actual = await pingAnthropic(arm.model, arm.effort);
-  else if (arm.transport === "mistral-api") actual = await pingMistral(arm.model);
-  else actual = await pingMesh(arm);
-} catch (error) {
-  actual = { httpStatus: null, latencyMs: null, resolvedModelId: null, wireModelId: null,
-    finishReason: null, output: "", pingExact: false, usage: null,
-    requestCount: Number.isInteger(error?.requestCount) ? error.requestCount : 0,
-    error: { category: "local-preflight",
-      code: error instanceof Error && error.message.endsWith("is absent")
-        ? "credential-absent" : "probe-failed" } };
+function failureDetails(error, wire) {
+  const providerError = error instanceof ProviderError ? error : error?.cause instanceof ProviderError
+    ? error.cause : null;
+  const effectiveWire = providerError?.wire ?? wire ?? null;
+  const classified = classifyFailure({ httpStatus: providerError?.httpStatus
+    ?? effectiveWire?.httpStatus ?? null, code: providerError?.code ?? error?.code ?? null,
+  terminalSse: effectiveWire?.terminalSse ?? null });
+  return { wire: effectiveWire, classified,
+    error: { category: classified.category,
+      code: sanitize(providerError?.code ?? error?.code ?? error?.name ?? "UNKNOWN"),
+      httpStatus: providerError?.httpStatus ?? effectiveWire?.httpStatus ?? null } };
 }
-if (actual.requestCount > 3) throw new Error("Phase-1 request ceiling exceeded");
-const receipt = {
-  schemaVersion: 1,
-  capturedAt: new Date().toISOString(),
-  arm: armName,
-  requested: { transport: arm.transport, modelId: arm.model,
-    effort: armName.endsWith("-off") ? "off" : arm.effort,
-    maxOutputTokens: 64, prompt },
-  actual,
-  llmMeshVersion: packageVersion,
-  requestCount: actual.requestCount ?? actual.wire?.length ?? 0,
-  redaction: { allowlistedFieldsOnly: true, secretsIncluded: false },
-};
-await writeOnce(receiptPath, receipt);
-await completeClaim(lockPath, receiptPath);
-console.log(JSON.stringify({ arm: armName, httpStatus: actual.httpStatus,
-  resolvedModelId: actual.resolvedModelId, wireModelId: actual.wireModelId ?? null,
-  pingExact: actual.pingExact, latencyMs: actual.latencyMs, requestCount: receipt.requestCount }));
-if (actual.httpStatus !== 200 || !actual.pingExact) process.exitCode = 1;
+
+function actualSummary(actual) {
+  return actual ? { responseId: actual.id, modelId: actual.modelId,
+    finishReason: actual.finishReason, responseTextSha256: sha256(actual.text ?? ""),
+    usage: actual.usage } : null;
+}
+
+async function frozenCorpus(document, manifest, repositoryRoot, materializeRefreshCorpus) {
+  const workerRoot = resolve(manifest.corpus.sourceRunRoot, "workers", document.city);
+  const pdfPath = resolve(workerRoot, "corpus", `${document.sha256}.pdf`);
+  const parsedPath = resolve(repositoryRoot, document.runtimeTextRelativePath);
+  const [pdf, parsedText] = await Promise.all([readFile(pdfPath), readFile(parsedPath, "utf8")]);
+  if (sha256(pdf) !== document.sha256 || sha256(parsedText) !== document.textSha256) {
+    throw new Error(`Frozen input hash mismatch: ${document.id}`);
+  }
+  const manifestKey = "refresh-benchmark-input.tsv";
+  const tsv = `source_id\tcity_slug\tsha\trepresentation_key\tsidecar_key\n${document.sourceId}\t${
+    document.city}\t${document.sha256}\t${document.originalKey}\t${document.originalKey}.meta.json\n`;
+  const reader = { async get(key) {
+    if (key === manifestKey) return Buffer.from(tsv);
+    if (key === document.originalKey) return pdf;
+    if (key === `${document.originalKey}.meta.json`) return readFile(`${pdfPath}.meta.json`);
+    throw new Error(`Unexpected input key: ${key}`);
+  } };
+  const corpus = await materializeRefreshCorpus({ citySlug: document.city, manifestKey, reader,
+    extractPdf: async () => parsedText });
+  if (corpus.chunks.length !== 1) throw new Error("One frozen document must yield one chunk");
+  return corpus;
+}
+
+async function progressFor(root, manifest, armName) {
+  const progress = { total: manifest.documents.length, processed: 0, accepted: 0,
+    errors: 0, lastReceipt: null, elapsedMs: 0 };
+  for (const document of manifest.documents) {
+    const decision = await resumeDecision(root, document.id, armName);
+    if (decision.action !== "skip") continue;
+    progress.processed += 1;
+    progress.accepted += Number(Boolean(decision.receipt.validation?.accepted));
+    progress.errors += Number(decision.receipt.status === "failed");
+    progress.elapsedMs += decision.receipt.latency?.totalMs ?? 0;
+    progress.lastReceipt = decision.paths.receipt;
+  }
+  return progress;
+}
+
+export async function runArm(armName, options = {}) {
+  const arm = arms[armName];
+  if (!arm) throw new Error(`Unknown v101 arm: ${armName ?? "N-A"}`);
+  const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
+  const resultRoot = required("BENCHMARK_RESULT_ROOT");
+  const executionRoot = process.env.BENCHMARK_EXECUTION_ROOT ?? resultRoot;
+  const t1Root = required("BENCHMARK_T1_ROOT");
+  const campaignRoot = resolve(executionRoot, "campaign", armName);
+  const statusPath = resolve(executionRoot, "status.json");
+  const logPath = resolve(executionRoot, "logs", `${armName}.log`);
+  await Promise.all([mkdir(resolve(executionRoot, "logs"), { recursive: true }),
+    mkdir(resolve(executionRoot, "limits"), { recursive: true })]);
+  const manifest = JSON.parse(await readFile(resolve(repositoryRoot,
+    "docs/reviews/refresh-benchmark/v101/manifest.json"), "utf8"));
+  if (manifest.contract.version !== "immo-pv-extraction-v9"
+    || manifest.contract.mainMergeCommit.slice(0, 8) !== "4e3a4db8"
+    || manifest.outputCap.commonMaxOutputTokens !== OUTPUT_CAP) {
+    throw new Error("Frozen v101 contract mismatch");
+  }
+  const profilePath = resolve(t1Root, "api/src/services/graph/refresh-profile.ts");
+  const corpusPath = resolve(t1Root, "api/src/services/graph/refresh-corpus.ts");
+  if (sha256(await readFile(profilePath)) !== manifest.contract.profileModuleSha256
+    || sha256(await readFile(corpusPath)) !== manifest.contract.corpusModuleSha256) {
+    throw new Error("Frozen T1 module hash mismatch");
+  }
+  const { extractRefreshProfile, loadRefreshProfileContext } = await import(pathToFileURL(profilePath));
+  const { materializeRefreshCorpus } = await import(pathToFileURL(corpusPath));
+  const context = loadRefreshProfileContext({ root: t1Root,
+    profilePath: resolve(t1Root, "radar/ontology/ontology-profile.yaml"), unregisteredOnly: true });
+  const expectedById = new Map(manifest.promptFreeze.documents.map((item) => [item.id, item]));
+  const [from, to] = String(options.slice ?? process.env.BENCHMARK_SLICE ?? `1-${
+    manifest.documents.length}`).split("-").map(Number);
+  if (!Number.isInteger(from) || !Number.isInteger(to) || from < 1 || to > manifest.documents.length
+    || from > to) throw new Error("BENCHMARK_SLICE must be a valid one-based range");
+  const documents = manifest.documents.slice(from - 1, to);
+  const concurrency = Number(options.concurrency ?? process.env.BENCHMARK_CONCURRENCY ?? "1");
+  if (![1, 2].includes(concurrency) || (concurrency === 2 && arm.lane !== "codex")) {
+    throw new Error("Only the Codex lane may use concurrency 2");
+  }
+  let requests = 0; let rateLimited = false;
+  try {
+    const priorStatus = JSON.parse(await readFile(statusPath, "utf8"));
+    requests = Number(priorStatus.arms?.[armName]?.requests ?? 0);
+  } catch (error) { if (error?.code !== "ENOENT") throw error; }
+  const progress = await progressFor(campaignRoot, manifest, armName);
+  const log = async (event) => {
+    const record = { at: new Date().toISOString(), arm: armName, ...event };
+    await appendFile(logPath, `${JSON.stringify(record)}\n`);
+    process.stdout.write(`${JSON.stringify(record)}\n`);
+  };
+  const publish = async (state) => updateGlobalStatus(statusPath, armName, () => {
+    const remaining = progress.total - progress.processed;
+    const meanMs = progress.processed ? progress.elapsedMs / progress.processed : null;
+    return { state, total: progress.total, processed: progress.processed,
+      accepted: progress.accepted, errors: progress.errors,
+      lastReceipt: progress.lastReceipt, requests,
+      etaSeconds: meanMs === null ? null : Math.ceil(meanMs * remaining / concurrency / 1_000) };
+  });
+  await publish("running");
+
+  const runDocument = async (document, provider) => {
+    let decision = await resumeDecision(campaignRoot, document.id, armName);
+    if (decision.action === "skip") return;
+    for (;;) {
+      const { attempt, previous, paths } = decision;
+      const expected = expectedById.get(document.id);
+      const started = Date.now();
+      let actual = null; let wire = null; let qualityError = null; let accepted = false;
+      let attemptRequests = 0;
+      await writeIntent(paths, { schemaVersion: 2, state: "in-flight",
+        startedAt: new Date(started).toISOString(), campaign: "v101", arm: armName,
+        documentId: document.id, attempt,
+        requested: { providerId: arm.provider, transportProviderId: arm.transport,
+          modelId: arm.model, effort: arm.effort, maxOutputTokens: OUTPUT_CAP } });
+      const temporary = await mkdtemp("/tmp/v101-profile-");
+      try {
+        const corpus = await frozenCorpus(document, manifest, repositoryRoot, materializeRefreshCorpus);
+        const textClient = { mode: "benchmark", provider: arm.provider, model: arm.model,
+          async generateJson(input) {
+            const hashes = { schemaSha256: sha256(input.schema), promptSha256: sha256(input.prompt) };
+            if (!expected || hashes.schemaSha256 !== expected.schemaSha256
+              || hashes.promptSha256 !== expected.promptSha256) throw new Error("Prompt/schema hash mismatch");
+            const messages = [{ role: "system", content: manifest.promptFreeze.systemPrompt },
+              { role: "user", content: `Schema: ${input.schema}\n\n${input.prompt}` }];
+            for (;;) {
+              try {
+                attemptRequests += 1;
+                actual = await provider.generate(messages, document.id); wire = actual.wire; break;
+              }
+              catch (error) {
+                const details = failureDetails(error, wire);
+                if (!details.classified.suspend) throw error;
+                rateLimited = true;
+                const resetAt = details.classified.category === "rate-limit"
+                  ? retryAt(error.headers) : null;
+                await appendFile(resolve(executionRoot, "limits", `${arm.lane}.jsonl`), `${JSON.stringify({
+                  at: new Date().toISOString(), arm: armName, documentId: document.id,
+                  category: details.classified.category,
+                  httpStatus: error.httpStatus ?? null, resetAt, headers: error.headers ?? {} })}\n`);
+                await publish(details.classified.category === "rate-limit"
+                  ? "suspended-429" : "suspended-request-budget");
+                if (!resetAt) { for (;;) await wait(3_600_000); }
+                await wait(Math.max(0, Date.parse(resetAt) - Date.now()) + 250);
+                await publish("running");
+              }
+            }
+            await writeImmutable(paths.raw, actual.text ?? "", true);
+            if (wire?.terminalSse?.expected && !wire.terminalSse.terminal) {
+              throw new ProviderError("STREAM_WITHOUT_TERMINAL", { httpStatus: wire.httpStatus,
+                headers: wire.headers, wire });
+            }
+            try { input.validateResponse(actual.text ?? ""); }
+            catch (error) { qualityError = sanitize(error?.message ?? error); throw error; }
+            await writeFile(input.outputPath, actual.text ?? "", "utf8");
+            return { status: "completed", provider: arm.provider, mode: "benchmark",
+              outputPath: input.outputPath, audit: { campaign: "v101", arm: armName } };
+          } };
+        try {
+          const result = await extractRefreshProfile(corpus.chunks, { textClient, context,
+            maxOutputTokens: OUTPUT_CAP, outputDir: temporary });
+          const extraction = result[0]?.extraction;
+          accepted = Boolean(extraction);
+          if (extraction) await writeImmutable(paths.output, extraction);
+        } catch (error) {
+          if (!actual) throw error;
+          qualityError ??= sanitize(error?.message ?? error);
+        }
+        const completed = Date.now();
+        const receipt = { schemaVersion: 2, campaign: "v101", arm: armName,
+          documentId: document.id, attemptNumber: attempt, status: "completed", terminal: true,
+          requestCount: attemptRequests,
+          requested: { providerId: arm.provider, transportProviderId: arm.transport,
+            modelId: arm.model, effort: arm.effort, maxOutputTokens: OUTPUT_CAP,
+            transportTimeoutMs: TIMEOUT_MS }, accountPseudonym: provider.accountPseudonym,
+          input: { pdfSha256: document.sha256, textSha256: document.textSha256,
+            schemaSha256: expected.schemaSha256, promptSha256: expected.promptSha256 },
+          wire, terminalSse: wire?.terminalSse ?? null,
+          actual: { responseId: actual.id, modelId: actual.modelId,
+            finishReason: actual.finishReason, responseTextSha256: sha256(actual.text ?? ""),
+            usage: actual.usage, costUsd: usageCostUsd(arm, actual.usage) },
+          validation: { layers: { transport: { accepted: true },
+            terminalStream: { accepted: !wire?.terminalSse?.expected || wire.terminalSse.terminal },
+            json: jsonLayer(actual.text), v9: { accepted, error: qualityError } }, accepted },
+          latency: { startedAt: new Date(started).toISOString(),
+            completedAt: new Date(completed).toISOString(), totalMs: completed - started,
+            networkMs: wire?.durationMs ?? null }, retry: { eligible: false, reason: null,
+            previousAttempt: previous ? 1 : null }, error: null,
+          artifacts: { intent: paths.intent, receipt: paths.receipt, raw: paths.raw,
+            output: accepted ? paths.output : null },
+          redaction: { allowlistedFieldsOnly: true, secretsIncluded: false } };
+        await writeImmutable(paths.receipt, receipt);
+        progress.processed += 1; progress.accepted += Number(accepted);
+        progress.elapsedMs += receipt.latency.totalMs; progress.lastReceipt = paths.receipt;
+        await publish("running"); await log({ event: "receipt", documentId: document.id,
+          attempt, accepted, receipt: paths.receipt }); return;
+      } catch (error) {
+        const completed = Date.now();
+        const details = failureDetails(error, wire);
+        const retryEligible = attempt === 1 && details.classified.retry;
+        const receipt = { schemaVersion: 2, campaign: "v101", arm: armName,
+          documentId: document.id, attemptNumber: attempt, status: "failed", terminal: true,
+          requestCount: attemptRequests,
+          requested: { providerId: arm.provider, transportProviderId: arm.transport,
+            modelId: arm.model, effort: arm.effort, maxOutputTokens: OUTPUT_CAP,
+            transportTimeoutMs: TIMEOUT_MS }, accountPseudonym: provider.accountPseudonym,
+          wire: details.wire, terminalSse: details.wire?.terminalSse ?? null,
+          actual: actualSummary(actual),
+          validation: { layers: { transport: { accepted: false },
+            terminalStream: { accepted: details.classified.category !== "stream-without-terminal" },
+            json: actual ? jsonLayer(actual.text) : null, v9: { accepted: false, error: null } },
+            accepted: false },
+          latency: { startedAt: new Date(started).toISOString(),
+            completedAt: new Date(completed).toISOString(), totalMs: completed - started,
+            networkMs: details.wire?.durationMs ?? null },
+          retry: { eligible: retryEligible, reason: retryEligible ? details.classified.category : null,
+            previousAttempt: previous ? 1 : null }, error: details.error,
+          artifacts: { intent: paths.intent, receipt: paths.receipt,
+            raw: actual ? paths.raw : null, output: null },
+          redaction: { allowlistedFieldsOnly: true, secretsIncluded: false } };
+        await writeImmutable(paths.receipt, receipt);
+        await log({ event: "receipt", documentId: document.id, attempt,
+          status: "failed", retryEligible, receipt: paths.receipt });
+        if (retryEligible) {
+          decision = { action: "run", attempt: 2, previous: receipt,
+            paths: artifactPaths(campaignRoot, document.id, armName, 2) };
+          continue;
+        }
+        progress.processed += 1; progress.errors += 1;
+        progress.elapsedMs += receipt.latency.totalMs; progress.lastReceipt = paths.receipt;
+        await publish("running"); return;
+      } finally { await rm(temporary, { recursive: true, force: true }); }
+    }
+  };
+
+  let cursor = 0;
+  const worker = async () => {
+    const provider = await createProvider(arm, { timeoutMs: TIMEOUT_MS,
+      beforeRequest() {
+        if (requests >= MAX_REQUESTS) throw new ProviderError("REQUEST_BUDGET_SUSPENDED");
+        requests += 1;
+      } });
+    for (;;) { const document = documents[cursor++]; if (!document) return; await runDocument(document, provider); }
+  };
+  await Promise.all(Array.from({ length: concurrency }, worker));
+  await publish(progress.processed === progress.total ? "completed" : "running");
+  return { arm: armName, requests, rateLimited, processed: progress.processed };
+}
+
+if (process.env.BENCHMARK_MODE === "availability") {
+  await import("./v101-availability-run.mjs");
+} else if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const result = await runArm(process.argv[2]);
+  console.log(JSON.stringify(result));
+}

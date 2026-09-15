@@ -50,6 +50,9 @@ export async function writeImmutable(path, value, raw = false) {
 }
 
 export function classifyFailure({ httpStatus = null, code = null, terminalSse = null } = {}) {
+  if (code === "REQUEST_BUDGET_SUSPENDED") {
+    return { category: "request-budget", retry: false, suspend: true };
+  }
   if (httpStatus === 429) return { category: "rate-limit", retry: false, suspend: true };
   if ([408, 425].includes(httpStatus) || (httpStatus >= 500 && httpStatus <= 599)) {
     return { category: "http-retryable", retry: true, suspend: false };
@@ -60,7 +63,7 @@ export function classifyFailure({ httpStatus = null, code = null, terminalSse = 
   if (httpStatus >= 400) return { category: "http-terminal", retry: false, suspend: false };
   const networkCodes = new Set(["ABORT_ERR", "ECONNRESET", "ECONNREFUSED", "ENOTFOUND",
     "EAI_AGAIN", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "UND_ERR_HEADERS_TIMEOUT"]);
-  if (networkCodes.has(code) || (httpStatus === null && code === null)) {
+  if (networkCodes.has(code) || code === "NETWORK_ERROR" || code === "TRANSPORT_ERROR") {
     return { category: "network", retry: true, suspend: false };
   }
   return { category: "terminal", retry: false, suspend: false };
