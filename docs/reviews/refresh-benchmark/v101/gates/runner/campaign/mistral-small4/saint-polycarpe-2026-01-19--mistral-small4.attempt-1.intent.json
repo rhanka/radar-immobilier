@@ -1,0 +1,1 @@
+{"schemaVersion":2,"state":"in-flight","startedAt":"2026-09-15T19:05:18.708Z","campaign":"v101","arm":"mistral-small4","documentId":"saint-polycarpe-2026-01-19","attempt":1,"requested":{"providerId":"mistral","transportProviderId":"mistral-api","modelId":"mistral-small-2603","effort":null,"maxOutputTokens":32768}}

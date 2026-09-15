@@ -1,0 +1,1 @@
+{"schemaVersion":2,"state":"in-flight","startedAt":"2026-09-15T19:08:00.936Z","campaign":"v101","arm":"mistral-small4","documentId":"saint-lin-laurentides-2026-06-09","attempt":1,"requested":{"providerId":"mistral","transportProviderId":"mistral-api","modelId":"mistral-small-2603","effort":null,"maxOutputTokens":32768}}
