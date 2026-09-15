@@ -1414,7 +1414,7 @@ gate-v101: check-v101-tools
 run-v101-arm: t1-v100-snapshot check-v101-tools
 	test -n "$(ARM)"
 	mkdir -p $(V101_RESULTS)/campaign $(V101_RESULTS)/logs $(V101_RESULTS)/limits
-	docker run --rm --tmpfs /workspace --tmpfs /run --tmpfs /tmp \
+	docker run --rm --tmpfs /workspace:exec --tmpfs /run --tmpfs /tmp \
 	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
 	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  --mount type=bind,source=$(V100_T1_ROOT),target=/t1-source,readonly \
@@ -1437,7 +1437,7 @@ run-v101-arm: t1-v100-snapshot check-v101-tools
 run-v101-lane: t1-v100-snapshot check-v101-tools
 	test -n "$(LANE)"
 	mkdir -p $(V101_RESULTS)/campaign $(V101_RESULTS)/logs $(V101_RESULTS)/limits $(V101_RESULTS)/scores
-	docker run --rm --tmpfs /workspace --tmpfs /run --tmpfs /tmp \
+	docker run --rm --tmpfs /workspace:exec --tmpfs /run --tmpfs /tmp \
 	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
 	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  --mount type=bind,source=$(V100_T1_ROOT),target=/t1-source,readonly \
