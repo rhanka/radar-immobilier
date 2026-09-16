@@ -69,6 +69,19 @@ export function classifyFailure({ httpStatus = null, code = null, terminalSse = 
   return { category: "terminal", retry: false, suspend: false };
 }
 
+export function advanceCircuit(current = {}, code, threshold) {
+  if (!Number.isInteger(threshold) || threshold < 1) throw new Error("Invalid circuit threshold");
+  if (current.open) return current;
+  if (!code) return { code: null, consecutive: 0, open: false };
+  const consecutive = current.code === code ? Number(current.consecutive ?? 0) + 1 : 1;
+  return { code, consecutive, open: consecutive >= threshold };
+}
+
+export function providerGatePassed(outcomes, requiredRequests) {
+  return outcomes.length === requiredRequests
+    && outcomes.every((outcome) => outcome.requestCount === 1 && outcome.accepted === true);
+}
+
 export function retryAt(headers, now = Date.now()) {
   const retryAfter = headers?.["retry-after"];
   if (retryAfter && /^\d+(?:\.\d+)?$/u.test(retryAfter)) {

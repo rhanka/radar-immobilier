@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 
 import { pingAnthropic } from "./v101-direct-ping.mjs";
 import { probeMesh } from "./v101-mesh-ping.mjs";
+import { providerGatePassed } from "./v101-runner-state.mjs";
 
 const root = process.env.BENCHMARK_RESULT_ROOT
   || (() => { throw new Error("BENCHMARK_RESULT_ROOT is required"); })();
@@ -36,8 +37,7 @@ for (const [provider, request] of providers) {
         httpStatus: null, error: { code: error?.code ?? error?.name ?? "probe_failed" } }));
     }
   }
-  const passed = outcomes.every((outcome) => outcome.requestCount === 1
-    && !outcome.noActiveAccount && (outcome.accepted || outcome.refusal));
+  const passed = providerGatePassed(outcomes, 3);
   failed ||= !passed;
   const receipt = { schemaVersion: 1, campaign: "v101b", capturedAt: new Date().toISOString(),
     provider, llmMeshVersion: provider === "anthropic" ? null : "0.19.3",

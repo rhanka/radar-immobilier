@@ -1,6 +1,6 @@
 const codexEfforts = ["low", "medium", "high", "xhigh"];
 export const OUTPUT_CAP = 32_768;
-export const CODEX_CAP_REASON = null;
+export const CODEX_CAP_REASON = "Codex ChatGPT rejects max_output_tokens; the runner omits it.";
 
 const entries = [
   ...["low", "medium", "high"].map((effort) =>
@@ -8,7 +8,7 @@ const entries = [
       provider: "gemini", model: "gemini-3.8-flash", effort }]),
   ...codexEfforts.map((effort) =>
     [`luna-${effort}`, { lane: "codex", transport: "codex",
-      provider: "openai", model: "gpt-5.6-luna", effort, capEnforced: true }]),
+      provider: "openai", model: "gpt-5.6-luna", effort, capEnforced: false }]),
   ["gpt41", { lane: "openai", transport: "openai-api",
     provider: "openai", model: "gpt-4.1", effort: null, prices: [2, 8] }],
   ...["off", "low", "high"].map((effort) =>
@@ -25,10 +25,10 @@ const entries = [
       effort: effort === "off" ? null : effort, prices: [5, 25] }]),
   ...codexEfforts.map((effort) =>
     [`sol-${effort}`, { lane: "codex", transport: "codex",
-      provider: "openai", model: "gpt-5.6-sol", effort, capEnforced: true }]),
+      provider: "openai", model: "gpt-5.6-sol", effort, capEnforced: false }]),
   ...codexEfforts.map((effort) =>
     [`astra-${effort}`, { lane: "codex", transport: "codex",
-      provider: "openai", model: "gpt-6-astra", effort, capEnforced: true }]),
+      provider: "openai", model: "gpt-6-astra", effort, capEnforced: false }]),
   ["mistral-small4", { lane: "mistral", transport: "mistral-api",
     provider: "mistral", model: "mistral-small-2603", effort: null, prices: [0.15, 0.60] }],
 ];

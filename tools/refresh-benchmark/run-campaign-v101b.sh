@@ -8,7 +8,8 @@ ENV_NAME=test-t1-model-benchmark
 test "$(jq -r '.version' "$RESULTS/gates/llm-mesh-install.json")" = "0.19.3"
 test "$(jq -r '.cap.enforced' "$RESULTS/gates/codex-cap-assessment.json")" = "true"
 for provider in cloud codex anthropic; do
-  jq -e '.outcomes | length == 3 and all(.requestCount == 1 and (.noActiveAccount | not))' \
+  jq -e '.passed == true and (.outcomes | length == 3 and all(.requestCount == 1
+    and .accepted == true))' \
     "$RESULTS/gates/provider-$provider.json" >/dev/null
 done
 test -f "$RESULTS/manifest.json" -a -f "$RESULTS/status.json"

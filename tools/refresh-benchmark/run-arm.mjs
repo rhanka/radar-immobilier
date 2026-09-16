@@ -5,8 +5,8 @@ import { pathToFileURL } from "node:url";
 
 import { arms, OUTPUT_CAP, receiptCap, usageCostUsd } from "./v101-arms.mjs";
 import { createProvider, ProviderError } from "./v101-provider.mjs";
-import { artifactPaths, classifyFailure, resumeDecision, retryAt, updateGlobalStatus,
-  writeImmutable, writeIntent } from "./v101-runner-state.mjs";
+import { advanceCircuit, artifactPaths, classifyFailure, resumeDecision, retryAt,
+  updateGlobalStatus, writeImmutable, writeIntent } from "./v101-runner-state.mjs";
 import { sanitize } from "./v101-probe-lib.mjs";
 
 const MAX_REQUESTS = 200;
@@ -122,6 +122,7 @@ export async function runArm(armName, options = {}) {
     throw new Error("Only the Codex lane may use concurrency 2");
   }
   let requests = 0; let rateLimited = false;
+  let circuit = advanceCircuit(undefined, null, 3);
   try {
     const priorStatus = JSON.parse(await readFile(statusPath, "utf8"));
     requests = Number(priorStatus.arms?.[armName]?.requests ?? 0);
@@ -234,6 +235,7 @@ export async function runArm(armName, options = {}) {
             output: accepted ? paths.output : null },
           redaction: { allowlistedFieldsOnly: true, secretsIncluded: false } };
         await writeImmutable(paths.receipt, receipt);
+        circuit = advanceCircuit(circuit, null, 3);
         progress.processed += 1; progress.accepted += Number(accepted);
         progress.elapsedMs += receipt.latency.totalMs; progress.lastReceipt = paths.receipt;
         await publish("running"); await log({ event: "receipt", documentId: document.id,
@@ -241,7 +243,8 @@ export async function runArm(armName, options = {}) {
       } catch (error) {
         const completed = Date.now();
         const details = failureDetails(error, wire);
-        const retryEligible = attempt === 1 && details.classified.retry;
+        circuit = advanceCircuit(circuit, details.error.code, 3);
+        const retryEligible = attempt === 1 && details.classified.retry && !circuit.open;
         const receipt = { schemaVersion: 2, campaign: CAMPAIGN, arm: armName,
           documentId: document.id, attemptNumber: attempt, status: "failed", terminal: true,
           requestCount: attemptRequests,
@@ -265,7 +268,7 @@ export async function runArm(armName, options = {}) {
           redaction: { allowlistedFieldsOnly: true, secretsIncluded: false } };
         await writeImmutable(paths.receipt, receipt);
         await log({ event: "receipt", documentId: document.id, attempt,
-          status: "failed", retryEligible, receipt: paths.receipt });
+          status: "failed", retryEligible, circuit, receipt: paths.receipt });
         if (retryEligible) {
           decision = { action: "run", attempt: 2, previous: receipt,
             paths: artifactPaths(campaignRoot, document.id, armName, 2) };
@@ -273,7 +276,7 @@ export async function runArm(armName, options = {}) {
         }
         progress.processed += 1; progress.errors += 1;
         progress.elapsedMs += receipt.latency.totalMs; progress.lastReceipt = paths.receipt;
-        await publish("running"); return;
+        await publish(circuit.open ? "circuit-open" : "running"); return;
       } finally { await rm(temporary, { recursive: true, force: true }); }
     }
   };
@@ -285,11 +288,18 @@ export async function runArm(armName, options = {}) {
         if (requests >= MAX_REQUESTS) throw new ProviderError("REQUEST_BUDGET_SUSPENDED");
         requests += 1;
       } });
-    for (;;) { const document = documents[cursor++]; if (!document) return; await runDocument(document, provider); }
+    for (;;) {
+      if (circuit.open) return;
+      const document = documents[cursor++];
+      if (!document) return;
+      await runDocument(document, provider);
+    }
   };
   await Promise.all(Array.from({ length: concurrency }, worker));
-  await publish(progress.processed === progress.total ? "completed" : "running");
-  return { arm: armName, requests, rateLimited, processed: progress.processed };
+  await publish(circuit.open ? "circuit-open"
+    : progress.processed === progress.total ? "completed" : "running");
+  return { arm: armName, requests, rateLimited, processed: progress.processed,
+    errors: progress.errors, circuitOpen: circuit.open, circuitCode: circuit.code };
 }
 
 if (process.env.BENCHMARK_MODE === "availability") {
