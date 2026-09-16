@@ -95,6 +95,10 @@ export function advanceCircuit(current = {}, code, threshold) {
   return { code, consecutive, open: consecutive >= threshold };
 }
 
+export function laneCircuitAction(lane, circuit) {
+  return circuit.open && lane === "codex" ? "stop-lane" : "continue";
+}
+
 export function providerGatePassed(outcomes, requiredRequests) {
   return outcomes.length === requiredRequests
     && outcomes.every((outcome) => outcome.requestCount === 1 && outcome.accepted === true);
