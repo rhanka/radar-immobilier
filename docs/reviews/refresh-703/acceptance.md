@@ -44,6 +44,10 @@ make lint API_PORT=8873 UI_PORT=5373 MAILDEV_UI_PORT=1173 ENV=test-mep-703
 
 The `.remote` acceptance harness and inspection scripts are local evidence,
 not production code. Mocked integration tests remain separate from this receipt.
+After review, commit `8edf8c7f` additionally binds Gemini catalogue discovery to
+the run's abort signal. All 101 refresh unit/integration tests, typecheck and lint
+pass after that fix. The live receipt predates this cancellation-only correction;
+it is not relabelled as a live run of the later commit.
 
 ## Production promotion path and outstanding infrastructure
 

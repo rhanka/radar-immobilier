@@ -45,5 +45,5 @@ Prepare #703 production PV refresh with Gemini 3.8 Flash medium and measured acc
   - [x] 19 mesh/state tests pass; exact tiered wire model, MEDIUM and 32768 asserted.
   - [x] Overlay regression checks require only PV active, Gemini defaults and production memory limit.
 - [x] Lot 4 — Real Gemini cycle: document acceptance 1/1, 11 PG nodes, zero explicit Signal nodes; v2 receipt and infrastructure boundary recorded.
-- [ ] Lot 5 — Push, French PR with Refs #703 and replacement of #682; CI checked.
+- [x] Lot 5 — Branch pushed; French PR #711 has Refs #703 and replaces #682; CI queried on full head SHA (final verdict in conductor handoff).
 - [ ] Merge and production activation reserved to conductor and k8s owner.
