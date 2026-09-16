@@ -339,6 +339,8 @@ export async function runArm(armName, options = {}) {
 if (process.env.BENCHMARK_MODE === "availability") {
   await import("./v101-availability-run.mjs");
 } else if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const result = await runArm(process.argv[2]);
+  const result = process.argv[2]?.startsWith("judge-")
+    ? await (await import("./v101-judge-run.mjs")).runV101bJudge(process.argv[2])
+    : await runArm(process.argv[2]);
   console.log(JSON.stringify(result));
 }

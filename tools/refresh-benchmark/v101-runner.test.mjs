@@ -13,6 +13,7 @@ import { cascade, discardDirect } from "./v101-score-lib.mjs";
 import { codexCapOption } from "./v101-provider.mjs";
 import { armExecutionRoot } from "./score-v101.mjs";
 import { selectJudgeDocuments } from "./v101-judge-freeze.mjs";
+import { judgeConfig, judgeMessages } from "./v101-judge-run.mjs";
 
 test("should enumerate every addressable arm when Codex 5.3 is unavailable", () => {
   assert.equal(Object.keys(arms).length, 26);
@@ -34,6 +35,16 @@ test("should freeze a verdict-independent 8/8/8/1 judge sample", () => {
   assert.deepEqual(Object.fromEntries(["S", "M", "L", "ancre"].map((bucket) =>
     [bucket, sample.filter(({ sizeBucket }) => sizeBucket === bucket).length])),
   { S: 8, M: 8, L: 8, ancre: 1 });
+});
+
+test("should keep model identity out of blind judge messages", () => {
+  assert.equal(judgeConfig("judge-terra").model, "gpt-5.6-terra");
+  assert.equal(judgeConfig("judge-opus46-thinking").model, "claude-opus-4-6-thinking");
+  const messages = judgeMessages({ judgeInstructions: ["Evaluate."] },
+    { alias: "unit-opaque", extraction: {} },
+    { pages: [{ page: 1, text: "Municipal record." }] });
+  assert.equal(JSON.stringify(messages).includes("gpt-5.6-terra"), false);
+  assert.equal(JSON.stringify(messages).includes("claude-opus"), false);
 });
 
 test("should calculate metered cost from normalized usage", () => {
