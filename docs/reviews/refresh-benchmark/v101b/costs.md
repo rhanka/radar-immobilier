@@ -1,6 +1,6 @@
 # v101b cost snapshot
 
-Generated: 2026-09-16T22:57:33.868Z. Every schema-v2 attempt receipt present under `campaign/` and `codex-replay/campaign/` is counted; retries are not discarded.
+Generated: 2026-09-16T23:01:17.287Z. Every schema-v2 attempt receipt present under `campaign/` and `codex-replay/campaign/` is counted; retries are not discarded.
 
 Selected Gemini plan: **N-A (owner tier source-gap)**. Selected ChatGPT plan: **N-A (owner tier source-gap)**.
 The owner must provide both actual tiers; Gemini also needs a measured or estimated weekly token reserve.
@@ -13,7 +13,7 @@ Output is billable output: visible output plus separately reported thinking toke
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | astra-high | 103 (2) | 2 / 100 | 14,209 / 7,105 | 11,372 / 5,686 | 0 | 11,372 | $0.7107 | N-A | $0.7107 | $355.35 | N-A | $355.35 | $35.53 |
 | astra-low | 103 (3) | 3 / 100 | 22,148 / 7,383 | 13,744 / 4,581 | 0 | 13,744 | $0.9087 | N-A | $0.9087 | $302.89 | N-A | $302.89 | $30.29 |
-| astra-medium | 134 (33) | 33 / 100 | 258,507 / 7,834 | 139,594 / 4,230 | 0 | 139,594 | $9.56 | N-A | $9.56 | $289.84 | N-A | $289.84 | $28.98 |
+| astra-medium | 136 (35) | 35 / 100 | 286,550 / 8,187 | 153,923 / 4,398 | 0 | 153,923 | $10.56 | N-A | $10.56 | $301.76 | N-A | $301.76 | $30.18 |
 | astra-xhigh | 103 (2) | 2 / 100 | 14,209 / 7,105 | 17,476 / 8,738 | 0 | 17,476 | $1.02 | N-A | $1.02 | $507.94 | N-A | $507.94 | $50.79 |
 | gemini-high | 100 (100) | 100 / 100 | 1,646,755 / 16,468 | 718,689 / 7,187 | 1,947,086 | 2,665,775 | $11.23 | N-A | $11.23 | $112.32 | N-A | $112.32 | $11.23 |
 | gemini-low | 100 (100) | 100 / 100 | 1,646,755 / 16,468 | 674,257 / 6,743 | 0 | 674,257 | $3.76 | N-A | $3.76 | $37.64 | N-A | $37.64 | $3.76 |
@@ -27,10 +27,10 @@ Output is billable output: visible output plus separately reported thinking toke
 | opus5-high | 180 (100) | 100 / 100 | 2,496,910 / 24,969 | 2,089,305 / 20,893 | 0 | 2,089,305 | $64.72 | N-A | $64.72 | $647.17 | N-A | $647.17 | $64.72 |
 | opus5-low | 180 (100) | 100 / 100 | 2,496,910 / 24,969 | 1,090,871 / 10,909 | 0 | 1,090,871 | $39.76 | N-A | $39.76 | $397.56 | N-A | $397.56 | $39.76 |
 | opus5-off | 127 (100) | 100 / 100 | 2,496,910 / 24,969 | 2,103,477 / 21,035 | 0 | 2,103,477 | $65.07 | N-A | $65.07 | $650.71 | N-A | $650.71 | $65.07 |
-| sol-high | 190 (80) | 80 / 100 | 1,109,489 / 13,869 | 1,147,660 / 14,346 | 0 | 1,147,660 | $27.39 | N-A | $27.39 | $342.39 | N-A | $342.39 | $34.24 |
+| sol-high | 191 (80) | 80 / 100 | 1,109,489 / 13,869 | 1,147,660 / 14,346 | 0 | 1,147,660 | $27.39 | N-A | $27.39 | $342.39 | N-A | $342.39 | $34.24 |
 | sol-low | 193 (78) | 78 / 100 | 1,106,987 / 14,192 | 511,985 / 6,564 | 0 | 511,985 | $14.67 | N-A | $14.67 | $188.05 | N-A | $188.05 | $18.80 |
 | sol-medium | 202 (100) | 100 / 100 | 1,511,249 / 15,112 | 1,040,498 / 10,405 | 0 | 1,040,498 | $26.85 | N-A | $26.85 | $268.55 | N-A | $268.55 | $26.85 |
-| sol-xhigh | 120 (17) | 17 / 100 | 125,809 / 7,401 | 270,655 / 15,921 | 0 | 270,655 | $5.92 | N-A | $5.92 | $348.02 | N-A | $348.02 | $34.80 |
+| sol-xhigh | 122 (19) | 19 / 100 | 140,491 / 7,394 | 305,970 / 16,104 | 0 | 305,970 | $6.68 | N-A | $6.68 | $351.65 | N-A | $351.65 | $35.17 |
 | sonnet46-cloud-high | 21 (0) | 0 / 15 | 0 / 0 | 0 / 0 | 0 | 0 | $0.0000 | N-A | $0.0000 | N-A | N-A | N-A | N-A |
 | sonnet46-cloud-low | 35 (14) | 14 / 29 | 121,952 / 8,711 | 113,572 / 8,112 | 0 | 113,572 | $2.07 | N-A | $2.07 | $147.82 | N-A | $147.82 | $14.78 |
 | sonnet46-cloud-off | 61 (46) | 46 / 56 | 526,599 / 11,448 | 431,329 / 9,377 | 0 | 431,329 | $8.05 | N-A | $8.05 | $174.99 | N-A | $174.99 | $17.50 |
@@ -105,4 +105,3 @@ No-intercept two-variable regression: `actual.costUsd × 1M = inputTokens × a +
 Without a numeric before/after observable, burning requests cannot estimate tokens per quota unit or weekly reserve. The alternative is exhaustion to HTTP 429, which is not authorized without explicit owner GO. No request was sent and no receipt was written under `burn/`.
 
 Consequently Gemini tokens/week and equivalent USD/token are N-A. ChatGPT equivalents are also N-A in this snapshot until the owner supplies `--plan-chatgpt`; no Codex burn was performed while its queues were active.
-
