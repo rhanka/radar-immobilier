@@ -1297,13 +1297,14 @@ freeze-blind-v100:
 V101_CAMPAIGN ?= v101
 V101_RESULTS ?= $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/$(V101_CAMPAIGN)
 V101_MESH_VERSION := 0.19.3
+SEAT_RESULTS ?= $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v101b
 
 .PHONY: check-v101-tools test-v101 catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 \
 	compact-v101-json verify-v101 gate-v101 run-v101-arm run-v101-lane score-v101 \
 	init-campaign-v101 gate-runner-v101 reconcile-interrupted-v101 status-v101-containers \
 	stop-v101-container check-v101-user-manager launch-v101-detached stop-v101-detached \
 	enroll-codex-v101 launch-v101-codex-detached gate-v101b-providers freeze-v101b \
-	test-cost-calculator cost-calculator generate-v101b-costs
+	test-cost-calculator cost-calculator generate-v101b-costs observe-cloud-code-quota
 
 check-v101-tools:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1331,6 +1332,7 @@ check-v101-tools:
 	    && node --check tools/refresh-benchmark/freeze-v101.mjs \
 	    && node --check tools/refresh-benchmark/compact-v101-json.mjs \
 	    && node --check tools/refresh-benchmark/cost-calculator.mjs \
+	    && node --check tools/refresh-benchmark/cloud-code-quota.mjs \
 	    && node --check tools/refresh-benchmark/verify-v101.mjs \
 	    && sh -n tools/refresh-benchmark/run-campaign-v101.sh \
 	    && sh -n tools/refresh-benchmark/run-campaign-v101b.sh \
@@ -1365,6 +1367,21 @@ generate-v101b-costs:
 	  --mount type=bind,source=$(V101_RESULTS),target=/results \
 	  -w /src $(NODE_IMAGE) sh -c \
 	  'node tools/refresh-benchmark/cost-calculator.mjs --campaign v101b --format md > /results/costs.md'
+
+observe-cloud-code-quota: check-v101-tools
+	test "$(ENV)" = "test-t1-model-benchmark"
+	mkdir -p $(SEAT_RESULTS)/burn/observables
+	docker run --rm --tmpfs /workspace --tmpfs /run \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(SEAT_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
+	  -e BENCHMARK_QUOTA_OUTPUT=/results/burn/observables/cloud-code-quota.json \
+	  -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring \
+	    && cd /workspace && npm install --silent --ignore-scripts \
+	      @sentropic/llm-mesh@$(V101_MESH_VERSION) >/dev/null \
+	    && cd /src && exec node tools/refresh-benchmark/cloud-code-quota.mjs'
 
 catalog-v101: check-v101-tools
 	mkdir -p $(V101_RESULTS)/availability
