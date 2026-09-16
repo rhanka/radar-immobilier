@@ -23,8 +23,10 @@ function latestReceipts(receipts) {
   return [...latest.values()];
 }
 
-export function summarizeReceipts(receipts, arm, rateLimit = 0) {
+export function summarizeReceipts(receipts, arm, rateLimit = 0,
+  transportReplayStartedAt = process.env.BENCHMARK_TRANSPORT_REPLAY_STARTED_AT) {
   const terminal = latestReceipts(receipts);
+  const transportReplayStartMs = Date.parse(transportReplayStartedAt ?? "");
   const completed = terminal.filter(({ status }) => status === "completed");
   const failed = terminal.filter(({ status }) => status === "failed");
   const latency = terminal.map(({ latency: value }) => value?.totalMs)
@@ -36,7 +38,9 @@ export function summarizeReceipts(receipts, arm, rateLimit = 0) {
   return {
     processed: terminal.length,
     accepted: completed.filter(({ validation }) => validation?.accepted === true).length,
-    transportReplayed: terminal.filter(({ attemptNumber }) => attemptNumber >= 3).length,
+    transportReplayed: arm.lane === "anthropic" && Number.isFinite(transportReplayStartMs)
+      ? terminal.filter(({ latency }) => Date.parse(latency?.startedAt ?? "")
+        >= transportReplayStartMs).length : 0,
     transport: failed.filter(({ error }) => (error?.httpStatus ?? 0) !== 429
       && (error?.category ?? "") !== "request-budget").length,
     rateLimit,
