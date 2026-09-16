@@ -1097,6 +1097,7 @@ compare-oracle-v1-v2:
 	  --mount type=bind,source=$(MAIN_ROOT),target=$(MAIN_ROOT),readonly \
 	  --mount type=bind,source=$(ORACLE_V2_ROOT),target=/out \
 	  -e BENCHMARK_REPOSITORY_ROOT=$(BENCHMARK_ROOT) \
+	  -e BENCHMARK_RETRY_NETWORK_TERMINAL \
 	  -e BENCHMARK_COMPARISON_ARMS='$(COMPARISON_ARMS)' \
 	  -e BENCHMARK_COMPARISON_OUTPUT=/out/$(or $(COMPARISON_FILE),oracle-v2-comparison.json) \
 	  -w $(BENCHMARK_ROOT) $(NODE_IMAGE) node tools/refresh-benchmark/compare-oracle-v1-v2.mjs
