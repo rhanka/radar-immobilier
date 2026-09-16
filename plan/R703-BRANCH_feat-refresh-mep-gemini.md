@@ -41,7 +41,7 @@ Prepare #703 production PV refresh with Gemini 3.8 Flash medium and measured acc
 - [x] Lot 0 — Rules, baseline and deployment path inspected.
 - [x] Lot 1 — Runtime dependency, Gemini medium defaults and regression tests authored.
 - [x] Lot 2 — Only causal production schedule armed; quota-compatible resources; immutable CD pin.
-- [ ] Lot 3 — Scoped tests, render assertions, harness gates and independent review.
+- [x] Lot 3 — Scoped tests, render assertions, harness gates and two independent reviews reconciled.
   - [x] 19 mesh/state tests pass; exact tiered wire model, MEDIUM and 32768 asserted.
   - [x] Overlay regression checks require only PV active, Gemini defaults and production memory limit.
 - [x] Lot 4 — Real Gemini cycle: document acceptance 1/1, 11 PG nodes, zero explicit Signal nodes; v2 receipt and infrastructure boundary recorded.
