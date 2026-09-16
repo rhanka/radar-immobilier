@@ -1,13 +1,14 @@
 import { laneArms } from "./v101-arms.mjs";
 import { runArm } from "./run-arm.mjs";
 import { scoreArm } from "./score-v101.mjs";
-import { advanceCircuit, laneCircuitAction } from "./v101-runner-state.mjs";
+import { advanceCircuit, laneCircuitAction, laneConcurrency } from "./v101-runner-state.mjs";
 
 const wait = (ms) => new Promise((done) => setTimeout(done, ms));
 const lane = process.argv[2];
 const campaign = process.env.BENCHMARK_CAMPAIGN ?? "v101";
 const names = laneArms[lane];
 if (!names) throw new Error(`Unknown ${campaign} lane: ${lane ?? "N-A"}`);
+
 let codexFirstTwentyClear = lane === "codex";
 let codexObserved = 0;
 let providerCircuit = advanceCircuit(undefined, null, 2);
@@ -25,7 +26,7 @@ campaign: for (let block = 0; block < 5; block += 1) {
       continue;
     }
     const [{ name }] = pending.splice(readyIndex, 1);
-    const concurrency = lane === "codex" && codexFirstTwentyClear ? 2 : 1;
+    const concurrency = laneConcurrency(lane, codexFirstTwentyClear);
     const result = await runArm(name, { slice: `${from}-${to}`, concurrency });
     if (result.deferred) {
       pending.push({ name, readyAt: Date.parse(result.resumeAt) });
@@ -45,6 +46,6 @@ campaign: for (let block = 0; block < 5; block += 1) {
 }
 if (!providerStopped) for (const name of names) await scoreArm(name);
 console.log(JSON.stringify({ campaign, lane, arms: names.length,
-  codexConcurrency: lane === "codex" && codexFirstTwentyClear ? 2 : 1,
+  concurrency: laneConcurrency(lane, codexFirstTwentyClear),
   state: providerStopped ? "provider-circuit-open" : "completed" }));
 if (providerStopped) process.exitCode = 2;

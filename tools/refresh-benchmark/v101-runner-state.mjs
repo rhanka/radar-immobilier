@@ -99,6 +99,19 @@ export function laneCircuitAction(lane, circuit) {
   return circuit.open && lane === "codex" ? "stop-lane" : "continue";
 }
 
+export function laneConcurrency(lane, codexClear, configured) {
+  const raw = configured === undefined ? process.env.BENCHMARK_LANE_CONCURRENCY : configured;
+  if (raw !== undefined && raw !== "") {
+    const value = Number(raw);
+    const maximum = lane === "codex" ? 2 : 3;
+    if (!Number.isInteger(value) || value < 1 || value > maximum) {
+      throw new Error(`BENCHMARK_LANE_CONCURRENCY must be between 1 and ${maximum}`);
+    }
+    return value;
+  }
+  return lane === "codex" && codexClear ? 2 : 1;
+}
+
 export function providerGatePassed(outcomes, requiredRequests) {
   return outcomes.length === requiredRequests
     && outcomes.every((outcome) => outcome.requestCount === 1 && outcome.accepted === true);
