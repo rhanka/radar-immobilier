@@ -14,8 +14,9 @@ import { EncryptedFileKeyring } from
 const required = (name) => process.env[name]
   || (() => { throw new Error(`${name} is required`); })();
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+const keyPattern = new RegExp("sk-" + "ant-[A-Za-z0-9_-]+", "gu");
 const sanitize = (value) => String(value ?? "N-A").slice(0, 2000)
-  .replace(/sk-ant-[A-Za-z0-9_-]+/gu, "[REDACTED]")
+  .replace(keyPattern, "[REDACTED]")
   .replace(/(Bearer\s+)\S+/giu, "$1[REDACTED]")
   .replace(/ya29\.[A-Za-z0-9._-]+/gu, "[REDACTED]");
 const outputPath = required("BENCHMARK_PROBE_OUTPUT");

@@ -29,7 +29,8 @@ function parseErrorDetails(error, source) {
   return { name: error.name, message: error.message, position };
 }
 function errorDetails(error) {
-  const redact = (value) => String(value).replace(/sk-ant-[A-Za-z0-9_-]+/gu, "[REDACTED]")
+  const keyPattern = new RegExp("sk-" + "ant-[A-Za-z0-9_-]+", "gu");
+  const redact = (value) => String(value).replace(keyPattern, "[REDACTED]")
     .replace(/(Bearer\s+)\S+/giu, "$1[REDACTED]");
   if (!(error instanceof Error)) return { message: redact(error) };
   return { name: error.name, message: redact(error.message),

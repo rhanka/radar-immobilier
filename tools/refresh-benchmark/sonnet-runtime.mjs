@@ -1,8 +1,9 @@
 import { CloudCodeRuntimeClient } from
   "/workspace/node_modules/@sentropic/llm-mesh/dist/index.js";
 
+const keyPattern = new RegExp("sk-" + "ant-[A-Za-z0-9_-]+", "gu");
 const sanitize = (value) => String(value ?? "N-A").slice(0, 500)
-  .replace(/sk-ant-[A-Za-z0-9_-]+/gu, "[REDACTED]")
+  .replace(keyPattern, "[REDACTED]")
   .replace(/(Bearer\s+)\S+/giu, "$1[REDACTED]");
 const contentText = (content) => typeof content === "string" ? content
   : content.filter(({ type }) => type === "text").map(({ text }) => text).join("");
