@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "protocol": "sentropic-16",
+  "case": "positive",
+  "completedAt": "2026-09-16T00:34:50.481Z",
+  "durationMs": 1540,
+  "installedPackage": {
+    "name": "@sentropic/llm-mesh",
+    "version": "0.19.3"
+  },
+  "account": {
+    "pseudonym": "acct-59dca62565",
+    "providerId": "cloud-code"
+  },
+  "request": {
+    "logicalModelId": "gemini-3.8-flash",
+    "effort": "low",
+    "maxOutputTokens": 64,
+    "prompt": "Reply with PING_OK only.",
+    "threadIdProvided": false
+  },
+  "transport": {
+    "httpStatus": 200,
+    "calls": [
+      {
+        "ordinal": 1,
+        "operation": "fetchAvailableModels",
+        "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels",
+        "method": "POST",
+        "projectRedacted": true,
+        "httpStatus": 200,
+        "durationMs": 398
+      },
+      {
+        "ordinal": 2,
+        "operation": "streamGenerateContent",
+        "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse",
+        "method": "POST",
+        "projectRedacted": true,
+        "httpStatus": 200,
+        "durationMs": 888
+      }
+    ]
+  },
+  "actual": {
+    "providerId": "gemini",
+    "responseModelId": "gemini-3.8-flash",
+    "messageExact": "PING_OK",
+    "pingExact": true,
+    "finishReason": "stop",
+    "providerRawFinishReason": "STOP",
+    "usage": {
+      "inputTokens": 9,
+      "outputTokens": 3,
+      "totalTokens": 12
+    }
+  },
+  "error": null,
+  "redaction": {
+    "bearer": "[REDACTED]",
+    "project": "[REDACTED]",
+    "ownerScopeRef": "[REDACTED]",
+    "secretsIncluded": false
+  }
+}
