@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "observations": [
+    {
+      "arm": "gemini-low",
+      "provider": "gemini",
+      "status": "N-A",
+      "reason": "weekly-window-source-gap"
+    },
+    {
+      "arm": "sol-medium",
+      "provider": "chatgpt",
+      "status": "scenario",
+      "method": "account-percent/campaign-token-ratio",
+      "sourceStatus": "observed",
+      "basePlan": null,
+      "windowMinutes": 10080,
+      "usedPercent": 67,
+      "campaignTokens": 16594220
+    },
+    {
+      "arm": "luna-high",
+      "provider": "chatgpt",
+      "status": "scenario",
+      "method": "account-percent/campaign-token-ratio",
+      "sourceStatus": "observed",
+      "basePlan": null,
+      "windowMinutes": 10080,
+      "usedPercent": 67,
+      "campaignTokens": 16594220
+    },
+    {
+      "arm": "sonnet46-cloud-off",
+      "provider": "claude",
+      "status": "N-A",
+      "reason": "transport-mismatch"
+    }
+  ]
+}

@@ -1358,7 +1358,8 @@ cost-calculator:
 	  -w /src $(NODE_IMAGE) node tools/refresh-benchmark/cost-calculator.mjs \
 	  --campaign $(CAMPAIGN) --format $(or $(FORMAT),md) \
 	  $(if $(PLAN_GEMINI),--plan-gemini $(PLAN_GEMINI)) \
-	  $(if $(PLAN_CHATGPT),--plan-chatgpt $(PLAN_CHATGPT))
+	  $(if $(PLAN_CHATGPT),--plan-chatgpt $(PLAN_CHATGPT)) \
+	  $(if $(SEAT_OBSERVATIONS),--seat-observations $(SEAT_OBSERVATIONS))
 
 generate-v101b-costs:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1366,7 +1367,8 @@ generate-v101b-costs:
 	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  --mount type=bind,source=$(V101_RESULTS),target=/results \
 	  -w /src $(NODE_IMAGE) sh -c \
-	  'node tools/refresh-benchmark/cost-calculator.mjs --campaign v101b --format md > /results/costs.md'
+	  'node tools/refresh-benchmark/cost-calculator.mjs --campaign v101b --format md \
+	    --seat-observations /results/burn/seat-observations.json > /results/costs.md'
 
 observe-cloud-code-quota: check-v101-tools
 	test "$(ENV)" = "test-t1-model-benchmark"
