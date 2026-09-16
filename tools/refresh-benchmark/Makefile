@@ -1293,14 +1293,15 @@ freeze-blind-v100:
 
 # v101 phase 1: catalogue and 64-token pings only. Dependencies are installed in
 # container tmpfs so the worktree and shared historical dependency volume stay untouched.
-V101_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v101
+V101_CAMPAIGN ?= v101
+V101_RESULTS ?= $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/$(V101_CAMPAIGN)
 V101_MESH_VERSION := 0.19.3
 
 .PHONY: check-v101-tools test-v101 catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 \
 	compact-v101-json verify-v101 gate-v101 run-v101-arm run-v101-lane score-v101 \
 	init-campaign-v101 gate-runner-v101 reconcile-interrupted-v101 status-v101-containers \
 	stop-v101-container check-v101-user-manager launch-v101-detached stop-v101-detached \
-	enroll-codex-v101 launch-v101-codex-detached
+	enroll-codex-v101 launch-v101-codex-detached gate-v101b-providers
 
 check-v101-tools:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1322,6 +1323,7 @@ check-v101-tools:
 	    && node --check tools/refresh-benchmark/init-campaign-v101.mjs \
 	    && node --check tools/refresh-benchmark/enroll-codex-v101.mjs \
 	    && node --check tools/refresh-benchmark/reconcile-interrupted-v101.mjs \
+	    && node --check tools/refresh-benchmark/gate-v101b-providers.mjs \
 	    && node --check tools/refresh-benchmark/measure-cprime-v101.mjs \
 	    && node --check tools/refresh-benchmark/freeze-v101.mjs \
 	    && node --check tools/refresh-benchmark/compact-v101-json.mjs \
@@ -1416,6 +1418,20 @@ gate-v101: check-v101-tools
 	      @sentropic/llm-mesh@$(V101_MESH_VERSION) >/dev/null \
 	    && cd /src && exec node tools/refresh-benchmark/gate-v101.mjs $(GATE)'
 
+gate-v101b-providers: check-v101-tools
+	test "$(V101_CAMPAIGN)" = "v101b"
+	mkdir -p $(V101_RESULTS)/gates
+	docker run --rm --tmpfs /workspace --tmpfs /run \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
+	  -e BENCHMARK_RESULT_ROOT=/results -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
+	  -e ANTHROPIC_API_KEY -w /src $(NODE_IMAGE) sh -c \
+	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring \
+	    && cd /workspace && npm install --silent --ignore-scripts \
+	      @sentropic/llm-mesh@$(V101_MESH_VERSION) >/dev/null \
+	    && cd /src && exec node tools/refresh-benchmark/gate-v101b-providers.mjs'
+
 run-v101-arm: t1-v100-snapshot check-v101-tools
 	test -n "$(ARM)"
 	mkdir -p $(V101_RESULTS)/campaign $(V101_RESULTS)/logs $(V101_RESULTS)/limits
@@ -1426,6 +1442,7 @@ run-v101-arm: t1-v100-snapshot check-v101-tools
 	  --mount type=bind,source=$(V101_RESULTS),target=/results \
 	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
+	  -e BENCHMARK_CAMPAIGN=$(V101_CAMPAIGN) \
 	  -e BENCHMARK_EXECUTION_ROOT=$(or $(RUN_ROOT),/results) \
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
 	  -e BENCHMARK_SLICE='$(or $(SLICE),1-100)' -e BENCHMARK_CONCURRENCY=$(or $(CONCURRENCY),1) \
@@ -1449,6 +1466,7 @@ run-v101-lane: t1-v100-snapshot check-v101-tools
 	  --mount type=bind,source=$(V101_RESULTS),target=/results \
 	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
+	  -e BENCHMARK_CAMPAIGN=$(V101_CAMPAIGN) \
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
 	  -e OPENAI_API_KEY -e ANTHROPIC_API_KEY -e MISTRAL_API_KEY \
 	  -w /src $(NODE_IMAGE) sh -c \
@@ -1469,6 +1487,7 @@ score-v101: t1-v100-snapshot check-v101-tools
 	  --mount type=bind,source=$(V101_RESULTS),target=/results \
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
+	  -e BENCHMARK_CAMPAIGN=$(V101_CAMPAIGN) \
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /t1-source /workspace/t1 && exec node /workspace/node_modules/tsx/dist/cli.mjs \
 	    tools/refresh-benchmark/score-v101.mjs $(ARM)'

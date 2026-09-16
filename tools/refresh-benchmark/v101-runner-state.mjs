@@ -98,7 +98,8 @@ export async function updateCampaignStatus(path, mutate, clock = () => Date.now(
     }
   }
   try {
-    const status = await jsonIfPresent(path) ?? { schemaVersion: 1, campaign: "v101", arms: {} };
+    const status = await jsonIfPresent(path) ?? { schemaVersion: 1,
+      campaign: process.env.BENCHMARK_CAMPAIGN ?? "v101", arms: {} };
     const updated = mutate(status) ?? status;
     updated.updatedAt = new Date(clock()).toISOString();
     const temporary = `${path}.${process.pid}.tmp`;

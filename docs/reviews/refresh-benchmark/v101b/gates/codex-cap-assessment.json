@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "sourceReceipt": "gates/codex-cap.json",
+  "llmMeshVersion": "0.19.3",
+  "requestedMaxOutputTokens": 32,
+  "observedWireMaxOutputTokens": 32,
+  "cap": { "enforced": true, "truncationObserved": false },
+  "providerOutcome": { "httpStatus": 400, "classification": "named-refusal" },
+  "requestCount": 1,
+  "note": "Wire materialization is proved; output truncation is not, because the backend rejected the 32-token request.",
+  "redaction": { "allowlistedFieldsOnly": true, "secretsIncluded": false }
+}

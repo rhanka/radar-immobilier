@@ -9,17 +9,18 @@ import { cascade, discardDirect, normalizeExtraction, parseExtraction,
   provenanceViolations } from "./v101-score-lib.mjs";
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+const CAMPAIGN = process.env.BENCHMARK_CAMPAIGN ?? "v101";
 const required = (name) => process.env[name]
   || (() => { throw new Error(`${name} is required`); })();
 
 export async function scoreArm(armName) {
-  if (!arms[armName]) throw new Error(`Unknown v101 arm: ${armName}`);
+  if (!arms[armName]) throw new Error(`Unknown ${CAMPAIGN} arm: ${armName}`);
   const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
   const resultRoot = required("BENCHMARK_RESULT_ROOT");
   const t1Root = required("BENCHMARK_T1_ROOT");
   const campaignRoot = resolve(resultRoot, "campaign", armName);
   const manifest = JSON.parse(await readFile(resolve(repositoryRoot,
-    "docs/reviews/refresh-benchmark/v101/manifest.json"), "utf8"));
+    `docs/reviews/refresh-benchmark/${CAMPAIGN}/manifest.json`), "utf8"));
   const profilePath = resolve(t1Root, "api/src/services/graph/refresh-profile.ts");
   const corpusPath = resolve(t1Root, "api/src/services/graph/refresh-corpus.ts");
   const { extractRefreshProfile, loadRefreshProfileContext } = await import(pathToFileURL(profilePath));
@@ -126,7 +127,7 @@ export async function scoreArm(armName) {
       violation: strict.directViolations[0], directDropped, cascadeDropped, validationError });
   }
   const terminal = documents.filter(({ strictAccepted }) => strictAccepted !== null);
-  const result = { schemaVersion: 1, campaign: "v101", arm: armName,
+  const result = { schemaVersion: 1, campaign: CAMPAIGN, arm: armName,
     measuredAt: new Date().toISOString(), contract: "immo-pv-extraction-v9",
     policy: "discard-one-direct-record-then-referential-cleanup-to-fixed-point-and-full-v9-validation",
     strict: { accepted: terminal.filter(({ strictAccepted }) => strictAccepted).length,
