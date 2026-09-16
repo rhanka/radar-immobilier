@@ -14,7 +14,7 @@ import { codexCapOption } from "./v101-provider.mjs";
 import { armExecutionRoot } from "./score-v101.mjs";
 import { circuitClosureFor, selectJudgeDocuments } from "./v101-judge-freeze.mjs";
 import { judgeConfig, judgeMessages } from "./v101-judge-run.mjs";
-import { summarizeReceipts } from "./v101-report.mjs";
+import { summarizeJudgeVerdicts, summarizeReceipts } from "./v101-report.mjs";
 
 test("should enumerate every addressable arm when Codex 5.3 is unavailable", () => {
   assert.equal(Object.keys(arms).length, 26);
@@ -78,6 +78,19 @@ test("should summarize terminal receipts by failure class", () => {
   assert.deepEqual(metrics, { processed: 4, accepted: 1, transport: 1, rateLimit: 2,
     json: 1, profile: 0, provenance: 1, budget: 0, latencyP50Ms: 1_000,
     latencyP95Ms: 3_000, inputTokens: 300, outputTokens: 60, costUsd: 0.00108 });
+});
+
+test("should summarize blind usefulness without exposing aliases as model names", () => {
+  const mapping = [{ alias: "a", arm: "gpt41" }, { alias: "b", arm: "gpt41" }];
+  const summary = summarizeJudgeVerdicts(mapping, {
+    terra: [{ alias: "a", verdict: { usefulness: 3 } },
+      { alias: "b", verdict: { usefulness: 5 } }],
+    opus46: [{ alias: "a", verdict: { usefulness: 4 } },
+      { alias: "b", verdict: { usefulness: 5 } }],
+  });
+  assert.deepEqual(summary.gpt41, { terra: { completed: 2, meanUsefulness: 4 },
+    opus46: { completed: 2, meanUsefulness: 4.5 },
+    agreement: { pairs: 2, exact: 1, meanAbsoluteDifference: 0.5 } });
 });
 
 test("should disclose that the Codex ChatGPT transport cannot enforce the output cap", () => {
