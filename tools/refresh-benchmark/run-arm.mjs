@@ -12,11 +12,16 @@ import { sanitize } from "./v101-probe-lib.mjs";
 
 const MAX_REQUESTS = 200;
 const TIMEOUT_MS = 480_000;
+const XHIGH_TIMEOUT_MS = 900_000;
 const CAMPAIGN = process.env.BENCHMARK_CAMPAIGN ?? "v101";
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const required = (name) => process.env[name]
   || (() => { throw new Error(`${name} is required`); })();
 const wait = (ms) => new Promise((done) => setTimeout(done, ms));
+
+export function timeoutMsForArm(arm) {
+  return arm?.effort === "xhigh" ? XHIGH_TIMEOUT_MS : TIMEOUT_MS;
+}
 
 function jsonLayer(text) {
   const trimmed = String(text ?? "").trim();
@@ -100,6 +105,7 @@ export async function runArm(armName, options = {}) {
   const executionRoot = process.env.BENCHMARK_EXECUTION_ROOT ?? resultRoot;
   const t1Root = required("BENCHMARK_T1_ROOT");
   const campaignRoot = resolve(executionRoot, "campaign", armName);
+  const timeoutMs = timeoutMsForArm(arm);
   const statusPath = resolve(executionRoot, "status.json");
   const logPath = resolve(executionRoot, "logs", `${armName}.log`);
   await Promise.all([mkdir(resolve(executionRoot, "logs"), { recursive: true }),
@@ -128,8 +134,9 @@ export async function runArm(armName, options = {}) {
     || from > to) throw new Error("BENCHMARK_SLICE must be a valid one-based range");
   const documents = manifest.documents.slice(from - 1, to);
   const concurrency = Number(options.concurrency ?? process.env.BENCHMARK_CONCURRENCY ?? "1");
-  if (![1, 2].includes(concurrency) || (concurrency === 2 && arm.lane !== "codex")) {
-    throw new Error("Only the Codex lane may use concurrency 2");
+  const maximumConcurrency = arm.lane === "codex" ? 2 : 3;
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > maximumConcurrency) {
+    throw new Error(`Concurrency must be between 1 and ${maximumConcurrency}`);
   }
   let requests = 0; let rateLimited = false; let rateLimitConsecutive = 0;
   let resumeAt = null; let armYield = null;
@@ -244,7 +251,7 @@ export async function runArm(armName, options = {}) {
           requestCount: attemptRequests,
           requested: { providerId: arm.provider, transportProviderId: arm.transport,
             modelId: arm.model, effort: arm.effort, maxOutputTokens: OUTPUT_CAP,
-            transportTimeoutMs: TIMEOUT_MS }, accountPseudonym: provider.accountPseudonym,
+            transportTimeoutMs: timeoutMs }, accountPseudonym: provider.accountPseudonym,
           input: { pdfSha256: document.sha256, textSha256: document.textSha256,
             schemaSha256: expected.schemaSha256, promptSha256: expected.promptSha256 },
           wire, terminalSse: wire?.terminalSse ?? null,
@@ -283,7 +290,7 @@ export async function runArm(armName, options = {}) {
           requestCount: attemptRequests,
           requested: { providerId: arm.provider, transportProviderId: arm.transport,
             modelId: arm.model, effort: arm.effort, maxOutputTokens: OUTPUT_CAP,
-            transportTimeoutMs: TIMEOUT_MS }, accountPseudonym: provider.accountPseudonym,
+            transportTimeoutMs: timeoutMs }, accountPseudonym: provider.accountPseudonym,
           wire: details.wire, terminalSse: details.wire?.terminalSse ?? null,
           actual: actualSummary(actual),
           cap: receiptCap(arm, actual?.usage),
@@ -316,7 +323,7 @@ export async function runArm(armName, options = {}) {
 
   let cursor = 0;
   const worker = async () => {
-    const provider = await createProvider(arm, { timeoutMs: TIMEOUT_MS,
+    const provider = await createProvider(arm, { timeoutMs,
       beforeRequest() {
         if (requests >= MAX_REQUESTS) throw new ProviderError("REQUEST_BUDGET_SUSPENDED");
         requests += 1;

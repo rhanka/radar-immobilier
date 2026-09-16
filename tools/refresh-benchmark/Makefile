@@ -1477,6 +1477,7 @@ run-v101-lane: t1-v100-snapshot check-v101-tools
 	  --mount type=bind,source=$(KEYRING_SOURCE),target=/keyring-source,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
 	  -e BENCHMARK_CAMPAIGN=$(V101_CAMPAIGN) \
+	  -e BENCHMARK_LANE_CONCURRENCY \
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
 	  -e OPENAI_API_KEY -e ANTHROPIC_API_KEY -e MISTRAL_API_KEY \
 	  -w /src $(NODE_IMAGE) sh -c \

@@ -5,13 +5,15 @@ import { resolve } from "node:path";
 import test from "node:test";
 
 import { arms, laneArms, receiptCap, usageCostUsd } from "./v101-arms.mjs";
-import { advanceCircuit, artifactPaths, classifyFailure, laneCircuitAction, providerGatePassed,
+import { advanceCircuit, artifactPaths, classifyFailure, laneCircuitAction, laneConcurrency,
+  providerGatePassed,
   rateLimitPlan, releaseRateLimitIntent, replayTransportGatePassed, resetRateLimitState,
   resumeDecision, retryAt, updateGlobalStatus, writeImmutable, writeIntent }
   from "./v101-runner-state.mjs";
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
 import { codexCapOption } from "./v101-provider.mjs";
 import { armExecutionRoot } from "./score-v101.mjs";
+import { timeoutMsForArm } from "./run-arm.mjs";
 import { circuitClosureFor, selectJudgeDocuments } from "./v101-judge-freeze.mjs";
 import { judgeConfig, judgeMessages } from "./v101-judge-run.mjs";
 import { summarizeJudgeVerdicts, summarizeReceipts } from "./v101-report.mjs";
@@ -21,6 +23,18 @@ test("should enumerate every addressable arm when Codex 5.3 is unavailable", () 
   assert.equal(Object.keys(arms).length, 26);
   assert.deepEqual(Object.fromEntries(Object.entries(laneArms).map(([key, value]) =>
     [key, value.length])), { cloud: 6, codex: 12, openai: 1, anthropic: 6, mistral: 1 });
+});
+
+test("should keep lane concurrency defaults and accept a bounded override", () => {
+  assert.equal(laneConcurrency("anthropic", false, ""), 1);
+  assert.equal(laneConcurrency("codex", true, ""), 2);
+  assert.equal(laneConcurrency("anthropic", false, "3"), 3);
+  assert.throws(() => laneConcurrency("codex", true, "3"), /between 1 and 2/u);
+});
+
+test("should extend only xhigh transport timeouts", () => {
+  assert.equal(timeoutMsForArm(arms["luna-high"]), 480_000);
+  assert.equal(timeoutMsForArm(arms["luna-xhigh"]), 900_000);
 });
 
 test("should score v101b Codex receipts from the isolated replay root", () => {
