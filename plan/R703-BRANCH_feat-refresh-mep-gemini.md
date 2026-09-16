@@ -37,7 +37,7 @@ Prepare #703 production PV refresh with Gemini 3.8 Flash medium and measured acc
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0 — Rules, baseline and deployment path inspected.
-- [ ] Lot 1 — Runtime dependency, Gemini medium defaults and regression tests.
+- [x] Lot 1 — Runtime dependency, Gemini medium defaults and regression tests authored.
 - [x] Lot 2 — Only causal production schedule armed; quota-compatible resources; immutable CD pin.
 - [ ] Lot 3 — Scoped tests, render assertions, harness gates and independent review.
 - [ ] Lot 4 — Real refresh attempt and v2 receipt; production handoff.
