@@ -77,6 +77,7 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 - [ ] Lot 26 — Finish and report the complete v101b campaign.
   - [x] Bound 429 suspension, resume the cloud lane, and launch the full Codex replay.
   - [x] Publish per-arm class-based health every 15 minutes and measure ten-minute throughput.
+  - [x] Measure seat quota observables and publish the conditional seat-versus-token projection.
   - [ ] Close every arm by completion or a documented circuit cause.
   - [ ] Score strict, C-prime, and oracle v2 metrics and run both frozen blind judges.
   - [ ] Publish the final report, verify secret absence, push the branch, and deliver the conductor report.
