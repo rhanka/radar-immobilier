@@ -12,7 +12,7 @@ import { advanceCircuit, artifactPaths, classifyFailure, laneCircuitAction, prov
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
 import { codexCapOption } from "./v101-provider.mjs";
 import { armExecutionRoot } from "./score-v101.mjs";
-import { selectJudgeDocuments } from "./v101-judge-freeze.mjs";
+import { circuitClosureFor, selectJudgeDocuments } from "./v101-judge-freeze.mjs";
 import { judgeConfig, judgeMessages } from "./v101-judge-run.mjs";
 import { summarizeReceipts } from "./v101-report.mjs";
 
@@ -46,6 +46,14 @@ test("should keep model identity out of blind judge messages", () => {
     { pages: [{ page: 1, text: "Municipal record." }] });
   assert.equal(JSON.stringify(messages).includes("gpt-5.6-terra"), false);
   assert.equal(JSON.stringify(messages).includes("claude-opus"), false);
+});
+
+test("should require an explicit cause before judging a circuit-closed gap", () => {
+  assert.deepEqual(circuitClosureFor({ arms: { "sonnet46-cloud-high": {
+    cause: "network_error", measuredAt: "2026-09-16T04:00:00Z" } } },
+  "sonnet46-cloud-high"), { cause: "network_error", measuredAt: "2026-09-16T04:00:00Z" });
+  assert.throws(() => circuitClosureFor({ arms: {} }, "sonnet46-cloud-high"),
+    /No measured circuit closure/u);
 });
 
 test("should calculate metered cost from normalized usage", () => {
