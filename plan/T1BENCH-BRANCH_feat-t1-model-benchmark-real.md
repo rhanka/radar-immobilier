@@ -65,11 +65,11 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
   - [x] Disclose the unenforced cap in every Codex receipt and classify observed output above 32,768 tokens out of cap.
   - [x] Pass the two-document `luna-low` gate and preflight `claude-opus-4-6-thinking` as the second judge.
   - [x] Launch the separate Codex lane at concurrency 2 and verify it after three minutes without restarting phase 2.
-- [ ] Lot 24 — Diagnose the v101 failures and launch the isolated v101b replay.
+- [x] Lot 24 — Diagnose the v101 failures and launch the isolated v101b replay.
   - [x] Reconcile receipt timing and reproduce account discovery in shell and unit-like environments.
   - [x] Pin benchmark tooling to llm-mesh 0.19.3 and re-prove Codex wire-cap materialization.
   - [x] Freeze v101b and pass three-request no-active-account provider gates.
-  - [ ] Launch v101b from the interactive environment and verify four provider files.
+  - [x] Launch v101b from the interactive environment and verify four provider files.
 
 ## Gates
 
