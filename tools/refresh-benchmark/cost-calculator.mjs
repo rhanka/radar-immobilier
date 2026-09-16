@@ -352,13 +352,15 @@ export function buildSeatComparisons(arms, observations = []) {
     const observation = byArm.get(arm.arm);
     for (const [plan, details] of Object.entries(SUBSCRIPTION_PLANS[arm.provider])) {
       const base = observation?.basePlan ? SUBSCRIPTION_PLANS[arm.provider][observation.basePlan] : null;
-      const scale = base && arm.observed.status !== "N-A"
-        ? details.limitMultiplier / base.limitMultiplier : null;
+      const scale = arm.observed.status === "N-A" ? null
+        : base ? details.limitMultiplier / base.limitMultiplier : 1;
       const docsPerMonth = scale === null ? null : arm.observed.docsPerMonth * scale;
       const breakEvenDocuments = arm.apiUsdPerDocument === null
         ? null : Math.floor(details.monthlyUsd / arm.apiUsdPerDocument) + 1;
       rows.push({ arm: arm.arm, provider: arm.provider, plan,
         monthlyUsd: details.monthlyUsd,
+        capacityBasis: scale === null ? "N-A"
+          : base ? "scaled-from-base-plan" : "conditional-plan-is-observed-tier",
         docsPerWeek: scale === null ? null : arm.observed.docsPerWeek * scale,
         docsPerMonth,
         acceptedDocsPerMonth: docsPerMonth === null || arm.acceptedRate === null
@@ -478,11 +480,11 @@ export function renderMarkdown(report) {
       + `${capacity ? count(capacity.tokensPerWeek, 0) : "N-A"} | `
       + `${money(arm.apiUsdPerDocument)} | ${money(arm.apiUsdPerAccepted)} |`);
   }
-  lines.push("", "Les capacités par palier restent N-A quand le palier observé 1x/5x/20x est source-gap. Les seuils économiques ne dépendent que du prix mensuel et du coût API mesuré.", "",
-    "| Arm | Palier | USD/mois | Docs/semaine | Docs/mois | Siège/doc | Seuil strict siège < API | Atteignable/siège | Sièges pour 1 000 docs/mois | Siège / 1 000 | API / 1 000 |",
-    "|---|---|---:|---:|---:|---:|---:|---|---:|---:|---:|" );
+  lines.push("", "Quand le palier observé 1x/5x/20x est source-gap, chaque ligne est conditionnelle: elle suppose que ce palier est celui du siège observé, sans extrapolation de multiplicateur. Avec `basePlan` renseigné, les autres lignes sont mises à l'échelle. Les seuils économiques ne dépendent que du prix mensuel et du coût API mesuré.", "",
+    "| Arm | Palier | Base capacité | USD/mois | Docs/semaine | Docs/mois | Siège/doc | Seuil strict siège < API | Atteignable/siège | Sièges pour 1 000 docs/mois | Siège / 1 000 | API / 1 000 |",
+    "|---|---|---|---:|---:|---:|---:|---:|---|---:|---:|---:|" );
   for (const row of report.seatComparison.rows) {
-    lines.push(`| ${row.arm} | ${row.provider}/${row.plan} | ${money(row.monthlyUsd)} | `
+    lines.push(`| ${row.arm} | ${row.provider}/${row.plan} | ${row.capacityBasis} | ${money(row.monthlyUsd)} | `
       + `${row.docsPerWeek === null ? "N-A" : count(row.docsPerWeek, 1)} | `
       + `${row.docsPerMonth === null ? "N-A" : count(row.docsPerMonth, 1)} | `
       + `${money(row.seatUsdPerDocument)} | ${count(row.breakEvenDocuments)} | `
