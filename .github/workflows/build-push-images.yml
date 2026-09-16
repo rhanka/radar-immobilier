@@ -1403,7 +1403,7 @@ jobs:
       - name: Deploy refresh CronJobs (prod)
         if: ${{ vars.REFRESH_CRONJOB_PROD_ENABLED == 'true' }}
         env:
-          SHA: ${{ steps.vars.outputs.sha }}
+          DIG_API: ${{ steps.pick.outputs.api }}
         run: |
           set -euo pipefail
           kver=5.4.3
@@ -1411,10 +1411,10 @@ jobs:
           curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
           sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
           cd deploy/k8s/refresh-cronjobs-prod
-          kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api:${SHA}
+          kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api@${DIG_API}
           kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n radar-immobilier apply -f -
-          echo "refresh CronJobs deployed to radar-immobilier (radar-api:${SHA}, suspend:false):"
-          kubectl -n radar-immobilier get cronjob radar-refresh-scrape radar-refresh-projection -o wide || true
+          echo "Causal PV refresh deployed to radar-immobilier (radar-api@${DIG_API}):"
+          kubectl -n radar-immobilier get cronjob radar-refresh-pv radar-refresh-scrape radar-refresh-projection -o wide
 
       - name: Wait for rollouts
         run: |

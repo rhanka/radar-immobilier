@@ -117,7 +117,7 @@ async function main(): Promise<void> {
       modelPolicy: `${selectedProvider}/${model}/${effort}`,
       budgetLimit: positive("REFRESH_BUDGET_LIMIT", 20_000, 1_000_000),
       maximumAttempts,
-      maxOutputTokens: positive("REFRESH_MAX_OUTPUT_TOKENS", 4_096, 65_536),
+      maxOutputTokens: positive("REFRESH_MAX_OUTPUT_TOKENS", 32_768, 65_536),
       acquisitionLimit: positive("REFRESH_ACQUISITION_LIMIT", 1, 100), signal: controller.signal,
       ...(acquire ? { acquire } : {}) });
     logger.info({ ...result, modelCalls }, "refresh-pv: completed");

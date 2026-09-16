@@ -113,7 +113,7 @@ export function createRefreshMesh(options: RefreshMeshOptions): RefreshMeshBundl
     routingSubject: options.routingSubject,
     adapters: {
       gemini: new GeminiAdapter({
-        client: options.geminiClient ?? new CloudCodeRuntimeClient(),
+        client: options.geminiClient ?? new CloudCodeRuntimeClient(bindRefreshFetchSignal(fetch, options.signal)),
       }),
       openai: new OpenAIAdapter({
         client: options.openAiClient ?? new CodexRuntimeClient({

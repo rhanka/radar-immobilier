@@ -45,12 +45,24 @@ function identity(baselineHash = "sha256:" + "b".repeat(64)): RefreshRunIdentity
     profileHash: "sha256:" + "c".repeat(64),
     registryHash: "sha256:" + "d".repeat(64),
     packageVersion: "0.18.0",
-    modelPolicy: "gemini:gemini-3.8-flash",
+    modelPolicy: "gemini/gemini-3.8-flash/medium",
     exclusions: ["signal:excluded"],
   };
 }
 
 describe("refresh durable state", () => {
+  it("should not resume a completed extraction made with another model or effort", async () => {
+    const store = new MemoryStore();
+    for (const modelPolicy of ["gemini/gemini-3.8-flash/low", "openai/gpt-5.6-luna/high"]) {
+      const previous = await openRefreshState(store, { ...identity(), modelPolicy }, 2);
+      const reserved = await reserveRefreshChunk(store, previous, "chunk.1", 1);
+      await completeRefreshChunk(store, reserved, "chunk.1", { nodes: [] });
+      const medium = await openRefreshState(store, identity(), 2);
+      expect(medium.key).not.toBe(previous.key);
+      expect((await reserveRefreshChunk(store, medium, "chunk.1", 1)).shouldCall).toBe(true);
+    }
+  });
+
   it("should resume a completed same-input chunk without another call", async () => {
     const store = new MemoryStore();
     let handle = await openRefreshState(store, identity(), 6);
