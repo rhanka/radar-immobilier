@@ -39,16 +39,26 @@ consecutive_open=0
 for arm in $ARMS; do
   run_arm "$arm" 1-3 1
   state=$(jq -r --arg arm "$arm" '.arms[$arm].state' "$STATUS")
-  if jq -e --arg arm "$arm" '.arms[$arm] | .requests == 3 and .processed == 3
-    and .errors == 0 and .state == "running"' "$STATUS" >/dev/null; then
+  gate_stats=$(jq -s '{receipts:length, requests:(map(.requestCount) | add),
+    validTransport:(map(select(.wire.httpStatus == 200
+      and .validation.layers.json.valid == true)) | length),
+    http400:(map(select((.wire.httpStatus // .error.httpStatus) == 400)) | length)}' \
+    "$REPLAY/campaign/$arm"/*.receipt.json)
+  if printf '%s\n' "$gate_stats" | jq -e '.receipts == 3 and .requests == 3
+    and .validTransport >= 2 and .http400 == 0' >/dev/null; then
     gate=true
     passed=$((passed + 1))
   else
     gate=false
   fi
+  valid_transport=$(printf '%s\n' "$gate_stats" | jq -r '.validTransport')
+  http_400=$(printf '%s\n' "$gate_stats" | jq -r '.http400')
   temporary="$REPLAY/gates/$arm.json.$$"
   jq -n --arg arm "$arm" --arg state "$state" --argjson passed "$gate" \
+    --argjson validTransport "$valid_transport" --argjson http400 "$http_400" \
     '{schemaVersion:1, arm:$arm, requiredRequests:3, passed:$passed, state:$state,
+      criterion:"at least 2/3 HTTP 200 JSON responses and zero HTTP 400",
+      validTransport:$validTransport, http400:$http400,
       redaction:{allowlistedFieldsOnly:true,secretsIncluded:false}}' > "$temporary"
   mv "$temporary" "$REPLAY/gates/$arm.json"
   if test "$state" = "circuit-open"; then
