@@ -298,13 +298,14 @@ spec:
                 - configMapRef: { name: radar-api }
               env:
                 - { name: NODE_OPTIONS, value: "--max-old-space-size=1024 --dns-result-order=ipv4first" }
-                - { name: REFRESH_PROVIDER, value: "openai" }
-                - { name: REFRESH_MODEL, value: "gpt-5.6-luna" }
-                - { name: REFRESH_REASONING_EFFORT, value: "high" }
+                - { name: REFRESH_PROVIDER, value: "gemini" }
+                - { name: REFRESH_MODEL, value: "gemini-3.8-flash" }
+                - { name: REFRESH_REASONING_EFFORT, value: "medium" }
                 - { name: REFRESH_MAXIMUM_ATTEMPTS, value: "1" }
                 - { name: REFRESH_TIMEOUT_MS, value: "900000" }
                 - { name: REFRESH_BUDGET_LIMIT, value: "20000" }
-                - { name: REFRESH_MAX_OUTPUT_TOKENS, value: "4096" }
+                # Full municipal minutes need the campaign's 32K output ceiling.
+                - { name: REFRESH_MAX_OUTPUT_TOKENS, value: "32768" }
                 - { name: REFRESH_ACQUISITION_LIMIT, value: "1" }
                 - { name: SENTROPIC_LLM_MESH_KEYRING_DIR, value: "/keyring/runtime" }
                 - name: REFRESH_PRINCIPAL_REF
