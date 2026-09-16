@@ -10,14 +10,15 @@ import {
   aggregateReceipts,
   apiCost,
   billableUsage,
+  buildSeatComparisons,
   buildReport,
-  chatgptReserveRange,
   loadReceiptEntries,
   parseArgs,
   regressObservedRates,
   renderMarkdown,
   simulatedCost,
   subscriptionCost,
+  validateSeatObservations,
 } from "./cost-calculator.mjs";
 
 const close = (actual, expected, tolerance = 1e-12) => {
@@ -65,12 +66,10 @@ test("should price thinking tokens as output in API and simulated modes", () => 
   close(simulated.blendedUsdPerMillion, api / 1.75);
 });
 
-test("should calculate a subscription equivalent from weekly tokens", () => {
+test("should calculate a subscription equivalent only from explicit weekly tokens", () => {
   const result = subscriptionCost(2_000_000, 20, 1_000_000);
   close(result.usdPerToken, 20 / (1_000_000 * 52 / 12));
   close(result.usd, 40 / (52 / 12));
-  assert.deepEqual(chatgptReserveRange("gpt-5.6-sol", "pro-5x", 10_000),
-    [500_000, 5_000_000]);
 });
 
 test("should aggregate one synthetic schema-v2 receipt", () => {
@@ -82,7 +81,47 @@ test("should aggregate one synthetic schema-v2 receipt", () => {
   assert.equal(arm.thinkingTokens, 200);
   assert.equal(arm.outputTokens, 700);
   assert.equal(arm.totalTokens, 1700);
+  assert.equal(arm.acceptedDocuments, 0);
   close(arm.apiUsd, (1000 * 0.75 + 700 * 3.75) / 1_000_000);
+});
+
+test("should project a weekly seat observation and fixed 1000-document cost", () => {
+  const arm = { arm: "sol-medium", documents: 10, attemptedDocuments: 10,
+    acceptedDocuments: 8, totalTokens: 10_000, apiUsd: 2 };
+  const observations = validateSeatObservations({ schemaVersion: 1, observations: [{
+    arm: "sol-medium", provider: "chatgpt", status: "scenario",
+    method: "account-percent/campaign-token-ratio", sourceStatus: "observed",
+    basePlan: "plus", windowMinutes: 10_080, usedPercent: 10,
+    campaignTokens: 10_000,
+  }] });
+  const result = buildSeatComparisons([arm], observations);
+  close(result.arms[0].observed.docsPerWeek, 100);
+  close(result.arms[0].observed.docsPerMonth, 100 * 52 / 12);
+  const plus = result.rows.find(({ plan }) => plan === "plus");
+  const pro5x = result.rows.find(({ plan }) => plan === "pro-5x");
+  close(plus.docsPerMonth, 100 * 52 / 12);
+  close(pro5x.docsPerMonth, 500 * 52 / 12);
+  assert.equal(plus.seatsFor1000Documents, 3);
+  assert.equal(plus.seatUsdFor1000Documents, 60);
+  assert.equal(plus.breakEvenDocuments, 101);
+  assert.equal(plus.breakEvenReachable, true);
+  close(plus.acceptedDocsPerMonth, plus.docsPerMonth * 0.8);
+});
+
+test("should reject non-allowlisted observation fields and keep five-hour capacity N-A", () => {
+  assert.throws(() => validateSeatObservations({ schemaVersion: 1, observations: [{
+    arm: "sol-medium", provider: "chatgpt", status: "N-A",
+    reason: "weekly-window-source-gap", unsafe: "must not render",
+  }] }), /Unknown observation field/u);
+  const observations = validateSeatObservations({ schemaVersion: 1, observations: [{
+    arm: "gemini-low", provider: "gemini", status: "scenario",
+    method: "account-percent/campaign-token-ratio", sourceStatus: "observed",
+    basePlan: "ai-pro", windowMinutes: 300, usedPercent: 10, campaignTokens: 10_000,
+  }] });
+  const result = buildSeatComparisons([{ arm: "gemini-low", documents: 10,
+    attemptedDocuments: 10, acceptedDocuments: 8, totalTokens: 10_000, apiUsd: 1 }], observations);
+  assert.equal(result.arms[0].status, "N-A");
+  assert.equal(result.arms[0].reason, "non-weekly-window");
 });
 
 test("should load attempts from campaign and codex replay without deduplication", async () => {
@@ -112,11 +151,13 @@ test("should recover input and output rates by receipt regression", () => {
   close(rates.outputUsdPerMillion, 8);
 });
 
-test("should parse CLI plans and render a report", () => {
+test("should parse a seat-observation path and render a report", () => {
   const options = parseArgs(["--campaign", "v101b", "--plan-gemini", "pro",
-    "--plan-chatgpt", "plus", "--gemini-weekly-tokens", "1000000"]);
+    "--plan-chatgpt", "plus", "--gemini-weekly-tokens", "1000000",
+    "--seat-observations", "seat.json"]);
   assert.equal(options.geminiPlan, "ai-pro");
+  assert.equal(options.seatObservations, "seat.json");
   const report = buildReport([receipt()], { ...options, cycleDocuments: 100 });
-  assert.match(renderMarkdown(report), /quota burn = 0%/u);
+  assert.match(renderMarkdown(report), /Siège vs token/u);
   assert.equal(report.arms[0].perBenchmarkCycle.documents, 100);
 });
