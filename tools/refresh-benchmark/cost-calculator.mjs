@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Prices are USD per million tokens. `output` includes provider-reported thinking tokens.
 export const RATE_CARDS = Object.freeze({
@@ -366,4 +367,82 @@ export function renderMarkdown(report) {
     "Without a numeric before/after observable, burning requests cannot estimate tokens per quota unit or weekly reserve. The alternative is exhaustion to HTTP 429, which is not authorized without explicit owner GO. No request was sent and no receipt was written under `burn/`.", "",
     "Consequently Gemini tokens/week and equivalent USD/token are N-A. ChatGPT equivalents are also N-A in this snapshot until the owner supplies `--plan-chatgpt`; no Codex burn was performed while its queues were active.", "");
   return `${lines.join("\n")}\n`;
+}
+
+const GEMINI_PLAN_ALIASES = Object.freeze({
+  pro: "ai-pro", "ai-pro": "ai-pro",
+  "ultra-5x": "ai-ultra-5x", "ai-ultra-5x": "ai-ultra-5x",
+  "ultra-20x": "ai-ultra-20x", "ai-ultra-20x": "ai-ultra-20x",
+});
+
+export function parseArgs(argv) {
+  const options = { format: "md", campaign: null, geminiPlan: null, chatgptPlan: null,
+    geminiWeeklyTokens: null, chatgptWeeklyTokens: null };
+  const valued = new Set(["--campaign", "--plan-gemini", "--plan-chatgpt", "--format",
+    "--gemini-weekly-tokens", "--chatgpt-weekly-tokens"]);
+  for (let index = 0; index < argv.length; index += 1) {
+    const flag = argv[index];
+    if (flag === "--help") return { ...options, help: true };
+    if (!valued.has(flag)) throw new Error(`Unknown argument: ${flag}`);
+    const value = argv[index += 1];
+    if (!value) throw new Error(`Missing value for ${flag}`);
+    if (flag === "--campaign") options.campaign = value;
+    else if (flag === "--format") options.format = value;
+    else if (flag === "--plan-gemini") options.geminiPlan = GEMINI_PLAN_ALIASES[value] ?? value;
+    else if (flag === "--plan-chatgpt") options.chatgptPlan = value;
+    else {
+      const number = Number(value);
+      if (!(number > 0)) throw new Error(`${flag} must be a positive number`);
+      options[flag === "--gemini-weekly-tokens" ? "geminiWeeklyTokens"
+        : "chatgptWeeklyTokens"] = number;
+    }
+  }
+  if (!options.campaign || !/^[A-Za-z0-9._-]+$/u.test(options.campaign)) {
+    throw new Error("--campaign is required and must be a safe campaign name");
+  }
+  if (!new Set(["md", "json"]).has(options.format)) throw new Error("--format must be md or json");
+  if (options.geminiPlan && !SUBSCRIPTION_PLANS.gemini[options.geminiPlan]) {
+    throw new Error(`Unknown Gemini plan: ${options.geminiPlan}`);
+  }
+  if (options.chatgptPlan && !SUBSCRIPTION_PLANS.chatgpt[options.chatgptPlan]) {
+    throw new Error(`Unknown ChatGPT plan: ${options.chatgptPlan}`);
+  }
+  return options;
+}
+
+export const HELP = `Usage: node cost-calculator.mjs --campaign <name> [options]
+
+Options:
+  --plan-gemini pro|ultra-5x|ultra-20x
+  --plan-chatgpt plus|pro-5x|pro-20x
+  --gemini-weekly-tokens <tokens>    Measured/estimated weekly reserve override
+  --chatgpt-weekly-tokens <tokens>   Override published-message estimate
+  --format md|json                   Default: md
+`;
+
+async function manifestDocumentCount(repositoryRoot, campaign) {
+  const path = join(repositoryRoot, "docs/reviews/refresh-benchmark", campaign, "manifest.json");
+  const manifest = JSON.parse(await readFile(path, "utf8"));
+  const value = manifest.corpus?.documentCount ?? (Array.isArray(manifest.documents)
+    ? manifest.documents.length : Object.keys(manifest.documents ?? {}).length);
+  return Number.isInteger(value) && value > 0 ? value : null;
+}
+
+export async function runCli(argv, write = (value) => process.stdout.write(value)) {
+  const options = parseArgs(argv);
+  if (options.help) { write(HELP); return null; }
+  const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+  const entries = await loadReceiptEntries(repositoryRoot, options.campaign);
+  const cycleDocuments = await manifestDocumentCount(repositoryRoot, options.campaign);
+  const report = buildReport(entries, { ...options, cycleDocuments });
+  write(options.format === "json" ? `${JSON.stringify(report, null, 2)}\n` : renderMarkdown(report));
+  return report;
+}
+
+const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
+if (invokedPath === fileURLToPath(import.meta.url)) {
+  runCli(process.argv.slice(2)).catch((error) => {
+    process.stderr.write(`cost-calculator: ${error.message}\n`);
+    process.exitCode = 1;
+  });
 }
