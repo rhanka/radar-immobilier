@@ -109,12 +109,25 @@ verify-renders:
 	    awk 'BEGIN{RS="\n---\n"} /[^[:space:]]/ { if ($$0 !~ /apiVersion:/ || $$0 !~ /kind:/) { print "missing apiVersion/kind in refresh render" > "/dev/stderr"; bad=1 } } END{ exit bad }' "$$render"; \
 	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 3 \
 	      || { echo "refresh render must contain exactly three CronJobs: $$render" >&2; exit 1; }; \
+	    test "$$(grep -c '^kind: PersistentVolumeClaim$$' "$$render")" -eq 1; \
+	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ { \
+	      pv=($$0 ~ /name: radar-refresh-pv\n/); \
+	      if (pv && $$0 !~ /suspend: false/) exit 1; \
+	      if (!pv && $$0 !~ /suspend: true/) exit 1; \
+	      if (pv && ($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: gemini\n/ \
+	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
+	        || $$0 !~ /name: REFRESH_REASONING_EFFORT\n[ ]+value: medium\n/ \
+	        || $$0 !~ /name: REFRESH_MAX_OUTPUT_TOKENS\n[ ]+value: "32768"/)) exit 1; \
+	    }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
 	    awk 'function flush(){if(active && literal && reference){print "mixed value/valueFrom: " name > "/dev/stderr"; bad=1} literal=0; reference=0} \
 	      /^[[:space:]]*- name:/ {flush(); active=1; name=$$0; next} \
 	      active && /^[[:space:]]+value:[[:space:]]/ {literal=1} \
 	      active && /^[[:space:]]+valueFrom:[[:space:]]*$$/ {reference=1} \
 	      END {flush(); exit bad}' "$$render"; \
-	  done
+	  done; \
+	  awk 'BEGIN{RS="\n---\n"} /name: radar-refresh-pv\n/ { \
+	    if ($$0 !~ /memory: 768Mi/ || $$0 !~ /--max-old-space-size=512/) exit 1; \
+	  }' "$$tmp/prod.yaml"
 
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
