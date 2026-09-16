@@ -1503,6 +1503,7 @@ score-v101: t1-v100-snapshot check-v101-tools
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
 	  -e BENCHMARK_CAMPAIGN=$(V101_CAMPAIGN) \
 	  -e BENCHMARK_RETRY_NETWORK_TERMINAL \
+	  -e BENCHMARK_TRANSPORT_REPLAY_STARTED_AT=$(TRANSPORT_REPLAY_STARTED_AT) \
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /t1-source /workspace/t1 && exec node /workspace/node_modules/tsx/dist/cli.mjs \
 	    tools/refresh-benchmark/score-v101.mjs $(ARM)'

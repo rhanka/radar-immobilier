@@ -100,12 +100,15 @@ test("should summarize terminal receipts by failure class", () => {
 
 test("should report transport replays and acceptance-adjusted F1", () => {
   const base = { documentId: "replayed", status: "failed", attemptNumber: 2,
-    latency: { totalMs: 1 }, error: { category: "network" }, actual: null,
+    latency: { totalMs: 1, startedAt: "2026-09-16T15:00:00Z" },
+    error: { category: "network" }, actual: null,
     validation: { accepted: false, layers: {} } };
   const replayed = { ...base, status: "completed", attemptNumber: 3, error: null,
+    latency: { totalMs: 1, startedAt: "2026-09-16T19:40:00Z" },
     actual: { usage: { inputTokens: 1, outputTokens: 1 } },
     validation: { accepted: true, layers: { json: { valid: true }, v9: {} } } };
-  assert.equal(summarizeReceipts([base, replayed], arms.gpt41).transportReplayed, 1);
+  assert.equal(summarizeReceipts([base, replayed], arms["sonnet5-off"], 0,
+    "2026-09-16T19:36:00Z").transportReplayed, 1);
   assert.equal(acceptanceAdjustedF1(0.5, 75, 100), 0.375);
   assert.equal(acceptanceAdjustedF1(null, 75, 100), null);
 });
