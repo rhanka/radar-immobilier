@@ -29,6 +29,7 @@ Prepare #703 production PV refresh with Gemini 3.8 Flash medium and measured acc
 - [x] BR703-EX1: fix production promotion image pin and refresh status in build-push-images.yml; required to deploy the accepted digest, rollback by reverting those hunks.
 - [x] Current kube context is Scaleway; OVH geo identity cannot inspect Immo. Production observations must identify their cluster.
 - [x] Production handoff documents tag/variable gates and missing OVH inventory access; no production mutation.
+- [x] Review finding accepted: bind Gemini catalogue fetch to the run abort signal; regression covers pending discovery cancellation.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single existing branch; independent review only, no delegated implementation.
