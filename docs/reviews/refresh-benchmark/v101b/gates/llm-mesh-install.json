@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "package": "@sentropic/llm-mesh",
+  "version": "0.19.3",
+  "registryShasum": "f6694204cc5dc03a3bd34bda289f6674ffa0e9ad",
+  "downloadedTarballSha1": "f6694204cc5dc03a3bd34bda289f6674ffa0e9ad",
+  "registryIntegrity": "sha512-yf2Mqxm6/cdgYCZJMX3xhed8oPf9P9Yfgedz3kWIpz9AiB453SrrLpEssZowFzg034NXCWU92tM4+0qms8E4gw==",
+  "downloadedTarballSha512": "c9fd8cab19bafdc760602649317df185e77ca0f7fd3fd61f81e773de4588a73f40881e39dd2aeb2e912cb19a30173834df835709653ddad338fb4aa6b3c13883",
+  "integrityCrossChecked": true,
+  "redaction": { "allowlistedFieldsOnly": true, "secretsIncluded": false }
+}

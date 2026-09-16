@@ -11,6 +11,7 @@ import { sanitize } from "./v101-probe-lib.mjs";
 
 const MAX_REQUESTS = 200;
 const TIMEOUT_MS = 480_000;
+const CAMPAIGN = process.env.BENCHMARK_CAMPAIGN ?? "v101";
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const required = (name) => process.env[name]
   || (() => { throw new Error(`${name} is required`); })();
@@ -83,7 +84,7 @@ async function progressFor(root, manifest, armName) {
 
 export async function runArm(armName, options = {}) {
   const arm = arms[armName];
-  if (!arm) throw new Error(`Unknown v101 arm: ${armName ?? "N-A"}`);
+  if (!arm) throw new Error(`Unknown ${CAMPAIGN} arm: ${armName ?? "N-A"}`);
   const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
   const resultRoot = required("BENCHMARK_RESULT_ROOT");
   const executionRoot = process.env.BENCHMARK_EXECUTION_ROOT ?? resultRoot;
@@ -94,7 +95,7 @@ export async function runArm(armName, options = {}) {
   await Promise.all([mkdir(resolve(executionRoot, "logs"), { recursive: true }),
     mkdir(resolve(executionRoot, "limits"), { recursive: true })]);
   const manifest = JSON.parse(await readFile(resolve(repositoryRoot,
-    "docs/reviews/refresh-benchmark/v101/manifest.json"), "utf8"));
+    `docs/reviews/refresh-benchmark/${CAMPAIGN}/manifest.json`), "utf8"));
   if (manifest.contract.version !== "immo-pv-extraction-v9"
     || manifest.contract.mainMergeCommit.slice(0, 8) !== "4e3a4db8"
     || manifest.outputCap.commonMaxOutputTokens !== OUTPUT_CAP) {
@@ -151,7 +152,7 @@ export async function runArm(armName, options = {}) {
       let actual = null; let wire = null; let qualityError = null; let accepted = false;
       let attemptRequests = 0;
       await writeIntent(paths, { schemaVersion: 2, state: "in-flight",
-        startedAt: new Date(started).toISOString(), campaign: "v101", arm: armName,
+        startedAt: new Date(started).toISOString(), campaign: CAMPAIGN, arm: armName,
         documentId: document.id, attempt,
         requested: { providerId: arm.provider, transportProviderId: arm.transport,
           modelId: arm.model, effort: arm.effort, maxOutputTokens: OUTPUT_CAP } });
@@ -196,7 +197,7 @@ export async function runArm(armName, options = {}) {
             catch (error) { qualityError = sanitize(error?.message ?? error); throw error; }
             await writeFile(input.outputPath, actual.text ?? "", "utf8");
             return { status: "completed", provider: arm.provider, mode: "benchmark",
-              outputPath: input.outputPath, audit: { campaign: "v101", arm: armName } };
+              outputPath: input.outputPath, audit: { campaign: CAMPAIGN, arm: armName } };
           } };
         try {
           const result = await extractRefreshProfile(corpus.chunks, { textClient, context,
@@ -209,7 +210,7 @@ export async function runArm(armName, options = {}) {
           qualityError ??= sanitize(error?.message ?? error);
         }
         const completed = Date.now();
-        const receipt = { schemaVersion: 2, campaign: "v101", arm: armName,
+        const receipt = { schemaVersion: 2, campaign: CAMPAIGN, arm: armName,
           documentId: document.id, attemptNumber: attempt, status: "completed", terminal: true,
           requestCount: attemptRequests,
           requested: { providerId: arm.provider, transportProviderId: arm.transport,
@@ -241,7 +242,7 @@ export async function runArm(armName, options = {}) {
         const completed = Date.now();
         const details = failureDetails(error, wire);
         const retryEligible = attempt === 1 && details.classified.retry;
-        const receipt = { schemaVersion: 2, campaign: "v101", arm: armName,
+        const receipt = { schemaVersion: 2, campaign: CAMPAIGN, arm: armName,
           documentId: document.id, attemptNumber: attempt, status: "failed", terminal: true,
           requestCount: attemptRequests,
           requested: { providerId: arm.provider, transportProviderId: arm.transport,
