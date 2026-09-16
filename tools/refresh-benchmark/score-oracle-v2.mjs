@@ -24,6 +24,11 @@ const normalized = (value) => value.normalize("NFC").toLocaleLowerCase("fr-CA")
 export const stripItemNumber = (value) => value.replace(/^\d+(?:\.\d+)*[.)]?\s+/, "");
 
 export const ORACLE_V2_ELIGIBLE_NODE_TYPES = Object.freeze(["Signal", "DesignationEvent", "Bylaw"]);
+const bylawStageToOracle = Object.freeze({
+  projet: "projet_reglement",
+  "1er_projet": "projet_reglement",
+  "2e_projet": "second_projet",
+});
 
 export const oracleV2Rules = Object.freeze({
   R1: "agenda item numbering stripped from anchor and candidate",
@@ -57,7 +62,8 @@ export function scoreValidV2(output, document, gold, options = {}) {
   for (const nodes of groups.values()) {
     const stages = new Set(nodes.flatMap((node) => {
       const properties = node.properties ?? node;
-      return [properties.etape, properties.stage, properties.stade];
+      return [properties.etape, properties.stage, properties.stade]
+        .map((stage) => node.node_type === "Bylaw" ? (bylawStageToOracle[stage] ?? stage) : stage);
     }).filter(Boolean));
     const records = nodes.flatMap((node) => [
       ...(node.citations ?? []),
