@@ -5,7 +5,7 @@ import { createLlmMeshFacade } from
 import { EncryptedFileKeyring } from
   "/workspace/node_modules/@sentropic/llm-mesh/dist/node/index.js";
 
-import { endpointPath, prompt, safeUsage, sha256 } from "./v101-probe-lib.mjs";
+import { endpointPath, prompt, safeUsage, sanitize, sha256 } from "./v101-probe-lib.mjs";
 
 function accountFor(accounts, providerId) {
   const eligible = accounts.filter((account) => account.providerId === providerId);
@@ -57,6 +57,13 @@ export async function probeMesh({ transport, model, effort, maxOutputTokens = 64
     const response = await fetch(url, { ...init, signal });
     request.httpStatus = response.status;
     request.durationMs = Date.now() - started;
+    if (!response.ok) {
+      const text = await response.clone().text();
+      let parsed = null;
+      try { parsed = JSON.parse(text); } catch { /* Preserve only a bounded sanitized string. */ }
+      request.responseError = sanitize(parsed?.error?.message ?? parsed?.detail ?? text);
+      request.responseErrorCode = sanitize(parsed?.error?.code ?? parsed?.code ?? "N-A");
+    }
     return response;
   };
   const client = transport === "codex"
@@ -68,7 +75,7 @@ export async function probeMesh({ transport, model, effort, maxOutputTokens = 64
       modelId: model,
       messages: [{ role: "user", content: promptText }],
       ...(effort ? { reasoning: { effort } } : {}),
-      maxOutputTokens,
+      ...(maxOutputTokens === null ? {} : { maxOutputTokens }),
       signal: AbortSignal.timeout(60_000),
     }, { auth: acquisition.material });
     const output = String(response.text ?? "").trim();
