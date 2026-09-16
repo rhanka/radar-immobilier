@@ -5,9 +5,10 @@ import { resolve } from "node:path";
 import test from "node:test";
 
 import { arms, laneArms, receiptCap, usageCostUsd } from "./v101-arms.mjs";
-import { advanceCircuit, artifactPaths, classifyFailure, providerGatePassed, rateLimitPlan,
-  releaseRateLimitIntent, replayTransportGatePassed, resetRateLimitState, resumeDecision, retryAt,
-  updateGlobalStatus, writeImmutable, writeIntent } from "./v101-runner-state.mjs";
+import { advanceCircuit, artifactPaths, classifyFailure, laneCircuitAction, providerGatePassed,
+  rateLimitPlan, releaseRateLimitIntent, replayTransportGatePassed, resetRateLimitState,
+  resumeDecision, retryAt, updateGlobalStatus, writeImmutable, writeIntent }
+  from "./v101-runner-state.mjs";
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
 import { codexCapOption } from "./v101-provider.mjs";
 
@@ -74,6 +75,9 @@ test("should stop a provider queue after two consecutive arm circuits", () => {
   assert.equal(queue.open, false);
   queue = advanceCircuit(queue, "arm-circuit-open", 2);
   assert.equal(queue.open, true);
+  assert.equal(laneCircuitAction("codex", queue), "stop-lane");
+  assert.equal(laneCircuitAction("cloud", queue), "continue");
+  assert.equal(laneCircuitAction("anthropic", queue), "continue");
   assert.equal(advanceCircuit({ code: "arm-circuit-open", consecutive: 1, open: false },
     null, 2).consecutive, 0);
 });

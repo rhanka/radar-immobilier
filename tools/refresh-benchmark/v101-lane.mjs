@@ -1,7 +1,7 @@
 import { laneArms } from "./v101-arms.mjs";
 import { runArm } from "./run-arm.mjs";
 import { scoreArm } from "./score-v101.mjs";
-import { advanceCircuit } from "./v101-runner-state.mjs";
+import { advanceCircuit, laneCircuitAction } from "./v101-runner-state.mjs";
 
 const wait = (ms) => new Promise((done) => setTimeout(done, ms));
 const lane = process.argv[2];
@@ -33,7 +33,10 @@ campaign: for (let block = 0; block < 5; block += 1) {
     }
     providerCircuit = advanceCircuit(providerCircuit,
       result.circuitOpen ? "arm-circuit-open" : null, 2);
-    if (providerCircuit.open) { providerStopped = true; break campaign; }
+    if (laneCircuitAction(lane, providerCircuit) === "stop-lane") {
+      providerStopped = true; break campaign;
+    }
+    if (providerCircuit.open) providerCircuit = advanceCircuit(undefined, null, 2);
     if (lane === "codex" && codexObserved < 20) {
       codexObserved += result.requests;
       if (result.rateLimited) codexFirstTwentyClear = false;
