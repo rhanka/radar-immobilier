@@ -70,6 +70,10 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
   - [x] Pin benchmark tooling to llm-mesh 0.19.3 and re-prove Codex wire-cap materialization.
   - [x] Freeze v101b and pass three-request no-active-account provider gates.
   - [x] Launch v101b from the interactive environment and verify four provider files.
+- [ ] Lot 25 — Diagnose the v101b Codex HTTP 400 failures and replay only Codex.
+  - [x] Prove the rejected wire parameter in four requests and capture the sanitized response body.
+  - [x] Add tested arm and provider circuit breakers and fail the three-request provider gate closed.
+  - [ ] Pass three requests per Codex arm and launch the isolated replay at concurrency two.
 
 ## Gates
 
@@ -94,3 +98,6 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 - `T1BENCH-EX3` — the owner explicitly requested the conductor delivery
   `.lanes/conductor/.remote/BENCH_CODEX_ARMS.md`; impact is one review-only Markdown file outside this
   worktree; rollback is deletion of that generated delivery. No repository source is affected.
+- `T1BENCH-EX4` — the owner explicitly requested the conductor delivery
+  `.lanes/conductor/.remote/BENCH_V101B_CODEX_400.md`; impact is one review-only Markdown file outside
+  this worktree; rollback is deletion of that generated delivery. No repository source is affected.

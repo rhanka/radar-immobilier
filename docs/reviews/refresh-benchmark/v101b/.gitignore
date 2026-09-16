@@ -6,3 +6,7 @@
 /status.json.lock/
 /campaign.pid
 /campaign.nohup.log
+/codex-replay/
+/codex-replay.pid
+/codex-replay.nohup.log
+/status-codex.json
