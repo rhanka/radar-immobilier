@@ -149,7 +149,9 @@ export async function collectV101bMetrics(resultRoot) {
       state: status.arms?.[arm.name]?.state ?? "unknown",
       ...summarizeReceipts(armReceipts, arm, limits),
       oracleV2AcceptedF1: oracle?.macroAccepted?.v2 ?? null,
+      oracleV2AcceptedMicroF1: oracle?.microAccepted?.v2 ?? null,
       oracleV2FixedF1: oracle?.macroFixed?.v2 ?? null,
+      oracleV2FixedMicroF1: oracle?.microFixed?.v2 ?? null,
       judges: judgesByArm[arm.name] ?? null });
   }
   return { schemaVersion: 1, campaign: "v101b", generatedAt: new Date().toISOString(),
@@ -160,7 +162,7 @@ export async function writeV101bReportData(resultRoot, output = resolve(resultRo
   "report-data.json")) {
   const temporary = `${output}.${process.pid}`;
   const data = await collectV101bMetrics(resultRoot);
-  await writeFile(temporary, `${JSON.stringify(data, null, 2)}\n`, { flag: "wx" });
+  await writeFile(temporary, `${JSON.stringify(data)}\n`, { flag: "wx" });
   await rename(temporary, output);
   return { output, arms: data.arms.length };
 }

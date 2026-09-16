@@ -15,6 +15,7 @@ import { armExecutionRoot } from "./score-v101.mjs";
 import { circuitClosureFor, selectJudgeDocuments } from "./v101-judge-freeze.mjs";
 import { judgeConfig, judgeMessages } from "./v101-judge-run.mjs";
 import { summarizeJudgeVerdicts, summarizeReceipts } from "./v101-report.mjs";
+import { microF1 } from "./v101-score-lib.mjs";
 
 test("should enumerate every addressable arm when Codex 5.3 is unavailable", () => {
   assert.equal(Object.keys(arms).length, 26);
@@ -78,6 +79,17 @@ test("should summarize terminal receipts by failure class", () => {
   assert.deepEqual(metrics, { processed: 4, accepted: 1, transport: 1, rateLimit: 2,
     json: 1, profile: 0, provenance: 1, budget: 0, latencyP50Ms: 1_000,
     latencyP95Ms: 3_000, inputTokens: 300, outputTokens: 60, costUsd: 0.00108 });
+});
+
+test("should micro-average complete-oracle counts", () => {
+  const cases = [
+    { v2: { tp: 2, fp: 1, fn: 3 } },
+    { v2: { tp: 4, fp: 2, fn: 0 } },
+    { partialOracle: true, v2: { tp: 99, fp: null, fn: 1 } },
+    { oracleAvailable: false, v2: { tp: 0, fp: 99, fn: 0 } },
+  ];
+  assert.equal(microF1(cases, (entry) => entry.v2), 12 / 18);
+  assert.equal(microF1([], (entry) => entry.v2), null);
 });
 
 test("should summarize blind usefulness without exposing aliases as model names", () => {
