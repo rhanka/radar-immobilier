@@ -5,8 +5,8 @@ import { pathToFileURL } from "node:url";
 
 import { arms, OUTPUT_CAP, receiptCap, usageCostUsd } from "./v101-arms.mjs";
 import { createProvider, ProviderError } from "./v101-provider.mjs";
-import { advanceCircuit, artifactPaths, classifyFailure, resumeDecision, retryAt,
-  updateGlobalStatus, writeImmutable, writeIntent } from "./v101-runner-state.mjs";
+import { advanceCircuit, artifactPaths, classifyFailure, rateLimitPlan, resetRateLimitState,
+  resumeDecision, updateGlobalStatus, writeImmutable, writeIntent } from "./v101-runner-state.mjs";
 import { sanitize } from "./v101-probe-lib.mjs";
 
 const MAX_REQUESTS = 200;
@@ -121,11 +121,13 @@ export async function runArm(armName, options = {}) {
   if (![1, 2].includes(concurrency) || (concurrency === 2 && arm.lane !== "codex")) {
     throw new Error("Only the Codex lane may use concurrency 2");
   }
-  let requests = 0; let rateLimited = false;
+  let requests = 0; let rateLimited = false; let rateLimitConsecutive = 0;
+  let resumeAt = null; let armYield = null;
   let circuit = advanceCircuit(undefined, null, 3);
   try {
     const priorStatus = JSON.parse(await readFile(statusPath, "utf8"));
     requests = Number(priorStatus.arms?.[armName]?.requests ?? 0);
+    rateLimitConsecutive = Number(priorStatus.arms?.[armName]?.rateLimitConsecutive ?? 0);
   } catch (error) { if (error?.code !== "ENOENT") throw error; }
   const progress = await progressFor(campaignRoot, manifest, armName);
   const log = async (event) => {
@@ -138,7 +140,7 @@ export async function runArm(armName, options = {}) {
     const meanMs = progress.processed ? progress.elapsedMs / progress.processed : null;
     return { state, total: progress.total, processed: progress.processed,
       accepted: progress.accepted, errors: progress.errors,
-      lastReceipt: progress.lastReceipt, requests,
+      lastReceipt: progress.lastReceipt, requests, rateLimitConsecutive, resumeAt,
       etaSeconds: meanMs === null ? null : Math.ceil(meanMs * remaining / concurrency / 1_000) };
   });
   await publish("running");
@@ -151,7 +153,7 @@ export async function runArm(armName, options = {}) {
       const expected = expectedById.get(document.id);
       const started = Date.now();
       let actual = null; let wire = null; let qualityError = null; let accepted = false;
-      let attemptRequests = 0;
+      let attemptRequests = 0; let yieldSignal = null;
       await writeIntent(paths, { schemaVersion: 2, state: "in-flight",
         startedAt: new Date(started).toISOString(), campaign: CAMPAIGN, arm: armName,
         documentId: document.id, attempt,
@@ -176,19 +178,30 @@ export async function runArm(armName, options = {}) {
                 const details = failureDetails(error, wire);
                 if (!details.classified.suspend) throw error;
                 rateLimited = true;
-                const resetAt = details.classified.category === "rate-limit"
-                  ? retryAt(error.headers) : null;
+                if (details.classified.category === "request-budget") {
+                  circuit = { code: "REQUEST_BUDGET_SUSPENDED", consecutive: 3, open: true };
+                  yieldSignal = { reason: "request-budget", resumeAt: null, circuitOpen: true };
+                  await publish("circuit-open");
+                  throw error;
+                }
+                const plan = rateLimitPlan(error.headers, rateLimitConsecutive);
+                rateLimitConsecutive = plan.consecutive; resumeAt = plan.resumeAt;
                 await appendFile(resolve(executionRoot, "limits", `${arm.lane}.jsonl`), `${JSON.stringify({
                   at: new Date().toISOString(), arm: armName, documentId: document.id,
                   category: details.classified.category,
-                  httpStatus: error.httpStatus ?? null, resetAt, headers: error.headers ?? {} })}\n`);
-                await publish(details.classified.category === "rate-limit"
-                  ? "suspended-429" : "suspended-request-budget");
-                if (!resetAt) { for (;;) await wait(3_600_000); }
-                await wait(Math.max(0, Date.parse(resetAt) - Date.now()) + 250);
-                await publish("running");
+                  httpStatus: error.httpStatus ?? null, resetAt: plan.resetAt,
+                  resumeAt: plan.resumeAt, suspension: plan.consecutive,
+                  action: plan.yieldLane ? "yield-lane" : "wait", headers: error.headers ?? {} })}\n`);
+                await publish("suspended-429");
+                if (plan.yieldLane) {
+                  yieldSignal = { reason: "rate-limit", resumeAt: plan.resumeAt, circuitOpen: false };
+                  throw error;
+                }
+                await wait(plan.waitMs);
               }
             }
+            ({ consecutive: rateLimitConsecutive, resumeAt } = resetRateLimitState());
+            await publish("running");
             await writeImmutable(paths.raw, actual.text ?? "", true);
             if (wire?.terminalSse?.expected && !wire.terminalSse.terminal) {
               throw new ProviderError("STREAM_WITHOUT_TERMINAL", { httpStatus: wire.httpStatus,
@@ -241,6 +254,11 @@ export async function runArm(armName, options = {}) {
         await publish("running"); await log({ event: "receipt", documentId: document.id,
           attempt, accepted, receipt: paths.receipt }); return;
       } catch (error) {
+        if (yieldSignal) {
+          await rm(paths.intent, { force: true });
+          armYield = yieldSignal;
+          return { yielded: true };
+        }
         const completed = Date.now();
         const details = failureDetails(error, wire);
         circuit = advanceCircuit(circuit, details.error.code, 3);
@@ -289,17 +307,18 @@ export async function runArm(armName, options = {}) {
         requests += 1;
       } });
     for (;;) {
-      if (circuit.open) return;
+      if (circuit.open || armYield) return;
       const document = documents[cursor++];
       if (!document) return;
       await runDocument(document, provider);
     }
   };
   await Promise.all(Array.from({ length: concurrency }, worker));
-  await publish(circuit.open ? "circuit-open"
+  await publish(circuit.open ? "circuit-open" : armYield ? "suspended-429"
     : progress.processed === progress.total ? "completed" : "running");
   return { arm: armName, requests, rateLimited, processed: progress.processed,
-    errors: progress.errors, circuitOpen: circuit.open, circuitCode: circuit.code };
+    errors: progress.errors, circuitOpen: circuit.open, circuitCode: circuit.code,
+    deferred: armYield?.reason === "rate-limit", resumeAt: armYield?.resumeAt ?? null };
 }
 
 if (process.env.BENCHMARK_MODE === "availability") {

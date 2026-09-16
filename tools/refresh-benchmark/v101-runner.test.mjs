@@ -5,8 +5,9 @@ import { resolve } from "node:path";
 import test from "node:test";
 
 import { arms, laneArms, receiptCap, usageCostUsd } from "./v101-arms.mjs";
-import { advanceCircuit, artifactPaths, classifyFailure, providerGatePassed, resumeDecision,
-  retryAt, updateGlobalStatus, writeImmutable, writeIntent } from "./v101-runner-state.mjs";
+import { advanceCircuit, artifactPaths, classifyFailure, providerGatePassed, rateLimitPlan,
+  replayTransportGatePassed, resetRateLimitState, resumeDecision, retryAt, updateGlobalStatus,
+  writeImmutable, writeIntent } from "./v101-runner-state.mjs";
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
 import { codexCapOption } from "./v101-provider.mjs";
 
@@ -58,11 +59,13 @@ test("should open an arm circuit after three consecutive failures with the same 
     "HTTP_422", 3), { code: "HTTP_422", consecutive: 1, open: false });
 });
 
-test("should reject a three-request provider gate containing terminal HTTP failures", () => {
-  const accepted = { requestCount: 1, accepted: true };
-  assert.equal(providerGatePassed([accepted, accepted, accepted], 3), true);
-  assert.equal(providerGatePassed([accepted, accepted,
-    { requestCount: 1, accepted: false, refusal: "HTTP_400" }], 3), false);
+test("should gate Codex replay on transport rather than extraction acceptance", () => {
+  const valid = { requestCount: 1, httpStatus: 200, jsonValid: true, accepted: true };
+  const qualityRefusal = { requestCount: 1, httpStatus: 200, jsonValid: true, accepted: false };
+  const isolatedTerminal = { requestCount: 1, httpStatus: 200, jsonValid: false, accepted: false };
+  assert.equal(replayTransportGatePassed([valid, qualityRefusal, isolatedTerminal], 3), true);
+  assert.equal(replayTransportGatePassed([valid, qualityRefusal,
+    { requestCount: 1, httpStatus: 400, jsonValid: false, accepted: false }], 3), false);
 });
 
 test("should stop a provider queue after two consecutive arm circuits", () => {
@@ -79,6 +82,38 @@ test("should parse provider reset headers without inventing an absent reset", ()
   assert.equal(retryAt({ "x-ratelimit-reset-requests": "1500ms" }, 0),
     "1970-01-01T00:00:01.500Z");
   assert.equal(retryAt({}, 0), null);
+});
+
+test("should bound missing-reset 429 waits and yield after three consecutive suspensions", () => {
+  const first = rateLimitPlan({}, 0, 0);
+  const second = rateLimitPlan({}, first.consecutive, 0);
+  const third = rateLimitPlan({}, second.consecutive, 0);
+  assert.deepEqual(first, { consecutive: 1, resetAt: null,
+    resumeAt: "1970-01-01T00:05:00.000Z", waitMs: 300_000, yieldLane: false });
+  assert.equal(second.waitMs, 900_000);
+  assert.equal(second.yieldLane, false);
+  assert.equal(third.waitMs, 0);
+  assert.equal(third.yieldLane, true);
+  assert.equal(third.resumeAt, "1970-01-01T00:15:00.000Z");
+});
+
+test("should honor retry-after within the bounded suspension window", () => {
+  assert.deepEqual(rateLimitPlan({ "retry-after": "30" }, 0, 0), {
+    consecutive: 1,
+    resetAt: "1970-01-01T00:00:30.000Z",
+    resumeAt: "1970-01-01T00:00:30.250Z",
+    waitMs: 30_250,
+    yieldLane: false,
+  });
+  assert.equal(rateLimitPlan({ "retry-after": "3600" }, 0, 0).waitMs, 900_000);
+});
+
+test("should restart the 429 sequence after a successful request", () => {
+  const suspended = rateLimitPlan({}, 1, 0);
+  assert.equal(suspended.consecutive, 2);
+  const recovered = resetRateLimitState();
+  assert.deepEqual(recovered, { consecutive: 0, resumeAt: null });
+  assert.equal(rateLimitPlan({}, recovered.consecutive, 0).waitMs, 300_000);
 });
 
 test("should claim before work, preserve receipts, and fail closed on uncertain intent", async () => {

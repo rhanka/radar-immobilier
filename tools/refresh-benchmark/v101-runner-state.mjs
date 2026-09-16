@@ -82,6 +82,14 @@ export function providerGatePassed(outcomes, requiredRequests) {
     && outcomes.every((outcome) => outcome.requestCount === 1 && outcome.accepted === true);
 }
 
+export function replayTransportGatePassed(outcomes, requiredRequests) {
+  const minimumValid = Math.ceil(requiredRequests * 2 / 3);
+  return outcomes.length === requiredRequests
+    && outcomes.every((outcome) => outcome.requestCount === 1 && outcome.httpStatus !== 400)
+    && outcomes.filter((outcome) => outcome.httpStatus === 200 && outcome.jsonValid).length
+      >= minimumValid;
+}
+
 export function retryAt(headers, now = Date.now()) {
   const retryAfter = headers?.["retry-after"];
   if (retryAfter && /^\d+(?:\.\d+)?$/u.test(retryAfter)) {
@@ -98,6 +106,23 @@ export function retryAt(headers, now = Date.now()) {
     }
   }
   return null;
+}
+
+export function rateLimitPlan(headers, consecutive = 0, now = Date.now()) {
+  const next = Number(consecutive) + 1;
+  const resetAt = retryAt(headers, now);
+  const fallbackMs = next === 1 ? 300_000 : 900_000;
+  const providerMs = resetAt === null ? fallbackMs
+    : Math.max(0, Date.parse(resetAt) - now) + 250;
+  const boundedMs = Math.min(providerMs, 900_000);
+  const yieldLane = next >= 3;
+  const waitMs = yieldLane ? 0 : boundedMs;
+  return { consecutive: next, resetAt,
+    resumeAt: new Date(now + boundedMs).toISOString(), waitMs, yieldLane };
+}
+
+export function resetRateLimitState() {
+  return { consecutive: 0, resumeAt: null };
 }
 
 export async function updateCampaignStatus(path, mutate, clock = () => Date.now()) {
