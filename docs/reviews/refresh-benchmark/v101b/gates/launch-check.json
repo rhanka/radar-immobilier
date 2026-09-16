@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "campaign": "v101b",
+  "launchedAt": "2026-09-16T00:39:06Z",
+  "checkedAt": "2026-09-16T00:44:29Z",
+  "launchMethod": "interactive-shell-setsid-nohup",
+  "systemd": false,
+  "pid": 600744,
+  "pidRole": "cloud-lane-container-host-process",
+  "process": { "state": "running", "sessionId": 600744 },
+  "files": {
+    "cloud": { "ok": true, "receipts": 21, "accepted": 20, "namedRefusals": 0, "noActiveAccount": 0 },
+    "codex": { "ok": true, "receipts": 1000, "accepted": 0, "namedRefusals": 1000, "noActiveAccount": 0, "dominantRefusal": "HTTP_400" },
+    "anthropic": { "ok": true, "receipts": 3, "accepted": 2, "namedRefusals": 0, "noActiveAccount": 0 },
+    "mistral": { "ok": true, "status": "not-applicable", "sourceCampaign": "v101" }
+  },
+  "filesOk": 4,
+  "filesTotal": 4,
+  "redaction": { "allowlistedFieldsOnly": true, "secretsIncluded": false }
+}
