@@ -1,0 +1,55 @@
+{
+  "version": 2,
+  "implementationSha": "d77f6132c4ce9cca30268adf507ee1061b86b2b7",
+  "acceptanceScope": "document-profile-provenance-and-PG; not explicit Signal or scheduled Kubernetes run",
+  "environment": "test-mep-703",
+  "provider": "gemini",
+  "model": "gemini-3.8-flash",
+  "effort": "medium",
+  "maxOutputTokens": 32768,
+  "documents": 1,
+  "accepted": 1,
+  "transport": true,
+  "json": true,
+  "profile": true,
+  "provenance": true,
+  "modelCalls": 1,
+  "startedAt": "2026-09-16T02:13:04.611Z",
+  "documentSha256": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
+  "result": {
+    "citySlug": "waterloo",
+    "candidateHash": "sha256:8aa3e806e7a212cf3e026323b4b8418565ee910df00c38faf24143ac6e74e200",
+    "stateKey": "refresh/018/waterloo/runs/3127e357f25b923517c45616852bb819ee166b6095d7142ecdb08216999d96a0/state.json",
+    "inputHash": "4d80b2ba029a9e58dcfdde731d754eb510043086fdc36c2af1ac937d8d28f9f5"
+  },
+  "projectedNodes": 11,
+  "finishedAt": "2026-09-16T02:13:47.279Z",
+  "projectedSignals": 0,
+  "durableStages": {
+    "candidate": "completed",
+    "corpus": "completed",
+    "enriched": "completed",
+    "profile": "completed",
+    "projected": "completed",
+    "published": "completed"
+  },
+  "projectedTypes": [
+    "Bylaw",
+    "Bylaw",
+    "DesignationEvent",
+    "DesignationEvent",
+    "DesignationEvent",
+    "DesignationEvent",
+    "DesignationEvent",
+    "DesignationEvent",
+    "Source",
+    "Zone",
+    "Zone"
+  ],
+  "oracleMatches": [
+    {
+      "type": "Bylaw",
+      "label": "Règlement 26-956-2"
+    }
+  ]
+}
