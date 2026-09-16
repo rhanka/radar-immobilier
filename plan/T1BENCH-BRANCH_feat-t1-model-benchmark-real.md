@@ -73,7 +73,13 @@ Compare historical Sonnet 4.6 T1 outputs with real Luna and Gemini 3.8 runs on t
 - [ ] Lot 25 — Diagnose the v101b Codex HTTP 400 failures and replay only Codex.
   - [x] Prove the rejected wire parameter in four requests and capture the sanitized response body.
   - [x] Add tested arm and provider circuit breakers and fail the three-request provider gate closed.
-  - [ ] Pass three requests per Codex arm and launch the isolated replay at concurrency two.
+  - [x] Pass the transport gate per Codex arm and launch the isolated replay at concurrency two.
+- [ ] Lot 26 — Finish and report the complete v101b campaign.
+  - [x] Bound 429 suspension, resume the cloud lane, and launch the full Codex replay.
+  - [x] Publish per-arm class-based health every 15 minutes and measure ten-minute throughput.
+  - [ ] Close every arm by completion or a documented circuit cause.
+  - [ ] Score strict, C-prime, and oracle v2 metrics and run both frozen blind judges.
+  - [ ] Publish the final report, verify secret absence, push the branch, and deliver the conductor report.
 
 ## Gates
 
