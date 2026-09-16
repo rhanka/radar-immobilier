@@ -10,3 +10,6 @@
 /codex-replay.pid
 /codex-replay.nohup.log
 /status-codex.json
+/health-monitor.pid
+/health-monitor.lock/
+/health-monitor.nohup.log
