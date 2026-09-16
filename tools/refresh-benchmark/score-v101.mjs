@@ -13,12 +13,19 @@ const CAMPAIGN = process.env.BENCHMARK_CAMPAIGN ?? "v101";
 const required = (name) => process.env[name]
   || (() => { throw new Error(`${name} is required`); })();
 
+export function armExecutionRoot(resultRoot, campaign, arm) {
+  return campaign === "v101b" && arm?.lane === "codex"
+    ? resolve(resultRoot, "codex-replay") : resultRoot;
+}
+
 export async function scoreArm(armName) {
-  if (!arms[armName]) throw new Error(`Unknown ${CAMPAIGN} arm: ${armName}`);
+  const arm = arms[armName];
+  if (!arm) throw new Error(`Unknown ${CAMPAIGN} arm: ${armName}`);
   const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
   const resultRoot = required("BENCHMARK_RESULT_ROOT");
+  const executionRoot = armExecutionRoot(resultRoot, CAMPAIGN, arm);
   const t1Root = required("BENCHMARK_T1_ROOT");
-  const campaignRoot = resolve(resultRoot, "campaign", armName);
+  const campaignRoot = resolve(executionRoot, "campaign", armName);
   const manifest = JSON.parse(await readFile(resolve(repositoryRoot,
     `docs/reviews/refresh-benchmark/${CAMPAIGN}/manifest.json`), "utf8"));
   const profilePath = resolve(t1Root, "api/src/services/graph/refresh-profile.ts");
@@ -134,7 +141,7 @@ export async function scoreArm(armName) {
       total: terminal.length },
     cPrime: { accepted: terminal.filter(({ cPrimeAccepted }) => cPrimeAccepted).length,
       total: terminal.length }, documents };
-  const output = resolve(resultRoot, "scores", `${armName}.json`);
+  const output = resolve(executionRoot, "scores", `${armName}.json`);
   await mkdir(dirname(output), { recursive: true });
   try { await writeFile(output, `${JSON.stringify(result)}\n`, { flag: "wx" }); }
   catch (error) { if (error?.code !== "EEXIST") throw error; }

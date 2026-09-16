@@ -11,11 +11,19 @@ import { advanceCircuit, artifactPaths, classifyFailure, laneCircuitAction, prov
   from "./v101-runner-state.mjs";
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
 import { codexCapOption } from "./v101-provider.mjs";
+import { armExecutionRoot } from "./score-v101.mjs";
 
 test("should enumerate every addressable arm when Codex 5.3 is unavailable", () => {
   assert.equal(Object.keys(arms).length, 26);
   assert.deepEqual(Object.fromEntries(Object.entries(laneArms).map(([key, value]) =>
     [key, value.length])), { cloud: 6, codex: 12, openai: 1, anthropic: 6, mistral: 1 });
+});
+
+test("should score v101b Codex receipts from the isolated replay root", () => {
+  assert.equal(armExecutionRoot("/results", "v101b", arms["sol-low"]),
+    "/results/codex-replay");
+  assert.equal(armExecutionRoot("/results", "v101b", arms["gemini-low"]), "/results");
+  assert.equal(armExecutionRoot("/results", "v101", arms["sol-low"]), "/results");
 });
 
 test("should calculate metered cost from normalized usage", () => {
