@@ -158,7 +158,7 @@ export function aggregateReceipts(entries) {
     if (receipt.schemaVersion !== 2 || typeof receipt.arm !== "string") continue;
     const aggregate = arms.get(receipt.arm) ?? {
       arm: receipt.arm, receiptCount: 0, usageReceiptCount: 0,
-      documentIds: new Set(), models: new Set(), transports: new Set(),
+      documentIds: new Set(), usageDocumentIds: new Set(), models: new Set(), transports: new Set(),
       inputTokens: 0, visibleOutputTokens: 0, thinkingTokens: 0,
       outputTokens: 0, totalTokens: 0, actualCostUsd: 0, actualCostSamples: 0,
     };
@@ -172,6 +172,7 @@ export function aggregateReceipts(entries) {
     if (receipt.actual?.usage) {
       const usage = billableUsage(receipt.actual.usage);
       aggregate.usageReceiptCount += 1;
+      if (receipt.documentId) aggregate.usageDocumentIds.add(receipt.documentId);
       for (const key of ["inputTokens", "visibleOutputTokens", "thinkingTokens",
         "outputTokens", "totalTokens"]) aggregate[key] += usage[key];
     }
@@ -186,12 +187,13 @@ export function aggregateReceipts(entries) {
     if (modelIds.length > 1) throw new Error(`Arm ${value.arm} has multiple models: ${modelIds}`);
     const modelId = modelIds[0] ?? null;
     const rate = RATE_CARDS[modelId] ?? null;
-    const documents = value.documentIds.size;
+    const documents = value.usageDocumentIds.size;
     const usage = { inputTokens: value.inputTokens, outputTokens: value.visibleOutputTokens,
       thoughtsTokenCount: value.thinkingTokens };
     return {
       arm: value.arm, modelId, transports: [...value.transports].sort(),
-      receiptCount: value.receiptCount, usageReceiptCount: value.usageReceiptCount, documents,
+      receiptCount: value.receiptCount, usageReceiptCount: value.usageReceiptCount,
+      documents, attemptedDocuments: value.documentIds.size,
       inputTokens: value.inputTokens, visibleOutputTokens: value.visibleOutputTokens,
       thinkingTokens: value.thinkingTokens, outputTokens: value.outputTokens,
       totalTokens: value.totalTokens,
@@ -304,6 +306,8 @@ export function buildReport(entries, options = {}) {
       { modelId: "mistral-small-4", supplied: { input: 0.2, output: 0.4 },
         verified: { input: 0.15, output: 0.6 }, note: "Receipt regression and official card agree." },
     ],
+    rateCards: RATE_CARDS, subscriptionPlans: SUBSCRIPTION_PLANS,
+    chatgptPlusWeeklyMessages: CHATGPT_PLUS_WEEKLY_MESSAGES,
     regressions: regressObservedRates(entries), arms,
   };
 }
@@ -328,13 +332,14 @@ export function renderMarkdown(report) {
     "The owner must provide both actual tiers; Gemini also needs a measured or estimated weekly token reserve.", "",
     "## Per-arm costs", "",
     "Output is billable output: visible output plus separately reported thinking tokens. Token columns are total / per document.", "",
-    "| Arm | Receipts (usage) | Docs | Input total / doc | Output total / doc | Thinking | API USD | Subscription USD | Simulated USD | API / 1,000 docs | Subscription / 1,000 docs | Simulated / 1,000 docs | API / benchmark cycle |",
-    "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+    "| Arm | Receipts (usage) | Docs usage / attempted | Input total / doc | Visible output total / doc | Thinking | Billable output | API USD | Subscription USD | Simulated USD | API / 1,000 docs | Subscription / 1,000 docs | Simulated / 1,000 docs | API / benchmark cycle |",
+    "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
   ];
   for (const arm of report.arms) {
-    lines.push(`| ${arm.arm} | ${count(arm.receiptCount)} (${count(arm.usageReceiptCount)}) | ${count(arm.documents)} | `
+    lines.push(`| ${arm.arm} | ${count(arm.receiptCount)} (${count(arm.usageReceiptCount)}) | ${count(arm.documents)} / ${count(arm.attemptedDocuments)} | `
       + `${tokenPair(arm.inputTokens, arm.perDocument?.inputTokens ?? 0)} | `
-      + `${tokenPair(arm.outputTokens, arm.perDocument?.outputTokens ?? 0)} | ${count(arm.thinkingTokens)} | `
+      + `${tokenPair(arm.visibleOutputTokens, arm.documents ? arm.visibleOutputTokens / arm.documents : 0)} | `
+      + `${count(arm.thinkingTokens)} | ${count(arm.outputTokens)} | `
       + `${money(arm.apiUsd)} | ${moneyRange(arm.subscription?.usd)} | ${money(arm.simulated?.usd)} | `
       + `${money(arm.per1000Documents?.apiUsd)} | ${moneyRange(arm.per1000Documents?.subscriptionUsd)} | `
       + `${money(arm.per1000Documents?.simulatedUsd)} | ${money(arm.perBenchmarkCycle?.apiUsd)} |`);
@@ -354,6 +359,22 @@ export function renderMarkdown(report) {
   }
   lines.push("", "Gemini output pricing includes thinking tokens; its cache-read rate is $0.075/M through 2026-12-31. `gpt-6-astra` batch/flex is $5/M input and $25/M output.", "",
     "Official verification changed two supplied assumptions: `gpt-5.6-sol` is currently promotional $4/$20, not $5/$30; Mistral Small 4 is $0.15/$0.60, not $0.20/$0.40.", "",
+    "## Subscription plan catalog", "",
+    "| Provider | Plan | USD/month | As of | Source |", "|---|---|---:|---|---|" );
+  for (const [provider, plans] of Object.entries(SUBSCRIPTION_PLANS)) {
+    for (const [planName, plan] of Object.entries(plans)) {
+      lines.push(`| ${provider} | ${planName} | ${plan.monthlyUsd} | ${plan.asOf} | `
+        + `[official plan page](${plan.source}) |`);
+    }
+  }
+  lines.push("", "The official Codex page publishes estimated weekly message ranges. Pro 5x and Pro 20x multiply the Plus bounds:", "",
+    "| Model | Plus messages/week | Pro 5x | Pro 20x |", "|---|---:|---:|---:|" );
+  for (const [modelId, bounds] of Object.entries(CHATGPT_PLUS_WEEKLY_MESSAGES)) {
+    lines.push(`| ${modelId} | ${bounds[0]}–${count(bounds[1])} | `
+      + `${count(bounds[0] * 5)}–${count(bounds[1] * 5)} | `
+      + `${count(bounds[0] * 20)}–${count(bounds[1] * 20)} |`);
+  }
+  lines.push("", "Google publishes relative plan tiers but no token-denominated weekly reserve. Anonymous access to the official plan page did not expose a stable regional price payload; the USD figures above are the owner-provided 2026-09-16 public values and remain a source-gap to recheck at checkout.", "",
     "## Receipt-cost regression", "",
     "No-intercept two-variable regression: `actual.costUsd × 1M = inputTokens × a + billableOutputTokens × b`.", "",
     "| Model | Samples | Input USD/M | Output USD/M | Hard-coded input/output |", "|---|---:|---:|---:|---|" );
