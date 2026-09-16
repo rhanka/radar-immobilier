@@ -124,6 +124,19 @@ test("should reject non-allowlisted observation fields and keep five-hour capaci
   assert.equal(result.arms[0].reason, "non-weekly-window");
 });
 
+test("should keep an unknown tier conditional without multiplying capacity", () => {
+  const observations = validateSeatObservations({ schemaVersion: 1, observations: [{
+    arm: "sol-medium", provider: "chatgpt", status: "scenario",
+    method: "account-percent/campaign-token-ratio", sourceStatus: "observed",
+    basePlan: null, windowMinutes: 10_080, usedPercent: 10, campaignTokens: 10_000,
+  }] });
+  const result = buildSeatComparisons([{ arm: "sol-medium", documents: 10,
+    attemptedDocuments: 10, acceptedDocuments: 8, totalTokens: 10_000, apiUsd: 2 }], observations);
+  assert.deepEqual(result.rows.map(({ docsPerWeek }) => docsPerWeek), [100, 100, 100]);
+  assert.ok(result.rows.every(({ capacityBasis }) =>
+    capacityBasis === "conditional-plan-is-observed-tier"));
+});
+
 test("should load attempts from campaign and codex replay without deduplication", async () => {
   const root = await mkdtemp(join(tmpdir(), "cost-calculator-"));
   try {
