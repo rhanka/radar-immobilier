@@ -5,9 +5,10 @@ import { resolve } from "node:path";
 import test from "node:test";
 
 import { arms, laneArms, receiptCap, usageCostUsd } from "./v101-arms.mjs";
-import { artifactPaths, classifyFailure, resumeDecision, retryAt, updateGlobalStatus,
-  writeImmutable, writeIntent } from "./v101-runner-state.mjs";
+import { advanceCircuit, artifactPaths, classifyFailure, providerGatePassed, resumeDecision,
+  retryAt, updateGlobalStatus, writeImmutable, writeIntent } from "./v101-runner-state.mjs";
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
+import { codexCapOption } from "./v101-provider.mjs";
 
 test("should enumerate every addressable arm when Codex 5.3 is unavailable", () => {
   assert.equal(Object.keys(arms).length, 26);
@@ -20,16 +21,17 @@ test("should calculate metered cost from normalized usage", () => {
   assert.equal(usageCostUsd(arms["sol-low"], { inputTokens: 1, outputTokens: 1 }), null);
 });
 
-test("should enforce the Codex cap under llm-mesh 0.19.3", () => {
+test("should disclose that the Codex ChatGPT transport cannot enforce the output cap", () => {
   assert.deepEqual(receiptCap(arms["luna-low"], { outputTokens: 32_768 }), {
     requested: 32_768,
-    enforced: true,
-    reason: null,
+    enforced: false,
+    reason: "Codex ChatGPT rejects max_output_tokens; the runner omits it.",
     observedOutputTokens: 32_768,
     classification: "within-observed-cap",
   });
   assert.equal(Object.values(arms).filter(({ lane }) => lane === "codex")
-    .every(({ capEnforced }) => capEnforced), true);
+    .every(({ capEnforced }) => capEnforced === false), true);
+  assert.deepEqual(codexCapOption(arms["sol-low"]), {});
 });
 
 test("should retry only transport classes and suspend a 429", () => {
@@ -42,6 +44,34 @@ test("should retry only transport classes and suspend a 429", () => {
   assert.equal(classifyFailure({ code: "REQUEST_BUDGET_SUSPENDED" }).suspend, true);
   assert.equal(classifyFailure({ httpStatus: 400 }).retry, false);
   assert.equal(classifyFailure({ httpStatus: 200 }).retry, false);
+});
+
+test("should open an arm circuit after three consecutive failures with the same code", () => {
+  let circuit = advanceCircuit(undefined, "HTTP_400", 3);
+  circuit = advanceCircuit(circuit, "HTTP_400", 3);
+  assert.equal(circuit.open, false);
+  circuit = advanceCircuit(circuit, "HTTP_400", 3);
+  assert.deepEqual(circuit, { code: "HTTP_400", consecutive: 3, open: true });
+  assert.deepEqual(advanceCircuit(circuit, null, 3), circuit);
+  assert.deepEqual(advanceCircuit(circuit, "HTTP_422", 3), circuit);
+  assert.deepEqual(advanceCircuit({ code: "HTTP_400", consecutive: 2, open: false },
+    "HTTP_422", 3), { code: "HTTP_422", consecutive: 1, open: false });
+});
+
+test("should reject a three-request provider gate containing terminal HTTP failures", () => {
+  const accepted = { requestCount: 1, accepted: true };
+  assert.equal(providerGatePassed([accepted, accepted, accepted], 3), true);
+  assert.equal(providerGatePassed([accepted, accepted,
+    { requestCount: 1, accepted: false, refusal: "HTTP_400" }], 3), false);
+});
+
+test("should stop a provider queue after two consecutive arm circuits", () => {
+  let queue = advanceCircuit(undefined, "arm-circuit-open", 2);
+  assert.equal(queue.open, false);
+  queue = advanceCircuit(queue, "arm-circuit-open", 2);
+  assert.equal(queue.open, true);
+  assert.equal(advanceCircuit({ code: "arm-circuit-open", consecutive: 1, open: false },
+    null, 2).consecutive, 0);
 });
 
 test("should parse provider reset headers without inventing an absent reset", () => {

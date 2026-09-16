@@ -74,6 +74,10 @@ function normalizedUsage(value) {
     : null;
 }
 
+export function codexCapOption(arm) {
+  return arm.capEnforced === false ? {} : { maxOutputTokens: 32_768 };
+}
+
 function directResult(arm, payload) {
   if (arm.transport === "openai-api") return { id: payload.id ?? null,
     modelId: payload.model ?? arm.model, text: textFromOpenAi(payload),
@@ -152,11 +156,18 @@ export async function createProvider(arm, { beforeRequest, timeoutMs }) {
     catch (error) { throw new ProviderError(error?.code ?? error?.cause?.code ?? "NETWORK_ERROR"); }
     const transcript = await response.clone().text();
     const headers = rateHeaders(response.headers);
+    let responseError = null;
+    if (!response.ok) {
+      let parsed = null;
+      try { parsed = JSON.parse(transcript); } catch { /* Keep only a bounded sanitized string. */ }
+      responseError = sanitize(parsed?.error?.message ?? parsed?.detail ?? transcript);
+    }
     const wire = { endpoint: endpointPath(url), method: init.method ?? "POST",
       requestBodySha256: sha256(bodyText), inputBytes: Buffer.byteLength(bodyText), ...fields,
       httpStatus: response.status, durationMs: Date.now() - started,
       requestId: response.headers.get("x-request-id") ?? response.headers.get("openai-request-id"),
-      terminalSse: inspectSse(response.headers.get("content-type") ?? "", transcript), headers };
+      terminalSse: inspectSse(response.headers.get("content-type") ?? "", transcript), headers,
+      ...(responseError ? { responseError } : {}) };
     recentWire = wire;
     if (!response.ok) throw new ProviderError(`HTTP_${response.status}`,
       { httpStatus: response.status, headers, wire });
@@ -190,7 +201,7 @@ export async function createProvider(arm, { beforeRequest, timeoutMs }) {
         : new mesh.CloudCodeRuntimeClient(fetchWithWire);
       const result = await client.generate({ modelId: arm.model, messages,
         ...(arm.effort ? { reasoning: { effort: arm.effort } } : {}),
-        responseFormat: { type: "json-object" }, maxOutputTokens: 32_768,
+        responseFormat: { type: "json-object" }, ...codexCapOption(arm),
         signal: AbortSignal.timeout(timeoutMs) }, { auth: acquisition.material });
       return { id: result.id ?? null, modelId: result.modelId ?? arm.model,
         text: result.text ?? "", finishReason: result.finishReason ?? null,
