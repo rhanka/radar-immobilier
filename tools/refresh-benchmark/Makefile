@@ -1301,7 +1301,7 @@ V101_MESH_VERSION := 0.19.3
 	compact-v101-json verify-v101 gate-v101 run-v101-arm run-v101-lane score-v101 \
 	init-campaign-v101 gate-runner-v101 reconcile-interrupted-v101 status-v101-containers \
 	stop-v101-container check-v101-user-manager launch-v101-detached stop-v101-detached \
-	enroll-codex-v101 launch-v101-codex-detached gate-v101b-providers
+	enroll-codex-v101 launch-v101-codex-detached gate-v101b-providers freeze-v101b
 
 check-v101-tools:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1324,11 +1324,13 @@ check-v101-tools:
 	    && node --check tools/refresh-benchmark/enroll-codex-v101.mjs \
 	    && node --check tools/refresh-benchmark/reconcile-interrupted-v101.mjs \
 	    && node --check tools/refresh-benchmark/gate-v101b-providers.mjs \
+	    && node --check tools/refresh-benchmark/freeze-v101b.mjs \
 	    && node --check tools/refresh-benchmark/measure-cprime-v101.mjs \
 	    && node --check tools/refresh-benchmark/freeze-v101.mjs \
 	    && node --check tools/refresh-benchmark/compact-v101-json.mjs \
 	    && node --check tools/refresh-benchmark/verify-v101.mjs \
 	    && sh -n tools/refresh-benchmark/run-campaign-v101.sh \
+	    && sh -n tools/refresh-benchmark/run-campaign-v101b.sh \
 	    && sh -n tools/refresh-benchmark/run-codex-v101.sh'
 
 test-v101:
@@ -1431,6 +1433,14 @@ gate-v101b-providers: check-v101-tools
 	    && cd /workspace && npm install --silent --ignore-scripts \
 	      @sentropic/llm-mesh@$(V101_MESH_VERSION) >/dev/null \
 	    && cd /src && exec node tools/refresh-benchmark/gate-v101b-providers.mjs'
+
+freeze-v101b: check-v101-tools
+	test "$(V101_CAMPAIGN)" = "v101b"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
+	  -w /src $(NODE_IMAGE) node tools/refresh-benchmark/freeze-v101b.mjs
 
 run-v101-arm: t1-v100-snapshot check-v101-tools
 	test -n "$(ARM)"
