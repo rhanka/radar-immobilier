@@ -1362,8 +1362,9 @@ generate-v101b-costs:
 	test "$(ENV)" = "test-t1-model-benchmark"
 	docker run --rm --network none \
 	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
-	  -w /src $(NODE_IMAGE) node tools/refresh-benchmark/cost-calculator.mjs \
-	  --campaign v101b --format md > $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v101b/costs.md
+	  --mount type=bind,source=$(V101_RESULTS),target=/results \
+	  -w /src $(NODE_IMAGE) sh -c \
+	  'node tools/refresh-benchmark/cost-calculator.mjs --campaign v101b --format md > /results/costs.md'
 
 catalog-v101: check-v101-tools
 	mkdir -p $(V101_RESULTS)/availability

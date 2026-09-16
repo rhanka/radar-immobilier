@@ -78,6 +78,7 @@ test("should aggregate one synthetic schema-v2 receipt", () => {
   assert.equal(arm.receiptCount, 1);
   assert.equal(arm.usageReceiptCount, 1);
   assert.equal(arm.documents, 1);
+  assert.equal(arm.attemptedDocuments, 1);
   assert.equal(arm.thinkingTokens, 200);
   assert.equal(arm.outputTokens, 700);
   assert.equal(arm.totalTokens, 1700);
