@@ -56,6 +56,20 @@ test("R2 credits a Bylaw node and counts it in the precision denominator", () =>
   assert.equal(v2.precision, 0.5);
 });
 
+test("R2 aligns the contract Bylaw stage vocabulary with the oracle", () => {
+  const cases = [
+    ["projet", "projet_reglement"],
+    ["1er_projet", "projet_reglement"],
+    ["2e_projet", "second_projet"],
+  ];
+  for (const [stage, oracleStage] of cases) {
+    const gold = [{ id: stage, stage: oracleStage, page: 1, anchor: "règlement 100" }];
+    const output = { nodes: [node(stage, "Bylaw", stage, 1,
+      "Premier projet du règlement 100")], edges: [] };
+    assert.equal(scoreValidV2(output, document, gold).tp, 1, stage);
+  }
+});
+
 test("R3 uses an alternate site only when the unit declares one", () => {
   const gold = [{ id: "B04", stage: "adoption", page: 2, anchor: "2026-04 modifiant le",
     alternate_sites: [{ page: 10, anchor: "2026-04 modifiant le" }] }];
