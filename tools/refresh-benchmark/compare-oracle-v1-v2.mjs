@@ -17,6 +17,7 @@ import { resolve } from "node:path";
 
 import { scoreValid } from "./score-v3.mjs";
 import { scoreValidV2 } from "./score-oracle-v2.mjs";
+import { arms as v101Arms } from "./v101-arms.mjs";
 
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
@@ -32,8 +33,13 @@ const DEFAULT_ARMS = [
   { campaign: "v13", variant: "gemini-low", directory: "campaign-gemini", contract: "immo-pv-extraction-v8" },
   { campaign: "v13", variant: "sonnet-cloudcode", directory: "campaign-cloudcode", contract: "immo-pv-extraction-v8" },
 ];
-const arms = process.env.BENCHMARK_COMPARISON_ARMS
-  ? JSON.parse(process.env.BENCHMARK_COMPARISON_ARMS) : DEFAULT_ARMS;
+const v101bArms = () => Object.keys(v101Arms).map((variant) => ({ campaign: "v101b", variant,
+  directory: "campaign", contract: "immo-pv-extraction-v9", attempted: true,
+  oracleCampaign: "v100", executionSubdir: v101Arms[variant].lane === "codex"
+    ? "codex-replay" : null }));
+const configuredArms = process.env.BENCHMARK_COMPARISON_ARMS;
+const arms = configuredArms === "v101b" ? v101bArms()
+  : configuredArms ? JSON.parse(configuredArms) : DEFAULT_ARMS;
 
 const oracleV2Bytes = await readFile(resolve(benchmarkRoot, "manual-oracle-v2.json"));
 const oracleV2 = JSON.parse(oracleV2Bytes.toString("utf8"));
@@ -49,15 +55,31 @@ const macro = (cases, pick) => {
 const results = [];
 for (const arm of arms) {
   const campaignRoot = resolve(benchmarkRoot, arm.campaign);
+  const executionRoot = arm.executionSubdir
+    ? resolve(campaignRoot, arm.executionSubdir) : campaignRoot;
   const manifest = await readJson(resolve(campaignRoot, "manifest.json"));
-  const oracleV1Bytes = await readFile(resolve(campaignRoot, "manual-oracle.json"));
+  const oracleV1Bytes = await readFile(resolve(benchmarkRoot,
+    arm.oracleCampaign ?? arm.campaign, "manual-oracle.json"));
   const oracleV1 = JSON.parse(oracleV1Bytes.toString("utf8"));
   if (sha256(oracleV1Bytes) !== oracleV2.derivedFrom.sha256) {
     throw new Error(`Campaign ${arm.campaign} does not carry the frozen v1 oracle`);
   }
   const cases = [];
   for (const document of manifest.documents) {
-    const stem = resolve(campaignRoot, arm.directory, `${document.id}--${arm.variant}`);
+    let stem = resolve(executionRoot, arm.directory, `${document.id}--${arm.variant}`);
+    let receipt;
+    if (arm.attempted) {
+      for (const attempt of [2, 1]) {
+        const candidate = `${stem}.attempt-${attempt}`;
+        try { receipt = await readJson(`${candidate}.receipt.json`); stem = candidate; break; }
+        catch (error) { if (error.code !== "ENOENT") throw error; }
+      }
+      if (!receipt) { cases.push({ documentId: document.id, state: "not_launched" }); continue; }
+      if (!receipt.validation?.accepted) {
+        cases.push({ documentId: document.id, accepted: false, state: "completed_invalid" });
+        continue;
+      }
+    }
     let output;
     try { output = await readJson(`${stem}.output.json`); }
     catch (error) {
@@ -65,7 +87,7 @@ for (const arm of arms) {
       cases.push({ documentId: document.id, state: "not_launched" });
       continue;
     }
-    const receipt = await readJson(`${stem}.receipt.json`);
+    receipt ??= await readJson(`${stem}.receipt.json`);
     const goldV1 = oracleV1.units.filter(({ doc_sha: digest }) => digest === document.sha256);
     const goldV2 = oracleV2.units.filter(({ doc_sha: digest }) => digest === document.sha256);
     if (goldV1.length !== goldV2.length) throw new Error(`Unit count drift on ${document.id}`);
