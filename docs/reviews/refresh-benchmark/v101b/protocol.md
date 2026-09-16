@@ -6,4 +6,9 @@ GPT-4.1 and Mistral Small 4 artifacts are copied byte-for-byte from v101; the ot
 
 Source v101 manifest SHA-256: `33ecc18a28112fae79db72c9866653108f5658edc20a17c796b68ab1a1eb5048`. The 32-token Codex probe materialized the cap but received HTTP 400, so output truncation was not observed.
 
-The replay is gated by three accepted requests per arm before any arm queue is opened. An arm opens its circuit after three consecutive failures with the same code; two consecutive arm circuits stop the provider queue. Replay artifacts and their atomic status live under `codex-replay/`, with an atomic public copy at `status-codex.json`.
+The replay gate is transport-only: an arm opens when at least two of its three
+probes return HTTP 200 with exploitable JSON and none returns HTTP 400. Quality
+acceptance is deliberately excluded from the gate. An arm opens its circuit
+after three consecutive failures with the same code; two consecutive arm
+circuits stop the provider queue. Replay artifacts and their atomic status live
+under `codex-replay/`, with an atomic public copy at `status-codex.json`.
