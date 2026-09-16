@@ -9,7 +9,7 @@ const names = laneArms.codex;
 const status = await updateCampaignStatus(resolve(root, "status.json"), (current) => {
   current.codexIncluded = true;
   current.files = { ...current.files, codex: names.length };
-  current.codexCapException = { requested: OUTPUT_CAP, enforced: false,
+  current.codexCapException = { requested: OUTPUT_CAP, enforced: true,
     reason: CODEX_CAP_REASON };
   for (const name of names) current.arms[name] ??= { state: "queued", total: 100,
     processed: 0, accepted: 0, errors: 0, lastReceipt: null, requests: 0, etaSeconds: null };

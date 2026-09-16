@@ -66,8 +66,11 @@ function normalizedUsage(value) {
   const totalTokens = value.totalTokens ?? value.total_tokens ?? value.totalTokenCount
     ?? (Number.isFinite(inputTokens) && Number.isFinite(outputTokens)
       ? inputTokens + outputTokens : undefined);
+  const thoughtsTokenCount = value.thoughtsTokenCount
+    ?? value.output_tokens_details?.reasoning_tokens;
   return Number.isFinite(inputTokens) && Number.isFinite(outputTokens)
-    ? { inputTokens, outputTokens, totalTokens: Number.isFinite(totalTokens) ? totalTokens : null }
+    ? { inputTokens, outputTokens, totalTokens: Number.isFinite(totalTokens) ? totalTokens : null,
+      ...(Number.isFinite(thoughtsTokenCount) ? { thoughtsTokenCount } : {}) }
     : null;
 }
 

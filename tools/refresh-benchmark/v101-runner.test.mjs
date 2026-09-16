@@ -20,17 +20,16 @@ test("should calculate metered cost from normalized usage", () => {
   assert.equal(usageCostUsd(arms["sol-low"], { inputTokens: 1, outputTokens: 1 }), null);
 });
 
-test("should disclose the unenforced Codex cap and classify oversized output", () => {
+test("should enforce the Codex cap under llm-mesh 0.19.3", () => {
   assert.deepEqual(receiptCap(arms["luna-low"], { outputTokens: 32_768 }), {
     requested: 32_768,
-    enforced: false,
-    reason: "llm-mesh 0.19.2 dist/codex.js:53 strips max_output_tokens",
+    enforced: true,
+    reason: null,
     observedOutputTokens: 32_768,
     classification: "within-observed-cap",
   });
-  assert.equal(receiptCap(arms["astra-xhigh"], {
-    output_tokens: 32_769,
-  }).classification, "out-of-cap");
+  assert.equal(Object.values(arms).filter(({ lane }) => lane === "codex")
+    .every(({ capEnforced }) => capEnforced), true);
 });
 
 test("should retry only transport classes and suspend a 429", () => {

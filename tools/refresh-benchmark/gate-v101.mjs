@@ -44,7 +44,7 @@ if (gate === "codex-cap") {
   const truncated = /length|max|incomplete/iu.test(String(probe.finishReason))
     || (Number.isFinite(outputTokens) && outputTokens >= 30);
   const proved = source.length > 0 && wireCap === 32 && probe.httpStatus === 200 && truncated;
-  await save("codex-cap", { gate, llmMeshVersion: "0.19.2", sourceEvidence: source,
+  await save("codex-cap", { gate, llmMeshVersion: "0.19.3", sourceEvidence: source,
     requestCount: probe.requestCount, requestedMaxOutputTokens: 32, observedWireMaxOutputTokens: wireCap,
     httpStatus: probe.httpStatus, finishReason: probe.finishReason, outputTokens, truncated, proved });
   console.log(JSON.stringify({ gate, requestCount: probe.requestCount, wireCap, truncated, proved }));
