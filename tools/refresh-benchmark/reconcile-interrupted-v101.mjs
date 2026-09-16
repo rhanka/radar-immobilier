@@ -3,6 +3,7 @@ import { basename, resolve } from "node:path";
 
 const root = process.env.BENCHMARK_RESULT_ROOT
   || (() => { throw new Error("BENCHMARK_RESULT_ROOT is required"); })();
+const campaign = process.env.BENCHMARK_CAMPAIGN ?? "v101";
 const campaignRoot = resolve(root, "campaign");
 const completedAt = new Date().toISOString();
 let reconciled = 0;
@@ -22,7 +23,7 @@ for (const armEntry of await readdir(campaignRoot, { withFileTypes: true })) {
     if (await exists(receiptPath)) continue;
     const intent = JSON.parse(await readFile(intentPath, "utf8"));
     const started = Date.parse(intent.startedAt);
-    const receipt = { schemaVersion: 2, campaign: "v101", arm: intent.arm,
+    const receipt = { schemaVersion: 2, campaign, arm: intent.arm,
       documentId: intent.documentId, attemptNumber: intent.attempt, status: "failed", terminal: true,
       requestCount: null, requested: { ...intent.requested, transportTimeoutMs: 480_000 },
       accountPseudonym: null, wire: null, terminalSse: null, actual: null,
@@ -47,5 +48,5 @@ for (const armEntry of await readdir(campaignRoot, { withFileTypes: true })) {
   }
 }
 
-console.log(JSON.stringify({ campaign: "v101", reconciled,
+console.log(JSON.stringify({ campaign, reconciled,
   classification: "operator-interrupted", retryEligible: false }));
