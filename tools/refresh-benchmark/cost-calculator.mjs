@@ -79,7 +79,6 @@ export const CHATGPT_PLUS_FIVE_HOUR_MESSAGES = Object.freeze({
   "gpt-5.6-terra": [25, 200],
   "gpt-5.6-luna": [250, 2000],
 });
-const CHATGPT_PLUS_WEEKLY_MESSAGES = CHATGPT_PLUS_FIVE_HOUR_MESSAGES;
 
 const MODEL_ALIASES = Object.freeze({
   "gemini-3.8-flash-tiered": "gemini-3.8-flash",
@@ -122,13 +121,6 @@ export function subscriptionCost(totalTokens, monthlyUsd, weeklyReserveTokens) {
   if (!(weeklyReserveTokens > 0)) return null;
   const usdPerToken = monthlyUsd / (weeklyReserveTokens * WEEKS_PER_MONTH);
   return { usd: totalTokens * usdPerToken, usdPerToken, weeklyReserveTokens };
-}
-
-export function chatgptReserveRange(modelId, planName, meanTokensPerRequest) {
-  const bounds = CHATGPT_PLUS_FIVE_HOUR_MESSAGES[canonicalModel(modelId)];
-  const plan = SUBSCRIPTION_PLANS.chatgpt[planName];
-  if (!bounds || !plan || !(meanTokensPerRequest > 0)) return null;
-  return bounds.map((messages) => messages * plan.limitMultiplier * meanTokensPerRequest);
 }
 
 async function receiptPaths(root) {
@@ -393,7 +385,8 @@ function scaleRange(range, factor) {
 
 export function buildReport(entries, options = {}) {
   const cycleDocuments = options.cycleDocuments ?? null;
-  const arms = aggregateReceipts(entries).map((arm) => {
+  const aggregateArms = aggregateReceipts(entries);
+  const arms = aggregateArms.map((arm) => {
     const factor1000 = arm.documents ? 1000 / arm.documents : null;
     const factorCycle = arm.documents && cycleDocuments ? cycleDocuments / arm.documents : null;
     const subscription = subscriptionForArm(arm, options);
@@ -428,7 +421,9 @@ export function buildReport(entries, options = {}) {
         verified: { input: 0.15, output: 0.6 }, note: "Receipt regression and official card agree." },
     ],
     rateCards: RATE_CARDS, subscriptionPlans: SUBSCRIPTION_PLANS,
-    chatgptPlusWeeklyMessages: CHATGPT_PLUS_WEEKLY_MESSAGES,
+    chatgptPlusFiveHourMessages: CHATGPT_PLUS_FIVE_HOUR_MESSAGES,
+    seatComparison: buildSeatComparisons(aggregateArms,
+      Array.isArray(options.seatObservations) ? options.seatObservations : []),
     regressions: regressObservedRates(entries), arms,
   };
 }
@@ -453,11 +448,12 @@ export function renderMarkdown(report) {
     "The owner must provide both actual tiers; Gemini also needs a measured or estimated weekly token reserve.", "",
     "## Per-arm costs", "",
     "Output is billable output: visible output plus separately reported thinking tokens. Token columns are total / per document.", "",
-    "| Arm | Receipts (usage) | Docs usage / attempted | Input total / doc | Visible output total / doc | Thinking | Billable output | API USD | Subscription USD | Simulated USD | API / 1,000 docs | Subscription / 1,000 docs | Simulated / 1,000 docs | API / benchmark cycle |",
+    "| Arm | Receipts (usage) | Docs usage / attempted / accepted | Input total / doc | Visible output total / doc | Thinking | Billable output | API USD | Subscription USD | Simulated USD | API / 1,000 docs | Subscription / 1,000 docs | Simulated / 1,000 docs | API / benchmark cycle |",
     "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
   ];
   for (const arm of report.arms) {
-    lines.push(`| ${arm.arm} | ${count(arm.receiptCount)} (${count(arm.usageReceiptCount)}) | ${count(arm.documents)} / ${count(arm.attemptedDocuments)} | `
+    lines.push(`| ${arm.arm} | ${count(arm.receiptCount)} (${count(arm.usageReceiptCount)}) | `
+      + `${count(arm.documents)} / ${count(arm.attemptedDocuments)} / ${count(arm.acceptedDocuments)} | `
       + `${tokenPair(arm.inputTokens, arm.perDocument?.inputTokens ?? 0)} | `
       + `${tokenPair(arm.visibleOutputTokens, arm.documents ? arm.visibleOutputTokens / arm.documents : 0)} | `
       + `${count(arm.thinkingTokens)} | ${count(arm.outputTokens)} | `
@@ -468,9 +464,36 @@ export function renderMarkdown(report) {
   lines.push("", "The benchmark-cycle projection uses the frozen manifest's "
     + `${count(report.cycle.benchmarkDocuments)} documents. Production refresh cycle = **source-gap**: `
     + "the CronJobs define schedules but no stable document count per run.", "",
+  "## Siège vs token", "",
+  "Une capacité n'est publiée que pour une fenêtre attestée de 7 jours. `scenario` est le ratio indirect quota compte/tokens campagne; il suppose un quota linéaire en tokens et une pondération Sol/Luna identique, toutes deux non vérifiées.", "",
+  "| Arm | Statut | Rendement accepté | Docs / 10% | Docs / semaine | Docs / mois | Tokens / semaine | API / doc | API / résultat accepté |",
+  "|---|---|---:|---:|---:|---:|---:|---:|---:|" );
+  for (const arm of report.seatComparison.arms) {
+    const capacity = arm.observed.status === "N-A" ? null : arm.observed;
+    lines.push(`| ${arm.arm} | ${arm.status}${arm.reason ? ` (${arm.reason})` : ""} | `
+      + `${arm.acceptedRate === null ? "N-A" : count(arm.acceptedRate * 100, 1) + "%"} | `
+      + `${capacity ? count(capacity.docsPerTenPercent, 1) : "N-A"} | `
+      + `${capacity ? count(capacity.docsPerWeek, 1) : "N-A"} | `
+      + `${capacity ? count(capacity.docsPerMonth, 1) : "N-A"} | `
+      + `${capacity ? count(capacity.tokensPerWeek, 0) : "N-A"} | `
+      + `${money(arm.apiUsdPerDocument)} | ${money(arm.apiUsdPerAccepted)} |`);
+  }
+  lines.push("", "Les capacités par palier restent N-A quand le palier observé 1x/5x/20x est source-gap. Les seuils économiques ne dépendent que du prix mensuel et du coût API mesuré.", "",
+    "| Arm | Palier | USD/mois | Docs/semaine | Docs/mois | Siège/doc | Seuil strict siège < API | Atteignable/siège | Sièges pour 1 000 docs/mois | Siège / 1 000 | API / 1 000 |",
+    "|---|---|---:|---:|---:|---:|---:|---|---:|---:|---:|" );
+  for (const row of report.seatComparison.rows) {
+    lines.push(`| ${row.arm} | ${row.provider}/${row.plan} | ${money(row.monthlyUsd)} | `
+      + `${row.docsPerWeek === null ? "N-A" : count(row.docsPerWeek, 1)} | `
+      + `${row.docsPerMonth === null ? "N-A" : count(row.docsPerMonth, 1)} | `
+      + `${money(row.seatUsdPerDocument)} | ${count(row.breakEvenDocuments)} | `
+      + `${row.breakEvenReachable === null ? "N-A" : row.breakEvenReachable ? "oui" : "non"} | `
+      + `${row.seatsFor1000Documents ?? "N-A"} | ${money(row.seatUsdFor1000Documents)} | `
+      + `${money(row.apiUsdFor1000Documents)} |`);
+  }
+  lines.push("", "Cycle de production: **N-A (source-gap)**. Le manifeste de 100 documents est un cycle benchmark, pas un volume de refresh. Pour un cycle de `N` documents, le coût API est `N × API/doc`; le coût siège requiert d'abord une capacité mensuelle attestée.", "",
   "## Modes", "",
   "- `api`: measured input × input rate + (visible output + thinking) × output rate.",
-  "- `subscription`: monthly plan price ÷ estimated monthly token reserve. ChatGPT estimates use the official weekly message range multiplied by measured tokens per usage-bearing request. A CLI weekly-token override replaces that estimate.",
+  "- `subscription`: monthly plan price ÷ monthly token reserve, uniquement avec un override hebdomadaire explicite; les limites 5 h ne sont jamais extrapolées en semaine.",
   "- `simulated`: measured input/output token shares × the same model's API rates, producing a blended USD/M token rate. It is algebraically equal to API cost and is kept explicit for scenario work.", "",
   "## Hard-coded rate cards", "",
   "| Model | Input USD/M | Output USD/M | As of | Valid until | Source |", "|---|---:|---:|---|---|---|" );
@@ -488,14 +511,14 @@ export function renderMarkdown(report) {
         + `[official plan page](${plan.source}) |`);
     }
   }
-  lines.push("", "The official Codex page publishes estimated weekly message ranges. Pro 5x and Pro 20x multiply the Plus bounds:", "",
-    "| Model | Plus messages/week | Pro 5x | Pro 20x |", "|---|---:|---:|---:|" );
-  for (const [modelId, bounds] of Object.entries(CHATGPT_PLUS_WEEKLY_MESSAGES)) {
+  lines.push("", "The official Codex page publishes estimated local-message ranges per five-hour period. They are not weekly capacities. Pro 5x and Pro 20x multiply the Plus bounds:", "",
+    "| Model | Plus messages/5h | Pro 5x | Pro 20x |", "|---|---:|---:|---:|" );
+  for (const [modelId, bounds] of Object.entries(CHATGPT_PLUS_FIVE_HOUR_MESSAGES)) {
     lines.push(`| ${modelId} | ${bounds[0]}–${count(bounds[1])} | `
       + `${count(bounds[0] * 5)}–${count(bounds[1] * 5)} | `
       + `${count(bounds[0] * 20)}–${count(bounds[1] * 20)} |`);
   }
-  lines.push("", "Google publishes relative plan tiers but no token-denominated weekly reserve. Anonymous access to the official plan page did not expose a stable regional price payload; the USD figures above are the owner-provided 2026-09-16 public values and remain a source-gap to recheck at checkout.", "",
+  lines.push("", "Google publishes the listed USD prices and relative 1x/5x/20x tiers, but no token-denominated weekly reserve. Checkout price and taxes remain region-dependent.", "",
     "## Receipt-cost regression", "",
     "No-intercept two-variable regression: `actual.costUsd × 1M = inputTokens × a + billableOutputTokens × b`.", "",
     "| Model | Samples | Input USD/M | Output USD/M | Hard-coded input/output |", "|---|---:|---:|---:|---|" );
@@ -504,10 +527,11 @@ export function renderMarkdown(report) {
     lines.push(`| ${value.modelId} | ${value.samples} | ${count(value.inputUsdPerMillion, 6)} | `
       + `${count(value.outputUsdPerMillion, 6)} | ${card ? `${card.input} / ${card.output}` : "N-A"} |`);
   }
-  lines.push("", "## Gemini quota experiment", "",
-    "**N-A; quota burn = 0%.** llm-mesh 0.19.3 has a generic `quota` outcome type but the Cloud Code transport never populates it. It only reads `Retry-After` after HTTP 429. Successful v101b receipts expose no rate headers; the recorded Cloud Code 429 also has empty headers and no reset.", "",
-    "Without a numeric before/after observable, burning requests cannot estimate tokens per quota unit or weekly reserve. The alternative is exhaustion to HTTP 429, which is not authorized without explicit owner GO. No request was sent and no receipt was written under `burn/`.", "",
-    "Consequently Gemini tokens/week and equivalent USD/token are N-A. ChatGPT equivalents are also N-A in this snapshot until the owner supplies `--plan-chatgpt`; no Codex burn was performed while its queues were active.", "");
+  lines.push("", "## Observables de quota", "",
+    "- Codex/ChatGPT: `wham/usage` expose le pourcentage, la durée et le reset de la fenêtre. La capacité Sol/Luna ci-dessus est un scénario par ratio avec les reçus de campagne, pas une mesure marginale par bras.",
+    "- Google Cloud Code: `loadCodeAssist` expose le palier et `retrieveUserQuota` des buckets par modèle (`remainingFraction`, `resetTime`). llm-mesh 0.19.3 n'appelle pas ce dernier et ne conserve que `Retry-After` après 429. Le bucket Gemini observé dure 5 h; aucune capacité hebdomadaire n'en est extrapolée.",
+    "- Claude Code OAuth: `/usage` expose les fenêtres 5 h et 7 j, mais `sonnet46-cloud-off` utilise Google Cloud Code. Une projection Claude Pro/Max pour ce bras serait un changement de transport; elle reste N-A.", "",
+    "Burn corpus: **0 requête Gemini, 0 requête Sonnet**. Les deux appels Google étaient des lectures de métadonnées quota. Le plafond de 10 % ne pouvait pas être garanti avant le document suivant; aucun traitement n'a été lancé.", "");
   return lines.join("\n");
 }
 
@@ -519,9 +543,9 @@ const GEMINI_PLAN_ALIASES = Object.freeze({
 
 export function parseArgs(argv) {
   const options = { format: "md", campaign: null, geminiPlan: null, chatgptPlan: null,
-    geminiWeeklyTokens: null, chatgptWeeklyTokens: null };
+    geminiWeeklyTokens: null, chatgptWeeklyTokens: null, seatObservations: null };
   const valued = new Set(["--campaign", "--plan-gemini", "--plan-chatgpt", "--format",
-    "--gemini-weekly-tokens", "--chatgpt-weekly-tokens"]);
+    "--gemini-weekly-tokens", "--chatgpt-weekly-tokens", "--seat-observations"]);
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
     if (flag === "--help") return { ...options, help: true };
@@ -530,6 +554,7 @@ export function parseArgs(argv) {
     if (!value) throw new Error(`Missing value for ${flag}`);
     if (flag === "--campaign") options.campaign = value;
     else if (flag === "--format") options.format = value;
+    else if (flag === "--seat-observations") options.seatObservations = value;
     else if (flag === "--plan-gemini") options.geminiPlan = GEMINI_PLAN_ALIASES[value] ?? value;
     else if (flag === "--plan-chatgpt") options.chatgptPlan = value;
     else {
@@ -559,6 +584,7 @@ Options:
   --plan-chatgpt plus|pro-5x|pro-20x
   --gemini-weekly-tokens <tokens>    Measured/estimated weekly reserve override
   --chatgpt-weekly-tokens <tokens>   Override published-message estimate
+  --seat-observations <json>         Allowlisted quota observations (schema v1)
   --format md|json                   Default: md
 `;
 
@@ -576,7 +602,9 @@ export async function runCli(argv, write = (value) => process.stdout.write(value
   const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
   const entries = await loadReceiptEntries(repositoryRoot, options.campaign);
   const cycleDocuments = await manifestDocumentCount(repositoryRoot, options.campaign);
-  const report = buildReport(entries, { ...options, cycleDocuments });
+  const seatObservations = options.seatObservations
+    ? validateSeatObservations(JSON.parse(await readFile(resolve(options.seatObservations), "utf8"))) : [];
+  const report = buildReport(entries, { ...options, cycleDocuments, seatObservations });
   write(options.format === "json" ? `${JSON.stringify(report, null, 2)}\n` : renderMarkdown(report));
   return report;
 }
