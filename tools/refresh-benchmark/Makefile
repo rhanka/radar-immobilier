@@ -1294,7 +1294,7 @@ freeze-blind-v100:
 # v101 phase 1: catalogue and 64-token pings only. Dependencies are installed in
 # container tmpfs so the worktree and shared historical dependency volume stay untouched.
 V101_RESULTS := $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v101
-V101_MESH_VERSION := 0.19.2
+V101_MESH_VERSION := 0.19.3
 
 .PHONY: check-v101-tools test-v101 catalog-v101 ping-v101 measure-cprime-v101 freeze-v101 \
 	compact-v101-json verify-v101 gate-v101 run-v101-arm run-v101-lane score-v101 \

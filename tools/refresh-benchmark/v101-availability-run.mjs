@@ -18,8 +18,8 @@ if (!await claimOnce(lockPath, receiptPath)) process.exit(0);
 const meshTransport = ["codex", "cloud-code"].includes(arm.transport);
 const packageVersion = meshTransport ? JSON.parse(await readFile(
   "/workspace/node_modules/@sentropic/llm-mesh/package.json", "utf8")).version : null;
-if (meshTransport && packageVersion !== "0.19.2") {
-  throw new Error(`llm-mesh 0.19.2 required, got ${packageVersion}`);
+if (meshTransport && packageVersion !== "0.19.3") {
+  throw new Error(`llm-mesh 0.19.3 required, got ${packageVersion}`);
 }
 let actual;
 try {

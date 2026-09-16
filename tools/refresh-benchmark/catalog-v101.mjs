@@ -53,7 +53,7 @@ if (!await claimOnce(lockPath, receiptPath)) process.exit(0);
 
 const meshPackage = JSON.parse(await readFile(
   "/workspace/node_modules/@sentropic/llm-mesh/package.json", "utf8"));
-if (meshPackage.version !== "0.19.2") throw new Error("llm-mesh 0.19.2 is required");
+if (meshPackage.version !== "0.19.3") throw new Error("llm-mesh 0.19.3 is required");
 const facade = createLlmMeshFacade({ mode: "cli",
   configResolver: { async resolveConfig() { return {}; } },
   keyring: new EncryptedFileKeyring("/run/benchmark-keyring") });
