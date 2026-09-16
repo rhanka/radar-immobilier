@@ -6,7 +6,8 @@ import { pathToFileURL } from "node:url";
 import { arms, OUTPUT_CAP, receiptCap, usageCostUsd } from "./v101-arms.mjs";
 import { createProvider, ProviderError } from "./v101-provider.mjs";
 import { advanceCircuit, artifactPaths, classifyFailure, rateLimitPlan, resetRateLimitState,
-  resumeDecision, updateGlobalStatus, writeImmutable, writeIntent } from "./v101-runner-state.mjs";
+  releaseRateLimitIntent, resumeDecision, updateGlobalStatus, writeImmutable,
+  writeIntent } from "./v101-runner-state.mjs";
 import { sanitize } from "./v101-probe-lib.mjs";
 
 const MAX_REQUESTS = 200;
@@ -82,6 +83,15 @@ async function progressFor(root, manifest, armName) {
   return progress;
 }
 
+async function lastRateLimitedDocument(executionRoot, lane, armName) {
+  try {
+    const content = await readFile(resolve(executionRoot, "limits", `${lane}.jsonl`), "utf8");
+    const events = content.trim().split("\n").filter(Boolean).map((line) => JSON.parse(line));
+    return events.reverse().find((event) => event.arm === armName
+      && event.category === "rate-limit")?.documentId ?? null;
+  } catch (error) { if (error?.code === "ENOENT") return null; throw error; }
+}
+
 export async function runArm(armName, options = {}) {
   const arm = arms[armName];
   if (!arm) throw new Error(`Unknown ${CAMPAIGN} arm: ${armName ?? "N-A"}`);
@@ -123,12 +133,17 @@ export async function runArm(armName, options = {}) {
   }
   let requests = 0; let rateLimited = false; let rateLimitConsecutive = 0;
   let resumeAt = null; let armYield = null;
-  let circuit = advanceCircuit(undefined, null, 3);
+  let circuit = advanceCircuit(undefined, null, 3); let priorArm = {};
   try {
     const priorStatus = JSON.parse(await readFile(statusPath, "utf8"));
-    requests = Number(priorStatus.arms?.[armName]?.requests ?? 0);
-    rateLimitConsecutive = Number(priorStatus.arms?.[armName]?.rateLimitConsecutive ?? 0);
+    priorArm = priorStatus.arms?.[armName] ?? {};
+    requests = Number(priorArm.requests ?? 0);
+    rateLimitConsecutive = Number(priorArm.rateLimitConsecutive ?? 0);
   } catch (error) { if (error?.code !== "ENOENT") throw error; }
+  if (priorArm.state === "suspended-429") {
+    const documentId = await lastRateLimitedDocument(executionRoot, arm.lane, armName);
+    if (documentId) await releaseRateLimitIntent(campaignRoot, documentId, armName);
+  }
   const progress = await progressFor(campaignRoot, manifest, armName);
   const log = async (event) => {
     const record = { at: new Date().toISOString(), arm: armName, ...event };

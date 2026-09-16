@@ -6,8 +6,8 @@ import test from "node:test";
 
 import { arms, laneArms, receiptCap, usageCostUsd } from "./v101-arms.mjs";
 import { advanceCircuit, artifactPaths, classifyFailure, providerGatePassed, rateLimitPlan,
-  replayTransportGatePassed, resetRateLimitState, resumeDecision, retryAt, updateGlobalStatus,
-  writeImmutable, writeIntent } from "./v101-runner-state.mjs";
+  releaseRateLimitIntent, replayTransportGatePassed, resetRateLimitState, resumeDecision, retryAt,
+  updateGlobalStatus, writeImmutable, writeIntent } from "./v101-runner-state.mjs";
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
 import { codexCapOption } from "./v101-provider.mjs";
 
@@ -114,6 +114,17 @@ test("should restart the 429 sequence after a successful request", () => {
   const recovered = resetRateLimitState();
   assert.deepEqual(recovered, { consecutive: 0, resumeAt: null });
   assert.equal(rateLimitPlan({}, recovered.consecutive, 0).waitMs, 300_000);
+});
+
+test("should release only a known rate-limit intent without a receipt", async () => {
+  const root = await mkdtemp(resolve(tmpdir(), "v101-resume-"));
+  try {
+    const paths = artifactPaths(root, "doc-a", "sonnet46-cloud-low", 1);
+    await writeIntent(paths, { state: "in-flight", documentId: "doc-a",
+      arm: "sonnet46-cloud-low" });
+    assert.equal(await releaseRateLimitIntent(root, "doc-a", "sonnet46-cloud-low"), true);
+    assert.equal((await resumeDecision(root, "doc-a", "sonnet46-cloud-low")).action, "run");
+  } finally { await rm(root, { recursive: true, force: true }); }
 });
 
 test("should claim before work, preserve receipts, and fail closed on uncertain intent", async () => {

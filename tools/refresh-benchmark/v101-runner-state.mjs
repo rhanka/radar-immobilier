@@ -33,6 +33,22 @@ export async function resumeDecision(root, documentId, arm) {
     paths: artifactPaths(root, documentId, arm, 1) };
 }
 
+export async function releaseRateLimitIntent(root, documentId, arm) {
+  for (const attempt of [2, 1]) {
+    const paths = artifactPaths(root, documentId, arm, attempt);
+    const [intent, receipt] = await Promise.all([
+      jsonIfPresent(paths.intent), jsonIfPresent(paths.receipt),
+    ]);
+    if (!intent || receipt) continue;
+    if (intent.state !== "in-flight" || intent.documentId !== documentId || intent.arm !== arm) {
+      throw new Error(`Invalid suspended intent: ${paths.intent}`);
+    }
+    await rm(paths.intent);
+    return true;
+  }
+  return false;
+}
+
 export async function writeIntent(paths, value) {
   await mkdir(dirname(paths.intent), { recursive: true });
   try { await writeFile(paths.intent, `${JSON.stringify(value)}\n`, { flag: "wx" }); }
