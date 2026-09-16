@@ -39,6 +39,7 @@ test("should retry only transport classes and suspend a 429", () => {
   assert.equal(classifyFailure({ httpStatus: 500 }).retry, true);
   assert.equal(classifyFailure({ httpStatus: 425 }).retry, true);
   assert.equal(classifyFailure({ code: "ENOTFOUND" }).retry, true);
+  assert.equal(classifyFailure({ code: "network_error" }).retry, true);
   assert.equal(classifyFailure({ terminalSse: { expected: true, terminal: false } }).retry, true);
   assert.deepEqual(classifyFailure({ httpStatus: 429 }),
     { category: "rate-limit", retry: false, suspend: true });

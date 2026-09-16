@@ -77,9 +77,11 @@ export function classifyFailure({ httpStatus = null, code = null, terminalSse = 
     return { category: "stream-without-terminal", retry: true, suspend: false };
   }
   if (httpStatus >= 400) return { category: "http-terminal", retry: false, suspend: false };
+  const normalizedCode = String(code ?? "").toUpperCase();
   const networkCodes = new Set(["ABORT_ERR", "ECONNRESET", "ECONNREFUSED", "ENOTFOUND",
     "EAI_AGAIN", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "UND_ERR_HEADERS_TIMEOUT"]);
-  if (networkCodes.has(code) || code === "NETWORK_ERROR" || code === "TRANSPORT_ERROR") {
+  if (networkCodes.has(normalizedCode) || normalizedCode === "NETWORK_ERROR"
+    || normalizedCode === "TRANSPORT_ERROR") {
     return { category: "network", retry: true, suspend: false };
   }
   return { category: "terminal", retry: false, suspend: false };
