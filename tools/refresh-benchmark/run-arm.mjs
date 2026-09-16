@@ -265,7 +265,7 @@ export async function runArm(armName, options = {}) {
           latency: { startedAt: new Date(started).toISOString(),
             completedAt: new Date(completed).toISOString(), totalMs: completed - started,
             networkMs: wire?.durationMs ?? null }, retry: { eligible: false, reason: null,
-            previousAttempt: previous ? 1 : null }, error: null,
+            previousAttempt: previous?.attemptNumber ?? null }, error: null,
           artifacts: { intent: paths.intent, receipt: paths.receipt, raw: paths.raw,
             output: accepted ? paths.output : null },
           redaction: { allowlistedFieldsOnly: true, secretsIncluded: false } };
@@ -302,7 +302,7 @@ export async function runArm(armName, options = {}) {
             completedAt: new Date(completed).toISOString(), totalMs: completed - started,
             networkMs: details.wire?.durationMs ?? null },
           retry: { eligible: retryEligible, reason: retryEligible ? details.classified.category : null,
-            previousAttempt: previous ? 1 : null }, error: details.error,
+            previousAttempt: previous?.attemptNumber ?? null }, error: details.error,
           artifacts: { intent: paths.intent, receipt: paths.receipt,
             raw: actual ? paths.raw : null, output: null },
           redaction: { allowlistedFieldsOnly: true, secretsIncluded: false } };
