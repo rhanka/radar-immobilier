@@ -51,8 +51,9 @@ export const RATE_CARDS = Object.freeze({
   },
 });
 
-const CHATGPT_SOURCE = "https://learn.chatgpt.com/docs/pricing";
+const CHATGPT_SOURCE = "https://developers.openai.com/codex/pricing";
 const GOOGLE_SOURCE = "https://gemini.google/subscriptions/";
+const CLAUDE_SOURCE = "https://www.anthropic.com/pricing";
 export const SUBSCRIPTION_PLANS = Object.freeze({
   chatgpt: {
     plus: { monthlyUsd: 20, limitMultiplier: 1, asOf: "2026-09-16", source: CHATGPT_SOURCE },
@@ -60,19 +61,25 @@ export const SUBSCRIPTION_PLANS = Object.freeze({
     "pro-20x": { monthlyUsd: 200, limitMultiplier: 20, asOf: "2026-09-16", source: CHATGPT_SOURCE },
   },
   gemini: {
-    "ai-pro": { monthlyUsd: 19.99, asOf: "2026-09-16", source: GOOGLE_SOURCE },
-    "ai-ultra-5x": { monthlyUsd: 99.99, asOf: "2026-09-16", source: GOOGLE_SOURCE },
-    "ai-ultra-20x": { monthlyUsd: 199.99, asOf: "2026-09-16", source: GOOGLE_SOURCE },
+    "ai-pro": { monthlyUsd: 19.99, limitMultiplier: 1, asOf: "2026-09-16", source: GOOGLE_SOURCE },
+    "ai-ultra-5x": { monthlyUsd: 99.99, limitMultiplier: 5, asOf: "2026-09-16", source: GOOGLE_SOURCE },
+    "ai-ultra-20x": { monthlyUsd: 199.99, limitMultiplier: 20, asOf: "2026-09-16", source: GOOGLE_SOURCE },
+  },
+  claude: {
+    pro: { monthlyUsd: 20, limitMultiplier: 1, asOf: "2026-09-16", source: CLAUDE_SOURCE },
+    "max-5x": { monthlyUsd: 100, limitMultiplier: 5, asOf: "2026-09-16", source: CLAUDE_SOURCE },
+    "max-20x": { monthlyUsd: 200, limitMultiplier: 20, asOf: "2026-09-16", source: CLAUDE_SOURCE },
   },
 });
 
-// Official Codex page: estimated messages/week on Plus; Pro tiers multiply these bounds.
-export const CHATGPT_PLUS_WEEKLY_MESSAGES = Object.freeze({
+// Official Codex page: estimated local messages per five-hour period, never a weekly reserve.
+export const CHATGPT_PLUS_FIVE_HOUR_MESSAGES = Object.freeze({
   "gpt-6-astra": [5, 45],
   "gpt-5.6-sol": [10, 100],
   "gpt-5.6-terra": [25, 200],
   "gpt-5.6-luna": [250, 2000],
 });
+const CHATGPT_PLUS_WEEKLY_MESSAGES = CHATGPT_PLUS_FIVE_HOUR_MESSAGES;
 
 const MODEL_ALIASES = Object.freeze({
   "gemini-3.8-flash-tiered": "gemini-3.8-flash",
@@ -118,7 +125,7 @@ export function subscriptionCost(totalTokens, monthlyUsd, weeklyReserveTokens) {
 }
 
 export function chatgptReserveRange(modelId, planName, meanTokensPerRequest) {
-  const bounds = CHATGPT_PLUS_WEEKLY_MESSAGES[canonicalModel(modelId)];
+  const bounds = CHATGPT_PLUS_FIVE_HOUR_MESSAGES[canonicalModel(modelId)];
   const plan = SUBSCRIPTION_PLANS.chatgpt[planName];
   if (!bounds || !plan || !(meanTokensPerRequest > 0)) return null;
   return bounds.map((messages) => messages * plan.limitMultiplier * meanTokensPerRequest);
@@ -158,12 +165,16 @@ export function aggregateReceipts(entries) {
     if (receipt.schemaVersion !== 2 || typeof receipt.arm !== "string") continue;
     const aggregate = arms.get(receipt.arm) ?? {
       arm: receipt.arm, receiptCount: 0, usageReceiptCount: 0,
-      documentIds: new Set(), usageDocumentIds: new Set(), models: new Set(), transports: new Set(),
+      documentIds: new Set(), usageDocumentIds: new Set(), acceptedDocumentIds: new Set(),
+      models: new Set(), transports: new Set(),
       inputTokens: 0, visibleOutputTokens: 0, thinkingTokens: 0,
       outputTokens: 0, totalTokens: 0, actualCostUsd: 0, actualCostSamples: 0,
     };
     aggregate.receiptCount += 1;
     if (receipt.documentId) aggregate.documentIds.add(receipt.documentId);
+    if (receipt.documentId && receipt.validation?.accepted === true) {
+      aggregate.acceptedDocumentIds.add(receipt.documentId);
+    }
     const modelId = receipt.requested?.modelId ?? receipt.actual?.modelId ?? receipt.wire?.model;
     if (modelId) aggregate.models.add(canonicalModel(modelId));
     if (receipt.requested?.transportProviderId) {
@@ -194,6 +205,7 @@ export function aggregateReceipts(entries) {
       arm: value.arm, modelId, transports: [...value.transports].sort(),
       receiptCount: value.receiptCount, usageReceiptCount: value.usageReceiptCount,
       documents, attemptedDocuments: value.documentIds.size,
+      acceptedDocuments: value.acceptedDocumentIds.size,
       inputTokens: value.inputTokens, visibleOutputTokens: value.visibleOutputTokens,
       thinkingTokens: value.thinkingTokens, outputTokens: value.outputTokens,
       totalTokens: value.totalTokens,
@@ -246,7 +258,7 @@ function rangedSubscription(totalTokens, plan, reserveRange, basis) {
 export function subscriptionForArm(arm, options = {}) {
   const isGemini = arm.modelId === "gemini-3.8-flash" && arm.transports.includes("cloud-code");
   const isChatgpt = arm.transports.includes("codex")
-    && Object.hasOwn(CHATGPT_PLUS_WEEKLY_MESSAGES, arm.modelId);
+    && Object.hasOwn(CHATGPT_PLUS_FIVE_HOUR_MESSAGES, arm.modelId);
   const provider = isGemini ? "gemini" : isChatgpt ? "chatgpt" : null;
   if (!provider) return null;
   const planName = options[`${provider}Plan`] ?? null;
@@ -258,11 +270,120 @@ export function subscriptionForArm(arm, options = {}) {
     ...rangedSubscription(arm.totalTokens, plan, [override, override], "weekly-token-override") };
   if (provider === "gemini") return { provider, plan: planName, status: "N-A",
     reason: "weekly-token-reserve-source-gap" };
-  const meanTokens = arm.usageReceiptCount ? arm.totalTokens / arm.usageReceiptCount : 0;
-  const reserve = chatgptReserveRange(arm.modelId, planName, meanTokens);
-  return reserve ? { provider, plan: planName, status: "estimated",
-    ...rangedSubscription(arm.totalTokens, plan, reserve, "published-messages-x-observed-tokens") }
-    : { provider, plan: planName, status: "N-A", reason: "published-limit-source-gap" };
+  return { provider, plan: planName, status: "N-A", reason: "weekly-token-reserve-source-gap" };
+}
+
+const SEAT_ARMS = Object.freeze({
+  "gemini-low": { provider: "gemini" },
+  "sol-medium": { provider: "chatgpt" },
+  "luna-high": { provider: "chatgpt" },
+  "sonnet46-cloud-off": { provider: "claude" },
+});
+const OBSERVATION_FIELDS = new Set(["arm", "provider", "status", "reason", "method",
+  "sourceStatus", "basePlan", "windowMinutes", "usedPercent", "campaignTokens",
+  "quotaDeltaPercent", "documents", "tokens"]);
+const N_A_REASONS = new Set(["weekly-window-source-gap", "transport-mismatch",
+  "plan-source-gap", "missing-observation"]);
+
+export function validateSeatObservations(value) {
+  if (!value || value.schemaVersion !== 1 || !Array.isArray(value.observations)) {
+    throw new Error("Seat observations must use schemaVersion 1 and an observations array");
+  }
+  const seen = new Set();
+  for (const observation of value.observations) {
+    for (const key of Object.keys(observation)) {
+      if (!OBSERVATION_FIELDS.has(key)) throw new Error(`Unknown observation field: ${key}`);
+    }
+    const config = SEAT_ARMS[observation.arm];
+    if (!config || observation.provider !== config.provider) {
+      throw new Error(`Invalid seat arm/provider mapping: ${observation.arm}`);
+    }
+    if (seen.has(observation.arm)) throw new Error(`Duplicate seat observation: ${observation.arm}`);
+    seen.add(observation.arm);
+    if (observation.status === "N-A") {
+      if (!N_A_REASONS.has(observation.reason)) throw new Error(`Invalid N-A reason: ${observation.reason}`);
+      continue;
+    }
+    if (!["measured", "scenario"].includes(observation.status)
+      || !["controlled-burn", "account-percent/campaign-token-ratio"].includes(observation.method)
+      || observation.sourceStatus !== "observed"
+      || !Number.isFinite(observation.windowMinutes) || observation.windowMinutes <= 0) {
+      throw new Error(`Invalid capacity observation: ${observation.arm}`);
+    }
+    const plans = SUBSCRIPTION_PLANS[observation.provider];
+    if (observation.basePlan !== null && !plans?.[observation.basePlan]) {
+      throw new Error(`Invalid base plan: ${observation.basePlan}`);
+    }
+    if (observation.method === "account-percent/campaign-token-ratio") {
+      if (!(observation.usedPercent > 0 && observation.usedPercent <= 100)
+        || !(observation.campaignTokens > 0)) throw new Error(`Invalid ratio data: ${observation.arm}`);
+    } else if (!(observation.quotaDeltaPercent > 0 && observation.quotaDeltaPercent <= 10)
+      || !(observation.documents > 0) || !(observation.tokens > 0)) {
+      throw new Error(`Invalid controlled burn: ${observation.arm}`);
+    }
+  }
+  return value.observations;
+}
+
+function observedCapacity(arm, observation) {
+  if (!observation) return { status: "N-A", reason: "missing-observation" };
+  if (observation.status === "N-A") return { status: "N-A", reason: observation.reason };
+  if (observation.windowMinutes !== 10_080) return { status: "N-A", reason: "non-weekly-window" };
+  const tokensPerDocument = arm.documents ? arm.totalTokens / arm.documents : 0;
+  if (!(tokensPerDocument > 0)) return { status: "N-A", reason: "missing-usage" };
+  const quotaFraction = (observation.method === "controlled-burn"
+    ? observation.quotaDeltaPercent : observation.usedPercent) / 100;
+  const docsPerWeek = observation.method === "controlled-burn"
+    ? observation.documents / quotaFraction
+    : observation.campaignTokens / quotaFraction / tokensPerDocument;
+  const tokensPerWeek = observation.method === "controlled-burn"
+    ? observation.tokens / quotaFraction : observation.campaignTokens / quotaFraction;
+  return { status: observation.status, method: observation.method,
+    docsPerTenPercent: docsPerWeek / 10, docsPerWeek,
+    docsPerMonth: docsPerWeek * WEEKS_PER_MONTH, tokensPerWeek };
+}
+
+export function buildSeatComparisons(arms, observations = []) {
+  const byArm = new Map(observations.map((value) => [value.arm, value]));
+  const selected = arms.filter(({ arm }) => SEAT_ARMS[arm]).map((arm) => {
+    const observation = byArm.get(arm.arm);
+    const observed = observedCapacity(arm, observation);
+    const acceptedRate = arm.attemptedDocuments ? arm.acceptedDocuments / arm.attemptedDocuments : null;
+    const apiUsdPerDocument = arm.documents && arm.apiUsd !== null ? arm.apiUsd / arm.documents : null;
+    return { arm: arm.arm, provider: SEAT_ARMS[arm.arm].provider,
+      status: observed.status, reason: observed.reason ?? null, observed,
+      acceptedRate, apiUsdPerDocument,
+      apiUsdPerAccepted: acceptedRate > 0 ? apiUsdPerDocument / acceptedRate : null };
+  });
+  const rows = [];
+  for (const arm of selected) {
+    const observation = byArm.get(arm.arm);
+    for (const [plan, details] of Object.entries(SUBSCRIPTION_PLANS[arm.provider])) {
+      const base = observation?.basePlan ? SUBSCRIPTION_PLANS[arm.provider][observation.basePlan] : null;
+      const scale = base && arm.observed.status !== "N-A"
+        ? details.limitMultiplier / base.limitMultiplier : null;
+      const docsPerMonth = scale === null ? null : arm.observed.docsPerMonth * scale;
+      const breakEvenDocuments = arm.apiUsdPerDocument === null
+        ? null : Math.floor(details.monthlyUsd / arm.apiUsdPerDocument) + 1;
+      rows.push({ arm: arm.arm, provider: arm.provider, plan,
+        monthlyUsd: details.monthlyUsd,
+        docsPerWeek: scale === null ? null : arm.observed.docsPerWeek * scale,
+        docsPerMonth,
+        acceptedDocsPerMonth: docsPerMonth === null || arm.acceptedRate === null
+          ? null : docsPerMonth * arm.acceptedRate,
+        seatUsdPerDocument: docsPerMonth ? details.monthlyUsd / docsPerMonth : null,
+        breakEvenDocuments,
+        breakEvenReachable: docsPerMonth === null || breakEvenDocuments === null
+          ? null : breakEvenDocuments <= docsPerMonth,
+        seatsFor1000Documents: docsPerMonth ? Math.ceil(1000 / docsPerMonth) : null,
+        seatUsdFor1000Documents: docsPerMonth
+          ? Math.ceil(1000 / docsPerMonth) * details.monthlyUsd : null,
+        apiUsdFor1000Documents: arm.apiUsdPerDocument === null
+          ? null : arm.apiUsdPerDocument * 1000,
+      });
+    }
+  }
+  return { arms: selected, rows };
 }
 
 function scaleRange(range, factor) {
