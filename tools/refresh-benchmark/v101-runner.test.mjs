@@ -14,6 +14,7 @@ import { codexCapOption } from "./v101-provider.mjs";
 import { armExecutionRoot } from "./score-v101.mjs";
 import { selectJudgeDocuments } from "./v101-judge-freeze.mjs";
 import { judgeConfig, judgeMessages } from "./v101-judge-run.mjs";
+import { summarizeReceipts } from "./v101-report.mjs";
 
 test("should enumerate every addressable arm when Codex 5.3 is unavailable", () => {
   assert.equal(Object.keys(arms).length, 26);
@@ -50,6 +51,25 @@ test("should keep model identity out of blind judge messages", () => {
 test("should calculate metered cost from normalized usage", () => {
   assert.equal(usageCostUsd(arms.gpt41, { inputTokens: 2_000_000, outputTokens: 700_000 }), 9.6);
   assert.equal(usageCostUsd(arms["sol-low"], { inputTokens: 1, outputTokens: 1 }), null);
+});
+
+test("should summarize terminal receipts by failure class", () => {
+  const base = { attemptNumber: 1, latency: { totalMs: 1_000 }, cap: {},
+    actual: { usage: { inputTokens: 100, outputTokens: 20 } } };
+  const metrics = summarizeReceipts([
+    { ...base, documentId: "accepted", status: "completed",
+      validation: { accepted: true, layers: { json: { valid: true }, v9: {} } } },
+    { ...base, documentId: "json", status: "completed", latency: { totalMs: 3_000 },
+      validation: { accepted: false, layers: { json: { valid: false }, v9: {} } } },
+    { ...base, documentId: "provenance", status: "completed", latency: { totalMs: 2_000 },
+      validation: { accepted: false, layers: { json: { valid: true },
+        v9: { error: "ungrounded PDF excerpt" } } } },
+    { ...base, documentId: "transport", status: "failed", actual: null,
+      error: { category: "network" }, validation: { accepted: false, layers: {} } },
+  ], arms.gpt41, 2);
+  assert.deepEqual(metrics, { processed: 4, accepted: 1, transport: 1, rateLimit: 2,
+    json: 1, profile: 0, provenance: 1, budget: 0, latencyP50Ms: 1_000,
+    latencyP95Ms: 3_000, inputTokens: 300, outputTokens: 60, costUsd: 0.00108 });
 });
 
 test("should disclose that the Codex ChatGPT transport cannot enforce the output cap", () => {
