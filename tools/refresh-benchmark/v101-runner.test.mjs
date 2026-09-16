@@ -17,7 +17,8 @@ import { armExecutionRoot } from "./score-v101.mjs";
 import { timeoutMsForArm } from "./run-arm.mjs";
 import { circuitClosureFor, selectJudgeDocuments } from "./v101-judge-freeze.mjs";
 import { judgeConfig, judgeMessages } from "./v101-judge-run.mjs";
-import { summarizeJudgeVerdicts, summarizeReceipts } from "./v101-report.mjs";
+import { acceptanceAdjustedF1, summarizeJudgeVerdicts, summarizeReceipts }
+  from "./v101-report.mjs";
 import { microF1 } from "./v101-score-lib.mjs";
 
 test("should enumerate every addressable arm when Codex 5.3 is unavailable", () => {
@@ -91,9 +92,22 @@ test("should summarize terminal receipts by failure class", () => {
     { ...base, documentId: "transport", status: "failed", actual: null,
       error: { category: "network" }, validation: { accepted: false, layers: {} } },
   ], arms.gpt41, 2);
-  assert.deepEqual(metrics, { processed: 4, accepted: 1, transport: 1, rateLimit: 2,
+  assert.deepEqual(metrics, { processed: 4, accepted: 1, transportReplayed: 0,
+    transport: 1, rateLimit: 2,
     json: 1, profile: 0, provenance: 1, budget: 0, latencyP50Ms: 1_000,
     latencyP95Ms: 3_000, inputTokens: 300, outputTokens: 60, costUsd: 0.00108 });
+});
+
+test("should report transport replays and acceptance-adjusted F1", () => {
+  const base = { documentId: "replayed", status: "failed", attemptNumber: 2,
+    latency: { totalMs: 1 }, error: { category: "network" }, actual: null,
+    validation: { accepted: false, layers: {} } };
+  const replayed = { ...base, status: "completed", attemptNumber: 3, error: null,
+    actual: { usage: { inputTokens: 1, outputTokens: 1 } },
+    validation: { accepted: true, layers: { json: { valid: true }, v9: {} } } };
+  assert.equal(summarizeReceipts([base, replayed], arms.gpt41).transportReplayed, 1);
+  assert.equal(acceptanceAdjustedF1(0.5, 75, 100), 0.375);
+  assert.equal(acceptanceAdjustedF1(null, 75, 100), null);
 });
 
 test("should micro-average complete-oracle counts", () => {

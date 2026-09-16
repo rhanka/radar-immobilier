@@ -36,6 +36,7 @@ export function summarizeReceipts(receipts, arm, rateLimit = 0) {
   return {
     processed: terminal.length,
     accepted: completed.filter(({ validation }) => validation?.accepted === true).length,
+    transportReplayed: terminal.filter(({ attemptNumber }) => attemptNumber >= 3).length,
     transport: failed.filter(({ error }) => (error?.httpStatus ?? 0) !== 429
       && (error?.category ?? "") !== "request-budget").length,
     rateLimit,
@@ -54,6 +55,11 @@ export function summarizeReceipts(receipts, arm, rateLimit = 0) {
       total + (usage.outputTokens ?? usage.output_tokens ?? 0), 0),
     costUsd: arm.prices ? Number(costs.reduce((total, cost) => total + cost, 0).toFixed(8)) : null,
   };
+}
+
+export function acceptanceAdjustedF1(f1, accepted, processed) {
+  return Number.isFinite(f1) && Number.isFinite(accepted) && processed > 0
+    ? f1 * accepted / processed : null;
 }
 
 export function summarizeJudgeVerdicts(mapping, verdictsByJudge) {
@@ -145,11 +151,14 @@ export async function collectV101bMetrics(resultRoot) {
       json(resolve(executionRoot, "status.json")),
     ]);
     const oracle = oracleByArm.get(arm.name);
+    const metrics = summarizeReceipts(armReceipts, arm, limits);
+    const acceptedF1 = oracle?.macroAccepted?.v2 ?? null;
     rows.push({ arm: arm.name, model: arm.model, effort: arm.effort ?? "off",
-      state: status.arms?.[arm.name]?.state ?? "unknown",
-      ...summarizeReceipts(armReceipts, arm, limits),
+      state: status.arms?.[arm.name]?.state ?? "unknown", ...metrics,
       oracleV2AcceptedF1: oracle?.macroAccepted?.v2 ?? null,
       oracleV2AcceptedMicroF1: oracle?.microAccepted?.v2 ?? null,
+      oracleV2AcceptanceAdjustedF1: acceptanceAdjustedF1(acceptedF1,
+        metrics.accepted, metrics.processed),
       oracleV2FixedF1: oracle?.macroFixed?.v2 ?? null,
       oracleV2FixedMicroF1: oracle?.microFixed?.v2 ?? null,
       judges: judgesByArm[arm.name] ?? null });
