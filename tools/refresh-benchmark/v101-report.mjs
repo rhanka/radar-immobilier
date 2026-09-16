@@ -56,6 +56,39 @@ export function summarizeReceipts(receipts, arm, rateLimit = 0) {
   };
 }
 
+export function summarizeJudgeVerdicts(mapping, verdictsByJudge) {
+  const armByAlias = new Map(mapping.map(({ alias, arm }) => [alias, arm]));
+  const byArm = {};
+  for (const [judge, records] of Object.entries(verdictsByJudge)) {
+    for (const record of records) {
+      const arm = armByAlias.get(record.alias);
+      const usefulness = record.verdict?.usefulness;
+      if (!arm || !Number.isInteger(usefulness)) continue;
+      const target = byArm[arm] ??= { values: {} };
+      (target.values[judge] ??= new Map()).set(record.alias, usefulness);
+    }
+  }
+  return Object.fromEntries(Object.entries(byArm).map(([arm, { values }]) => {
+    const summary = {};
+    for (const [judge, scores] of Object.entries(values)) {
+      const numbers = [...scores.values()];
+      summary[judge] = { completed: numbers.length,
+        meanUsefulness: Number((numbers.reduce((total, value) => total + value, 0)
+          / numbers.length).toFixed(3)) };
+    }
+    const [leftName, rightName] = Object.keys(values);
+    if (leftName && rightName) {
+      const pairs = [...values[leftName]].filter(([alias]) => values[rightName].has(alias))
+        .map(([alias, value]) => [value, values[rightName].get(alias)]);
+      summary.agreement = { pairs: pairs.length,
+        exact: pairs.filter(([left, right]) => left === right).length,
+        meanAbsoluteDifference: pairs.length ? Number((pairs.reduce((total, [left, right]) =>
+          total + Math.abs(left - right), 0) / pairs.length).toFixed(3)) : null };
+    }
+    return [arm, summary];
+  }));
+}
+
 async function json(path) {
   return JSON.parse(await readFile(path, "utf8"));
 }
@@ -85,9 +118,24 @@ async function rateLimitCount(root, arm) {
   } catch (error) { if (error?.code === "ENOENT") return 0; throw error; }
 }
 
+async function collectJudgeMetrics(resultRoot) {
+  let mapping;
+  try { ({ mapping } = await json(resolve(resultRoot, "judges", "blind-map.json"))); }
+  catch (error) { if (error?.code === "ENOENT") return {}; throw error; }
+  const verdicts = {};
+  for (const [label, directory] of [["terra", "judge-terra"],
+    ["opus46", "judge-opus46-thinking"]]) {
+    const root = resolve(resultRoot, "judges", directory, "verdicts");
+    const names = (await files(root, ".json")).filter((name) => !name.endsWith(".intent.json"));
+    verdicts[label] = await Promise.all(names.map((name) => json(resolve(root, name))));
+  }
+  return summarizeJudgeVerdicts(mapping, verdicts);
+}
+
 export async function collectV101bMetrics(resultRoot) {
   const comparison = await json(resolve(resultRoot, "oracle-v2-comparison.json"));
   const oracleByArm = new Map(comparison.arms.map((entry) => [entry.variant, entry]));
+  const judgesByArm = await collectJudgeMetrics(resultRoot);
   const rows = [];
   for (const arm of Object.values(arms)) {
     const executionRoot = arm.lane === "codex" ? resolve(resultRoot, "codex-replay") : resultRoot;
@@ -101,7 +149,8 @@ export async function collectV101bMetrics(resultRoot) {
       state: status.arms?.[arm.name]?.state ?? "unknown",
       ...summarizeReceipts(armReceipts, arm, limits),
       oracleV2AcceptedF1: oracle?.macroAccepted?.v2 ?? null,
-      oracleV2FixedF1: oracle?.macroFixed?.v2 ?? null });
+      oracleV2FixedF1: oracle?.macroFixed?.v2 ?? null,
+      judges: judgesByArm[arm.name] ?? null });
   }
   return { schemaVersion: 1, campaign: "v101b", generatedAt: new Date().toISOString(),
     oracleMacroExcludes: comparison.macroExcludes, arms: rows };
