@@ -18,6 +18,7 @@ import { resolve } from "node:path";
 import { scoreValid } from "./score-v3.mjs";
 import { scoreValidV2 } from "./score-oracle-v2.mjs";
 import { arms as v101Arms } from "./v101-arms.mjs";
+import { microF1 } from "./v101-score-lib.mjs";
 
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
 const repositoryRoot = required("BENCHMARK_REPOSITORY_ROOT");
@@ -34,8 +35,8 @@ const DEFAULT_ARMS = [
   { campaign: "v13", variant: "sonnet-cloudcode", directory: "campaign-cloudcode", contract: "immo-pv-extraction-v8" },
 ];
 const v101bArms = () => Object.keys(v101Arms).map((variant) => ({ campaign: "v101b", variant,
-  directory: "campaign", contract: "immo-pv-extraction-v9", attempted: true,
-  oracleCampaign: "v100", executionSubdir: v101Arms[variant].lane === "codex"
+  directory: `campaign/${variant}`, contract: "immo-pv-extraction-v9", attempted: true,
+  oracleCampaign: "v13", executionSubdir: v101Arms[variant].lane === "codex"
     ? "codex-replay" : null }));
 const configuredArms = process.env.BENCHMARK_COMPARISON_ARMS;
 const arms = configuredArms === "v101b" ? v101bArms()
@@ -47,7 +48,7 @@ const oracleV2 = JSON.parse(oracleV2Bytes.toString("utf8"));
 const mean = (values) => values.length
   ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
 const macro = (cases, pick) => {
-  const values = cases.filter((entry) => !entry.partialOracle)
+  const values = cases.filter((entry) => !entry.partialOracle && entry.oracleAvailable !== false)
     .map(pick).filter((value) => value !== null && value !== undefined);
   return values.length ? mean(values) : null;
 };
@@ -93,6 +94,7 @@ for (const arm of arms) {
     if (goldV1.length !== goldV2.length) throw new Error(`Unit count drift on ${document.id}`);
     cases.push({ documentId: document.id, accepted: Boolean(receipt.validation?.accepted),
       state: receipt.validation?.accepted ? "completed_valid" : "completed_invalid",
+      oracleAvailable: goldV2.length > 0,
       partialOracle: document.id === "waterloo-2026-08-18",
       v1: scoreValid(output, document, goldV1),
       r1: scoreValidV2(output, document, goldV1,
@@ -116,7 +118,11 @@ for (const arm of arms) {
       precisionV1: macro(scored, (entry) => entry.v1.precision),
       precisionV2: macro(scored, (entry) => entry.v2.precision),
       recallV1: macro(scored, (entry) => entry.v1.recall),
-      recallV2: macro(scored, (entry) => entry.v2.recall) } });
+      recallV2: macro(scored, (entry) => entry.v2.recall) },
+    microAccepted: { v1: microF1(acceptedCases, (entry) => entry.v1),
+      v2: microF1(acceptedCases, (entry) => entry.v2) },
+    microFixed: { v1: microF1(scored, (entry) => entry.v1),
+      v2: microF1(scored, (entry) => entry.v2) } });
 }
 
 const result = { schemaVersion: 1, generatedAt: new Date().toISOString(), network: "none",
@@ -124,7 +130,7 @@ const result = { schemaVersion: 1, generatedAt: new Date().toISOString(), networ
   oracleUnits: oracleV2.units.length, addedUnits: oracleV2.realignment.addedUnits,
   addedSites: oracleV2.realignment.addedSites, rules: oracleV2.realignment.rules,
   macroExcludes: "waterloo-2026-08-18 (partial oracle by construction)", arms: results };
-await writeFile(outputPath, `${JSON.stringify(result, null, 1)}\n`, "utf8");
+await writeFile(outputPath, `${JSON.stringify(result)}\n`, "utf8");
 const round = (value) => value === null ? null : Number(value.toFixed(3));
 console.log(JSON.stringify(results.map((arm) => ({ arm: `${arm.campaign}/${arm.variant}`,
   accepted: `${arm.totals.accepted}/${arm.totals.planned}`,

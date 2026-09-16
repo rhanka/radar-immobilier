@@ -106,3 +106,13 @@ export function cascade(extraction, evidenceNodeTypes) {
     return dropped;
   }
 }
+
+export function microF1(cases, pick) {
+  const counts = cases.filter((entry) => !entry.partialOracle && entry.oracleAvailable !== false).map(pick)
+    .filter((score) => score && Number.isFinite(score.tp)
+      && Number.isFinite(score.fp) && Number.isFinite(score.fn))
+    .reduce((total, score) => ({ tp: total.tp + score.tp, fp: total.fp + score.fp,
+      fn: total.fn + score.fn }), { tp: 0, fp: 0, fn: 0 });
+  const denominator = 2 * counts.tp + counts.fp + counts.fn;
+  return denominator ? 2 * counts.tp / denominator : null;
+}
