@@ -306,3 +306,64 @@ export function buildReport(entries, options = {}) {
     regressions: regressObservedRates(entries), arms,
   };
 }
+
+const count = (value, digits = 0) => Number(value).toLocaleString("en-US", {
+  minimumFractionDigits: digits, maximumFractionDigits: digits });
+const money = (value) => value === null || value === undefined ? "N-A"
+  : `$${value.toFixed(Math.abs(value) < 1 ? 4 : 2)}`;
+const moneyRange = (range) => !range ? "N-A"
+  : Math.abs(range.max - range.min) < 1e-12 ? money(range.min)
+    : `${money(range.min)}–${money(range.max)}`;
+const tokenPair = (total, perDocument) => `${count(total)} / ${count(perDocument, 0)}`;
+
+export function renderMarkdown(report) {
+  const planGemini = report.selections.geminiPlan ?? "N-A (owner tier source-gap)";
+  const planChatgpt = report.selections.chatgptPlan ?? "N-A (owner tier source-gap)";
+  const lines = [
+    `# ${report.campaign} cost snapshot`, "",
+    `Generated: ${report.generatedAt}. Every schema-v2 attempt receipt present under \`campaign/\` and `
+      + "`codex-replay/campaign/` is counted; retries are not discarded.", "",
+    `Selected Gemini plan: **${planGemini}**. Selected ChatGPT plan: **${planChatgpt}**.`,
+    "The owner must provide both actual tiers; Gemini also needs a measured or estimated weekly token reserve.", "",
+    "## Per-arm costs", "",
+    "Output is billable output: visible output plus separately reported thinking tokens. Token columns are total / per document.", "",
+    "| Arm | Receipts (usage) | Docs | Input total / doc | Output total / doc | Thinking | API USD | Subscription USD | Simulated USD | API / 1,000 docs | Subscription / 1,000 docs | Simulated / 1,000 docs | API / benchmark cycle |",
+    "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+  ];
+  for (const arm of report.arms) {
+    lines.push(`| ${arm.arm} | ${count(arm.receiptCount)} (${count(arm.usageReceiptCount)}) | ${count(arm.documents)} | `
+      + `${tokenPair(arm.inputTokens, arm.perDocument?.inputTokens ?? 0)} | `
+      + `${tokenPair(arm.outputTokens, arm.perDocument?.outputTokens ?? 0)} | ${count(arm.thinkingTokens)} | `
+      + `${money(arm.apiUsd)} | ${moneyRange(arm.subscription?.usd)} | ${money(arm.simulated?.usd)} | `
+      + `${money(arm.per1000Documents?.apiUsd)} | ${moneyRange(arm.per1000Documents?.subscriptionUsd)} | `
+      + `${money(arm.per1000Documents?.simulatedUsd)} | ${money(arm.perBenchmarkCycle?.apiUsd)} |`);
+  }
+  lines.push("", "The benchmark-cycle projection uses the frozen manifest's "
+    + `${count(report.cycle.benchmarkDocuments)} documents. Production refresh cycle = **source-gap**: `
+    + "the CronJobs define schedules but no stable document count per run.", "",
+  "## Modes", "",
+  "- `api`: measured input × input rate + (visible output + thinking) × output rate.",
+  "- `subscription`: monthly plan price ÷ estimated monthly token reserve. ChatGPT estimates use the official weekly message range multiplied by measured tokens per usage-bearing request. A CLI weekly-token override replaces that estimate.",
+  "- `simulated`: measured input/output token shares × the same model's API rates, producing a blended USD/M token rate. It is algebraically equal to API cost and is kept explicit for scenario work.", "",
+  "## Hard-coded rate cards", "",
+  "| Model | Input USD/M | Output USD/M | As of | Valid until | Source |", "|---|---:|---:|---|---|---|" );
+  for (const [modelId, rate] of Object.entries(RATE_CARDS)) {
+    lines.push(`| ${modelId} | ${rate.input} | ${rate.output} | ${rate.asOf} | `
+      + `${rate.validUntil ?? "—"} | [official pricing](${rate.source}) |`);
+  }
+  lines.push("", "Gemini output pricing includes thinking tokens; its cache-read rate is $0.075/M through 2026-12-31. `gpt-6-astra` batch/flex is $5/M input and $25/M output.", "",
+    "Official verification changed two supplied assumptions: `gpt-5.6-sol` is currently promotional $4/$20, not $5/$30; Mistral Small 4 is $0.15/$0.60, not $0.20/$0.40.", "",
+    "## Receipt-cost regression", "",
+    "No-intercept two-variable regression: `actual.costUsd × 1M = inputTokens × a + billableOutputTokens × b`.", "",
+    "| Model | Samples | Input USD/M | Output USD/M | Hard-coded input/output |", "|---|---:|---:|---:|---|" );
+  for (const value of report.regressions) {
+    const card = RATE_CARDS[value.modelId];
+    lines.push(`| ${value.modelId} | ${value.samples} | ${count(value.inputUsdPerMillion, 6)} | `
+      + `${count(value.outputUsdPerMillion, 6)} | ${card ? `${card.input} / ${card.output}` : "N-A"} |`);
+  }
+  lines.push("", "## Gemini quota experiment", "",
+    "**N-A; quota burn = 0%.** llm-mesh 0.19.3 has a generic `quota` outcome type but the Cloud Code transport never populates it. It only reads `Retry-After` after HTTP 429. Successful v101b receipts expose no rate headers; the recorded Cloud Code 429 also has empty headers and no reset.", "",
+    "Without a numeric before/after observable, burning requests cannot estimate tokens per quota unit or weekly reserve. The alternative is exhaustion to HTTP 429, which is not authorized without explicit owner GO. No request was sent and no receipt was written under `burn/`.", "",
+    "Consequently Gemini tokens/week and equivalent USD/token are N-A. ChatGPT equivalents are also N-A in this snapshot until the owner supplies `--plan-chatgpt`; no Codex burn was performed while its queues were active.", "");
+  return `${lines.join("\n")}\n`;
+}
