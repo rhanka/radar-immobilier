@@ -1302,7 +1302,8 @@ V101_MESH_VERSION := 0.19.3
 	compact-v101-json verify-v101 gate-v101 run-v101-arm run-v101-lane score-v101 \
 	init-campaign-v101 gate-runner-v101 reconcile-interrupted-v101 status-v101-containers \
 	stop-v101-container check-v101-user-manager launch-v101-detached stop-v101-detached \
-	enroll-codex-v101 launch-v101-codex-detached gate-v101b-providers freeze-v101b
+	enroll-codex-v101 launch-v101-codex-detached gate-v101b-providers freeze-v101b \
+	test-cost-calculator cost-calculator generate-v101b-costs
 
 check-v101-tools:
 	test "$(ENV)" = "test-t1-model-benchmark"
@@ -1329,6 +1330,7 @@ check-v101-tools:
 	    && node --check tools/refresh-benchmark/measure-cprime-v101.mjs \
 	    && node --check tools/refresh-benchmark/freeze-v101.mjs \
 	    && node --check tools/refresh-benchmark/compact-v101-json.mjs \
+	    && node --check tools/refresh-benchmark/cost-calculator.mjs \
 	    && node --check tools/refresh-benchmark/verify-v101.mjs \
 	    && sh -n tools/refresh-benchmark/run-campaign-v101.sh \
 	    && sh -n tools/refresh-benchmark/run-campaign-v101b.sh \
@@ -1339,6 +1341,29 @@ test-v101:
 	docker run --rm --network none \
 	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
 	  -w /src $(NODE_IMAGE) node --test tools/refresh-benchmark/v101-runner.test.mjs
+
+test-cost-calculator:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node --test tools/refresh-benchmark/cost-calculator.test.mjs
+
+cost-calculator:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	test -n "$(CAMPAIGN)"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node tools/refresh-benchmark/cost-calculator.mjs \
+	  --campaign $(CAMPAIGN) --format $(or $(FORMAT),md) \
+	  $(if $(PLAN_GEMINI),--plan-gemini $(PLAN_GEMINI)) \
+	  $(if $(PLAN_CHATGPT),--plan-chatgpt $(PLAN_CHATGPT))
+
+generate-v101b-costs:
+	test "$(ENV)" = "test-t1-model-benchmark"
+	docker run --rm --network none \
+	  --mount type=bind,source=$(BENCHMARK_ROOT),target=/src,readonly \
+	  -w /src $(NODE_IMAGE) node tools/refresh-benchmark/cost-calculator.mjs \
+	  --campaign v101b --format md > $(BENCHMARK_ROOT)/docs/reviews/refresh-benchmark/v101b/costs.md
 
 catalog-v101: check-v101-tools
 	mkdir -p $(V101_RESULTS)/availability
