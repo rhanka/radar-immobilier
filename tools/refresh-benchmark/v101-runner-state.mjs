@@ -2,8 +2,13 @@ import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 const delay = (ms) => new Promise((done) => setTimeout(done, ms));
+const terminalNetworkReplayCodes = new Set(["ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "ENOTFOUND",
+  "EAI_AGAIN", "ECONNRESET"]);
 
 export function artifactPaths(root, documentId, arm, attempt) {
+  if (!Number.isInteger(attempt) || attempt < 1 || attempt > 4) {
+    throw new Error("Attempt must be an integer between 1 and 4");
+  }
   const stem = `${documentId}--${arm}.attempt-${attempt}`;
   return Object.freeze({ stem, intent: resolve(root, `${stem}.intent.json`),
     receipt: resolve(root, `${stem}.receipt.json`), raw: resolve(root, `${stem}.raw.txt`),
@@ -15,12 +20,25 @@ async function jsonIfPresent(path) {
   catch (error) { if (error?.code === "ENOENT") return null; throw error; }
 }
 
+function isTerminalNetworkFailure(receipt) {
+  if (receipt.status !== "failed") return false;
+  const code = String(receipt.error?.code ?? receipt.error?.cause?.code ?? "").toUpperCase();
+  return receipt.error?.category === "network" || terminalNetworkReplayCodes.has(code)
+    || code.includes("TLS");
+}
+
 export async function resumeDecision(root, documentId, arm) {
-  for (const attempt of [2, 1]) {
+  const terminalNetworkReplay = process.env.BENCHMARK_RETRY_NETWORK_TERMINAL === "1";
+  const attempts = terminalNetworkReplay ? [4, 3, 2, 1] : [2, 1];
+  for (const attempt of attempts) {
     const paths = artifactPaths(root, documentId, arm, attempt);
     const receipt = await jsonIfPresent(paths.receipt);
     if (receipt) {
-      const terminal = receipt.status === "completed" || !receipt.retry?.eligible || attempt === 2;
+      if (terminalNetworkReplay && attempt < 4 && isTerminalNetworkFailure(receipt)) {
+        return { action: "run", attempt: attempt + 1, previous: receipt,
+          paths: artifactPaths(root, documentId, arm, attempt + 1) };
+      }
+      const terminal = receipt.status === "completed" || !receipt.retry?.eligible || attempt >= 2;
       return terminal ? { action: "skip", attempt, receipt, paths }
         : { action: "run", attempt: 2, previous: receipt,
           paths: artifactPaths(root, documentId, arm, 2) };
