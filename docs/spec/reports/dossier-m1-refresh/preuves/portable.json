@@ -1,0 +1,23 @@
+{
+  "output": "docs/spec/reports/dossier-m1-refresh/decision-focus.html",
+  "bytes": 556537,
+  "htmlSha256": "62e42dd6e23480e371116b801e8ba3d0fcc38459349c2d38053130c3ae059800",
+  "dossierHash": "7bd421c2a6456db49c83d51453ea023b8ab758bc3860a7f44853197eaef6d746",
+  "artifactInputHash": "bd6c2449ba4be84a4bdf2938cdf69f9dc0fdcc965ca16c7095cee87e6709f6bc",
+  "graphs": [
+    {
+      "id": "chaine-de-mesure",
+      "nodes": 18,
+      "edges": 5,
+      "subflows": 6,
+      "sceneHash": "8d1bb85d398e1ff33f9050dfdb019e36624d695a232edabd4c98131f69e5ee57"
+    },
+    {
+      "id": "resultats-v4-v100",
+      "nodes": 21,
+      "edges": 5,
+      "subflows": 6,
+      "sceneHash": "61bc306e5d0d9974c1668a721252d8198d751cfeb0b6dfd6f8543d937e5617dd"
+    }
+  ]
+}
