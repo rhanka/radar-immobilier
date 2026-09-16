@@ -46,6 +46,7 @@ const headers = {
 };
 
 const finite = (value) => Number.isFinite(value) ? Number(value) : null;
+const RELEVANT_MODELS = new Set(["gemini-3.8-flash-tiered", "claude-sonnet-4-6"]);
 const safeTier = (tier) => tier && typeof tier === "object"
   ? { id: typeof tier.id === "string" ? tier.id : null,
     availableCreditsCount: Array.isArray(tier.availableCredits) ? tier.availableCredits.length : null }
@@ -83,7 +84,8 @@ try {
     retrieveUserQuota: {
       status: quota.response.status,
       buckets: Array.isArray(quota.payload?.buckets)
-        ? quota.payload.buckets.map(safeBucket).filter(({ modelId }) => modelId).sort((a, b) =>
+        ? quota.payload.buckets.map(safeBucket).filter(({ modelId }) => RELEVANT_MODELS.has(modelId))
+          .sort((a, b) =>
           a.modelId.localeCompare(b.modelId)) : [],
     },
   };

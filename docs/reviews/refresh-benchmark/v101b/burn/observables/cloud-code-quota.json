@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-16T23:46:58.998Z",
+  "networkRequests": 2,
+  "loadCodeAssist": {
+    "status": 200,
+    "currentTier": {
+      "id": "free-tier",
+      "availableCreditsCount": null
+    },
+    "paidTier": {
+      "id": "g1-pro-tier",
+      "availableCreditsCount": 1
+    }
+  },
+  "retrieveUserQuota": {
+    "status": 200,
+    "buckets": [
+      {
+        "modelId": "claude-sonnet-4-6",
+        "remainingFraction": 0.14231667,
+        "remainingAmount": null,
+        "resetAt": "2026-09-21T10:32:04Z"
+      },
+      {
+        "modelId": "gemini-3.8-flash-tiered",
+        "remainingFraction": 1,
+        "remainingAmount": null,
+        "resetAt": "2026-09-17T04:46:58Z"
+      }
+    ]
+  }
+}
