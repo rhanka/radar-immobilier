@@ -230,3 +230,79 @@ export function regressObservedRates(entries) {
       outputUsdPerMillion: (group.yc * group.xx - group.xc * group.xy) / determinant };
   });
 }
+
+function rangedSubscription(totalTokens, plan, reserveRange, basis) {
+  const [reserveMin, reserveMax] = reserveRange;
+  const low = subscriptionCost(totalTokens, plan.monthlyUsd, reserveMax);
+  const high = subscriptionCost(totalTokens, plan.monthlyUsd, reserveMin);
+  return { basis, weeklyReserveTokens: { min: reserveMin, max: reserveMax },
+    usd: { min: low.usd, max: high.usd },
+    usdPerToken: { min: low.usdPerToken, max: high.usdPerToken } };
+}
+
+export function subscriptionForArm(arm, options = {}) {
+  const isGemini = arm.modelId === "gemini-3.8-flash" && arm.transports.includes("cloud-code");
+  const isChatgpt = arm.transports.includes("codex")
+    && Object.hasOwn(CHATGPT_PLUS_WEEKLY_MESSAGES, arm.modelId);
+  const provider = isGemini ? "gemini" : isChatgpt ? "chatgpt" : null;
+  if (!provider) return null;
+  const planName = options[`${provider}Plan`] ?? null;
+  if (!planName) return { provider, plan: null, status: "N-A", reason: "plan-source-gap" };
+  const plan = SUBSCRIPTION_PLANS[provider][planName];
+  if (!plan) throw new Error(`Unknown ${provider} plan: ${planName}`);
+  const override = options[`${provider}WeeklyTokens`] ?? null;
+  if (override) return { provider, plan: planName, status: "estimated",
+    ...rangedSubscription(arm.totalTokens, plan, [override, override], "weekly-token-override") };
+  if (provider === "gemini") return { provider, plan: planName, status: "N-A",
+    reason: "weekly-token-reserve-source-gap" };
+  const meanTokens = arm.usageReceiptCount ? arm.totalTokens / arm.usageReceiptCount : 0;
+  const reserve = chatgptReserveRange(arm.modelId, planName, meanTokens);
+  return reserve ? { provider, plan: planName, status: "estimated",
+    ...rangedSubscription(arm.totalTokens, plan, reserve, "published-messages-x-observed-tokens") }
+    : { provider, plan: planName, status: "N-A", reason: "published-limit-source-gap" };
+}
+
+function scaleRange(range, factor) {
+  if (!range) return null;
+  return { min: range.min * factor, max: range.max * factor };
+}
+
+export function buildReport(entries, options = {}) {
+  const cycleDocuments = options.cycleDocuments ?? null;
+  const arms = aggregateReceipts(entries).map((arm) => {
+    const factor1000 = arm.documents ? 1000 / arm.documents : null;
+    const factorCycle = arm.documents && cycleDocuments ? cycleDocuments / arm.documents : null;
+    const subscription = subscriptionForArm(arm, options);
+    return { ...arm, subscription,
+      per1000Documents: factor1000 === null ? null : {
+        apiUsd: arm.apiUsd === null ? null : arm.apiUsd * factor1000,
+        subscriptionUsd: scaleRange(subscription?.usd, factor1000),
+        simulatedUsd: arm.simulated ? arm.simulated.usd * factor1000 : null,
+      },
+      perBenchmarkCycle: factorCycle === null ? null : {
+        documents: cycleDocuments,
+        apiUsd: arm.apiUsd === null ? null : arm.apiUsd * factorCycle,
+        subscriptionUsd: scaleRange(subscription?.usd, factorCycle),
+        simulatedUsd: arm.simulated ? arm.simulated.usd * factorCycle : null,
+      } };
+  });
+  return {
+    schemaVersion: 1, campaign: options.campaign ?? null,
+    generatedAt: new Date().toISOString(),
+    selections: { geminiPlan: options.geminiPlan ?? null,
+      chatgptPlan: options.chatgptPlan ?? null,
+      geminiWeeklyTokens: options.geminiWeeklyTokens ?? null,
+      chatgptWeeklyTokens: options.chatgptWeeklyTokens ?? null },
+    cycle: { benchmarkDocuments: cycleDocuments, refreshDocuments: null,
+      refreshStatus: "source-gap" },
+    burn: { status: "N-A", quotaBurnPercent: 0, requests: 0,
+      reason: "No measurable pre/post Cloud Code quota observable; 429 exhaustion needs owner GO." },
+    verifiedDiscrepancies: [
+      { modelId: "gpt-5.6-sol", supplied: { input: 5, output: 30 },
+        verified: { input: 4, output: 20 }, note: "Official promotional standard rate." },
+      { modelId: "mistral-small-4", supplied: { input: 0.2, output: 0.4 },
+        verified: { input: 0.15, output: 0.6 }, note: "Receipt regression and official card agree." },
+    ],
+    regressions: regressObservedRates(entries), arms,
+  };
+}
