@@ -27,10 +27,13 @@ function isTerminalNetworkFailure(receipt) {
     || code.includes("TLS");
 }
 
+export function receiptAttemptOrder() {
+  return process.env.BENCHMARK_RETRY_NETWORK_TERMINAL === "1" ? [4, 3, 2, 1] : [2, 1];
+}
+
 export async function resumeDecision(root, documentId, arm) {
   const terminalNetworkReplay = process.env.BENCHMARK_RETRY_NETWORK_TERMINAL === "1";
-  const attempts = terminalNetworkReplay ? [4, 3, 2, 1] : [2, 1];
-  for (const attempt of attempts) {
+  for (const attempt of receiptAttemptOrder()) {
     const paths = artifactPaths(root, documentId, arm, attempt);
     const receipt = await jsonIfPresent(paths.receipt);
     if (receipt) {

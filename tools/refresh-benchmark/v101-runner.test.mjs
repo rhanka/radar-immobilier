@@ -7,7 +7,8 @@ import test from "node:test";
 import { arms, laneArms, receiptCap, usageCostUsd } from "./v101-arms.mjs";
 import { advanceCircuit, artifactPaths, classifyFailure, laneCircuitAction, laneConcurrency,
   providerGatePassed,
-  rateLimitPlan, releaseRateLimitIntent, replayTransportGatePassed, resetRateLimitState,
+  rateLimitPlan, receiptAttemptOrder, releaseRateLimitIntent, replayTransportGatePassed,
+  resetRateLimitState,
   resumeDecision, retryAt, updateGlobalStatus, writeImmutable, writeIntent }
   from "./v101-runner-state.mjs";
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
@@ -246,6 +247,7 @@ test("should reserve attempts three and four for enabled terminal network replay
   const previous = process.env.BENCHMARK_RETRY_NETWORK_TERMINAL;
   process.env.BENCHMARK_RETRY_NETWORK_TERMINAL = "1";
   try {
+    assert.deepEqual(receiptAttemptOrder(), [4, 3, 2, 1]);
     assert.match(artifactPaths(root, "doc-a", "sonnet5-off", 3).stem, /attempt-3$/u);
     assert.match(artifactPaths(root, "doc-a", "sonnet5-off", 4).stem, /attempt-4$/u);
     await writeImmutable(artifactPaths(root, "doc-a", "sonnet5-off", 2).receipt,
@@ -293,6 +295,7 @@ test("should keep attempt two terminal when network replay is not enabled", asyn
   const previous = process.env.BENCHMARK_RETRY_NETWORK_TERMINAL;
   delete process.env.BENCHMARK_RETRY_NETWORK_TERMINAL;
   try {
+    assert.deepEqual(receiptAttemptOrder(), [2, 1]);
     await writeImmutable(artifactPaths(root, "doc-a", "opus5-high", 2).receipt,
       { status: "failed", error: { category: "network" }, retry: { eligible: true } });
     const decision = await resumeDecision(root, "doc-a", "opus5-high");

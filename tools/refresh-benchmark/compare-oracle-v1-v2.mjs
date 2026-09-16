@@ -18,6 +18,7 @@ import { resolve } from "node:path";
 import { scoreValid } from "./score-v3.mjs";
 import { scoreValidV2 } from "./score-oracle-v2.mjs";
 import { arms as v101Arms } from "./v101-arms.mjs";
+import { receiptAttemptOrder } from "./v101-runner-state.mjs";
 import { microF1 } from "./v101-score-lib.mjs";
 
 const required = (name) => process.env[name] || (() => { throw new Error(`${name} is required`); })();
@@ -34,12 +35,15 @@ const DEFAULT_ARMS = [
   { campaign: "v13", variant: "gemini-low", directory: "campaign-gemini", contract: "immo-pv-extraction-v8" },
   { campaign: "v13", variant: "sonnet-cloudcode", directory: "campaign-cloudcode", contract: "immo-pv-extraction-v8" },
 ];
-const v101bArms = () => Object.keys(v101Arms).map((variant) => ({ campaign: "v101b", variant,
-  directory: `campaign/${variant}`, contract: "immo-pv-extraction-v9", attempted: true,
-  oracleCampaign: "v13", executionSubdir: v101Arms[variant].lane === "codex"
-    ? "codex-replay" : null }));
+const v101bArms = (excludeCodex = false) => Object.keys(v101Arms)
+  .filter((variant) => !excludeCodex || v101Arms[variant].lane !== "codex")
+  .map((variant) => ({ campaign: "v101b", variant,
+    directory: `campaign/${variant}`, contract: "immo-pv-extraction-v9", attempted: true,
+    oracleCampaign: "v13", executionSubdir: v101Arms[variant].lane === "codex"
+      ? "codex-replay" : null }));
 const configuredArms = process.env.BENCHMARK_COMPARISON_ARMS;
 const arms = configuredArms === "v101b" ? v101bArms()
+  : configuredArms === "v101b-non-codex" ? v101bArms(true)
   : configuredArms ? JSON.parse(configuredArms) : DEFAULT_ARMS;
 
 const oracleV2Bytes = await readFile(resolve(benchmarkRoot, "manual-oracle-v2.json"));
@@ -70,7 +74,7 @@ for (const arm of arms) {
     let stem = resolve(executionRoot, arm.directory, `${document.id}--${arm.variant}`);
     let receipt;
     if (arm.attempted) {
-      for (const attempt of [2, 1]) {
+      for (const attempt of receiptAttemptOrder()) {
         const candidate = `${stem}.attempt-${attempt}`;
         try { receipt = await readJson(`${candidate}.receipt.json`); stem = candidate; break; }
         catch (error) { if (error.code !== "ENOENT") throw error; }
