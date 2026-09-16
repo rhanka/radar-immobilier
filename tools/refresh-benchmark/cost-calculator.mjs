@@ -387,7 +387,7 @@ export function renderMarkdown(report) {
     "**N-A; quota burn = 0%.** llm-mesh 0.19.3 has a generic `quota` outcome type but the Cloud Code transport never populates it. It only reads `Retry-After` after HTTP 429. Successful v101b receipts expose no rate headers; the recorded Cloud Code 429 also has empty headers and no reset.", "",
     "Without a numeric before/after observable, burning requests cannot estimate tokens per quota unit or weekly reserve. The alternative is exhaustion to HTTP 429, which is not authorized without explicit owner GO. No request was sent and no receipt was written under `burn/`.", "",
     "Consequently Gemini tokens/week and equivalent USD/token are N-A. ChatGPT equivalents are also N-A in this snapshot until the owner supplies `--plan-chatgpt`; no Codex burn was performed while its queues were active.", "");
-  return `${lines.join("\n")}\n`;
+  return lines.join("\n");
 }
 
 const GEMINI_PLAN_ALIASES = Object.freeze({
