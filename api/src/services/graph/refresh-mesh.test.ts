@@ -90,6 +90,24 @@ function runtimeHarness(generate: (request: GenerateRequest) => Promise<Generate
 }
 
 describe("refresh mesh", () => {
+  it("should cancel pending Gemini catalogue discovery at the run deadline", async () => {
+    const controller = new AbortController();
+    const fetchCatalogue = vi.fn<typeof fetch>((_url, init) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
+    }));
+    const client = new CloudCodeRuntimeClient(bindRefreshFetchSignal(fetchCatalogue, controller.signal));
+    const generated = client.generate({ providerId: "gemini", modelId: "gemini-3.8-flash",
+      reasoning: { effort: "medium" }, messages: [], signal: controller.signal }, {
+      auth: { material: { type: "account-transport", provider: "cloud-code",
+        accessToken: "fixture-token", accountId: "fixture-account",
+        metadata: { cloudaicompanionProject: "fixture-project" } },
+      descriptor: { sourceType: "account-transport", accountProviderId: "cloud-code" } },
+    });
+    expect(fetchCatalogue).toHaveBeenCalledTimes(1);
+    controller.abort();
+    await expect(generated).rejects.toMatchObject({ name: "AbortError" });
+  });
+
   it.each([true, false])("should resolve medium through the account catalogue or fail closed (%s)", async (available) => {
     const calls: Record<string, unknown>[] = [];
     const client = new CloudCodeRuntimeClient(async (_url, init) => {
