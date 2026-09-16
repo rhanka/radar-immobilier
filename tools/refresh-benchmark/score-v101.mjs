@@ -149,6 +149,14 @@ export async function scoreArm(armName) {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const result = await scoreArm(process.argv[2]);
-  console.log(JSON.stringify({ arm: result.arm, strict: result.strict, cPrime: result.cPrime }));
+  if (process.argv[2] === "freeze-judges") {
+    const { freezeV101bJudges } = await import("./v101-judge-freeze.mjs");
+    console.log(JSON.stringify(await freezeV101bJudges({
+      repositoryRoot: required("BENCHMARK_REPOSITORY_ROOT"),
+      resultRoot: required("BENCHMARK_RESULT_ROOT"),
+    })));
+  } else {
+    const result = await scoreArm(process.argv[2]);
+    console.log(JSON.stringify({ arm: result.arm, strict: result.strict, cPrime: result.cPrime }));
+  }
 }

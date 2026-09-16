@@ -12,6 +12,7 @@ import { advanceCircuit, artifactPaths, classifyFailure, laneCircuitAction, prov
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
 import { codexCapOption } from "./v101-provider.mjs";
 import { armExecutionRoot } from "./score-v101.mjs";
+import { selectJudgeDocuments } from "./v101-judge-freeze.mjs";
 
 test("should enumerate every addressable arm when Codex 5.3 is unavailable", () => {
   assert.equal(Object.keys(arms).length, 26);
@@ -24,6 +25,15 @@ test("should score v101b Codex receipts from the isolated replay root", () => {
     "/results/codex-replay");
   assert.equal(armExecutionRoot("/results", "v101b", arms["gemini-low"]), "/results");
   assert.equal(armExecutionRoot("/results", "v101", arms["sol-low"]), "/results");
+});
+
+test("should freeze a verdict-independent 8/8/8/1 judge sample", () => {
+  const documents = ["S", "M", "L", "ancre"].flatMap((sizeBucket) =>
+    Array.from({ length: 10 }, (_, index) => ({ id: `${sizeBucket}-${index}`, sizeBucket })));
+  const sample = selectJudgeDocuments(documents);
+  assert.deepEqual(Object.fromEntries(["S", "M", "L", "ancre"].map((bucket) =>
+    [bucket, sample.filter(({ sizeBucket }) => sizeBucket === bucket).length])),
+  { S: 8, M: 8, L: 8, ancre: 1 });
 });
 
 test("should calculate metered cost from normalized usage", () => {
