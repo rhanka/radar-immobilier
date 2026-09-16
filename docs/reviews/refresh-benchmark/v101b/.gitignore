@@ -13,3 +13,4 @@
 /health-monitor.pid
 /health-monitor.lock/
 /health-monitor.nohup.log
+/judges/
