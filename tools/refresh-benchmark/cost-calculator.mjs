@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import { readdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
+
 // Prices are USD per million tokens. `output` includes provider-reported thinking tokens.
 export const RATE_CARDS = Object.freeze({
   "gemini-3.8-flash": {
@@ -118,4 +121,112 @@ export function chatgptReserveRange(modelId, planName, meanTokensPerRequest) {
   const plan = SUBSCRIPTION_PLANS.chatgpt[planName];
   if (!bounds || !plan || !(meanTokensPerRequest > 0)) return null;
   return bounds.map((messages) => messages * plan.limitMultiplier * meanTokensPerRequest);
+}
+
+async function receiptPaths(root) {
+  const found = [];
+  async function visit(directory) {
+    let entries;
+    try { entries = await readdir(directory, { withFileTypes: true }); }
+    catch (error) {
+      if (error?.code === "ENOENT") return;
+      throw error;
+    }
+    for (const entry of entries) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) await visit(path);
+      else if (/\.attempt-\d+\.receipt\.json$/u.test(entry.name)) found.push(path);
+    }
+  }
+  await visit(root);
+  return found.sort();
+}
+
+export async function loadReceiptEntries(repositoryRoot, campaign) {
+  const resultRoot = join(repositoryRoot, "docs/reviews/refresh-benchmark", campaign);
+  const paths = [...await receiptPaths(join(resultRoot, "campaign")),
+    ...await receiptPaths(join(resultRoot, "codex-replay/campaign"))];
+  return Promise.all(paths.map(async (path) => ({ path,
+    receipt: JSON.parse(await readFile(path, "utf8")) })));
+}
+
+export function aggregateReceipts(entries) {
+  const arms = new Map();
+  for (const entry of entries) {
+    const receipt = entry.receipt ?? entry;
+    if (receipt.schemaVersion !== 2 || typeof receipt.arm !== "string") continue;
+    const aggregate = arms.get(receipt.arm) ?? {
+      arm: receipt.arm, receiptCount: 0, usageReceiptCount: 0,
+      documentIds: new Set(), models: new Set(), transports: new Set(),
+      inputTokens: 0, visibleOutputTokens: 0, thinkingTokens: 0,
+      outputTokens: 0, totalTokens: 0, actualCostUsd: 0, actualCostSamples: 0,
+    };
+    aggregate.receiptCount += 1;
+    if (receipt.documentId) aggregate.documentIds.add(receipt.documentId);
+    const modelId = receipt.requested?.modelId ?? receipt.actual?.modelId ?? receipt.wire?.model;
+    if (modelId) aggregate.models.add(canonicalModel(modelId));
+    if (receipt.requested?.transportProviderId) {
+      aggregate.transports.add(receipt.requested.transportProviderId);
+    }
+    if (receipt.actual?.usage) {
+      const usage = billableUsage(receipt.actual.usage);
+      aggregate.usageReceiptCount += 1;
+      for (const key of ["inputTokens", "visibleOutputTokens", "thinkingTokens",
+        "outputTokens", "totalTokens"]) aggregate[key] += usage[key];
+    }
+    if (Number.isFinite(receipt.actual?.costUsd)) {
+      aggregate.actualCostUsd += receipt.actual.costUsd;
+      aggregate.actualCostSamples += 1;
+    }
+    arms.set(receipt.arm, aggregate);
+  }
+  return [...arms.values()].sort((a, b) => a.arm.localeCompare(b.arm)).map((value) => {
+    const modelIds = [...value.models].sort();
+    if (modelIds.length > 1) throw new Error(`Arm ${value.arm} has multiple models: ${modelIds}`);
+    const modelId = modelIds[0] ?? null;
+    const rate = RATE_CARDS[modelId] ?? null;
+    const documents = value.documentIds.size;
+    const usage = { inputTokens: value.inputTokens, outputTokens: value.visibleOutputTokens,
+      thoughtsTokenCount: value.thinkingTokens };
+    return {
+      arm: value.arm, modelId, transports: [...value.transports].sort(),
+      receiptCount: value.receiptCount, usageReceiptCount: value.usageReceiptCount, documents,
+      inputTokens: value.inputTokens, visibleOutputTokens: value.visibleOutputTokens,
+      thinkingTokens: value.thinkingTokens, outputTokens: value.outputTokens,
+      totalTokens: value.totalTokens,
+      perDocument: documents ? { inputTokens: value.inputTokens / documents,
+        outputTokens: value.outputTokens / documents, totalTokens: value.totalTokens / documents } : null,
+      rate, apiUsd: rate ? apiCost(usage, rate) : null,
+      simulated: rate ? simulatedCost(usage, rate) : null,
+      actualCostUsd: value.actualCostSamples ? value.actualCostUsd : null,
+      actualCostSamples: value.actualCostSamples,
+    };
+  });
+}
+
+export function regressObservedRates(entries) {
+  const groups = new Map();
+  for (const entry of entries) {
+    const receipt = entry.receipt ?? entry;
+    if (!receipt.actual?.usage || !Number.isFinite(receipt.actual?.costUsd)) continue;
+    const modelId = canonicalModel(receipt.requested?.modelId ?? receipt.actual?.modelId);
+    const usage = billableUsage(receipt.actual.usage);
+    const group = groups.get(modelId) ?? { modelId, samples: 0, xx: 0, xy: 0, yy: 0, xc: 0, yc: 0 };
+    const costPerMillion = receipt.actual.costUsd * 1_000_000;
+    group.samples += 1;
+    group.xx += usage.inputTokens ** 2;
+    group.xy += usage.inputTokens * usage.outputTokens;
+    group.yy += usage.outputTokens ** 2;
+    group.xc += usage.inputTokens * costPerMillion;
+    group.yc += usage.outputTokens * costPerMillion;
+    groups.set(modelId, group);
+  }
+  return [...groups.values()].sort((a, b) => a.modelId.localeCompare(b.modelId)).map((group) => {
+    const determinant = group.xx * group.yy - group.xy ** 2;
+    if (!determinant) return { modelId: group.modelId, samples: group.samples,
+      inputUsdPerMillion: null, outputUsdPerMillion: null };
+    return { modelId: group.modelId, samples: group.samples,
+      inputUsdPerMillion: (group.xc * group.yy - group.yc * group.xy) / determinant,
+      outputUsdPerMillion: (group.yc * group.xx - group.xc * group.xy) / determinant };
+  });
 }
