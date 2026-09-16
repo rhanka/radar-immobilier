@@ -97,4 +97,30 @@ if (gate === "codex-cap") {
     pingExact: probe.output === "PING_OK", usage: probe.usage, wire: probe.wire, proved });
   console.log(JSON.stringify({ gate, judge, generationRequestCount, proved }));
   if (!proved) process.exitCode = 1;
+} else if (gate === "codex-400") {
+  const cases = [
+    { name: "without-max-low", effort: "low", maxOutputTokens: null },
+    { name: "max-32768-low", effort: "low", maxOutputTokens: 32_768 },
+    { name: "max-4096-low", effort: "low", maxOutputTokens: 4_096 },
+    { name: "without-max-xhigh", effort: "xhigh", maxOutputTokens: null },
+  ];
+  const outcomes = [];
+  for (const item of cases) {
+    const probe = await probeMesh({ transport: "codex", model: "gpt-5.6-sol",
+      effort: item.effort, maxOutputTokens: item.maxOutputTokens, requestLimit: 1 });
+    const wire = probe.wire.at(-1) ?? null;
+    outcomes.push({ ...item, requestCount: probe.requestCount, httpStatus: probe.httpStatus,
+      pingExact: probe.pingExact, wire });
+  }
+  const withoutMax = outcomes.filter(({ maxOutputTokens }) => maxOutputTokens === null);
+  const withMax = outcomes.filter(({ maxOutputTokens }) => maxOutputTokens !== null);
+  const proved = withoutMax.every(({ requestCount, httpStatus, pingExact, wire }) =>
+    requestCount === 1 && httpStatus === 200 && pingExact && wire?.maxOutputTokens === null)
+    && withMax.every(({ requestCount, httpStatus, wire }) => requestCount === 1
+      && httpStatus === 400 && /max_output_tokens/iu.test(wire?.responseError ?? ""));
+  await save("codex-400-diagnostic", { gate, llmMeshVersion: "0.19.3",
+    requestCount: outcomes.reduce((sum, item) => sum + item.requestCount, 0), outcomes, proved });
+  console.log(JSON.stringify({ gate, requestCount: outcomes.reduce((sum, item) =>
+    sum + item.requestCount, 0), proved }));
+  if (!proved) process.exitCode = 1;
 } else throw new Error(`Unknown v101 gate: ${gate ?? "N-A"}`);
