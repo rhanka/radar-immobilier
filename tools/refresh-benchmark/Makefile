@@ -1454,6 +1454,7 @@ run-v101-arm: t1-v100-snapshot check-v101-tools
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
 	  -e BENCHMARK_CAMPAIGN=$(V101_CAMPAIGN) \
 	  -e BENCHMARK_EXECUTION_ROOT=$(or $(RUN_ROOT),/results) \
+	  -e BENCHMARK_RETRY_NETWORK_TERMINAL \
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
 	  -e BENCHMARK_SLICE='$(or $(SLICE),1-100)' -e BENCHMARK_CONCURRENCY=$(or $(CONCURRENCY),1) \
 	  -e OPENAI_API_KEY -e ANTHROPIC_API_KEY -e MISTRAL_API_KEY \
@@ -1478,6 +1479,7 @@ run-v101-lane: t1-v100-snapshot check-v101-tools
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
 	  -e BENCHMARK_CAMPAIGN=$(V101_CAMPAIGN) \
 	  -e BENCHMARK_LANE_CONCURRENCY \
+	  -e BENCHMARK_RETRY_NETWORK_TERMINAL \
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
 	  -e OPENAI_API_KEY -e ANTHROPIC_API_KEY -e MISTRAL_API_KEY \
 	  -w /src $(NODE_IMAGE) sh -c \
@@ -1499,6 +1501,7 @@ score-v101: t1-v100-snapshot check-v101-tools
 	  --mount type=volume,source=$(ROOT_MODULES),target=/workspace/node_modules,readonly \
 	  -e BENCHMARK_REPOSITORY_ROOT=/src -e BENCHMARK_RESULT_ROOT=/results \
 	  -e BENCHMARK_CAMPAIGN=$(V101_CAMPAIGN) \
+	  -e BENCHMARK_RETRY_NETWORK_TERMINAL \
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /t1-source /workspace/t1 && exec node /workspace/node_modules/tsx/dist/cli.mjs \
 	    tools/refresh-benchmark/score-v101.mjs $(ARM)'

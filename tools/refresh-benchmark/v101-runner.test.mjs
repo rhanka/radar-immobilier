@@ -241,6 +241,70 @@ test("should claim before work, preserve receipts, and fail closed on uncertain 
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
+test("should reserve attempts three and four for enabled terminal network replay", async () => {
+  const root = await mkdtemp(resolve(tmpdir(), "v101-network-replay-"));
+  const previous = process.env.BENCHMARK_RETRY_NETWORK_TERMINAL;
+  process.env.BENCHMARK_RETRY_NETWORK_TERMINAL = "1";
+  try {
+    assert.match(artifactPaths(root, "doc-a", "sonnet5-off", 3).stem, /attempt-3$/u);
+    assert.match(artifactPaths(root, "doc-a", "sonnet5-off", 4).stem, /attempt-4$/u);
+    await writeImmutable(artifactPaths(root, "doc-a", "sonnet5-off", 2).receipt,
+      { status: "failed", error: { category: "network" }, retry: { eligible: false } });
+    assert.equal((await resumeDecision(root, "doc-a", "sonnet5-off")).attempt, 3);
+    await writeImmutable(artifactPaths(root, "doc-a", "sonnet5-off", 3).receipt,
+      { status: "failed", error: { category: "terminal",
+        code: "ERR_TLS_CERT_ALTNAME_INVALID" }, retry: { eligible: false } });
+    assert.equal((await resumeDecision(root, "doc-a", "sonnet5-off")).attempt, 4);
+    await writeImmutable(artifactPaths(root, "doc-a", "sonnet5-off", 4).receipt,
+      { status: "failed", error: { category: "network" }, retry: { eligible: true } });
+    assert.deepEqual(await resumeDecision(root, "doc-a", "sonnet5-off"), {
+      action: "skip", attempt: 4,
+      receipt: JSON.parse(await readFile(artifactPaths(root, "doc-a", "sonnet5-off", 4)
+        .receipt, "utf8")),
+      paths: artifactPaths(root, "doc-a", "sonnet5-off", 4),
+    });
+  } finally {
+    if (previous === undefined) delete process.env.BENCHMARK_RETRY_NETWORK_TERMINAL;
+    else process.env.BENCHMARK_RETRY_NETWORK_TERMINAL = previous;
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("should skip accepted and quality-refused receipts during terminal network replay", async () => {
+  const root = await mkdtemp(resolve(tmpdir(), "v101-network-skip-"));
+  const previous = process.env.BENCHMARK_RETRY_NETWORK_TERMINAL;
+  process.env.BENCHMARK_RETRY_NETWORK_TERMINAL = "1";
+  try {
+    await writeImmutable(artifactPaths(root, "accepted", "sonnet5-low", 2).receipt,
+      { status: "completed", validation: { accepted: true }, retry: { eligible: false } });
+    await writeImmutable(artifactPaths(root, "quality", "sonnet5-low", 2).receipt,
+      { status: "completed", validation: { accepted: false }, retry: { eligible: false } });
+    assert.equal((await resumeDecision(root, "accepted", "sonnet5-low")).action, "skip");
+    assert.equal((await resumeDecision(root, "quality", "sonnet5-low")).action, "skip");
+  } finally {
+    if (previous === undefined) delete process.env.BENCHMARK_RETRY_NETWORK_TERMINAL;
+    else process.env.BENCHMARK_RETRY_NETWORK_TERMINAL = previous;
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("should keep attempt two terminal when network replay is not enabled", async () => {
+  const root = await mkdtemp(resolve(tmpdir(), "v101-network-disabled-"));
+  const previous = process.env.BENCHMARK_RETRY_NETWORK_TERMINAL;
+  delete process.env.BENCHMARK_RETRY_NETWORK_TERMINAL;
+  try {
+    await writeImmutable(artifactPaths(root, "doc-a", "opus5-high", 2).receipt,
+      { status: "failed", error: { category: "network" }, retry: { eligible: true } });
+    const decision = await resumeDecision(root, "doc-a", "opus5-high");
+    assert.equal(decision.action, "skip");
+    assert.equal(decision.attempt, 2);
+  } finally {
+    if (previous === undefined) delete process.env.BENCHMARK_RETRY_NETWORK_TERMINAL;
+    else process.env.BENCHMARK_RETRY_NETWORK_TERMINAL = previous;
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("should update one global status file atomically", async () => {
   const root = await mkdtemp(resolve(tmpdir(), "v101-status-"));
   try {
