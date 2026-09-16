@@ -155,6 +155,9 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       repositoryRoot: required("BENCHMARK_REPOSITORY_ROOT"),
       resultRoot: required("BENCHMARK_RESULT_ROOT"),
     })));
+  } else if (process.argv[2] === "report-data") {
+    const { writeV101bReportData } = await import("./v101-report.mjs");
+    console.log(JSON.stringify(await writeV101bReportData(required("BENCHMARK_RESULT_ROOT"))));
   } else {
     const result = await scoreArm(process.argv[2]);
     console.log(JSON.stringify({ arm: result.arm, strict: result.strict, cPrime: result.cPrime }));

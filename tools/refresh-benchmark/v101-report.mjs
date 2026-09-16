@@ -107,16 +107,20 @@ export async function collectV101bMetrics(resultRoot) {
     oracleMacroExcludes: comparison.macroExcludes, arms: rows };
 }
 
-async function main() {
-  const resultRoot = process.env.BENCHMARK_RESULT_ROOT
-    || (() => { throw new Error("BENCHMARK_RESULT_ROOT is required"); })();
-  const output = process.env.BENCHMARK_REPORT_DATA_OUTPUT
-    ?? resolve(resultRoot, "report-data.json");
+export async function writeV101bReportData(resultRoot, output = resolve(resultRoot,
+  "report-data.json")) {
   const temporary = `${output}.${process.pid}`;
   const data = await collectV101bMetrics(resultRoot);
   await writeFile(temporary, `${JSON.stringify(data, null, 2)}\n`, { flag: "wx" });
   await rename(temporary, output);
-  console.log(JSON.stringify({ output, arms: data.arms.length }));
+  return { output, arms: data.arms.length };
+}
+
+async function main() {
+  const resultRoot = process.env.BENCHMARK_RESULT_ROOT
+    || (() => { throw new Error("BENCHMARK_RESULT_ROOT is required"); })();
+  console.log(JSON.stringify(await writeV101bReportData(resultRoot,
+    process.env.BENCHMARK_REPORT_DATA_OUTPUT)));
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) await main();
