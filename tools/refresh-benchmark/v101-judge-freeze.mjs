@@ -25,7 +25,9 @@ export function selectJudgeDocuments(documents) {
 
 async function terminal(root, documentId, arm) {
   const stem = resolve(root, "campaign", arm, `${documentId}--${arm}`);
-  for (const attempt of [2, 1]) {
+  // Network replays may create attempts three or four. A judge must use the
+  // newest terminal attempt, exactly as the runner's resume policy does.
+  for (const attempt of [4, 3, 2, 1]) {
     const base = `${stem}.attempt-${attempt}`;
     try { return { receipt: await json(`${base}.receipt.json`), base }; }
     catch (error) { if (error?.code !== "ENOENT") throw error; }
@@ -54,7 +56,10 @@ export async function freezeV101bJudges({ repositoryRoot, resultRoot }) {
     const executionRoot = arm.lane === "codex" ? resolve(resultRoot, "codex-replay") : resultRoot;
     for (const document of sample) {
       const terminalRecord = await terminal(executionRoot, document.id, armName);
-      const closure = terminalRecord ? null : circuitClosureFor(closures, armName);
+      // A missing terminal receipt is an operational gap, not an extraction to
+      // grade. It is deliberately omitted rather than represented as null.
+      if (!terminalRecord) continue;
+      const closure = null;
       let extraction = null; let rawTextSha256 = null;
       if (terminalRecord?.receipt.artifacts?.raw) {
         const { base } = terminalRecord;
