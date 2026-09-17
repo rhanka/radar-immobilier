@@ -188,6 +188,21 @@ describe("refresh model policy", () => {
     expect(resumed.calls.at(-1)).toBe(primary.model);
   });
 
+  it("should count new quota failures on documents resumed after primary-only chunks", async () => {
+    const run = fixture(async (model) => {
+      if (model === primary) throw Object.assign(new Error("quota"), { status: 429 });
+      return "{}";
+    });
+    for (const id of ["a", "b", "c"]) {
+      run.policy.restoreDocument(id, [{ modelUsed: primary, status: "completed", latencyMs: 1 }]);
+      await run.document(id).generateJson(input);
+      run.policy.completeDocument(id);
+    }
+    await run.document("d").generateJson(input);
+    expect(run.calls.filter((model) => model === primary.model)).toHaveLength(3);
+    expect(run.receipts.at(-1)?.fallbackReason).toBe("circuit-open");
+  });
+
   it("should not fall back when the validated output cannot be written", async () => {
     let calls = 0;
     const policy = createRefreshModelPolicy({ primary, fallback, forceFallback: false, timeoutMs: 1000,

@@ -60,7 +60,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
     restoreDocument(docSha, receipts) {
       const reason = receipts.find((receipt) => receipt.fallbackReason)?.fallbackReason
         ?? receipts.find((receipt) => receipt.status === "failed")?.failureReason;
-      documents.set(docSha, { ...(reason ? { reason } : {}), counted: true });
+      documents.set(docSha, { ...(reason ? { reason } : {}), counted: reason !== undefined });
     },
     forDocument(docSha, record) {
       let document = documents.get(docSha);
