@@ -1,51 +1,17 @@
-# Local acceptance and rollout boundary
+# Acceptation locale et périmètre de déploiement
 
-The local acceptance uses two public PDFs: Waterloo 2026-08-18 municipal
-minutes and Saint-Polycarpe 2026-01-19 agenda, selected before execution.
-Their public URLs and SHA-256 values are retained in the JSON receipts.
-The first comes from the #711 oracle; the second is the first document in
-the frozen v101 corpus, not selected by model outcome.
+L’acceptation locale utilise deux PDF publics : le procès-verbal municipal de Waterloo du 2026-08-18 et l’ordre du jour de Saint-Polycarpe du 2026-01-19, sélectionnés avant exécution. Leurs URL publiques et valeurs SHA-256 sont conservées dans les reçus JSON. Le premier provient de l’oracle #711 ; le second est le premier document du corpus v101 gelé, non choisi selon le résultat du modèle.
 
-The test harness runs the real `runPvRefresh`, Poppler, v9 profile/provenance,
-MinIO and PostgreSQL. Its read-only keyring reader uses the existing AES-GCM
-format without chmod, copying or writing the source keyring. Account updates
-remain in process memory. Only active account counts and same-owner agreement
-are emitted. One Codex account and one Cloud Code account were available.
+Le harnais exécute le vrai `runPvRefresh`, Poppler, le profil/provenance v9, MinIO et PostgreSQL. Son lecteur keyring en lecture seule utilise le format AES-GCM existant sans chmod, copie ni écriture du keyring source. Les mises à jour de compte restent en mémoire de processus. Seuls les nombres de comptes actifs et l’accord de même owner sont émis. Un compte Codex et un compte Cloud Code étaient disponibles.
 
-Initial primary receipt at `7bf2d17f`: 2/2 accepted, Astra low, 144601ms and
-122984ms. This predates exact-route and subsequent review hardening; it is
-not relabelled as a final-commit proof.
+Reçu primaire initial à `7bf2d17f` : 2/2 acceptés, Astra low, 144601ms et 122984ms. Il précède le durcissement exact-route et les revues suivantes ; il n’est pas renommé preuve du commit final.
 
-Initial forced fallback: Gemini low generated and passed profile/provenance
-for both documents (42003ms, 13660ms; zero Astra calls). Publication/projection
-acceptance was 0/2: the local harness reset S3 baselines but retained earlier
-Astra PG graphs, so the existing regression guard stopped projection. This
-was a test-isolation error; no product guard was weakened. Corrected campaigns
-use separate initially empty test databases and S3 buckets for primary and
-forced fallback.
+Repli forcé initial : Gemini low a généré et passé profil/provenance pour les deux documents (42003ms, 13660ms ; zéro appel Astra). L’acceptation publication/projection était 0/2 : le harnais local a réinitialisé les bases S3 mais conservé les graphes PG Astra antérieurs, donc le garde de régression existant a arrêté la projection. C’était une erreur d’isolation de test ; aucun garde produit n’a été affaibli. Les campagnes corrigées utilisent des bases de test et buckets S3 initialement vides, séparés pour primaire et repli forcé.
 
-Corrected real campaigns: [primary receipt](receipt-primary.json) **2/2**,
-Astra low, 171776ms and 123815ms; [forced receipt](receipt-fallback.json)
-**2/2**, Gemini low, 25018ms and 10707ms, zero Astra calls. All six durable
-stages completed for each document, including S3 publication and PG projection.
-These are document/profile/provenance proofs, not a municipal-opportunity F1
-benchmark or Kubernetes scheduling proof. Each receipt names the actual code
-commit at launch; later terminal-refusal and resumed-counter hardening are
-covered by regression tests, not relabelled as extra live calls.
+Campagnes réelles corrigées : [reçu primaire](receipt-primary.json) **2/2**, Astra low, 171776ms et 123815ms ; [reçu forcé](receipt-fallback.json) **2/2**, Gemini low, 25018ms et 10707ms, zéro appel Astra. Les six étapes durables sont terminées pour chaque document, y compris publication S3 et projection PG. Ce sont des preuves document/profil/provenance, pas un benchmark F1 d’opportunités municipales ni une preuve d’ordonnancement Kubernetes. Chaque reçu nomme le commit réel au lancement ; le durcissement ultérieur des refus terminaux et compteurs repris est couvert par des tests de régression, sans le présenter comme appels live supplémentaires.
 
-Verification commands use `ENV=test-astra-703`, no host service ports, with
-API/UI/Maildev reserved as 8893/5393/1193. `make typecheck` and `make lint`
-reuse the test Compose volumes through `COMPOSE_RUN_API_NODEPS`; they run the
-same workspace scripts as their standard targets. Harness CLI checks are
-advisory scope/branch checks, not substitutes for actual test execution.
+Les commandes de vérification utilisent `ENV=test-astra-703`, sans ports de service hôte, avec API/UI/Maildev réservés à 8893/5393/1193. `make typecheck` et `make lint` réutilisent les volumes Compose de test via `COMPOSE_RUN_API_NODEPS` et exécutent les mêmes scripts workspace que les cibles standard. Les contrôles CLI harness scope/branch sont consultatifs, pas des substituts à l’exécution des tests.
 
-Final verification: 131 tests across eight files passed, including six
-integration tests. Typecheck, lint, both overlay renders, harness static/unit
-and scope/branch checks, and `git diff --check` passed. The test Compose stack
-was removed with `down -v`, including PostgreSQL, MinIO and dependency volumes.
+Vérification finale : 131 tests sur huit fichiers ont réussi, dont six tests d’intégration. Typecheck, lint, les deux rendus overlay, harness static/unit et contrôles scope/branch, ainsi que `git diff --check`, ont réussi. La stack Compose de test a été supprimée avec `down -v`, y compris PostgreSQL, MinIO et volumes de dépendances.
 
-Read-only preprod observation on 2026-09-17: image `3cf4f69`, PV active,
-legacy scrape/projection suspended. The cert-ro identity cannot create Jobs
-or read Secrets/PVCs. GitHub repository variable `REFRESH_CRONJOB_PROD_ENABLED`
-was absent. Production resources remain unverified by this code lane; k8s
-must complete the runbook's prerequisites and sequential acceptance.
+Observation préprod en lecture seule au 2026-09-17 : image `3cf4f69`, PV actif, scrape/projection historiques suspendus. L’identité cert-ro ne peut ni créer des Jobs ni lire Secrets/PVC. La variable GitHub `REFRESH_CRONJOB_PROD_ENABLED` était absente. Les ressources production restent non vérifiées par cette lane code ; k8s doit compléter les prérequis et l’acceptation séquentielle du runbook.
