@@ -13,51 +13,17 @@ legs:
     status: completed
 ---
 
-# Corrective review round
+# Tour de revue corrective
 
-This is a new, explicitly recorded round. The [original dossier](review.md)
-retains both automatic approval rejections. GitHub subsequently proved the
-repository public and public-diff launches were authorized. The first public
-[runtime review](review-runtime-public.md) requested changes; the first public
-[deployment leg](review-deployment-public.md) failed with gateway HTTP 503.
-None of those failures is represented as a completed review.
+Nouveau tour explicitement consigné. Le [dossier initial](review.md) conserve les deux refus d’approbation automatique. GitHub a ensuite prouvé que le dépôt était public et les lancements public-diff autorisés. La première [revue runtime publique](review-runtime-public.md) a demandé des changements ; la première jambe [déploiement publique](review-deployment-public.md) a échoué avec HTTP 503. Ces échecs ne sont pas présentés comme revues terminées.
 
-Both current legs target the same public commit, with requested identities
-Claude/gpt-5.6-sol/high and Claude/gpt-5.6-terra/high. Launch receipts do not
-attest effective upstream identity. The latest local delta after the target
-adds a Gemini low wire test and fixes counting of a new quota failure on a
-resumed primary-only document; that delta has its own regression test.
+Les deux jambes actuelles ciblent le même commit public, avec identités demandées Claude/gpt-5.6-sol/high et Claude/gpt-5.6-terra/high. Les reçus de lancement n’attestent pas l’identité upstream effective. Le dernier delta local ajoute un test wire Gemini low et corrige le comptage d’un nouvel échec quota sur document primaire repris ; il a son test de régression.
 
-## Reconciliation
+## Rapprochement
 
-- Original runtime findings accepted: document fallback is restored from
-  durable receipts; returned identities/status are checked; timeout is raced
-  and late responses cannot validate or overwrite fallback output. A two-chunk
-  restart integration test and noncooperative-client/metadata tests pass.
-- Corrective runtime findings accepted and fixed in `f1d415ea`: terminal
-  identity/status refusals are now persisted and restored before any new call;
-  every non-completed result is terminal even without a validation callback.
-  Restart tests cover both mismatched identity and missing-text status. The
-  local independent state reviewer verified both fixes in the final code.
-- Deployment finding on durable circuit: rejected against the authorized
-  cycle semantics. The circuit is deliberately per scheduled invocation;
-  a later cycle probes the recovered primary. Document affinity survives,
-  whereas the quota streak does not. This distinction was already explicit in
-  the runbook and independently confirmed in the local state review.
-- Deployment finding on new release attestation: outside this change's
-  authorized implementation scope. Owner explicitly selected the existing
-  tag + GitHub variable + production environment promotion, with sequential
-  preprod acceptance operated by k8s/i-cond. The workflow declares
-  `environment: production`; the runbook requires both preprod receipts before
-  promotion. This is an operational gate, not a claimed mechanical evidence
-  attestation. No CI approval-system redesign or one-shot variable was requested.
+- Constats runtime initiaux acceptés : le repli document est restauré depuis les reçus ; identités/statuts retournés sont vérifiés ; délai en course et réponses tardives ne valident ni n’écrasent la sortie de repli. Les tests intégration redémarrage deux fragments et client non coopératif/métadonnées passent.
+- Constats runtime correctifs acceptés et corrigés dans `f1d415ea` : refus terminaux identité/statut persistés et restaurés avant appel ; tout résultat non terminé est terminal même sans callback validation. Les tests de reprise couvrent identité divergente et statut texte absent. Le relecteur local indépendant d’état a vérifié ces correctifs.
+- Constat déploiement sur circuit durable rejeté au regard de la sémantique de cycle autorisée : le circuit est délibérément par invocation planifiée ; le cycle suivant sonde le primaire rétabli. L’affinité document survit, non la séquence quota.
+- Constat déploiement sur attestation nouvelle release hors périmètre autorisé. L’owner a retenu tag + variable GitHub + environnement production, avec acceptation préprod séquentielle par k8s/i-cond. C’est une porte opérationnelle, pas une attestation mécanique revendiquée.
 
-The deployment review's disagreement remains visible in its own artifact;
-the coordinator does not rewrite its verdict.
-
-An independent local state adjudication also rejected both deployment P1s as
-scope extensions: `backoffLimit: 0` / `restartPolicy: Never` make the next
-scheduled invocation a new cycle, and the owner expressly retained the existing
-promotion controls. Coordinator and state reviewer agree on that disposition;
-the deployment review's dissent is preserved. Actual preprod acceptance remains
-a required operational gate before production activation, outside this code lane.
+La divergence de la revue déploiement reste visible dans son artefact. Une adjudication locale indépendante a également rejeté les deux P1 comme extensions de périmètre : `backoffLimit: 0` / `restartPolicy: Never` font de la prochaine invocation un nouveau cycle, et l’owner a expressément conservé les contrôles de promotion existants. L’acceptation préprod réelle reste requise avant activation production.

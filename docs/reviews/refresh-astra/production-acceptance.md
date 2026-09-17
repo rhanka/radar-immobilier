@@ -1,111 +1,52 @@
-# Astra low refresh: preproduction then production
+# Rafraîchissement Astra low : préproduction puis production
 
-Refs #703 and #697. Owner decision: 2026-09-17 04:40Z. The code lane prepares
-the release; i-cond merges and the k8s lane executes the authorized rollout.
+Refs #703 et #697. Décision owner : 2026-09-17 04:40Z. La lane code prépare la livraison ; i-cond fusionne et la lane k8s exécute le déploiement autorisé.
 
-## Runtime contract
+## Contrat d’exécution
 
-Primary: `openai / gpt-6-astra / low`, transported by `CodexRuntimeClient`.
-Fallback: `gemini / gemini-3.8-flash / low`, transported by Cloud Code.
-`@sentropic/llm-mesh-refresh` remains exactly 0.19.2. Its installed
-`dist/codex.js:53` removes `max_output_tokens`; the HTTP-boundary unit test
-asserts omission even when the graph extraction requests 32768 tokens.
-The Gemini limit remains 32768. `REFRESH_MAXIMUM_ATTEMPTS` must equal 1:
-Graphify may retry validation failures with larger route budgets.
+Primaire : `openai / gpt-6-astra / low`, transporté par `CodexRuntimeClient`. Repli : `gemini / gemini-3.8-flash / low`, via Cloud Code. `@sentropic/llm-mesh-refresh` reste exactement en 0.19.2. Son `dist/codex.js:53` retire `max_output_tokens`; le test unitaire à la frontière HTTP vérifie son omission même lorsque l’extraction demande 32768 jetons. La limite Gemini reste 32768. `REFRESH_MAXIMUM_ATTEMPTS` doit valoir 1 : Graphify peut réessayer les refus de validation avec des budgets de route supérieurs.
 
-`REFRESH_TIMEOUT_MS=900000` is a separate deadline for each model attempt.
-The Job deadline is 2100 seconds, leaving room for both model windows plus
-acquisition/publication. A large multi-chunk document can still reach the Job
-deadline; completed chunks resume durably in a later cycle.
+`REFRESH_TIMEOUT_MS=900000` est une échéance distincte par tentative modèle. L’échéance Job est 2100 secondes, laissant la place aux deux fenêtres modèle plus acquisition/publication. Un gros document multi-fragments peut atteindre l’échéance ; les fragments terminés reprennent durablement au cycle suivant.
 
-Transport errors, quota/429, 5xx, no active account, timeout and empty text
-trigger fallback. JSON, profile and provenance refusals stop without fallback.
-Fallback sticks to the remaining chunks of that document. After three distinct
-documents fall back for quota/429 consecutively, later documents skip Astra.
-A wholly successful primary document resets that count; successful intermediate
-chunks do not. The circuit resets next cycle; partial documents restore fallback
-from durable receipts. Current acquisition selects one
-PDF per city cycle; use two distinct cycles for two-document acceptance.
+Les erreurs de transport, quota/429, 5xx, compte actif absent, délai et texte vide déclenchent le repli. Les refus JSON, profil et provenance s’arrêtent sans repli. Le repli reste attaché aux fragments restants du document. Après trois documents distincts repliés consécutivement pour quota/429, les suivants ignorent Astra. Un document primaire entièrement réussi remet ce compteur à zéro ; les fragments intermédiaires réussis ne le font pas. Le circuit se réinitialise au cycle suivant ; les documents partiels restaurent le repli depuis les reçus durables. L’acquisition courante sélectionne un PDF par cycle ville ; utiliser deux cycles distincts pour l’acceptation à deux documents.
 
-`state.json` contains both models and forced mode in `identity.modelPolicy`.
-`documentModels[docSha][]` retains each chunk attempt's `modelUsed`, status,
-latency, `failureReason` and/or `fallbackReason`. A mixed document therefore
-retains both models. Completed chunks resume without duplicate generation.
-Returned provider/model/status are checked before recording completion; a
-returned identity mismatch stops with `modelUsed: null`. Integrity/status refusals
-carry `terminalFailure: true` across restarts,
-so a later cycle cannot reinterpret them as transport fallback. The deadline is enforced
-even for an uncooperative client. Late responses cannot validate or overwrite the
-selected output file, which only the policy writes after success.
-Logs emit the same safe metadata as `refresh-pv: model receipt`; no provider
-messages, prompts, credentials or account material are logged.
+`state.json` contient les deux modèles et le mode forcé dans `identity.modelPolicy`. `documentModels[docSha][]` conserve `modelUsed`, statut, latence, `failureReason` et/ou `fallbackReason` pour chaque tentative. Un document mixte conserve donc les deux modèles. Les fragments terminés reprennent sans génération dupliquée. Le fournisseur/modèle/statut retournés sont contrôlés avant enregistrement ; une identité retournée différente arrête avec `modelUsed: null`. Les refus d’intégrité/statut portent `terminalFailure: true` entre redémarrages. L’échéance est appliquée même pour un client non coopératif. Les réponses tardives ne peuvent ni valider ni écraser le fichier choisi. Les journaux n’émettent que les métadonnées sûres de `refresh-pv: model receipt` ; aucun message fournisseur, prompt, identifiant ou matière de compte.
 
-## Keyring and principal prerequisites
+## Prérequis keyring et principal
 
-Use the existing Secret keys `REFRESH_PRINCIPAL_REF` and
-`REFRESH_OWNER_SCOPE_REF` in `radar-refresh-runtime` for both transports.
-Measured installed mesh 0.19.2 `dist/service/local-account-transport-service.js`
-lines 334–358 filter route accounts by owner scope and expose each account's
-target/transport separately. A principal is the caller identity, not a single
-provider credential. No fallback-specific Secret keys are needed when both
-accounts are enrolled under this owner. Do not copy an unrelated owner's account.
+Employer les clés Secret existantes `REFRESH_PRINCIPAL_REF` et `REFRESH_OWNER_SCOPE_REF` de `radar-refresh-runtime` pour les deux transports. Mesh 0.19.2 installé, `dist/service/local-account-transport-service.js` lignes 334–358, filtre les comptes de route par owner scope et expose séparément cible/transport. Un principal est l’identité appelante, pas un identifiant fournisseur unique. Aucune clé Secret spécifique au repli n’est nécessaire si les deux comptes sont enrôlés sous ce même owner. Ne pas copier le compte d’un autre owner.
 
-The k8s lane must enroll Codex under the same owner as the existing Cloud Code
-account in `/keyring/runtime` on `radar-refresh-keyring`. Bootstrap copies only
-when `.key` is absent: replacing `radar-refresh-keyring-bootstrap` alone does
-not enroll Codex in an already initialized PVC. Preserve the writable runtime
-keyring and its refreshed credentials. Never include keyring bytes in receipts.
+### Enrôlement owner et import PVC existant
 
-## Preproduction acceptance (k8s lane)
+1. Sur le poste de l’owner, avec le keyring source qui contient sa `.key`, enrôler ChatGPT/Codex sous **la même** valeur `REFRESH_OWNER_SCOPE_REF` que Cloud Code :
+   ```sh
+   make -f deploy/k8s/refresh-cronjobs/refresh-018.mk enroll-codex LOCAL_IMAGE=<image-locale> KEYRING_SOURCE_DIR=<keyring-source> REFRESH_OWNER_SCOPE_REF=<owner-scope> ENV=test-refresh-018
+   ```
+   L’URL de consentement et le code à usage unique s’affichent uniquement dans ce terminal. La sortie finale ne contient que le pseudonyme et `codex`.
+2. Pour un PVC déjà initialisé (préprod), créer hors journal l’unique Secret temporaire `radar-refresh-keyring-account-import` à partir du keyring source complet, puis rendre le Job sans l’appliquer :
+   ```sh
+   make -f deploy/k8s/refresh-cronjobs/refresh-018.mk import-keyring-account IMPORT_IMAGE_REF=<digest-immuable> IMPORT_RENDER_OUT=<fichier.yaml> ENV=preprod
+   ```
+   La lane k8s applique ce manifeste une seule fois, attend le Job, vérifie sa sortie pseudonymisée, puis supprime Job et Secret temporaire. Le Job prend `flock` sur `.refresh.lock` puis `.bootstrap.lock`, vérifie que les `.key` source/runtime sont identiques, ajoute uniquement l’enveloppe et le record public Codex à l’index runtime, et ne remplace ni l’index Gemini ni les credentials rafraîchis. Aucun `apply` n’est fait par la lane code.
+3. Pour un PVC neuf (production), préparer le Secret bootstrap avec le keyring qui contient **les deux** comptes avant le premier démarrage. Le bootstrap ne copie que si `.key` est absent : remplacer `radar-refresh-keyring-bootstrap` ne modifie donc pas un PVC déjà initialisé. Ne jamais inclure des octets de keyring dans les reçus.
 
-1. Verify the OVH preprod cluster/namespace, runtime Secret key names, both
-   enrolled transports, writable PVC and 1536Mi workload limit. The code lane's
-   `~/.kube/radar-immobilier-preprod-cert-ro.kubeconfig` is read-only.
-2. Merge the green PR through i-cond. Wait for CD preprod; record the release
-   SHA and immutable API digest. Render verification must show only PV active,
-   the six model variables and matching init/runtime image digests.
-3. Through the k8s lane's Make target, create a uniquely named one-off Job from
-   `radar-refresh-pv`. Respect the keyring `flock` and avoid the 05:17 UTC run.
-   Select public PDFs with unused input identities or record durable skips.
-4. Record per-document model receipts, JSON/profile/provenance acceptance,
-   six completed durable stages, PG projection, duration and Job outcome.
-   Primary acceptance requires an actual `gpt-6-astra / low` call.
-5. Create a second one-off Job with `REFRESH_FORCE_FALLBACK=1` set on that Job
-   only. Keep its own receipt: Gemini low, reason `forced`, zero Astra calls.
-   The changed policy identity prevents reuse of the primary extraction.
-6. Require both checks before production. A quality refusal is a failed
-   acceptance, never a reason to silently rerun through another model.
+## Acceptation préproduction (lane k8s)
 
-## Production promotion (k8s lane and i-cond)
+1. Vérifier cluster/namespace OVH préprod, noms des clés runtime, deux transports enrôlés, PVC inscriptible et limite workload 1536Mi. Le kubeconfig cert-ro de la lane code est en lecture seule.
+2. Fusionner la PR verte via i-cond, attendre CD préprod et consigner SHA de livraison et digest API immuable. Le rendu doit montrer uniquement PV actif, six variables modèle et images init/runtime correspondantes.
+3. Après l’import Codex si le PVC existe déjà, créer via la cible k8s un Job unique depuis `radar-refresh-pv`. Respecter le `flock`, éviter 05:17 UTC et choisir des PDF publics aux identités d’entrée inutilisées, ou consigner les skips durables.
+4. Conserver, par document, modèle réellement employé, acceptations JSON/profil/provenance, six étapes durables terminées, projection PG, durée et issue Job. L’acceptation primaire exige un appel réel `gpt-6-astra / low`.
+5. Créer un second Job unique avec `REFRESH_FORCE_FALLBACK=1` sur ce seul Job. Conserver son reçu : Gemini low, raison `forced`, zéro appel Astra. L’identité de politique modifiée évite la réutilisation de l’extraction primaire.
+6. Collecter les preuves e2e demandées : modèle par document, acceptés/refusés, durée, liens vers les nouveaux signaux filtre B′ sur immo-preprod puis immo-prod, et logs du Job. Un refus qualité est une acceptation échouée, jamais un motif de relance silencieuse avec un autre modèle.
 
-1. With owner GO in the k8s lane, verify/create production runtime and bootstrap
-   Secrets, the writable `radar-refresh-keyring` PVC, both account enrollments,
-   dedicated S3 credentials and 768Mi workload headroom. Check the actual OVH
-   production context; historical Scaleway inventory is not production proof.
-2. Set GitHub variable `REFRESH_CRONJOB_PROD_ENABLED=true` after prerequisites.
-   Create the release `v*` tag on the accepted merged commit. Approve the
-   `production` environment gate if required. `build-push-images.yml`'s
-   `promote-prod` job deploys the overlay using the release's exact API digest.
-3. Verify PV is active, legacy scrape/projection remain suspended, the six
-   model values are low-effort Astra/Gemini, and both container images match.
-4. Run the authorized one-off acceptance, then inspect the next scheduled Job.
-   Retain state keys, safe receipts, accepted/refused counts and durations.
+## Promotion production (lane k8s et i-cond)
 
-## Rollback and quota watch
+1. Avec GO owner, vérifier/créer les Secrets runtime et bootstrap production, PVC `radar-refresh-keyring` inscriptible, deux enrôlements, identifiants S3 dédiés et marge 768Mi. Vérifier le contexte OVH production réel ; un inventaire Scaleway historique ne prouve rien.
+2. Mettre `REFRESH_CRONJOB_PROD_ENABLED=true`, créer le tag `v*` sur le commit fusionné accepté et approuver la porte `production` si nécessaire. `promote-prod` déploie le digest API exact de la release.
+3. Vérifier PV actif, scrape/projection historiques suspendus, six valeurs modèle Astra/Gemini low et images identiques. Exécuter l’acceptation unique autorisée puis inspecter le Job planifié suivant ; conserver clés d’état, reçus sûrs, comptes acceptés/refusés et durées.
 
-Rollback criteria: wrong release/model, exposed secret, repeated failed Jobs,
-loss of provenance/quality enforcement, canonical/PG divergence, or inability
-to use Gemini after an Astra transport failure. K8s first suspends the PV job
-and handles any active Job deliberately. Restore the previous accepted CronJob
-digest and policy together (old Gemini code does not know these fallback vars).
-`rollback.yml` accepts `environment`, `failed_ref`, `reason` and rolls back
-Deployments only: it does **not** undo CronJobs, published S3 graphs or PG data.
-Use the stored canonical backup/application receipt for an owner-approved data
-recovery if publication occurred; never presume image rollback restores data.
+## Retour arrière et suivi quota
 
-Benchmark quota observation supplied by owner: 79% of the Codex week consumed
-at 2026-09-17 04:15Z; reset 2026-09-22T13:12Z. Refresh this measurement before
-promotion and monitor quota/429 receipts daily. Expect Gemini fallback while
-Codex is unavailable, with the document circuit after three consecutive quota
-switches in a multi-document cycle. Alert on fallback failure or quality refusal;
-fallback's measured benchmark acceptance was 85/100, not Astra's 100/100.
+Critères : mauvaise release/modèle, secret exposé, Jobs échoués répétés, perte d’application provenance/qualité, divergence canonique/PG ou impossibilité d’utiliser Gemini après erreur Astra. K8s suspend d’abord PV et traite explicitement tout Job actif. Restaurer ensemble digest CronJob et politique acceptés précédents. `rollback.yml` ne restaure que les Deployments, pas les CronJobs, graphes S3 publiés ni données PG. Employer la sauvegarde canonique/le reçu d’application pour une récupération approuvée owner si publication ; un rollback image ne restaure pas les données.
+
+Mesure owner : 79 % du quota Codex hebdomadaire consommé au 2026-09-17 04:15Z ; reset `2026-09-22T13:12Z`. Rafraîchir cette mesure avant promotion et surveiller quotidiennement les reçus quota/429. Attendre Gemini quand Codex est indisponible ; alerter sur échec de repli ou refus qualité. L’acceptation benchmark Gemini mesurée est 85/100, pas les 100/100 d’Astra.

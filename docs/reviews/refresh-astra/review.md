@@ -8,20 +8,12 @@ review-author:
 target-ref: 7bf2d17f5f30236879cd6eb91353ae253a28c866
 ---
 
-# Independent review
+# Revue indépendante
 
-Selected declared/requested legs: Claude host with `gpt-5.6-sol` high
-(runtime correctness) and Claude host with `gemini-3.8-flash` high
-(deployment, persistence, failure semantics). Both differ from author host/model.
-Model IDs checked against installed mesh 0.19.2 catalogue on 2026-09-17.
-Launch receipts attest requested identity only, not effective upstream routing.
+Jambes déclarées/demandées : hôte Claude avec `gpt-5.6-sol` high (exactitude runtime) et hôte Claude avec `gemini-3.8-flash` high (déploiement, persistance, sémantique d’échec). Elles diffèrent de l’hôte/modèle auteur. Les IDs ont été contrôlés dans le catalogue mesh 0.19.2 installé le 2026-09-17. Les reçus de lancement attestent l’identité demandée, non le routage upstream effectif.
 
-Design reviews identified and implementation addresses document/chunk counting,
-separate timeout signals, reserved fallback budget, forced-policy identity,
-quality retry suppression and durable per-chunk model receipts.
+Les revues de conception ont identifié, et l’implémentation traite, le comptage document/fragment, les signaux de délai séparés, le budget de repli réservé, l’identité de politique forcée, la suppression des retries qualité et les reçus de modèle durables par fragment.
 
-Leg artifacts: [runtime](review-runtime.md), [deployment](review-deployment.md).
+Artefacts : [runtime](review-runtime.md), [déploiement](review-deployment.md).
 
-Both MCP launches were rejected before starting: automatic approval classified
-private repository diff export to these external destinations as unauthorized.
-Owner authorization has been requested; no consensus verdict is claimed.
+Les deux lancements MCP ont été refusés avant démarrage : l’approbation automatique a classé l’export de diff de dépôt privé vers ces destinations externes comme non autorisé. Une autorisation owner a été demandée ; aucun verdict de consensus n’est avancé.
