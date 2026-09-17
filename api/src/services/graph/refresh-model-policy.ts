@@ -68,6 +68,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
             const timeout = setTimeout(() => controller.abort(new DOMException("Refresh model timeout", "TimeoutError")),
               options.timeoutMs);
             let qualityRefused = false;
+            let responseValidated = false;
             let failed = false;
             let failure: unknown;
             let result: Awaited<ReturnType<TextJsonGenerationClient["generateJson"]>> | undefined;
@@ -76,10 +77,14 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
               result = await options.createClient(model, controller.signal).generateJson({ ...input,
                 async validateResponse(text) {
                   if (!text.trim()) throw Object.assign(new Error("Empty refresh output"), { code: "REFRESH_EMPTY_OUTPUT" });
-                  try { await input.validateResponse?.(text); }
+                  try { await input.validateResponse?.(text); responseValidated = true; }
                   catch (error) { qualityRefused = true; throw error; }
                 } });
-            } catch (error) { failed = true; failure = error; }
+            } catch (error) {
+              // The text client writes its output after validation. A local I/O failure is not a transport failure.
+              if (responseValidated) throw error;
+              failed = true; failure = error;
+            }
             finally {
               clearTimeout(timeout);
               options.signal?.removeEventListener("abort", abort);
