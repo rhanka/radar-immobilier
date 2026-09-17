@@ -91,6 +91,25 @@ function runtimeHarness(generate: (request: GenerateRequest) => Promise<Generate
 }
 
 describe("refresh mesh", () => {
+  it("should request Gemini low through the tiered Cloud Code wire model", async () => {
+    const calls: Record<string, unknown>[] = [];
+    const client = new CloudCodeRuntimeClient(async (_url, init) => {
+      calls.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+      if (calls.length === 1) return Response.json({ models: { "gemini-3.8-flash-tiered": {} } });
+      return new Response('data: {"response":{"candidates":[{"content":{"parts":[{"text":"{}"}]},"finishReason":"STOP"}]}}\n\n',
+        { headers: { "content-type": "text/event-stream" } });
+    });
+    await client.generate({ providerId: "gemini", modelId: "gemini-3.8-flash", reasoning: { effort: "low" },
+      maxOutputTokens: 32768, messages: [] }, {
+      auth: { material: { type: "account-transport", provider: "cloud-code", accessToken: "fixture-token",
+        accountId: "fixture-account", metadata: { cloudaicompanionProject: "fixture-project" } },
+      descriptor: { sourceType: "account-transport", accountProviderId: "cloud-code" } },
+    });
+    expect(calls[1]).toMatchObject({ model: "gemini-3.8-flash-tiered", request: {
+      generationConfig: { maxOutputTokens: 32768, thinkingConfig: { thinkingLevel: "LOW" } },
+    } });
+  });
+
   it("should omit max_output_tokens on the pinned Codex HTTP transport", async () => {
     let body: Record<string, unknown> | undefined;
     const client = new CodexRuntimeClient({ fetch: async (url, init) => {
