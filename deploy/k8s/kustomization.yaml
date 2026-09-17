@@ -82,5 +82,4 @@ configMapGenerator:
     files:
       - db-backup/dump.sh
       - db-backup/upload.sh
-      - db-backup/retention.sh
       - db-backup/restore-verify.sh
