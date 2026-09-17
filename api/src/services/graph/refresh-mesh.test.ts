@@ -7,6 +7,7 @@ import {
 } from "@sentropic/graphify/llm-mesh";
 import {
   CloudCodeRuntimeClient,
+  CodexRuntimeClient,
   DEFAULT_ROUTE_POLICY,
   type GenerateRequest,
   type GenerateResponse,
@@ -90,6 +91,26 @@ function runtimeHarness(generate: (request: GenerateRequest) => Promise<Generate
 }
 
 describe("refresh mesh", () => {
+  it("should omit max_output_tokens on the pinned Codex HTTP transport", async () => {
+    let body: Record<string, unknown> | undefined;
+    const client = new CodexRuntimeClient({ fetch: async (url, init) => {
+      expect(String(url)).toBe("https://chatgpt.com/backend-api/codex/responses");
+      body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return new Response('data: {"type":"response.output_text.delta","delta":"{}"}\n\n'
+        + 'data: {"type":"response.completed","response":{"status":"completed"}}\n\n',
+      { headers: { "content-type": "text/event-stream" } });
+    } });
+    const result = await client.generate({ providerId: "openai", modelId: "gpt-6-astra",
+      reasoning: { effort: "low" }, maxOutputTokens: 32768,
+      messages: [{ role: "user", content: "Extract" }] }, {
+      auth: { material: { type: "account-transport", provider: "codex", accessToken: "fixture-token",
+        accountId: "fixture-account" }, descriptor: { sourceType: "account-transport", accountProviderId: "codex" } },
+    });
+    expect(result.text).toBe("{}");
+    expect(body).toMatchObject({ model: "gpt-6-astra", reasoning: { effort: "low" } });
+    expect(body).not.toHaveProperty("max_output_tokens");
+  });
+
   it("should cancel pending Gemini catalogue discovery at the run deadline", async () => {
     const controller = new AbortController();
     const fetchCatalogue = vi.fn<typeof fetch>((_url, init) => new Promise((_resolve, reject) => {

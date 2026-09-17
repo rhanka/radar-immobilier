@@ -37,8 +37,8 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0 — Read rules, inspect transport and existing deployment path.
-- [ ] Lot 1 — Document-scoped fallback, bounded attempts and safe receipts.
-- [ ] Lot 2 — Durable model trace and script wiring.
+- [x] Lot 1 — Document-scoped fallback, bounded attempts and safe receipts.
+- [x] Lot 2 — Durable model trace and script wiring.
 - [ ] Lot 3 — Manifest policy and deployment runbook.
 - [ ] Lot 4 — Unit/integration, static and harness gates; independent review reconciliation.
 - [ ] Lot 5 — Real local acceptance or measured credential gap; remove test volumes.
