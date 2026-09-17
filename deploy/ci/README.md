@@ -238,18 +238,6 @@ store holds up to **N+1** objects per env at the peak (default `14` → up to `1
 The current backup is categorically the rollback point of the release being cut,
 so it is never counted against the retention budget — a deliberate one-object
 safety bias.
-# Déploiement du rafraîchissement Astra low
+# Déploiement du rafraîchissement Gemini low puis Astra low
 
-Le CronJob PV utilise Astra low via Codex, avec Gemini 3.8 Flash low via Cloud
-Code comme repli de transport. Les deux comptes doivent être enrôlés sous le
-owner scope du Secret runtime dans le PVC keyring inscriptible. L’owner enrôle
-d’abord Codex localement avec `make enroll-codex`; pour un PVC déjà initialisé,
-la lane k8s rend puis applique le Job éphémère `make import-keyring-account`
-avec un Secret temporaire, afin d’ajouter Codex sans remplacer Gemini. Pour un
-PVC neuf, le Secret bootstrap contient les deux comptes avant le premier
-bootstrap. L’ordre de déploiement, la preuve de repli forcé, les preuves e2e
-(modèle par document, acceptés, durée, liens filtre B′ et logs Job) et le retour
-arrière propre au CronJob sont documentés dans
-[`production-acceptance.md`](../../docs/reviews/refresh-astra/production-acceptance.md).
-L’overlay production reste protégé par `REFRESH_CRONJOB_PROD_ENABLED=true` et
-la promotion release `v*` ; une fusion seule déploie la préproduction.
+Le CronJob PV utilise Gemini 3.8 Flash low avec deux essais maximum sur refus de qualité du contrat v9, puis Astra low comme repli. Les incidents transport, quota/429, délai et flux vide basculent immédiatement vers Astra. `REFRESH_FORCE_FALLBACK=1` est réservé aux recettes. Les deux comptes doivent être enrôlés sous le même owner scope du Secret runtime dans le PVC keyring inscriptible. L’owner enrôle les comptes localement (`make enroll-cloud-code` et `make enroll-codex`); pour un PVC déjà initialisé, la lane k8s rend puis applique le Job éphémère `make import-keyring-account`, sans remplacer l’autre compte. Pour un PVC neuf, le Secret bootstrap contient les deux comptes avant le premier bootstrap. La validation préproduction (purge `refresh/018/*`, cycle complet, mesures par document et liens B′) et la promotion par variable GitHub puis tag `v*` sont documentées dans [`production-acceptance.md`](../../docs/reviews/refresh-cascade/production-acceptance.md). Une fusion déploie la préproduction; la production reste protégée par `REFRESH_CRONJOB_PROD_ENABLED=true`.

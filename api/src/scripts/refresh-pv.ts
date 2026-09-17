@@ -75,9 +75,9 @@ async function main(): Promise<void> {
   const timeoutMs = positive("REFRESH_TIMEOUT_MS", 900_000, 3_600_000);
   const primary = selectedModel("REFRESH");
   const fallback = selectedModel("REFRESH_FALLBACK");
-  // Graphify retries validation refusals when multiple route attempts are allowed.
-  // The explicit policy owns the only retry: a transport-only fallback.
+  // The explicit policy owns bounded quality retries; Graphify gets one route attempt.
   const maximumAttempts = positive("REFRESH_MAXIMUM_ATTEMPTS", 1, 1);
+  const primaryQualityAttempts = positive("REFRESH_PRIMARY_QUALITY_ATTEMPTS", 2, 10);
   const profileContext = loadRefreshProfileContext({ root: process.cwd(), profilePath,
     unregisteredOnly: true });
   const acquire = await seedSavedInput(store, city);
@@ -88,14 +88,14 @@ async function main(): Promise<void> {
     keyring: new EncryptedFileKeyring(required("SENTROPIC_LLM_MESH_KEYRING_DIR")),
     maximumAttempts,
   };
-  const documentModels = createRefreshModelPolicy({ primary, fallback, timeoutMs,
+  const documentModels = createRefreshModelPolicy({ primary, fallback, primaryQualityAttempts, timeoutMs,
     forceFallback: process.env.REFRESH_FORCE_FALLBACK === "1",
     createClient: (model, signal) => createRefreshMesh({ ...common,
       provider: model.provider, model: model.model,
       reasoning: { effort: model.effort as "low" }, signal }).textClient,
   });
   let modelCalls = 0;
-  logger.info({ city, modelPolicy: documentModels.policy, maximumAttempts, timeoutMs },
+  logger.info({ city, modelPolicy: documentModels.policy, maximumAttempts, primaryQualityAttempts, timeoutMs },
     "refresh-pv: starting");
   try {
     const result = await runPvRefresh({ citySlug: city, store, db, profileContext,
