@@ -1,34 +1,39 @@
 # Tableau complet — benchmark v101b
 
-Oracle v2: F1 macro calculé sur les acceptés à date; `F1 × acceptation = F1 × acceptés/N`. Codex: siège Pro 20x mesuré passivement, fenêtre 7 j; granularité 1 point (±8 %). Latences sur tous les reçus terminaux, concurrence 1 équivalente.
+Généré depuis `report-data.json` le 2026-09-17T09:20:11.394Z. Les 26 bras de campagne sont listés; `opus5-cli-off` est hors-campagne (0/0, Claude CLI N-A). Oracle v2 : F1 macro sur les sorties acceptées; `F1 × acceptation = F1 × acceptés / 100`. Waterloo est exclue du macro-oracle partiel. Les p50/p95 couvrent les derniers reçus terminaux; docs/h est l'inverse du p50 (repère concurrence 1, pas un SLA).
 
-| Bras | État; acceptés/N | F1 v2 macro | F1 × acceptation | Entrée/doc | Sortie/doc | USD API/doc | USD siège/doc | Sièges / 1 000 docs/mois | p50 | p95 | Moy. | Docs/h (C1) | Échecs |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| astra-low | complet; 100/100 | 0.584 | 0.584 | 15 112 | 5 122 | $0.4072 | $0.0177 | 1 | 147.779 s | 297.020 s | 156.124 s | 23.059 | — |
-| sol-medium | complet; 94/100 | 0.558 | 0.525 | 15 112 | 10 405 | $0.2685 | $0.0223 | 1 | 187.289 s | 317.291 s | 192.067 s | 18.743 | provenance:6 |
-| opus5-off | complet; 68/100 | 0.690 | 0.470 | 24 969 | 21 035 | $0.6507 | N-A (burn en cours) | N-A | 167.035 s | 278.962 s | 173.809 s | 20.712 | JSON:24/profil:4/provenance:4 |
-| astra-medium | complet; 99/100 | 0.452 | 0.448 | 15 196 | 6 340 | $0.4689 | $0.0188 | 1 | 189.827 s | 320.214 s | 191.550 s | 18.794 | transport:1 |
-| gemini-low | complet; 85/100 | 0.518 | 0.441 | 16 468 | 6 743 | $0.0376 | N-A (burn en cours) | N-A | 15.260 s | 36.953 s | 18.398 s | 195.676 | profil:7/provenance:8 |
-| sol-xhigh | complet; 85/100 | 0.517 | 0.439 | 14 411 | 24 607 | $0.5498 | $0.0340 | 1 | 416.067 s | 878.890 s | 452.570 s | 7.955 | transport:10/provenance:5 |
-| luna-high | complet; 43/100 | 0.788 | 0.339 | 13 953 | 14 282 | $0.0199 | $0.0246 | 1 | 247.785 s | 480.006 s | 275.547 s | 13.065 | transport:13/JSON:1/profil:33/provenance:10 |
-| gemini-medium | complet; 79/100 | 0.423 | 0.334 | 16 468 | 11 070 | $0.0539 | N-A (burn en cours) | N-A | 26.983 s | 44.647 s | 27.967 s | 128.724 | profil:12/provenance:9 |
-| sonnet5-off | complet; 62/100 | 0.528 | 0.327 | 24 862 | 18 100 | $0.2307 | N-A (burn en cours) | N-A | 113.244 s | 242.693 s | 138.296 s | 26.031 | transport:1/JSON:13/profil:12/provenance:12 |
-| luna-medium | complet; 51/100 | 0.582 | 0.297 | 15 171 | 7 239 | $0.0117 | $0.0195 | 1 | 126.613 s | 216.756 s | 131.902 s | 27.293 | transport:2/JSON:2/profil:36/provenance:9 |
-| sonnet5-low | complet; 58/100 | 0.512 | 0.297 | 24 969 | 6 150 | $0.1114 | N-A (burn en cours) | N-A | 38.012 s | 71.212 s | 40.569 s | 88.738 | JSON:2/profil:18/provenance:22 |
-| sonnet5-high | complet; 70/100 | 0.396 | 0.277 | 24 969 | 17 959 | $0.2295 | N-A (burn en cours) | N-A | 121.408 s | 249.426 s | 131.610 s | 27.353 | JSON:13/profil:8/provenance:9 |
-| gemini-high | complet; 53/100 | 0.518 | 0.275 | 16 468 | 26 658 | $0.1123 | N-A (burn en cours) | N-A | 68.997 s | 88.431 s | 67.842 s | 53.064 | JSON:44/profil:2/provenance:1 |
-| luna-low | complet; 39/100 | 0.621 | 0.242 | 15 161 | 5 380 | $0.0095 | $0.0179 | 1 | 94.808 s | 168.192 s | 100.164 s | 35.941 | transport:2/profil:50/provenance:9 |
-| mistral-small4 | complet; 40/100 | 0.250 | 0.100 | 16 655 | 4 168 | $0.0050 | N-A (API seule) | N-A | 15.878 s | 62.954 s | 20.416 s | 176.329 | transport:4/profil:28/provenance:28 |
-| gpt41 | complet; 64/100 | 0.000 | 0.000 | 15 349 | 2 944 | $0.0543 | N-A (API seule) | N-A | 17.161 s | 41.294 s | 19.554 s | 184.108 | transport:3/profil:16/provenance:17 |
-| sonnet46-cloud-off | en cours 56/100; 32/56 | N-A | N-A | 11 448 | 9 377 | $0.1750 | N-A (siège Google) | N-A | 64.119 s | 146.778 s | 67.556 s | 53.289 | transport:10/profil:10/provenance:4 |
-| sonnet46-cloud-low | en cours 29/100; 14/29 | N-A | N-A | 8 711 | 8 112 | $0.1478 | N-A (siège Google) | N-A | 0.705 s | 93.724 s | 33.451 s | 107.619 | transport:15 |
-| sonnet46-cloud-high | en cours 15/100; 0/15 | N-A | N-A | N-A | N-A | N-A | N-A (siège Google) | N-A | 0.283 s | 0.397 s | 0.290 s | 12419.503 | transport:15 |
-| sol-low | en cours 87/100; 70/87 | N-A | N-A | 14 192 | 6 564 | $0.1880 | $0.0181 | 1 | 117.451 s | 211.393 s | 118.808 s | 30.301 | transport:9/profil:1/provenance:7 |
-| sol-high | en cours 92/100; 76/92 | N-A | N-A | 13 869 | 14 346 | $0.3424 | $0.0246 | 1 | 254.674 s | 480.005 s | 277.097 s | 12.992 | transport:12/provenance:4 |
-| opus5-low | complet; 74/100 | N-A | N-A | 24 969 | 10 909 | $0.3976 | N-A (burn en cours) | N-A | 79.295 s | 157.027 s | 87.669 s | 41.064 | JSON:2/profil:14/provenance:10 |
-| opus5-high | complet; 63/100 | N-A | N-A | 24 969 | 20 893 | $0.6472 | N-A (burn en cours) | N-A | 157.988 s | 276.812 s | 171.983 s | 20.932 | JSON:24/profil:6/provenance:7 |
-| luna-xhigh | en cours 44/100; 22/44 | N-A | N-A | 8 577 | 18 471 | $0.0239 | $0.0236 | 1 | 289.238 s | 718.760 s | 485.774 s | 7.411 | transport:12/profil:6/provenance:4 |
-| astra-xhigh | en cours 23/100; 14/23 | N-A | N-A | 11 693 | 17 059 | $0.9699 | $0.0251 | 1 | 708.034 s | 900.017 s | 647.140 s | 5.563 | transport:9 |
-| astra-high | en cours 73/100; 58/73 | N-A | N-A | 10 406 | 9 019 | $0.5550 | $0.0169 | 1 | 294.132 s | 480.011 s | 312.351 s | 11.525 | transport:15 |
+| Bras | État; acceptés/N | F1 v2 macro | F1 × acceptation | Entrée/doc | Sortie/doc | USD API/doc | USD siège/doc | Sièges/1 000 | p50 | p95 | Docs/h C1 | Échecs dernière tentative |
+|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|---|
+| gemini-low | complet; 85/100 | 0.518 | 0.441 | 16 468 | 6 743 | $0.0376 | AI Pro mesuré; $0,0014 | N-A | 15.3 s | 37.0 s | 235.9 | profile:7 · provenance:8 |
+| gemini-medium | complet; 79/100 | 0.423 | 0.334 | 16 468 | 6 360 | $0.0539 | N-A | N-A | 27.0 s | 44.6 s | 133.4 | profile:12 · provenance:9 |
+| gemini-high | complet; 53/100 | 0.518 | 0.275 | 16 468 | 7 187 | $0.1123 | N-A | N-A | 69.0 s | 88.4 s | 52.2 | json:44 · profile:2 · provenance:1 |
+| luna-low | complet; 39/100 | 0.621 | 0.242 | 14 857 | 5 273 | $0.0095 | N-A | N-A | 94.8 s | 168.2 s | 38.0 | transport:2 · profile:50 · provenance:9 |
+| luna-medium | complet; 51/100 | 0.582 | 0.297 | 14 868 | 7 094 | $0.0117 | N-A | N-A | 126.6 s | 216.8 s | 28.4 | transport:2 · json:2 · profile:36 · provenance:9 |
+| luna-high | complet; 43/100 | 0.788 | 0.339 | 12 139 | 12 425 | $0.0199 | N-A | N-A | 247.8 s | 480.0 s | 14.5 | transport:13 · json:1 · profile:33 · provenance:10 |
+| luna-xhigh | complet; 47/100 | N-A | N-A | 12 073 | 22 489 | $0.0346 | N-A | N-A | 480.0 s | 900.0 s | 7.5 | transport:15 · profile:23 · provenance:15 · budget:22 |
+| gpt41 | complet; 64/100 | 0.000 | 0.000 | 14 889 | 2 856 | $0.0542 | N-A | N-A | 17.2 s | 41.3 s | 209.8 | transport:3 · profile:16 · provenance:17 |
+| sonnet46-cloud-off | partiel (56/100); 32/56 | N-A | N-A | 9 404 | 7 702 | $0.1750 | N-A | N-A | 64.1 s | 146.8 s | 56.1 | transport:10 · profile:10 · provenance:4 |
+| sonnet46-cloud-low | partiel (29/100); 14/29 | N-A | N-A | 4 205 | 3 916 | $0.1478 | N-A | N-A | 0.7 s | 93.7 s | 5106.4 | transport:15 · rateLimit:1 |
+| sonnet46-cloud-high | partiel (15/100); 0/15 | N-A | N-A | 0 | 0 | N-A | N-A | N-A | 0.3 s | 0.4 s | 12720.8 | transport:15 |
+| sonnet5-off | complet; 62/100 | 0.528 | 0.327 | 24 614 | 17 919 | $0.2307 | N-A | N-A | 113.2 s | 242.7 s | 31.8 | transport:1 · json:13 · profile:12 · provenance:12 |
+| sonnet5-low | complet; 58/100 | 0.512 | 0.297 | 24 969 | 6 150 | $0.1114 | N-A | N-A | 38.0 s | 71.2 s | 94.7 | json:2 · profile:18 · provenance:22 |
+| sonnet5-high | complet; 70/100 | 0.396 | 0.277 | 24 969 | 17 959 | $0.2295 | N-A | N-A | 121.4 s | 249.4 s | 29.7 | json:13 · profile:8 · provenance:9 |
+| opus5-off | complet; 68/100 | 0.690 | 0.470 | 24 969 | 21 035 | $0.6507 | N-A | N-A | 167.0 s | 279.0 s | 21.6 | json:24 · profile:4 · provenance:4 |
+| opus5-low | complet; 74/100 | N-A | N-A | 24 969 | 10 909 | $0.3976 | N-A | N-A | 79.3 s | 157.0 s | 45.4 | json:2 · profile:14 · provenance:10 |
+| opus5-high | complet; 63/100 | N-A | N-A | 24 969 | 20 893 | $0.6472 | N-A | N-A | 158.0 s | 276.8 s | 22.8 | json:24 · profile:6 · provenance:7 |
+| sol-low | complet; 90/100 | N-A | N-A | 14 823 | 6 674 | $0.1967 | N-A | N-A | 121.3 s | 205.5 s | 29.7 | transport:2 · profile:1 · provenance:7 |
+| sol-medium | complet; 94/100 | 0.558 | 0.525 | 15 112 | 10 405 | $0.2686 | N-A | N-A | 187.3 s | 317.3 s | 19.2 | provenance:6 |
+| sol-high | complet; 83/100 | N-A | N-A | 12 307 | 12 761 | $0.3460 | N-A | N-A | 266.9 s | 480.0 s | 13.5 | transport:12 · provenance:5 |
+| sol-xhigh | complet; 85/100 | 0.517 | 0.439 | 12 970 | 22 146 | $0.5498 | N-A | N-A | 416.1 s | 878.9 s | 8.7 | transport:10 · provenance:5 · budget:20 |
+| astra-low | complet; 100/100 | 0.584 | 0.584 | 15 112 | 5 122 | $0.4072 | conditionnel Pro 20x; $0,0177 | N-A | 147.8 s | 297.0 s | 24.4 | — |
+| astra-medium | complet; 99/100 | 0.452 | 0.448 | 15 044 | 6 276 | $0.4689 | N-A | N-A | 189.8 s | 320.2 s | 19.0 | transport:1 |
+| astra-high | complet; 68/100 | N-A | N-A | 8 333 | 6 351 | $0.5896 | N-A | N-A | 316.1 s | 480.0 s | 11.4 | transport:32 |
+| astra-xhigh | complet; 65/100 | N-A | N-A | 8 221 | 11 660 | $0.9929 | N-A | N-A | 596.7 s | 900.0 s | 6.0 | transport:33 · profile:1 · provenance:1 |
+| mistral-small4 | complet; 40/100 | 0.250 | 0.100 | 15 989 | 4 001 | $0.0050 | N-A | N-A | 15.9 s | 63.0 s | 226.7 | transport:4 · profile:28 · provenance:28 |
 
-Classes: transport hors 429; JSON; profil; provenance; code 23 = flux Codex sans sortie. Les catégories sont exclusives par reçu.
+## Notes de fermeture
+
+- Rejeu réseau Luna xhigh / Sol low : 13/13 documents initiaux ont désormais une dernière tentative terminale non réseau; aucune tentative n'écrase un reçu antérieur.
+- Code 23 Codex : flux HTTP 200 terminé sans sortie exploitable sur documents lourds; classe backend définitive, distincte du transport, non rejouée.
+- Sonnet 4.6 Cloud Code : partiel, quota Google; F1 N-A. Les autres F1 N-A sont des source-gaps oracle et ne sont pas assimilés à zéro.
+- Sièges : Gemini AI Pro mesuré sur 260 documents; Codex passif et Claude CLI sont N-A pour une capacité publiable.

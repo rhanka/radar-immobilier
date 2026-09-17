@@ -1508,7 +1508,7 @@ run-v101-arm: t1-v100-snapshot check-v101-tools
 	  -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring \
 	    && cp -a /t1-source /workspace/t1 && cd /workspace \
-	    && env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u MISTRAL_API_KEY \
+	    && $(if $(filter judge-%,$(ARM)),,env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u MISTRAL_API_KEY) \
 	      npm install --silent --ignore-scripts @sentropic/graphify@0.18.0 \
 	      @sentropic/llm-mesh@$(V101_MESH_VERSION) tsx@4.22.3 >/dev/null \
 	    && cd /src && exec node /workspace/node_modules/tsx/dist/cli.mjs \

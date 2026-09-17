@@ -1,34 +1,34 @@
 # v101b campaign health
 
-Updated: `2026-09-16T03:20:34Z` · arms closed: `2/26` · alerts: `18`
+Updated: `2026-09-17T10:55:52Z` · arms closed: `23/26` · alerts: `3`
 
 | Arm | State | Processed | Accepted | Transport | 429 | JSON | Profile | Provenance | Budget | Last receipt | Age | Alert |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---|
-| gemini-low | running | 20/100 | 19 | 0 | 0 | 0 | 1 | 0 | 0 | 2026-09-16T00:43:35.740Z | 9419s | STALE>20m |
-| gemini-medium | running | 26/100 | 24 | 0 | 0 | 0 | 2 | 0 | 0 | 2026-09-16T03:20:06.277Z | 28s |  |
-| gemini-high | running | 20/100 | 13 | 0 | 0 | 7 | 0 | 0 | 0 | 2026-09-16T01:10:39.878Z | 7795s | STALE>20m |
-| luna-low | running | 5/100 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T03:19:58.041Z | 36s |  |
-| luna-medium | running | 3/100 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T01:03:37.328Z | 8217s | STALE>20m |
-| luna-high | running | 3/100 | 2 | 0 | 0 | 0 | 1 | 0 | 0 | 2026-09-16T01:15:41.213Z | 7493s | STALE>20m |
-| luna-xhigh | running | 3/100 | 1 | 1 | 0 | 0 | 0 | 1 | 0 | 2026-09-16T01:32:25.877Z | 6489s | STALE>20m |
-| gpt41 | completed | 100/100 | 64 | 3 | 0 | 0 | 16 | 17 | 0 | 2026-09-15T19:52:04.716Z | 26910s |  |
-| sonnet46-cloud-off | running | 20/100 | 17 | 0 | 0 | 0 | 3 | 0 | 0 | 2026-09-16T01:34:00.167Z | 6394s | STALE>20m |
-| sonnet46-cloud-low | circuit-open | 19/100 | 14 | 5 | 1 | 0 | 0 | 0 | 0 | 2026-09-16T03:17:31.215Z | 183s |  |
-| sonnet46-cloud-high | circuit-open | 5/100 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T03:17:32.142Z | 182s |  |
-| sonnet5-off | running | 20/100 | 16 | 0 | 0 | 0 | 3 | 1 | 0 | 2026-09-16T01:06:02.785Z | 8072s | STALE>20m |
-| sonnet5-low | running | 26/100 | 23 | 0 | 0 | 0 | 1 | 2 | 0 | 2026-09-16T03:20:18.303Z | 16s |  |
-| sonnet5-high | running | 20/100 | 17 | 0 | 0 | 0 | 3 | 0 | 0 | 2026-09-16T01:41:06.722Z | 5968s | STALE>20m |
-| opus5-off | running | 20/100 | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T02:19:22.638Z | 3672s | STALE>20m |
-| opus5-low | running | 20/100 | 18 | 0 | 0 | 0 | 2 | 0 | 0 | 2026-09-16T02:40:41.600Z | 2393s | STALE>20m |
-| opus5-high | running | 20/100 | 17 | 0 | 0 | 0 | 2 | 1 | 0 | 2026-09-16T03:17:04.003Z | 210s |  |
-| sol-low | running | 3/100 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T01:37:38.863Z | 6176s | STALE>20m |
-| sol-medium | running | 3/100 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T01:43:54.416Z | 5800s | STALE>20m |
-| sol-high | running | 3/100 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T01:55:04.824Z | 5130s | STALE>20m |
-| sol-xhigh | running | 3/100 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T02:08:55.511Z | 4299s | STALE>20m |
-| astra-low | running | 3/100 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T02:16:07.136Z | 3867s | STALE>20m |
-| astra-medium | running | 3/100 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T02:21:59.828Z | 3515s | STALE>20m |
-| astra-high | running | 3/100 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T02:36:02.176Z | 2672s | STALE>20m |
-| astra-xhigh | running | 3/100 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T02:53:03.292Z | 1651s | STALE>20m |
-| mistral-small4 | completed | 100/100 | 40 | 4 | 0 | 0 | 28 | 28 | 0 | 2026-09-15T19:51:35.873Z | 26939s |  |
+| gemini-low | completed | 100/100 | 85 | 0 | 0 | 0 | 7 | 8 | 0 | 2026-09-16T05:23:13.792Z | 106359s |  |
+| gemini-medium | completed | 100/100 | 79 | 0 | 0 | 0 | 12 | 9 | 0 | 2026-09-16T05:33:39.887Z | 105733s |  |
+| gemini-high | completed | 100/100 | 53 | 0 | 0 | 44 | 2 | 1 | 0 | 2026-09-16T05:56:48.501Z | 104344s |  |
+| luna-low | completed | 100/100 | 39 | 2 | 0 | 0 | 50 | 9 | 0 | 2026-09-16T04:41:07.597Z | 108885s |  |
+| luna-medium | completed | 100/100 | 51 | 2 | 0 | 2 | 36 | 9 | 0 | 2026-09-16T06:30:01.098Z | 102351s |  |
+| luna-high | completed | 100/100 | 43 | 13 | 0 | 1 | 33 | 10 | 0 | 2026-09-16T10:15:28.148Z | 88824s |  |
+| luna-xhigh | completed | 100/100 | 47 | 15 | 0 | 0 | 23 | 15 | 22 | 2026-09-17T09:10:57.932Z | 6295s |  |
+| gpt41 | completed | 100/100 | 64 | 3 | 0 | 0 | 16 | 17 | 0 | 2026-09-15T19:52:04.716Z | 140628s |  |
+| sonnet46-cloud-off | circuit-open | 56/100 | 32 | 10 | 0 | 0 | 10 | 4 | 0 | 2026-09-16T06:53:35.034Z | 100937s | STALE>20m |
+| sonnet46-cloud-low | circuit-open | 29/100 | 14 | 15 | 1 | 0 | 0 | 0 | 0 | 2026-09-16T06:53:46.184Z | 100926s | STALE>20m |
+| sonnet46-cloud-high | circuit-open | 15/100 | 0 | 15 | 0 | 0 | 0 | 0 | 0 | 2026-09-16T06:53:55.961Z | 100917s | STALE>20m |
+| sonnet5-off | completed | 100/100 | 62 | 1 | 0 | 13 | 12 | 12 | 0 | 2026-09-16T20:03:54.209Z | 53518s |  |
+| sonnet5-low | completed | 100/100 | 58 | 0 | 0 | 2 | 18 | 22 | 0 | 2026-09-16T19:58:12.862Z | 53860s |  |
+| sonnet5-high | completed | 100/100 | 70 | 0 | 0 | 13 | 8 | 9 | 0 | 2026-09-16T20:28:42.013Z | 52030s |  |
+| opus5-off | completed | 100/100 | 68 | 0 | 0 | 24 | 4 | 4 | 0 | 2026-09-16T20:19:16.198Z | 52596s |  |
+| opus5-low | completed | 100/100 | 74 | 0 | 0 | 2 | 14 | 10 | 0 | 2026-09-16T20:53:57.119Z | 50515s |  |
+| opus5-high | completed | 100/100 | 63 | 0 | 0 | 24 | 6 | 7 | 0 | 2026-09-16T21:10:25.843Z | 49527s |  |
+| sol-low | completed | 100/100 | 90 | 2 | 0 | 0 | 1 | 7 | 0 | 2026-09-17T08:52:53.609Z | 7379s |  |
+| sol-medium | completed | 100/100 | 94 | 0 | 0 | 0 | 0 | 6 | 0 | 2026-09-16T22:15:45.584Z | 45607s |  |
+| sol-high | completed | 100/100 | 83 | 12 | 0 | 0 | 0 | 5 | 0 | 2026-09-17T06:33:53.700Z | 15719s |  |
+| sol-xhigh | completed | 100/100 | 85 | 10 | 0 | 0 | 0 | 5 | 20 | 2026-09-17T04:26:46.338Z | 23346s |  |
+| astra-low | completed | 100/100 | 100 | 0 | 0 | 0 | 0 | 0 | 0 | 2026-09-17T01:15:20.458Z | 34832s |  |
+| astra-medium | completed | 100/100 | 99 | 1 | 0 | 0 | 0 | 0 | 0 | 2026-09-17T01:00:27.051Z | 35725s |  |
+| astra-high | completed | 100/100 | 68 | 32 | 0 | 0 | 0 | 0 | 0 | 2026-09-17T06:01:45.887Z | 17647s |  |
+| astra-xhigh | circuit-open | 100/100 | 65 | 33 | 0 | 0 | 1 | 1 | 0 | 2026-09-17T08:10:09.598Z | 9943s |  |
+| mistral-small4 | completed | 100/100 | 40 | 4 | 0 | 0 | 28 | 28 | 0 | 2026-09-15T19:51:35.873Z | 140657s |  |
 
 Counts use the latest terminal receipt per document. The 429 column counts suspension events.

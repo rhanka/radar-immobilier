@@ -12,7 +12,7 @@ import { advanceCircuit, artifactPaths, classifyFailure, laneCircuitAction, lane
   resumeDecision, retryAt, updateGlobalStatus, writeImmutable, writeIntent }
   from "./v101-runner-state.mjs";
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
-import { cliUsage, codexCapOption } from "./v101-provider.mjs";
+import { cliUsage, codexCapOption, directRequest } from "./v101-provider.mjs";
 import { armExecutionRoot } from "./score-v101.mjs";
 import { timeoutMsForArm } from "./run-arm.mjs";
 import { circuitClosureFor, selectJudgeDocuments } from "./v101-judge-freeze.mjs";
@@ -65,12 +65,24 @@ test("should keep model identity out of blind judge messages", () => {
   assert.equal(JSON.stringify(messages).includes("claude-opus"), false);
 });
 
+test("should select the newest terminal replay attempt for judging", async () => {
+  const source = await readFile(new URL("./v101-judge-freeze.mjs", import.meta.url), "utf8");
+  assert.match(source, /for \(const attempt of \[4, 3, 2, 1\]\)/u);
+  assert.match(source, /if \(!terminalRecord\) continue/u);
+});
+
 test("should require an explicit cause before judging a circuit-closed gap", () => {
   assert.deepEqual(circuitClosureFor({ arms: { "sonnet46-cloud-high": {
     cause: "network_error", measuredAt: "2026-09-16T04:00:00Z" } } },
   "sonnet46-cloud-high"), { cause: "network_error", measuredAt: "2026-09-16T04:00:00Z" });
   assert.throws(() => circuitClosureFor({ arms: {} }, "sonnet46-cloud-high"),
     /No measured circuit closure/u);
+});
+
+test("should materialize Terra medium effort in the direct OpenAI request", () => {
+  const request = directRequest(judgeConfig("judge-terra"), [{ role: "user", content: "x" }], 32_768);
+  assert.deepEqual(request.body.reasoning, { effort: "medium" });
+  assert.equal(request.body.max_output_tokens, 32_768);
 });
 
 test("should normalize Claude CLI JSON usage", () => {

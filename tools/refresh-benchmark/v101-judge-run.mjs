@@ -11,10 +11,10 @@ const required = (name) => process.env[name]
   || (() => { throw new Error(`${name} is required`); })();
 
 export function judgeConfig(name) {
-  if (name === "judge-terra") return { name, lane: "judge", transport: "codex",
-    provider: "openai", model: "gpt-5.6-terra", effort: "medium", capEnforced: false };
-  if (name === "judge-opus46-thinking") return { name, lane: "judge", transport: "cloud-code",
-    provider: "anthropic", model: "claude-opus-4-6-thinking", effort: null };
+  if (name === "judge-terra") return { name, lane: "judge", transport: "openai-api",
+    provider: "openai", model: "gpt-5.6-terra", effort: "medium" };
+  if (name === "judge-opus46-thinking") return { name, lane: "judge", transport: "anthropic-api",
+    provider: "anthropic", model: "claude-opus-4-6", effort: "medium" };
   throw new Error(`Unknown v101b judge: ${name ?? "N-A"}`);
 }
 

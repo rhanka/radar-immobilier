@@ -4,6 +4,8 @@ import { spawn } from "node:child_process";
 import { endpointPath, safeUsage, textFromOpenAi } from "./v101-probe-lib.mjs";
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+const sanitize = (value) => String(value).replace(/sk-[A-Za-z0-9_-]+|AIza[0-9A-Za-z_-]+|ya29\.[A-Za-z0-9._-]+|eyJ[A-Za-z0-9._-]+/gu,
+  "[redacted]").replace(/\s+/gu, " ").trim().slice(0, 512);
 const limitNames = ["retry-after", "x-ratelimit-limit-requests", "x-ratelimit-limit-tokens",
   "x-ratelimit-remaining-requests", "x-ratelimit-remaining-tokens",
   "x-ratelimit-reset-requests", "x-ratelimit-reset-tokens",
@@ -101,11 +103,12 @@ function directResult(arm, payload) {
     usage: normalizedUsage(payload.usage) };
 }
 
-function directRequest(arm, messages, maxOutputTokens) {
+export function directRequest(arm, messages, maxOutputTokens) {
   if (arm.transport === "openai-api") return {
     url: "https://api.openai.com/v1/responses",
     headers: { authorization: `Bearer ${process.env.OPENAI_API_KEY ?? ""}` },
-    body: { model: arm.model, input: messages, max_output_tokens: maxOutputTokens },
+    body: { model: arm.model, input: messages, max_output_tokens: maxOutputTokens,
+      ...(arm.effort ? { reasoning: { effort: arm.effort } } : {}) },
     credential: process.env.OPENAI_API_KEY,
   };
   if (arm.transport === "anthropic-api") return {
