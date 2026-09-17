@@ -29,6 +29,8 @@
 ## Feedback Loop
 - [x] Owner decision fixes models/transports; llm-mesh-refresh stays pinned at 0.19.2.
 - [x] Independent design reviews requested for transport and durable-state correctness.
+- [x] Exact-model routes only; mesh equivalent-model substitution is disabled for truthful receipts.
+- [ ] External consensus review blocked by automatic approval (private diff export); owner authorization requested.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single existing branch; two independent read-only reviewers.
