@@ -85,18 +85,18 @@ function options(city: string, fx: Awaited<ReturnType<typeof fixture>>, targetDb
 }
 
 describe("refresh 0.18 real storage integration", () => {
-  it("restores Gemini for an incomplete multichunk document after a process restart", async () => {
+  it("restores Astra for an incomplete multichunk document after a process restart", async () => {
     const city = `refresh-resume-${randomUUID()}`;
     const fx = await fixture(city);
     let primaryCalls = 0;
     let fallbackCalls = 0;
     const policy = () => createRefreshModelPolicy({
-      primary: { provider: "openai", model: "gpt-6-astra", effort: "low" },
-      fallback: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
-      timeoutMs: 1000, forceFallback: false,
+      primary: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      fallback: { provider: "openai", model: "gpt-6-astra", effort: "low" },
+      timeoutMs: 1000, forceFallback: false, primaryQualityAttempts: 2,
       createClient(model) {
         return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(input) {
-          if (model.provider === "openai") {
+          if (model.provider === "gemini") {
             primaryCalls++;
             throw Object.assign(new Error("quota"), { status: 429 });
           }
@@ -113,11 +113,11 @@ describe("refresh 0.18 real storage integration", () => {
       const result = await runPvRefresh({ ...configured, documentModels: policy() });
       const state = JSON.parse(new TextDecoder().decode(await store.get(result.stateKey)));
       expect(Object.keys(state.completedChunks)).toHaveLength(2);
-      expect(state.reservedCalls).toBe(6);
+      expect(state.reservedCalls).toBe(9);
       expect(primaryCalls).toBe(1);
       expect(fallbackCalls).toBe(3);
       expect(state.documentModels[fx.sha].at(-1)).toMatchObject({
-        modelUsed: { model: "gemini-3.8-flash" }, status: "completed", fallbackReason: "quota",
+        modelUsed: { model: "gpt-6-astra" }, status: "completed", fallbackReason: "quota",
       });
     } finally { await clean(city); }
   }, 60_000);
@@ -127,11 +127,11 @@ describe("refresh 0.18 real storage integration", () => {
     const fx = await fixture(city);
     let primaryCalls = 0;
     const documentModels = createRefreshModelPolicy({
-      primary: { provider: "openai", model: "gpt-6-astra", effort: "low" },
-      fallback: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
-      timeoutMs: 1000, forceFallback: false,
+      primary: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      fallback: { provider: "openai", model: "gpt-6-astra", effort: "low" },
+      timeoutMs: 1000, forceFallback: false, primaryQualityAttempts: 2,
       createClient(model) {
-        if (model.provider === "gemini") return { ...fx.textClient, async generateJson(input) {
+        if (model.provider === "openai") return { ...fx.textClient, async generateJson(input) {
           return { ...await fx.textClient.generateJson(input), provider: model.provider, model: model.model };
         } };
         return { ...fx.textClient, async generateJson() {
@@ -144,11 +144,11 @@ describe("refresh 0.18 real storage integration", () => {
     try {
       const result = await runPvRefresh(configured);
       const state = JSON.parse(new TextDecoder().decode(await store.get(result.stateKey)));
-      expect(state.reservedCalls).toBe(2);
+      expect(state.reservedCalls).toBe(3);
       expect(state.identity.modelPolicy).toBe(documentModels.policy);
       expect(state.documentModels[fx.sha]).toMatchObject([
-        { modelUsed: { model: "gpt-6-astra", effort: "low" }, status: "failed", failureReason: "quota" },
-        { modelUsed: { model: "gemini-3.8-flash", effort: "low" }, status: "completed", fallbackReason: "quota" },
+        { modelUsed: { model: "gemini-3.8-flash", effort: "low" }, status: "failed", failureReason: "quota" },
+        { modelUsed: { model: "gpt-6-astra", effort: "low" }, status: "completed", fallbackReason: "quota" },
       ]);
       await runPvRefresh(configured);
       expect(primaryCalls).toBe(1);

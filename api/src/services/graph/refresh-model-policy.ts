@@ -10,10 +10,15 @@ export interface RefreshModel {
   readonly model: string;
   readonly effort: string;
 }
-export type RefreshFallbackReason = "quota" | "timeout" | "empty-output" | "transport" | "forced" | "circuit-open";
+export type RefreshFallbackReason = "quota" | "timeout" | "empty-output" | "transport" | "quality" | "forced" | "circuit-open";
+export type RefreshModelTransition = "primary" | "same-model-retry" | "fallback";
 export interface RefreshModelReceipt {
   readonly modelUsed: RefreshModel | null;
   readonly status: "completed" | "failed" | "quality-refused";
+  /** One-based model invocation number for this document. */
+  readonly attempt: number;
+  /** Distinguishes a Gemini retry from a switch to Astra. */
+  readonly transition: RefreshModelTransition;
   readonly fallbackReason?: RefreshFallbackReason;
   readonly failureReason?: RefreshFallbackReason;
   readonly terminalFailure?: true;
@@ -23,12 +28,14 @@ export interface RefreshModelPolicyOptions {
   readonly primary: RefreshModel;
   readonly fallback: RefreshModel;
   readonly forceFallback: boolean;
+  readonly primaryQualityAttempts: number;
   readonly timeoutMs: number;
   readonly signal?: AbortSignal;
   readonly createClient: (model: RefreshModel, signal: AbortSignal) => TextJsonGenerationClient;
 }
 export interface RefreshDocumentModels {
   readonly policy: string;
+  readonly maximumAttempts: number;
   forDocument(docSha: string, record: (receipt: RefreshModelReceipt) => Promise<void>): TextJsonGenerationClient;
   completeDocument(docSha: string): void;
   restoreDocument(docSha: string, receipts: readonly RefreshModelReceipt[]): void;
@@ -46,28 +53,37 @@ export function refreshFallbackReason(error: unknown): RefreshFallbackReason {
   return "transport";
 }
 
-/** One instance per cycle. A fallback sticks to its document, never to a quality refusal. */
+/** One instance per cycle. A fallback sticks to its document after any model switch. */
 export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): RefreshDocumentModels {
   let consecutiveQuotaDocuments = 0;
+  if (!Number.isInteger(options.primaryQualityAttempts) || options.primaryQualityAttempts < 1) {
+    throw new Error("Refresh primary quality attempts must be positive");
+  }
   let circuitOpen = false;
-  const documents = new Map<string, { reason?: RefreshFallbackReason; counted: boolean; terminal?: boolean }>();
+  const documents = new Map<string, {
+    reason?: RefreshFallbackReason; counted: boolean; terminal?: boolean; attempts: number; primaryQualityCalls: number;
+  }>();
   return {
-    policy: JSON.stringify({ version: 1, primary: options.primary, fallback: options.fallback,
-      forceFallback: options.forceFallback, quotaThreshold: 3 }),
+    policy: JSON.stringify({ version: 2, primary: options.primary, fallback: options.fallback,
+      primaryQualityAttempts: options.primaryQualityAttempts, forceFallback: options.forceFallback, quotaThreshold: 3 }),
+    maximumAttempts: options.primaryQualityAttempts + 1,
     completeDocument(docSha) {
       const document = documents.get(docSha);
       if (document && !document.reason) consecutiveQuotaDocuments = 0;
     },
     restoreDocument(docSha, receipts) {
+      const primaryQualityCalls = receipts.filter((receipt) => receipt.modelUsed?.provider === options.primary.provider
+        && receipt.modelUsed.model === options.primary.model && receipt.status === "quality-refused").length;
       const reason = receipts.find((receipt) => receipt.fallbackReason)?.fallbackReason
-        ?? receipts.find((receipt) => receipt.status === "failed")?.failureReason;
+        ?? receipts.find((receipt) => receipt.status === "failed")?.failureReason
+        ?? (primaryQualityCalls >= options.primaryQualityAttempts ? "quality" : undefined);
       documents.set(docSha, { ...(reason ? { reason } : {}), counted: reason !== undefined,
-        terminal: receipts.some((receipt) => receipt.terminalFailure) });
+        terminal: receipts.some((receipt) => receipt.terminalFailure), attempts: receipts.length, primaryQualityCalls });
     },
     forDocument(docSha, record) {
       let document = documents.get(docSha);
       if (!document) {
-        document = { counted: false,
+        document = { counted: false, attempts: 0, primaryQualityCalls: 0,
           ...(options.forceFallback ? { reason: "forced" as const }
             : circuitOpen ? { reason: "circuit-open" as const } : {}) };
         documents.set(docSha, document);
@@ -82,7 +98,9 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
           if (selected.terminal) throw Object.assign(new Error("Refresh document has a terminal receipt"),
             { code: "REFRESH_TERMINAL_STATE" });
           const { outputPath, ...generationInput } = input;
-          const attempt = async (model: RefreshModel, fallbackReason?: RefreshFallbackReason) => {
+          const attempt = async (model: RefreshModel, transition: RefreshModelTransition,
+            fallbackReason?: RefreshFallbackReason) => {
+            const attemptNumber = ++selected.attempts;
             const controller = new AbortController();
             const abort = () => controller.abort(options.signal?.reason);
             options.signal?.addEventListener("abort", abort, { once: true });
@@ -137,6 +155,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
             const modelUsed = result ? result.provider === model.provider && result.model === model.model
               ? { ...model, model: result.model } : null : model;
             await record({ modelUsed, status: qualityRefused ? "quality-refused" : failed ? "failed" : "completed",
+              attempt: attemptNumber, transition,
               ...(terminalFailure ? { terminalFailure: true as const } : {}),
               ...(fallbackReason ? { fallbackReason } : {}),
               ...(failed && !qualityRefused ? { failureReason: reason } : {}), latencyMs: Date.now() - startedAt });
@@ -151,19 +170,23 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
             return { ...attempted.result!, ...(outputPath ? { outputPath } : {}) };
           };
           if (!selected.reason) {
-            const primary = await attempt(options.primary);
-            if (!primary.failed || primary.qualityRefused || primary.terminalFailure) {
-              if (primary.failed) throw primary.failure;
-              return finish(primary);
-            }
-            selected.reason = primary.reason;
+            let primary;
+            do {
+              primary = await attempt(options.primary,
+                selected.primaryQualityCalls === 0 ? "primary" : "same-model-retry");
+              if (!primary.failed) return finish(primary);
+              if (!primary.qualityRefused || primary.terminalFailure) break;
+              selected.primaryQualityCalls += 1;
+            } while (selected.primaryQualityCalls < options.primaryQualityAttempts);
+            if (primary.terminalFailure) throw primary.failure;
+            selected.reason = primary.qualityRefused ? "quality" : primary.reason;
             if (!selected.counted) {
               selected.counted = true;
               consecutiveQuotaDocuments = primary.reason === "quota" ? consecutiveQuotaDocuments + 1 : 0;
               if (consecutiveQuotaDocuments >= 3) circuitOpen = true;
             }
           }
-          const fallback = await attempt(options.fallback, selected.reason);
+          const fallback = await attempt(options.fallback, "fallback", selected.reason);
           if (fallback.failed) throw fallback.failure;
           return finish(fallback);
         },
