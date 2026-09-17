@@ -21,7 +21,7 @@ cp "$input" "$staged"
 printf '{"input":%s,"ids":%s,"origin":%s,"output":%s}\n' \
   '"/workspace/api/src/scripts/fixtures/.prove-refresh-signals-input.ndjson"' \
   "$(printf %s "$2" | jq -Rs .)" \
-  "$(printf %s "${3:-https://immo-preprod.sent-tech.ca}" | jq -Rs .)" \
+  "$(printf %s "${3:-https://preprod.immo.sent-tech.ca}" | jq -Rs .)" \
   '"/workspace/api/src/scripts/fixtures/.prove-refresh-signals-output.md"' >"$request"
 make test-api SCOPE=src/scripts/prove-refresh-signals.test.ts ENV="${ENV:-test-signals-proof-703}"
 cat "$rendered"
