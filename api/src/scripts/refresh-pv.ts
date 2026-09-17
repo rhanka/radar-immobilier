@@ -97,7 +97,7 @@ async function main(): Promise<void> {
     "refresh-pv: starting");
   try {
     const result = await runPvRefresh({ citySlug: city, store, db, profileContext,
-      textClient: documentModels.forDocument("unused", async () => {}), documentModels,
+      documentModels,
       onModelReceipt(docSha, chunkId, receipt) {
         modelCalls += 1;
         logger.info({ docSha, chunkId, modelCalls, ...receipt }, "refresh-pv: model receipt");
