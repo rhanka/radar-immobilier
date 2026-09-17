@@ -241,3 +241,32 @@ safety bias.
 # Déploiement du rafraîchissement Gemini low puis Astra low
 
 Le CronJob PV utilise Gemini 3.8 Flash low avec deux essais maximum sur refus de qualité du contrat v9, puis Astra low comme repli. Les incidents transport, quota/429, délai et flux vide basculent immédiatement vers Astra. `REFRESH_FORCE_FALLBACK=1` est réservé aux recettes. Les deux comptes doivent être enrôlés sous le même owner scope du Secret runtime dans le PVC keyring inscriptible. L’owner enrôle les comptes localement (`make enroll-cloud-code` et `make enroll-codex`); pour un PVC déjà initialisé, la lane k8s rend puis applique le Job éphémère `make import-keyring-account`, sans remplacer l’autre compte. Pour un PVC neuf, le Secret bootstrap contient les deux comptes avant le premier bootstrap. La validation préproduction (purge `refresh/018/*`, cycle complet, mesures par document et liens B′) et la promotion par variable GitHub puis tag `v*` sont documentées dans [`production-acceptance.md`](../../docs/reviews/refresh-cascade/production-acceptance.md). Une fusion déploie la préproduction; la production reste protégée par `REFRESH_CRONJOB_PROD_ENABLED=true`.
+## Scheduled data backup and restore rehearsal (#698)
+
+`deploy/k8s/41-db-backup-cronjob.yaml` is the durable logical backup for the
+radar PostgreSQL/PostGIS database, including Steve's annotations. It takes a
+PostgreSQL 16 custom dump, records SHA-256 and a manifest, and uploads the
+three-object set to the OVH S3 backup bucket. It retains the newest **7 daily,
+4 weekly, and 1 monthly** complete sets per environment. Retention values reject
+non-numeric input; its portable `awk` deliberately avoids `{n}` intervals.
+
+The base (production) CronJob is `suspend: true`. The preproduction overlay
+activates it and uses its distinct bucket. An owner provisions
+`radar-backup-s3-credentials` out-of-band with an identity restricted to that
+environment's `postgres/` prefix; no value belongs in Git.
+
+The isolated rehearsal Job is `deploy/k8s/42-db-restore-verify-job.yaml`. It is
+not a permanent resource and its placeholder backup stem is fail-loud. On owner
+GO, the k8s lane patches `BACKUP_OBJECT`, applies it to preprod, then reads its
+report:
+
+```sh
+kubectl kustomize --load-restrictor LoadRestrictionsNone deploy/k8s/db-restore-verify | kubectl -n radar-immobilier-preprod apply -f -
+kubectl -n radar-immobilier-preprod wait --for=condition=complete job/radar-db-restore-verify --timeout=3700s
+kubectl -n radar-immobilier-preprod logs job/radar-db-restore-verify -c restore-and-verify
+```
+
+It verifies the downloaded SHA-256, restores with `pg_restore --exit-on-error`
+into `radar_restore_verify` (never the source database), compares source and scratch table-count lists, and reports the hash and table
+total. It drops/recreates only that scratch database; a
+future production swap is out of scope.
