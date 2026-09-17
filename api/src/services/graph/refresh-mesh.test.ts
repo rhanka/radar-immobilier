@@ -160,6 +160,7 @@ describe("refresh mesh", () => {
 
   it("should fence planner retries to the job attempt budget", () => {
     expect(createRefreshRoutePolicyProfiles(2).active()?.policy.maxAttempts).toBe(2);
+    expect(createRefreshRoutePolicyProfiles(1).active()?.policy.allowEquivalentModels).toBe(false);
     expect(() => createRefreshRoutePolicyProfiles(9)).toThrow(
       "maxAttempts must be an integer between 1 and 8",
     );
