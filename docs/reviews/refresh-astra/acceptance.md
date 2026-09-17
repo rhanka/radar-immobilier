@@ -22,7 +22,16 @@ acceptance was 0/2: the local harness reset S3 baselines but retained earlier
 Astra PG graphs, so the existing regression guard stopped projection. This
 was a test-isolation error; no product guard was weakened. Corrected campaigns
 use separate initially empty test databases and S3 buckets for primary and
-forced fallback. Final measurements are recorded after they complete.
+forced fallback.
+
+Corrected real campaigns: [primary receipt](receipt-primary.json) **2/2**,
+Astra low, 171776ms and 123815ms; [forced receipt](receipt-fallback.json)
+**2/2**, Gemini low, 25018ms and 10707ms, zero Astra calls. All six durable
+stages completed for each document, including S3 publication and PG projection.
+These are document/profile/provenance proofs, not a municipal-opportunity F1
+benchmark or Kubernetes scheduling proof. Each receipt names the actual code
+commit at launch; later terminal-refusal and resumed-counter hardening are
+covered by regression tests, not relabelled as extra live calls.
 
 Verification commands use `ENV=test-astra-703`, no host service ports, with
 API/UI/Maildev reserved as 8893/5393/1193. `make typecheck` and `make lint`
