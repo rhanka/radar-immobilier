@@ -1,0 +1,413 @@
+<!doctype html><html><head><meta charset="utf-8"><base href="file:///home/antoinefa/src/radar-immobilier/.lanes/conductor/docs/reports/"><title>Enquête coûts immo & geo — août–septembre 2026</title><style>
+@page { size: A4; margin: 16mm 14mm 18mm 14mm; }
+* { box-sizing: border-box; }
+body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; line-height: 1.42; font-size: 10.5px; }
+h1 { font-size: 28px; line-height: 1.12; color: #0b1728; margin: 0 0 12px; padding-bottom: 10px; border-bottom: 3px solid #2563eb; }
+h2 { font-size: 18px; color: #10203a; margin: 26px 0 10px; padding-top: 6px; border-top: 1px solid #d8dee9; break-after: avoid; }
+h3 { font-size: 13.5px; color: #1d3557; margin: 18px 0 8px; break-after: avoid; }
+h4 { font-size: 12px; margin: 14px 0 6px; break-after: avoid; }
+p { margin: 6px 0; }
+ul, ol { margin-top: 5px; padding-left: 20px; }
+li { margin: 2px 0; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0 14px; font-size: 9px; break-inside: avoid; }
+th, td { border: 1px solid #cbd5e1; padding: 4px 5px; vertical-align: top; }
+th { background: #eef4ff; color: #10203a; font-weight: 700; }
+blockquote { border-left: 4px solid #93c5fd; background: #f8fbff; margin: 10px 0; padding: 8px 10px; color: #334155; }
+code { font-family: "SFMono-Regular", Consolas, monospace; background: #f1f5f9; padding: 1px 3px; border-radius: 3px; font-size: 0.9em; }
+pre { background: #0f172a; color: #e2e8f0; padding: 10px; border-radius: 6px; overflow: hidden; font-size: 8.5px; }
+img { display: block; max-width: 100%; max-height: 132mm; margin: 8px auto 16px; border: 1px solid #d7dde8; border-radius: 8px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12); break-inside: avoid; }
+hr { border: 0; border-top: 1px solid #d8dee9; margin: 18px 0; }
+strong { color: #0f172a; }
+a { color: #1d4ed8; text-decoration: none; }
+.cover-note { font-size: 10px; color: #64748b; margin-bottom: 18px; }
+table { break-inside: auto; } tr { break-inside: avoid; } thead { display: table-header-group; } td code { overflow-wrap: anywhere; } a { overflow-wrap: anywhere; }</style></head><body><h1>Coûts immo &amp; geo — 12 août → 10 septembre 2026</h1>
+<p><strong>Période</strong> : <code>2026-08-12T00:00:00-04:00</code> → <code>2026-09-10T23:59:59-04:00</code>, soit 30 jours.<br><strong>Établi le 11 septembre 2026</strong> : montants en CAD, infrastructure et abonnements LLM séparés. Les coûts produits restent des allocations calculées, pas des lignes de facture fournisseur par tenant.</p>
+<blockquote>
+<p><strong>Résultat corrigé : 257,63 CAD pour immo + geo</strong>, contre 260,78 CAD dans la première version. Le dénominateur infrastructure couvrait déjà tout le cluster ; la correction principale vient du lissage de deux instantanés complets au lieu d&#39;extrapoler un pic CPU préprod. Le dédoublonnage des messages Claude réduit fortement les volumes publiés, mais change peu le coût alloué parce qu&#39;il réduit aussi le pic de capacité commun.</p>
+</blockquote>
+<h2>Résumé exécutif — ancien vs corrigé</h2>
+<table>
+<thead>
+<tr>
+<th>Poste</th>
+<th align="right">immo — ancien</th>
+<th align="right">immo — corrigé</th>
+<th align="right">geo — ancien</th>
+<th align="right">geo — corrigé</th>
+<th align="right">Total ancien</th>
+<th align="right"><strong>Total corrigé</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Infrastructure OVH [estimé]</td>
+<td align="right">40,27</td>
+<td align="right"><strong>36,74</strong></td>
+<td align="right">5,82</td>
+<td align="right"><strong>6,15</strong></td>
+<td align="right">46,08</td>
+<td align="right"><strong>42,89</strong></td>
+</tr>
+<tr>
+<td>Abonnements LLM, marge ×1,15</td>
+<td align="right">117,71</td>
+<td align="right"><strong>118,26</strong></td>
+<td align="right">96,98</td>
+<td align="right"><strong>96,48</strong></td>
+<td align="right">214,70</td>
+<td align="right"><strong>214,74</strong></td>
+</tr>
+<tr>
+<td><strong>Total période</strong></td>
+<td align="right"><strong>157,98</strong></td>
+<td align="right"><strong>155,00</strong></td>
+<td align="right"><strong>102,80</strong></td>
+<td align="right"><strong>102,64</strong></td>
+<td align="right"><strong>260,78</strong></td>
+<td align="right"><strong>257,63 CAD</strong></td>
+</tr>
+</tbody></table>
+<p>Les totaux sont calculés avant arrondi ; l&#39;addition des cellules arrondies peut différer de 0,01 CAD.</p>
+<ul>
+<li><strong>Écart total : −3,15 CAD (−1,2 %).</strong> L&#39;infrastructure baisse de 3,19 CAD ; le LLM augmente de 0,04 CAD après correction des volumes et des pics.</li>
+<li><strong>Volumes LLM corrigés</strong> : immo <strong>12,37 Md tokens</strong> au lieu de 32,21 Md ; geo <strong>10,09 Md</strong> au lieu de 26,54 Md.</li>
+<li><strong>Périmètre immo vérifié</strong> : le calcul agent-stats ne contient que le dépôt <code>radar-immobilier</code>. <code>geo</code> et <code>geo-quebec</code> appartiennent au groupe geo ; les dépôts plateforme sont séparés.</li>
+</ul>
+<h2>1. Infrastructure Kubernetes OVH</h2>
+<h3>1.1 Pool facturable de la période</h3>
+<p>Le pool nœuds OVH est proratisé à <strong>129,631836 CAD</strong> pour la fenêtre. Le relevé d&#39;août expose 122,448322 CAD de nœuds b3-8 ; celui de septembre 53,798241 CAD, arrêté le 11 septembre à 15:00:13Z.</p>
+<table>
+<thead>
+<tr>
+<th>Composante</th>
+<th>Calcul</th>
+<th align="right">Pool nœuds CAD</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>12→31 août, 20 jours</td>
+<td>122,448322 × 20/31</td>
+<td align="right">78,998917</td>
+</tr>
+<tr>
+<td>1→10 septembre, 10 jours</td>
+<td>53,798241 × 10/10,625151192</td>
+<td align="right">50,632918</td>
+</tr>
+<tr>
+<td><strong>Pool période</strong></td>
+<td>somme avant arrondi</td>
+<td align="right"><strong>129,631836</strong></td>
+</tr>
+</tbody></table>
+<p>Les services S3, registry, load balancers et fournisseurs de tuiles ne sont pas ventilés dans ce montant centré sur nœuds + PVC. Leur absence du tableau ne signifie pas un coût nul.</p>
+<h3>1.2 Vérification du dénominateur : tout le cluster</h3>
+<p>Deux exécutions bornées ont été contrôlées avec <code>kubectl top pods -A</code> — limite de 30 secondes et <code>--request-timeout=20s</code>. <strong>Les deux dénominateurs contiennent les 22 namespaces retournés par le cluster, sans filtrage préalable par client.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Groupe</th>
+<th>Namespaces inclus dans le dénominateur</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>radar</td>
+<td><code>radar-immobilier</code>, <code>radar-immobilier-preprod</code></td>
+</tr>
+<tr>
+<td>geo</td>
+<td><code>geo</code>, <code>geo-preprod</code></td>
+</tr>
+<tr>
+<td>matchid</td>
+<td><code>matchid-dev</code>, <code>matchid-prod</code></td>
+</tr>
+<tr>
+<td>openerp</td>
+<td><code>openerp-dev</code>, <code>openerp-prod</code></td>
+</tr>
+<tr>
+<td>sentropic</td>
+<td><code>sentropic</code>, <code>sentropic-preprod</code>, <code>sentropic-remote</code></td>
+</tr>
+<tr>
+<td>autres tenants</td>
+<td><code>h2a-mcp</code>, <code>mcp-wave</code>, <code>nc-fullstack</code>, <code>pokemon-cards</code>, <code>transpose-cv</code></td>
+</tr>
+<tr>
+<td>plateforme cluster</td>
+<td><code>cert-manager</code>, <code>keda</code>, <code>kube-system</code>, <code>nfs-server</code>, <code>sealed-secrets</code>, <code>traefik</code></td>
+</tr>
+</tbody></table>
+<p>Le soupçon d&#39;un dénominateur limité à radar+geo n&#39;est donc <strong>pas confirmé</strong> : matchid, openerp, sentropic et les autres workloads participaient déjà aux totaux de <strong>319 mCPU / 6 021 MiB</strong>, puis <strong>259 mCPU / 6 024 MiB</strong>.</p>
+<h3>1.3 Deux instantanés complets et clé retenue</h3>
+<p>La clé d&#39;allocation reste <code>(part CPU + part RAM) / 2</code>. Le premier rapport extrapolait le premier relevé à tout le mois. Le second relevé, effectué environ trois heures plus tard, montre que radar préprod est passé de <strong>86 à 42 mCPU</strong>, tandis que sa RAM reste à <strong>957 MiB</strong>. Le premier relevé captait notamment MinIO à <strong>76 mCPU</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Mesure</th>
+<th align="right">Cluster CPU/RAM</th>
+<th align="right">Clé immo</th>
+<th align="right">Clé geo</th>
+<th align="right">Infra immo, nœuds+PVC</th>
+<th align="right">Infra geo, nœuds+PVC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Instantané initial</td>
+<td align="right">319 m / 6 021 MiB</td>
+<td align="right">28,7221 %</td>
+<td align="right">4,2424 %</td>
+<td align="right">40,27</td>
+<td align="right">5,82</td>
+</tr>
+<tr>
+<td>Nouveau relevé borné</td>
+<td align="right">259 m / 6 024 MiB</td>
+<td align="right">23,2752 %</td>
+<td align="right">4,7608 %</td>
+<td align="right">33,21</td>
+<td align="right">6,49</td>
+</tr>
+<tr>
+<td><strong>Moyenne retenue [estimé]</strong></td>
+<td align="right">deux dénominateurs complets</td>
+<td align="right"><strong>25,9986 %</strong></td>
+<td align="right"><strong>4,5016 %</strong></td>
+<td align="right"><strong>36,74</strong></td>
+<td align="right"><strong>6,15</strong></td>
+</tr>
+</tbody></table>
+<p>La moyenne simple des deux clés évite de choisir le relevé le plus favorable. Elle reste un proxy : faute de télémétrie mensuelle conservée, la fourchette observée est <strong>33,21–40,27 CAD pour immo</strong> et <strong>5,82–6,49 CAD pour geo</strong>. Les deux relevés du 11 septembre (15:14Z et 18:13Z) sont <strong>postérieurs à la fin de fenêtre</strong> (11 septembre 03:59:59Z) : ils servent de proxy, pas de mesure intra-période.</p>
+<p><strong>Décomposition prod / préprod de la clé immo.</strong> Le namespace <code>radar-immobilier-preprod</code> porte <strong>21,43 points sur 28,72</strong> au premier relevé et <strong>16,05 points sur 23,28</strong> au second, soit en moyenne <strong>18,74 %</strong> pour la préprod contre <strong>7,26 %</strong> pour la production seule (7,30 % puis 7,22 %). La production immo seule vaut donc <strong>≈ 10,04 CAD</strong> (7,26 % × 129,63 + 0,63 de PVC prod). Le rapport P−1 ne comptait aucune préprod (namespace créé le 16 août) : le passage de 8,94 à 36,74 CAD reflète l&#39;inclusion de la préprod et le passage du pool de 2 nœuds (P−1) à 3 nœuds au relevé du 11 septembre, pas une dérive de la production. L&#39;imputation de la préprod au poste immo est un *<em><strong>décision owner du 11 septembre : la préproduction est facturée au client</strong> (la décomposition prod/préprod reste indicative)</em>*, pas une mesure.</p>
+<h3>1.4 Stockage direct et allocation corrigée</h3>
+<p>Le tarif block utilisé est <strong>0,000088 CAD/GiB·h</strong>. Les PVC actuels sont connus ; leur historique de capacité n&#39;est pas reconstitué heure par heure.</p>
+<table>
+<thead>
+<tr>
+<th>Produit / environnement</th>
+<th>PVC retenus</th>
+<th align="right">Coût [estimé]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo prod</td>
+<td>MinIO 5 Gi + Postgres 5 Gi, 720 h</td>
+<td align="right">0,633600</td>
+</tr>
+<tr>
+<td>immo préprod</td>
+<td>MinIO 40 Gi + Postgres 5 Gi, 606,038889 h depuis le 16 août</td>
+<td align="right">2,399914</td>
+</tr>
+<tr>
+<td>geo prod</td>
+<td>PostGIS 5 Gi, 720 h</td>
+<td align="right">0,316800</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">Nœuds, clé moyenne × 129,631836</th>
+<th align="right">Stockage direct</th>
+<th align="right"><strong>Infrastructure corrigée</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">33,702491</td>
+<td align="right">3,033514</td>
+<td align="right"><strong>36,736005 CAD</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">5,835546</td>
+<td align="right">0,316800</td>
+<td align="right"><strong>6,152346 CAD</strong></td>
+</tr>
+<tr>
+<td><strong>immo + geo</strong></td>
+<td align="right">39,538037</td>
+<td align="right">3,350314</td>
+<td align="right"><strong>42,888351 CAD</strong></td>
+</tr>
+</tbody></table>
+<p>Le stockage immo peut être surestimé : les 40 GiB de MinIO préprod sont appliqués à toute sa durée dans la fenêtre alors que le journal mentionne des redimensionnements début septembre.</p>
+<h2>2. Abonnements IA et agents LLM</h2>
+<h3>2.1 Périmètre, fenêtre et formule</h3>
+<p>La relance agent-stats utilise exactement :</p>
+<ul>
+<li>groupe <strong>immo</strong> : dépôt <code>radar-immobilier</code> seulement ;</li>
+<li>groupe <strong>geo</strong> : dépôts <code>geo</code> et <code>geo-quebec</code> ;</li>
+<li>groupe <strong>plateforme</strong> : séparé, donc non imputé à immo ou geo ;</li>
+<li>fenêtre courante : 12 août→10 septembre inclus ; fenêtre précédente : 13 juillet→9 août inclus ;</li>
+<li>horizon de capacité : 4 mai→11 septembre ; pic glissant de sept jours calculé séparément pour Claude et Codex ;</li>
+<li>forfaits repris du rapport précédent : 2 sièges Claude à 200 USD/mois et 1 abonnement ChatGPT Pro à 200 USD/mois pour les sessions Codex, change 1,37 CAD/USD ; marge <strong>×1,15 sur le LLM seulement</strong>.</li>
+</ul>
+<p>Les 16 009 fichiers indexés ont 16 009 chemins uniques. Aucun transcript ni aucune session n&#39;est attribué simultanément aux groupes immo, geo et plateforme : <strong>0 session croisée, 0 token croisé</strong> (sortie de <code>month-token-audit.mjs</code> déposée sous <code>.remote/month-evidence/token-audit-scope.txt</code>).</p>
+<h3>2.2 Double comptage des messages Claude</h3>
+<p>Le parseur comptait une ligne <code>assistant</code> comme un tour. Dans les transcripts Claude, le même <code>message.id</code> peut être répété pour plusieurs blocs de contenu ou d&#39;outil avec les mêmes compteurs d&#39;usage. Le contrôle complet des 342 fichiers Claude donne :</p>
+<table>
+<thead>
+<tr>
+<th>Contrôle Claude</th>
+<th align="right">Valeur</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Lignes parcourues</td>
+<td align="right">1 464 036</td>
+</tr>
+<tr>
+<td>Enregistrements assistant avec usage</td>
+<td align="right">404 619</td>
+</tr>
+<tr>
+<td>Messages uniques (<code>fichier</code>, <code>message.id</code>)</td>
+<td align="right">173 140</td>
+</tr>
+<tr>
+<td>Enregistrements répétés retirés</td>
+<td align="right">231 479</td>
+</tr>
+<tr>
+<td>Doublons avec usage divergent</td>
+<td align="right">27, valeur composante par composante maximale retenue</td>
+</tr>
+<tr>
+<td>Lignes malformées</td>
+<td align="right">5, ignorées comme par le parseur courant</td>
+</tr>
+</tbody></table>
+<p>Le dédoublonnage s&#39;effectue par couple <strong>fichier + <code>message.id</code></strong>, ce qui évite de fusionner deux sessions différentes portant un identifiant semblable. Côté Codex, les identifiants de session de l&#39;index sont uniques ; un contrôle des événements identiques réduit seulement le pic historique et le volume immo de façon marginale.</p>
+<h3>2.3 Volumes et pics corrigés</h3>
+<table>
+<thead>
+<tr>
+<th>Groupe / capacité</th>
+<th align="right">Claude ancien</th>
+<th align="right">Claude corrigé</th>
+<th align="right">Codex ancien</th>
+<th align="right">Codex corrigé</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pic capacité 7 j</td>
+<td align="right">40 092 898 291</td>
+<td align="right"><strong>15 121 217 650</strong></td>
+<td align="right">35 407 501 297</td>
+<td align="right"><strong>32 217 805 325</strong></td>
+</tr>
+<tr>
+<td>immo, période</td>
+<td align="right">31 943 473 332</td>
+<td align="right"><strong>12 098 039 262</strong></td>
+<td align="right">268 382 392</td>
+<td align="right"><strong>268 072 226</strong></td>
+</tr>
+<tr>
+<td>geo, période</td>
+<td align="right">26 318 264 265</td>
+<td align="right"><strong>9 870 054 358</strong></td>
+<td align="right">220 024 915</td>
+<td align="right"><strong>220 024 915</strong></td>
+</tr>
+</tbody></table>
+<p>Le pic Claude reste placé sur <strong>30 août→5 septembre</strong> après correction ; le pic Codex reste sur <strong>4→10 mai</strong>. La fenêtre du pic n&#39;a donc pas été déplacée pour modifier l&#39;allocation.</p>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">Volume total ancien</th>
+<th align="right"><strong>Volume total corrigé</strong></th>
+<th align="right">Variation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">32,21 Md</td>
+<td align="right"><strong>12,37 Md</strong></td>
+<td align="right">−61,6 %</td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">26,54 Md</td>
+<td align="right"><strong>10,09 Md</strong></td>
+<td align="right">−62,0 %</td>
+</tr>
+</tbody></table>
+<h3>2.4 Allocation LLM corrigée</h3>
+<p>L&#39;allocation projette d&#39;abord la capacité de la fenêtre (<code>pic 7 j × 30/7</code>), puis applique la part <code>tokens produit / capacité 30 j</code> au forfait mensuel, au change et à la marge. Comme le même défaut gonflait à la fois les numérateurs Claude et leur dénominateur commun, la chute des volumes ne produit pas une chute équivalente des dollars.</p>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">LLM ancien</th>
+<th align="right"><strong>LLM corrigé</strong></th>
+<th align="right">Écart</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">117,71</td>
+<td align="right"><strong>118,259451</strong></td>
+<td align="right">+0,55</td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">96,98</td>
+<td align="right"><strong>96,483708</strong></td>
+<td align="right">−0,50</td>
+</tr>
+<tr>
+<td><strong>immo + geo</strong></td>
+<td align="right"><strong>214,70</strong></td>
+<td align="right"><strong>214,743159 CAD</strong></td>
+<td align="right"><strong>+0,04</strong></td>
+</tr>
+</tbody></table>
+<p>La fenêtre précédente recalculée sur le corpus actuellement disponible vaut <strong>113,436497 CAD</strong>, soit 4,05 CAD/j contre 7,16 CAD/j sur la période courante : <strong>+76,7 %</strong>. La comparaison avec le montant P−1 publié de 172,65 CAD donne <strong>+16,1 % par jour</strong>. Cette divergence interdit de remplacer rétroactivement le rapport précédent sans ses journaux et règles de parsing d&#39;origine.</p>
+<h2>3. Total facturable corrigé</h2>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">Infrastructure [estimé]</th>
+<th align="right">LLM ×1,15</th>
+<th align="right"><strong>Total</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">36,736005</td>
+<td align="right">118,259451</td>
+<td align="right"><strong>154,995456 CAD</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">6,152346</td>
+<td align="right">96,483708</td>
+<td align="right"><strong>102,636054 CAD</strong></td>
+</tr>
+<tr>
+<td><strong>immo + geo</strong></td>
+<td align="right"><strong>42,888351</strong></td>
+<td align="right"><strong>214,743159</strong></td>
+<td align="right"><strong>257,631510 CAD</strong></td>
+</tr>
+</tbody></table>
+<p>Le coût corrigé est donc <strong>257,63 CAD</strong>, soit <strong>8,59 CAD/j</strong> sur 30 jours.</p>
+<h2>4. Cause de l&#39;écart et limites</h2>
+<ol>
+<li><strong>Le dénominateur cluster n&#39;était pas incomplet.</strong> Les anciens totaux incluaient déjà radar, geo, matchid, openerp, sentropic, les autres tenants et les namespaces système.</li>
+<li><strong>L&#39;instantané initial sur-attribuait immo.</strong> Radar préprod consommait 86 mCPU, dont 76 mCPU pour MinIO, contre 42 mCPU au second relevé. La moyenne des deux mesures complètes ramène la clé immo de 28,72 % à 26,00 %.</li>
+<li><strong>La part geo remonte légèrement.</strong> Sa consommation est stable alors que le total CPU cluster baisse ; sa clé moyenne passe de 4,24 % à 4,50 %.</li>
+<li><strong>Les volumes Claude étaient comptés par enregistrement, pas par message unique.</strong> Le dédoublonnage retire 231 479 répétitions. L&#39;effet financier est faible parce que le pic de capacité commun était gonflé par le même mécanisme.</li>
+<li><strong>L&#39;infrastructure demeure estimée.</strong> Deux instantanés du 11 septembre ne remplacent pas une série temporelle couvrant les 30 jours. La fourchette est publiée pour rendre cette incertitude visible.</li>
+<li><strong>La reproduction historique reste non conforme.</strong> Les journaux accessibles aujourd&#39;hui ne reproduisent pas au seuil de 0,1 % les montants P−1 publiés ; les comparaisons à cette période sont donc signalées séparément.</li>
+<li><strong>La préprod pèse plus que la prod dans l&#39;infra immo.</strong> Sur la clé moyenne de 26,00 %, la préprod en porte 18,74 points et la production 7,26 points ; immo prod seule ≈ 10,04 CAD. Le rapport P−1 ne comptait aucune préprod. L&#39;imputation de la préprod au client est un choix à trancher par l&#39;owner, pas une mesure.</li>
+</ol>
+<hr>
+<p><em>Sources : relevés OVH d&#39;août et septembre 2026 ; deux inventaires complets <code>kubectl top pods -A</code> bornés et leurs métadonnées sous <code>.remote/month-evidence/</code> ; inventaire PVC ; agent-stats relancé avec groupes et fenêtres explicites ; audit exhaustif des <code>message.id</code> Claude et contrôle des sessions Codex (<code>token-audit-scope.txt</code>). Aucun HTML/PDF n&#39;est généré par cette révision.</em></p>
+</body></html>
