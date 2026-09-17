@@ -8,4 +8,4 @@ target-ref: 7bf2d17f5f30236879cd6eb91353ae253a28c866
 lens: runtime correctness
 ---
 
-Launch rejected before the reviewer started. No verdict.
+Lancement refusé avant démarrage du relecteur. Aucun verdict.
