@@ -1,0 +1,340 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "label": "Procès-verbal de la séance ordinaire du 13 avril 2026 - Stanstead-Est",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "review_status": "validated",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "date": "2026-04-13",
+      "municipality": "stanstead-est",
+      "url": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL\nSÉANCE RÉGULIÈRE DU CONSEIL MUNICIPAL\n13 avril 2026 – 19 h 30, réunion CM2026-04"
+        }
+      ]
+    },
+    {
+      "id": "event-res-2026-04-03",
+      "label": "Appui demande CPTAQ Mélanie Banville - Lot 6 374 262",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "demandeur": "Mélanie Banville",
+      "municipality": "stanstead-est",
+      "resolution": "2026-04-03",
+      "resolutionRef": "Rés. 2026-04-03",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "description": "Appui à la demande de Mélanie Banville auprès de la CPTAQ pour l'acquisition d'une superficie d'environ 54 acres du lot 6 374 262 à des fins d'exploitation agricole.",
+      "no_lot": "6374262",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262."
+        }
+      ]
+    },
+    {
+      "id": "event-res-2026-04-04",
+      "label": "Appui demande CPTAQ nouvelle résidence - Lot 5 417 438",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "validated",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "municipality": "stanstead-est",
+      "resolution": "2026-04-04",
+      "resolutionRef": "Rés. 2026-04-04",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "description": "Appui à la demande déposée à la CPTAQ par le propriétaire du lot 5 417 438 (2710 Route 141) visant à autoriser la construction d'une nouvelle résidence et démolition de la résidence actuelle.",
+      "no_lot": "5417438",
+      "superficie_m2": 4000,
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence dans la portion nord-ouest du"
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-45064",
+      "label": "Demande CPTAQ 45064 - LET Lot 2 935 698",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "node_type": "Constraint",
+      "status": "validated",
+      "review_status": "validated",
+      "constraintType": "cptaq",
+      "municipality": "stanstead-est",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "resolution": "2026-03-21",
+      "resolutionRef": "Rés. 2026-03-21",
+      "description": "Demande d'autorisation CPTAQ dossier no 45064 pour agrandissement du lieu d'enfouissement technique sur le lot 2 935 698 en zone agricole permanente.",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "meetingDate": "2026-04-13",
+      "dossier": "45064",
+      "evidence_refs": [
+        "ev-cptaq-let"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "ATTENDU que la Régie a présenté à la Commission de protection\ndu territoire agricole du Québec (la «CPTAQ») une demande\nd’autorisation visant l’agrandissement LET d’une superficie\nd’environ 25,5 hectares (dossier numéro 45064) (la «Demande»);"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-04",
+      "label": "Règlement 2026-04 modifiant 2016-10",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "review_status": "validated",
+      "numero": "2026-04",
+      "title": "Règlement 2026-04 modifiant 2016-10 sur la tarification des permis et certificats",
+      "objet": "Tarification des permis et certificats",
+      "date": "2026-04-13",
+      "stage": "adoption",
+      "municipality": "stanstead-est",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "meetingDate": "2026-04-13",
+      "resolution": "2026-04-34",
+      "resolutionRef": "Rés. 2026-04-34",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2016-10",
+      "label": "Règlement 2016-10 sur la tarification des permis et certificats",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "candidate",
+      "numero": "2016-10",
+      "title": "Règlement sur la tarification des permis et certificats",
+      "municipality": "stanstead-est",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "10.1 RÈGLEMENT 2026-04 - MODIFIANT 2016-10 SUR LA\nTARIFICATION DES PERMIS ET CERTIFICATS"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-2026-04",
+      "target": "bylaw-2016-10",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amends"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;"
+        }
+      ]
+    },
+    {
+      "source": "source-24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "target": "event-res-2026-04-03",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "evidence_refs": [
+        "ev-event-03"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "4.1.1 RÉSOLUTION – APPUI DEMANDE LOT 6 374 262\nCPTAQ - APPUI À LA DEMANDE DE MADAME MÉLANIE BANVILLE\nPOUR L’ACQUISITION D’UNE SUPERFICIE DE 54 ACRES DU LOT\n6 374 262"
+        }
+      ]
+    },
+    {
+      "source": "source-24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "target": "event-res-2026-04-04",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "evidence_refs": [
+        "ev-event-04"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "4.1.2 RÉSOLUTION – APPUI DEMANDE LOT 5 417 438\nATTENDU que le propriétaire du lot 5 417 438, situé au 2710 Route 141\ndans la Municipalité de Stanstead-Est, a déposé une demande"
+        }
+      ]
+    },
+    {
+      "source": "source-24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "target": "constraint-cptaq-45064",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "evidence_refs": [
+        "ev-cptaq-let"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "8.5 RÉSOLUTION RIGDSC – AGRANDISSEMENT DU LIEU D’ENFOUISSEMENT"
+        }
+      ]
+    },
+    {
+      "source": "source-24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "target": "bylaw-2026-04",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amends"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "10.1 RÈGLEMENT 2026-04 - MODIFIANT 2016-10 SUR LA\nTARIFICATION DES PERMIS ET CERTIFICATS"
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-45064",
+      "target": "source-24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "evidence_refs": [
+        "ev-cptaq-let"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "ATTENDU que la Régie a présenté à la Commission de protection\ndu territoire agricole du Québec (la «CPTAQ») une demande\nd’autorisation visant l’agrandissement LET d’une superficie\nd’environ 25,5 hectares (dossier numéro 45064) (la «Demande»);"
+        }
+      ]
+    },
+    {
+      "source": "event-res-2026-04-03",
+      "target": "source-24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "evidence_refs": [
+        "ev-event-03"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262."
+        }
+      ]
+    },
+    {
+      "source": "event-res-2026-04-04",
+      "target": "source-24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "evidence_refs": [
+        "ev-event-04"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence dans la portion nord-ouest du"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2026-04",
+      "target": "source-24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amends"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-event-03",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée par Madame Mélanie Banville auprès de la CPTAQ concernant l’acquisition d’une superficie de 54 acres du lot 6 374 262."
+    },
+    {
+      "id": "ev-event-04",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la CPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la construction d’une nouvelle résidence dans la portion nord-ouest du terrain"
+    },
+    {
+      "id": "ev-cptaq-let",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "ATTENDU que la Régie a présenté à la Commission de protection du territoire agricole du Québec (la «CPTAQ») une demande d’autorisation visant l’agrandissement LET d’une superficie d’environ 25,5 hectares (dossier numéro 45064) (la «Demande»);"
+    },
+    {
+      "id": "ev-bylaw-amends",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "modality": "pdf",
+      "page": 18,
+      "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10 sur la tarification des permis et certificats ;"
+    }
+  ],
+  "input_tokens": 4825,
+  "output_tokens": 1560
+}
+```

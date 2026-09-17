@@ -1,0 +1,520 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-pv-2026-05-04",
+      "label": "Procès-verbal de la séance ordinaire du 4 mai 2026 - Barnston-Ouest",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "date": "2026-05-04",
+      "municipality": "barnston-ouest",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "url": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire des membres du conseil de la Municipalité\nde Barnston-Ouest tenue le 4 mai 2026, à 19h00"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-325-2026",
+      "label": "Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "325-2026",
+      "title": "Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme",
+      "municipality": "barnston-ouest",
+      "stage": "projet",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "meetingDate": "2026-05-04",
+      "resolution": "26 05 056",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-224",
+      "label": "Règlement numéro 224 Plan d’urbanisme",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "224",
+      "title": "Règlement numéro 224 Plan d’urbanisme",
+      "municipality": "barnston-ouest",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "6.2.3. Dépôt et présentation du Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-326-2026",
+      "label": "Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "326-2026",
+      "title": "Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage",
+      "municipality": "barnston-ouest",
+      "stage": "projet",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "meetingDate": "2026-05-04",
+      "resolution": "26 05 057",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-225",
+      "label": "Règlement numéro 225 de zonage",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "225",
+      "title": "Règlement numéro 225 de zonage",
+      "municipality": "barnston-ouest",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "6.2.5. Dépôt et présentation du Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-327-2026",
+      "label": "Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "327-2026",
+      "title": "Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement",
+      "municipality": "barnston-ouest",
+      "stage": "projet",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "meetingDate": "2026-05-04",
+      "resolution": "26 05 058",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-226-2012",
+      "label": "Règlement numéro 226 (2012) de lotissement",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "226 (2012)",
+      "title": "Règlement numéro 226 (2012) de lotissement",
+      "municipality": "barnston-ouest",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "6.2.7. Dépôt et présentation du Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-328-2026",
+      "label": "Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "328-2026",
+      "title": "Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale",
+      "municipality": "barnston-ouest",
+      "stage": "projet",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "meetingDate": "2026-05-04",
+      "resolution": "26 05 059",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’in"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-221",
+      "label": "Règlement numéro 221 sur les plans d’implantation et d’intégration architecturale",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "221",
+      "title": "Règlement numéro 221 sur les plans d’implantation et d’intégration architecturale",
+      "municipality": "barnston-ouest",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "6.2.9. Dépôt et présentation du Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’intégration\narchitecturale"
+        }
+      ]
+    },
+    {
+      "id": "event-motion-325-2026",
+      "label": "Avis de motion - Règlement numéro 325-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "municipality": "barnston-ouest",
+      "resolution": "26 05 056",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "description": "Avis de motion - Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme",
+      "etape": "avis_motion",
+      "etape_date": "2026-05-04",
+      "reglement_number": "325-2026",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme."
+        }
+      ]
+    },
+    {
+      "id": "event-motion-326-2026",
+      "label": "Avis de motion - Règlement numéro 326-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "municipality": "barnston-ouest",
+      "resolution": "26 05 057",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "description": "Avis de motion - Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage",
+      "etape": "avis_motion",
+      "etape_date": "2026-05-04",
+      "reglement_number": "326-2026",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage."
+        }
+      ]
+    },
+    {
+      "id": "event-motion-327-2026",
+      "label": "Avis de motion - Règlement numéro 327-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "decision": "approuvé",
+      "kind": "subdivision",
+      "municipality": "barnston-ouest",
+      "resolution": "26 05 058",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "description": "Avis de motion - Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement",
+      "etape": "avis_motion",
+      "etape_date": "2026-05-04",
+      "reglement_number": "327-2026",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement."
+        }
+      ]
+    },
+    {
+      "id": "event-motion-328-2026",
+      "label": "Avis de motion - Règlement numéro 328-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "decision": "approuvé",
+      "kind": "piia",
+      "municipality": "barnston-ouest",
+      "resolution": "26 05 059",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "description": "Avis de motion - Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale",
+      "etape": "avis_motion",
+      "etape_date": "2026-05-04",
+      "reglement_number": "328-2026",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’in"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-325-2026",
+      "target": "bylaw-224",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-325"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-326-2026",
+      "target": "bylaw-225",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-326"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-327-2026",
+      "target": "bylaw-226-2012",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-327"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-328-2026",
+      "target": "bylaw-221",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-328"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’in"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-05-04",
+      "target": "bylaw-325-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-325"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme."
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-05-04",
+      "target": "bylaw-326-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-326"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage."
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-05-04",
+      "target": "bylaw-327-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-327"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement."
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-05-04",
+      "target": "bylaw-328-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-328"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’in"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-05-04",
+      "target": "event-motion-325-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-325"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme."
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-05-04",
+      "target": "event-motion-326-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-326"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage."
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-05-04",
+      "target": "event-motion-327-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-327"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement."
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-05-04",
+      "target": "event-motion-328-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "evidence_refs": [
+        "ev-motion-328"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’in"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-motion-325",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme."
+    },
+    {
+      "id": "ev-motion-326",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage."
+    },
+    {
+      "id": "ev-motion-327",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement."
+    },
+    {
+      "id": "ev-motion-328",
+      "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+      "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+      "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+      "modality": "pdf",
+      "page": 9,
+      "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’in"
+    }
+  ],
+  "input_tokens": 4200,
+  "output_tokens": 1250
+}
+```

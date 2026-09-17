@@ -1,0 +1,335 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "node_type": "Source",
+      "label": "Procès-verbal de la séance ordinaire du 13 janvier 2026 - Dosquet",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "date": "2026-01-13",
+      "municipality": "dosquet",
+      "url": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Séance ordinaire du conseil de cette municipalité tenue le mardi, 13 janvier 2026,"
+        }
+      ]
+    },
+    {
+      "id": "zone-dosquet-25a",
+      "node_type": "Zone",
+      "label": "Zone 25A",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "code": "25A",
+      "municipality": "dosquet",
+      "usage": "résidentiel",
+      "status": "candidate",
+      "meetingDate": "2026-01-13",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "id": "zone-dosquet-5h",
+      "node_type": "Zone",
+      "label": "Zone 5H",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "code": "5H",
+      "municipality": "dosquet",
+      "usage": "résidentiel",
+      "status": "candidate",
+      "meetingDate": "2026-01-13",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "id": "event-26-01-08-cptaq",
+      "node_type": "DesignationEvent",
+      "label": "Résolution 26-01-08 - Appui à une demande adressée à la CPTAQ",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "date": "2026-01-13",
+      "meetingDate": "2026-01-13",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "municipality": "dosquet",
+      "resolution": "26-01-08",
+      "no_lot": "6274449",
+      "superficie_m2": 4631.6,
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "status": "candidate",
+      "description": "Appui municipal à une demande adressée à la Commission de la protection du territoire agricole du Québec pour étendre le droit résidentiel en zone agricole sur une portion du lot 6 274 449 et aliénation des lots 5 376 188 et 4 819 191.",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "POUR CES MOTIFS : IL EST PROPOSÉ par madame Mélanie St-Jean ET RÉSOLU À L’UNANIMITÉ des membres présents :\nQue la municipalité est favorable et recommande la demande."
+        }
+      ]
+    },
+    {
+      "id": "signal-26-01-08-cptaq",
+      "node_type": "Signal",
+      "label": "Signal - Demande CPTAQ extension droit résidentiel",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "category": "cptaq",
+      "kind": "demande_cptaq",
+      "date": "2026-01-13",
+      "meetingDate": "2026-01-13",
+      "resolution": "26-01-08",
+      "municipality": "dosquet",
+      "no_lot": "6274449",
+      "status": "candidate",
+      "scope": "local",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "description": "Demande CPTAQ recommandée favorablement par la municipalité visant à étendre le droit résidentiel à la partie du lot 6 274 449 située en zone agricole.",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "POUR CES MOTIFS : IL EST PROPOSÉ par madame Mélanie St-Jean ET RÉSOLU À L’UNANIMITÉ des membres présents :\nQue la municipalité est favorable et recommande la demande."
+        }
+      ]
+    },
+    {
+      "id": "constraint-26-01-08-cptaq",
+      "node_type": "Constraint",
+      "label": "Contrainte agricole CPTAQ - Lot 6 274 449",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "constraintType": "cptaq",
+      "municipality": "dosquet",
+      "organisme": "Commission de la protection du territoire agricole du Québec",
+      "resolution": "26-01-08",
+      "superficie_concernee_m2": 4631.6,
+      "status": "candidate",
+      "meetingDate": "2026-01-13",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "description": "Portion du lot 6 274 449 située dans la zone agricole (4 631,6 m²).",
+      "evidence_refs": [
+        "ev-cptaq-1"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE la superficie visée par la demande correspond à la portion située dans la zone agricole, laquelle a une superficie de 4 631,6 m²;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "event-26-01-08-cptaq",
+      "target": "zone-dosquet-25a",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-cptaq-2"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "source": "event-26-01-08-cptaq",
+      "target": "zone-dosquet-5h",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-cptaq-2"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "source": "event-26-01-08-cptaq",
+      "target": "signal-26-01-08-cptaq",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-cptaq-3"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "POUR CES MOTIFS : IL EST PROPOSÉ par madame Mélanie St-Jean ET RÉSOLU À L’UNANIMITÉ des membres présents :\nQue la municipalité est favorable et recommande la demande."
+        }
+      ]
+    },
+    {
+      "source": "signal-26-01-08-cptaq",
+      "target": "zone-dosquet-25a",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-cptaq-2"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "source": "signal-26-01-08-cptaq",
+      "target": "zone-dosquet-5h",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-cptaq-2"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "source": "constraint-26-01-08-cptaq",
+      "target": "zone-dosquet-25a",
+      "relation": "constrains",
+      "confidence": "INFERRED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-cptaq-1",
+        "ev-cptaq-2"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 est situé en partie dans le périmètre urbain et en partie dans la zone agricole, et qu’il possède une superficie totale de 7 200 m²;"
+        }
+      ]
+    },
+    {
+      "source": "event-26-01-08-cptaq",
+      "target": "source-20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-cptaq-3"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "POUR CES MOTIFS : IL EST PROPOSÉ par madame Mélanie St-Jean ET RÉSOLU À L’UNANIMITÉ des membres présents :\nQue la municipalité est favorable et recommande la demande."
+        }
+      ]
+    },
+    {
+      "source": "zone-dosquet-25a",
+      "target": "source-20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-cptaq-2"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "source": "zone-dosquet-5h",
+      "target": "source-20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-cptaq-2"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones"
+        }
+      ]
+    },
+    {
+      "source": "constraint-26-01-08-cptaq",
+      "target": "source-20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "evidence_refs": [
+        "ev-cptaq-1"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE la superficie visée par la demande correspond à la portion située dans la zone agricole, laquelle a une superficie de 4 631,6 m²;"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-cptaq-1",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "ATTENDU QUE la superficie visée par la demande correspond à la portion située dans la zone agricole, laquelle a une superficie de 4 631,6 m²;"
+    },
+    {
+      "id": "ev-cptaq-2",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel que montré au règlement de zonage en vigueur, et que l’usage résidentiel est autorisé dans ces deux zones, conformément à la réglementation d’urbanisme municipale;"
+    },
+    {
+      "id": "ev-cptaq-3",
+      "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+      "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+      "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "POUR CES MOTIFS : IL EST PROPOSÉ par madame Mélanie St-Jean ET RÉSOLU À L’UNANIMITÉ des membres présents :\nQue la municipalité est favorable et recommande la demande."
+    }
+  ],
+  "input_tokens": 3850,
+  "output_tokens": 1780
+}
+```

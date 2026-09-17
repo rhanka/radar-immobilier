@@ -1,0 +1,284 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "label": "Procès-verbal - Séance ordinaire du 7 avril 2026 - Cookshire-Eaton",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "date": "2026-04-07",
+      "municipality": "cookshire-eaton",
+      "url": "https://cookshire-eaton.qc.ca/wp-content/uploads/2026/05/2026-04-07-PV-Seance.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE ORDINAIRE DU 7 AVRIL 2026\nSession ordinaire du conseil sous la présidence de madame la mairesse"
+        }
+      ]
+    },
+    {
+      "id": "event-26-dm-01",
+      "label": "Dérogation mineure 26-DM-01",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "dossier": "26-DM-01",
+      "municipality": "cookshire-eaton",
+      "resolution": "2026-04-0726",
+      "docSha": "3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "description": "Autorisation de la dérogation mineure no 26-DM-01 pour la construction d'une résidence sans services au 978, rue Faulkner (lot 4487978) avec un frontage de 15.66 mètres au lieu de 50 mètres exigés.",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-04-07",
+      "no_lot": "4487978",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "PAR CONSÉQUENT, il est proposé par le conseiller Marcel Charpentier,\nappuyé par le conseiller Jean-Marc Dickenson et résolu d’autoriser la\ndérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue"
+        }
+      ]
+    },
+    {
+      "id": "zone-re-303",
+      "label": "Zone Re-303",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "Re-303",
+      "municipality": "cookshire-eaton",
+      "secteur": "Sawyerville",
+      "docSha": "3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT la demande de dérogation mineure numéro 26-DM-01 pour\nl’immeuble situé au 978, rue Faulkner (lot 4 487 978) en zone Re-303 et Ru012, secteur Sawyerville;"
+        }
+      ]
+    },
+    {
+      "id": "zone-ru-012",
+      "label": "Zone Ru-012",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "Ru012",
+      "municipality": "cookshire-eaton",
+      "secteur": "Sawyerville",
+      "docSha": "3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT la demande de dérogation mineure numéro 26-DM-01 pour\nl’immeuble situé au 978, rue Faulkner (lot 4 487 978) en zone Re-303 et Ru012, secteur Sawyerville;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-400-2026",
+      "label": "Règlement numéro 400-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "400-2026",
+      "title": "Règlement numéro 400-2026 concernant l’occupation et l’entretien des bâtiments",
+      "stage": "1er_projet",
+      "municipality": "cookshire-eaton",
+      "docSha": "3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-04-0736",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Il est proposé par la conseillère Jennifer McMullin, appuyé par la conseillère\nJosée Pérusse et résolu d’adopter le projet de Règlement numéro 400-2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-399-2026",
+      "label": "Règlement numéro 399-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "399-2026",
+      "title": "Règlement numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles numéro 316-2023",
+      "stage": "1er_projet",
+      "municipality": "cookshire-eaton",
+      "docSha": "3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-04-0740",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Il est proposé par le conseiller Jean-Marc Dickenson, appuyé par la\nconseillère Annie Guillemette et résolu d’adopter le projet de Règlement\nnuméro 399-2026 amendant le règlement relatif à la démolition"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-316-2023",
+      "label": "Règlement numéro 316-2023",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "316-2023",
+      "title": "Règlement relatif à la démolition d’immeubles numéro 316-2023",
+      "municipality": "cookshire-eaton",
+      "docSha": "3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Règlement numéro 399-2026 amendant le règlement relatif à la\ndémolition d’immeubles numéro 316-2023 – Avis de motion et adoption\ndu projet de règlement."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "event-26-dm-01",
+      "target": "zone-re-303",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "evidence_refs": [
+        "ev-dm-26-01"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT la demande de dérogation mineure numéro 26-DM-01 pour\nl’immeuble situé au 978, rue Faulkner (lot 4 487 978) en zone Re-303 et Ru012, secteur Sawyerville;"
+        }
+      ]
+    },
+    {
+      "source": "event-26-dm-01",
+      "target": "zone-ru-012",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "evidence_refs": [
+        "ev-dm-26-01"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT la demande de dérogation mineure numéro 26-DM-01 pour\nl’immeuble situé au 978, rue Faulkner (lot 4 487 978) en zone Re-303 et Ru012, secteur Sawyerville;"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-399-2026",
+      "target": "bylaw-316-2023",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "evidence_refs": [
+        "ev-bylaw-399"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Il est proposé par le conseiller Jean-Marc Dickenson, appuyé par la\nconseillère Annie Guillemette et résolu d’adopter le projet de Règlement\nnuméro 399-2026 amendant le règlement relatif à la démolition"
+        }
+      ]
+    },
+    {
+      "source": "source-3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "target": "event-26-dm-01",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "evidence_refs": [
+        "ev-dm-26-01"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "PAR CONSÉQUENT, il est proposé par le conseiller Marcel Charpentier,\nappuyé par le conseiller Jean-Marc Dickenson et résolu d’autoriser la\ndérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue"
+        }
+      ]
+    },
+    {
+      "source": "source-3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "target": "bylaw-400-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "evidence_refs": [
+        "ev-bylaw-400"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Il est proposé par la conseillère Jennifer McMullin, appuyé par la conseillère\nJosée Pérusse et résolu d’adopter le projet de Règlement numéro 400-2026"
+        }
+      ]
+    },
+    {
+      "source": "source-3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "target": "bylaw-399-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "evidence_refs": [
+        "ev-bylaw-399"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Il est proposé par le conseiller Jean-Marc Dickenson, appuyé par la\nconseillère Annie Guillemette et résolu d’adopter le projet de Règlement\nnuméro 399-2026 amendant le règlement relatif à la démolition"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-dm-26-01",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "rawRef": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "docSha": "3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "sourceUrl": "https://cookshire-eaton.qc.ca/wp-content/uploads/2026/05/2026-04-07-PV-Seance.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "CONSIDÉRANT la demande de dérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue Faulkner (lot 4 487 978) en zone Re-303 et Ru012, secteur Sawyerville;\nCONSIDÉRANT QUE la demande vise la construction d’une résidence sans services selon un frontage inférieur à la règlementation municipale, soit un frontage de 15.66 mètres alors que le règlement de lotissement en vigueur exige un minimum de 50 mètres;\nCONSIDÉRANT l’avis favorable du Comité consultatif d’urbanisme selon sa recommandation numéro 26-UR-06 en date du 25 février 2026;\nCONSIDÉRANT QU’un avis a été publié le 19 mars 2026 conformément à l’article 145.6 de la Loi sur l’aménagement et l’urbanisme (RLRQ, c. A-19.1);\nPAR CONSÉQUENT, il est proposé par le conseiller Marcel Charpentier, appuyé par le conseiller Jean-Marc Dickenson et résolu d’autoriser la dérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue Faulkner (lot 4 487 978)."
+    },
+    {
+      "id": "ev-bylaw-400",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "rawRef": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "docSha": "3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "sourceUrl": "https://cookshire-eaton.qc.ca/wp-content/uploads/2026/05/2026-04-07-PV-Seance.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "Résolution 2026-04-0736\nIl est proposé par la conseillère Jennifer McMullin, appuyé par la conseillère Josée Pérusse et résolu d’adopter le projet de Règlement numéro 400-2026 concernant l’occupation et l’entretien des bâtiments tel que déposé et joint à la présente pour en faire partie intégrante."
+    },
+    {
+      "id": "ev-bylaw-399",
+      "source_file": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "rawRef": "raw/proces-verbaux-cookshire-eaton/cas/3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.pdf",
+      "docSha": "3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b",
+      "sourceUrl": "https://cookshire-eaton.qc.ca/wp-content/uploads/2026/05/2026-04-07-PV-Seance.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Résolution 2026-04-0740\nIl est proposé par le conseiller Jean-Marc Dickenson, appuyé par la conseillère Annie Guillemette et résolu d’adopter le projet de Règlement numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles numéro 316-2023."
+    }
+  ],
+  "input_tokens": 4652,
+  "output_tokens": 1640
+}
+```

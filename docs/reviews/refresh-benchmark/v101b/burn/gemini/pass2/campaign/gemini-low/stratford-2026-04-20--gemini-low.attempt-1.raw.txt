@@ -1,0 +1,360 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "label": "Ordre du jour - 20 avril 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "date": "2026-04-20",
+      "municipality": "stratford",
+      "url": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROJET D’ORDRE DU JOUR\n\nLundi 20 avril 2026, à 19 h\n\nSéance ordinaire"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1256",
+      "label": "Règlement no 1256",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "1256",
+      "title": "Règlement no 1256 modifiant le règlement relatif à la démolition d’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments assujettis",
+      "stage": "projet",
+      "municipality": "stratford",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "meetingDate": "2026-04-20",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1212",
+      "label": "Règlement no 1212",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "1212",
+      "title": "règlement relatif à la démolition d’immeubles no 1212",
+      "municipality": "stratford",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "meetingDate": "2026-04-20",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1257",
+      "label": "Règlement no 1257",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "1257",
+      "title": "Règlement no 1257 modifiant le règlement de zonage no 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés",
+      "stage": "2e_projet",
+      "municipality": "stratford",
+      "zone_cible": "RU-13",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "meetingDate": "2026-04-20",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-1035",
+      "label": "Règlement no 1035",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "1035",
+      "title": "règlement de zonage no 1035",
+      "municipality": "stratford",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "meetingDate": "2026-04-20",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+        }
+      ]
+    },
+    {
+      "id": "zone-ru-13",
+      "label": "Zone RU-13",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "RU-13",
+      "municipality": "stratford",
+      "bylaw": "1257",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "meetingDate": "2026-04-20",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-derogation-lot-6674217",
+      "label": "Demande de dérogation mineure – lot 6 674 217",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-04-20",
+      "no_lot": "6674217",
+      "date": "2026-04-20",
+      "meetingDate": "2026-04-20",
+      "municipality": "stratford",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "description": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-derogation-405-rang-elgin",
+      "label": "Demande de dérogation mineure – 405 rang Elgin",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-04-20",
+      "date": "2026-04-20",
+      "meetingDate": "2026-04-20",
+      "municipality": "stratford",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "description": "Demande de dérogation mineure – 405 rang Elgin",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Demande de dérogation mineure – 405 rang Elgin"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-1256",
+      "target": "bylaw-1212",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "evidence_refs": [
+        "ev-bylaw-1256"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-1257",
+      "target": "bylaw-1035",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "evidence_refs": [
+        "ev-bylaw-1257"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-1257",
+      "target": "zone-ru-13",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "evidence_refs": [
+        "ev-bylaw-1257"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+        }
+      ]
+    },
+    {
+      "source": "zone-ru-13",
+      "target": "bylaw-1257",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "evidence_refs": [
+        "ev-bylaw-1257"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+        }
+      ]
+    },
+    {
+      "source": "source-08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "target": "bylaw-1256",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "evidence_refs": [
+        "ev-bylaw-1256"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+        }
+      ]
+    },
+    {
+      "source": "source-08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "target": "bylaw-1257",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "evidence_refs": [
+        "ev-bylaw-1257"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+        }
+      ]
+    },
+    {
+      "source": "source-08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "target": "zone-ru-13",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "evidence_refs": [
+        "ev-bylaw-1257"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+        }
+      ]
+    },
+    {
+      "source": "source-08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "target": "designation-event-derogation-lot-6674217",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "evidence_refs": [
+        "ev-derogation-lot"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson"
+        }
+      ]
+    },
+    {
+      "source": "source-08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "target": "designation-event-derogation-405-rang-elgin",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "evidence_refs": [
+        "ev-derogation-elgin"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Demande de dérogation mineure – 405 rang Elgin"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-1256",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+    },
+    {
+      "id": "ev-bylaw-1257",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+    },
+    {
+      "id": "ev-derogation-lot",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson"
+    },
+    {
+      "id": "ev-derogation-elgin",
+      "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+      "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+      "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Demande de dérogation mineure – 405 rang Elgin"
+    }
+  ],
+  "input_tokens": 850,
+  "output_tokens": 1200
+}
+```

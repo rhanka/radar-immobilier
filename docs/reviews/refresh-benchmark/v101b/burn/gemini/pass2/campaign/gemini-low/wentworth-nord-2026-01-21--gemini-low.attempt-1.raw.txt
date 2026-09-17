@@ -1,0 +1,441 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "label": "Procès-verbal de la séance ordinaire du 21 janvier 2026 - Wentworth-Nord",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire tenue par le Conseil municipal le\n21 janvier 2026 à 19 h au Centre communautaire de Laurel situé au 3470, route\nPrincipale à Wentworth-Nord."
+        }
+      ],
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "date": "2026-01-21",
+      "municipality": "wentworth-nord",
+      "url": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf"
+    },
+    {
+      "id": "bylaw-2017-498",
+      "label": "Règlement de zonage 2017-498",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "node_type": "Bylaw",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "DÉPÔT DES CERTIFICATS ATTESTANT LE RÉSULTAT DE LA PROCÉDURE\nD’ENREGISTREMENT DES PERSONNES HABILES À VOTER – RÈGLEMENTS\nDISTINCTS EN LIEN AVEC LE PROJET DE RÈGLEMENT 2017-498-30 MODIFIANT LE\nRÈGLEMENT DE ZONAGE 2017-498"
+        }
+      ],
+      "numero": "2017-498",
+      "title": "Règlement de zonage 2017-498",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1"
+    },
+    {
+      "id": "bylaw-2017-498-30-c09",
+      "label": "Règlement n° 2017-498-30-C09",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction\ndans la zone commerciale C-09"
+        }
+      ],
+      "numero": "2017-498-30-C09",
+      "title": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel « hébergement touristique de type résidence principale » avec restriction dans la zone commerciale C-09",
+      "zone_cible": "C-09",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1"
+    },
+    {
+      "id": "bylaw-2017-498-30-cons08",
+      "label": "Règlement n° 2017-498-30-CONS08",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nconservation CONS-08"
+        }
+      ],
+      "numero": "2017-498-30-CONS08",
+      "title": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage n°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel « hébergement touristique de type résidence principale » dans la zone conservation CONS-08",
+      "zone_cible": "CONS-08",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1"
+    },
+    {
+      "id": "bylaw-2017-498-30-i04",
+      "label": "Règlement n° 2017-498-30-I04",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nindustrielle I-04."
+        }
+      ],
+      "numero": "2017-498-30-I04",
+      "title": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage n°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel « hébergement touristique de type résidence principale » dans la zone industrielle I-04.",
+      "zone_cible": "I-04",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1"
+    },
+    {
+      "id": "zone-c-09",
+      "label": "Zone C-09",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "node_type": "Zone",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction\ndans la zone commerciale C-09"
+        }
+      ],
+      "code": "C-09",
+      "municipality": "wentworth-nord",
+      "usage": "commerciale",
+      "bylaw": "2017-498",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1"
+    },
+    {
+      "id": "zone-cons-08",
+      "label": "Zone CONS-08",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "node_type": "Zone",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nconservation CONS-08"
+        }
+      ],
+      "code": "CONS-08",
+      "municipality": "wentworth-nord",
+      "usage": "conservation",
+      "bylaw": "2017-498",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1"
+    },
+    {
+      "id": "zone-i-04",
+      "label": "Zone I-04",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "node_type": "Zone",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nindustrielle I-04."
+        }
+      ],
+      "code": "I-04",
+      "municipality": "wentworth-nord",
+      "usage": "industrielle",
+      "bylaw": "2017-498",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1"
+    },
+    {
+      "id": "event-dm-2025-0418",
+      "label": "Dérogation mineure DM 2025-0418",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une\nemprise de rue constituée du lot projeté 6 704 332 (Wentworth-Nord)"
+        }
+      ],
+      "date": "2026-01-21",
+      "meetingDate": "2026-01-21",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "dossier": "DM 2025-0418",
+      "municipality": "wentworth-nord",
+      "resolution": "2026-01-3809",
+      "resolutionRef": "2026-01-3809",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-01-21",
+      "reglement_number": "2017-497"
+    },
+    {
+      "id": "constraint-milieu-humide-dm-2025-0418",
+      "label": "Contrainte rive et milieux humides - DM 2025-0418",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE la MRC des Pays-d’en-Haut devra également statuer sur la\nprésente demande de dérogation mineure puisque cette emprise de rue sera\nsituée dans un lieu où l’occupation du sol est soumisse à des contraintes\nparticulières pour des raisons de protection de l’environnement (dans la rive d’un\ncours d’eau et de milieux humides) ;"
+        }
+      ],
+      "evidence_refs": [
+        "ev-constraint-1"
+      ],
+      "constraintType": "milieu_humide",
+      "municipality": "wentworth-nord",
+      "resolution": "2026-01-3809",
+      "resolutionRef": "2026-01-3809",
+      "description": "Emprise de rue située dans un lieu où l'occupation du sol est soumise à des contraintes particulières pour des raisons de protection de l'environnement (rive d'un cours d'eau et milieux humides)",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "meetingDate": "2026-01-21",
+      "dossier": "DM 2025-0418"
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-2017-498-30-c09",
+      "target": "bylaw-2017-498",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-amends-c09"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction\ndans la zone commerciale C-09"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-cons08",
+      "target": "bylaw-2017-498",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-amends-cons08"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nconservation CONS-08"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-i04",
+      "target": "bylaw-2017-498",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-amends-i04"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nindustrielle I-04."
+        }
+      ]
+    },
+    {
+      "source": "zone-c-09",
+      "target": "bylaw-2017-498",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-amends-c09"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction\ndans la zone commerciale C-09"
+        }
+      ]
+    },
+    {
+      "source": "zone-cons-08",
+      "target": "bylaw-2017-498",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-amends-cons08"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nconservation CONS-08"
+        }
+      ]
+    },
+    {
+      "source": "zone-i-04",
+      "target": "bylaw-2017-498",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-amends-i04"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nindustrielle I-04."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-c09",
+      "target": "zone-c-09",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-amends-c09"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction\ndans la zone commerciale C-09"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-cons08",
+      "target": "zone-cons-08",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-amends-cons08"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nconservation CONS-08"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-i04",
+      "target": "zone-i-04",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-amends-i04"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nindustrielle I-04."
+        }
+      ]
+    },
+    {
+      "source": "source-2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "target": "event-dm-2025-0418",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-dm-res"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une\nemprise de rue constituée du lot projeté 6 704 332 (Wentworth-Nord)"
+        }
+      ]
+    },
+    {
+      "source": "source-2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "target": "bylaw-2017-498-30-c09",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "evidence_refs": [
+        "ev-amends-c09"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction\ndans la zone commerciale C-09"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-amends-c09",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel"
+    },
+    {
+      "id": "ev-amends-cons08",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage n°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel"
+    },
+    {
+      "id": "ev-amends-i04",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage n°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel"
+    },
+    {
+      "id": "ev-dm-res",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "modality": "pdf",
+      "page": 9,
+      "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la demande de dérogation mineure 2025-0418"
+    },
+    {
+      "id": "ev-constraint-1",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "ATTENDU QUE la MRC des Pays-d’en-Haut devra également statuer sur la présente demande de dérogation mineure puisque cette emprise de rue sera située dans un lieu où l’occupation du sol est soumisse à des contraintes particulières pour des raisons de protection de l’environnement"
+    }
+  ],
+  "input_tokens": 4650,
+  "output_tokens": 2048
+}
+```

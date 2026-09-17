@@ -1,0 +1,263 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-acton-vale-2cc698c8",
+      "label": "Ordre du jour - Séance ordinaire du 16 mars 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "date": "2026-03-16",
+      "municipality": "acton-vale",
+      "url": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROJET D’ORDRE DU JOUR\nSÉANCE ORDINAIRE DU 16 MARS 2026"
+        }
+      ]
+    },
+    {
+      "id": "event-ppcmoi-001-2026",
+      "label": "PPCMOI-001-2026 - 1050, rue Dubois",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "ppcmoi",
+      "dossier": "PPCMOI-001-2026",
+      "municipality": "acton-vale",
+      "meetingDate": "2026-03-16",
+      "etape": "ppcmoi",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "description": "Adoption de la résolution finale d'un projet particulier de construction, de modification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue Dubois.",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+        }
+      ]
+    },
+    {
+      "id": "signal-ppcmoi-001-2026",
+      "label": "Signal PPCMOI-001-2026 (1050, rue Dubois)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "ppcmoi",
+      "kind": "ppcmoi",
+      "municipality": "acton-vale",
+      "meetingDate": "2026-03-16",
+      "etape": "ppcmoi",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "description": "Adoption de la résolution finale d'un projet particulier de construction, de modification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue Dubois.",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-guilmette",
+      "label": "Demande CPTAQ - Ferme Guilmette Inc.",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "municipality": "acton-vale",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "meetingDate": "2026-03-16",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "description": "Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Ferme Guilmette Inc.).",
+      "evidence_refs": [
+        "ev-cptaq-guilmette"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-laroche",
+      "label": "Demande CPTAQ - Daniel Laroche",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "municipality": "acton-vale",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "meetingDate": "2026-03-16",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "description": "Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Daniel Laroche).",
+      "evidence_refs": [
+        "ev-cptaq-laroche"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "event-ppcmoi-001-2026",
+      "target": "signal-ppcmoi-001-2026",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-001-2026"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+        }
+      ]
+    },
+    {
+      "source": "source-acton-vale-2cc698c8",
+      "target": "event-ppcmoi-001-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-001-2026"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+        }
+      ]
+    },
+    {
+      "source": "source-acton-vale-2cc698c8",
+      "target": "constraint-cptaq-guilmette",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-cptaq-guilmette"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+        }
+      ]
+    },
+    {
+      "source": "source-acton-vale-2cc698c8",
+      "target": "constraint-cptaq-laroche",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-cptaq-laroche"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+        }
+      ]
+    },
+    {
+      "source": "event-ppcmoi-001-2026",
+      "target": "source-acton-vale-2cc698c8",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-001-2026"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-guilmette",
+      "target": "source-acton-vale-2cc698c8",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-cptaq-guilmette"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-laroche",
+      "target": "source-acton-vale-2cc698c8",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-cptaq-laroche"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-ppcmoi-001-2026",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+    },
+    {
+      "id": "ev-cptaq-guilmette",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+    },
+    {
+      "id": "ev-cptaq-laroche",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+    }
+  ],
+  "input_tokens": 1780,
+  "output_tokens": 1720
+}
+```

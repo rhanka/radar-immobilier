@@ -1,0 +1,100 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+      "label": "Procès-verbal de la séance ordinaire du 7 avril 2026 - Sainte-Christine",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+      "date": "2026-04-07",
+      "municipality": "sainte-christine",
+      "url": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire tenue le 7 avril 2026 à 19h30 à la\nsalle du conseil sise au 629, rue des Loisirs à Sainte-Christine."
+        }
+      ]
+    },
+    {
+      "id": "event-071-04-2026",
+      "label": "Opération cadastrale route 116 (Pont de la Rivière LeRenne)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+      "node_type": "DesignationEvent",
+      "status": "attached",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "decision": "approuvé",
+      "kind": "subdivision",
+      "resolution": "071-04-2026",
+      "resolutionRef": "071-04-2026 2.16",
+      "municipality": "sainte-christine",
+      "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+      "description": "Autorisation de signature de documents cadastraux pour le projet de modification du cadastre concernant la route 116 au pont de la rivière Le Renne.",
+      "etape": "adoption",
+      "etape_date": "2026-04-07",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\nnom de la municipalité, tous les documents cadastraux requis"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+      "target": "event-071-04-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+      "evidence_refs": [
+        "ev-071-04-2026"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\nnom de la municipalité, tous les documents cadastraux requis"
+        }
+      ]
+    },
+    {
+      "source": "event-071-04-2026",
+      "target": "source-338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+      "evidence_refs": [
+        "ev-071-04-2026"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\nnom de la municipalité, tous les documents cadastraux requis"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-071-04-2026",
+      "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+      "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+      "sourceUrl": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 9,
+      "excerpt": "Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\nnom de la municipalité, tous les documents cadastraux requis dans le\ncadre de l’opération cadastrale liée au projet de modification du\ncadastre concernant la route 116, conditionnellement à l’obtention de\ntous les permis d’urbanisme requis."
+    }
+  ],
+  "input_tokens": 4820,
+  "output_tokens": 820
+}
+```

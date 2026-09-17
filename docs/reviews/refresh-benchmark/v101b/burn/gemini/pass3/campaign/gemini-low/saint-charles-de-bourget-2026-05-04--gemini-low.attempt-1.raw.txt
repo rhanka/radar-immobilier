@@ -1,0 +1,215 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517",
+      "label": "PROJET D’ORDRE DU JOUR - 1er JUIN 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "node_type": "Source",
+      "status": "candidate",
+      "docSha": "02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517",
+      "date": "2026-06-01",
+      "municipality": "saint-charles-de-bourget",
+      "url": "https://www.stcharlesdebourget.ca/fichiersUpload/fichiers/20260601112329-projet-odj-juin-2026-public.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE ORDINAIRE DU CONSEIL\nTENUE LE LUNDI 1er JOUR DE JUIN 2026 À 19 H 30\nSALLE DU CONSEIL\nSAINT-CHARLES-DE-BOURGET\nPROJET D’ORDRE DU JOUR"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-446-26",
+      "label": "Règlement no 446.26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "446.26",
+      "title": "CONCERNANT L’EXERCICE DU DROIT DE PRÉEMPTION PAR LA MUNICIPALITÉ",
+      "stage": "adoption",
+      "municipality": "saint-charles-de-bourget",
+      "meetingDate": "2026-06-01",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\nPRÉEMPTION PAR LA MUNICIPALITÉ"
+        }
+      ]
+    },
+    {
+      "id": "event-derogation-237-maltais-laberge",
+      "label": "Demande de dérogation mineure – 237, chemin Maltais-Laberge",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "municipality": "saint-charles-de-bourget",
+      "description": "DEMANDE DE DÉROGATION MINEURE – 237, CHEMIN MALTAIS-LABERGE",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "DEMANDE DE DÉROGATION MINEURE – 237, CHEMIN MALTAIS-LABERGE"
+        }
+      ]
+    },
+    {
+      "id": "event-cptaq-lot-5682717",
+      "label": "Demande d’autorisation à la CPTAQ pour aliéner le lot 5 682 717",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "cptaq",
+      "no_lot": "5682717",
+      "etape_date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "municipality": "saint-charles-de-bourget",
+      "description": "DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À FINS D’AGRICULTURE",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\nFINS D’AGRICULTURE"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-447-26",
+      "label": "Règlement omnibus municipal no 447.26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "447.26",
+      "title": "RÈGLEMENT OMNIBUS MUNICIPAL NO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE",
+      "stage": "projet",
+      "municipality": "saint-charles-de-bourget",
+      "meetingDate": "2026-06-01",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT OMNIBUS MUNICIPAL\nNO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517",
+      "target": "bylaw-446-26",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "evidence_refs": [
+        "ev-1"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\nPRÉEMPTION PAR LA MUNICIPALITÉ"
+        }
+      ]
+    },
+    {
+      "source": "source-02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517",
+      "target": "event-derogation-237-maltais-laberge",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "evidence_refs": [
+        "ev-2"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "DEMANDE DE DÉROGATION MINEURE – 237, CHEMIN MALTAIS-LABERGE"
+        }
+      ]
+    },
+    {
+      "source": "source-02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517",
+      "target": "event-cptaq-lot-5682717",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "evidence_refs": [
+        "ev-3"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\nFINS D’AGRICULTURE"
+        }
+      ]
+    },
+    {
+      "source": "source-02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517",
+      "target": "bylaw-447-26",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "evidence_refs": [
+        "ev-4"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT OMNIBUS MUNICIPAL\nNO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "rawRef": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "docSha": "02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517",
+      "sourceUrl": "https://www.stcharlesdebourget.ca/fichiersUpload/fichiers/20260601112329-projet-odj-juin-2026-public.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\nPRÉEMPTION PAR LA MUNICIPALITÉ"
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "rawRef": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "docSha": "02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517",
+      "sourceUrl": "https://www.stcharlesdebourget.ca/fichiersUpload/fichiers/20260601112329-projet-odj-juin-2026-public.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "DEMANDE DE DÉROGATION MINEURE – 237, CHEMIN MALTAIS-LABERGE"
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "rawRef": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "docSha": "02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517",
+      "sourceUrl": "https://www.stcharlesdebourget.ca/fichiersUpload/fichiers/20260601112329-projet-odj-juin-2026-public.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\nFINS D’AGRICULTURE"
+    },
+    {
+      "id": "ev-4",
+      "source_file": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "rawRef": "raw/proces-verbaux-saint-charles-de-bourget/cas/02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517.pdf",
+      "docSha": "02b4c8cc2a898b9cca84902e636201af5993903377578f675729969a04c53517",
+      "sourceUrl": "https://www.stcharlesdebourget.ca/fichiersUpload/fichiers/20260601112329-projet-odj-juin-2026-public.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT OMNIBUS MUNICIPAL\nNO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE"
+    }
+  ],
+  "input_tokens": 1200,
+  "output_tokens": 850
+}
+```

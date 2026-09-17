@@ -1,0 +1,279 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "label": "Procès-verbal de la séance ordinaire du 5 mai 2026 - Parisville",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "date": "2026-05-05",
+      "municipality": "parisville",
+      "url": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil de Parisville tenue à la salle du\nconseil, le mardi 5 mai 2026 à compter de 19 h 30."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-308-2011",
+      "label": "Règlement de zonage # 308-2011",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "node_type": "Bylaw",
+      "status": "attached",
+      "numero": "308-2011",
+      "title": "Règlement de zonage",
+      "municipality": "parisville",
+      "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "CONSIDÉRANT QUE le règlement de zonage de la municipalité de Parisville\nest en vigueur depuis le 19 mars 2012;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-432-2026",
+      "label": "Règlement # 432-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "432-2026",
+      "title": "Règlement # 432-2026 modifiant le règlement de zonage # 308-2011",
+      "date": "2026-05-05",
+      "stage": "adoption",
+      "municipality": "parisville",
+      "resolution": "73-05-26",
+      "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "meetingDate": "2026-05-05",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-311-2011",
+      "label": "Règlement de lotissement # 311-2011",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "node_type": "Bylaw",
+      "status": "attached",
+      "numero": "311-2011",
+      "title": "Règlement de lotissement",
+      "municipality": "parisville",
+      "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "CONSIDÉRANT QUE le règlement de lotissement de la municipalité de\nParisville est en vigueur depuis le 19 mars 2012;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-433-2026",
+      "label": "Règlement # 433-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "433-2026",
+      "title": "Règlement # 433-2026 modifiant le règlement de lotissement # 311-2011",
+      "date": "2026-05-05",
+      "stage": "adoption",
+      "municipality": "parisville",
+      "resolution": "74-05-26",
+      "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "meetingDate": "2026-05-05",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+        }
+      ]
+    },
+    {
+      "id": "event-adoption-432-2026",
+      "label": "Adoption du règlement 432-2026 modifiant le règlement de zonage 308-2011",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-05-05",
+      "meetingDate": "2026-05-05",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "municipality": "parisville",
+      "resolution": "73-05-26",
+      "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "description": "Adoption du règlement # 432-2026 modifiant le règlement de zonage # 308-2011",
+      "etape": "adoption",
+      "etape_date": "2026-05-05",
+      "reglement_number": "432-2026",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+        }
+      ]
+    },
+    {
+      "id": "event-adoption-433-2026",
+      "label": "Adoption du règlement 433-2026 modifiant le règlement de lotissement 311-2011",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-05-05",
+      "meetingDate": "2026-05-05",
+      "decision": "approuvé",
+      "kind": "subdivision",
+      "municipality": "parisville",
+      "resolution": "74-05-26",
+      "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "description": "Adoption du règlement # 433-2026 modifiant le règlement de lotissement # 311-2011 afin de permettre le remembrement d’un terrain",
+      "etape": "adoption",
+      "etape_date": "2026-05-05",
+      "reglement_number": "433-2026",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-432-2026",
+      "target": "bylaw-308-2011",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "evidence_refs": [
+        "ev-amend-432"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-433-2026",
+      "target": "bylaw-311-2011",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "evidence_refs": [
+        "ev-amend-433"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+        }
+      ]
+    },
+    {
+      "source": "source-1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "target": "bylaw-432-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "evidence_refs": [
+        "ev-amend-432"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+        }
+      ]
+    },
+    {
+      "source": "source-1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "target": "bylaw-433-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "evidence_refs": [
+        "ev-amend-433"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+        }
+      ]
+    },
+    {
+      "source": "source-1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "target": "event-adoption-432-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "evidence_refs": [
+        "ev-amend-432"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+        }
+      ]
+    },
+    {
+      "source": "source-1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "target": "event-adoption-433-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "evidence_refs": [
+        "ev-amend-433"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-amend-432",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+    },
+    {
+      "id": "ev-amend-433",
+      "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+      "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+      "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+    }
+  ],
+  "input_tokens": 2500,
+  "output_tokens": 1200
+}
+```

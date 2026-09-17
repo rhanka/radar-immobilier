@@ -1,0 +1,281 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "label": "Ordre du jour - Séance ordinaire du 10 février 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ORDRE DU JOUR\nSéance ordinaire\n10 février 2026"
+        }
+      ],
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "date": "2026-02-10",
+      "municipality": "coteau-du-lac",
+      "url": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+      "sourceKind": "pv",
+      "format": "pdf"
+    },
+    {
+      "id": "bylaw-rmh-450-2025",
+      "label": "Règlement RMH-450-2025",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Adoption. Règlement municipal harmonisé #RMH-450-2025 sur les nuisances"
+        }
+      ],
+      "numero": "RMH-450-2025",
+      "title": "Règlement municipal harmonisé #RMH-450-2025 sur les nuisances",
+      "stage": "adoption",
+      "municipality": "coteau-du-lac",
+      "meetingDate": "2026-02-10",
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537"
+    },
+    {
+      "id": "event-piia-3-principale",
+      "label": "PIIA - 3, rue Principale",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)"
+        }
+      ],
+      "kind": "piia",
+      "etape": "piia",
+      "meetingDate": "2026-02-10",
+      "municipality": "coteau-du-lac",
+      "description": "Demande d’approbation de PIIA pour le 3, rue Principale (enseigne sur vitrage)",
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537"
+    },
+    {
+      "id": "event-piia-9-principale",
+      "label": "PIIA - 9, rue Principale",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "b) Pour le 9, rue Principale (modification enseigne sur poteau)"
+        }
+      ],
+      "kind": "piia",
+      "etape": "piia",
+      "meetingDate": "2026-02-10",
+      "municipality": "coteau-du-lac",
+      "description": "Demande d’approbation de PIIA pour le 9, rue Principale (modification enseigne sur poteau)",
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537"
+    },
+    {
+      "id": "event-ppcmoi-25-chutes",
+      "label": "PPCMOI - 25, rue des Chutes",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "8.3. Demande d’un PPCMOI\n\na)\n\nApprobation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)"
+        }
+      ],
+      "kind": "ppcmoi",
+      "etape": "ppcmoi",
+      "meetingDate": "2026-02-10",
+      "municipality": "coteau-du-lac",
+      "description": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes (agrandissement résidentiel)",
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537"
+    },
+    {
+      "id": "signal-ppcmoi-25-chutes",
+      "label": "Signal - PPCMOI 25, rue des Chutes",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "b)\n\nAdoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)"
+        }
+      ],
+      "category": "ppcmoi",
+      "kind": "agrandissement résidentiel",
+      "etape": "projet_reglement",
+      "date": "2026-02-10",
+      "meetingDate": "2026-02-10",
+      "municipality": "coteau-du-lac",
+      "description": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue des Chutes (agrandissement résidentiel)",
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537"
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "target": "bylaw-rmh-450-2025",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "evidence_refs": [
+        "ev-bylaw-rmh-450-2025"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Adoption. Règlement municipal harmonisé #RMH-450-2025 sur les nuisances"
+        }
+      ]
+    },
+    {
+      "source": "source-0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "target": "event-piia-3-principale",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "evidence_refs": [
+        "ev-piia-3-principale"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)"
+        }
+      ]
+    },
+    {
+      "source": "source-0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "target": "event-piia-9-principale",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "evidence_refs": [
+        "ev-piia-9-principale"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "b) Pour le 9, rue Principale (modification enseigne sur poteau)"
+        }
+      ]
+    },
+    {
+      "source": "source-0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "target": "event-ppcmoi-25-chutes",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-25-chutes"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)"
+        }
+      ]
+    },
+    {
+      "source": "event-ppcmoi-25-chutes",
+      "target": "signal-ppcmoi-25-chutes",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-premier-projet"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)"
+        }
+      ]
+    },
+    {
+      "source": "source-0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "target": "signal-ppcmoi-25-chutes",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-premier-projet"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-rmh-450-2025",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "Adoption. Règlement municipal harmonisé #RMH-450-2025 sur les nuisances"
+    },
+    {
+      "id": "ev-piia-3-principale",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)"
+    },
+    {
+      "id": "ev-piia-9-principale",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "b) Pour le 9, rue Principale (modification enseigne sur poteau)"
+    },
+    {
+      "id": "ev-ppcmoi-25-chutes",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)"
+    },
+    {
+      "id": "ev-ppcmoi-premier-projet",
+      "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+      "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+      "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)"
+    }
+  ],
+  "input_tokens": 1400,
+  "output_tokens": 1100
+}
+```

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "campaign": "v101b",
+  "arms": {
+    "gemini-low": {
+      "state": "running",
+      "total": 100,
+      "processed": 60,
+      "accepted": 53,
+      "errors": 0,
+      "lastReceipt": "/results/burn/gemini/pass3/campaign/gemini-low/richelieu-2026-02-03--gemini-low.attempt-1.receipt.json",
+      "requests": 120,
+      "rateLimitConsecutive": 0,
+      "resumeAt": null,
+      "etaSeconds": 655
+    }
+  },
+  "updatedAt": "2026-09-17T01:28:16.206Z"
+}

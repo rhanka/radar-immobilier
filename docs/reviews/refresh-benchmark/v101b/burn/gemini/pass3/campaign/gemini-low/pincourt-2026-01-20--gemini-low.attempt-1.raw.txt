@@ -1,0 +1,350 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "src-1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "label": "Ordre du jour - Séance ordinaire du 20 janvier 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "date": "2026-01-20",
+      "municipality": "pincourt",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ORDRE DU JOUR\nSÉANCE ORDINAIRE TENUE LE MARDI 20 JANVIER 2026 À 19 HEURES"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-931-04",
+      "label": "Règlement no 931-04",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "numero": "931-04",
+      "title": "MODIFIANT LE RÈGLEMENT NO 931 RELATIF AUX NUISANCES",
+      "stage": "avis_motion",
+      "municipality": "pincourt",
+      "meetingDate": "2026-01-20",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-931",
+      "label": "Règlement no 931",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "numero": "931",
+      "title": "RÈGLEMENT NO 931 RELATIF AUX NUISANCES",
+      "municipality": "pincourt",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-778-03",
+      "label": "Règlement no 778-03",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "numero": "778-03",
+      "title": "RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+      "stage": "adoption",
+      "municipality": "pincourt",
+      "meetingDate": "2026-01-20",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-779-03",
+      "label": "Règlement no 779-03",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "numero": "779-03",
+      "title": "RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+      "stage": "adoption",
+      "municipality": "pincourt",
+      "meetingDate": "2026-01-20",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-780-28",
+      "label": "Règlement no 780-28",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "numero": "780-28",
+      "title": "RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+      "stage": "adoption",
+      "municipality": "pincourt",
+      "meetingDate": "2026-01-20",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-784-09",
+      "label": "Règlement no 784-09",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "numero": "784-09",
+      "title": "RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+      "stage": "adoption",
+      "municipality": "pincourt",
+      "meetingDate": "2026-01-20",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-780-32",
+      "label": "Règlement no 780-32",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "numero": "780-32",
+      "title": "MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ",
+      "stage": "adoption",
+      "municipality": "pincourt",
+      "meetingDate": "2026-01-20",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-780",
+      "label": "Règlement no 780",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "numero": "780",
+      "title": "RÈGLEMENT DE ZONAGE ET DE PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780",
+      "municipality": "pincourt",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+        }
+      ]
+    },
+    {
+      "id": "de-8-1",
+      "label": "Avis de motion et dépôt - Règlement 931-04",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "date": "2026-01-20",
+      "meetingDate": "2026-01-20",
+      "etape": "avis_motion",
+      "etape_date": "2026-01-20",
+      "reglement_number": "931-04",
+      "municipality": "pincourt",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+        }
+      ]
+    },
+    {
+      "id": "de-8-2",
+      "label": "Adoption des règlements 778-03, 779-03, 780-28 et 784-09",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "date": "2026-01-20",
+      "meetingDate": "2026-01-20",
+      "etape": "adoption",
+      "etape_date": "2026-01-20",
+      "municipality": "pincourt",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+        }
+      ]
+    },
+    {
+      "id": "de-8-3",
+      "label": "Adoption du règlement 780-32",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "status": "candidate",
+      "date": "2026-01-20",
+      "meetingDate": "2026-01-20",
+      "etape": "adoption",
+      "etape_date": "2026-01-20",
+      "reglement_number": "780-32",
+      "municipality": "pincourt",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-931-04",
+      "target": "bylaw-931",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-780-32",
+      "target": "bylaw-780",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+        }
+      ]
+    },
+    {
+      "source": "src-1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "target": "de-8-1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+        }
+      ]
+    },
+    {
+      "source": "src-1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "target": "de-8-2",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+        }
+      ]
+    },
+    {
+      "source": "src-1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "target": "de-8-3",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+      "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+      "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+    }
+  ],
+  "input_tokens": 1250,
+  "output_tokens": 1780
+}
+```

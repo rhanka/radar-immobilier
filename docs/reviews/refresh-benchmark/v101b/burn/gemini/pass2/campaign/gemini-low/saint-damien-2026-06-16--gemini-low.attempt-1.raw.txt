@@ -1,0 +1,254 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "label": "Ordre du jour - 16 juin 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "date": "2026-06-16",
+      "municipality": "saint-damien",
+      "url": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE ORDINAIRE DU CONSEIL MUNICIPAL\nLe 16 JUIN 2026 – 19 H 30\nPROJET D’ORDRE DU JOUR"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2026-122",
+      "label": "Demande de dérogation mineure 2026-122 - 73, rue Messier",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "kind": "derogation",
+      "dossier": "2026-122",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-16",
+      "meetingDate": "2026-06-16",
+      "municipality": "saint-damien",
+      "status": "candidate",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2026-133",
+      "label": "Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "kind": "derogation",
+      "dossier": "2026-133",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-16",
+      "meetingDate": "2026-06-16",
+      "municipality": "saint-damien",
+      "status": "candidate",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-135",
+      "label": "Demande d’approbation au PIIA 2026-135 – 6710, rue Principale",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "kind": "piia",
+      "dossier": "2026-135",
+      "etape": "piia",
+      "etape_date": "2026-06-16",
+      "meetingDate": "2026-06-16",
+      "municipality": "saint-damien",
+      "status": "candidate",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-804-1",
+      "label": "Projet de règlement 804-1",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "numero": "804-1",
+      "stage": "projet",
+      "title": "modification du règlement 804 portant sur les camions de cuisine cantines temporaires",
+      "meetingDate": "2026-06-16",
+      "municipality": "saint-damien",
+      "status": "candidate",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-804",
+      "label": "Règlement 804",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "numero": "804",
+      "title": "portant sur les camions de cuisine cantines temporaires",
+      "municipality": "saint-damien",
+      "status": "candidate",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "event-dm-2026-122",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-dm-2026-122"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "event-dm-2026-133",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-dm-2026-133"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "event-piia-2026-135",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-piia-2026-135"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "bylaw-804-1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-bylaw-804-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-804-1",
+      "target": "bylaw-804",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-bylaw-804-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-dm-2026-122",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+    },
+    {
+      "id": "ev-dm-2026-133",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+    },
+    {
+      "id": "ev-piia-2026-135",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+    },
+    {
+      "id": "ev-bylaw-804-1",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+    }
+  ],
+  "input_tokens": 1200,
+  "output_tokens": 1150
+}
+```

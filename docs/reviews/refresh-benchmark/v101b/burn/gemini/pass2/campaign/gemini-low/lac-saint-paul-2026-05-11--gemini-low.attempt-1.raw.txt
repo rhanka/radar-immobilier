@@ -1,0 +1,308 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "label": "Procès-verbal de la séance ordinaire du 11 mai 2026 - Lac-Saint-Paul",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "review_status": "in_review",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "date": "2026-05-11",
+      "municipality": "lac-saint-paul",
+      "url": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lac-saint-paul/_publication/fichiers/2026-05-11_P-V%20CONSEIL(1).pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire tenue le lundi 11 mai 2026 à 19 h 00 à la salle communautaire située au 386, rue Principale, Lac-Saint-Paul (Québec) J0W 1K0."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-078-2026",
+      "label": "Règlement 078-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "review_status": "in_review",
+      "numero": "078-2026",
+      "title": "Règlement numéro 078-2026 sur les modalités de publication des avis publics de la municipalité de Lac-Saint-Paul",
+      "objet": "modalités de publication des avis publics de la municipalité de Lac-Saint-Paul",
+      "date": "2026-05-11",
+      "stage": "adoption",
+      "municipality": "lac-saint-paul",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "meetingDate": "2026-05-11",
+      "resolution": "101-05-2026",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "QUE le règlement numéro 078-2026 sur les modalités de publication des avis publics de la municipalité de Lac-Saint-Paul soit adopté."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-079-2026",
+      "label": "Règlement 079-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "in_review",
+      "numero": "079-2026",
+      "title": "Règlement no. 079-2026, abrogeant le règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial",
+      "objet": "abroger le règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial",
+      "stage": "projet",
+      "municipality": "lac-saint-paul",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "meetingDate": "2026-05-11",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "QU’une séance de consultation publique soit tenue le 13 juillet 2026 à 18 h 30 à la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour présenter et expliquer le projet de règlement numéro 079-2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-046-2023",
+      "label": "Règlement 046-2023",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "review_status": "in_review",
+      "numero": "046-2023",
+      "title": "Règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial",
+      "municipality": "lac-saint-paul",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "meetingDate": "2026-05-11",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "le greffier-trésorier présente et dépose l’avis spécial relatif à l’abrogation du règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial."
+        }
+      ]
+    },
+    {
+      "id": "event-consultation-079-2026",
+      "label": "Consultation publique sur le règlement 079-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "review_status": "in_review",
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "decision": "approuvé",
+      "municipality": "lac-saint-paul",
+      "resolution": "106-05-2026",
+      "resolutionRef": "106-05-2026",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "description": "Tenue d'une séance de consultation publique le 13 juillet 2026 à 18 h 30 pour présenter et expliquer le projet de règlement numéro 079-2026.",
+      "etape": "consultation_publique",
+      "etape_date": "2026-07-13",
+      "reglement_number": "079-2026",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "QU’une séance de consultation publique soit tenue le 13 juillet 2026 à 18 h 30 à la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour présenter et expliquer le projet de règlement numéro 079-2026"
+        }
+      ]
+    },
+    {
+      "id": "signal-agroenvironnemental",
+      "label": "Opposition et demande de révision du projet de règlement sur les pratiques agroenvironnementales",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "node_type": "Signal",
+      "status": "validated",
+      "review_status": "in_review",
+      "category": "environnement",
+      "kind": "resolution_opposition",
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "description": "Demande à la ministre de l'Environnement de suspendre le processus d'adoption du Projet de règlement sur les pratiques agroenvironnementales pour renoncer à la préséance sur les règlements municipaux et lier l'augmentation des superficies en culture à l'aménagement du territoire.",
+      "resolution": "107-05-2026",
+      "resolutionRef": "107-05-2026",
+      "scope": "regional",
+      "municipality": "lac-saint-paul",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les Changements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de suspendre le processus d’adoption de ce règlement afin de le réviser"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "target": "bylaw-078-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "evidence_refs": [
+        "ev-bylaw-078"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "QUE le règlement numéro 078-2026 sur les modalités de publication des avis publics de la municipalité de Lac-Saint-Paul soit adopté."
+        }
+      ]
+    },
+    {
+      "source": "source-1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "target": "bylaw-079-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "evidence_refs": [
+        "ev-bylaw-079"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "QU’une séance de consultation publique soit tenue le 13 juillet 2026 à 18 h 30 à la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour présenter et expliquer le projet de règlement numéro 079-2026"
+        }
+      ]
+    },
+    {
+      "source": "source-1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "target": "bylaw-046-2023",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "evidence_refs": [
+        "ev-bylaw-046"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "le greffier-trésorier présente et dépose l’avis spécial relatif à l’abrogation du règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial."
+        }
+      ]
+    },
+    {
+      "source": "source-1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "target": "event-consultation-079-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "evidence_refs": [
+        "ev-consultation-079"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "QU’une séance de consultation publique soit tenue le 13 juillet 2026 à 18 h 30 à la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour présenter et expliquer le projet de règlement numéro 079-2026"
+        }
+      ]
+    },
+    {
+      "source": "source-1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "target": "signal-agroenvironnemental",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "evidence_refs": [
+        "ev-signal-agro"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les Changements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de suspendre le processus d’adoption de ce règlement afin de le réviser"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-079-2026",
+      "target": "bylaw-046-2023",
+      "relation": "replaces",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "evidence_refs": [
+        "ev-replaces-046"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT NUMÉRO 079-2026, ABROGEANT LE RÈGLEMENT NUMÉRO 046-2023 ÉTABLISSANT LA CITATION DE L’ÉGLISE SAINT-PAUL À TITRE D’IMMEUBLE PATRIMONIAL"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-078",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "rawRef": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lac-saint-paul/_publication/fichiers/2026-05-11_P-V%20CONSEIL(1).pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "QUE le règlement numéro 078-2026 sur les modalités de publication des avis publics de la municipalité de Lac-Saint-Paul soit adopté."
+    },
+    {
+      "id": "ev-bylaw-079",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "rawRef": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lac-saint-paul/_publication/fichiers/2026-05-11_P-V%20CONSEIL(1).pdf",
+      "modality": "pdf",
+      "page": 6,
+      "excerpt": "QU’une séance de consultation publique soit tenue le 13 juillet 2026 à 18 h 30 à la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour présenter et expliquer le projet de règlement numéro 079-2026"
+    },
+    {
+      "id": "ev-bylaw-046",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "rawRef": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lac-saint-paul/_publication/fichiers/2026-05-11_P-V%20CONSEIL(1).pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "le greffier-trésorier présente et dépose l’avis spécial relatif à l’abrogation du règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial."
+    },
+    {
+      "id": "ev-consultation-079",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "rawRef": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lac-saint-paul/_publication/fichiers/2026-05-11_P-V%20CONSEIL(1).pdf",
+      "modality": "pdf",
+      "page": 6,
+      "excerpt": "QU’une séance de consultation publique soit tenue le 13 juillet 2026 à 18 h 30 à la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour présenter et expliquer le projet de règlement numéro 079-2026"
+    },
+    {
+      "id": "ev-signal-agro",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "rawRef": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lac-saint-paul/_publication/fichiers/2026-05-11_P-V%20CONSEIL(1).pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les Changements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de suspendre le processus d’adoption de ce règlement afin de le réviser"
+    },
+    {
+      "id": "ev-replaces-046",
+      "source_file": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "rawRef": "raw/proces-verbaux-lac-saint-paul/cas/1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922.pdf",
+      "docSha": "1dde1acdb542e4f9a2666a760426358e1be938048662226fdc5cca1cc3225922",
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lac-saint-paul/_publication/fichiers/2026-05-11_P-V%20CONSEIL(1).pdf",
+      "modality": "pdf",
+      "page": 6,
+      "excerpt": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT NUMÉRO 079-2026, ABROGEANT LE RÈGLEMENT NUMÉRO 046-2023 ÉTABLISSANT LA CITATION DE L’ÉGLISE SAINT-PAUL À TITRE D’IMMEUBLE PATRIMONIAL"
+    }
+  ],
+  "input_tokens": 4022,
+  "output_tokens": 1720
+}
+```

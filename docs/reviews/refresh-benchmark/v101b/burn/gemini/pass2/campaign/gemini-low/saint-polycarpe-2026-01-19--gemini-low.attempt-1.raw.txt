@@ -1,0 +1,211 @@
+```json
+{
+  "contract_version": "immo-pv-extraction-v9",
+  "type": "Graphify Extraction",
+  "nodes": [
+    {
+      "id": "source-00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+      "label": "Ordre du jour - 19 janvier 2026 - Saint-Polycarpe",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+      "date": "2026-01-19",
+      "municipality": "saint-polycarpe",
+      "url": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE ORDINAIRE DU LUNDI 19 JANVIER 2026 À 19 H 30\nORDRE DU JOUR"
+        }
+      ]
+    },
+    {
+      "id": "event-cptaq-8-1",
+      "label": "Résolution d'appui CPTAQ - Utilisation autre que l'agriculture",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "cptaq",
+      "municipality": "saint-polycarpe",
+      "meetingDate": "2026-01-19",
+      "description": "RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN AUTRE QUE L’AGRICULTURE.",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.1\n\nRÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE."
+        }
+      ]
+    },
+    {
+      "id": "signal-cptaq-8-1",
+      "label": "Demande CPTAQ autre qu'agriculture",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "cptaq",
+      "kind": "exclusion_ou_utilisation",
+      "date": "2026-01-19",
+      "meetingDate": "2026-01-19",
+      "municipality": "saint-polycarpe",
+      "description": "Résolution d'appui pour la CPTAQ visant l'autorisation à une fin autre que l'agriculture.",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.1\n\nRÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE."
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-8-1",
+      "label": "Contrainte zone agricole CPTAQ",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "organisme": "CPTAQ",
+      "municipality": "saint-polycarpe",
+      "meetingDate": "2026-01-19",
+      "description": "Autorisation requise pour une fin autre que l'agriculture auprès de la CPTAQ.",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.1\n\nRÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-169-2019-01",
+      "label": "Règlement no 169-2019-01",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "169-2019-01",
+      "stage": "projet",
+      "title": "AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT LE RÈGLEMENT SUR LES NUISANCES (RMH 450)",
+      "municipality": "saint-polycarpe",
+      "meetingDate": "2026-01-19",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "10.1\n\nAVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-rmh-450",
+      "label": "Règlement sur les nuisances (RMH 450)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "RMH 450",
+      "title": "RÈGLEMENT SUR LES NUISANCES (RMH 450)",
+      "municipality": "saint-polycarpe",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "event-cptaq-8-1",
+      "target": "signal-cptaq-8-1",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "evidence_refs": [
+        "ev-8-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.1\n\nRÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-169-2019-01",
+      "target": "bylaw-rmh-450",
+      "relation": "replaces",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "evidence_refs": [
+        "ev-10-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)"
+        }
+      ]
+    },
+    {
+      "source": "source-00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+      "target": "event-cptaq-8-1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "evidence_refs": [
+        "ev-8-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.1\n\nRÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE."
+        }
+      ]
+    },
+    {
+      "source": "source-00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+      "target": "bylaw-169-2019-01",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "evidence_refs": [
+        "ev-10-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "10.1\n\nAVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-8-1",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+      "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "8.1\n\nRÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE."
+    },
+    {
+      "id": "ev-10-1",
+      "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+      "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+      "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "10.1\n\nAVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)"
+    }
+  ],
+  "input_tokens": 1250,
+  "output_tokens": 850
+}
+```

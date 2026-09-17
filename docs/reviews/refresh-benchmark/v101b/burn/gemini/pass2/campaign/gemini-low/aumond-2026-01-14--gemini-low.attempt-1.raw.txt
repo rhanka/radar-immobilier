@@ -1,0 +1,42 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+      "label": "Procès-verbal 14 janvier 2026 - Municipalité d'Aumond",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+      "date": "2026-01-14",
+      "municipality": "aumond",
+      "url": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal 14 janvier 2026\nSéance ordinaire du conseil de la Municipalité d'Aumond"
+        }
+      ]
+    }
+  ],
+  "edges": [],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+      "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+      "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+      "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "Procès-verbal 14 janvier 2026\nSéance ordinaire du conseil de la Municipalité d'Aumond"
+    }
+  ],
+  "input_tokens": 2048,
+  "output_tokens": 420
+}
+```

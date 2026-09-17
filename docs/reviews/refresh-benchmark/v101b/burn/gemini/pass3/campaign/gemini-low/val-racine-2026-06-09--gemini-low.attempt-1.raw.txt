@@ -1,0 +1,303 @@
+```json
+{
+  "contract_version": "immo-pv-extraction-v9",
+  "type": "Graphify Extraction",
+  "nodes": [
+    {
+      "id": "source-11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "label": "Ordre du jour du 9 juin 2026 - Val-Racine",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "status": "attached",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "date": "2026-06-09",
+      "municipality": "val-racine",
+      "url": "https://www.val-racine.com/fichiersUpload/fichiers/20260604152627-2026-06-09-ordre-du-jour.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "MUNICIPALITÉ DE VAL-RACINE\nPROJET D’ORDRE DU JOUR\nMardi, le 9 juin 2026"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2026-001",
+      "label": "DM-2026-001 - Dérogation mineure lot 4 768 354",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "status": "candidate",
+      "kind": "derogation",
+      "dossier": "DM-2026-001",
+      "meetingDate": "2026-06-09",
+      "municipality": "val-racine",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-09",
+      "no_lot": "4768354",
+      "description": "DM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.3.\n\nDM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2996-st-leon",
+      "label": "PIIA - 2996, chemin St-Léon (Arbres)",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "meetingDate": "2026-06-09",
+      "municipality": "val-racine",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "etape": "piia",
+      "etape_date": "2026-06-09",
+      "description": "PIIA - Demande du 2996, chemin St-Léon (Arbres)",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.4.\n\nPIIA\n\n- Demande du 2996, chemin St-Léon (Arbres)"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2984-st-leon",
+      "label": "PIIA - 2984, chemin St-Léon (Arbres)",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "meetingDate": "2026-06-09",
+      "municipality": "val-racine",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "etape": "piia",
+      "etape_date": "2026-06-09",
+      "description": "PIIA - Demande du 2984, chemin St-Léon (Arbres)",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.5.\n\nPIIA\n\n- Demande du 2984, chemin St-Léon (Arbres)"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-333",
+      "label": "Projet de Règlement no 333",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "status": "candidate",
+      "numero": "333",
+      "stage": "projet",
+      "municipality": "val-racine",
+      "meetingDate": "2026-06-09",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "title": "Projet de Règlement no 333 annulant le règlement no 315 décrétant l’entretien des chemins l’hiver pour la circulation pour les véhicules automobiles avec la fusion du déneigement par tolérance",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.1.\n\nProjet de Règlement no 333 annulant le règlement no 315 décrétant l’entretien des chemins l’hiver pour"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-315",
+      "label": "Règlement no 315",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "status": "candidate",
+      "numero": "315",
+      "municipality": "val-racine",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "title": "règlement no 315 décrétant l’entretien des chemins l’hiver pour la circulation pour les véhicules automobiles avec la fusion du déneigement par tolérance",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Projet de Règlement no 333 annulant le règlement no 315 décrétant l’entretien des chemins l’hiver pour"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-332",
+      "label": "Projet de Règlement no 332",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "status": "candidate",
+      "numero": "332",
+      "stage": "projet",
+      "municipality": "val-racine",
+      "meetingDate": "2026-06-09",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "title": "Projet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement tertiaire avec désinfestation par rayonnement ultraviolet",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "9.1.\n\nProjet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "target": "event-dm-2026-001",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "evidence_refs": [
+        "ev-dm-2026-001"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.3.\n\nDM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354"
+        }
+      ]
+    },
+    {
+      "source": "source-11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "target": "event-piia-2996-st-leon",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "evidence_refs": [
+        "ev-piia-2996"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.4.\n\nPIIA\n\n- Demande du 2996, chemin St-Léon (Arbres)"
+        }
+      ]
+    },
+    {
+      "source": "source-11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "target": "event-piia-2984-st-leon",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "evidence_refs": [
+        "ev-piia-2984"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.5.\n\nPIIA\n\n- Demande du 2984, chemin St-Léon (Arbres)"
+        }
+      ]
+    },
+    {
+      "source": "source-11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "target": "bylaw-333",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "evidence_refs": [
+        "ev-bylaw-333"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.1.\n\nProjet de Règlement no 333 annulant le règlement no 315 décrétant l’entretien des chemins l’hiver pour"
+        }
+      ]
+    },
+    {
+      "source": "source-11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "target": "bylaw-332",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "evidence_refs": [
+        "ev-bylaw-332"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "9.1.\n\nProjet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-333",
+      "target": "bylaw-315",
+      "relation": "replaces",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "evidence_refs": [
+        "ev-bylaw-333"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5.1.\n\nProjet de Règlement no 333 annulant le règlement no 315 décrétant l’entretien des chemins l’hiver pour"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-dm-2026-001",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "rawRef": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "sourceUrl": "https://www.val-racine.com/fichiersUpload/fichiers/20260604152627-2026-06-09-ordre-du-jour.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "6.3.\n\nDM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354\n\nR"
+    },
+    {
+      "id": "ev-piia-2996",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "rawRef": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "sourceUrl": "https://www.val-racine.com/fichiersUpload/fichiers/20260604152627-2026-06-09-ordre-du-jour.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "6.4.\n\nPIIA\n\n- Demande du 2996, chemin St-Léon (Arbres)\n\nR"
+    },
+    {
+      "id": "ev-piia-2984",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "rawRef": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "sourceUrl": "https://www.val-racine.com/fichiersUpload/fichiers/20260604152627-2026-06-09-ordre-du-jour.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "6.5.\n\nPIIA\n\n- Demande du 2984, chemin St-Léon (Arbres)\n\nR"
+    },
+    {
+      "id": "ev-bylaw-333",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "rawRef": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "sourceUrl": "https://www.val-racine.com/fichiersUpload/fichiers/20260604152627-2026-06-09-ordre-du-jour.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "5.1.\n\nProjet de Règlement no 333 annulant le règlement no 315 décrétant l’entretien des chemins l’hiver pour\nla circulation pour les véhicules automobiles avec la fusion du déneigement par tolérance"
+    },
+    {
+      "id": "ev-bylaw-332",
+      "source_file": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "rawRef": "raw/proces-verbaux-val-racine/cas/11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6.pdf",
+      "docSha": "11ceacb156deff39cfc0379c929619092c4515ab9318943a208054b4d03952c6",
+      "sourceUrl": "https://www.val-racine.com/fichiersUpload/fichiers/20260604152627-2026-06-09-ordre-du-jour.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "9.1.\n\nProjet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement\ntertiaire avec désinfestation par rayonnement ultraviolet"
+    }
+  ],
+  "input_tokens": 1450,
+  "output_tokens": 620
+}
+```

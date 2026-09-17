@@ -1,0 +1,415 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "label": "Procès-verbal du conseil municipal - 28 avril 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "date": "2026-04-28",
+      "municipality": "brossard",
+      "url": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de l’assemblée ordinaire du conseil municipal de la Ville de Brossard, tenue\nsous la présidence du conseiller Patrick Langlois, le 28 avril 2026"
+        }
+      ]
+    },
+    {
+      "id": "zone-ha-219",
+      "label": "Zone Ha-219",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "node_type": "Zone",
+      "status": "attached",
+      "code": "Ha-219",
+      "municipality": "brossard",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "meetingDate": "2026-04-28",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Considérant qu’une demande de dérogation mineure a été déposée pour le lot projeté\n6 720 588 afin de permettre une largeur de lot de 10,74 mètres, alors que la grille des usages\net normes de la zone Ha-219"
+        }
+      ]
+    },
+    {
+      "id": "zone-hc-316",
+      "label": "Zone Hc-316",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "node_type": "Zone",
+      "status": "attached",
+      "code": "Hc-316",
+      "municipality": "brossard",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "meetingDate": "2026-04-28",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "permettre un maximum de 210 logements dans l’ensemble de la zone Hc-316;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-reg-362",
+      "label": "Règlement de zonage REG-362",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "node_type": "Bylaw",
+      "status": "attached",
+      "numero": "REG-362",
+      "title": "Règlement de zonage",
+      "municipality": "brossard",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "alors que la grille des usages\net normes de la zone Ha-219 du règlement de zonage REG-362 prescrit une largeur de lot\nminimale de 12 mètres;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-reg-434-01",
+      "label": "Règlement REG-434-01",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "REG-434-01",
+      "title": "Règlement REG-434-01 modifiant le règlement sur les commerces de prêts sur gages et autres articles d'occasion",
+      "municipality": "brossard",
+      "stage": "avis_motion",
+      "date": "2026-04-28",
+      "meetingDate": "2026-04-28",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "Avis de motion est donné par la conseillère Sophie Allard à l'effet que sera présenté pour\nadoption à une séance ultérieure, le règlement REG-434-01"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-reg-512",
+      "label": "Règlement REG-512",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "REG-512",
+      "title": "Règlement REG-512 relatif au Code d’éthique et de déontologie des élues et élus de la Ville de Brossard",
+      "resolution": "260428-099",
+      "municipality": "brossard",
+      "stage": "adoption",
+      "date": "2026-04-28",
+      "meetingDate": "2026-04-28",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’adopter le règlement REG-512 modifiant le règlement relatif au Code d’éthique et de\ndéontologie des élues et élus de la Ville de Brossard, tel que soumis."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-reg-516",
+      "label": "Règlement REG-516",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "REG-516",
+      "title": "Règlement REG-516 décrétant des dépenses en immobilisations et un emprunt de 6 500 000 $ pour la réalisation de travaux de planage et de pavage",
+      "resolution": "260428-100",
+      "municipality": "brossard",
+      "stage": "adoption",
+      "date": "2026-04-28",
+      "meetingDate": "2026-04-28",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’adopter le règlement REG-516 décrétant des dépenses en immobilisations et un emprunt\nde 6 500 000 $ pour la réalisation de travaux de planage et de pavage, tel que soumis."
+        }
+      ]
+    },
+    {
+      "id": "event-260428-096",
+      "label": "Dérogation mineure - 5641, rue Aline",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "derogation",
+      "decision": "approuvé",
+      "resolution": "260428-096",
+      "municipality": "brossard",
+      "date": "2026-04-28",
+      "meetingDate": "2026-04-28",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-04-28",
+      "zone_ref": "Ha-219",
+      "no_lot": "6720588",
+      "reglement_number": "REG-362",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588"
+        }
+      ]
+    },
+    {
+      "id": "event-260428-101",
+      "label": "PPCMOI-2026-001 - 3605-3665, rue de Châteauneuf",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "ppcmoi",
+      "decision": "approuvé",
+      "resolution": "260428-101",
+      "dossier": "PPCMOI-2026-001",
+      "municipality": "brossard",
+      "date": "2026-04-28",
+      "meetingDate": "2026-04-28",
+      "etape": "adoption",
+      "etape_date": "2026-04-28",
+      "zone_ref": "Hc-316",
+      "no_lot": "6052495",
+      "reglement_number": "REG-367",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367)"
+        }
+      ]
+    },
+    {
+      "id": "signal-ppcmoi-2026-001",
+      "label": "Signal PPCMOI - 210 logements 3605-3665 rue de Châteauneuf",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "node_type": "Signal",
+      "status": "validated",
+      "category": "redéveloppement_résidentiel",
+      "kind": "ppcmoi",
+      "resolution": "260428-101",
+      "date": "2026-04-28",
+      "meetingDate": "2026-04-28",
+      "etape": "adoption",
+      "etape_date": "2026-04-28",
+      "zone_ref": "Hc-316",
+      "no_lot": "6052495",
+      "nb_unites_max": 210,
+      "municipality": "brossard",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "Considérant qu’il est demandé d’ajouter 20 logements supplémentaires aux 190 déjà\nautorisés;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "zone-ha-219",
+      "target": "bylaw-reg-362",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "evidence_refs": [
+        "ev-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "la grille des usages\net normes de la zone Ha-219 du règlement de zonage REG-362 prescrit une largeur de lot\nminimale de 12 mètres;"
+        }
+      ]
+    },
+    {
+      "source": "event-260428-096",
+      "target": "zone-ha-219",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "evidence_refs": [
+        "ev-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588"
+        }
+      ]
+    },
+    {
+      "source": "event-260428-101",
+      "target": "zone-hc-316",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "evidence_refs": [
+        "ev-2"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "permettre un maximum de 210 logements dans l’ensemble de la zone Hc-316;"
+        }
+      ]
+    },
+    {
+      "source": "event-260428-101",
+      "target": "signal-ppcmoi-2026-001",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "evidence_refs": [
+        "ev-2"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367)"
+        }
+      ]
+    },
+    {
+      "source": "signal-ppcmoi-2026-001",
+      "target": "zone-hc-316",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "evidence_refs": [
+        "ev-2"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "permettre un maximum de 210 logements dans l’ensemble de la zone Hc-316;"
+        }
+      ]
+    },
+    {
+      "source": "source-04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "target": "event-260428-096",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "evidence_refs": [
+        "ev-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588"
+        }
+      ]
+    },
+    {
+      "source": "source-04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "target": "event-260428-101",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "evidence_refs": [
+        "ev-2"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367)"
+        }
+      ]
+    },
+    {
+      "source": "source-04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "target": "bylaw-reg-512",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "evidence_refs": [
+        "ev-3"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’adopter le règlement REG-512 modifiant le règlement relatif au Code d’éthique et de\ndéontologie des élues et élus de la Ville de Brossard, tel que soumis."
+        }
+      ]
+    },
+    {
+      "source": "source-04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "target": "bylaw-reg-516",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "evidence_refs": [
+        "ev-4"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’adopter le règlement REG-516 décrétant des dépenses en immobilisations et un emprunt\nde 6 500 000 $ pour la réalisation de travaux de planage et de pavage, tel que soumis."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue Aline, lot projeté 6 720 588"
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+      "modality": "pdf",
+      "page": 6,
+      "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif aux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367)"
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "D’adopter le règlement REG-512 modifiant le règlement relatif au Code d’éthique et de déontologie des élues et élus de la Ville de Brossard, tel que soumis."
+    },
+    {
+      "id": "ev-4",
+      "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+      "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+      "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "D’adopter le règlement REG-516 décrétant des dépenses en immobilisations et un emprunt de 6 500 000 $ pour la réalisation de travaux de planage et de pavage, tel que soumis."
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 5800,
+  "output_tokens": 1200
+}
+```

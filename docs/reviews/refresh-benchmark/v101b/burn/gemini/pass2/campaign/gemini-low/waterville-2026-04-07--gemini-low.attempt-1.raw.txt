@@ -1,0 +1,298 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "label": "Ordre du jour - Assemblée régulière du 7 avril 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "date": "2026-04-07",
+      "municipality": "waterville",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "sourceKind": "pv",
+      "url": "https://www.waterville.ca/upload/odj/2026-04-07%20ODJ%20s%C3%A9ance%20publique.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ORDRE DU JOUR\nAssemblée régulière du 7 avril 2026\nÀ 19h"
+        }
+      ]
+    },
+    {
+      "id": "event-6-1-demande-2026-01-0006",
+      "label": "Demande de modification règlementaire 2026-01-0006",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "rezonage",
+      "dossier": "2026-01-0006",
+      "meetingDate": "2026-04-07",
+      "municipality": "waterville",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "description": "Demande de modification règlementaire 2026-01-0006",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.1 Demande de modification règlementaire 2026-01-0006"
+        }
+      ]
+    },
+    {
+      "id": "event-6-2-derogation-2026-02-0007",
+      "label": "Dérogation mineure 2026-02-0007",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "derogation",
+      "dossier": "2026-02-0007",
+      "meetingDate": "2026-04-07",
+      "municipality": "waterville",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "description": "Dérogation mineure 2026-02-0007",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.2 Dérogation mineure 2026-02-0007"
+        }
+      ]
+    },
+    {
+      "id": "event-6-3-derogation-2026-02-0008",
+      "label": "Dérogation mineure 2026-02-0008",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "derogation",
+      "dossier": "2026-02-0008",
+      "meetingDate": "2026-04-07",
+      "municipality": "waterville",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "description": "Dérogation mineure 2026-02-0008",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.3 Dérogation mineure 2026-02-0008"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-615-amendement",
+      "label": "Projet de règlement amendant le règlement de lotissement no 615",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "stage": "avis_motion",
+      "meetingDate": "2026-04-07",
+      "municipality": "waterville",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "title": "Avis de motion projet de règlement amendant le règlement de lotissement no 615 de la Ville de Waterville",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.3\nAvis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-615",
+      "label": "Règlement de lotissement no 615",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "615",
+      "municipality": "waterville",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "title": "Règlement de lotissement no 615 de la Ville de Waterville",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.3\nAvis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville"
+        }
+      ]
+    },
+    {
+      "id": "constraint-8-5-cptaq",
+      "label": "Demande d'autorisation CPTAQ - Agrandissement LET",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "organisme": "Commission de protection agricole du Québec",
+      "meetingDate": "2026-04-07",
+      "municipality": "waterville",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "description": "Demande d’autorisation à la Commission de protection agricole du Québec – Agrandissement du lieu d’enfouissement technique",
+      "evidence_refs": [
+        "ev-constraint-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "8.5\nDemande d’autorisation à la Commission de protection agricole du Québec –\nAgrandissement du lieu d’enfouissement technique"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "target": "event-6-1-demande-2026-01-0006",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "evidence_refs": [
+        "ev-event-6-1"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.1 Demande de modification règlementaire 2026-01-0006"
+        }
+      ]
+    },
+    {
+      "source": "source-34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "target": "event-6-2-derogation-2026-02-0007",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "evidence_refs": [
+        "ev-event-6-2"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.2 Dérogation mineure 2026-02-0007"
+        }
+      ]
+    },
+    {
+      "source": "source-34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "target": "event-6-3-derogation-2026-02-0008",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "evidence_refs": [
+        "ev-event-6-3"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.3 Dérogation mineure 2026-02-0008"
+        }
+      ]
+    },
+    {
+      "source": "source-34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "target": "bylaw-615-amendement",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amend"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.3\nAvis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville"
+        }
+      ]
+    },
+    {
+      "source": "source-34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "target": "constraint-8-5-cptaq",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "evidence_refs": [
+        "ev-constraint-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "8.5\nDemande d’autorisation à la Commission de protection agricole du Québec –\nAgrandissement du lieu d’enfouissement technique"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-615-amendement",
+      "target": "bylaw-615",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amend"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "7.3\nAvis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-event-6-1",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "rawRef": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "sourceUrl": "https://www.waterville.ca/upload/odj/2026-04-07%20ODJ%20s%C3%A9ance%20publique.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "6.1 Demande de modification règlementaire 2026-01-0006"
+    },
+    {
+      "id": "ev-event-6-2",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "rawRef": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "sourceUrl": "https://www.waterville.ca/upload/odj/2026-04-07%20ODJ%20s%C3%A9ance%20publique.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "6.2 Dérogation mineure 2026-02-0007"
+    },
+    {
+      "id": "ev-event-6-3",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "rawRef": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "sourceUrl": "https://www.waterville.ca/upload/odj/2026-04-07%20ODJ%20s%C3%A9ance%20publique.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "6.3 Dérogation mineure 2026-02-0008"
+    },
+    {
+      "id": "ev-bylaw-amend",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "rawRef": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "sourceUrl": "https://www.waterville.ca/upload/odj/2026-04-07%20ODJ%20s%C3%A9ance%20publique.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "7.3\nAvis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville"
+    },
+    {
+      "id": "ev-constraint-cptaq",
+      "source_file": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "rawRef": "raw/proces-verbaux-waterville/cas/34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.pdf",
+      "docSha": "34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974",
+      "sourceUrl": "https://www.waterville.ca/upload/odj/2026-04-07%20ODJ%20s%C3%A9ance%20publique.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "8.5\nDemande d’autorisation à la Commission de protection agricole du Québec –\nAgrandissement du lieu d’enfouissement technique"
+    }
+  ],
+  "input_tokens": 1250,
+  "output_tokens": 780
+}
+```

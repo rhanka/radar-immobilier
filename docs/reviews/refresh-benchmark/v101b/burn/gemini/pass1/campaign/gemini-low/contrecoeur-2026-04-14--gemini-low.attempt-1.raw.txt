@@ -1,0 +1,516 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "label": "Procès-verbal de la séance ordinaire du conseil - 14 avril 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "attached",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "date": "2026-04-14",
+      "municipality": "ville-de-contrecoeur",
+      "url": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal tenue le mardi 14 avril 2026 à 19 h"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-u-102",
+      "label": "Projet de Règlement U-102",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "numero": "U-102",
+      "title": "Constituant le comité consultatif en urbanisme – Abrogeant le Règlement 147-82",
+      "stage": "avis_motion",
+      "municipality": "ville-de-contrecoeur",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "meetingDate": "2026-04-14",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par madame la conseillère Manon Handfield."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-147-82",
+      "label": "Règlement 147-82",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "numero": "147-82",
+      "title": "Constituant un comité consultatif d’urbanisme pour la municipalité de Contrecœur",
+      "municipality": "ville-de-contrecoeur",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "meetingDate": "2026-04-14",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "QU’à une séance subséquente de ce conseil tenue à un jour ultérieur, il sera présenté en vue de son adoption, le Règlement U-102 constituant le comité consultatif en urbanisme et abrogeant le Règlement 147-82"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-u-100-1",
+      "label": "Second projet de Règlement U-100-1",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "numero": "U-100-1",
+      "title": "Modifiant le Règlement U-100 relatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de l’annexe B",
+      "stage": "2e_projet",
+      "municipality": "ville-de-contrecoeur",
+      "zone_cible": "P2-51",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "meetingDate": "2026-04-14",
+      "resolution": "2026-04-057",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100 relatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de l’annexe B."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-u-100",
+      "label": "Règlement U-100",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "numero": "U-100",
+      "title": "Règlement relatif au zonage",
+      "municipality": "ville-de-contrecoeur",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "meetingDate": "2026-04-14",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100 relatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de l’annexe B."
+        }
+      ]
+    },
+    {
+      "id": "zone-p2-51",
+      "label": "Zone P2-51",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "code": "P2-51",
+      "municipality": "ville-de-contrecoeur",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "meetingDate": "2026-04-14",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QU'une modification a été apportée au règlement relatif à la grille des usages et des normes de la zone P2-51;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-u-101",
+      "label": "Règlement U-101",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "numero": "U-101",
+      "title": "Contrôle intérimaire relatif au secteur industriel",
+      "stage": "adoption",
+      "date": "2026-04-14",
+      "municipality": "ville-de-contrecoeur",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "meetingDate": "2026-04-14",
+      "resolution": "2026-04-058",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur industriel."
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-009",
+      "label": "PIIA 2026-009 - 4270, rue des Patriotes, suite 101",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "date": "2026-04-14",
+      "meetingDate": "2026-04-14",
+      "decision": "approuvé",
+      "dossier": "2026-009",
+      "municipality": "ville-de-contrecoeur",
+      "resolution": "2026-04-071",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "etape": "piia",
+      "etape_date": "2026-04-14",
+      "zone_ref": "C6-18",
+      "no_lot": "6652234",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une enseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau autoroutier au 4270, rue des Patriotes"
+        }
+      ]
+    },
+    {
+      "id": "zone-c6-18",
+      "label": "Zone C6-18",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "code": "C6-18",
+      "municipality": "ville-de-contrecoeur",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "meetingDate": "2026-04-14",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une enseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau autoroutier au 4270, rue des Patriotes"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-012",
+      "label": "PIIA 2026-012 - 5725, rue Moreau",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "date": "2026-04-14",
+      "meetingDate": "2026-04-14",
+      "decision": "approuvé",
+      "dossier": "2026-012",
+      "municipality": "ville-de-contrecoeur",
+      "resolution": "2026-04-072",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "etape": "piia",
+      "etape_date": "2026-04-14",
+      "no_lot": "6382589",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un bâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589 au cadastre du Québec"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2026-011",
+      "label": "Dérogation mineure 2026-011 - 360-366 et 398-400, rue Papin",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "kind": "derogation",
+      "date": "2026-04-14",
+      "meetingDate": "2026-04-14",
+      "decision": "approuvé",
+      "dossier": "2026-011",
+      "municipality": "ville-de-contrecoeur",
+      "resolution": "2026-04-073",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-04-14",
+      "zone_ref": "C3-58",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles situés aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre du Québec, circonscription foncière de Verchères"
+        }
+      ]
+    },
+    {
+      "id": "zone-c3-58",
+      "label": "Zone C3-58",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "code": "C3-58",
+      "municipality": "ville-de-contrecoeur",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "meetingDate": "2026-04-14",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles situés aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre du Québec, circonscription foncière de Verchères"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2026-020",
+      "label": "Dérogation mineure 2026-020 - 275, rue de l'Église",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "kind": "derogation",
+      "date": "2026-04-14",
+      "meetingDate": "2026-04-14",
+      "decision": "approuvé",
+      "dossier": "2026-020",
+      "municipality": "ville-de-contrecoeur",
+      "resolution": "2026-04-074",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-04-14",
+      "zone_ref": "P2-174",
+      "no_lot": "6607642",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé au 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière de Verchères, zone P2-174 visant à permettre"
+        }
+      ]
+    },
+    {
+      "id": "zone-p2-174",
+      "label": "Zone P2-174",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "status": "candidate",
+      "code": "P2-174",
+      "municipality": "ville-de-contrecoeur",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "meetingDate": "2026-04-14",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé au 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière de Verchères, zone P2-174 visant à permettre"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-u-102",
+      "target": "bylaw-147-82",
+      "relation": "replaces",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "evidence_refs": [
+        "ev-u-102-motion"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "QU’à une séance subséquente de ce conseil tenue à un jour ultérieur, il sera présenté en vue de son adoption, le Règlement U-102 constituant le comité consultatif en urbanisme et abrogeant le Règlement 147-82"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-u-100-1",
+      "target": "bylaw-u-100",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "evidence_refs": [
+        "ev-u-100-1-adopt"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100 relatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de l’annexe B."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-u-100-1",
+      "target": "zone-p2-51",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "evidence_refs": [
+        "ev-u-100-1-zone"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QU'une modification a été apportée au règlement relatif à la grille des usages et des normes de la zone P2-51;"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-009",
+      "target": "zone-c6-18",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "evidence_refs": [
+        "ev-piia-2026-009"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une enseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau autoroutier au 4270, rue des Patriotes"
+        }
+      ]
+    },
+    {
+      "source": "event-dm-2026-011",
+      "target": "zone-c3-58",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "evidence_refs": [
+        "ev-dm-2026-011"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles situés aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre du Québec, circonscription foncière de Verchères"
+        }
+      ]
+    },
+    {
+      "source": "event-dm-2026-020",
+      "target": "zone-p2-174",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "evidence_refs": [
+        "ev-dm-2026-020"
+      ],
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé au 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière de Verchères, zone P2-174 visant à permettre"
+        }
+      ]
+    },
+    {
+      "source": "source-04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "target": "bylaw-u-101",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "evidence_refs": [
+        "ev-u-101-adopt"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur industriel."
+        }
+      ]
+    },
+    {
+      "source": "source-04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "target": "event-piia-2026-012",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "evidence_refs": [
+        "ev-piia-2026-012"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un bâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589 au cadastre du Québec"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-u-102-motion",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "QU’à une séance subséquente de ce conseil tenue à un jour ultérieur, il sera présenté en vue de son adoption, le Règlement U-102 constituant le comité consultatif en urbanisme et abrogeant le Règlement 147-82 constituant un comité consultatif d’urbanisme pour la municipalité de Contrecœur."
+    },
+    {
+      "id": "ev-u-100-1-adopt",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100 relatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de l’annexe B."
+    },
+    {
+      "id": "ev-u-100-1-zone",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "CONSIDÉRANT QU'une modification a été apportée au règlement relatif à la grille des usages et des normes de la zone P2-51;"
+    },
+    {
+      "id": "ev-u-101-adopt",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur industriel."
+    },
+    {
+      "id": "ev-piia-2026-009",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une enseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau autoroutier au 4270, rue des Patriotes, suite 101, sur le lot 6 652 234 au cadastre du Québec, circonscription foncière de Verchères, zone C6-18, conformément aux plans et dessins préparés par Accès et déposés au Service de l’urbanisme et de l’environnement."
+    },
+    {
+      "id": "ev-piia-2026-012",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un bâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589 au cadastre du Québec, circonscription foncière de Verchères, conformément aux plans réalisés par Dessins Drummond, datés du 19 mars 2026 et déposés au Service de l’urbanisme et de l’environnement."
+    },
+    {
+      "id": "ev-dm-2026-011",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles situés aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre du Québec, circonscription foncière de Verchères, zone C3-58 visant à permettre : - De déroger à la grille C3-58 du règlement de zonage afin d’autoriser la modification de deux lots existants pour porter leur profondeur respective à 51,73 mètres et 52,41 mètres, alors que la profondeur minimale est de 80 mètres, tel que prescrit audit règlement de zonage; - De déroger à la grille C3-58 du règlement de zonage afin d’autoriser la modification de deux lots existants pour porter leur superficie respective à 1 163,4 mètres carrés et 1 214,4 mètres carrés, alors que la superficie minimale est de 3 000 mètres carrés, tel que prescrit audit règlement de zonage."
+    },
+    {
+      "id": "ev-dm-2026-020",
+      "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+      "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+      "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 15,
+      "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé au 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière de Verchères, zone P2-174 visant à permettre : - De déroger à l’article 677 du règlement de zonage afin de soustraire à l’obligation de la plantation d’un arbre à tous les 7 mètres dans l’aire d’isolement située entre l’allée d’accès et l’aire de stationnement, tel que prescrit audit règlement de zonage; - De déroger à l’article 450 du règlement de zonage afin d’autoriser la localisation d’un équipement accessoire en cour avant, au lieu d’être localisé en cour latérale ou arrière, tel que prescrit audit règlement de zonage; - De déroger à l’article 509 du règlement de zonage afin d’autoriser l’implantation d’un équipement accessoire à une distance de 1,50 mètre de la ligne de terrain, au lieu de la distance minimale de 2 mètres, tel que prescrit audit règlement de zonage."
+    }
+  ],
+  "input_tokens": 6250,
+  "output_tokens": 2580
+}
+```

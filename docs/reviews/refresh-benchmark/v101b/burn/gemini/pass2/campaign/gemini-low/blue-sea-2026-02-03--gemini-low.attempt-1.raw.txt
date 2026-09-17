@@ -1,0 +1,3 @@
+```json
+{"contract_version":"immo-pv-extraction-v9","type":"Graphify Extraction","nodes":[],"edges":[],"input_tokens":1850,"output_tokens":35}
+```

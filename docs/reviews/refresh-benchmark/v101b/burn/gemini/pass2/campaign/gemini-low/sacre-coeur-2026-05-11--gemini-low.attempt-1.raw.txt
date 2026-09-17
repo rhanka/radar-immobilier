@@ -1,0 +1,493 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "label": "Procès-verbal de la séance ordinaire du 11 mai 2026 - Sacré-Cœur",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "date": "2026-05-11",
+      "municipality": "sacre-coeur",
+      "url": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "À une séance ordinaire du conseil de la Municipalité de Sacré-Cœur, comté\nde la Haute-Côte-Nord à l’endroit ordinaire des séances du conseil, à la salle\ndu conseil, au 88 rue Principale Nord"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-645",
+      "label": "Règlement numéro 645",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "645",
+      "title": "Règlement sur l’occupation et l’entretien des bâtiments",
+      "date": "2026-05-11",
+      "stage": "adoption",
+      "municipality": "sacre-coeur",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "meetingDate": "2026-05-11",
+      "resolution": "2026-05-167",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté :"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-646-projet",
+      "label": "Projet de règlement numéro 646",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "646",
+      "title": "Règlement de délégation de pouvoirs",
+      "date": "2026-05-11",
+      "stage": "projet",
+      "municipality": "sacre-coeur",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "meetingDate": "2026-05-11",
+      "resolution": "2026-05-174",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Un projet de règlement intitulé « Règlement numéro 646 intitulé délégation\nde pouvoir » est déposé séance tenante."
+        }
+      ]
+    },
+    {
+      "id": "zone-40-rec",
+      "label": "Zone 40-REC",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "Zone",
+      "status": "attached",
+      "code": "40-REC",
+      "municipality": "sacre-coeur",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "meetingDate": "2026-05-11",
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "CONSIDÉRANT QUE madame Chantal Gauthier a fait une demande à\nPIIA numéro 2026-010 afin d’autoriser la reconstruction de leur maison au\n318, chemin de L’Anse-de-Roche dans la zone 40-REC;"
+        }
+      ]
+    },
+    {
+      "id": "event-ppcmoi-2026-009",
+      "label": "PPCMOI 2026-009 (Mario Bédard)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "decision": "approuvé",
+      "kind": "ppcmoi",
+      "dossier": "2026-009",
+      "demandeur": "Mario Bédard",
+      "municipality": "sacre-coeur",
+      "resolution": "2026-05-186",
+      "no_lot": "4700425",
+      "etape": "ppcmoi",
+      "etape_date": "2026-05-11",
+      "description": "Autorisation par projet de résolution de la demande PPCMOI visant à intégrer la classe d'usage (Hc) bifamilial isolé sur le lot 4 700 425",
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présents, d’autoriser par projet de\nrésolution la demande numéro 2026-009 de M. Mario Bédard"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-010",
+      "label": "PIIA 2026-010 (Chantal Gauthier)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "decision": "approuvé",
+      "kind": "piia",
+      "dossier": "2026-010",
+      "demandeur": "Chantal Gauthier",
+      "municipality": "sacre-coeur",
+      "resolution": "2026-05-187",
+      "zone_ref": "40-REC",
+      "etape": "piia",
+      "etape_date": "2026-05-11",
+      "description": "Autorisation de la demande de PIIA aux fins de permettre la reconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la zone 40-REC",
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-008",
+      "label": "PIIA 2026-008 (Jennifer Hovington)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "decision": "approuvé",
+      "kind": "piia",
+      "dossier": "2026-008",
+      "demandeur": "Jennifer Hovington",
+      "municipality": "sacre-coeur",
+      "resolution": "2026-05-188",
+      "zone_ref": "40-REC",
+      "etape": "piia",
+      "etape_date": "2026-05-11",
+      "description": "Autorisation de la demande de PIIA aux fins de permettre la construction de la maison au 99, chemin du fjord dans la zone 40-REC",
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-007",
+      "label": "PIIA 2026-007 (Ken Gauthier)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "decision": "approuvé",
+      "kind": "piia",
+      "dossier": "2026-007",
+      "demandeur": "Ken Gauthier",
+      "municipality": "sacre-coeur",
+      "resolution": "2026-05-189",
+      "zone_ref": "40-REC",
+      "etape": "piia",
+      "etape_date": "2026-05-11",
+      "description": "Autorisation de la demande de PIIA aux fins de permettre l’ajout de panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche dans la zone 40-REC",
+      "citations": [
+        {
+          "page": 21,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Paul J. Choquette et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-006",
+      "label": "PIIA 2026-006 (Émilie Dufour)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "decision": "approuvé",
+      "kind": "piia",
+      "dossier": "2026-006",
+      "demandeur": "Émilie Dufour",
+      "municipality": "sacre-coeur",
+      "resolution": "2026-05-190",
+      "zone_ref": "40-REC",
+      "etape": "piia",
+      "etape_date": "2026-05-11",
+      "description": "Autorisation de la demande de PIIA aux fins d’autoriser l’agrandissement du patio à la place de la terrasse actuelle au 295 chemin de L’Anse de Roche dans la zone 40-REC",
+      "citations": [
+        {
+          "page": 21,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-20226-009",
+      "label": "Dérogation mineure 20226-009 (Société des frais funéraires)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "dossier": "20226-009",
+      "demandeur_corporate": "Société des frais funéraires de Sacré-Cœur inc.",
+      "municipality": "sacre-coeur",
+      "resolution": "2026-05-191",
+      "no_lot": "4700841",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-05-11",
+      "description": "Autorisation de dérogation mineure pour réduire la marge de recul arrière de huit mètres à deux mètres pour un garage attenant sur le lot 4 700 841",
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Guy Brisson et résolu, à\nl’unanimité des conseillers présents, d’autoriser la demande de dérogation\nmineure numéro 20226-009 soumise par la Société des frais funéraires de\nSacré-Cœur inc."
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2026-011",
+      "label": "Dérogation mineure 2026-011 (Yannick Hovington)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "dossier": "2026-011",
+      "demandeur": "Yannick Hovington",
+      "municipality": "sacre-coeur",
+      "resolution": "2026-05-192",
+      "no_lot": "4701026",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-05-11",
+      "description": "Autorisation de dérogation mineure pour réduire la marge de recul arrière de huit mètres à 6,25 mètres derrière le garage attenant sur le lot 4 701 026",
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu, à l’unanimité des conseillers présents, d’autoriser la demande de\ndérogation mineure numéro 2026-011 soumise par monsieur Yannick\nHovington"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "target": "bylaw-645",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "evidence_refs": ["ev-1"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté :"
+        }
+      ]
+    },
+    {
+      "source": "source-1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "target": "bylaw-646-projet",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Un projet de règlement intitulé « Règlement numéro 646 intitulé délégation\nde pouvoir » est déposé séance tenante."
+        }
+      ]
+    },
+    {
+      "source": "source-1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "target": "event-ppcmoi-2026-009",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présents, d’autoriser par projet de\nrésolution la demande numéro 2026-009 de M. Mario Bédard"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-010",
+      "target": "zone-40-rec",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\nzone 40-REC."
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-008",
+      "target": "zone-40-rec",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 20,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC."
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-007",
+      "target": "zone-40-rec",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "evidence_refs": ["ev-6"],
+      "citations": [
+        {
+          "page": 21,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Paul J. Choquette et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche\ndans la zone 40-REC"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-006",
+      "target": "zone-40-rec",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "evidence_refs": ["ev-7"],
+      "citations": [
+        {
+          "page": 21,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\ndu patio à la place de la terrasse actuelle au 295 chemin de\nL’Anse de Roche dans la zone 40-REC."
+        }
+      ]
+    },
+    {
+      "source": "source-1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "target": "event-dm-20226-009",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "evidence_refs": ["ev-8"],
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Guy Brisson et résolu, à\nl’unanimité des conseillers présents, d’autoriser la demande de dérogation\nmineure numéro 20226-009 soumise par la Société des frais funéraires de\nSacré-Cœur inc."
+        }
+      ]
+    },
+    {
+      "source": "source-1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "target": "event-dm-2026-011",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "evidence_refs": ["ev-9"],
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu, à l’unanimité des conseillers présents, d’autoriser la demande de\ndérogation mineure numéro 2026-011 soumise par monsieur Yannick\nHovington"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté :"
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "Un projet de règlement intitulé « Règlement numéro 646 intitulé délégation\nde pouvoir » est déposé séance tenante."
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+      "modality": "pdf",
+      "page": 19,
+      "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présents, d’autoriser par projet de\nrésolution la demande numéro 2026-009 de M. Mario Bédard"
+    },
+    {
+      "id": "ev-4",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+      "modality": "pdf",
+      "page": 20,
+      "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\nzone 40-REC."
+    },
+    {
+      "id": "ev-5",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+      "modality": "pdf",
+      "page": 20,
+      "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC."
+    },
+    {
+      "id": "ev-6",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+      "modality": "pdf",
+      "page": 21,
+      "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Paul J. Choquette et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche\ndans la zone 40-REC"
+    },
+    {
+      "id": "ev-7",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+      "modality": "pdf",
+      "page": 21,
+      "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\ndu patio à la place de la terrasse actuelle au 295 chemin de\nL’Anse de Roche dans la zone 40-REC."
+    },
+    {
+      "id": "ev-8",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+      "modality": "pdf",
+      "page": 22,
+      "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Guy Brisson et résolu, à\nl’unanimité des conseillers présents, d’autoriser la demande de dérogation\nmineure numéro 20226-009 soumise par la Société des frais funéraires de\nSacré-Cœur inc."
+    },
+    {
+      "id": "ev-9",
+      "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+      "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+      "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+      "modality": "pdf",
+      "page": 22,
+      "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu, à l’unanimité des conseillers présents, d’autoriser la demande de\ndérogation mineure numéro 2026-011 soumise par monsieur Yannick\nHovington"
+    }
+  ],
+  "input_tokens": 6250,
+  "output_tokens": 1950
+}
+```

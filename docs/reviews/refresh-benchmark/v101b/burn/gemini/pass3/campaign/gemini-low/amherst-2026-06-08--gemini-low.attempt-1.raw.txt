@@ -1,0 +1,42 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+      "label": "Ordre du jour - Séance ordinaire du 8 juin 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "municipality": "amherst",
+      "date": "2026-06-08",
+      "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "url": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE ORDINAIRE DU CONSEIL\nDATE :\nHEURE :\nLIEU :\n\nLundi 8 juin 2026"
+        }
+      ]
+    }
+  ],
+  "edges": [],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+      "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+      "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+      "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "SÉANCE ORDINAIRE DU CONSEIL\nDATE :\nHEURE :\nLIEU :\n\nLundi 8 juin 2026"
+    }
+  ],
+  "input_tokens": 1200,
+  "output_tokens": 300
+}
+```

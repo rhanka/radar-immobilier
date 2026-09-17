@@ -1,0 +1,458 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "src-2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "label": "Procès-verbal de la séance ordinaire du 12 janvier 2026 - Saint-Odilon-de-Cranbourne",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "date": "2026-01-12",
+      "municipality": "saint-odilon-de-cranbourne",
+      "url": "https://www.saint-odilon.qc.ca/wp-content/uploads/2026/03/01-301_PVCONSEIL_2026-01-12.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de Saint-Odilon-deCranbourne, tenue au 111 rue Hôtel-de-Ville à Saint-Odilon-de-Cranbourne, le\n12 janvier 2026 à 20h."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-437-2025",
+      "label": "Règlement 437-2025 modifiant le plan d'urbanisme 392-2021",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "node_type": "Bylaw",
+      "status": "attached",
+      "numero": "437-2025",
+      "title": "Règlement 437-2025 modifiant le plan d'urbanisme 392-2021",
+      "objet": "modifiant le plan d'urbanisme 392-2021",
+      "date": "2026-01-12",
+      "stage": "adoption",
+      "municipality": "saint-odilon-de-cranbourne",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "meetingDate": "2026-01-12",
+      "resolution": "5-01-2026",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021\nRésolution 5-01-2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-392-2021",
+      "label": "Plan d'urbanisme 392-2021",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "392-2021",
+      "title": "Plan d'urbanisme 392-2021",
+      "municipality": "saint-odilon-de-cranbourne",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-438-2025",
+      "label": "Règlement 438-2025 modifiant le règlement de zonage 394-2021",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "node_type": "Bylaw",
+      "status": "attached",
+      "numero": "438-2025",
+      "title": "Règlement 438-2025 modifiant le règlement de zonage 394-2021 – Concordance permettant la modification de la zone M-77 et abroge la zone Rm-93.",
+      "objet": "modifiant le règlement de zonage 394-2021 – Concordance permettant la modification de la zone M-77 et abroge la zone Rm-93",
+      "date": "2026-01-12",
+      "stage": "adoption",
+      "municipality": "saint-odilon-de-cranbourne",
+      "zone_cible": "M-77",
+      "zones_ciblees": [
+        "M-77",
+        "Rm-93"
+      ],
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "meetingDate": "2026-01-12",
+      "resolution": "6-01-2026",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021\nRésolution 6-01-2026"
+        },
+        {
+          "page": 4,
+          "excerpt": "Le règlement s’intitule « Règlement 438-2025 modifiant le règlement de zonage\n394-2021 – Concordance permettant la modification de la zone M-77 et abroge\nla zone Rm-93."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-394-2021",
+      "label": "Règlement de zonage 394-2021",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "394-2021",
+      "title": "Règlement de zonage 394-2021",
+      "municipality": "saint-odilon-de-cranbourne",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021"
+        }
+      ]
+    },
+    {
+      "id": "zone-m-77",
+      "label": "Zone M-77",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "M-77",
+      "municipality": "saint-odilon-de-cranbourne",
+      "usage": "mixte",
+      "description": "Zone mixte M-77",
+      "bylaw": "394-2021",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "meetingDate": "2026-01-12",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "ATTENDU QUE le conseil est favorable à la modification de la zone\nM-77 et l’abrogation de la zone Rm-93;"
+        },
+        {
+          "page": 5,
+          "excerpt": "La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\nzone Rm-93 est donc abrogée."
+        }
+      ]
+    },
+    {
+      "id": "zone-rm-93",
+      "label": "Zone Rm-93",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "node_type": "Zone",
+      "status": "superseded",
+      "code": "Rm-93",
+      "municipality": "saint-odilon-de-cranbourne",
+      "description": "Zone Rm-93 abrogée et fusionnée dans la zone M-77",
+      "bylaw": "394-2021",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "meetingDate": "2026-01-12",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "ATTENDU QUE le conseil est favorable à la modification de la zone\nM-77 et l’abrogation de la zone Rm-93;"
+        },
+        {
+          "page": 5,
+          "excerpt": "La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\nzone Rm-93 est donc abrogée."
+        }
+      ]
+    },
+    {
+      "id": "event-6-01-2026",
+      "label": "Adoption du règlement 438-2025 - fusion/agrandissement zone M-77 et abrogation Rm-93",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "node_type": "DesignationEvent",
+      "status": "attached",
+      "date": "2026-01-12",
+      "meetingDate": "2026-01-12",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "municipality": "saint-odilon-de-cranbourne",
+      "resolution": "6-01-2026",
+      "resolutionRef": "Résolution 6-01-2026",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "description": "Agrandissement de la zone M-77 pour inclure la totalité de la zone Rm-93, et abrogation de la zone Rm-93.",
+      "etape": "adoption",
+      "etape_date": "2026-01-12",
+      "zone_ref": "M-77",
+      "reglement_number": "438-2025",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "PAR CONSÉQUENT, il est proposé par Vincent Poulin et résolu à\nl’unanimité des membres présents de ce conseil :\nQu’il soit décrété par ledit règlement ce qui suit :"
+        },
+        {
+          "page": 5,
+          "excerpt": "La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\nzone Rm-93 est donc abrogée."
+        }
+      ]
+    },
+    {
+      "id": "signal-suivi-zonage-multilogements",
+      "label": "Signal - Suivi zonage multilogements rue des Cerisiers",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "rezonage",
+      "date": "2026-01-12",
+      "meetingDate": "2026-01-12",
+      "description": "Résultats des tests de pompage permettant d'envisager un changement de zonage pour du multilogement dans le secteur de la rue des Cerisiers.",
+      "scope": "local",
+      "municipality": "saint-odilon-de-cranbourne",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "citations": [
+        {
+          "page": 23,
+          "excerpt": "La directrice générale informe les membres du conseil que les résultats\ndes premiers tests de pompage du puits démontrent une capacité suffisante\npermettant d’envisager un changement de zonage dans le secteur de la rue des\nCerisiers."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-437-2025",
+      "target": "bylaw-392-2021",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "evidence_refs": [
+        "ev-bylaw-437-amends-392"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-438-2025",
+      "target": "bylaw-394-2021",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "evidence_refs": [
+        "ev-bylaw-438-amends-394"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-438-2025",
+      "target": "zone-m-77",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "evidence_refs": [
+        "ev-bylaw-438-defines-m77"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\nzone Rm-93 est donc abrogée."
+        }
+      ]
+    },
+    {
+      "source": "zone-m-77",
+      "target": "bylaw-394-2021",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "evidence_refs": [
+        "ev-zone-m77-governed-by-394"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "Le « Plan de zonage » indiqué à l’article 3 du règlement de zonage est modifié\nde façon à agrandir la zone mixte M-77."
+        }
+      ]
+    },
+    {
+      "source": "event-6-01-2026",
+      "target": "zone-m-77",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "evidence_refs": [
+        "ev-event-6-targets-m77"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "ATTENDU QUE le conseil est favorable à la modification de la zone\nM-77 et l’abrogation de la zone Rm-93;"
+        }
+      ]
+    },
+    {
+      "source": "event-6-01-2026",
+      "target": "zone-rm-93",
+      "relation": "merges",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "evidence_refs": [
+        "ev-event-6-merges-rm93"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\nzone Rm-93 est donc abrogée."
+        }
+      ]
+    },
+    {
+      "source": "src-2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "target": "bylaw-438-2025",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "evidence_refs": [
+        "ev-src-supports-438"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021\nRésolution 6-01-2026"
+        }
+      ]
+    },
+    {
+      "source": "src-2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "target": "event-6-01-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "evidence_refs": [
+        "ev-src-supports-event6"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "PAR CONSÉQUENT, il est proposé par Vincent Poulin et résolu à\nl’unanimité des membres présents de ce conseil :"
+        }
+      ]
+    },
+    {
+      "source": "src-2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "target": "signal-suivi-zonage-multilogements",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "evidence_refs": [
+        "ev-src-mentions-signal"
+      ],
+      "citations": [
+        {
+          "page": 23,
+          "excerpt": "La directrice générale informe les membres du conseil que les résultats\ndes premiers tests de pompage du puits démontrent une capacité suffisante\npermettant d’envisager un changement de zonage dans le secteur de la rue des\nCerisiers."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-bylaw-437-amends-392",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "rawRef": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "sourceUrl": "https://www.saint-odilon.qc.ca/wp-content/uploads/2026/03/01-301_PVCONSEIL_2026-01-12.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021"
+    },
+    {
+      "id": "ev-bylaw-438-amends-394",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "rawRef": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "sourceUrl": "https://www.saint-odilon.qc.ca/wp-content/uploads/2026/03/01-301_PVCONSEIL_2026-01-12.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021"
+    },
+    {
+      "id": "ev-bylaw-438-defines-m77",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "rawRef": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "sourceUrl": "https://www.saint-odilon.qc.ca/wp-content/uploads/2026/03/01-301_PVCONSEIL_2026-01-12.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La zone Rm-93 est donc abrogée."
+    },
+    {
+      "id": "ev-zone-m77-governed-by-394",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "rawRef": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "sourceUrl": "https://www.saint-odilon.qc.ca/wp-content/uploads/2026/03/01-301_PVCONSEIL_2026-01-12.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "Le « Plan de zonage » indiqué à l’article 3 du règlement de zonage est modifié de façon à agrandir la zone mixte M-77."
+    },
+    {
+      "id": "ev-event-6-targets-m77",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "rawRef": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "sourceUrl": "https://www.saint-odilon.qc.ca/wp-content/uploads/2026/03/01-301_PVCONSEIL_2026-01-12.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "ATTENDU QUE le conseil est favorable à la modification de la zone M-77 et l’abrogation de la zone Rm-93;"
+    },
+    {
+      "id": "ev-event-6-merges-rm93",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "rawRef": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "sourceUrl": "https://www.saint-odilon.qc.ca/wp-content/uploads/2026/03/01-301_PVCONSEIL_2026-01-12.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La zone Rm-93 est donc abrogée."
+    },
+    {
+      "id": "ev-src-supports-438",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "rawRef": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "sourceUrl": "https://www.saint-odilon.qc.ca/wp-content/uploads/2026/03/01-301_PVCONSEIL_2026-01-12.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021"
+    },
+    {
+      "id": "ev-src-supports-event6",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "rawRef": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "sourceUrl": "https://www.saint-odilon.qc.ca/wp-content/uploads/2026/03/01-301_PVCONSEIL_2026-01-12.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "PAR CONSÉQUENT, il est proposé par Vincent Poulin et résolu à l’unanimité des membres présents de ce conseil :"
+    },
+    {
+      "id": "ev-src-mentions-signal",
+      "source_file": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "rawRef": "raw/proces-verbaux-saint-odilon-de-cranbourne/cas/2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979.pdf",
+      "docSha": "2de25d25414f0665cbea5cb5d98af9c62da224e766e1eb2ab6f7be35aea20979",
+      "sourceUrl": "https://www.saint-odilon.qc.ca/wp-content/uploads/2026/03/01-301_PVCONSEIL_2026-01-12.pdf",
+      "modality": "pdf",
+      "page": 23,
+      "excerpt": "La directrice générale informe les membres du conseil que les résultats des premiers tests de pompage du puits démontrent une capacité suffisante permettant d’envisager un changement de zonage dans le secteur de la rue des Cerisiers."
+    }
+  ],
+  "input_tokens": 4200,
+  "output_tokens": 1200
+}
+```

@@ -1,0 +1,346 @@
+```json
+{
+  "contract_version": "immo-pv-extraction-v9",
+  "type": "Graphify Extraction",
+  "nodes": [
+    {
+      "id": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "label": "Ordre du jour - 16 juin 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "date": "2026-06-16",
+      "municipality": "saint-damien",
+      "url": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE ORDINAIRE DU CONSEIL MUNICIPAL\nLe 16 JUIN 2026 – 19 H 30\nPROJET D’ORDRE DU JOUR"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2026-122",
+      "label": "Demande de dérogation mineure 2026-122 - 73, rue Messier",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-06-16",
+      "kind": "derogation",
+      "dossier": "2026-122",
+      "municipality": "saint-damien",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "description": "Demande de dérogation mineure 2026-122 - 73, rue Messier",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-16",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+        }
+      ]
+    },
+    {
+      "id": "signal-dm-2026-122",
+      "label": "Signal - Dérogation mineure 2026-122 (73, rue Messier)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "derogation_mineure",
+      "kind": "derogation",
+      "meetingDate": "2026-06-16",
+      "date": "2026-06-16",
+      "description": "Demande de dérogation mineure 2026-122 - 73, rue Messier",
+      "scope": "local",
+      "municipality": "saint-damien",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-16",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2026-133",
+      "label": "Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-06-16",
+      "kind": "derogation",
+      "dossier": "2026-133",
+      "municipality": "saint-damien",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "description": "Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-16",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+        }
+      ]
+    },
+    {
+      "id": "signal-dm-2026-133",
+      "label": "Signal - Dérogation mineure 2026-133 (3173, chemin du Ruisseau)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "derogation_mineure",
+      "kind": "derogation",
+      "meetingDate": "2026-06-16",
+      "date": "2026-06-16",
+      "description": "Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau",
+      "scope": "local",
+      "municipality": "saint-damien",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-16",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-135",
+      "label": "Demande d’approbation au PIIA 2026-135 – 6710, rue Principale",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-06-16",
+      "kind": "piia",
+      "dossier": "2026-135",
+      "municipality": "saint-damien",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "description": "Demande d’approbation au PIIA 2026-135 – 6710, rue Principale",
+      "etape": "piia",
+      "etape_date": "2026-06-16",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+        }
+      ]
+    },
+    {
+      "id": "signal-piia-2026-135",
+      "label": "Signal - PIIA 2026-135 (6710, rue Principale)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "piia",
+      "kind": "piia",
+      "meetingDate": "2026-06-16",
+      "date": "2026-06-16",
+      "description": "Demande d’approbation au PIIA 2026-135 – 6710, rue Principale",
+      "scope": "local",
+      "municipality": "saint-damien",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "etape": "piia",
+      "etape_date": "2026-06-16",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "event-dm-2026-122",
+      "target": "signal-dm-2026-122",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-dm-122"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+        }
+      ]
+    },
+    {
+      "source": "event-dm-2026-133",
+      "target": "signal-dm-2026-133",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-dm-133"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-135",
+      "target": "signal-piia-2026-135",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-piia-135"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "event-dm-2026-122",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-dm-122"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "event-dm-2026-133",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-dm-133"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "event-piia-2026-135",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-piia-135"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+        }
+      ]
+    },
+    {
+      "source": "event-dm-2026-122",
+      "target": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-dm-122"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+        }
+      ]
+    },
+    {
+      "source": "event-dm-2026-133",
+      "target": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-dm-133"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-135",
+      "target": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-piia-135"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-dm-122",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+    },
+    {
+      "id": "ev-dm-133",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+    },
+    {
+      "id": "ev-piia-135",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+    }
+  ],
+  "input_tokens": 1420,
+  "output_tokens": 1690
+}
+```

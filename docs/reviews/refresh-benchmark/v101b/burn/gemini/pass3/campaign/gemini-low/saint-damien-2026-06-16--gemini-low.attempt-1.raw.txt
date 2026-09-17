@@ -1,0 +1,315 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "label": "Ordre du jour - 16 juin 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "date": "2026-06-16",
+      "municipality": "saint-damien",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "url": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE ORDINAIRE DU CONSEIL MUNICIPAL\nLe 16 JUIN 2026 – 19 H 30\nPROJET D’ORDRE DU JOUR"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2026-122",
+      "label": "Demande de dérogation mineure 2026-122 - 73, rue Messier",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "derogation",
+      "dossier": "2026-122",
+      "meetingDate": "2026-06-16",
+      "municipality": "saint-damien",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-16",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "description": "Demande de dérogation mineure 2026-122 - 73, rue Messier",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2026-133",
+      "label": "Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "derogation",
+      "dossier": "2026-133",
+      "meetingDate": "2026-06-16",
+      "municipality": "saint-damien",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-16",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "description": "Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-135",
+      "label": "Demande d’approbation au PIIA 2026-135 – 6710, rue Principale",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "piia",
+      "dossier": "2026-135",
+      "meetingDate": "2026-06-16",
+      "municipality": "saint-damien",
+      "etape": "piia",
+      "etape_date": "2026-06-16",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "description": "Demande d’approbation au PIIA 2026-135 – 6710, rue Principale",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-834",
+      "label": "Règlement 834 portant sur la gestion contractuelle",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "834",
+      "title": "Règlement 834 portant sur la gestion contractuelle",
+      "stage": "adoption",
+      "meetingDate": "2026-06-16",
+      "municipality": "saint-damien",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "14.1 Adoption finale – règlement 834 portant sur la gestion contractuelle"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-804-1",
+      "label": "Projet de règlement 804-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "804-1",
+      "title": "Projet de règlement 804-1 – modification du règlement 804 portant sur les camions de cuisine cantines temporaires",
+      "stage": "projet",
+      "meetingDate": "2026-06-16",
+      "municipality": "saint-damien",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-830-2",
+      "label": "Projet de règlement 830-2",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "830-2",
+      "title": "Projet de règlement 830-2 – modification du règlement 830 décrétant la tarification d’activités, biens ou services municipaux",
+      "stage": "projet",
+      "meetingDate": "2026-06-16",
+      "municipality": "saint-damien",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "14.3 Avis de motion et présentation – projet de règlement 830-2 – modification du\nrèglement 830 décrétant la tarification d’activités, biens ou services municipaux"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "event-dm-2026-122",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-1"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "event-dm-2026-133",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-2"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "event-piia-2026-135",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-3"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "bylaw-834",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-4"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "14.1 Adoption finale – règlement 834 portant sur la gestion contractuelle"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "bylaw-804-1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-5"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+        }
+      ]
+    },
+    {
+      "source": "source-111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "target": "bylaw-830-2",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "evidence_refs": [
+        "ev-6"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "14.3 Avis de motion et présentation – projet de règlement 830-2 – modification du\nrèglement 830 décrétant la tarification d’activités, biens ou services municipaux"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+    },
+    {
+      "id": "ev-4",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "14.1 Adoption finale – règlement 834 portant sur la gestion contractuelle"
+    },
+    {
+      "id": "ev-5",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+    },
+    {
+      "id": "ev-6",
+      "source_file": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "rawRef": "raw/proces-verbaux-saint-damien/cas/111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415.pdf",
+      "docSha": "111f5b09889cffcc8273583fcd84080e8575ff93a8654dfc2b6eb31b952e2415",
+      "sourceUrl": "https://www.st-damien.com/uploads/8/0/4/0/80408348/2026-06-16_-_odj_-_projet.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "14.3 Avis de motion et présentation – projet de règlement 830-2 – modification du\nrèglement 830 décrétant la tarification d’activités, biens ou services municipaux"
+    }
+  ],
+  "input_tokens": 1250,
+  "output_tokens": 680
+}
+```

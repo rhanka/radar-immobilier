@@ -1,0 +1,443 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "label": "Procès-verbal de la séance ordinaire du conseil de la Ville de Richelieu du 3 février 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "date": "2026-02-03",
+      "municipality": "ville-de-richelieu",
+      "url": "https://ville.richelieu.qc.ca/wp-content/uploads/2026/03/1-2026-02-03_pv_adopte.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil de la Ville de Richelieu, tenue le 3 février 2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-26-r-285",
+      "label": "Règlement numéro 26-R-285",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "26-R-285",
+      "title": "Règlement interdisant l'épandage de déjections animales ou de boues à des dates prédéterminées entre le 31 mai et le 1er octobre 2026",
+      "date": "2026-02-03",
+      "stage": "adoption",
+      "municipality": "ville-de-richelieu",
+      "resolution": "26-02-031",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "En conséquence, il est proposé par Joël Caisse, appuyé par Charles Fraser-Guay et résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé"
+        }
+      ]
+    },
+    {
+      "id": "event-ppcmoi-2025-07",
+      "label": "Résolution finale PPCMOI-2025-07",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "ppcmoi",
+      "decision": "approuvé",
+      "dossier": "PPCMOI-2025-07",
+      "demandeur_corporate": "Gestion Guilmain inc.",
+      "resolution": "26-02-043",
+      "date": "2026-02-03",
+      "meetingDate": "2026-02-03",
+      "etape": "adoption",
+      "etape_date": "2026-02-03",
+      "reglement_number": "14-R-186",
+      "municipality": "ville-de-richelieu",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "description": "Approbation finale de la demande PPCMOI-2025-07 visant à fusionner les lots 6 465 474 et 6 465 475 et à autoriser deux bâtiments principaux résidentiels.",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra être réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur l'aspect suivant"
+        }
+      ]
+    },
+    {
+      "id": "event-ppcmoi-2025-08",
+      "label": "Résolution finale PPCMOI-2025-08",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "ppcmoi",
+      "decision": "approuvé",
+      "dossier": "PPCMOI-2025-08",
+      "demandeur_corporate": "Gestion Guilmain inc.",
+      "resolution": "26-02-044",
+      "date": "2026-02-03",
+      "meetingDate": "2026-02-03",
+      "etape": "adoption",
+      "etape_date": "2026-02-03",
+      "reglement_number": "14-R-186",
+      "municipality": "ville-de-richelieu",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "description": "Approbation finale de la demande PPCMOI-2025-08 visant à fusionner les lots 6 465 476 et 6 465 477 et à autoriser deux bâtiments principaux résidentiels.",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra être réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur l'aspect suivant"
+        }
+      ]
+    },
+    {
+      "id": "event-ppcmoi-2025-09",
+      "label": "Résolution finale PPCMOI-2025-09",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "ppcmoi",
+      "decision": "approuvé",
+      "dossier": "PPCMOI-2025-09",
+      "demandeur_corporate": "Gestion Guilmain inc.",
+      "resolution": "26-02-045",
+      "date": "2026-02-03",
+      "meetingDate": "2026-02-03",
+      "etape": "adoption",
+      "etape_date": "2026-02-03",
+      "reglement_number": "14-R-186",
+      "municipality": "ville-de-richelieu",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "description": "Approbation finale de la demande PPCMOI-2025-09 visant à fusionner les lots 6 465 470, 6 465 471 et 6 460 234 et à autoriser trois bâtiments principaux résidentiels.",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra être réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur l'aspect suivant"
+        }
+      ]
+    },
+    {
+      "id": "zone-529",
+      "label": "Zone 529",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "node_type": "Zone",
+      "status": "attached",
+      "code": "529",
+      "municipality": "ville-de-richelieu",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "meetingDate": "2026-02-03",
+      "description": "Zone située sur le chemin des Patriotes à prédominance résidentielle.",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "CONSIDÉRANT que l'immeuble est situé dans la zone 529, sur le chemin des Patriotes et de maisons construites de part et d'autre;"
+        }
+      ]
+    },
+    {
+      "id": "event-cptaq-5891123",
+      "label": "Appui à une demande à la CPTAQ - lot 5 891 123",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "cptaq",
+      "decision": "approuvé",
+      "resolution": "26-02-046",
+      "date": "2026-02-03",
+      "meetingDate": "2026-02-03",
+      "municipality": "ville-de-richelieu",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "zone_ref": "529",
+      "no_lot": "5891123",
+      "superficie_m2": 809.2,
+      "description": "Appui du conseil municipal à une demande à la CPTAQ pour l'utilisation à des fins autres qu'agricoles du lot 5 891 123 afin d'y construire une habitation unifamiliale.",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "En conséquence, il est proposé par Lise Ferland, appuyé par Michel Beaudoin et résolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour la construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot numéro 5 891 123 du cadastre du Québec."
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-5891123",
+      "label": "Assujettissement CPTAQ - lot 5 891 123",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "node_type": "Constraint",
+      "status": "attached",
+      "constraintType": "cptaq",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "municipality": "ville-de-richelieu",
+      "resolution": "26-02-046",
+      "meetingDate": "2026-02-03",
+      "superficie_concernee_m2": 809.2,
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "description": "Demande d'autorisation pour l'utilisation à des fins autres qu'agricoles du lot 5 891 123.",
+      "evidence_refs": [
+        "ev-cptaq-5891123"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "CONSIDÉRANT que le demandeur doit s'adresser à la Commission de protection du territoire agricole du Québec (CPTAQ) pour l'utilisation à des fins autres qu'agricoles du lot 5 891 123 du cadastre du Québec;"
+        }
+      ]
+    },
+    {
+      "id": "signal-cptaq-5891123",
+      "label": "Signal de développement résidentiel en zone CPTAQ - lot 5 891 123",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "node_type": "Signal",
+      "status": "attached",
+      "category": "cptaq",
+      "kind": "habitation_unifamiliale",
+      "date": "2026-02-03",
+      "meetingDate": "2026-02-03",
+      "municipality": "ville-de-richelieu",
+      "resolution": "26-02-046",
+      "scope": "local",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "zone_ref": "529",
+      "no_lot": "5891123",
+      "description": "Demande à la CPTAQ pour la construction d'une habitation unifamiliale au 2860, chemin des Patriotes.",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "En conséquence, il est proposé par Lise Ferland, appuyé par Michel Beaudoin et résolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour la construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot numéro 5 891 123 du cadastre du Québec."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "target": "bylaw-26-r-285",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-r-285"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "En conséquence, il est proposé par Joël Caisse, appuyé par Charles Fraser-Guay et résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé"
+        }
+      ]
+    },
+    {
+      "source": "source-37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "target": "event-ppcmoi-2025-07",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-2025-07"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra être réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur l'aspect suivant"
+        }
+      ]
+    },
+    {
+      "source": "source-37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "target": "event-ppcmoi-2025-08",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-2025-08"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra être réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur l'aspect suivant"
+        }
+      ]
+    },
+    {
+      "source": "source-37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "target": "event-ppcmoi-2025-09",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-2025-09"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra être réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur l'aspect suivant"
+        }
+      ]
+    },
+    {
+      "source": "source-37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "target": "event-cptaq-5891123",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "evidence_refs": [
+        "ev-cptaq-appui"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "En conséquence, il est proposé par Lise Ferland, appuyé par Michel Beaudoin et résolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour la construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot numéro 5 891 123 du cadastre du Québec."
+        }
+      ]
+    },
+    {
+      "source": "event-cptaq-5891123",
+      "target": "zone-529",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "evidence_refs": [
+        "ev-zone-529"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "CONSIDÉRANT que l'immeuble est situé dans la zone 529, sur le chemin des Patriotes et de maisons construites de part et d'autre;"
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-5891123",
+      "target": "zone-529",
+      "relation": "constrains",
+      "confidence": "INFERRED",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "evidence_refs": [
+        "ev-zone-529",
+        "ev-cptaq-5891123"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "CONSIDÉRANT que l'immeuble est situé dans la zone 529, sur le chemin des Patriotes et de maisons construites de part et d'autre;"
+        }
+      ]
+    },
+    {
+      "source": "event-cptaq-5891123",
+      "target": "signal-cptaq-5891123",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "evidence_refs": [
+        "ev-cptaq-appui"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "En conséquence, il est proposé par Lise Ferland, appuyé par Michel Beaudoin et résolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour la construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot numéro 5 891 123 du cadastre du Québec."
+        }
+      ]
+    },
+    {
+      "source": "signal-cptaq-5891123",
+      "target": "zone-529",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "evidence_refs": [
+        "ev-zone-529"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "CONSIDÉRANT que l'immeuble est situé dans la zone 529, sur le chemin des Patriotes et de maisons construites de part et d'autre;"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-bylaw-26-r-285",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "rawRef": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "sourceUrl": "https://ville.richelieu.qc.ca/wp-content/uploads/2026/03/1-2026-02-03_pv_adopte.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "En conséquence, il est proposé par Joël Caisse, appuyé par Charles Fraser-Guay et résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé : « Règlement interdisant l'épandage de déjections animales ou de boues à des dates prédéterminées entre le 31 mai et le 1er octobre 2026 »."
+    },
+    {
+      "id": "ev-ppcmoi-2025-07",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "rawRef": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "sourceUrl": "https://ville.richelieu.qc.ca/wp-content/uploads/2026/03/1-2026-02-03_pv_adopte.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra être réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur l'aspect suivant : Article 1. Autoriser deux (2) bâtiments principaux résidentiels. Le nombre de bâtiments principaux sera de deux (2) au lieu d'un (1) seul (article 11.1 du Règlement d'urbanisme numéro 14-R-186)."
+    },
+    {
+      "id": "ev-ppcmoi-2025-08",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "rawRef": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "sourceUrl": "https://ville.richelieu.qc.ca/wp-content/uploads/2026/03/1-2026-02-03_pv_adopte.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra être réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur l'aspect suivant : Article 1. Autoriser deux (2) bâtiments principaux résidentiels. Le nombre de bâtiments principaux sera de deux (2) au lieu d'un (1) seul (article 11.1 du Règlement d'urbanisme numéro 14-R-186)."
+    },
+    {
+      "id": "ev-ppcmoi-2025-09",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "rawRef": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "sourceUrl": "https://ville.richelieu.qc.ca/wp-content/uploads/2026/03/1-2026-02-03_pv_adopte.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra être réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur l'aspect suivant : Article 1. Autoriser trois (3) bâtiments principaux résidentiels. Le nombre de bâtiments principaux sera de trois (3) au lieu d'un (1) seul (article 11.1 du Règlement d'urbanisme numéro 14-R-186)."
+    },
+    {
+      "id": "ev-cptaq-appui",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "rawRef": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "sourceUrl": "https://ville.richelieu.qc.ca/wp-content/uploads/2026/03/1-2026-02-03_pv_adopte.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "En conséquence, il est proposé par Lise Ferland, appuyé par Michel Beaudoin et résolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour la construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot numéro 5 891 123 du cadastre du Québec."
+    },
+    {
+      "id": "ev-zone-529",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "rawRef": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "sourceUrl": "https://ville.richelieu.qc.ca/wp-content/uploads/2026/03/1-2026-02-03_pv_adopte.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "CONSIDÉRANT que l'immeuble est situé dans la zone 529, sur le chemin des Patriotes et de maisons construites de part et d'autre;"
+    },
+    {
+      "id": "ev-cptaq-5891123",
+      "source_file": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "rawRef": "raw/proces-verbaux-richelieu/cas/37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.pdf",
+      "docSha": "37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27",
+      "sourceUrl": "https://ville.richelieu.qc.ca/wp-content/uploads/2026/03/1-2026-02-03_pv_adopte.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "CONSIDÉRANT que le demandeur doit s'adresser à la Commission de protection du territoire agricole du Québec (CPTAQ) pour l'utilisation à des fins autres qu'agricoles du lot 5 891 123 du cadastre du Québec;"
+    }
+  ],
+  "input_tokens": 5832,
+  "output_tokens": 2845
+}
+```

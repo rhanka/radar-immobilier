@@ -1368,6 +1368,7 @@ generate-v101b-costs:
 	  --mount type=bind,source=$(V101_RESULTS),target=/results \
 	  -w /src $(NODE_IMAGE) sh -c \
 	  'node tools/refresh-benchmark/cost-calculator.mjs --campaign v101b --format md \
+	    --plan-gemini pro --plan-chatgpt pro-20x \
 	    --seat-observations /results/burn/seat-observations.json > /results/costs.md'
 
 observe-cloud-code-quota: check-v101-tools
