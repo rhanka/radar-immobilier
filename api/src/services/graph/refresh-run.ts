@@ -15,12 +15,13 @@ import { enrichGraphify34Snapshot, type Graphify34Snapshot } from "./graphify-34
 import { applyGraphify34Snapshots, applyPlanKey, buildGraphify34Manifest,
   type Graphify34SnapshotStore } from "./graphify-34-snapshot.js";
 import { materializeRefreshCorpus } from "./refresh-corpus.js";
+import type { RefreshDocumentModels, RefreshModelReceipt } from "./refresh-model-policy.js";
 import { extractRefreshProfile, type RefreshProfileChunk,
   type RefreshProfileContext } from "./refresh-profile.js";
 import { canonicalHash } from "./replay/canonical-json.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
 import { completeRefreshChunk, findPublishedRefreshState, openRefreshState, readCompletedRefreshChunk,
-  reserveRefreshChunk, writeRefreshCandidate, writeRefreshStageReceipt,
+  recordRefreshModel, reserveRefreshChunk, writeRefreshCandidate, writeRefreshStageReceipt,
   type RefreshStage, type RefreshStateHandle } from "./refresh-state.js";
 
 export type RefreshAcquire = (
@@ -101,7 +102,9 @@ export interface RunPvRefreshOptions {
   readonly store: Graphify34SnapshotStore & ObjectStore;
   readonly db: Database;
   readonly profileContext: RefreshProfileContext;
-  readonly textClient: TextJsonGenerationClient;
+  readonly textClient?: TextJsonGenerationClient;
+  readonly documentModels?: RefreshDocumentModels;
+  readonly onModelReceipt?: (docSha: string, chunkId: string, receipt: RefreshModelReceipt) => void;
   readonly extractPdf: (bytes: Uint8Array, sourceUrl: string) => Promise<string>;
   readonly profileHash: string;
   readonly registryHash: string;
@@ -180,7 +183,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   const scope = {
     citySlug: options.citySlug, inputHash: `sha256:${corpus.inputHash}`,
     profileHash: options.profileHash, registryHash: options.registryHash, packageVersion: options.packageVersion,
-    modelPolicy: options.modelPolicy, exclusions: options.excludedNodeIds ?? [],
+    modelPolicy: options.documentModels?.policy ?? options.modelPolicy, exclusions: options.excludedNodeIds ?? [],
   };
   const prior = await findPublishedRefreshState(options.store, { ...scope, publishedHash: baselineHash });
   if (prior?.state.receipts.projected?.status === "completed") {
@@ -194,18 +197,31 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   }
   let handle = await openRefreshState(options.store, { ...scope, baselineHash }, options.budgetLimit, now);
   handle = await completeStage(options.store, handle, "corpus", `sha256:${corpus.inputHash}`, now);
+  for (const [docSha, receipts] of Object.entries(handle.state.documentModels ?? {})) {
+    options.documentModels?.restoreDocument(docSha, receipts);
+  }
   const profiled: RefreshProfileChunk[] = [];
   for (const chunk of corpus.chunks) {
-    const reserved = await reserveRefreshChunk(options.store, handle, chunk.id, options.maximumAttempts);
+    const reserved = await reserveRefreshChunk(options.store, handle, chunk.id,
+      options.maximumAttempts * (options.documentModels ? 2 : 1));
     handle = reserved;
     if (!reserved.shouldCall) {
       profiled.push(await readCompletedRefreshChunk(options.store, handle, chunk.id));
+      const document = corpus.documents.find((item) => item.sha256 === chunk.docSha);
+      if (document?.chunks.at(-1)?.id === chunk.id) options.documentModels?.completeDocument(chunk.docSha);
       continue;
     }
-    const result = (await extractRefreshProfile([chunk], { textClient: options.textClient,
+    const textClient = options.documentModels?.forDocument(chunk.docSha, async (receipt) => {
+      handle = await recordRefreshModel(options.store, handle, chunk.docSha, chunk.id, receipt);
+      options.onModelReceipt?.(chunk.docSha, chunk.id, receipt);
+    }) ?? options.textClient;
+    if (!textClient) throw new Error("Refresh requires a text client or document model policy");
+    const result = (await extractRefreshProfile([chunk], { textClient,
       context: options.profileContext, maxOutputTokens: options.maxOutputTokens }))[0]!;
     handle = await completeRefreshChunk(options.store, handle, chunk.id, result);
     profiled.push(result);
+    const document = corpus.documents.find((item) => item.sha256 === chunk.docSha);
+    if (document?.chunks.at(-1)?.id === chunk.id) options.documentModels?.completeDocument(chunk.docSha);
   }
   const extraction = profiled.map((item) => item.extraction).reduce(mergeExtractions);
   handle = await completeStage(options.store, handle, "profile", canonicalHash(extraction), now);

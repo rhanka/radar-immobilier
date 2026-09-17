@@ -6,6 +6,7 @@ import {
   findPublishedRefreshState,
   openRefreshState,
   readCompletedRefreshChunk,
+  recordRefreshModel,
   reserveRefreshChunk,
   writeRefreshCandidate,
   writeRefreshStageReceipt,
@@ -51,6 +52,26 @@ function identity(baselineHash = "sha256:" + "b".repeat(64)): RefreshRunIdentity
 }
 
 describe("refresh durable state", () => {
+  it("should preserve actual models and fallback reasons through durable resume", async () => {
+    const store = new MemoryStore();
+    let handle = await openRefreshState(store, identity(), 2);
+    handle = await reserveRefreshChunk(store, handle, "chunk.1", 2);
+    const docSha = "a".repeat(64);
+    handle = await recordRefreshModel(store, handle, docSha, "chunk.1", {
+      modelUsed: { provider: "openai", model: "gpt-6-astra", effort: "low" },
+      status: "failed", failureReason: "quota", latencyMs: 1,
+    });
+    handle = await recordRefreshModel(store, handle, docSha, "chunk.1", {
+      modelUsed: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      status: "completed", fallbackReason: "quota", latencyMs: 2,
+    });
+    await completeRefreshChunk(store, handle, "chunk.1", { nodes: [] });
+    const resumed = await openRefreshState(store, identity(), 2);
+    expect(resumed.state.documentModels?.[docSha]).toEqual(handle.state.documentModels?.[docSha]);
+    expect((await reserveRefreshChunk(store, resumed, "chunk.1", 2)).shouldCall).toBe(false);
+    await expect(reserveRefreshChunk(store, resumed, "chunk.2", 2)).rejects.toThrow("budget exhausted");
+  });
+
   it("should not resume a completed extraction made with another model or effort", async () => {
     const store = new MemoryStore();
     for (const modelPolicy of ["gemini/gemini-3.8-flash/low", "openai/gpt-5.6-luna/high"]) {

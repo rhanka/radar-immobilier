@@ -114,9 +114,12 @@ verify-renders:
 	      pv=($$0 ~ /name: radar-refresh-pv\n/); \
 	      if (pv && $$0 !~ /suspend: false/) exit 1; \
 	      if (!pv && $$0 !~ /suspend: true/) exit 1; \
-	      if (pv && ($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: gemini\n/ \
-	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
-	        || $$0 !~ /name: REFRESH_REASONING_EFFORT\n[ ]+value: medium\n/ \
+	      if (pv && ($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: openai\n/ \
+	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gpt-6-astra\n/ \
+	        || $$0 !~ /name: REFRESH_REASONING_EFFORT\n[ ]+value: low\n/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_MAX_OUTPUT_TOKENS\n[ ]+value: "32768"/)) exit 1; \
 	    }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
 	    awk 'function flush(){if(active && literal && reference){print "mixed value/valueFrom: " name > "/dev/stderr"; bad=1} literal=0; reference=0} \
@@ -184,7 +187,7 @@ observe-scheduled-preprod: guard-preprod
 	    -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.ownerReferences[0].name}{"\t"}{.metadata.creationTimestamp}{"\n"}{end}' \
 	    | awk '$$2 == "radar-refresh-pv" { print }' | sort -k3 | tail -1 | cut -f1)"; \
 	  test -n "$$job" || { echo "Scheduled Job owner reference not found" >&2; exit 1; }; \
-	  $(K) wait --for=condition=complete "job/$$job" --timeout=1200s; \
+	  $(K) wait --for=condition=complete "job/$$job" --timeout=2100s; \
 	  $(K) get "job/$$job" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,IMAGE:.spec.template.spec.containers[0].image,START:.status.startTime,END:.status.completionTime; \
 	  $(K) logs "job/$$job" --all-containers=true
 
