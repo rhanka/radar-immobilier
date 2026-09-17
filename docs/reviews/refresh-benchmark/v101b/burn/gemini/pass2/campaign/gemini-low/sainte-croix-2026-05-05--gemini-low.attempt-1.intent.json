@@ -1,0 +1,1 @@
+{"schemaVersion":2,"state":"in-flight","startedAt":"2026-09-17T01:08:55.069Z","campaign":"v101b","arm":"gemini-low","documentId":"sainte-croix-2026-05-05","attempt":1,"requested":{"providerId":"gemini","transportProviderId":"cloud-code","modelId":"gemini-3.8-flash","effort":"low","maxOutputTokens":32768}}

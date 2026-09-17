@@ -1,0 +1,205 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "label": "Procès-verbal de la séance ordinaire du Conseil de la Municipalité de Warden tenue le mercredi 8 avril 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du Conseil de la Municipalité de Warden tenue le\nmercredi 8 avril 2026"
+        }
+      ],
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "date": "2026-04-08",
+      "municipality": "warden",
+      "url": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+      "pdfPath": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "sourceKind": "pv",
+      "format": "pdf"
+    },
+    {
+      "id": "bylaw-2017-127",
+      "label": "Règlement de zonage numéro 2017-127",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "« Projet de règlement numéro 2026-184 modifiant le règlement de zonage\nnuméro 2017-127 afin d'intégrer les dispositions relatives aux territoires\nincompatibles à l'activité minière (TIAM) »."
+        }
+      ],
+      "numero": "2017-127",
+      "municipality": "warden",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab"
+    },
+    {
+      "id": "bylaw-2026-184",
+      "label": "Règlement numéro 2026-184",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance\nultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184"
+        }
+      ],
+      "numero": "2026-184",
+      "title": "Projet de règlement numéro 2026-184 modifiant le règlement de zonage numéro 2017-127 afin d'intégrer les dispositions relatives aux territoires incompatibles à l'activité minière (TIAM)",
+      "objet": "Intégrer les dispositions relatives aux territoires incompatibles à l'activité minière (TIAM)",
+      "stage": "projet",
+      "municipality": "warden",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "meetingDate": "2026-04-08",
+      "resolution": "2026-04-047"
+    },
+    {
+      "id": "event-2026-04-047-motion",
+      "label": "Avis de motion et adoption du projet de règlement 2026-184",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+        }
+      ],
+      "date": "2026-04-08",
+      "meetingDate": "2026-04-08",
+      "decision": "approuvé",
+      "municipality": "warden",
+      "resolution": "2026-04-047",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "description": "Avis de motion, dépôt et adoption du projet de règlement numéro 2026-184 modifiant le règlement de zonage numéro 2017-127",
+      "etape": "projet_reglement",
+      "etape_date": "2026-04-08",
+      "reglement_number": "2026-184"
+    },
+    {
+      "id": "signal-2026-04-047-tiam",
+      "label": "Projet de modification de zonage TIAM 2026-184",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+        }
+      ],
+      "category": "zonage",
+      "date": "2026-04-08",
+      "meetingDate": "2026-04-08",
+      "description": "Adoption du projet de règlement 2026-184 modifiant le règlement de zonage 2017-127 pour intégrer les dispositions relatives aux territoires incompatibles à l'activité minière (TIAM)",
+      "resolution": "2026-04-047",
+      "municipality": "warden",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "etape": "projet_reglement",
+      "etape_date": "2026-04-08",
+      "reglement_number": "2026-184"
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-2026-184",
+      "target": "bylaw-2017-127",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "evidence_refs": [
+        "ev-amends-2026-184"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "« Projet de règlement numéro 2026-184 modifiant le règlement de zonage\nnuméro 2017-127 afin d'intégrer les dispositions relatives aux territoires\nincompatibles à l'activité minière (TIAM) »."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-04-047-motion",
+      "target": "signal-2026-04-047-tiam",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "evidence_refs": [
+        "ev-motion-2026-184"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+        }
+      ]
+    },
+    {
+      "source": "source-34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "target": "bylaw-2026-184",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "evidence_refs": [
+        "ev-motion-2026-184"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance\nultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184"
+        }
+      ]
+    },
+    {
+      "source": "source-34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "target": "event-2026-04-047-motion",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "evidence_refs": [
+        "ev-motion-2026-184"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-amends-2026-184",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "« Projet de règlement numéro 2026-184 modifiant le règlement de zonage\nnuméro 2017-127 afin d'intégrer les dispositions relatives aux territoires\nincompatibles à l'activité minière (TIAM) »."
+    },
+    {
+      "id": "ev-motion-2026-184",
+      "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+      "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+      "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 4000,
+  "output_tokens": 1200
+}
+```

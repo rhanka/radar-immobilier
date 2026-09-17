@@ -1,0 +1,452 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "label": "Procès-verbal de la séance ordinaire du Conseil municipal du Canton de Potton du 19 janvier 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "date": "2026-01-19",
+      "municipality": "canton-de-potton",
+      "url": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Séance ordinaire du Conseil municipal du Canton de Potton tenue"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2001-291-br",
+      "label": "Règlement numéro 2001-291-BR",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2001-291-BR",
+      "title": "Premier projet de règlement numéro 2001-291-BR modifiant le règlement de zonage 2001-291",
+      "date": "2026-01-19",
+      "stage": "1er_projet",
+      "municipality": "canton-de-potton",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "meetingDate": "2026-01-19",
+      "resolution": "2026 01 26",
+      "citations": [
+        {
+          "page": 44,
+          "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001-291-BR qui décrète ce qui suit :"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2001-291",
+      "label": "Règlement de zonage numéro 2001-291",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "2001-291",
+      "title": "Règlement de zonage 2001-291",
+      "municipality": "canton-de-potton",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "citations": [
+        {
+          "page": 44,
+          "excerpt": "L’article 20 « Extension de l’usage dérogatoire d’une construction ou d’un terrain » du règlement de zonage 2001 -291 et ses amendements se lisant comme suit"
+        }
+      ]
+    },
+    {
+      "id": "zone-ru-6",
+      "label": "Zone RU-6",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "RU-6",
+      "municipality": "canton-de-potton",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "meetingDate": "2026-01-19",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment principal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les articles 22 et 113 du règlement de zonage numéro 2001-291 et ses amendements stipulent qu’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à une distance d’au moins 15 m de la ligne de lot avant en zone municipale RU-6"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-01-17",
+      "label": "Dérogation mineure - Lot 5 553 677, ch. de la Mine",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-01-19",
+      "meetingDate": "2026-01-19",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "municipality": "canton-de-potton",
+      "resolution": "2026 01 17",
+      "resolutionRef": "2026 01 17",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "description": "Implantation d’une habitation unifamiliale isolée en marge de recul minimal avant, à 6 m au lieu de 15 m",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-01-19",
+      "zone_ref": "RU-6",
+      "no_lot": "5553677",
+      "reglement_number": "2001-291",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment principal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les articles 22 et 113 du règlement de zonage numéro 2001-291 et ses amendements stipule nt qu’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à une distance d’au moins 15 m de la ligne de lot avant en zone municipale RU-6, ce qui constitue un empi étement de 9 mètres aux dispositions minimales ap plicables."
+        }
+      ]
+    },
+    {
+      "id": "event-2026-01-18",
+      "label": "PIIA - Lot 5 753 149, chemin du Mont-Bear",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-01-19",
+      "meetingDate": "2026-01-19",
+      "decision": "approuvé",
+      "kind": "piia",
+      "dossier": "CCU251209-5.1",
+      "municipality": "canton-de-potton",
+      "resolution": "2026 01 18",
+      "resolutionRef": "2026 01 18",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "description": "Construction d’une maison unifamiliale assujettie au PIIA-5",
+      "etape": "piia",
+      "etape_date": "2026-01-19",
+      "no_lot": "5753149",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5 753 149, le tout conformément aux plans mentionnés précédemment."
+        }
+      ]
+    },
+    {
+      "id": "signal-2026-01-17",
+      "label": "Signal Dérogation mineure - Lot 5 553 677",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "node_type": "Signal",
+      "status": "validated",
+      "category": "derogation_mineure",
+      "kind": "derogation",
+      "date": "2026-01-19",
+      "meetingDate": "2026-01-19",
+      "description": "Dérogation accordée pour implantation d'une habitation en marge minimale avant de 6 m au lieu de 15 m",
+      "resolution": "2026 01 17",
+      "resolutionRef": "2026 01 17",
+      "scope": "local",
+      "municipality": "canton-de-potton",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-01-19",
+      "zone_ref": "RU-6",
+      "no_lot": "5553677",
+      "reglement_number": "2001-291",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment principal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les articles 22 et 113 du règlement de zonage numéro 2001-291 et ses amendements stipule nt qu’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à une distance d’au moins 15 m de la ligne de lot avant en zone municipale RU-6, ce qui constitue un empi étement de 9 mètres aux dispositions minimales ap plicables."
+        }
+      ]
+    },
+    {
+      "id": "signal-2026-01-18",
+      "label": "Signal PIIA - Lot 5 753 149",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "node_type": "Signal",
+      "status": "validated",
+      "category": "piia",
+      "kind": "piia",
+      "date": "2026-01-19",
+      "meetingDate": "2026-01-19",
+      "description": "Approbation de la construction d'une maison unifamiliale selon le PIIA-5",
+      "resolution": "2026 01 18",
+      "resolutionRef": "2026 01 18",
+      "scope": "local",
+      "municipality": "canton-de-potton",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "etape": "piia",
+      "etape_date": "2026-01-19",
+      "no_lot": "5753149",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5 753 149, le tout conformément aux plans mentionnés précédemment."
+        }
+      ]
+    },
+    {
+      "id": "signal-2026-01-26",
+      "label": "Signal Projet de règlement 2001-291-BR",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "projet_reglement",
+      "kind": "rezonage",
+      "date": "2026-01-19",
+      "meetingDate": "2026-01-19",
+      "description": "Premier projet de règlement modifiant les conditions d'extension d'un cimetière dérogatoire protégé par droits acquis",
+      "resolution": "2026 01 26",
+      "resolutionRef": "2026 01 26",
+      "scope": "local",
+      "municipality": "canton-de-potton",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "etape": "projet_reglement",
+      "etape_date": "2026-01-19",
+      "reglement_number": "2001-291-BR",
+      "citations": [
+        {
+          "page": 44,
+          "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001 -291- BR qui décrète ce qui suit :"
+        }
+      ]
+    },
+    {
+      "id": "constraint-slope-30",
+      "label": "Pentes de 30% et plus - Lot 5 553 677",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "node_type": "Constraint",
+      "status": "validated",
+      "constraintType": "autre",
+      "municipality": "canton-de-potton",
+      "resolution": "2026 01 17",
+      "resolutionRef": "2026 01 17",
+      "description": "Présence d’un talus présentant des pentes de 30% et plus, soit un secteur où la construction est interdite",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "meetingDate": "2026-01-19",
+      "evidence_refs": [
+        "ev-constraint-slope"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "CONSIDÉRANT QUE l’espace disponible sur ce terrain afin d’implanter une résidence de dimensions conformes est très limité par la présence d’un talus présentant des pentes de 30% et plus, soit un secteur où la construction est interdite;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-2001-291-br",
+      "target": "bylaw-2001-291",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amends"
+      ],
+      "citations": [
+        {
+          "page": 44,
+          "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001 -291- BR qui décrète ce qui suit :"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-01-17",
+      "target": "zone-ru-6",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "evidence_refs": [
+        "ev-event-derogation"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment principal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les articles 22 et 113 du règlement de zonage numéro 2001 -291 et ses amendements stipule nt qu’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à une distance d’au moins 15 m de la ligne de lot avant en zone municipale RU -6, ce qui constitue un empi étement de 9 mètres aux dispositions minimales ap plicables."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-01-17",
+      "target": "signal-2026-01-17",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "evidence_refs": [
+        "ev-event-derogation"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment principal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les articles 22 et 113 du règlement de zonage numéro 2001 -291 et ses amendements stipule nt qu’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à une distance d’au moins 15 m de la ligne de lot avant en zone municipale RU -6, ce qui constitue un empi étement de 9 mètres aux dispositions minimales ap plicables."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-01-18",
+      "target": "signal-2026-01-18",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "evidence_refs": [
+        "ev-event-piia"
+      ],
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5 753 149, le tout conformément aux plans mentionnés précédemment."
+        }
+      ]
+    },
+    {
+      "source": "constraint-slope-30",
+      "target": "zone-ru-6",
+      "relation": "constrains",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "evidence_refs": [
+        "ev-constraint-slope"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "CONSIDÉRANT QUE l’espace disponible sur ce terrain afin d’implanter une résidence de dimensions conformes est très limité par la présence d’un talus présentant des pentes de 30% et plus, soit un secteur où la construction est interdite;"
+        }
+      ]
+    },
+    {
+      "source": "zone-ru-6",
+      "target": "bylaw-2001-291",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "evidence_refs": [
+        "ev-event-derogation"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "CONSIDÉRANT QUE la présente demande consiste à permettre l’implantation d’un bâtiment principal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les articles 22 et 113 du règlement de zonage numéro 2001 -291 et ses amendements stipulent q u’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à une distance d’au moins 15 m de la ligne de lot avant en zone municipale RU -6"
+        }
+      ]
+    },
+    {
+      "source": "source-141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "target": "bylaw-2001-291-br",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amends"
+      ],
+      "citations": [
+        {
+          "page": 44,
+          "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001 -291- BR qui décrète ce qui suit :"
+        }
+      ]
+    },
+    {
+      "source": "source-141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "target": "event-2026-01-17",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "evidence_refs": [
+        "ev-event-derogation"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment principal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les articles 22 et 113 du règlement de zonage numéro 2001 -291 et ses amendements stipule nt qu’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à une distance d’au moins 15 m de la ligne de lot avant en zone municipale RU -6, ce qui constitue un empi étement de 9 mètres aux dispositions minimales ap plicables."
+        }
+      ]
+    },
+    {
+      "source": "source-141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "target": "event-2026-01-18",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "evidence_refs": [
+        "ev-event-piia"
+      ],
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5 753 149, le tout conformément aux plans mentionnés précédemment."
+        }
+      ]
+    },
+    {
+      "source": "source-141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "target": "signal-2026-01-26",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amends"
+      ],
+      "citations": [
+        {
+          "page": 44,
+          "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001 -291- BR qui décrète ce qui suit :"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-bylaw-amends",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 44,
+      "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001 -291- BR qui décrète ce qui suit :"
+    },
+    {
+      "id": "ev-event-derogation",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment principal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les articles 22 et 113 du règlement de zonage numéro 2001 -291 et ses amendements stipule nt qu’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à une distance d’au moins 15 m de la ligne de lot avant en zone municipale RU -6, ce qui constitue un empi étement de 9 mètres aux dispositions minimales ap plicables."
+    },
+    {
+      "id": "ev-event-piia",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 15,
+      "excerpt": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5 753 149, le tout conformément aux plans mentionnés précédemment."
+    },
+    {
+      "id": "ev-constraint-slope",
+      "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+      "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+      "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "CONSIDÉRANT QUE l’espace disponible sur ce terrain afin d’implanter une résidence de dimensions conformes est très limité par la présence d’un talus présentant des pentes de 30% et plus, soit un secteur où la construction est interdite;"
+    }
+  ],
+  "input_tokens": 10500,
+  "output_tokens": 2350
+}
+```

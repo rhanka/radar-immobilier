@@ -4,30 +4,32 @@
     {
       "arm": "gemini-low",
       "provider": "gemini",
-      "status": "N-A",
-      "reason": "weekly-window-source-gap"
+      "status": "measured",
+      "method": "controlled-burn",
+      "sourceStatus": "observed",
+      "basePlan": "ai-pro",
+      "windowMinutes": 10080,
+      "quotaDeltaPercent": 7.58,
+      "documents": 260,
+      "tokens": 5635342,
+      "t0Utc": "2026-09-17T00:05:00Z",
+      "t1Utc": "2026-09-17T01:33:00Z"
     },
     {
       "arm": "sol-medium",
       "provider": "chatgpt",
-      "status": "scenario",
-      "method": "account-percent/campaign-token-ratio",
-      "sourceStatus": "observed",
-      "basePlan": null,
-      "windowMinutes": 10080,
-      "usedPercent": 67,
-      "campaignTokens": 16594220
+      "status": "N-A",
+      "reason": "no-quota-delta",
+      "t0Utc": "2026-09-17T00:32:00Z",
+      "t1Utc": "2026-09-17T01:33:00Z"
     },
     {
       "arm": "luna-high",
       "provider": "chatgpt",
-      "status": "scenario",
-      "method": "account-percent/campaign-token-ratio",
-      "sourceStatus": "observed",
-      "basePlan": null,
-      "windowMinutes": 10080,
-      "usedPercent": 67,
-      "campaignTokens": 16594220
+      "status": "N-A",
+      "reason": "no-quota-delta",
+      "t0Utc": "2026-09-17T00:32:00Z",
+      "t1Utc": "2026-09-17T01:33:00Z"
     },
     {
       "arm": "sonnet46-cloud-off",

@@ -1,0 +1,1 @@
+{"schemaVersion":2,"state":"in-flight","startedAt":"2026-09-17T01:15:36.458Z","campaign":"v101b","arm":"gemini-low","documentId":"candiac-2026-06-15","attempt":1,"requested":{"providerId":"gemini","transportProviderId":"cloud-code","modelId":"gemini-3.8-flash","effort":"low","maxOutputTokens":32768}}

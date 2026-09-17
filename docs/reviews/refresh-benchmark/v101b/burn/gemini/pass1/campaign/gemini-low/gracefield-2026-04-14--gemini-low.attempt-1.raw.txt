@@ -1,0 +1,189 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+      "label": "Procès-verbal de la séance ordinaire du 14 avril 2026 - Ville de Gracefield",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+      "date": "2026-04-14",
+      "municipality": "gracefield",
+      "url": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Séance ordinaire du conseil municipal de la Ville de Gracefield, tenue le\n14 avril 2026, à la salle du conseil, située au 3, rue de la Polyvalente,\nGracefield, à 19 h 00."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-263-2026",
+      "label": "Règlement numéro 263-2026 relatif à l’occupation et l’entretien des bâtiments patrimoniaux",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "263-2026",
+      "title": "Règlement relatif à l’occupation et à l’entretien des bâtiments patrimoniaux",
+      "objet": "établir des normes minimales d’occupation, de salubrité et d’entretien des bâtiments patrimoniaux identifiés par le schéma d’aménagement et de développement révisé de la MRCVG sur le territoire de la Ville de Gracefield",
+      "date": "2026-04-14",
+      "stage": "adoption",
+      "municipality": "gracefield",
+      "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+      "meetingDate": "2026-04-14",
+      "resolution": "2026-04-063",
+      "resolutionRef": "2026-04-063",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "2026-04-063 Adoption du règlement numéro 263-2026 relatif à\nl’occupation et l’entretien des bâtiments patrimoniaux"
+        },
+        {
+          "page": 15,
+          "excerpt": "Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui\nsuit :"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-064",
+      "label": "Demande d’autorisation CPTAQ - Lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-04-14",
+      "meetingDate": "2026-04-14",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "municipality": "gracefield",
+      "resolution": "2026-04-064",
+      "resolutionRef": "2026-04-064",
+      "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+      "description": "Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du Québec pour un droit superficiaire personnel et temporaire de la résidence construite sur le lot 5 412 018 et aliénation des lots 5 412 018, 5 412 019 et 5 410 311 au 40, chemin Éloi-Lachapelle",
+      "motif": "Ladite demande ne contrevient pas à la règlementation municipale ; La demande est sans impact négatif sur le développement des activités agricoles ; L’emplacement visé constitue l’espace approprié compte tenu de l’occupation historique de la situation existante.",
+      "etape": "adoption",
+      "etape_date": "2026-04-14",
+      "no_lot": "5412018",
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du\nQuébec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410\n311 du cadastre du Québec dans la circonscription\nfoncière de Gatineau"
+        },
+        {
+          "page": 23,
+          "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec."
+        }
+      ]
+    },
+    {
+      "id": "signal-2026-04-064",
+      "label": "Recommandation favorable CPTAQ aliénation temporaire",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "node_type": "Signal",
+      "status": "validated",
+      "category": "cptaq",
+      "kind": "cptaq",
+      "date": "2026-04-14",
+      "meetingDate": "2026-04-14",
+      "description": "Appui et recommandation favorable à la CPTAQ pour l'aliénation d'un droit superficiaire personnel et temporaire (résidence lot 5 412 018) et aliénation des lots 5 412 018, 5 412 019 et 5 410 311",
+      "resolution": "2026-04-064",
+      "resolutionRef": "2026-04-064",
+      "scope": "local",
+      "municipality": "gracefield",
+      "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+      "outcome": "recommandation favorable",
+      "etape": "adoption",
+      "etape_date": "2026-04-14",
+      "no_lot": "5412018",
+      "citations": [
+        {
+          "page": 23,
+          "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+      "target": "bylaw-263-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "evidence_refs": [
+        "ev-bylaw-263-2026"
+      ],
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "2026-04-063 Adoption du règlement numéro 263-2026 relatif à\nl’occupation et l’entretien des bâtiments patrimoniaux"
+        }
+      ]
+    },
+    {
+      "source": "source-125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+      "target": "event-2026-04-064",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "evidence_refs": [
+        "ev-event-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 22,
+          "excerpt": "2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du\nQuébec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410\n311 du cadastre du Québec dans la circonscription\nfoncière de Gatineau"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-04-064",
+      "target": "signal-2026-04-064",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "evidence_refs": [
+        "ev-event-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 23,
+          "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-bylaw-263-2026",
+      "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+      "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+      "modality": "pdf",
+      "page": 15,
+      "excerpt": "2026-04-063 Adoption du règlement numéro 263-2026 relatif à\nl’occupation et l’entretien des bâtiments patrimoniaux"
+    },
+    {
+      "id": "ev-event-cptaq",
+      "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+      "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+      "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+      "modality": "pdf",
+      "page": 23,
+      "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec."
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 7800,
+  "output_tokens": 1200
+}
+```

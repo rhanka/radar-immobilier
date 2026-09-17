@@ -1,0 +1,461 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "src-pv-2026-06-02",
+      "label": "Procès-verbal - Bedford - 2026-06-02",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "date": "2026-06-02",
+      "municipality": "bedford",
+      "url": "https://ville.bedford.qc.ca/wp-content/uploads/2026/06/ODJ-et-PV-06-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "PROCÈS-VERBAL d’une séance ordinaire du conseil municipal de la Ville de\nBedford, tenue à l’hôtel de ville, situé au 26, rue de la Rivière, à Bedford, le mardi 2\njuin 2026 à 19 h 00."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-765-26",
+      "label": "Règlement 765-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "765-26",
+      "title": "Règlement numéro 765-26 relativement à l’occupation du domaine public",
+      "objet": "Occupation du domaine public",
+      "stage": "projet",
+      "municipality": "bedford",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "meetingDate": "2026-06-02",
+      "resolution": "26-06-170",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "La conseillère Mona Beaulac donne un avis de motion qu’il, ou en son absence un\nautre conseiller, proposera, à la prochaine séance ou toute séance ultérieure de ce\nconseil, l’adoption du règlement 765-26"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-702-26-9",
+      "label": "Règlement 702-26-9",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "702-26-9",
+      "title": "Règlement numéro 702-26-9 modifiant le règlement numéro 702-11, tel qu’amendé, intitulé Règlement sur l’émission des permis et certificats, afin de sévir sur les amendes relatives à l’abattage d’arbre",
+      "stage": "1er_projet",
+      "municipality": "bedford",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "meetingDate": "2026-06-02",
+      "resolution": "26-06-191",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "Que le conseil municipal adopte le premier projet de règlement numéro 702-26-9\nmodifiant le règlement numéro 702-11, tel qu’amendé, sur l’émission des permis et\ncertificats"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-702-11",
+      "label": "Règlement 702-11",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "702-11",
+      "title": "Règlement sur l’émission des permis et certificats",
+      "municipality": "bedford",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "meetingDate": "2026-06-02",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "Le conseiller Pierre Le Blanc donne un avis de motion qu’il, ou en son absence un\nautre conseiller, proposera, à la prochaine séance ou toute séance ultérieure de ce\nconseil, l’adoption du règlement numéro 702-26-9"
+        }
+      ]
+    },
+    {
+      "id": "zone-rx-1",
+      "label": "Zone RX-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "RX-1",
+      "municipality": "bedford",
+      "bylaw": "699-11",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "meetingDate": "2026-06-02",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Considérant que la zone RX-1 du règlement de zonage 699-11 exige une marge\navant minimale de 7,6 mètres ;"
+        }
+      ]
+    },
+    {
+      "id": "de-piia-152-riviere",
+      "label": "PIIA - 152, Rivière",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-06-02",
+      "meetingDate": "2026-06-02",
+      "decision": "approuvé",
+      "kind": "piia",
+      "etape": "piia",
+      "etape_date": "2026-06-02",
+      "municipality": "bedford",
+      "resolution": "26-06-177",
+      "resolutionRef": "26-06-177",
+      "reglement_number": "706-12",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "description": "Approbation du remplacement du revêtement de bardeau d’asphalte de toiture au 152, Rivière",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Que ce conseil accorde, tel que recommandé par le CCU, la demande de PIIA."
+        }
+      ]
+    },
+    {
+      "id": "de-piia-leclair-4plex",
+      "label": "PIIA - Rue Leclair (4 plex)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-06-02",
+      "meetingDate": "2026-06-02",
+      "decision": "approuvé",
+      "kind": "piia",
+      "etape": "piia",
+      "etape_date": "2026-06-02",
+      "dossier": "2026-28",
+      "no_lot": "5603254",
+      "municipality": "bedford",
+      "resolution": "26-06-178",
+      "resolutionRef": "26-06-178",
+      "reglement_number": "706-12",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "description": "Autorisation de construction d’un immeuble de quatre logements sur le lot 5 603 254 rue Leclair",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Que ce conseil accorde, tel que recommandé par le CCU, la demande de PIIA."
+        }
+      ]
+    },
+    {
+      "id": "de-dm-alcee-rocheleau",
+      "label": "Dérogation mineure - 125 et 137, rue Alcée-Rocheleau",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-06-02",
+      "meetingDate": "2026-06-02",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-02",
+      "municipality": "bedford",
+      "resolution": "26-06-179",
+      "resolutionRef": "26-06-179",
+      "reglement_number": "699-11",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "description": "Réduction de marge de stationnement à moins de 60 centimètres pour le 125 et le 137, rue Alcée-Rocheleau",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Que ce conseil accorde, tel que recommandé par le CCU, la demande de dérogation\nmineure."
+        }
+      ]
+    },
+    {
+      "id": "de-dm-180-parc",
+      "label": "Dérogation mineure - 180, rue du Parc",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-06-02",
+      "meetingDate": "2026-06-02",
+      "decision": "approuvé",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-02",
+      "zone_ref": "RX-1",
+      "dossier": "21126",
+      "municipality": "bedford",
+      "resolution": "26-06-180",
+      "resolutionRef": "26-06-180",
+      "reglement_number": "699-11",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "description": "Marge avant dérogatoire de 5,68 mètres au lieu de 7,6 mètres en zone RX-1",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Que ce conseil accepte la demande de dérogation mineure."
+        }
+      ]
+    },
+    {
+      "id": "de-avis-cerfs",
+      "label": "Avis préliminaire - Développement des Cerfs",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-06-02",
+      "meetingDate": "2026-06-02",
+      "decision": "refusé",
+      "kind": "piia",
+      "etape": "piia",
+      "etape_date": "2026-06-02",
+      "municipality": "bedford",
+      "resolution": "26-06-181",
+      "resolutionRef": "26-06-181",
+      "reglement_number": "706-12",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "description": "Refus de l’aménagement du développement des Cerfs tel que présenté compte tenu de l’emplacement des fins de parcs",
+      "motif": "compte tenu de l'emplacement des fins de parcs",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Que ce conseil refuse l’aménagement du développement des Cerfs tel que présenté,\ncompte tenu de l’emplacement des fins de parcs."
+        }
+      ]
+    },
+    {
+      "id": "signal-cerfs-refus",
+      "label": "Signal - Refus aménagement Développement des Cerfs",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "developpement_residentiel",
+      "kind": "refus_amenagement",
+      "date": "2026-06-02",
+      "meetingDate": "2026-06-02",
+      "description": "Refus par le conseil municipal de l'aménagement du projet résidentiel Développement des Cerfs",
+      "resolution": "26-06-181",
+      "resolutionRef": "26-06-181",
+      "scope": "local",
+      "municipality": "bedford",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Que ce conseil refuse l’aménagement du développement des Cerfs tel que présenté,\ncompte tenu de l’emplacement des fins de parcs."
+        }
+      ]
+    },
+    {
+      "id": "signal-4plex-leclair",
+      "label": "Signal - Construction 4 plex rue Leclair",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "densification_residentielle",
+      "kind": "approbation_piia",
+      "date": "2026-06-02",
+      "meetingDate": "2026-06-02",
+      "description": "Approbation PIIA pour la construction d'un immeuble de 4 logements sur la rue Leclair",
+      "resolution": "26-06-178",
+      "resolutionRef": "26-06-178",
+      "scope": "local",
+      "municipality": "bedford",
+      "no_lot": "5603254",
+      "nb_unites_min": 4,
+      "nb_unites_max": 4,
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Considérant la demande afin d’autoriser la construction d’un immeuble de quatre\nlogements ;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-702-26-9",
+      "target": "bylaw-702-11",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "evidence_refs": [
+        "ev-amends-702"
+      ],
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "Que le conseil municipal adopte le premier projet de règlement numéro 702-26-9\nmodifiant le règlement numéro 702-11, tel qu’amendé, sur l’émission des permis et\ncertificats"
+        }
+      ]
+    },
+    {
+      "source": "de-dm-180-parc",
+      "target": "zone-rx-1",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "evidence_refs": [
+        "ev-dm-zone-rx1"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Considérant que la zone RX-1 du règlement de zonage 699-11 exige une marge\navant minimale de 7,6 mètres ;"
+        }
+      ]
+    },
+    {
+      "source": "de-piia-leclair-4plex",
+      "target": "signal-4plex-leclair",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "evidence_refs": [
+        "ev-piia-leclair"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Que ce conseil accorde, tel que recommandé par le CCU, la demande de PIIA."
+        }
+      ]
+    },
+    {
+      "source": "de-avis-cerfs",
+      "target": "signal-cerfs-refus",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "evidence_refs": [
+        "ev-cerfs-refus"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Que ce conseil refuse l’aménagement du développement des Cerfs tel que présenté,\ncompte tenu de l’emplacement des fins de parcs."
+        }
+      ]
+    },
+    {
+      "source": "src-pv-2026-06-02",
+      "target": "bylaw-765-26",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "evidence_refs": [
+        "ev-bylaw-765"
+      ],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "La conseillère Mona Beaulac donne un avis de motion qu’il, ou en son absence un\nautre conseiller, proposera, à la prochaine séance ou toute séance ultérieure de ce\nconseil, l’adoption du règlement 765-26"
+        }
+      ]
+    },
+    {
+      "source": "src-pv-2026-06-02",
+      "target": "bylaw-702-26-9",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "evidence_refs": [
+        "ev-amends-702"
+      ],
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "Que le conseil municipal adopte le premier projet de règlement numéro 702-26-9\nmodifiant le règlement numéro 702-11, tel qu’amendé, sur l’émission des permis et\ncertificats"
+        }
+      ]
+    },
+    {
+      "source": "src-pv-2026-06-02",
+      "target": "de-dm-180-parc",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "evidence_refs": [
+        "ev-dm-zone-rx1"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Que ce conseil accepte la demande de dérogation mineure."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-amends-702",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "rawRef": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "sourceUrl": "https://ville.bedford.qc.ca/wp-content/uploads/2026/06/ODJ-et-PV-06-2026.pdf",
+      "modality": "pdf",
+      "page": 15,
+      "excerpt": "Que le conseil municipal adopte le premier projet de règlement numéro 702-26-9\nmodifiant le règlement numéro 702-11, tel qu’amendé, sur l’émission des permis et\ncertificats, afin de sévir sur les amendes relatives à l’abattage d’arbre."
+    },
+    {
+      "id": "ev-dm-zone-rx1",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "rawRef": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "sourceUrl": "https://ville.bedford.qc.ca/wp-content/uploads/2026/06/ODJ-et-PV-06-2026.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "Considérant que la zone RX-1 du règlement de zonage 699-11 exige une marge\navant minimale de 7,6 mètres ;"
+    },
+    {
+      "id": "ev-piia-leclair",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "rawRef": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "sourceUrl": "https://ville.bedford.qc.ca/wp-content/uploads/2026/06/ODJ-et-PV-06-2026.pdf",
+      "modality": "pdf",
+      "page": 9,
+      "excerpt": "Que ce conseil accorde, tel que recommandé par le CCU, la demande de PIIA."
+    },
+    {
+      "id": "ev-cerfs-refus",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "rawRef": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "sourceUrl": "https://ville.bedford.qc.ca/wp-content/uploads/2026/06/ODJ-et-PV-06-2026.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "Que ce conseil refuse l’aménagement du développement des Cerfs tel que présenté,\ncompte tenu de l’emplacement des fins de parcs."
+    },
+    {
+      "id": "ev-bylaw-765",
+      "source_file": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "rawRef": "raw/proces-verbaux-bedford--brome-missisquoi/cas/24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.pdf",
+      "docSha": "24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d",
+      "sourceUrl": "https://ville.bedford.qc.ca/wp-content/uploads/2026/06/ODJ-et-PV-06-2026.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "La conseillère Mona Beaulac donne un avis de motion qu’il, ou en son absence un\nautre conseiller, proposera, à la prochaine séance ou toute séance ultérieure de ce\nconseil, l’adoption du règlement 765-26 relativement à l’occupation du domaine public."
+    }
+  ],
+  "input_tokens": 5839,
+  "output_tokens": 2048
+}
+```

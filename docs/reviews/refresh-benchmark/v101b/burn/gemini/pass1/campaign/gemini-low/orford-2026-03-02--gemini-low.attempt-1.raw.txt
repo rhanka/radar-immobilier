@@ -1,0 +1,377 @@
+```json
+{
+  "contract_version": "immo-pv-extraction-v9",
+  "type": "Graphify Extraction",
+  "nodes": [
+    {
+      "id": "doc-105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "label": "Procès-verbal de la séance ordinaire du 2 mars 2026 - Canton d'Orford",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "date": "2026-03-02",
+      "municipality": "orford",
+      "url": "https://canton.orford.qc.ca/wp-content/uploads/2026/04/2026-03-02_PV.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil d’Orford tenue à la mairie, le\nlundi 2 mars 2026 à compter de 19 h."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-955",
+      "label": "Règlement numéro 955",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "955",
+      "title": "Règlement numéro 955 sur les plans d’implantation et d’intégration architecturale",
+      "municipality": "orford",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "citations": [
+        {
+          "page": 42,
+          "excerpt": "Cette partie du projet est donc assujettie au Règlement\nnuméro 955 sur les plans d’implantation et d’intégration\narchitecturale (PIIA des pentes de terrain de 15 % à 30 %);"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-951",
+      "label": "Règlement numéro 951",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "951",
+      "title": "Règlement numéro 951 de zonage et de lotissement",
+      "municipality": "orford",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "citations": [
+        {
+          "page": 45,
+          "excerpt": "CONSIDÉRANT QUE le Règlement numéro 951 de zonage et de lotissement et ses\namendements permet au conseil d’exiger une contribution\npour fins de parcs, de terrains de jeux, d'espaces naturels et"
+        }
+      ]
+    },
+    {
+      "id": "zone-r38",
+      "label": "Zone R38",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "R38",
+      "municipality": "orford",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "citations": [
+        {
+          "page": 43,
+          "excerpt": "Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38."
+        }
+      ]
+    },
+    {
+      "id": "zone-c3",
+      "label": "Zone C3",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "C3",
+      "municipality": "orford",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "citations": [
+        {
+          "page": 45,
+          "excerpt": "Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 –\nZone C3."
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-03-59",
+      "label": "Approbation PIIA 2026-03-59 (Lot 6 474 528)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "decision": "approuvé",
+      "kind": "piia",
+      "demandeur_corporate": "9350-2722 Québec Inc.",
+      "municipality": "orford",
+      "resolution": "2026-03-59",
+      "resolutionRef": "2026-03-59",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "description": "Approbation d'un projet de PIIA relatif à l'aire de stationnement en pente (au plus 18,7 %) sur le lot 6 474 528",
+      "etape": "piia",
+      "etape_date": "2026-03-02",
+      "zone_ref": "R38",
+      "no_lot": "6474528",
+      "reglement_number": "955",
+      "citations": [
+        {
+          "page": 43,
+          "excerpt": "D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à\nun endroit où la pente du terrain est d'au plus 18,7 %."
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-03-60",
+      "label": "Approbation PIIA 2026-03-60 (Lot 3 786 675)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "decision": "approuvé",
+      "kind": "piia",
+      "municipality": "orford",
+      "resolution": "2026-03-60",
+      "resolutionRef": "2026-03-60",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "description": "Approbation du projet de PIIA concernant des travaux de rénovation au 2197-2199, chemin du Parc (lot 3 786 675)",
+      "etape": "piia",
+      "etape_date": "2026-03-02",
+      "zone_ref": "C3",
+      "no_lot": "3786675",
+      "reglement_number": "955",
+      "citations": [
+        {
+          "page": 45,
+          "excerpt": "D’APPROUVER le présent projet de PIIA concernant les travaux de rénovation."
+        }
+      ]
+    },
+    {
+      "id": "signal-piia-2026-03-59",
+      "label": "Signal - Permis de construction/PIIA lot 6 474 528",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "urbanisme",
+      "kind": "piia",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "description": "Demande de permis pour construire une résidence et garage rattaché avec aménagement d'aire de stationnement en pente assujettie au PIIA",
+      "resolution": "2026-03-59",
+      "resolutionRef": "2026-03-59",
+      "scope": "local",
+      "municipality": "orford",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "etape": "piia",
+      "etape_date": "2026-03-02",
+      "zone_ref": "R38",
+      "no_lot": "6474528",
+      "reglement_number": "955",
+      "citations": [
+        {
+          "page": 42,
+          "excerpt": "CONSIDÉRANT QUE la requérante, Mme Genevieve Lacroix, mandataire pour la\ncompagnie 9350-2722 Québec Inc., a déposé à la\nMunicipalité une demande de permis pour construire une\nrésidence et un garage rattaché"
+        }
+      ]
+    },
+    {
+      "id": "signal-consolidation-2026-03-62",
+      "label": "Signal - Demande d'agrandissement d'un secteur de consolidation",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "urbanisme",
+      "kind": "amenagement",
+      "date": "2026-03-02",
+      "meetingDate": "2026-03-02",
+      "description": "Demande à la MRC de Memphrémagog d'agrandir le secteur de consolidation pour y intégrer le lot 3 787 898 afin de permettre le prolongement d'une rue",
+      "resolution": "2026-03-62",
+      "resolutionRef": "2026-03-62",
+      "scope": "regional",
+      "municipality": "orford",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "no_lot": "3787898",
+      "citations": [
+        {
+          "page": 47,
+          "excerpt": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle\nintérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur\nde consolidation, le tout de manière à y intégrer"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "doc-105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "target": "bylaw-955",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-piia-955"
+      ],
+      "citations": [
+        {
+          "page": 42,
+          "excerpt": "Cette partie du projet est donc assujettie au Règlement\nnuméro 955 sur les plans d’implantation et d’intégration\narchitecturale (PIIA des pentes de terrain de 15 % à 30 %);"
+        }
+      ]
+    },
+    {
+      "source": "doc-105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "target": "bylaw-951",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-bylaw-951"
+      ],
+      "citations": [
+        {
+          "page": 45,
+          "excerpt": "CONSIDÉRANT QUE le Règlement numéro 951 de zonage et de lotissement et ses\namendements permet au conseil d’exiger une contribution\npour fins de parcs, de terrains de jeux, d'espaces naturels et"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-03-59",
+      "target": "zone-r38",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-res-59-zone"
+      ],
+      "citations": [
+        {
+          "page": 43,
+          "excerpt": "Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38."
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-03-59",
+      "target": "signal-piia-2026-03-59",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-res-59-piia"
+      ],
+      "citations": [
+        {
+          "page": 43,
+          "excerpt": "D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à\nun endroit où la pente du terrain est d'au plus 18,7 %."
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-03-60",
+      "target": "zone-c3",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-res-60-zone"
+      ],
+      "citations": [
+        {
+          "page": 45,
+          "excerpt": "Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 –\nZone C3."
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-03-59",
+      "target": "doc-105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-res-59-piia"
+      ],
+      "citations": [
+        {
+          "page": 43,
+          "excerpt": "D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à\nun endroit où la pente du terrain est d'au plus 18,7 %."
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-03-60",
+      "target": "doc-105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "evidence_refs": [
+        "ev-res-60-zone"
+      ],
+      "citations": [
+        {
+          "page": 45,
+          "excerpt": "D’APPROUVER le présent projet de PIIA concernant les travaux de rénovation."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-piia-955",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "rawRef": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "sourceUrl": "https://canton.orford.qc.ca/wp-content/uploads/2026/04/2026-03-02_PV.pdf",
+      "modality": "pdf",
+      "page": 42,
+      "excerpt": "Cette partie du projet est donc assujettie au Règlement numéro 955 sur les plans d’implantation et d’intégration architecturale (PIIA des pentes de terrain de 15 % à 30 %);"
+    },
+    {
+      "id": "ev-bylaw-951",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "rawRef": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "sourceUrl": "https://canton.orford.qc.ca/wp-content/uploads/2026/04/2026-03-02_PV.pdf",
+      "modality": "pdf",
+      "page": 45,
+      "excerpt": "CONSIDÉRANT QUE le Règlement numéro 951 de zonage et de lotissement et ses amendements permet au conseil d’exiger une contribution pour fins de parcs, de terrains de jeux, d'espaces naturels et"
+    },
+    {
+      "id": "ev-res-59-zone",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "rawRef": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "sourceUrl": "https://canton.orford.qc.ca/wp-content/uploads/2026/04/2026-03-02_PV.pdf",
+      "modality": "pdf",
+      "page": 43,
+      "excerpt": "Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38."
+    },
+    {
+      "id": "ev-res-59-piia",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "rawRef": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "sourceUrl": "https://canton.orford.qc.ca/wp-content/uploads/2026/04/2026-03-02_PV.pdf",
+      "modality": "pdf",
+      "page": 43,
+      "excerpt": "D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à un endroit où la pente du terrain est d'au plus 18,7 %."
+    },
+    {
+      "id": "ev-res-60-zone",
+      "source_file": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "rawRef": "raw/proces-verbaux-orford/cas/105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050.pdf",
+      "docSha": "105c5d10c23c2edc8073fed40590ffaf0839066d167137cbc6b63be4fa83b050",
+      "sourceUrl": "https://canton.orford.qc.ca/wp-content/uploads/2026/04/2026-03-02_PV.pdf",
+      "modality": "pdf",
+      "page": 45,
+      "excerpt": "D’APPROUVER le présent projet de PIIA concernant les travaux de rénovation."
+    }
+  ],
+  "input_tokens": 12400,
+  "output_tokens": 1850
+}
+```

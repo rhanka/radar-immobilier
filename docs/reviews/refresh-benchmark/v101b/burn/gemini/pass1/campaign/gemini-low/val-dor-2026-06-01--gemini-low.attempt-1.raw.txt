@@ -1,0 +1,547 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "label": "Ordre du jour - 569e séance ordinaire - 1er juin 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "status": "validated",
+      "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "date": "2026-06-01",
+      "municipality": "val-d-or",
+      "url": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ORDRE DU JOUR\n569e SÉANCE ORDINAIRE - 1er JUIN 2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-12",
+      "label": "Règlement 2026-12",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "status": "candidate",
+      "numero": "2026-12",
+      "title": "zonage et urbanisme - Partie centrale du Domaine des Deux Lacs",
+      "stage": "1er_projet",
+      "municipality": "val-d-or",
+      "meetingDate": "2026-06-01",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-14",
+      "label": "Règlement 2026-14",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "status": "candidate",
+      "numero": "2026-14",
+      "title": "Zonage - Règlement Omnibus",
+      "stage": "projet",
+      "municipality": "val-d-or",
+      "meetingDate": "2026-06-01",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-21",
+      "label": "Règlement 2026-21",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "status": "candidate",
+      "numero": "2026-21",
+      "title": "Amendement 2024-10 sur le CCSRM",
+      "stage": "projet",
+      "municipality": "val-d-or",
+      "meetingDate": "2026-06-01",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\nle CCSRM."
+        }
+      ]
+    },
+    {
+      "id": "event-item-3",
+      "label": "Adoption du premier projet de règlement 2026-12",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "status": "candidate",
+      "meetingDate": "2026-06-01",
+      "kind": "rezonage",
+      "etape": "projet_reglement",
+      "etape_date": "2026-06-01",
+      "reglement_number": "2026-12",
+      "municipality": "val-d-or",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+        }
+      ]
+    },
+    {
+      "id": "event-item-4",
+      "label": "Consultation publique - Règlement 2026-14",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "status": "candidate",
+      "meetingDate": "2026-06-01",
+      "kind": "rezonage",
+      "etape": "consultation_publique",
+      "etape_date": "2026-06-01",
+      "reglement_number": "2026-14",
+      "municipality": "val-d-or",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+        }
+      ]
+    },
+    {
+      "id": "event-item-5",
+      "label": "Avis de motion - Règlement 2026-21",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "status": "candidate",
+      "meetingDate": "2026-06-01",
+      "kind": "rezonage",
+      "etape": "avis_motion",
+      "etape_date": "2026-06-01",
+      "reglement_number": "2026-21",
+      "municipality": "val-d-or",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\nle CCSRM."
+        }
+      ]
+    },
+    {
+      "id": "event-item-14",
+      "label": "Approbation du plan-projet d'opération cadastrale - Domaine des Deux Lacs",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "status": "candidate",
+      "meetingDate": "2026-06-01",
+      "kind": "subdivision",
+      "municipality": "val-d-or",
+      "description": "Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des Deux Lacs.",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\nDeux Lacs."
+        }
+      ]
+    },
+    {
+      "id": "event-item-15",
+      "label": "Demande d'appui auprès de la CPTAQ - lot 4721047",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "status": "candidate",
+      "meetingDate": "2026-06-01",
+      "kind": "cptaq",
+      "no_lot": "4721047",
+      "municipality": "val-d-or",
+      "description": "Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047.",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-lot-4721047",
+      "label": "Contrainte CPTAQ - Lot 4 721 047",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "organisme": "CPTAQ",
+      "municipality": "val-d-or",
+      "meetingDate": "2026-06-01",
+      "description": "Utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047 soumise à la CPTAQ.",
+      "evidence_refs": [
+        "ev-cptaq-15"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "target": "bylaw-2026-12",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-3"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+        }
+      ]
+    },
+    {
+      "source": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "target": "bylaw-2026-14",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-4"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+        }
+      ]
+    },
+    {
+      "source": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "target": "bylaw-2026-21",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-5"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\nle CCSRM."
+        }
+      ]
+    },
+    {
+      "source": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "target": "event-item-3",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-3"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+        }
+      ]
+    },
+    {
+      "source": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "target": "event-item-4",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-4"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+        }
+      ]
+    },
+    {
+      "source": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "target": "event-item-5",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-5"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\nle CCSRM."
+        }
+      ]
+    },
+    {
+      "source": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "target": "event-item-14",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-cadastre-14"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\nDeux Lacs."
+        }
+      ]
+    },
+    {
+      "source": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "target": "event-item-15",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-cptaq-15"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+        }
+      ]
+    },
+    {
+      "source": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "target": "constraint-cptaq-lot-4721047",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-cptaq-15"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2026-12",
+      "target": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-3"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2026-14",
+      "target": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-4"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2026-21",
+      "target": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-5"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\nle CCSRM."
+        }
+      ]
+    },
+    {
+      "source": "event-item-3",
+      "target": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-3"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+        }
+      ]
+    },
+    {
+      "source": "event-item-4",
+      "target": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-4"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+        }
+      ]
+    },
+    {
+      "source": "event-item-5",
+      "target": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-bylaw-5"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\nle CCSRM."
+        }
+      ]
+    },
+    {
+      "source": "event-item-14",
+      "target": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-cadastre-14"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\nDeux Lacs."
+        }
+      ]
+    },
+    {
+      "source": "event-item-15",
+      "target": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-cptaq-15"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-lot-4721047",
+      "target": "source-14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "evidence_refs": [
+        "ev-cptaq-15"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-3",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+    },
+    {
+      "id": "ev-bylaw-4",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+    },
+    {
+      "id": "ev-bylaw-5",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\nle CCSRM."
+    },
+    {
+      "id": "ev-cadastre-14",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\nDeux Lacs."
+    },
+    {
+      "id": "ev-cptaq-15",
+      "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+      "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+      "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+    }
+  ],
+  "input_tokens": 1200,
+  "output_tokens": 1450
+}
+```

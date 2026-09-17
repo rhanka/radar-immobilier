@@ -1,0 +1,1 @@
+{"schemaVersion":2,"state":"in-flight","startedAt":"2026-09-17T00:27:10.608Z","campaign":"v101b","arm":"gemini-low","documentId":"mont-saint-hilaire-2026-04-13","attempt":1,"requested":{"providerId":"gemini","transportProviderId":"cloud-code","modelId":"gemini-3.8-flash","effort":"low","maxOutputTokens":32768}}

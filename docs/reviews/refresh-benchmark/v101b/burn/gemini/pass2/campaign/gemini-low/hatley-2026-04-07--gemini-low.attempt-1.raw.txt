@@ -1,0 +1,303 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "label": "Procès-verbal du conseil municipal de Hatley - 7 avril 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "status": "attached",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "date": "2026-04-07",
+      "municipality": "hatley",
+      "url": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Le conseil de la municipalité de Hatley siège en assemblée ordinaire, ce mardi 7 avril 2026 à\n19 h, présidée par le maire suppléant, le conseiller M. Jean-Sébastien Bouffard"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2075",
+      "label": "Règlement numéro 2075",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "status": "validated",
+      "numero": "2075",
+      "title": "Code d’éthique et de déontologie des élus municipaux",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-047",
+      "municipality": "hatley",
+      "stage": "adoption",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Adoption du règlement numéro 2075 établissant un Code d’éthique et de\ndéontologie des élus municipaux"
+        },
+        {
+          "page": 4,
+          "excerpt": "Il est proposé par le conseiller Gilles Viens et résolu\nQUE par le présent règlement statué et décrété ce qui suit :"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2025-03-0004",
+      "label": "PIIA-1 2025-03-0004 - 141 rue Main",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "status": "validated",
+      "kind": "piia",
+      "etape": "piia",
+      "etape_date": "2026-04-07",
+      "decision": "approuvé",
+      "dossier": "PIIA-1 2025-03-0004",
+      "no_lot": "4666122",
+      "resolution": "2026-054",
+      "resolutionRef": "Résolution 2026-054",
+      "meetingDate": "2026-04-07",
+      "date": "2026-04-07",
+      "municipality": "hatley",
+      "description": "Demande de construction visant l'agrandissement du bâtiment principal situé au 141 rue Main (lot 4 666 122)",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "8.2 141 rue Main (lot 4 666 122) – PIIA-1 2025-03-0004"
+        },
+        {
+          "page": 11,
+          "excerpt": "Il est proposé par le conseiller Richard Poirier et résolu\nD’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main"
+        }
+      ]
+    },
+    {
+      "id": "signal-piia-2025-03-0004",
+      "label": "Signal - Autorisation PIIA agrandissement 141 rue Main",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "status": "validated",
+      "category": "urbanisme",
+      "kind": "piia",
+      "etape": "piia",
+      "etape_date": "2026-04-07",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-054",
+      "resolutionRef": "Résolution 2026-054",
+      "municipality": "hatley",
+      "no_lot": "4666122",
+      "description": "Autorisation de la demande d'agrandissement du bâtiment principal situé au 141 rue Main (PIIA-1 2025-03-0004)",
+      "scope": "local",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Il est proposé par le conseiller Richard Poirier et résolu\nD’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main"
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-45064",
+      "label": "Contrainte CPTAQ - Dossier 45064",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "status": "validated",
+      "constraintType": "cptaq",
+      "dossier": "45064",
+      "municipality": "hatley",
+      "resolution": "2026-058",
+      "resolutionRef": "Résolution 2026-058",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "meetingDate": "2026-04-07",
+      "description": "Demande d'autorisation pour l'utilisation, à des fins autres qu'agricoles, d'une partie du lot 2 935 698 se trouvant à l'intérieur de la zone agricole permanente, pour l'agrandissement du lieu d'enfouissement technique de la RIGDSC",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "evidence_refs": [
+        "ev-cptaq-1"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "ATTENDU QUE la Régie a présenté à la Commission de protection du territoire agricole\ndu Québec (la « CPTAQ ») une demande d’autorisation visant l’agrandissement LET\nd’une superficie d’environ 25,5 hectares (dossier numéro 45064)"
+        },
+        {
+          "page": 13,
+          "excerpt": "D’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec\nvisant l’obtention d’une autorisation pour l’utilisation, à des fins autres qu’agricoles, d’une partie du lot 2 935 698"
+        }
+      ]
+    },
+    {
+      "id": "signal-cptaq-45064",
+      "label": "Signal - Demande d'autorisation CPTAQ agrandissement LET RIGDSC",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "status": "validated",
+      "category": "environnement",
+      "kind": "cptaq",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-058",
+      "resolutionRef": "Résolution 2026-058",
+      "municipality": "hatley",
+      "no_lot": "2935698",
+      "description": "Appui du conseil municipal de Hatley à la demande de la RIGDSC auprès de la CPTAQ pour l'agrandissement du LET sur le lot 2 935 698",
+      "scope": "regional",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Il est proposé par le conseiller Richard Poirier et résolu\nD’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "target": "bylaw-2075",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "evidence_refs": [
+        "ev-bylaw-1"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "5.3 Adoption du règlement numéro 2075 établissant un Code d’éthique et de\ndéontologie des élus municipaux"
+        }
+      ]
+    },
+    {
+      "source": "source-06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "target": "event-piia-2025-03-0004",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "evidence_refs": [
+        "ev-piia-1"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "8.2 141 rue Main (lot 4 666 122) – PIIA-1 2025-03-0004"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2025-03-0004",
+      "target": "signal-piia-2025-03-0004",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "evidence_refs": [
+        "ev-piia-2"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Il est proposé par le conseiller Richard Poirier et résolu\nD’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main"
+        }
+      ]
+    },
+    {
+      "source": "source-06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "target": "constraint-cptaq-45064",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "evidence_refs": [
+        "ev-cptaq-1"
+      ],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "9.3 Appui à la demande d’autorisation à la Commission de protection du\nterritoire agricole du Québec – Agrandissement du lieu d’enfouissement\ntechnique de la RIGDSC"
+        }
+      ]
+    },
+    {
+      "source": "source-06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "target": "signal-cptaq-45064",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "evidence_refs": [
+        "ev-cptaq-2"
+      ],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Il est proposé par le conseiller Richard Poirier et résolu\nD’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-1",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "5.3 Adoption du règlement numéro 2075 établissant un Code d’éthique et de\ndéontologie des élus municipaux"
+    },
+    {
+      "id": "ev-piia-1",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "8.2 141 rue Main (lot 4 666 122) – PIIA-1 2025-03-0004"
+    },
+    {
+      "id": "ev-piia-2",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Il est proposé par le conseiller Richard Poirier et résolu\nD’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main"
+    },
+    {
+      "id": "ev-cptaq-1",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "ATTENDU QUE la Régie a présenté à la Commission de protection du territoire agricole\ndu Québec (la « CPTAQ ») une demande d’autorisation visant l’agrandissement LET\nd’une superficie d’environ 25,5 hectares (dossier numéro 45064)"
+    },
+    {
+      "id": "ev-cptaq-2",
+      "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+      "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+      "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "Il est proposé par le conseiller Richard Poirier et résolu\nD’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec"
+    }
+  ],
+  "input_tokens": 5890,
+  "output_tokens": 1780
+}
+```

@@ -1,0 +1,671 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "label": "Procès-verbal du conseil municipal d'Eastman - 1er juin 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "validated",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "date": "2026-06-01",
+      "municipality": "eastman",
+      "url": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "Le Conseil de la Municipalité d’Eastman siège en séance ordinaire ce 1er juin 2026 à 19 h 30 à la salle du conseil de l’hôtel de ville situé au 160, chemin GeorgeBonnallie à Eastman."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-07",
+      "label": "Règlement no 2026-07",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "numero": "2026-07",
+      "title": "Règlement no 2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et à la gestion des voies publiques",
+      "stage": "avis_motion",
+      "municipality": "eastman",
+      "meetingDate": "2026-06-01",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté pour adoption, lors d’une prochaine séance du conseil municipal, le règlement no 2026-07"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-ru-2023-02",
+      "label": "Règlement RU-2023-02",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "numero": "RU-2023-02",
+      "title": "Règlement uniformisé RU-2023-02 relatif au stationnement et à la gestion des voies publiques",
+      "municipality": "eastman",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté pour adoption, lors d’une prochaine séance du conseil municipal, le règlement no 2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et à la gestion des voies publiques."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-04",
+      "label": "Règlement no 2026-04",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "numero": "2026-04",
+      "title": "Règlement no 2026-04 sur la gestion contractuelle",
+      "stage": "adoption",
+      "date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "resolution": "2026-06-124",
+      "municipality": "eastman",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’adopter le Règlement no 2026-04 sur la gestion contractuelle dont copie est jointe aux présentes pour en faire partie intégrante."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-05",
+      "label": "Règlement no 2026-05",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "numero": "2026-05",
+      "title": "Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford",
+      "stage": "adoption",
+      "date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "resolution": "2026-06-125",
+      "municipality": "eastman",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-06",
+      "label": "Règlement no 2026-06",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "numero": "2026-06",
+      "title": "Règlement no 2026-06 décrétant la création d’une réserve financière à des fins d’infrastructures municipales",
+      "stage": "adoption",
+      "date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "resolution": "2026-06-126",
+      "municipality": "eastman",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "D’adopter le Règlement no 2026-06 décrétant la création d’une réserve financière à des fins d’infrastructures municipales dont copie est jointe aux présentes pour en faire partie intégrante;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-03",
+      "label": "Règlement no 2026-03",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "numero": "2026-03",
+      "title": "Règlement no 2026-03 sur l’occupation et l’entretien des bâtiments",
+      "stage": "adoption",
+      "date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "resolution": "2026-06-144",
+      "municipality": "eastman",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont copie est jointe aux présentes pour en faire partie intégrante;"
+        }
+      ]
+    },
+    {
+      "id": "zone-v-10",
+      "label": "Zone V-10",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "code": "V-10",
+      "municipality": "eastman",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "meetingDate": "2026-06-01",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de la marge latérale droite dans le but de permettre la construction d’un garage attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin de la Traverse, zone V-10"
+        }
+      ]
+    },
+    {
+      "id": "zone-v-2",
+      "label": "Zone V-2",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "code": "V-2",
+      "municipality": "eastman",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "meetingDate": "2026-06-01",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la coupe d’arbres sur une propriété où le déboisement excède déjà la superficie de déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et 4 380 322, 152 chemin Bellevue, zone V-2."
+        }
+      ]
+    },
+    {
+      "id": "zone-r-10",
+      "label": "Zone R-10",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "code": "R-10",
+      "municipality": "eastman",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "meetingDate": "2026-06-01",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot 2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely, Parker et d’Argent."
+        }
+      ]
+    },
+    {
+      "id": "event-2026-06-127",
+      "label": "Autorisation de modification de l'acte de vente 19 377 959",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "decision": "approuvé",
+      "date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "resolution": "2026-06-127",
+      "municipality": "eastman",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "no_lot": "4380408",
+      "description": "Autorisation de la modification de l’acte de vente 19 377 959 lors de la vente des lots 4 380 408 et 4 380 601 en vue de la création de logements/multiplexes avec don de lots et contribution de 250 000 $.",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots 4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions suivantes"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-06-140",
+      "label": "Refus dérogation mineure - 70 chemin de la Traverse",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "kind": "derogation",
+      "decision": "refusé",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-01",
+      "date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "resolution": "2026-06-140",
+      "municipality": "eastman",
+      "zone_ref": "V-10",
+      "no_lot": "4380003",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "description": "Refus de la demande de dérogation mineure visant la réduction de la marge latérale droite pour un garage attenant au bâtiment principal (lot 4 380 003, 70 chemin de la Traverse).",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de la marge latérale droite dans le but de permettre la construction d’un garage attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin de la Traverse, zone V-10"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-06-141",
+      "label": "Refus dérogation mineure - 152 chemin Bellevue",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "kind": "derogation",
+      "decision": "refusé",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-01",
+      "date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "resolution": "2026-06-141",
+      "municipality": "eastman",
+      "zone_ref": "V-2",
+      "no_lot": "4380313",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "description": "Refus de la demande de dérogation mineure visant à autoriser la coupe d'arbres sur une propriété où le déboisement excède la superficie maximale (lots 4 380 313 et 4 380 322, 152 chemin Bellevue).",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la coupe d’arbres sur une propriété où le déboisement excède déjà la superficie de déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et 4 380 322, 152 chemin Bellevue, zone V-2."
+        }
+      ]
+    },
+    {
+      "id": "event-2026-06-142",
+      "label": "Acceptation dérogation mineure - 6 chemin de la Mésange",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "kind": "derogation",
+      "decision": "approuvé",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-06-01",
+      "date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "resolution": "2026-06-142",
+      "municipality": "eastman",
+      "zone_ref": "R-10",
+      "no_lot": "2235834",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "description": "Acceptation de la demande de dérogation mineure visant à autoriser la construction d'un bâtiment accessoire en cour avant (lot 2 235 834, 6 chemin de la Mésange).",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot 2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely, Parker et d’Argent."
+        }
+      ]
+    },
+    {
+      "id": "event-2026-06-143",
+      "label": "Approbation et refus de plans PIIA",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "decision": "approuvé",
+      "etape": "piia",
+      "etape_date": "2026-06-01",
+      "date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "resolution": "2026-06-143",
+      "municipality": "eastman",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "description": "Approbation et refus de diverses demandes de permis dans le cadre du règlement PIIA 2002-14.",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "D’accepter la demande d’approbation au règlement PIIA suivante :"
+        }
+      ]
+    },
+    {
+      "id": "signal-multiplex-2026-06-127",
+      "label": "Signal - Projet de multiplexes lots 4 380 408 et 4 380 601",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "status": "candidate",
+      "category": "densification_residentielle",
+      "kind": "projet_residentiel",
+      "date": "2026-06-01",
+      "meetingDate": "2026-06-01",
+      "resolution": "2026-06-127",
+      "municipality": "eastman",
+      "no_lot": "4380408",
+      "amount_cad": 250000,
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "description": "Entente et modification d’acte de vente visant à permettre la vente et la construction de multiplexes sur les lots 4 380 408 et 4 380 601, incluant une contribution de 250 000 $ pour la création de logements.",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "ATTENDU QUE le propriétaire souhaite désormais vendre ces lots afin qu’un projet de construction de multiplexes voie le jour;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "target": "bylaw-2026-07",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-bylaw-2026-07"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté pour adoption, lors d’une prochaine séance du conseil municipal, le règlement no 2026-07"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2026-07",
+      "target": "bylaw-ru-2023-02",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-bylaw-2026-07"],
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté pour adoption, lors d’une prochaine séance du conseil municipal, le règlement no 2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et à la gestion des voies publiques."
+        }
+      ]
+    },
+    {
+      "source": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "target": "bylaw-2026-04",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-bylaw-2026-04"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’adopter le Règlement no 2026-04 sur la gestion contractuelle dont copie est jointe aux présentes pour en faire partie intégrante."
+        }
+      ]
+    },
+    {
+      "source": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "target": "bylaw-2026-05",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-bylaw-2026-05"],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante;"
+        }
+      ]
+    },
+    {
+      "source": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "target": "bylaw-2026-06",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-bylaw-2026-06"],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "D’adopter le Règlement no 2026-06 décrétant la création d’une réserve financière à des fins d’infrastructures municipales dont copie est jointe aux présentes pour en faire partie intégrante;"
+        }
+      ]
+    },
+    {
+      "source": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "target": "bylaw-2026-03",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-bylaw-2026-03"],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont copie est jointe aux présentes pour en faire partie intégrante;"
+        }
+      ]
+    },
+    {
+      "source": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "target": "event-2026-06-127",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-res-127"],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots 4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions suivantes"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-06-127",
+      "target": "signal-multiplex-2026-06-127",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-res-127"],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "ATTENDU QUE le propriétaire souhaite désormais vendre ces lots afin qu’un projet de construction de multiplexes voie le jour;"
+        }
+      ]
+    },
+    {
+      "source": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "target": "event-2026-06-140",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-res-140"],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de la marge latérale droite dans le but de permettre la construction d’un garage attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin de la Traverse, zone V-10"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-06-140",
+      "target": "zone-v-10",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-res-140"],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de la marge latérale droite dans le but de permettre la construction d’un garage attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin de la Traverse, zone V-10"
+        }
+      ]
+    },
+    {
+      "source": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "target": "event-2026-06-141",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-res-141"],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la coupe d’arbres sur une propriété où le déboisement excède déjà la superficie de déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et 4 380 322, 152 chemin Bellevue, zone V-2."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-06-141",
+      "target": "zone-v-2",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-res-141"],
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la coupe d’arbres sur une propriété où le déboisement excède déjà la superficie de déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et 4 380 322, 152 chemin Bellevue, zone V-2."
+        }
+      ]
+    },
+    {
+      "source": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "target": "event-2026-06-142",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-res-142"],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot 2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely, Parker et d’Argent."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-06-142",
+      "target": "zone-r-10",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-res-142"],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot 2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely, Parker et d’Argent."
+        }
+      ]
+    },
+    {
+      "source": "source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "target": "event-2026-06-143",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "evidence_refs": ["ev-res-143"],
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "D’accepter la demande d’approbation au règlement PIIA suivante :"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-2026-07",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "modality": "pdf",
+      "page": 4,
+      "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté pour adoption, lors d’une prochaine séance du conseil municipal, le règlement no 2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et à la gestion des voies publiques."
+    },
+    {
+      "id": "ev-bylaw-2026-04",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "D’adopter le Règlement no 2026-04 sur la gestion contractuelle dont copie est jointe aux présentes pour en faire partie intégrante."
+    },
+    {
+      "id": "ev-bylaw-2026-05",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante;"
+    },
+    {
+      "id": "ev-bylaw-2026-06",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "modality": "pdf",
+      "page": 6,
+      "excerpt": "D’adopter le Règlement no 2026-06 décrétant la création d’une réserve financière à des fins d’infrastructures municipales dont copie est jointe aux présentes pour en faire partie intégrante;"
+    },
+    {
+      "id": "ev-bylaw-2026-03",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont copie est jointe aux présentes pour en faire partie intégrante;"
+    },
+    {
+      "id": "ev-res-127",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots 4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions suivantes"
+    },
+    {
+      "id": "ev-res-140",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de la marge latérale droite dans le but de permettre la construction d’un garage attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin de la Traverse, zone V-10, PIIA-4 - Corridor visuel d'intérêt supérieur."
+    },
+    {
+      "id": "ev-res-141",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la coupe d’arbres sur une propriété où le déboisement excède déjà la superficie de déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et 4 380 322, 152 chemin Bellevue, zone V-2."
+    },
+    {
+      "id": "ev-res-142",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot 2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely, Parker et d’Argent."
+    },
+    {
+      "id": "ev-res-143",
+      "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+      "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+      "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "D’accepter la demande d’approbation au règlement PIIA suivante :"
+    }
+  ],
+  "input_tokens": 5890,
+  "output_tokens": 2840
+}
+```

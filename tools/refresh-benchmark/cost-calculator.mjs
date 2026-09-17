@@ -273,9 +273,9 @@ const SEAT_ARMS = Object.freeze({
 });
 const OBSERVATION_FIELDS = new Set(["arm", "provider", "status", "reason", "method",
   "sourceStatus", "basePlan", "windowMinutes", "usedPercent", "campaignTokens",
-  "quotaDeltaPercent", "documents", "tokens"]);
+  "quotaDeltaPercent", "documents", "tokens", "t0Utc", "t1Utc"]);
 const N_A_REASONS = new Set(["weekly-window-source-gap", "transport-mismatch",
-  "plan-source-gap", "missing-observation"]);
+  "plan-source-gap", "missing-observation", "no-quota-delta"]);
 
 export function validateSeatObservations(value) {
   if (!value || value.schemaVersion !== 1 || !Array.isArray(value.observations)) {
@@ -531,9 +531,9 @@ export function renderMarkdown(report) {
   }
   lines.push("", "## Observables de quota", "",
     "- Codex/ChatGPT: `wham/usage` expose le pourcentage, la durée et le reset de la fenêtre. La capacité Sol/Luna ci-dessus est un scénario par ratio avec les reçus de campagne, pas une mesure marginale par bras.",
-    "- Google Cloud Code: `loadCodeAssist` expose le palier et `retrieveUserQuota` des buckets par modèle (`remainingFraction`, `resetTime`). llm-mesh 0.19.3 n'appelle pas ce dernier et ne conserve que `Retry-After` après 429. Le bucket Gemini observé dure 5 h; aucune capacité hebdomadaire n'en est extrapolée.",
+    "- Google Cloud Code: `agy /usage` expose directement les pourcentages hebdomadaire et 5 h pour Gemini Flash/Pro. Une observation `controlled-burn` avec fenêtre 10 080 min est donc une capacité hebdomadaire mesurée; les reçus restent la source des documents et tokens.",
     "- Claude Code OAuth: `/usage` expose les fenêtres 5 h et 7 j, mais `sonnet46-cloud-off` utilise Google Cloud Code. Une projection Claude Pro/Max pour ce bras serait un changement de transport; elle reste N-A.", "",
-    "Burn corpus: **0 requête Gemini, 0 requête Sonnet**. Les deux appels Google étaient des lectures de métadonnées quota. Le plafond de 10 % ne pouvait pas être garanti avant le document suivant; aucun traitement n'a été lancé.", "");
+    "Burn réel: voir `burn/seat-observations.json` pour les pourcentages et les bornes UTC allowlistés; aucun identifiant de session ni secret n'est conservé. Les capacités Codex sans delta de compteur sont N-A, non extrapolées.", "");
   return lines.join("\n");
 }
 

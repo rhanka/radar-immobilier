@@ -1,0 +1,426 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "label": "Ordre du jour du conseil d'Ogden - 9 mars 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "date": "2026-03-09",
+      "municipality": "ogden",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "url": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "MUNICIPALITÉ D’OGDEN\nORDRE DU JOUR\nSéance ordinaire du conseil\nLundi, 9 mars 2026 à 19 heures"
+        }
+      ]
+    },
+    {
+      "id": "event-6-3-derogation-905-descente-2",
+      "label": "Demande de deux dérogations mineures au 905 Descente 2",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "derogation",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "date": "2026-03-09",
+      "municipality": "ogden",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "description": "Demande de deux (2) dérogations mineures au 905 Descente 2",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.3 Demande de deux (2) dérogations mineures au 905 Descente 2"
+        }
+      ]
+    },
+    {
+      "id": "event-6-4-piia-2050-marlington",
+      "label": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "piia",
+      "etape": "piia",
+      "etape_date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "date": "2026-03-09",
+      "municipality": "ogden",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "description": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.4 Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+        }
+      ]
+    },
+    {
+      "id": "event-6-5-piia-3695-stanstead",
+      "label": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "piia",
+      "etape": "piia",
+      "etape_date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "date": "2026-03-09",
+      "municipality": "ogden",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "description": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.5 Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2025-05",
+      "label": "Règlement de zonage no. 2025-05",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2025-05",
+      "title": "Règlement de zonage no. 2025-05",
+      "municipality": "ogden",
+      "meetingDate": "2026-03-09",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.7 Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-05",
+      "label": "Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2026.05",
+      "title": "Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments",
+      "stage": "projet",
+      "municipality": "ogden",
+      "meetingDate": "2026-03-09",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "13.3 Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments"
+        }
+      ]
+    },
+    {
+      "id": "event-13-3-avis-motion-2026-05",
+      "label": "Avis de motion – Règlement no. 2026.05",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "etape": "avis_motion",
+      "etape_date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "date": "2026-03-09",
+      "municipality": "ogden",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "reglement_number": "2026.05",
+      "description": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "13.3 Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments"
+        }
+      ]
+    },
+    {
+      "id": "event-13-4-adoption-projet-2026-05",
+      "label": "Adoption – Projet de règlement no. 2026.05",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "etape": "projet_reglement",
+      "etape_date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "date": "2026-03-09",
+      "municipality": "ogden",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "reglement_number": "2026.05",
+      "description": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "13.4 Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments"
+        }
+      ]
+    },
+    {
+      "id": "signal-derogations-descente-2",
+      "label": "Signal - Dérogations mineures 905 Descente 2",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "derogation",
+      "date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "municipality": "ogden",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-03-09",
+      "description": "Demande de deux (2) dérogations mineures au 905 Descente 2",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.3 Demande de deux (2) dérogations mineures au 905 Descente 2"
+        }
+      ]
+    },
+    {
+      "id": "signal-piia-marlington",
+      "label": "Signal - PIIA nouveau bâtiment 2050 chemin Marlington",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "piia",
+      "date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "municipality": "ogden",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "etape": "piia",
+      "etape_date": "2026-03-09",
+      "description": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.4 Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+        }
+      ]
+    },
+    {
+      "id": "signal-piia-stanstead",
+      "label": "Signal - PIIA nouveau bâtiment 3695 chemin Stanstead",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "piia",
+      "date": "2026-03-09",
+      "meetingDate": "2026-03-09",
+      "municipality": "ogden",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "etape": "piia",
+      "etape_date": "2026-03-09",
+      "description": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.5 Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "target": "event-6-3-derogation-905-descente-2",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "evidence_refs": [
+        "ev-6-3"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.3 Demande de deux (2) dérogations mineures au 905 Descente 2"
+        }
+      ]
+    },
+    {
+      "source": "source-168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "target": "event-6-4-piia-2050-marlington",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "evidence_refs": [
+        "ev-6-4"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.4 Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+        }
+      ]
+    },
+    {
+      "source": "source-168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "target": "event-6-5-piia-3695-stanstead",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "evidence_refs": [
+        "ev-6-5"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.5 Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+        }
+      ]
+    },
+    {
+      "source": "source-168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "target": "bylaw-2025-05",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "evidence_refs": [
+        "ev-6-7"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.7 Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+        }
+      ]
+    },
+    {
+      "source": "source-168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "target": "bylaw-2026-05",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "evidence_refs": [
+        "ev-13-3"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "13.3 Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments"
+        }
+      ]
+    },
+    {
+      "source": "event-6-3-derogation-905-descente-2",
+      "target": "signal-derogations-descente-2",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "evidence_refs": [
+        "ev-6-3"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.3 Demande de deux (2) dérogations mineures au 905 Descente 2"
+        }
+      ]
+    },
+    {
+      "source": "event-6-4-piia-2050-marlington",
+      "target": "signal-piia-marlington",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "evidence_refs": [
+        "ev-6-4"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.4 Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+        }
+      ]
+    },
+    {
+      "source": "event-6-5-piia-3695-stanstead",
+      "target": "signal-piia-stanstead",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "evidence_refs": [
+        "ev-6-5"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "6.5 Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-6-3",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "6.3 Demande de deux (2) dérogations mineures au 905 Descente 2"
+    },
+    {
+      "id": "ev-6-4",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "6.4 Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+    },
+    {
+      "id": "ev-6-5",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "6.5 Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+    },
+    {
+      "id": "ev-6-7",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "6.7 Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+    },
+    {
+      "id": "ev-13-3",
+      "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+      "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+      "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "13.3 Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments"
+    }
+  ],
+  "input_tokens": 1280,
+  "output_tokens": 1820
+}
+```

@@ -1,0 +1,182 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "label": "Règlement 5005-024",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "sha256": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "municipality": "candiac",
+      "citySlug": "candiac",
+      "url": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+      "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+      "sourceKind": "reglement",
+      "sourceType": "reglement",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "RÈGLEMENT 5005-024\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\nCERTIFICATS"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-5005-024",
+      "label": "Règlement 5005-024",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "5005-024",
+      "bylawNumber": "5005-024",
+      "number": "5005-024",
+      "title": "RÈGLEMENT 5005-024 MODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET CERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE D’ÉTUDES ET DE MESURES DE MITIGATION, NOTAMMENT EN BORDURE D’AUTOROUTE, ET EXIGER LA CONSTRUCTION DES OUVRAGES REQUIS AVANT L’ÉMISSION D’UN PERMIS DE CONSTRUCTION",
+      "titre": "RÈGLEMENT 5005-024 MODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET CERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE D’ÉTUDES ET DE MESURES DE MITIGATION, NOTAMMENT EN BORDURE D’AUTOROUTE, ET EXIGER LA CONSTRUCTION DES OUVRAGES REQUIS AVANT L’ÉMISSION D’UN PERMIS DE CONSTRUCTION",
+      "objet": "MODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET CERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE D’ÉTUDES ET DE MESURES DE MITIGATION, NOTAMMENT EN BORDURE D’AUTOROUTE, ET EXIGER LA CONSTRUCTION DES OUVRAGES REQUIS AVANT L’ÉMISSION D’UN PERMIS DE CONSTRUCTION",
+      "municipality": "candiac",
+      "citySlug": "candiac",
+      "meetingDate": "2026-06-15",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "À LA SÉANCE DU 15 JUIN 2026 LE CONSEIL MUNICIPAL DE LA\nVILLE DE CANDIAC DÉCRÈTE :"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-5005",
+      "label": "Règlement 5005",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "5005",
+      "bylawNumber": "5005",
+      "number": "5005",
+      "title": "Règlement 5005 relatif aux permis et certificats",
+      "titre": "Règlement 5005 relatif aux permis et certificats",
+      "municipality": "candiac",
+      "citySlug": "candiac",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-5005-024",
+      "target": "bylaw-5005",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "evidence_refs": [
+        "ev-1-amends"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+        }
+      ]
+    },
+    {
+      "source": "source-1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "target": "bylaw-5005-024",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "evidence_refs": [
+        "ev-1-source-mentions-bylaw-5005-024"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "RÈGLEMENT 5005-024\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\nCERTIFICATS"
+        }
+      ]
+    },
+    {
+      "source": "source-1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "target": "bylaw-5005",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "evidence_refs": [
+        "ev-1-amends"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-5005-024",
+      "target": "source-1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "evidence_refs": [
+        "ev-1-source-mentions-bylaw-5005-024"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "RÈGLEMENT 5005-024\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\nCERTIFICATS"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-5005",
+      "target": "source-1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "evidence_refs": [
+        "ev-1-amends"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-1-source-mentions-bylaw-5005-024",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "RÈGLEMENT 5005-024\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\nCERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE\nD’ÉTUDES ET DE MESURES DE MITIGATION, NOTAMMENT EN\nBORDURE D’AUTOROUTE, ET EXIGER LA CONSTRUCTION DES\nOUVRAGES REQUIS AVANT L’ÉMISSION D’UN PERMIS DE\nCONSTRUCTION"
+    },
+    {
+      "id": "ev-1-amends",
+      "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+      "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+      "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+    }
+  ],
+  "input_tokens": 1780,
+  "output_tokens": 1050
+}
+```

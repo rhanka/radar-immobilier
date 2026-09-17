@@ -1,0 +1,172 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "label": "Procès-verbal - 02 février 2026 - Saint-Just-de-Bretenières",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "status": "validated",
+      "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "date": "2026-02-02",
+      "municipality": "saint-just-de-bretenieres",
+      "url": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "MUNICIPALITÉ DE SAINT-JUST-DE-BRETENIÈRES,\nMONTMAGNY\nAssemblée régulière du Conseil municipal, tenue le 02 février 2026"
+        }
+      ]
+    },
+    {
+      "id": "constraint-41-02-2026-milieux-hydriques",
+      "label": "Compétence MRC Montmagny - Milieux hydriques et inondations",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "status": "validated",
+      "constraintType": "milieu_humide",
+      "municipality": "saint-just-de-bretenieres",
+      "loi": "Règlement sur l’encadrement d’activités sous la responsabilité des municipalités réalisées dans des milieux hydriques et sur des ouvrages de protection contre les inondations",
+      "organisme": "MRC de Montmagny",
+      "resolution": "41-02-2026",
+      "resolutionRef": "41-02-2026",
+      "description": "Délégation / acceptation de déclaration de compétence exclusive à la MRC de Montmagny concernant la délivrance de certaines autorisations relatives aux activités réalisées dans les milieux hydriques et sur des ouvrages de protection contre les inondations (hors bâtiments).",
+      "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "meetingDate": "2026-02-02",
+      "evidence_refs": [
+        "ev-41-02-2026-1"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT la résolution adoptée par le conseil de la MRC de\nMontmagny lors de la séance tenue le 20 janvier 2026, annonçant son\nintention de déclarer sa compétence"
+        },
+        {
+          "page": 8,
+          "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration"
+        }
+      ]
+    },
+    {
+      "id": "signal-40-02-2026-deboisement-bande-boisee",
+      "label": "Demande de révision réglementaire - Déboisement bande boisée",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "status": "candidate",
+      "category": "urbanisme",
+      "kind": "revision_reglementaire",
+      "date": "2026-02-02",
+      "meetingDate": "2026-02-02",
+      "description": "Demande de révision du règlement existant exigeant le maintien d'une bande boisée de 20 mètres en raison des interventions d'Hydro-Québec entraînant des pertes de revenus forestiers.",
+      "resolution": "40-02-2026",
+      "resolutionRef": "40-02-2026",
+      "scope": "local",
+      "municipality": "saint-just-de-bretenieres",
+      "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\nrèglement soit revu en tenant compte des éléments soulevés."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "target": "constraint-41-02-2026-milieux-hydriques",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "evidence_refs": [
+        "ev-41-02-2026-1"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration"
+        }
+      ]
+    },
+    {
+      "source": "constraint-41-02-2026-milieux-hydriques",
+      "target": "source-2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "evidence_refs": [
+        "ev-41-02-2026-1"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration"
+        }
+      ]
+    },
+    {
+      "source": "source-2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "target": "signal-40-02-2026-deboisement-bande-boisee",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "evidence_refs": [
+        "ev-40-02-2026-1"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\nrèglement soit revu en tenant compte des éléments soulevés."
+        }
+      ]
+    },
+    {
+      "source": "source-2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "target": "signal-40-02-2026-deboisement-bande-boisee",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "evidence_refs": [
+        "ev-40-02-2026-1"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\nrèglement soit revu en tenant compte des éléments soulevés."
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-41-02-2026-1",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des conseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration de compétence de la MRC de Montmagny concernant la délivrance de certaines autorisations en vertu du Règlement sur l’encadrement d’activités sous la responsabilité des municipalités réalisées dans des milieux hydriques et sur des ouvrages de protection contre les inondations"
+    },
+    {
+      "id": "ev-40-02-2026-1",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le règlement soit revu en tenant compte des éléments soulevés."
+    }
+  ],
+  "input_tokens": 3317,
+  "output_tokens": 1285
+}
+```

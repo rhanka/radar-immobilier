@@ -1,0 +1,234 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "label": "Procès-verbal de la séance ordinaire du 1er avril 2026 - Saint-Bernard-de-Michaudville",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "docSha": "12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "date": "2026-04-01",
+      "municipality": "saint-bernard-de-michaudville",
+      "url": "https://saintbernarddemichaudville.qc.ca/upload/seances-du-conseil/proces-verbaux/2026/pv2026-04-01.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL de la quatrième séance ordinaire du conseil de la Municipalité de SaintBernard-de-Michaudville tenue le mercredi 1er avril 2026 à 20 h 00"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-01",
+      "label": "Règlement no 2026-01 de tarification et de frais administratif",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "numero": "2026-01",
+      "title": "Règlement No 2026-01 de tarification et de frais administratif pour la fourniture de biens et services",
+      "stage": "adoption",
+      "date": "2026-04-01",
+      "meetingDate": "2026-04-01",
+      "municipality": "saint-bernard-de-michaudville",
+      "resolution": "2026.04.04",
+      "docSha": "12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’ADOPTER le Règlement No 2026-01 de tarification et de frais administratif pour la fourniture de biens et services"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2025-11",
+      "label": "Règlement no 2025-11 concernant la tarification et les frais administratifs",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "numero": "2025-11",
+      "title": "règlement 2025-11 concernant la tarification et les frais administratifs pour la fourniture de biens et de services",
+      "municipality": "saint-bernard-de-michaudville",
+      "docSha": "12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "status": "superseded",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QU'il y a lieu de modifier et remplacer le règlement 2025-11 concernant la tarification et les frais administratifs pour la fourniture de biens et de services"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-02",
+      "label": "Règlement no 2026-02 édictant le code d'éthique et de déontologie des élus municipaux",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "numero": "2026-02",
+      "title": "Règlement numéro 2026-02 édictant le code d’éthique et de déontologie des élus municipaux",
+      "stage": "adoption",
+      "date": "2026-04-01",
+      "meetingDate": "2026-04-01",
+      "municipality": "saint-bernard-de-michaudville",
+      "resolution": "2026.04.05",
+      "docSha": "12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’ADOPTER le Règlement numéro 2026-02 édictant le code d’éthique et de déontologie des élus municipaux tel que déposé."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2022-01",
+      "label": "Règlement no 2022-01 concernant le Code d’éthique et de déontologie des élus",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "numero": "2022-01",
+      "title": "Règlement numéro 2022-01 concernant le Code d’éthique et de déontologie des élus de la Municipalité de SaintBernard-de-Michaudville",
+      "date": "2022-02-07",
+      "municipality": "saint-bernard-de-michaudville",
+      "docSha": "12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "status": "superseded",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "ATTENDU QUE le conseil de la Municipalité a adopté, le 7 février 2022, le Règlement numéro 2022-01 concernant le Code d’éthique et de déontologie des élus de la Municipalité de SaintBernard-de-Michaudville ;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-2026-01",
+      "target": "bylaw-2025-11",
+      "relation": "replaces",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "evidence_refs": [
+        "ev-bylaw-replace-2025-11"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QU'il y a lieu de modifier et remplacer le règlement 2025-11 concernant la tarification et les frais administratifs pour la fourniture de biens et de services afin de clarifier certains détails"
+        }
+      ]
+    },
+    {
+      "source": "source-12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "target": "bylaw-2026-01",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-01"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’ADOPTER le Règlement No 2026-01 de tarification et de frais administratif pour la fourniture de biens et services"
+        }
+      ]
+    },
+    {
+      "source": "source-12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "target": "bylaw-2026-02",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2026-02"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "D’ADOPTER le Règlement numéro 2026-02 édictant le code d’éthique et de déontologie des élus municipaux tel que déposé."
+        }
+      ]
+    },
+    {
+      "source": "source-12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "target": "bylaw-2025-11",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "evidence_refs": [
+        "ev-bylaw-replace-2025-11"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT QU'il y a lieu de modifier et remplacer le règlement 2025-11 concernant la tarification et les frais administratifs pour la fourniture de biens et de services afin de clarifier certains détails"
+        }
+      ]
+    },
+    {
+      "source": "source-12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "target": "bylaw-2022-01",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "evidence_refs": [
+        "ev-bylaw-2022-01"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "ATTENDU QUE le conseil de la Municipalité a adopté, le 7 février 2022, le Règlement numéro 2022-01 concernant le Code d’éthique et de déontologie des élus de la Municipalité de SaintBernard-de-Michaudville ;"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-2026-01",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "rawRef": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "docSha": "12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "sourceUrl": "https://saintbernarddemichaudville.qc.ca/upload/seances-du-conseil/proces-verbaux/2026/pv2026-04-01.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "D’ADOPTER le Règlement No 2026-01 de tarification et de frais administratif pour la fourniture de biens et services"
+    },
+    {
+      "id": "ev-bylaw-replace-2025-11",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "rawRef": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "docSha": "12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "sourceUrl": "https://saintbernarddemichaudville.qc.ca/upload/seances-du-conseil/proces-verbaux/2026/pv2026-04-01.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "CONSIDÉRANT QU'il y a lieu de modifier et remplacer le règlement 2025-11 concernant la tarification et les frais administratifs pour la fourniture de biens et de services afin de clarifier certains détails dans la grille de tarification ;"
+    },
+    {
+      "id": "ev-bylaw-2026-02",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "rawRef": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "docSha": "12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "sourceUrl": "https://saintbernarddemichaudville.qc.ca/upload/seances-du-conseil/proces-verbaux/2026/pv2026-04-01.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "D’ADOPTER le Règlement numéro 2026-02 édictant le code d’éthique et de déontologie des élus municipaux tel que déposé."
+    },
+    {
+      "id": "ev-bylaw-2022-01",
+      "source_file": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "rawRef": "raw/proces-verbaux-saint-bernard-de-michaudville/cas/12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0.pdf",
+      "docSha": "12203d36183a2004251dbff6ebb9f198f5fd7842f510e1c2d69e28a29e54a7c0",
+      "sourceUrl": "https://saintbernarddemichaudville.qc.ca/upload/seances-du-conseil/proces-verbaux/2026/pv2026-04-01.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "ATTENDU QUE le conseil de la Municipalité a adopté, le 7 février 2022, le Règlement numéro 2022-01 concernant le Code d’éthique et de déontologie des élus de la Municipalité de SaintBernard-de-Michaudville ;"
+    }
+  ],
+  "input_tokens": 3600,
+  "output_tokens": 1450
+}
+```

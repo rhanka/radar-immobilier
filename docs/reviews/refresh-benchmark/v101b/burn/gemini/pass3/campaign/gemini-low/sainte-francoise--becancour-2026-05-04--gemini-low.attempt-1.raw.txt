@@ -1,0 +1,434 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "label": "Procès-verbal de la séance ordinaire du 4 mai 2026 - Sainte-Françoise",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "date": "2026-05-04",
+      "municipality": "sainte-francoise",
+      "url": "https://ste-francoise.com/wp-content/uploads/2026/06/03085549/01-301-PV-2026-05-04.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL DE LA SÉANCE ORDINAIRE DU CONSEIL DE LA MUNICIPALITÉ DE\nSAINTE-FRANÇOISE, TENUE À LA SALLE MUNICIPALE, LE LUNDI 4 MAI 2026, À 20H."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-55-2026",
+      "label": "Règlement #55-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "55-2026",
+      "title": "Règlement #55-2026 modifiant le règlement de zonage #2010-03",
+      "stage": "2e_projet",
+      "municipality": "sainte-francoise",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "meetingDate": "2026-05-04",
+      "resolution": "61-05-2026",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2010-03",
+      "label": "Règlement de zonage #2010-03",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2010-03",
+      "title": "Règlement de zonage #2010-03",
+      "municipality": "sainte-francoise",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le règlement de zonage de la municipalité de Sainte-Françoise est\nen vigueur depuis le 27 avril 2010;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-58-2026",
+      "label": "Règlement #58-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "58-2026",
+      "title": "Règlement #58-2026 modifiant le plan d’urbanisme #2010-01",
+      "stage": "avis_motion",
+      "municipality": "sainte-francoise",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "meetingDate": "2026-05-04",
+      "resolution": "64-05-2026",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2010-01",
+      "label": "Plan d'urbanisme #2010-01",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2010-01",
+      "title": "Plan d'urbanisme #2010-01",
+      "municipality": "sainte-francoise",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-59-2026",
+      "label": "Règlement #59-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "59-2026",
+      "title": "Règlement #59-2026 modifiant le règlement de construction #2010-05",
+      "stage": "avis_motion",
+      "municipality": "sainte-francoise",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "meetingDate": "2026-05-04",
+      "resolution": "65-05-2026",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2010-05",
+      "label": "Règlement de construction #2010-05",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "2010-05",
+      "title": "Règlement de construction #2010-05",
+      "municipality": "sainte-francoise",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05."
+        }
+      ]
+    },
+    {
+      "id": "zone-m-03",
+      "label": "Zone M-03",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "M-03",
+      "municipality": "sainte-francoise",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage afin\nd’agrandir la zone M-03 à même la zone IND-02;"
+        }
+      ]
+    },
+    {
+      "id": "zone-ind-02",
+      "label": "Zone IND-02",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "IND-02",
+      "municipality": "sainte-francoise",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage afin\nd’agrandir la zone M-03 à même la zone IND-02;"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-61-05-2026",
+      "label": "Adoption du projet de règlement #55-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "resolution": "61-05-2026",
+      "municipality": "sainte-francoise",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "reglement_number": "55-2026",
+      "zone_ref": "M-03",
+      "etape": "second_projet",
+      "etape_date": "2026-05-04",
+      "description": "Adoption du projet de règlement #55-2026 modifiant le règlement de zonage #2010-03 afin notamment d'agrandir la zone M-03 à même la zone IND-02.",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026"
+        }
+      ]
+    },
+    {
+      "id": "signal-rezonage-m-03",
+      "label": "Signal - Rezonage M-03 / IND-02",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "rezonage",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "resolution": "61-05-2026",
+      "municipality": "sainte-francoise",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "zone_ref": "M-03",
+      "reglement_number": "55-2026",
+      "etape": "second_projet",
+      "etape_date": "2026-05-04",
+      "description": "Modification du règlement de zonage pour agrandir la zone M-03 à même la zone IND-02.",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage afin\nd’agrandir la zone M-03 à même la zone IND-02;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-55-2026",
+      "target": "bylaw-2010-03",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "evidence_refs": [
+        "ev-bylaw-55-amends"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-58-2026",
+      "target": "bylaw-2010-01",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "evidence_refs": [
+        "ev-bylaw-58-amends"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-59-2026",
+      "target": "bylaw-2010-05",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "evidence_refs": [
+        "ev-bylaw-59-amends"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05."
+        }
+      ]
+    },
+    {
+      "source": "designation-event-61-05-2026",
+      "target": "zone-m-03",
+      "relation": "rezones",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "evidence_refs": [
+        "ev-rezonage-m03"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage afin\nd’agrandir la zone M-03 à même la zone IND-02;"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-61-05-2026",
+      "target": "zone-ind-02",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "evidence_refs": [
+        "ev-rezonage-m03"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage afin\nd’agrandir la zone M-03 à même la zone IND-02;"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-61-05-2026",
+      "target": "signal-rezonage-m-03",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "evidence_refs": [
+        "ev-rezonage-m03"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage afin\nd’agrandir la zone M-03 à même la zone IND-02;"
+        }
+      ]
+    },
+    {
+      "source": "signal-rezonage-m-03",
+      "target": "zone-m-03",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "evidence_refs": [
+        "ev-rezonage-m03"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage afin\nd’agrandir la zone M-03 à même la zone IND-02;"
+        }
+      ]
+    },
+    {
+      "source": "source-127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "target": "bylaw-55-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "evidence_refs": [
+        "ev-bylaw-55-amends"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026"
+        }
+      ]
+    },
+    {
+      "source": "source-127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "target": "designation-event-61-05-2026",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "evidence_refs": [
+        "ev-bylaw-55-amends"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026"
+        }
+      ]
+    },
+    {
+      "source": "source-127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "target": "zone-m-03",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "evidence_refs": [
+        "ev-rezonage-m03"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage afin\nd’agrandir la zone M-03 à même la zone IND-02;"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-bylaw-55-amends",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "sourceUrl": "https://ste-francoise.com/wp-content/uploads/2026/06/03085549/01-301-PV-2026-05-04.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents que le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier projet de règlement #55-2026 modifiant le règlement de zonage #2010-03."
+    },
+    {
+      "id": "ev-rezonage-m03",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "sourceUrl": "https://ste-francoise.com/wp-content/uploads/2026/06/03085549/01-301-PV-2026-05-04.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage afin d’agrandir la zone M-03 à même la zone IND-02;"
+    },
+    {
+      "id": "ev-bylaw-58-amends",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "sourceUrl": "https://ste-francoise.com/wp-content/uploads/2026/06/03085549/01-301-PV-2026-05-04.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance ultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme #2010-01."
+    },
+    {
+      "id": "ev-bylaw-59-amends",
+      "source_file": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-francoise--becancour/cas/127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.pdf",
+      "docSha": "127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93",
+      "sourceUrl": "https://ste-francoise.com/wp-content/uploads/2026/06/03085549/01-301-PV-2026-05-04.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance ultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de construction #2010-05."
+    }
+  ],
+  "input_tokens": 4812,
+  "output_tokens": 2420
+}
+```

@@ -1,0 +1,453 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "label": "Minutes of the August 11, 2026 regular meeting - Arundel",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "date": "2026-08-11",
+      "municipality": "arundel",
+      "url": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Minutes of the August 11, 2026 regular meeting at 7:00 p.m. of the Council of the Municipality of the Township of Arundel, held at the Community Hall, 60 Route Morrison, Arundel."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-312-2026",
+      "label": "Bylaw 312-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "312-2026",
+      "title": "Bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI)",
+      "date": "2026-08-11",
+      "meetingDate": "2026-08-11",
+      "stage": "2e_projet",
+      "municipality": "arundel",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "resolution": "2026-08-123",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-08-123",
+      "label": "Adoption in second reading - Bylaw 312-2026 (SCAOPI)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-08-11",
+      "meetingDate": "2026-08-11",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "municipality": "arundel",
+      "resolution": "2026-08-123",
+      "reglement_number": "312-2026",
+      "etape": "second_projet",
+      "etape_date": "2026-08-11",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "description": "Adoption in second reading of Bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI)",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes"
+        }
+      ]
+    },
+    {
+      "id": "signal-2026-08-123",
+      "label": "Regulatory signal - Bylaw 312-2026 (SCAOPI) second reading",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "node_type": "Signal",
+      "status": "validated",
+      "category": "reglementation",
+      "kind": "second_projet",
+      "date": "2026-08-11",
+      "meetingDate": "2026-08-11",
+      "resolution": "2026-08-123",
+      "scope": "local",
+      "municipality": "arundel",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "etape": "second_projet",
+      "etape_date": "2026-08-11",
+      "reglement_number": "312-2026",
+      "description": "Adoption in second reading of bylaw 312-2026 relating to SCAOPI",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-08-132",
+      "label": "SPAIP Approval - 165 ch de la Rouge",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-08-11",
+      "meetingDate": "2026-08-11",
+      "decision": "approuvé",
+      "kind": "piia",
+      "municipality": "arundel",
+      "resolution": "2026-08-132",
+      "reglement_number": "285",
+      "etape": "piia",
+      "etape_date": "2026-08-11",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "description": "Authorize permit in accordance with Bylaw 285 regarding SPAIP for the construction of a car shelter at 165 Chemin de la Rouge.",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge."
+        }
+      ]
+    },
+    {
+      "id": "signal-2026-08-132",
+      "label": "SPAIP Approval Signal - 165 ch de la Rouge",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "node_type": "Signal",
+      "status": "validated",
+      "category": "spaip",
+      "kind": "piia",
+      "date": "2026-08-11",
+      "meetingDate": "2026-08-11",
+      "resolution": "2026-08-132",
+      "scope": "local",
+      "municipality": "arundel",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "etape": "piia",
+      "etape_date": "2026-08-11",
+      "reglement_number": "285",
+      "description": "Approval of SPAIP permit for car shelter construction at 165 Chemin de la Rouge",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge."
+        }
+      ]
+    },
+    {
+      "id": "event-2026-08-133",
+      "label": "SPAIP Approval - 117 rue du Village",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "date": "2026-08-11",
+      "meetingDate": "2026-08-11",
+      "decision": "approuvé",
+      "kind": "piia",
+      "municipality": "arundel",
+      "resolution": "2026-08-133",
+      "reglement_number": "168",
+      "etape": "piia",
+      "etape_date": "2026-08-11",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "description": "Authorize permit in accordance with Bylaw 168 regarding SPAIP for the renovation of the roof and facade of the garage of the building located at 117 Rue du Village.",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located"
+        }
+      ]
+    },
+    {
+      "id": "signal-2026-08-133",
+      "label": "SPAIP Approval Signal - 117 rue du Village",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "node_type": "Signal",
+      "status": "validated",
+      "category": "spaip",
+      "kind": "piia",
+      "date": "2026-08-11",
+      "meetingDate": "2026-08-11",
+      "resolution": "2026-08-133",
+      "scope": "local",
+      "municipality": "arundel",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "etape": "piia",
+      "etape_date": "2026-08-11",
+      "reglement_number": "168",
+      "description": "Approval of SPAIP permit for garage roof and facade renovation at 117 Rue du Village",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "event-2026-08-123",
+      "target": "signal-2026-08-123",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-edge-event-signal-123"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-132",
+      "target": "signal-2026-08-132",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-edge-event-signal-132"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-133",
+      "target": "signal-2026-08-133",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-edge-event-signal-133"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located"
+        }
+      ]
+    },
+    {
+      "source": "source-1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "target": "bylaw-312-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-source-bylaw"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes"
+        }
+      ]
+    },
+    {
+      "source": "source-1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "target": "event-2026-08-123",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-source-event-123"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes"
+        }
+      ]
+    },
+    {
+      "source": "source-1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "target": "event-2026-08-132",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-source-event-132"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge."
+        }
+      ]
+    },
+    {
+      "source": "source-1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "target": "event-2026-08-133",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-source-event-133"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-312-2026",
+      "target": "source-1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-source-bylaw"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-123",
+      "target": "source-1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-source-event-123"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-132",
+      "target": "source-1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-source-event-132"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-08-133",
+      "target": "source-1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "evidence_refs": [
+        "ev-source-event-133"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-edge-event-signal-123",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes of this day’s assembly."
+    },
+    {
+      "id": "ev-edge-event-signal-132",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+      "modality": "pdf",
+      "page": 6,
+      "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge."
+    },
+    {
+      "id": "ev-edge-event-signal-133",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located at 117 Rue du Village."
+    },
+    {
+      "id": "ev-source-bylaw",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes of this day’s assembly."
+    },
+    {
+      "id": "ev-source-event-123",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI), which the French language text can be found in the minutes of this day’s assembly."
+    },
+    {
+      "id": "ev-source-event-132",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+      "modality": "pdf",
+      "page": 6,
+      "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge."
+    },
+    {
+      "id": "ev-source-event-133",
+      "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+      "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+      "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located at 117 Rue du Village."
+    }
+  ],
+  "input_tokens": 2840,
+  "output_tokens": 1780
+}
+```

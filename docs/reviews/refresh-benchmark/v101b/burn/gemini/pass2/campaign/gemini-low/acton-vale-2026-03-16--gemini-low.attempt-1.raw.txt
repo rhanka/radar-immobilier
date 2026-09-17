@@ -1,0 +1,329 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "label": "Ordre du jour - Séance ordinaire du 16 mars 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "Source",
+      "status": "candidate",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "date": "2026-03-16",
+      "municipality": "acton-vale",
+      "url": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "VILLE D’ACTON VALE\nPROJET D’ORDRE DU JOUR\nSÉANCE ORDINAIRE DU 16 MARS 2026"
+        }
+      ]
+    },
+    {
+      "id": "de-18-1-ppcmoi-001-2026",
+      "label": "PPCMOI-001-2026 - 1050, rue Dubois",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-03-16",
+      "municipality": "acton-vale",
+      "kind": "piia",
+      "dossier": "PPCMOI-001-2026",
+      "etape": "ppcmoi",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "description": "Adoption de la résolution finale d'un projet particulier de construction, de modification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue Dubois.",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+        }
+      ]
+    },
+    {
+      "id": "de-18-2-cptaq-ferme-guilmette",
+      "label": "Demande CPTAQ - Ferme Guilmette Inc.",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-03-16",
+      "municipality": "acton-vale",
+      "kind": "cptaq",
+      "demandeur_corporate": "Ferme Guilmette Inc.",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "description": "Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Ferme Guilmette Inc.).",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+        }
+      ]
+    },
+    {
+      "id": "de-18-3-cptaq-daniel-laroche",
+      "label": "Demande CPTAQ - Daniel Laroche",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-03-16",
+      "municipality": "acton-vale",
+      "kind": "cptaq",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "description": "Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Daniel Laroche).",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+        }
+      ]
+    },
+    {
+      "id": "cst-cptaq-guilmette",
+      "label": "Contrainte CPTAQ - Ferme Guilmette Inc.",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "municipality": "acton-vale",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "meetingDate": "2026-03-16",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "description": "Demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Ferme Guilmette Inc.).",
+      "evidence_refs": [
+        "ev-18-2"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+        }
+      ]
+    },
+    {
+      "id": "cst-cptaq-laroche",
+      "label": "Contrainte CPTAQ - Daniel Laroche",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "municipality": "acton-vale",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "meetingDate": "2026-03-16",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "description": "Demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Daniel Laroche).",
+      "evidence_refs": [
+        "ev-18-3"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "target": "de-18-1-ppcmoi-001-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-18-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+        }
+      ]
+    },
+    {
+      "source": "de-18-1-ppcmoi-001-2026",
+      "target": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-18-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+        }
+      ]
+    },
+    {
+      "source": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "target": "de-18-2-cptaq-ferme-guilmette",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-18-2"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+        }
+      ]
+    },
+    {
+      "source": "de-18-2-cptaq-ferme-guilmette",
+      "target": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-18-2"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+        }
+      ]
+    },
+    {
+      "source": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "target": "cst-cptaq-guilmette",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-18-2"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+        }
+      ]
+    },
+    {
+      "source": "cst-cptaq-guilmette",
+      "target": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-18-2"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+        }
+      ]
+    },
+    {
+      "source": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "target": "de-18-3-cptaq-daniel-laroche",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-18-3"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+        }
+      ]
+    },
+    {
+      "source": "de-18-3-cptaq-daniel-laroche",
+      "target": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-18-3"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+        }
+      ]
+    },
+    {
+      "source": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "target": "cst-cptaq-laroche",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-18-3"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+        }
+      ]
+    },
+    {
+      "source": "cst-cptaq-laroche",
+      "target": "src-2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "evidence_refs": [
+        "ev-18-3"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-18-1",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+    },
+    {
+      "id": "ev-18-2",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+    },
+    {
+      "id": "ev-18-3",
+      "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+      "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+      "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+    }
+  ],
+  "input_tokens": 1780,
+  "output_tokens": 1540
+}
+```

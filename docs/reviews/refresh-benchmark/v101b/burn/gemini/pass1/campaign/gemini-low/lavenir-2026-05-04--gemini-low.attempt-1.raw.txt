@@ -1,0 +1,375 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "doc-36d45e7b",
+      "label": "Procès-verbal du 4 mai 2026 - L'Avenir",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "date": "2026-05-04",
+      "municipality": "l-avenir",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "url": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de la\nmunicipalité de L’Avenir, tenue le 4 mai 2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-654-12",
+      "label": "Règlement de zonage no. 654-12",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Bylaw",
+      "status": "attached",
+      "numero": "654-12",
+      "municipality": "l-avenir",
+      "title": "Règlement de zonage",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "ATTENDU QUE la municipalité de L’Avenir a le pouvoir, en vertu de la Loi\nsur l’aménagement et l’urbanisme, de modifier son règlement de zonage\n654-12;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-797-26",
+      "label": "Règlement no. 797-26",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Bylaw",
+      "status": "validated",
+      "numero": "797-26",
+      "municipality": "l-avenir",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "resolution": "R 2026-05-107",
+      "resolutionRef": "R 2026-05-107",
+      "stage": "adoption",
+      "title": "Règlement d'amendement no. 797-26, modifiant le règlement de zonage no. 654-12",
+      "zone_cible": "C3",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "id": "zone-c3",
+      "label": "Zone C3",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Zone",
+      "status": "attached",
+      "code": "C3",
+      "municipality": "l-avenir",
+      "usages_autorises": [
+        "h3"
+      ],
+      "bylaw": "654-12",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+        }
+      ]
+    },
+    {
+      "id": "event-r2026-05-107",
+      "label": "Adoption du règlement 797-26 (Zone C3)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "DesignationEvent",
+      "status": "validated",
+      "kind": "rezonage",
+      "decision": "approuvé",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "etape": "adoption",
+      "etape_date": "2026-05-04",
+      "municipality": "l-avenir",
+      "resolution": "R 2026-05-107",
+      "resolutionRef": "R 2026-05-107",
+      "zone_ref": "C3",
+      "reglement_number": "797-26",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "description": "Adoption du règlement d'amendement no. 797-26 modifiant le règlement de zonage no. 654-12 pour permettre l'usage habitation multifamiliale (h3) dans la zone C3",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "id": "signal-r2026-05-107",
+      "label": "Autorisation usage multifamilial h3 dans zone C3",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "densification",
+      "kind": "ajout_usage_multifamilial",
+      "date": "2026-05-04",
+      "meetingDate": "2026-05-04",
+      "etape": "adoption",
+      "etape_date": "2026-05-04",
+      "municipality": "l-avenir",
+      "resolution": "R 2026-05-107",
+      "resolutionRef": "R 2026-05-107",
+      "zone_ref": "C3",
+      "reglement_number": "797-26",
+      "scope": "local",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "description": "Ajout dans la grille de la zone C3 permettant l'usage habitation multifamiliale (h3) dans le périmètre urbain",
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation."
+        }
+      ]
+    },
+    {
+      "id": "constraint-riveraine-prmhhn",
+      "label": "Protection des bandes riveraines - PRMHHN",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "node_type": "Constraint",
+      "status": "attached",
+      "constraintType": "riveraine",
+      "municipality": "l-avenir",
+      "organisme": "MRC de Drummond",
+      "resolution": "R 2026-05-117",
+      "resolutionRef": "R 2026-05-117",
+      "meetingDate": "2026-05-04",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "description": "Application et caractérisation de la bande de protection riveraine sur le territoire de la municipalité dans le cadre du Plan Régional des Milieux Humides, Hydriques et Naturels (PRMHHN)",
+      "evidence_refs": [
+        "ev-prmhhn"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le cadre réglementaire provinciale partage actuellement avec\nles municipalités et les inspectrices et inspecteurs locaux la responsabilité\nde l’application de la bande de protection riveraine ;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-797-26",
+      "target": "bylaw-654-12",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-amends"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-654-12",
+      "target": "zone-c3",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-defines"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "L’annexe B de ce règlement de zonage no 654-12 de la\nmunicipalité de l’Avenir, concernant la grille des usages et normes, est\nmodifiée comme suit :"
+        }
+      ]
+    },
+    {
+      "source": "zone-c3",
+      "target": "bylaw-654-12",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-defines"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "L’annexe B de ce règlement de zonage no 654-12 de la\nmunicipalité de l’Avenir, concernant la grille des usages et normes, est\nmodifiée comme suit :"
+        }
+      ]
+    },
+    {
+      "source": "event-r2026-05-107",
+      "target": "zone-c3",
+      "relation": "rezones",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-rezone"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation."
+        }
+      ]
+    },
+    {
+      "source": "event-r2026-05-107",
+      "target": "zone-c3",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-rezone"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "ATTENDU QU’IL est souhaitable de permettre l’usage h3 (habitation\nmultifamiliale) dans la zone C3 à l’intérieur du périmètre urbain;"
+        }
+      ]
+    },
+    {
+      "source": "event-r2026-05-107",
+      "target": "signal-r2026-05-107",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-rezone"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "source": "signal-r2026-05-107",
+      "target": "zone-c3",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-rezone"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation."
+        }
+      ]
+    },
+    {
+      "source": "doc-36d45e7b",
+      "target": "bylaw-797-26",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-amends"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "source": "doc-36d45e7b",
+      "target": "event-r2026-05-107",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-rezone"
+      ],
+      "citations": [
+        {
+          "page": 3,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+        }
+      ]
+    },
+    {
+      "source": "doc-36d45e7b",
+      "target": "constraint-riveraine-prmhhn",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "evidence_refs": [
+        "ev-prmhhn"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE le cadre réglementaire provinciale partage actuellement avec\nles municipalités et les inspectrices et inspecteurs locaux la responsabilité\nde l’application de la bande de protection riveraine ;"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-amends",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12 et\nqu'il soit statué et décrété ce qui suit:"
+    },
+    {
+      "id": "ev-defines",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "L’annexe B de ce règlement de zonage no 654-12 de la\nmunicipalité de l’Avenir, concernant la grille des usages et normes, est\nmodifiée comme suit :"
+    },
+    {
+      "id": "ev-rezone",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 3,
+      "excerpt": "En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation."
+    },
+    {
+      "id": "ev-prmhhn",
+      "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+      "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+      "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "ATTENDU QUE le cadre réglementaire provinciale partage actuellement avec\nles municipalités et les inspectrices et inspecteurs locaux la responsabilité\nde l’application de la bande de protection riveraine ;"
+    }
+  ],
+  "input_tokens": 4620,
+  "output_tokens": 2040
+}
+```

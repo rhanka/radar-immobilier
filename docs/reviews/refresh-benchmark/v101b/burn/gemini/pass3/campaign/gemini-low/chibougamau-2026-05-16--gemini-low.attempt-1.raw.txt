@@ -1,0 +1,293 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "label": "Séance du conseil municipal du 20 avril 2026 - Ville de Chibougamau",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "docSha": "11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "date": "2026-04-20",
+      "municipality": "chibougamau",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "url": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2026-04-20.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Sé anc e du c onse il munic ip al\ndu 20 avr il 20 26"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-002",
+      "label": "Demande de PIIA 2026-002 (959, 3e Rue)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-04-20",
+      "kind": "piia",
+      "dossier": "2026-002",
+      "no_lot": "6659704",
+      "municipality": "chibougamau",
+      "docSha": "11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "description": "Demande de plan d’implantation et d’intégration architecturale (PIIA) 2026-002 – 959, 3e Rue – Lot 6 659 704",
+      "etape": "piia",
+      "etape_date": "2026-04-20",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-2026-003",
+      "label": "Demande de PIIA 2026-003 (418, 3e Rue)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-04-20",
+      "kind": "piia",
+      "dossier": "2026-003",
+      "no_lot": "3867144",
+      "municipality": "chibougamau",
+      "docSha": "11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "description": "Demande de plan d’implantation et d’intégration architecturale (PIIA) 2026-003 – 418, 3e Rue – Lot 3 867 144",
+      "etape": "piia",
+      "etape_date": "2026-04-20",
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4"
+        }
+      ]
+    },
+    {
+      "id": "event-derogation-2026-003",
+      "label": "Demande de dérogation mineure 2026-003 (170, rue Joe-Mann)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-04-20",
+      "kind": "derogation",
+      "dossier": "2026-003",
+      "no_lot": "3868446",
+      "municipality": "chibougamau",
+      "docSha": "11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "description": "Demande de dérogation mineure 2026-003 - 170, rue Joe-Mann Lot 3 868 446",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-04-20",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 3 - 170 , rue J o e - Mann Lo t 3 868 4 4 6"
+        }
+      ]
+    },
+    {
+      "id": "event-derogation-2026-004",
+      "label": "Demande de dérogation mineure 2026-004 (516, 4e Rue)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "meetingDate": "2026-04-20",
+      "kind": "derogation",
+      "dossier": "2026-004",
+      "no_lot": "3866957",
+      "municipality": "chibougamau",
+      "docSha": "11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "description": "Demande de dérogation mineure 2026-004 - 516, 4e Rue Lot 3 866 957",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-04-20",
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 4 - 516, 4 e Rue Lo t 3 866 957"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "target": "event-piia-2026-002",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "evidence_refs": [
+        "ev-piia-2026-002"
+      ],
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-002",
+      "target": "source-11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "evidence_refs": [
+        "ev-piia-2026-002"
+      ],
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4"
+        }
+      ]
+    },
+    {
+      "source": "source-11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "target": "event-piia-2026-003",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "evidence_refs": [
+        "ev-piia-2026-003"
+      ],
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-2026-003",
+      "target": "source-11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "evidence_refs": [
+        "ev-piia-2026-003"
+      ],
+      "citations": [
+        {
+          "page": 17,
+          "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4"
+        }
+      ]
+    },
+    {
+      "source": "source-11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "target": "event-derogation-2026-003",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "evidence_refs": [
+        "ev-derogation-2026-003"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 3 - 170 , rue J o e - Mann Lo t 3 868 4 4 6"
+        }
+      ]
+    },
+    {
+      "source": "event-derogation-2026-003",
+      "target": "source-11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "evidence_refs": [
+        "ev-derogation-2026-003"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 3 - 170 , rue J o e - Mann Lo t 3 868 4 4 6"
+        }
+      ]
+    },
+    {
+      "source": "source-11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "target": "event-derogation-2026-004",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "evidence_refs": [
+        "ev-derogation-2026-004"
+      ],
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 4 - 516, 4 e Rue Lo t 3 866 957"
+        }
+      ]
+    },
+    {
+      "source": "event-derogation-2026-004",
+      "target": "source-11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "evidence_refs": [
+        "ev-derogation-2026-004"
+      ],
+      "citations": [
+        {
+          "page": 19,
+          "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 4 - 516, 4 e Rue Lo t 3 866 957"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-piia-2026-002",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "rawRef": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "docSha": "11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2026-04-20.pdf",
+      "modality": "pdf",
+      "page": 16,
+      "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4"
+    },
+    {
+      "id": "ev-piia-2026-003",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "rawRef": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "docSha": "11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2026-04-20.pdf",
+      "modality": "pdf",
+      "page": 17,
+      "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4"
+    },
+    {
+      "id": "ev-derogation-2026-003",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "rawRef": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "docSha": "11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2026-04-20.pdf",
+      "modality": "pdf",
+      "page": 18,
+      "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 3 - 170 , rue J o e - Mann Lo t 3 868 4 4 6"
+    },
+    {
+      "id": "ev-derogation-2026-004",
+      "source_file": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "rawRef": "raw/proces-verbaux-chibougamau/cas/11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4.pdf",
+      "docSha": "11c60b8495df779d9420f5285af47f1c15afb2a011626e92fb57b4a4cbb4fac4",
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2026-04-20.pdf",
+      "modality": "pdf",
+      "page": 19,
+      "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 4 - 516, 4 e Rue Lo t 3 866 957"
+    }
+  ],
+  "input_tokens": 1780,
+  "output_tokens": 1860
+}
+```

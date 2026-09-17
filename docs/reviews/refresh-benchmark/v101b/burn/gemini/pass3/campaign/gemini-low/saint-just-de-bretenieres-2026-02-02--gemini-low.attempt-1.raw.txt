@@ -1,0 +1,101 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "label": "Procès-verbal du conseil municipal - 2 février 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "date": "2026-02-02",
+      "municipality": "saint-just-de-bretenieres",
+      "url": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "status": "attached",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "MUNICIPALITÉ DE SAINT-JUST-DE-BRETENIÈRES,\nMONTMAGNY\nAssemblée régulière du Conseil municipal, tenue le 02 février 2026"
+        }
+      ]
+    },
+    {
+      "id": "constraint-41-02-2026",
+      "label": "Déclaration de compétence MRC - Milieux hydriques et inondations",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "constraintType": "milieu_humide",
+      "status": "candidate",
+      "municipality": "saint-just-de-bretenieres",
+      "resolution": "41-02-2026",
+      "resolutionRef": "41-02-2026",
+      "loi": "Règlement sur l’encadrement d’activités sous la responsabilité des municipalités réalisées dans des milieux hydriques et sur des ouvrages de protection contre les inondations",
+      "organisme": "MRC de Montmagny",
+      "meetingDate": "2026-02-02",
+      "description": "Acceptation de l'intention de déclaration de compétence de la MRC de Montmagny concernant la délivrance de certaines autorisations relatives aux activités réalisées dans les milieux hydriques et ouvrages de protection contre les inondations.",
+      "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "evidence_refs": [
+        "ev-41-02-2026"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "target": "constraint-41-02-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "evidence_refs": [
+        "ev-41-02-2026"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration"
+        }
+      ]
+    },
+    {
+      "source": "constraint-41-02-2026",
+      "target": "source-2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "evidence_refs": [
+        "ev-41-02-2026"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-41-02-2026",
+      "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+      "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+      "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration"
+    }
+  ],
+  "input_tokens": 4443,
+  "output_tokens": 1269
+}
+```

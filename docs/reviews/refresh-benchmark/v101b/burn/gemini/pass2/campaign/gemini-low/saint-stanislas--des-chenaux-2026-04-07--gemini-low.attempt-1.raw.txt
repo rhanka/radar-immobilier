@@ -1,0 +1,379 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-0f3149bf",
+      "label": "Procès-verbal du 7 avril 2026 - Saint-Stanislas",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "status": "attached",
+      "date": "2026-04-07",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "municipality": "saint-stanislas",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "url": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil de la Municipalité de SaintStanislas tenue le 7 avril 2026 à 19 h 30"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2009-474-06",
+      "label": "Règlement 2009-474-06 modifiant le plan d'urbanisme",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "status": "candidate",
+      "numero": "2009-474-06",
+      "title": "Règlement no 2009-474-06 modifiant le règlement 2009-474 sur le plan d’urbanisme",
+      "objet": "Le règlement 2009-474-06 modifie le Plan d’urbanisme afin d’y intégrer un cadre détaillé pour l’implantation des éoliennes commerciales, en concordance avec le Schéma d’aménagement et de développement révisé de la MRC des Chenaux",
+      "stage": "projet",
+      "municipality": "saint-stanislas",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-04-51",
+      "resolutionRef": "2026-04-51",
+      "citations": [
+        {
+          "page": 4,
+          "excerpt": "AVIS DE MOTION est par les présentes donné par Michel Sanscartier à l’effet qu’il présentera, à une séance ultérieure de ce conseil, le règlement 2009-474-06 modifiant le plan d’urbanisme pour adoption."
+        },
+        {
+          "page": 5,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-474-06 modifiant le règlement de zonage 2009-474."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2009-474",
+      "label": "Règlement 2009-474 sur le plan d'urbanisme",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "status": "candidate",
+      "numero": "2009-474",
+      "title": "Règlement sur le plan d’urbanisme numéro 2009-474",
+      "municipality": "saint-stanislas",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas ait adopté, le 04 mai 2009, le Règlement sur le plan d’urbanisme numéro 2009-474 ;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2009-475-04",
+      "label": "Règlement 2009-475-04 modifiant le règlement sur les permis et certificats",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "status": "candidate",
+      "numero": "2009-475-04",
+      "title": "Règlement no 2009-475-04 modifiant le règlement 2009-475 relatif aux permis et certificats",
+      "objet": "Le règlement 2009-475-04 vise à modifier le Règlement sur les permis et certificats no 2009-475 afin d’assurer sa concordance avec le Schéma d’aménagement et de développement révisé de la MRC les Chenaux et d’encadrer spécifiquement les éoliennes commerciales.",
+      "stage": "projet",
+      "municipality": "saint-stanislas",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-04-52",
+      "resolutionRef": "2026-04-52",
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "AVIS DE MOTION est par les présentes donné par Michel Sanscartier à l’effet qu’il présentera, à une séance ultérieure de ce conseil, le règlement 2009-475-04 modifiant le règlement 2009-475 relatif aux permis et certificats."
+        },
+        {
+          "page": 6,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-475-04 modifiant le règlement sur les permis et certificats 2009-475."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2009-475",
+      "label": "Règlement 2009-475 sur les permis et certificats",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "status": "candidate",
+      "numero": "2009-475",
+      "title": "Règlement sur les permis et certificats numéro 2009-475",
+      "municipality": "saint-stanislas",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas a adopté, le 04 mai 2009, le Règlement sur les permis et certificats numéro 2009-475 ;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2009-476-14",
+      "label": "Règlement 2009-476-14 modifiant le règlement de zonage",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "status": "candidate",
+      "numero": "2009-476-14",
+      "title": "Règlement no 2009-476-14 modifiant le règlement de zonage 2009-476",
+      "objet": "Le règlement 2009-476-14 vise à modifier le règlement de zonage afin d’assurer la concordance avec le schéma d’aménagement révisé de la MRC les Chenaux, notamment en intégrant des aires de protection des ouvrages de captage des eaux souterraines et en encadrant de façon détaillée l’implantation des éoliennes commerciales et domestiques.",
+      "stage": "projet",
+      "municipality": "saint-stanislas",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-04-53",
+      "resolutionRef": "2026-04-53",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "Avis de motion est par les présentes donné par Michel Sanscartier à l’effet qu’il présentera, à une séance ultérieure de ce conseil, le règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+        },
+        {
+          "page": 7,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2009-476",
+      "label": "Règlement de zonage 2009-476",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "status": "candidate",
+      "numero": "2009-476",
+      "title": "Règlement de zonage numéro 2009-476",
+      "municipality": "saint-stanislas",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas a adopté, le 04 mai 2009, le Règlement de zonage numéro 2009-476 ;"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-53",
+      "label": "Adoption projet règlement 2009-476-14",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "status": "candidate",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "municipality": "saint-stanislas",
+      "resolution": "2026-04-53",
+      "resolutionRef": "2026-04-53",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "description": "Adoption du projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476",
+      "etape": "projet_reglement",
+      "etape_date": "2026-04-07",
+      "reglement_number": "2009-476-14",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+        }
+      ]
+    },
+    {
+      "id": "signal-2026-04-53",
+      "label": "Signal - Projet règlement 2009-476-14 (éoliennes / captage des eaux)",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "status": "candidate",
+      "category": "zonage",
+      "kind": "modification_zonage",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "description": "Adoption du projet de règlement no 2009-476-14 modifiant le règlement de zonage 2009-476 pour intégrer les aires de protection des puits de captage et encadrer l'implantation d'éoliennes",
+      "resolution": "2026-04-53",
+      "resolutionRef": "2026-04-53",
+      "scope": "local",
+      "municipality": "saint-stanislas",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "etape": "projet_reglement",
+      "etape_date": "2026-04-07",
+      "reglement_number": "2009-476-14",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-2009-474-06",
+      "target": "bylaw-2009-474",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amends-474"
+      ],
+      "citations": [
+        {
+          "page": 5,
+          "excerpt": "Projet de règlement numéro 2009-474-06 modifiant le règlement 2009-474 sur le plan d’urbanisme – Adoption"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2009-475-04",
+      "target": "bylaw-2009-475",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amends-475"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "Projet de règlement numéro 2009-475-04 modifiant le règlement 2009-475 relatif aux permis et certificats – Adoption"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2009-476-14",
+      "target": "bylaw-2009-476",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "evidence_refs": [
+        "ev-bylaw-amends-476"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "5.10 Projet de règlement numéro 2009-476-14 modifiant le règlement de zonage 2009-476 – Adoption"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-04-53",
+      "target": "signal-2026-04-53",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "evidence_refs": [
+        "ev-event-adoption-476"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+        }
+      ]
+    },
+    {
+      "source": "source-0f3149bf",
+      "target": "bylaw-2009-476-14",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "evidence_refs": [
+        "ev-event-adoption-476"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+        }
+      ]
+    },
+    {
+      "source": "source-0f3149bf",
+      "target": "event-2026-04-53",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "evidence_refs": [
+        "ev-event-adoption-476"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+        }
+      ]
+    },
+    {
+      "source": "source-0f3149bf",
+      "target": "signal-2026-04-53",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "evidence_refs": [
+        "ev-event-adoption-476"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-04-53",
+      "target": "source-0f3149bf",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "evidence_refs": [
+        "ev-event-adoption-476"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-amends-474",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 5,
+      "excerpt": "Projet de règlement numéro 2009-474-06 modifiant le règlement 2009-474 sur le plan d’urbanisme – Adoption"
+    },
+    {
+      "id": "ev-bylaw-amends-475",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 6,
+      "excerpt": "Projet de règlement numéro 2009-475-04 modifiant le règlement 2009-475 relatif aux permis et certificats – Adoption"
+    },
+    {
+      "id": "ev-event-adoption-476",
+      "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+      "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+      "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu à l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+    }
+  ],
+  "input_tokens": 4200,
+  "output_tokens": 1750
+}
+```

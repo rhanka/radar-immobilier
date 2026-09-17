@@ -1,0 +1,386 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+      "label": "Séance ordinaire du conseil municipal du 8 juin 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "node_type": "Source",
+      "status": "attached",
+      "date": "2026-06-08",
+      "municipality": "cantons-unis-de-stoneham-et-tewkesbury",
+      "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+      "sourceKind": "pv",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Séance ordinaire\n\nConseil municipal\n\n8 juin 2026\nTenue au complexe municipal\nWebdiffusée en direct\nMunicipalité des cantons unis de Stoneham-et-Tewkesbury"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-26-1105",
+      "label": "Règlement numéro 26-1105",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "26-1105",
+      "title": "Adoption du Règlement numéro 26-1105 modifiant le Règlement de zonage numéro 09-591",
+      "municipality": "cantons-unis-de-stoneham-et-tewkesbury",
+      "stage": "adoption",
+      "meetingDate": "2026-06-08",
+      "citations": [
+        {
+          "page": 52,
+          "excerpt": "16.1\n\nAdoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-09-591",
+      "label": "Règlement de zonage numéro 09-591",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "09-591",
+      "title": "Règlement de zonage numéro 09-591",
+      "municipality": "cantons-unis-de-stoneham-et-tewkesbury",
+      "citations": [
+        {
+          "page": 52,
+          "excerpt": "16.1\n\nAdoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591"
+        }
+      ]
+    },
+    {
+      "id": "zone-rt-503",
+      "label": "Zone RT-503",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "RT-503",
+      "usage": "récréotouristique",
+      "municipality": "cantons-unis-de-stoneham-et-tewkesbury",
+      "citations": [
+        {
+          "page": 52,
+          "excerpt": "• Créer la zone récréotouristique RT-503 (chemin de la GrandeLigne, près des activités offertes par Empire 47)"
+        }
+      ]
+    },
+    {
+      "id": "zone-f-304",
+      "label": "Zone F-304",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "F-304",
+      "municipality": "cantons-unis-de-stoneham-et-tewkesbury",
+      "citations": [
+        {
+          "page": 52,
+          "excerpt": "• Agrandir la zone F-304 pour créer une zone tampon entre LacDelage et la zone RT-503"
+        }
+      ]
+    },
+    {
+      "id": "zone-cs-507",
+      "label": "Zone CS-507",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "CS-507",
+      "usage": "conservation",
+      "municipality": "cantons-unis-de-stoneham-et-tewkesbury",
+      "citations": [
+        {
+          "page": 52,
+          "excerpt": "• Agrandir la zone de conservation CS-507 (Marais du Nord)"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-26-1106",
+      "label": "Règlement numéro 26-1106",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "26-1106",
+      "title": "Adoption du Règlement numéro 26-1106 modifiant le Règlement relatif aux plans d’implantation et d’intégration architecturale numéro 09-603",
+      "municipality": "cantons-unis-de-stoneham-et-tewkesbury",
+      "stage": "adoption",
+      "meetingDate": "2026-06-08",
+      "citations": [
+        {
+          "page": 54,
+          "excerpt": "16.2\n\nAdoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-09-603",
+      "label": "Règlement numéro 09-603",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "09-603",
+      "title": "Règlement relatif aux plans d’implantation et d’intégration architecturale numéro 09-603",
+      "municipality": "cantons-unis-de-stoneham-et-tewkesbury",
+      "citations": [
+        {
+          "page": 54,
+          "excerpt": "16.2\n\nAdoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603"
+        }
+      ]
+    },
+    {
+      "id": "event-ppcmoi-102-1re-avenue",
+      "label": "Refus PPCMOI - 102, 1re Avenue",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "rezonage",
+      "etape": "ppcmoi",
+      "decision": "refusé",
+      "municipality": "cantons-unis-de-stoneham-et-tewkesbury",
+      "meetingDate": "2026-06-08",
+      "description": "Refus de la demande de projet particulier de construction, de modification ou d’occupation d’un immeuble (PPCMOI) visant à autoriser un projet résidentiel intégré de trois bâtiments principaux (18 logements) et un bâtiment de remisage isolé au 102, 1re Avenue.",
+      "citations": [
+        {
+          "page": 56,
+          "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser\nun projet résidentiel intégré de trois"
+        }
+      ]
+    },
+    {
+      "id": "signal-ppcmoi-102-1re-avenue",
+      "label": "Signal PPCMOI refusé - 18 logements au 102, 1re Avenue",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "ppcmoi",
+      "kind": "refus_ppcmoi",
+      "nb_unites_min": 18,
+      "nb_unites_max": 18,
+      "outcome": "refusé",
+      "date": "2026-06-08",
+      "meetingDate": "2026-06-08",
+      "municipality": "cantons-unis-de-stoneham-et-tewkesbury",
+      "description": "Demande de PPCMOI pour un projet résidentiel intégré de 18 logements locatifs (3 bâtiments de 3, 6 et 9 logements) refusée.",
+      "citations": [
+        {
+          "page": 56,
+          "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser\nun projet résidentiel intégré de trois"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-26-1105",
+      "target": "bylaw-09-591",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-1105"
+      ],
+      "citations": [
+        {
+          "page": 52,
+          "excerpt": "16.1\n\nAdoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-26-1105",
+      "target": "zone-rt-503",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-1105"
+      ],
+      "citations": [
+        {
+          "page": 52,
+          "excerpt": "• Créer la zone récréotouristique RT-503 (chemin de la GrandeLigne, près des activités offertes par Empire 47)"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-26-1105",
+      "target": "zone-f-304",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-1105"
+      ],
+      "citations": [
+        {
+          "page": 52,
+          "excerpt": "• Agrandir la zone F-304 pour créer une zone tampon entre LacDelage et la zone RT-503"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-26-1105",
+      "target": "zone-cs-507",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-1105"
+      ],
+      "citations": [
+        {
+          "page": 52,
+          "excerpt": "• Agrandir la zone de conservation CS-507 (Marais du Nord)"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-26-1106",
+      "target": "bylaw-09-603",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-1106"
+      ],
+      "citations": [
+        {
+          "page": 54,
+          "excerpt": "16.2\n\nAdoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-26-1106",
+      "target": "zone-rt-503",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-1106"
+      ],
+      "citations": [
+        {
+          "page": 54,
+          "excerpt": "Les modifications au PIIA visent à encadrer le développement\ndans la nouvelle zone RT-503 afin de préserver les\ncaractéristiques du milieu naturel."
+        }
+      ]
+    },
+    {
+      "source": "event-ppcmoi-102-1re-avenue",
+      "target": "signal-ppcmoi-102-1re-avenue",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-refus"
+      ],
+      "citations": [
+        {
+          "page": 56,
+          "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser\nun projet résidentiel intégré de trois"
+        }
+      ]
+    },
+    {
+      "source": "source-3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+      "target": "bylaw-26-1105",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-1105"
+      ],
+      "citations": [
+        {
+          "page": 52,
+          "excerpt": "16.1\n\nAdoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591"
+        }
+      ]
+    },
+    {
+      "source": "source-3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+      "target": "bylaw-26-1106",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "evidence_refs": [
+        "ev-bylaw-26-1106"
+      ],
+      "citations": [
+        {
+          "page": 54,
+          "excerpt": "16.2\n\nAdoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603"
+        }
+      ]
+    },
+    {
+      "source": "source-3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+      "target": "event-ppcmoi-102-1re-avenue",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "evidence_refs": [
+        "ev-ppcmoi-refus"
+      ],
+      "citations": [
+        {
+          "page": 56,
+          "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser\nun projet résidentiel intégré de trois"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-26-1105",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+      "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+      "modality": "pdf",
+      "page": 52,
+      "excerpt": "16.1\n\nAdoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591"
+    },
+    {
+      "id": "ev-bylaw-26-1106",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+      "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+      "modality": "pdf",
+      "page": 54,
+      "excerpt": "16.2\n\nAdoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603"
+    },
+    {
+      "id": "ev-ppcmoi-refus",
+      "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+      "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+      "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+      "modality": "pdf",
+      "page": 56,
+      "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser\nun projet résidentiel intégré de trois"
+    }
+  ],
+  "input_tokens": 4200,
+  "output_tokens": 1250
+}
+```

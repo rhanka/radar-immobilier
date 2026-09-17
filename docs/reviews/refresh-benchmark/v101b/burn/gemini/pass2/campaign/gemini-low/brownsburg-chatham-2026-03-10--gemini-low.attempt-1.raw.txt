@@ -1,0 +1,468 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-pv-2026-03-10",
+      "label": "Procès-verbal du 10 mars 2026 - Brownsburg-Chatham",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "date": "2026-03-10",
+      "municipality": "brownsburg-chatham",
+      "url": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL d'une séance ordinaire du conseil municipal\nde Brownsburg-Chatham tenue le mardi 10 mars 2026, à 19 h"
+        }
+      ]
+    },
+    {
+      "id": "zone-r-615",
+      "label": "Zone résidentielle R-615",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "code": "R-615",
+      "municipality": "brownsburg-chatham",
+      "usage": "résidentielle",
+      "status": "validated",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "meetingDate": "2026-03-10",
+      "citations": [
+        {
+          "page": 41,
+          "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-615 selon le plan de zonage en vigueur"
+        }
+      ]
+    },
+    {
+      "id": "zone-pl-530",
+      "label": "Zone pôle local Pl-530",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "code": "Pl-530",
+      "municipality": "brownsburg-chatham",
+      "usage": "pôle local",
+      "status": "validated",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "meetingDate": "2026-03-10",
+      "citations": [
+        {
+          "page": 57,
+          "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone pôle local Pl-530 selon le plan de zonage en vigueur"
+        }
+      ]
+    },
+    {
+      "id": "zone-v-425",
+      "label": "Zone villégiature V-425",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "code": "V-425",
+      "municipality": "brownsburg-chatham",
+      "usage": "villégiature",
+      "status": "validated",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "meetingDate": "2026-03-10",
+      "citations": [
+        {
+          "page": 60,
+          "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone villégiature V-425 selon le plan de zonage en vigueur"
+        }
+      ]
+    },
+    {
+      "id": "zone-r-604",
+      "label": "Zone résidentielle R-604",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "code": "R-604",
+      "municipality": "brownsburg-chatham",
+      "usage": "résidentielle",
+      "status": "validated",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "meetingDate": "2026-03-10",
+      "citations": [
+        {
+          "page": 61,
+          "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-604 selon le plan de zonage en vigueur"
+        }
+      ]
+    },
+    {
+      "id": "zone-r-614",
+      "label": "Zone résidentielle R-614",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "code": "R-614",
+      "municipality": "brownsburg-chatham",
+      "usage": "résidentielle",
+      "status": "validated",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "meetingDate": "2026-03-10",
+      "citations": [
+        {
+          "page": 62,
+          "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-614 selon le plan de zonage en vigueur"
+        }
+      ]
+    },
+    {
+      "id": "zone-a-131",
+      "label": "Zone agricole A-131",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "code": "A-131",
+      "municipality": "brownsburg-chatham",
+      "usage": "agricole",
+      "status": "validated",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "meetingDate": "2026-03-10",
+      "citations": [
+        {
+          "page": 63,
+          "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone agricole A-131 selon le plan de zonage en vigueur"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-361-2026",
+      "label": "Règlement numéro 361-2026",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "numero": "361-2026",
+      "title": "Règlement numéro 361-2026 concernant l’occupation et l’entretien des bâtiments",
+      "stage": "projet",
+      "municipality": "brownsburg-chatham",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "meetingDate": "2026-03-10",
+      "resolution": "26-03-104",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 66,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par madame la conseillère\nMartine Renaud et résolu que soit adopté le Règlement numéro\n361-2026 intitulé « Règlement numéro 361-2026 concernant\nl’occupation et l’entretien des bâtiments »"
+        }
+      ]
+    },
+    {
+      "id": "event-piia-26-03-086",
+      "label": "PIIA 2026-006 - Prolongement de la rue Lacasse",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "date": "2026-03-10",
+      "meetingDate": "2026-03-10",
+      "decision": "approuvé",
+      "status": "validated",
+      "kind": "piia",
+      "dossier": "2026-006",
+      "municipality": "brownsburg-chatham",
+      "resolution": "26-03-086",
+      "resolutionRef": "Résolution 26-03-086",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "etape": "piia",
+      "etape_date": "2026-03-10",
+      "zone_ref": "R-615",
+      "no_lot": "4234857",
+      "citations": [
+        {
+          "page": 42,
+          "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle projet de développement d’envergure projeté sur le lot\n4 234 857"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-26-03-087",
+      "label": "Dérogation mineure DM-2026-00030",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "date": "2026-03-10",
+      "meetingDate": "2026-03-10",
+      "decision": "approuvé",
+      "status": "validated",
+      "kind": "derogation",
+      "dossier": "DM-2026-00030",
+      "municipality": "brownsburg-chatham",
+      "resolution": "26-03-087",
+      "resolutionRef": "Résolution 26-03-087",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-03-10",
+      "zone_ref": "R-615",
+      "no_lot": "6721120",
+      "reglement_number": "198-2013",
+      "citations": [
+        {
+          "page": 44,
+          "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00030, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 120"
+        }
+      ]
+    },
+    {
+      "id": "event-dm-26-03-098",
+      "label": "Dérogation mineure DM-2025-00725",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "date": "2026-03-10",
+      "meetingDate": "2026-03-10",
+      "decision": "approuvé",
+      "status": "validated",
+      "kind": "derogation",
+      "dossier": "DM-2025-00725",
+      "municipality": "brownsburg-chatham",
+      "resolution": "26-03-098",
+      "resolutionRef": "Résolution 26-03-098",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-03-10",
+      "zone_ref": "Pl-530",
+      "no_lot": "6703926",
+      "reglement_number": "197-2013",
+      "citations": [
+        {
+          "page": 58,
+          "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2025-00725, visant des dispositions du\nRèglement de zonage numéro 197-2013 pour le lot projeté\n6 703 926"
+        }
+      ]
+    },
+    {
+      "id": "signal-hlm-8-10",
+      "label": "Signal de développement - Unités HLM Brownsburg-Chatham",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "category": "logement_social",
+      "kind": "transfert_hlm",
+      "date": "2026-03-10",
+      "meetingDate": "2026-03-10",
+      "status": "validated",
+      "resolution": "26-03-066",
+      "resolutionRef": "Résolution 26-03-066",
+      "scope": "local",
+      "municipality": "brownsburg-chatham",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "nb_unites_max": 48,
+      "description": "Volonté d'accueillir des unités de HLM (jusqu'à 48 logements sur 2 bâtiments) sur une partie des lots 4 236 205 et 5 641 417.",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\nconfirme sa volonté d’accueillir des unités d’Habitation à loyer\nmodique (HLM) sur son territoire"
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-14-21",
+      "label": "Contrainte LPTAA - Art. 103 - Lot 6 715 763 et 6 715 764",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "constraintType": "cptaq",
+      "status": "validated",
+      "municipality": "brownsburg-chatham",
+      "loi": "Loi sur la protection du territoire et des activités agricoles",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "resolution": "26-03-105",
+      "resolutionRef": "Résolution 26-03-105",
+      "meetingDate": "2026-03-10",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "description": "Opération cadastrale en zone agricole permise en vertu de l'article 103 de la LPTAA sans l'autorisation de la CPTAQ.",
+      "evidence_refs": [
+        "ev-cptaq-1"
+      ],
+      "citations": [
+        {
+          "page": 66,
+          "excerpt": "CONSIDÉRANT QUE ce projet d'opération cadastre est rendu\npossible en vertu de l'article 103 de la Loi sur la protection du\nterritoire et des activités agricoles (LPTAA)"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-pv-2026-03-10",
+      "target": "bylaw-361-2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "evidence_refs": [
+        "ev-source-bylaw"
+      ],
+      "citations": [
+        {
+          "page": 66,
+          "excerpt": "EN CONSÉQUENCE, il est proposé par madame la conseillère\nMartine Renaud et résolu que soit adopté le Règlement numéro\n361-2026 intitulé « Règlement numéro 361-2026 concernant\nl’occupation et l’entretien des bâtiments »"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-03-10",
+      "target": "event-piia-26-03-086",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "evidence_refs": [
+        "ev-source-piia"
+      ],
+      "citations": [
+        {
+          "page": 42,
+          "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle projet de développement d’envergure projeté sur le lot\n4 234 857"
+        }
+      ]
+    },
+    {
+      "source": "event-piia-26-03-086",
+      "target": "zone-r-615",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "evidence_refs": [
+        "ev-piia-zone"
+      ],
+      "citations": [
+        {
+          "page": 41,
+          "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-615 selon le plan de zonage en vigueur"
+        }
+      ]
+    },
+    {
+      "source": "event-dm-26-03-087",
+      "target": "zone-r-615",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "evidence_refs": [
+        "ev-dm-zone"
+      ],
+      "citations": [
+        {
+          "page": 43,
+          "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-615 selon le plan de zonage en vigueur"
+        }
+      ]
+    },
+    {
+      "source": "event-dm-26-03-098",
+      "target": "zone-pl-530",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "evidence_refs": [
+        "ev-dm-pl530"
+      ],
+      "citations": [
+        {
+          "page": 57,
+          "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone pôle local Pl-530 selon le plan de zonage en vigueur"
+        }
+      ]
+    },
+    {
+      "source": "source-pv-2026-03-10",
+      "target": "signal-hlm-8-10",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "evidence_refs": [
+        "ev-signal-hlm"
+      ],
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\nconfirme sa volonté d’accueillir des unités d’Habitation à loyer\nmodique (HLM) sur son territoire"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-cptaq-1",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+      "modality": "pdf",
+      "page": 66,
+      "excerpt": "CONSIDÉRANT QUE ce projet d'opération cadastre est rendu\npossible en vertu de l'article 103 de la Loi sur la protection du\nterritoire et des activités agricoles (LPTAA)"
+    },
+    {
+      "id": "ev-source-bylaw",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+      "modality": "pdf",
+      "page": 66,
+      "excerpt": "EN CONSÉQUENCE, il est proposé par madame la conseillère\nMartine Renaud et résolu que soit adopté le Règlement numéro\n361-2026 intitulé « Règlement numéro 361-2026 concernant\nl’occupation et l’entretien des bâtiments »"
+    },
+    {
+      "id": "ev-source-piia",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+      "modality": "pdf",
+      "page": 42,
+      "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle projet de développement d’envergure projeté sur le lot\n4 234 857"
+    },
+    {
+      "id": "ev-piia-zone",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+      "modality": "pdf",
+      "page": 41,
+      "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-615 selon le plan de zonage en vigueur"
+    },
+    {
+      "id": "ev-dm-zone",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+      "modality": "pdf",
+      "page": 43,
+      "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-615 selon le plan de zonage en vigueur"
+    },
+    {
+      "id": "ev-dm-pl530",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+      "modality": "pdf",
+      "page": 57,
+      "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone pôle local Pl-530 selon le plan de zonage en vigueur"
+    },
+    {
+      "id": "ev-signal-hlm",
+      "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+      "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+      "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+      "modality": "pdf",
+      "page": 18,
+      "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\nconfirme sa volonté d’accueillir des unités d’Habitation à loyer\nmodique (HLM) sur son territoire"
+    }
+  ],
+  "input_tokens": 12850,
+  "output_tokens": 3120
+}
+```

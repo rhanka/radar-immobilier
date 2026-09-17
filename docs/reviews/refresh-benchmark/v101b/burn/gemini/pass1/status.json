@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "campaign": "v101b",
+  "arms": {
+    "gemini-low": {
+      "state": "completed",
+      "total": 100,
+      "processed": 100,
+      "accepted": 84,
+      "errors": 0,
+      "lastReceipt": "/results/burn/gemini/pass1/campaign/gemini-low/waterloo-2026-08-18--gemini-low.attempt-1.receipt.json",
+      "requests": 200,
+      "rateLimitConsecutive": 0,
+      "resumeAt": null,
+      "etaSeconds": 0
+    }
+  },
+  "updatedAt": "2026-09-17T00:43:38.338Z"
+}

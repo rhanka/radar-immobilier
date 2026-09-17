@@ -1,0 +1,326 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "label": "Ordre du jour - Séance ordinaire du 10 février 2026 - Dollard-des-Ormeaux",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "date": "2026-02-10",
+      "municipality": "dollard-des-ormeaux",
+      "url": "https://ville.ddo.qc.ca/wp-content/uploads/2026/02/2026-02-10_Ordinaire_Ordre_du_jour.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE ORDINAIRE DU 10 FÉVRIER 2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-r-2026-199-1",
+      "label": "Règlement R-2026-199-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "R-2026-199-1",
+      "title": "Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements, clarifications, améliorations et corrections",
+      "stage": "1er_projet",
+      "municipality": "dollard-des-ormeaux",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "meetingDate": "2026-02-10",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-r-2025-199",
+      "label": "Règlement de zonage R-2025-199",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "R-2025-199",
+      "title": "Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux",
+      "municipality": "dollard-des-ormeaux",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "meetingDate": "2026-02-10",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements, clarifications, améliorations et corrections"
+        }
+      ]
+    },
+    {
+      "id": "event-avis-motion-r-2026-199-1",
+      "label": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "rezonage",
+      "etape": "avis_motion",
+      "etape_date": "2026-02-10",
+      "meetingDate": "2026-02-10",
+      "date": "2026-02-10",
+      "dossier": "SD2026-400-2804",
+      "reglement_number": "R-2026-199-1",
+      "municipality": "dollard-des-ormeaux",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "description": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements, clarifications, améliorations et corrections (SD2026-400-2804)",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter\ndivers ajustements, clarifications, améliorations et corrections (SD2026-400-2804)"
+        }
+      ]
+    },
+    {
+      "id": "event-adoption-1er-projet-r-2026-199-1",
+      "label": "Adoption du premier projet du Règlement R-2026-199-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "kind": "rezonage",
+      "etape": "projet_reglement",
+      "etape_date": "2026-02-10",
+      "meetingDate": "2026-02-10",
+      "date": "2026-02-10",
+      "dossier": "SD2026-400-2805",
+      "reglement_number": "R-2026-199-1",
+      "municipality": "dollard-des-ormeaux",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "description": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements, clarifications, améliorations et corrections (SD2026-400-2805)",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers\najustements, clarifications, améliorations et corrections (SD2026-400-2805)"
+        }
+      ]
+    },
+    {
+      "id": "signal-r-2026-199-1",
+      "label": "Signalement de modification au règlement de zonage (R-2026-199-1)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "zonage",
+      "kind": "modification_reglementaire",
+      "date": "2026-02-10",
+      "meetingDate": "2026-02-10",
+      "etape": "projet_reglement",
+      "etape_date": "2026-02-10",
+      "reglement_number": "R-2026-199-1",
+      "municipality": "dollard-des-ormeaux",
+      "scope": "local",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "description": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-r-2026-199-1",
+      "target": "bylaw-r-2025-199",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": [
+        "ev-50-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux"
+        }
+      ]
+    },
+    {
+      "source": "event-adoption-1er-projet-r-2026-199-1",
+      "target": "signal-r-2026-199-1",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": [
+        "ev-50-2"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers"
+        }
+      ]
+    },
+    {
+      "source": "event-avis-motion-r-2026-199-1",
+      "target": "event-adoption-1er-projet-r-2026-199-1",
+      "relation": "lifecycle_predecessor",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": [
+        "ev-50-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux"
+        }
+      ]
+    },
+    {
+      "source": "source-1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "bylaw-r-2026-199-1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": [
+        "ev-50-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux"
+        }
+      ]
+    },
+    {
+      "source": "source-1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "event-avis-motion-r-2026-199-1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": [
+        "ev-50-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter\ndivers ajustements, clarifications, améliorations et corrections (SD2026-400-2804)"
+        }
+      ]
+    },
+    {
+      "source": "source-1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "event-adoption-1er-projet-r-2026-199-1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": [
+        "ev-50-2"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers\najustements, clarifications, améliorations et corrections (SD2026-400-2805)"
+        }
+      ]
+    },
+    {
+      "source": "source-1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "signal-r-2026-199-1",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": [
+        "ev-50-2"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-r-2026-199-1",
+      "target": "source-1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": [
+        "ev-50-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux"
+        }
+      ]
+    },
+    {
+      "source": "event-avis-motion-r-2026-199-1",
+      "target": "source-1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": [
+        "ev-50-1"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter\ndivers ajustements, clarifications, améliorations et corrections (SD2026-400-2804)"
+        }
+      ]
+    },
+    {
+      "source": "event-adoption-1er-projet-r-2026-199-1",
+      "target": "source-1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": [
+        "ev-50-2"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers\najustements, clarifications, améliorations et corrections (SD2026-400-2805)"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-50-1",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "rawRef": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "sourceUrl": "https://ville.ddo.qc.ca/wp-content/uploads/2026/02/2026-02-10_Ordinaire_Ordre_du_jour.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements, clarifications, améliorations et corrections (SD2026-400-2804)"
+    },
+    {
+      "id": "ev-50-2",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "rawRef": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "sourceUrl": "https://ville.ddo.qc.ca/wp-content/uploads/2026/02/2026-02-10_Ordinaire_Ordre_du_jour.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements, clarifications, améliorations et corrections (SD2026-400-2805)"
+    }
+  ],
+  "input_tokens": 1780,
+  "output_tokens": 850
+}
+```

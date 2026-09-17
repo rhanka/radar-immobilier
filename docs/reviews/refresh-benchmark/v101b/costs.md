@@ -1,8 +1,8 @@
 # v101b cost snapshot
 
-Generated: 2026-09-16T23:53:51.057Z. Every schema-v2 attempt receipt present under `campaign/` and `codex-replay/campaign/` is counted; retries are not discarded.
+Generated: 2026-09-17T01:32:25.452Z. Every schema-v2 attempt receipt present under `campaign/` and `codex-replay/campaign/` is counted; retries are not discarded.
 
-Selected Gemini plan: **N-A (owner tier source-gap)**. Selected ChatGPT plan: **N-A (owner tier source-gap)**.
+Selected Gemini plan: **ai-pro**. Selected ChatGPT plan: **pro-20x**.
 The owner must provide both actual tiers; Gemini also needs a measured or estimated weekly token reserve.
 
 ## Per-arm costs
@@ -11,9 +11,9 @@ Output is billable output: visible output plus separately reported thinking toke
 
 | Arm | Receipts (usage) | Docs usage / attempted / accepted | Input total / doc | Visible output total / doc | Thinking | Billable output | API USD | Subscription USD | Simulated USD | API / 1,000 docs | Subscription / 1,000 docs | Simulated / 1,000 docs | API / benchmark cycle |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| astra-high | 103 (2) | 2 / 100 / 2 | 14,209 / 7,105 | 11,372 / 5,686 | 0 | 11,372 | $0.7107 | N-A | $0.7107 | $355.35 | N-A | $355.35 | $35.53 |
-| astra-low | 147 (47) | 47 / 100 / 47 | 437,651 / 9,312 | 189,587 / 4,034 | 0 | 189,587 | $13.86 | N-A | $13.86 | $294.81 | N-A | $294.81 | $29.48 |
-| astra-medium | 165 (64) | 64 / 100 / 64 | 691,287 / 10,801 | 352,662 / 5,510 | 0 | 352,662 | $24.55 | N-A | $24.55 | $383.53 | N-A | $383.53 | $38.35 |
+| astra-high | 112 (11) | 11 / 100 / 11 | 79,869 / 7,261 | 76,489 / 6,954 | 0 | 76,489 | $4.62 | N-A | $4.62 | $420.29 | N-A | $420.29 | $42.03 |
+| astra-low | 200 (100) | 100 / 100 / 100 | 1,511,249 / 15,112 | 512,229 / 5,122 | 0 | 512,229 | $40.72 | N-A | $40.72 | $407.24 | N-A | $407.24 | $40.72 |
+| astra-medium | 200 (99) | 99 / 100 / 99 | 1,504,435 / 15,196 | 627,618 / 6,340 | 0 | 627,618 | $46.43 | N-A | $46.43 | $468.94 | N-A | $468.94 | $46.89 |
 | astra-xhigh | 103 (2) | 2 / 100 / 2 | 14,209 / 7,105 | 17,476 / 8,738 | 0 | 17,476 | $1.02 | N-A | $1.02 | $507.94 | N-A | $507.94 | $50.79 |
 | gemini-high | 100 (100) | 100 / 100 / 53 | 1,646,755 / 16,468 | 718,689 / 7,187 | 1,947,086 | 2,665,775 | $11.23 | N-A | $11.23 | $112.32 | N-A | $112.32 | $11.23 |
 | gemini-low | 100 (100) | 100 / 100 / 85 | 1,646,755 / 16,468 | 674,257 / 6,743 | 0 | 674,257 | $3.76 | N-A | $3.76 | $37.64 | N-A | $37.64 | $3.76 |
@@ -30,7 +30,7 @@ Output is billable output: visible output plus separately reported thinking toke
 | sol-high | 194 (80) | 80 / 100 / 76 | 1,109,489 / 13,869 | 1,147,660 / 14,346 | 0 | 1,147,660 | $27.39 | N-A | $27.39 | $342.39 | N-A | $342.39 | $34.24 |
 | sol-low | 193 (78) | 78 / 100 / 70 | 1,106,987 / 14,192 | 511,985 / 6,564 | 0 | 511,985 | $14.67 | N-A | $14.67 | $188.05 | N-A | $188.05 | $18.80 |
 | sol-medium | 202 (100) | 100 / 100 / 94 | 1,511,249 / 15,112 | 1,040,498 / 10,405 | 0 | 1,040,498 | $26.85 | N-A | $26.85 | $268.55 | N-A | $268.55 | $26.85 |
-| sol-xhigh | 139 (36) | 36 / 100 / 36 | 309,471 / 8,596 | 630,338 / 17,509 | 0 | 630,338 | $13.84 | N-A | $13.84 | $384.57 | N-A | $384.57 | $38.46 |
+| sol-xhigh | 164 (60) | 60 / 100 / 60 | 636,900 / 10,615 | 1,257,183 / 20,953 | 0 | 1,257,183 | $27.69 | N-A | $27.69 | $461.52 | N-A | $461.52 | $46.15 |
 | sonnet46-cloud-high | 21 (0) | 0 / 15 / 0 | 0 / 0 | 0 / 0 | 0 | 0 | $0.0000 | N-A | $0.0000 | N-A | N-A | N-A | N-A |
 | sonnet46-cloud-low | 35 (14) | 14 / 29 / 14 | 121,952 / 8,711 | 113,572 / 8,112 | 0 | 113,572 | $2.07 | N-A | $2.07 | $147.82 | N-A | $147.82 | $14.78 |
 | sonnet46-cloud-off | 61 (46) | 46 / 56 / 32 | 526,599 / 11,448 | 431,329 / 9,377 | 0 | 431,329 | $8.05 | N-A | $8.05 | $174.99 | N-A | $174.99 | $17.50 |
@@ -46,24 +46,24 @@ Une capacité n'est publiée que pour une fenêtre attestée de 7 jours. `scenar
 
 | Arm | Statut | Rendement accepté | Docs / 10% | Docs / semaine | Docs / mois | Tokens / semaine | API / doc | API / résultat accepté |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| gemini-low | N-A (weekly-window-source-gap) | 85.0% | N-A | N-A | N-A | N-A | $0.0376 | $0.0443 |
-| luna-high | scenario | 43.0% | 87.7 | 877.2 | 3,801.1 | 24,767,493 | $0.0199 | $0.0463 |
-| sol-medium | scenario | 94.0% | 97.1 | 970.6 | 4,206.0 | 24,767,493 | $0.2685 | $0.2857 |
+| gemini-low | measured | 85.0% | 343.0 | 3,430.1 | 14,863.7 | 74,344,881 | $0.0376 | $0.0443 |
+| luna-high | N-A (no-quota-delta) | 43.0% | N-A | N-A | N-A | N-A | $0.0199 | $0.0463 |
+| sol-medium | N-A (no-quota-delta) | 94.0% | N-A | N-A | N-A | N-A | $0.2685 | $0.2857 |
 | sonnet46-cloud-off | N-A (transport-mismatch) | 57.1% | N-A | N-A | N-A | N-A | $0.1750 | $0.3062 |
 
 Quand le palier observé 1x/5x/20x est source-gap, chaque ligne est conditionnelle: elle suppose que ce palier est celui du siège observé, sans extrapolation de multiplicateur. Avec `basePlan` renseigné, les autres lignes sont mises à l'échelle. Les seuils économiques ne dépendent que du prix mensuel et du coût API mesuré.
 
 | Arm | Palier | Base capacité | USD/mois | Docs/semaine | Docs/mois | Siège/doc | Seuil strict siège < API | Atteignable/siège | Sièges pour 1 000 docs/mois | Siège / 1 000 | API / 1 000 |
 |---|---|---|---:|---:|---:|---:|---:|---|---:|---:|---:|
-| gemini-low | gemini/ai-pro | N-A | $19.99 | N-A | N-A | N-A | 532 | N-A | N-A | N-A | $37.64 |
-| gemini-low | gemini/ai-ultra-5x | N-A | $99.99 | N-A | N-A | N-A | 2,657 | N-A | N-A | N-A | $37.64 |
-| gemini-low | gemini/ai-ultra-20x | N-A | $199.99 | N-A | N-A | N-A | 5,314 | N-A | N-A | N-A | $37.64 |
-| luna-high | chatgpt/plus | conditional-plan-is-observed-tier | $20.00 | 877.2 | 3,801.1 | $0.0053 | 1,004 | oui | 1 | $20.00 | $19.93 |
-| luna-high | chatgpt/pro-5x | conditional-plan-is-observed-tier | $100.00 | 877.2 | 3,801.1 | $0.0263 | 5,018 | non | 1 | $100.00 | $19.93 |
-| luna-high | chatgpt/pro-20x | conditional-plan-is-observed-tier | $200.00 | 877.2 | 3,801.1 | $0.0526 | 10,036 | non | 1 | $200.00 | $19.93 |
-| sol-medium | chatgpt/plus | conditional-plan-is-observed-tier | $20.00 | 970.6 | 4,206.0 | $0.0048 | 75 | oui | 1 | $20.00 | $268.55 |
-| sol-medium | chatgpt/pro-5x | conditional-plan-is-observed-tier | $100.00 | 970.6 | 4,206.0 | $0.0238 | 373 | oui | 1 | $100.00 | $268.55 |
-| sol-medium | chatgpt/pro-20x | conditional-plan-is-observed-tier | $200.00 | 970.6 | 4,206.0 | $0.0476 | 745 | oui | 1 | $200.00 | $268.55 |
+| gemini-low | gemini/ai-pro | scaled-from-base-plan | $19.99 | 3,430.1 | 14,863.7 | $0.0013 | 532 | oui | 1 | $19.99 | $37.64 |
+| gemini-low | gemini/ai-ultra-5x | scaled-from-base-plan | $99.99 | 17,150.4 | 74,318.4 | $0.0013 | 2,657 | oui | 1 | $99.99 | $37.64 |
+| gemini-low | gemini/ai-ultra-20x | scaled-from-base-plan | $199.99 | 68,601.6 | 297,273.5 | $0.0007 | 5,314 | oui | 1 | $199.99 | $37.64 |
+| luna-high | chatgpt/plus | N-A | $20.00 | N-A | N-A | N-A | 1,004 | N-A | N-A | N-A | $19.93 |
+| luna-high | chatgpt/pro-5x | N-A | $100.00 | N-A | N-A | N-A | 5,018 | N-A | N-A | N-A | $19.93 |
+| luna-high | chatgpt/pro-20x | N-A | $200.00 | N-A | N-A | N-A | 10,036 | N-A | N-A | N-A | $19.93 |
+| sol-medium | chatgpt/plus | N-A | $20.00 | N-A | N-A | N-A | 75 | N-A | N-A | N-A | $268.55 |
+| sol-medium | chatgpt/pro-5x | N-A | $100.00 | N-A | N-A | N-A | 373 | N-A | N-A | N-A | $268.55 |
+| sol-medium | chatgpt/pro-20x | N-A | $200.00 | N-A | N-A | N-A | 745 | N-A | N-A | N-A | $268.55 |
 | sonnet46-cloud-off | claude/pro | N-A | $20.00 | N-A | N-A | N-A | 115 | N-A | N-A | N-A | $174.99 |
 | sonnet46-cloud-off | claude/max-5x | N-A | $100.00 | N-A | N-A | N-A | 572 | N-A | N-A | N-A | $174.99 |
 | sonnet46-cloud-off | claude/max-20x | N-A | $200.00 | N-A | N-A | N-A | 1,143 | N-A | N-A | N-A | $174.99 |
@@ -134,7 +134,7 @@ No-intercept two-variable regression: `actual.costUsd × 1M = inputTokens × a +
 ## Observables de quota
 
 - Codex/ChatGPT: `wham/usage` expose le pourcentage, la durée et le reset de la fenêtre. La capacité Sol/Luna ci-dessus est un scénario par ratio avec les reçus de campagne, pas une mesure marginale par bras.
-- Google Cloud Code: `loadCodeAssist` expose le palier et `retrieveUserQuota` des buckets par modèle (`remainingFraction`, `resetTime`). llm-mesh 0.19.3 n'appelle pas ce dernier et ne conserve que `Retry-After` après 429. Le bucket Gemini observé dure 5 h; aucune capacité hebdomadaire n'en est extrapolée.
+- Google Cloud Code: `agy /usage` expose directement les pourcentages hebdomadaire et 5 h pour Gemini Flash/Pro. Une observation `controlled-burn` avec fenêtre 10 080 min est donc une capacité hebdomadaire mesurée; les reçus restent la source des documents et tokens.
 - Claude Code OAuth: `/usage` expose les fenêtres 5 h et 7 j, mais `sonnet46-cloud-off` utilise Google Cloud Code. Une projection Claude Pro/Max pour ce bras serait un changement de transport; elle reste N-A.
 
-Burn corpus: **0 requête Gemini, 0 requête Sonnet**. Les deux appels Google étaient des lectures de métadonnées quota. Le plafond de 10 % ne pouvait pas être garanti avant le document suivant; aucun traitement n'a été lancé.
+Burn réel: voir `burn/seat-observations.json` pour les pourcentages et les bornes UTC allowlistés; aucun identifiant de session ni secret n'est conservé. Les capacités Codex sans delta de compteur sont N-A, non extrapolées.

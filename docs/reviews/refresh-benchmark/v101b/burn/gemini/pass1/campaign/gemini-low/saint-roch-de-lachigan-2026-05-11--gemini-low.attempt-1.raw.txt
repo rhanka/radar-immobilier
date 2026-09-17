@@ -1,0 +1,223 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source_01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "label": "Ordre du jour - 11 mai 2026 - Saint-Roch-de-l'Achigan",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Vous êtes convoqués à la séance ordinaire du conseil municipal de Saint-Roch-de-l'Achigan,\ndevant se tenir ce lundi 11 mai 2026 à 19 h 30"
+        }
+      ],
+      "docSha": "01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "date": "2026-05-11",
+      "municipality": "saint-roch-de-lachigan",
+      "url": "https://sra.quebec/Ordres%20du%20jour/Ordo_2026-05-11_ordinaire.pdf",
+      "sourceKind": "pv",
+      "format": "pdf"
+    },
+    {
+      "id": "bylaw_583_2026",
+      "label": "Règlement 583-2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "7.4 Adoption du règlement 583-2026 relatif aux droits sur les mutations immobilières"
+        }
+      ],
+      "numero": "583-2026",
+      "title": "Règlement 583-2026 relatif aux droits sur les mutations immobilières",
+      "stage": "adoption",
+      "municipality": "saint-roch-de-lachigan",
+      "docSha": "01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "meetingDate": "2026-05-11"
+    },
+    {
+      "id": "event_derogation_296_riviere_nord",
+      "label": "Demande de dérogation mineure - 296 rang de la Rivière Nord",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation"
+        }
+      ],
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "kind": "derogation",
+      "municipality": "saint-roch-de-lachigan",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-05-11",
+      "description": "Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation",
+      "docSha": "01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946"
+    },
+    {
+      "id": "event_derogation_28_beaucage",
+      "label": "Demande de dérogation mineure - 28 rue Beaucage",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation"
+        }
+      ],
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "kind": "derogation",
+      "municipality": "saint-roch-de-lachigan",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-05-11",
+      "description": "Demande de dérogation mineure - 28 rue Beaucage - Autorisation",
+      "docSha": "01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946"
+    },
+    {
+      "id": "signal_preemption_lot_6141751",
+      "label": "Vente du lot 6 141 751 - exercice du droit de préemption",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption"
+        }
+      ],
+      "category": "droit_de_preemption",
+      "date": "2026-05-11",
+      "meetingDate": "2026-05-11",
+      "description": "Vente du lot lot 6 141 751-exercise du droit de préemption",
+      "scope": "local",
+      "municipality": "saint-roch-de-lachigan",
+      "no_lot": "6141751",
+      "docSha": "01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946"
+    }
+  ],
+  "edges": [
+    {
+      "source": "source_01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "target": "bylaw_583_2026",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "evidence_refs": [
+        "ev-bylaw-583"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "7.4 Adoption du règlement 583-2026 relatif aux droits sur les mutations immobilières"
+        }
+      ]
+    },
+    {
+      "source": "source_01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "target": "event_derogation_296_riviere_nord",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "evidence_refs": [
+        "ev-derog-296"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation"
+        }
+      ]
+    },
+    {
+      "source": "source_01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "target": "event_derogation_28_beaucage",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "evidence_refs": [
+        "ev-derog-28"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation"
+        }
+      ]
+    },
+    {
+      "source": "source_01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "target": "signal_preemption_lot_6141751",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "evidence_refs": [
+        "ev-preemption"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-583",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "rawRef": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "docSha": "01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "sourceUrl": "https://sra.quebec/Ordres%20du%20jour/Ordo_2026-05-11_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "7.4 Adoption du règlement 583-2026 relatif aux droits sur les mutations immobilières"
+    },
+    {
+      "id": "ev-derog-296",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "rawRef": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "docSha": "01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "sourceUrl": "https://sra.quebec/Ordres%20du%20jour/Ordo_2026-05-11_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation"
+    },
+    {
+      "id": "ev-derog-28",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "rawRef": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "docSha": "01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "sourceUrl": "https://sra.quebec/Ordres%20du%20jour/Ordo_2026-05-11_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation"
+    },
+    {
+      "id": "ev-preemption",
+      "source_file": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "rawRef": "raw/proces-verbaux-saint-roch-de-lachigan/cas/01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946.pdf",
+      "docSha": "01f4ad12cbcaa142d18aab8bec7de5ef02f7777b9802a644924c5a279d6ef946",
+      "sourceUrl": "https://sra.quebec/Ordres%20du%20jour/Ordo_2026-05-11_ordinaire.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption"
+    }
+  ],
+  "input_tokens": 1400,
+  "output_tokens": 1200
+}
+```

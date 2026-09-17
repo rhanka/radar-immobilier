@@ -1,0 +1,332 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "label": "Ordre du jour – Séance ordinaire du 7 avril 2026 - L'Islet",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "status": "candidate",
+      "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "date": "2026-04-07",
+      "municipality": "lislet",
+      "sourceKind": "pv",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "ORDRE DU JOUR – SÉANCE ORDINAIRE DU 7 AVRIL 2026"
+        }
+      ]
+    },
+    {
+      "id": "event-30-derogation-mineure-418-pionniers",
+      "label": "Demande de dérogation mineure pour le 418, chemin des Pionniers Est",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "status": "candidate",
+      "kind": "derogation",
+      "meetingDate": "2026-04-07",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-04-07",
+      "municipality": "lislet",
+      "description": "30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est"
+        }
+      ]
+    },
+    {
+      "id": "event-31-piia-81-pionniers",
+      "label": "Demande de PIIA pour le 81, chemin des Pionniers Est",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "meetingDate": "2026-04-07",
+      "etape": "piia",
+      "etape_date": "2026-04-07",
+      "municipality": "lislet",
+      "description": "31. Demande de PIIA pour le 81, chemin des Pionniers Est",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "31. Demande de PIIA pour le 81, chemin des Pionniers Est"
+        }
+      ]
+    },
+    {
+      "id": "event-32-piia-272-pionniers",
+      "label": "Demande de PIIA pour le 272, chemin des Pionniers Est",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "meetingDate": "2026-04-07",
+      "etape": "piia",
+      "etape_date": "2026-04-07",
+      "municipality": "lislet",
+      "description": "32. Demande de PIIA pour le 272, chemin des Pionniers Est",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "32. Demande de PIIA pour le 272, chemin des Pionniers Est"
+        }
+      ]
+    },
+    {
+      "id": "constraint-34-cptaq-sabliere",
+      "label": "Demande d'autorisation à la CPTAQ pour renouvellement de permis d'exploitation d'une sablière",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "organisme": "CPTAQ",
+      "meetingDate": "2026-04-07",
+      "municipality": "lislet",
+      "description": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une sablière (Michel Gamache & Frères)",
+      "evidence_refs": [
+        "ev-34-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+        }
+      ]
+    },
+    {
+      "id": "event-34-cptaq-sabliere",
+      "label": "Demande d'autorisation à la CPTAQ pour le renouvellement de permis d'exploitation d'une sablière",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "status": "candidate",
+      "kind": "cptaq",
+      "meetingDate": "2026-04-07",
+      "demandeur_corporate": "Michel Gamache & Frères",
+      "municipality": "lislet",
+      "description": "Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une sablière (Michel Gamache & Frères)",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "target": "event-30-derogation-mineure-418-pionniers",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "evidence_refs": [
+        "ev-30-derogation"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est"
+        }
+      ]
+    },
+    {
+      "source": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "target": "event-31-piia-81-pionniers",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "evidence_refs": [
+        "ev-31-piia"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "31. Demande de PIIA pour le 81, chemin des Pionniers Est"
+        }
+      ]
+    },
+    {
+      "source": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "target": "event-32-piia-272-pionniers",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "evidence_refs": [
+        "ev-32-piia"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "32. Demande de PIIA pour le 272, chemin des Pionniers Est"
+        }
+      ]
+    },
+    {
+      "source": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "target": "constraint-34-cptaq-sabliere",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "evidence_refs": [
+        "ev-34-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+        }
+      ]
+    },
+    {
+      "source": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "target": "event-34-cptaq-sabliere",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "evidence_refs": [
+        "ev-34-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+        }
+      ]
+    },
+    {
+      "source": "event-30-derogation-mineure-418-pionniers",
+      "target": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "evidence_refs": [
+        "ev-30-derogation"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est"
+        }
+      ]
+    },
+    {
+      "source": "event-31-piia-81-pionniers",
+      "target": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "evidence_refs": [
+        "ev-31-piia"
+      ],
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "31. Demande de PIIA pour le 81, chemin des Pionniers Est"
+        }
+      ]
+    },
+    {
+      "source": "event-32-piia-272-pionniers",
+      "target": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "evidence_refs": [
+        "ev-32-piia"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "32. Demande de PIIA pour le 272, chemin des Pionniers Est"
+        }
+      ]
+    },
+    {
+      "source": "constraint-34-cptaq-sabliere",
+      "target": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "evidence_refs": [
+        "ev-34-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+        }
+      ]
+    },
+    {
+      "source": "event-34-cptaq-sabliere",
+      "target": "source-177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "evidence_refs": [
+        "ev-34-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-30-derogation",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est"
+    },
+    {
+      "id": "ev-31-piia",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "31. Demande de PIIA pour le 81, chemin des Pionniers Est"
+    },
+    {
+      "id": "ev-32-piia",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "32. Demande de PIIA pour le 272, chemin des Pionniers Est"
+    },
+    {
+      "id": "ev-34-cptaq",
+      "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+      "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+      "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 1780,
+  "output_tokens": 1450
+}
+```

@@ -1,0 +1,366 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "label": "Procès-verbal de la séance ordinaire du 20 avril 2026 - Sainte-Clotilde",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "node_type": "Source",
+      "status": "validated",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "date": "2026-04-20",
+      "municipality": "sainte-clotilde",
+      "url": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil municipal tenue le 20 avril 2026, à\ncompter de 19h00, à la salle du conseil de l’édifice municipal au 2452, chemin de l’Église à\nSainte-Clotilde"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-471-09",
+      "label": "Règlement 471-09 modifiant le règlement de zonage numéro 471",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "471-09",
+      "title": "Règlement numéro 47109 modifiant le règlement de zonage numéro 471",
+      "objet": "modifier le règlement de zonage numéro 471 et d’assurer la concordance au schéma d’aménagement et de développement de la MRC des Jardins-deNapierville (URB-205-21-2025 et URB-2025-17-2024-01)",
+      "date": "2026-04-20",
+      "stage": "avis_motion",
+      "municipality": "sainte-clotilde",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "meetingDate": "2026-04-20",
+      "resolution": "2026-04-192",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est par la présente donné par ROBERT ARCOITE conseiller, qu’à une séance\nultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47109 modifiant le règlement de zonage"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-470-04",
+      "label": "Règlement 470-04 relatif au plan d'urbanisme",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "470-04",
+      "title": "Règlement numéro 47004 relatif au schéma d’aménagement de la MRC des Jardins-de-Napierville",
+      "objet": "modifier le règlement du plan d’urbanisme numéro 470 et d’assurer la concordance au schéma d’aménagement et de développement de la MRC des Jardins-de-Napierville (URB-205-21-2025)",
+      "date": "2026-04-20",
+      "stage": "avis_motion",
+      "municipality": "sainte-clotilde",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "meetingDate": "2026-04-20",
+      "resolution": "2026-04-193",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est par la présente donné par MARCEL TREMBLAY conseiller, qu’à une\nséance ultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47004 relatif au schéma"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-472-04",
+      "label": "Règlement 472-04 modifiant le règlement de lotissement numéro 472",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "472-04",
+      "title": "Règlement numéro 47204 modifiant le règlement de lotissement numéro 472",
+      "objet": "modifier le règlement de lotissement numéro 472 et d’assurer la concordance au schéma d’aménagement et de développement de la MRC des Jardins-deNapierville (URB-205-21-2025)",
+      "date": "2026-04-20",
+      "stage": "avis_motion",
+      "municipality": "sainte-clotilde",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "meetingDate": "2026-04-20",
+      "resolution": "2026-04-194",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est par la présente donné par FRANÇOIS BARBEAU conseiller, qu’à une\nséance ultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47204 modifiant le règlement"
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-2026-04-195",
+      "label": "Demande CPTAQ - Construction DJL Inc. (lots 6 199 292 et 6 471 805)",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "municipality": "sainte-clotilde",
+      "organisme": "Commission de la protection du territoire agricole du Québec (CPTAQ)",
+      "resolution": "2026-04-195",
+      "resolutionRef": "2026-04-195",
+      "description": "Correction de la résolution 2025-12-286 appuyant la demande de Construction DJL Inc. auprès de la CPTAQ pour le renouvellement de l’autorisation d’exploitation d’une carrière sur le rang 2, ajoutant la partie du lot 6 471 805 en plus du lot 6 199 292.",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "meetingDate": "2026-04-20",
+      "evidence_refs": [
+        "ev-10-5-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "CONSIDÉRANT la résolution numéro 2025-12-286 adoptée le 15 décembre 2025, appuyant\nla demande de Construction DJL Inc. auprès de la Commission de la protection du territoire\nagricole du Québec (CPTAQ)"
+        },
+        {
+          "page": 10,
+          "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-cptaq-2026-04-195",
+      "label": "Correction de résolution d'appui CPTAQ - DJL Inc.",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-04-20",
+      "meetingDate": "2026-04-20",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "demandeur_corporate": "Construction DJL Inc.",
+      "municipality": "sainte-clotilde",
+      "resolution": "2026-04-195",
+      "resolutionRef": "2026-04-195",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "description": "Correction de la résolution numéro 2025-12-286 afin d'ajouter une partie du lot 6 471 805 en plus du lot 6 199 292 pour la demande d'autorisation d'exploitation d'une carrière.",
+      "no_lot": "6471805",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;"
+        }
+      ]
+    },
+    {
+      "id": "signal-avis-motion-471-09",
+      "label": "Signal - Avis de motion règlement 471-09 zonage",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "zonage",
+      "date": "2026-04-20",
+      "meetingDate": "2026-04-20",
+      "description": "Avis de motion et projet de règlement numéro 471-09 modifiant le règlement de zonage 471 pour concordance MRC.",
+      "resolution": "2026-04-192",
+      "resolutionRef": "2026-04-192",
+      "scope": "local",
+      "municipality": "sainte-clotilde",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "etape": "avis_motion",
+      "etape_date": "2026-04-20",
+      "reglement_number": "471-09",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est par la présente donné par ROBERT ARCOITE conseiller, qu’à une séance\nultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47109 modifiant le règlement de zonage"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "target": "bylaw-471-09",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "evidence_refs": [
+        "ev-10-2-bylaw-471"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est par la présente donné par ROBERT ARCOITE conseiller, qu’à une séance\nultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47109 modifiant le règlement de zonage"
+        }
+      ]
+    },
+    {
+      "source": "source-2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "target": "bylaw-470-04",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "evidence_refs": [
+        "ev-10-3-bylaw-470"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est par la présente donné par MARCEL TREMBLAY conseiller, qu’à une\nséance ultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47004 relatif au schéma"
+        }
+      ]
+    },
+    {
+      "source": "source-2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "target": "bylaw-472-04",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "evidence_refs": [
+        "ev-10-4-bylaw-472"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est par la présente donné par FRANÇOIS BARBEAU conseiller, qu’à une\nséance ultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47204 modifiant le règlement"
+        }
+      ]
+    },
+    {
+      "source": "source-2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "target": "constraint-cptaq-2026-04-195",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "evidence_refs": [
+        "ev-10-5-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "CONSIDÉRANT la résolution numéro 2025-12-286 adoptée le 15 décembre 2025, appuyant\nla demande de Construction DJL Inc. auprès de la Commission de la protection du territoire\nagricole du Québec (CPTAQ)"
+        }
+      ]
+    },
+    {
+      "source": "source-2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "target": "designation-event-cptaq-2026-04-195",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "evidence_refs": [
+        "ev-10-5-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-471-09",
+      "target": "source-2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "evidence_refs": [
+        "ev-10-2-bylaw-471"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est par la présente donné par ROBERT ARCOITE conseiller, qu’à une séance\nultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47109 modifiant le règlement de zonage"
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-2026-04-195",
+      "target": "source-2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "evidence_refs": [
+        "ev-10-5-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-cptaq-2026-04-195",
+      "target": "source-2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "evidence_refs": [
+        "ev-10-5-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;"
+        }
+      ]
+    },
+    {
+      "source": "source-2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "target": "signal-avis-motion-471-09",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "evidence_refs": [
+        "ev-10-2-bylaw-471"
+      ],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Avis de motion est par la présente donné par ROBERT ARCOITE conseiller, qu’à une séance\nultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47109 modifiant le règlement de zonage"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-10-2-bylaw-471",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+      "modality": "pdf",
+      "page": 9,
+      "excerpt": "Avis de motion est par la présente donné par ROBERT ARCOITE conseiller, qu’à une séance\nultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47109 modifiant le règlement de zonage numéro 471."
+    },
+    {
+      "id": "ev-10-3-bylaw-470",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+      "modality": "pdf",
+      "page": 9,
+      "excerpt": "Avis de motion est par la présente donné par MARCEL TREMBLAY conseiller, qu’à une\nséance ultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47004 relatif au schéma d’aménagement de la MRC des Jardins-de-Napierville."
+    },
+    {
+      "id": "ev-10-4-bylaw-472",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+      "modality": "pdf",
+      "page": 9,
+      "excerpt": "Avis de motion est par la présente donné par FRANÇOIS BARBEAU conseiller, qu’à une\nséance ultérieure du conseil municipal sera présenté pour adoption le Règlement numéro 47204 modifiant le règlement de lotissement numéro 472."
+    },
+    {
+      "id": "ev-10-5-cptaq",
+      "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+      "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+      "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+      "modality": "pdf",
+      "page": 10,
+      "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;"
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 4800,
+  "output_tokens": 1550
+}
+```
