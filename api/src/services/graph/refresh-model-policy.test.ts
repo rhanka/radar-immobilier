@@ -135,6 +135,21 @@ describe("refresh model policy", () => {
     expect(run.calls).toEqual([primary.model]);
   });
 
+  it("should restore fallback affinity for an incomplete document in a new cycle", async () => {
+    const initial = fixture(async (model) => {
+      if (model === primary) throw Object.assign(new Error("quota"), { status: 429 });
+      return "{}";
+    });
+    await initial.document("one").generateJson(input);
+    const resumed = fixture(async () => "{}");
+    resumed.policy.restoreDocument("one", initial.receipts);
+    await resumed.document("one").generateJson(input);
+    expect(resumed.calls).toEqual([fallback.model]);
+    expect(resumed.receipts[0]?.fallbackReason).toBe("quota");
+    await resumed.document("two").generateJson(input);
+    expect(resumed.calls.at(-1)).toBe(primary.model);
+  });
+
   it("should not fall back when the validated output cannot be written", async () => {
     let calls = 0;
     const policy = createRefreshModelPolicy({ primary, fallback, forceFallback: false, timeoutMs: 1000,

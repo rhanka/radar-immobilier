@@ -27,6 +27,7 @@ export interface RefreshDocumentModels {
   readonly policy: string;
   forDocument(docSha: string, record: (receipt: RefreshModelReceipt) => Promise<void>): TextJsonGenerationClient;
   completeDocument(docSha: string): void;
+  restoreDocument(docSha: string, receipts: readonly RefreshModelReceipt[]): void;
 }
 
 /** Inspect only for classification; never emit upstream messages or response bodies. */
@@ -52,6 +53,11 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
     completeDocument(docSha) {
       const document = documents.get(docSha);
       if (document && !document.reason) consecutiveQuotaDocuments = 0;
+    },
+    restoreDocument(docSha, receipts) {
+      const reason = receipts.find((receipt) => receipt.fallbackReason)?.fallbackReason
+        ?? receipts.find((receipt) => receipt.status === "failed")?.failureReason;
+      if (reason) documents.set(docSha, { reason, counted: true });
     },
     forDocument(docSha, record) {
       let document = documents.get(docSha);

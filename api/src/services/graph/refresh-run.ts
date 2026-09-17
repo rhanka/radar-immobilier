@@ -197,6 +197,9 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   }
   let handle = await openRefreshState(options.store, { ...scope, baselineHash }, options.budgetLimit, now);
   handle = await completeStage(options.store, handle, "corpus", `sha256:${corpus.inputHash}`, now);
+  for (const [docSha, receipts] of Object.entries(handle.state.documentModels ?? {})) {
+    options.documentModels?.restoreDocument(docSha, receipts);
+  }
   const profiled: RefreshProfileChunk[] = [];
   for (const chunk of corpus.chunks) {
     const reserved = await reserveRefreshChunk(options.store, handle, chunk.id,
