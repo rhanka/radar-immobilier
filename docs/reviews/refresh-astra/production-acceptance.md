@@ -32,8 +32,8 @@ PDF per city cycle; use two distinct cycles for two-document acceptance.
 latency, `failureReason` and/or `fallbackReason`. A mixed document therefore
 retains both models. Completed chunks resume without duplicate generation.
 Returned provider/model/status are checked before recording completion; a
-returned identity mismatch stops with `modelUsed: null`. The deadline is enforced
-and integrity/status refusals carry `terminalFailure: true` across restarts,
+returned identity mismatch stops with `modelUsed: null`. Integrity/status refusals
+carry `terminalFailure: true` across restarts,
 so a later cycle cannot reinterpret them as transport fallback. The deadline is enforced
 even for an uncooperative client. Late responses cannot validate or overwrite the
 selected output file, which only the policy writes after success.
