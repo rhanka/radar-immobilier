@@ -16,6 +16,7 @@ export interface RefreshModelReceipt {
   readonly status: "completed" | "failed" | "quality-refused";
   readonly fallbackReason?: RefreshFallbackReason;
   readonly failureReason?: RefreshFallbackReason;
+  readonly terminalFailure?: true;
   readonly latencyMs: number;
 }
 export interface RefreshModelPolicyOptions {
@@ -49,7 +50,7 @@ export function refreshFallbackReason(error: unknown): RefreshFallbackReason {
 export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): RefreshDocumentModels {
   let consecutiveQuotaDocuments = 0;
   let circuitOpen = false;
-  const documents = new Map<string, { reason?: RefreshFallbackReason; counted: boolean }>();
+  const documents = new Map<string, { reason?: RefreshFallbackReason; counted: boolean; terminal?: boolean }>();
   return {
     policy: JSON.stringify({ version: 1, primary: options.primary, fallback: options.fallback,
       forceFallback: options.forceFallback, quotaThreshold: 3 }),
@@ -60,7 +61,8 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
     restoreDocument(docSha, receipts) {
       const reason = receipts.find((receipt) => receipt.fallbackReason)?.fallbackReason
         ?? receipts.find((receipt) => receipt.status === "failed")?.failureReason;
-      documents.set(docSha, { ...(reason ? { reason } : {}), counted: reason !== undefined });
+      documents.set(docSha, { ...(reason ? { reason } : {}), counted: reason !== undefined,
+        terminal: receipts.some((receipt) => receipt.terminalFailure) });
     },
     forDocument(docSha, record) {
       let document = documents.get(docSha);
@@ -77,6 +79,8 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
         model: options.primary.model,
         async generateJson(input) {
           options.signal?.throwIfAborted();
+          if (selected.terminal) throw Object.assign(new Error("Refresh document has a terminal receipt"),
+            { code: "REFRESH_TERMINAL_STATE" });
           const { outputPath, ...generationInput } = input;
           const attempt = async (model: RefreshModel, fallbackReason?: RefreshFallbackReason) => {
             const controller = new AbortController();
@@ -112,7 +116,11 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
                 terminalFailure = true;
                 throw Object.assign(new Error("Refresh result identity mismatch"), { code: "REFRESH_MODEL_MISMATCH" });
               }
-              if (result.status !== "completed" || text === undefined) {
+              if (result.status !== "completed") {
+                terminalFailure = true;
+                throw Object.assign(new Error("Refresh result is not completed"), { code: "REFRESH_INCOMPLETE_RESULT" });
+              }
+              if (text === undefined) {
                 throw Object.assign(new Error("Refresh output incomplete"), { code: "REFRESH_EMPTY_OUTPUT" });
               }
             } catch (error) {
@@ -129,6 +137,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
             const modelUsed = result ? result.provider === model.provider && result.model === model.model
               ? { ...model, model: result.model } : null : model;
             await record({ modelUsed, status: qualityRefused ? "quality-refused" : failed ? "failed" : "completed",
+              ...(terminalFailure ? { terminalFailure: true as const } : {}),
               ...(fallbackReason ? { fallbackReason } : {}),
               ...(failed && !qualityRefused ? { failureReason: reason } : {}), latencyMs: Date.now() - startedAt });
             options.signal?.throwIfAborted();

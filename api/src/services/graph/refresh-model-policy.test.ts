@@ -77,15 +77,15 @@ describe("refresh model policy", () => {
     } finally { vi.useRealTimers(); }
   });
 
-  it.each(["failed-status", "wrong-model"])("should refuse a resolved invalid result (%s)", async (kind) => {
+  it.each(["failed-status", "wrong-model", "status-without-text"])("should refuse a resolved invalid result (%s)", async (kind) => {
     const receipts: RefreshModelReceipt[] = [];
     let calls = 0;
     const policy = createRefreshModelPolicy({ primary, fallback, forceFallback: false, timeoutMs: 1000,
       createClient(model) {
         return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(request) {
           calls++;
-          await request.validateResponse?.("{}");
-          return { status: kind === "failed-status" ? "instructions_written" : "completed", mode: "mesh",
+          if (kind !== "status-without-text") await request.validateResponse?.("{}");
+          return { status: kind !== "wrong-model" ? "instructions_written" : "completed", mode: "mesh",
             provider: model.provider, model: kind === "wrong-model" ? "unexpected" : model.model, audit: {} };
         } };
       } });
@@ -93,7 +93,11 @@ describe("refresh model policy", () => {
       .generateJson(input)).rejects.toThrow();
     expect(calls).toBe(1);
     expect(receipts[0]?.status).toBe("failed");
+    expect(receipts[0]?.terminalFailure).toBe(true);
     if (kind === "wrong-model") expect(receipts[0]?.modelUsed).toBeNull();
+    policy.restoreDocument("one", receipts);
+    await expect(policy.forDocument("one", async () => {}).generateJson(input)).rejects.toThrow("terminal receipt");
+    expect(calls).toBe(1);
   });
 
   it.each(["Invalid JSON", "Invalid profile extraction", "ungrounded PDF excerpt"])(
