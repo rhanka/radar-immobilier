@@ -8,8 +8,6 @@ target-ref: 5f26f219
 lens: deployment and durability of published public diff
 ---
 
-Retry after GitHub `isPrivate=false` proved the prior rejection's private-repo
-premise false, and the owner-requested branch was published publicly.
+Nouvel essai après preuve GitHub `isPrivate=false` que le motif de refus précédent était erroné, et publication de la branche demandée par l’owner.
 
-The launched reviewer returned API Error 503 from its gateway before writing a
-review. No verdict is available. A new review round must keep this failure visible.
+Le relecteur lancé a retourné API Error 503 depuis sa passerelle avant écriture d’une revue. Aucun verdict n’est disponible. Un nouveau tour doit conserver cet échec visible.

@@ -238,12 +238,18 @@ store holds up to **N+1** objects per env at the peak (default `14` → up to `1
 The current backup is categorically the rollback point of the release being cut,
 so it is never counted against the retention budget — a deliberate one-object
 safety bias.
-# Astra low refresh rollout
+# Déploiement du rafraîchissement Astra low
 
-The PV CronJob uses Astra low through Codex, with Gemini 3.8 Flash low through
-Cloud Code as transport fallback. Both accounts must be enrolled under the
-runtime Secret's owner scope in the writable keyring PVC. The rollout order,
-forced-fallback proof and CronJob-specific rollback are documented in
+Le CronJob PV utilise Astra low via Codex, avec Gemini 3.8 Flash low via Cloud
+Code comme repli de transport. Les deux comptes doivent être enrôlés sous le
+owner scope du Secret runtime dans le PVC keyring inscriptible. L’owner enrôle
+d’abord Codex localement avec `make enroll-codex`; pour un PVC déjà initialisé,
+la lane k8s rend puis applique le Job éphémère `make import-keyring-account`
+avec un Secret temporaire, afin d’ajouter Codex sans remplacer Gemini. Pour un
+PVC neuf, le Secret bootstrap contient les deux comptes avant le premier
+bootstrap. L’ordre de déploiement, la preuve de repli forcé, les preuves e2e
+(modèle par document, acceptés, durée, liens filtre B′ et logs Job) et le retour
+arrière propre au CronJob sont documentés dans
 [`production-acceptance.md`](../../docs/reviews/refresh-astra/production-acceptance.md).
-The production overlay remains gated by `REFRESH_CRONJOB_PROD_ENABLED=true`
-and the `v*` release promotion; merging alone deploys preproduction.
+L’overlay production reste protégé par `REFRESH_CRONJOB_PROD_ENABLED=true` et
+la promotion release `v*` ; une fusion seule déploie la préproduction.

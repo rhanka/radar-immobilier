@@ -1,0 +1,62 @@
+# The k8s lane applies this only after creating the uniquely named Secret
+# radar-refresh-keyring-account-import. It must contain the encrypted source
+# keyring files and .key from the owner enrollment; it is deleted after import.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-refresh-keyring-account-import
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: refresh-keyring-import
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: import-account
+          image: ghcr.io/rhanka/radar-api:PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          command:
+            - /bin/sh
+            - -ceu
+            - |
+              exec 9>/keyring/runtime/.refresh.lock
+              flock -x 9
+              exec 8>/keyring/runtime/.bootstrap.lock
+              flock -x 8
+              test -f /keyring/runtime/.key
+              test -f /import/.key
+              cmp -s /keyring/runtime/.key /import/.key \
+                || { echo "source and runtime keyring master keys differ" >&2; exit 1; }
+              mkdir -p /keyring/runtime/.import
+              trap 'rm -rf /keyring/runtime/.import' EXIT
+              cp -a /import/. /keyring/runtime/.import/
+              node /workspace/enroll-codex-import.mjs /keyring/runtime /keyring/runtime/.import
+          volumeMounts:
+            - { name: keyring, mountPath: /keyring }
+            - { name: account-import, mountPath: /import, readOnly: true }
+            - { name: import-script, mountPath: /workspace/enroll-codex-import.mjs, subPath: enroll-codex-import.mjs, readOnly: true }
+      volumes:
+        - name: keyring
+          persistentVolumeClaim: { claimName: radar-refresh-keyring }
+        - name: account-import
+          secret:
+            secretName: radar-refresh-keyring-account-import
+            defaultMode: 0440
+        - name: import-script
+          configMap:
+            name: radar-refresh-keyring-import-script
+            defaultMode: 0444
