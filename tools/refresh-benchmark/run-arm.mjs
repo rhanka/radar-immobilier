@@ -132,7 +132,13 @@ export async function runArm(armName, options = {}) {
     manifest.documents.length}`).split("-").map(Number);
   if (!Number.isInteger(from) || !Number.isInteger(to) || from < 1 || to > manifest.documents.length
     || from > to) throw new Error("BENCHMARK_SLICE must be a valid one-based range");
-  const documents = manifest.documents.slice(from - 1, to);
+  const slicedDocuments = manifest.documents.slice(from - 1, to);
+  const requestedDocumentIds = String(process.env.BENCHMARK_DOCUMENT_IDS ?? "")
+    .split(",").map((id) => id.trim()).filter(Boolean);
+  const selectedDocumentIds = new Set(requestedDocumentIds);
+  const documents = requestedDocumentIds.length === 0
+    ? slicedDocuments
+    : slicedDocuments.filter((document) => selectedDocumentIds.has(document.id));
   const concurrency = Number(options.concurrency ?? process.env.BENCHMARK_CONCURRENCY ?? "1");
   const maximumConcurrency = arm.lane === "codex" ? 4 : 3;
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > maximumConcurrency) {
@@ -274,7 +280,13 @@ export async function runArm(armName, options = {}) {
         progress.processed += 1; progress.accepted += Number(accepted);
         progress.elapsedMs += receipt.latency.totalMs; progress.lastReceipt = paths.receipt;
         await publish("running"); await log({ event: "receipt", documentId: document.id,
-          attempt, accepted, receipt: paths.receipt }); return;
+          attempt, accepted, receipt: paths.receipt });
+        if (process.env.BENCHMARK_RETRY_QUALITY === "1" && !accepted && attempt < 4) {
+          decision = { action: "run", attempt: attempt + 1, previous: receipt,
+            paths: artifactPaths(campaignRoot, document.id, armName, attempt + 1) };
+          continue;
+        }
+        return;
       } catch (error) {
         if (yieldSignal) {
           await rm(paths.intent, { force: true });

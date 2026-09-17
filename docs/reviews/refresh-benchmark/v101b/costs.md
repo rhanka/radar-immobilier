@@ -178,3 +178,9 @@ No-intercept two-variable regression: `actual.costUsd × 1M = inputTokens × a +
 - Claude Code OAuth: `/usage` expose les fenêtres 5 h et 7 j, mais `sonnet46-cloud-off` utilise Google Cloud Code. Une projection Claude Pro/Max pour ce bras serait un changement de transport; elle reste N-A.
 
 Burn réel: voir `burn/seat-observations.json` pour les pourcentages et les bornes UTC allowlistés; aucun identifiant de session ni secret n'est conservé. Les capacités Codex sans delta de compteur sont N-A, non extrapolées.
+
+| gemini-low → astra-low | measured-partial | 100.0% | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A |
+| gemini-medium → astra-low | measured-partial | 100.0% | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A |
+
+| gemini-low → astra-low | measured-partial | 100.0% | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A |
+| gemini-medium → astra-low | measured-partial | 100.0% | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A |

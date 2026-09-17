@@ -41,6 +41,13 @@ export async function resumeDecision(root, documentId, arm) {
         return { action: "run", attempt: attempt + 1, previous: receipt,
           paths: artifactPaths(root, documentId, arm, attempt + 1) };
       }
+      const qualityReplay = process.env.BENCHMARK_RETRY_QUALITY === "1";
+      const qualityRefusal = receipt.status === "completed"
+        && receipt.validation?.accepted === false;
+      if (qualityReplay && qualityRefusal && attempt < 4) {
+        return { action: "run", attempt: attempt + 1, previous: receipt,
+          paths: artifactPaths(root, documentId, arm, attempt + 1) };
+      }
       const terminal = receipt.status === "completed" || !receipt.retry?.eligible || attempt >= 2;
       return terminal ? { action: "skip", attempt, receipt, paths }
         : { action: "run", attempt: 2, previous: receipt,

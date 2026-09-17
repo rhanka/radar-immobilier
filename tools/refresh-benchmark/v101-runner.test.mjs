@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import test from "node:test";
@@ -25,6 +26,12 @@ test("should enumerate every addressable arm when Codex 5.3 is unavailable", () 
   assert.equal(Object.keys(arms).length, 27);
   assert.deepEqual(Object.fromEntries(Object.entries(laneArms).map(([key, value]) =>
     [key, value.length])), { cloud: 6, codex: 12, openai: 1, anthropic: 6, mistral: 1, claude: 1 });
+});
+
+test("should filter documents after the frozen slice when requested", () => {
+  const runnerSource = readFileSync(new URL("./run-arm.mjs", import.meta.url), "utf8");
+  assert.match(runnerSource, /BENCHMARK_DOCUMENT_IDS/u);
+  assert.match(runnerSource, /slicedDocuments\.filter\(\(document\) => selectedDocumentIds\.has\(document\.id\)\)/u);
 });
 
 test("should keep lane concurrency defaults and accept a bounded override", () => {

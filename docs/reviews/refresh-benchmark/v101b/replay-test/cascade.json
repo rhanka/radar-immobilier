@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "status": "measured-partial",
+  "documents": 100,
+  "variants": {
+    "gemini-low->astra-low": {
+      "accepted": "100/100",
+      "f1V2Macro": "N-A",
+      "f1TimesAcceptance": "N-A",
+      "apiUsdPerDoc": "N-A",
+      "seatUsdPerDoc": "N-A",
+      "latencyP50": "N-A",
+      "latencyP95": "N-A",
+      "note": "Astra-low 100/100; mixed metrics N-A until retries close."
+    },
+    "gemini-medium->astra-low": {
+      "accepted": "100/100",
+      "f1V2Macro": "N-A",
+      "f1TimesAcceptance": "N-A",
+      "apiUsdPerDoc": "N-A",
+      "seatUsdPerDoc": "N-A",
+      "latencyP50": "N-A",
+      "latencyP95": "N-A",
+      "note": "Astra-low 100/100; mixed metrics N-A until retries close."
+    }
+  }
+}
