@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "implementationSha": "7bf2d17f5f30236879cd6eb91353ae253a28c866",
-  "scope": "real PDF/profile/provenance/S3/PG; two distinct city cycles",
+  "implementationSha": "b7753f76",
+  "scope": "real PDF/profile/provenance/S3/PG; isolated primary database and bucket",
   "environment": "test-astra-703",
   "forced": false,
   "accepted": 2,
-  "startedAt": "2026-09-17T04:49:38.343Z",
-  "finishedAt": "2026-09-17T04:54:06.734Z",
+  "startedAt": "2026-09-17T04:57:07.996Z",
+  "finishedAt": "2026-09-17T05:02:04.275Z",
   "keyring": {
     "activeCodex": 1,
     "activeGemini": 1,
@@ -18,7 +18,7 @@
       "sourceUrl": "https://ville.waterloo.qc.ca/wp-content/uploads/2026/09/Proces-verbal-de-la-seance-du-18-aout-2026.pdf",
       "docSha": "c18dcea9adf05d028f5ee1c71b2244fb3dc5e83acdab86996c81401d4038cebd",
       "accepted": true,
-      "projectedNodes": 17,
+      "projectedNodes": 18,
       "modelPolicy": "{\"version\":1,\"primary\":{\"provider\":\"openai\",\"model\":\"gpt-6-astra\",\"effort\":\"low\"},\"fallback\":{\"provider\":\"gemini\",\"model\":\"gemini-3.8-flash\",\"effort\":\"low\"},\"forceFallback\":false,\"quotaThreshold\":3}",
       "calls": [
         {
@@ -30,12 +30,12 @@
             "effort": "low"
           },
           "status": "completed",
-          "latencyMs": 144601
+          "latencyMs": 171776
         }
       ],
       "result": {
         "citySlug": "waterloo",
-        "candidateHash": "sha256:7cc6d6b19502d92f8c75e05e90e5291dde81d82ce60f64a4eb91da796260f64b",
+        "candidateHash": "sha256:726fce60905cea9b6f3cb1a9cba70d63ac5cbed8f068dab4df214e6a2a6b9823",
         "stateKey": "refresh/018/waterloo/runs/90257833e53fa03c80d6a73ca1cf9c6a2a643b6b58db127f3f99028c572ee496/state.json",
         "inputHash": "4d80b2ba029a9e58dcfdde731d754eb510043086fdc36c2af1ac937d8d28f9f5"
       },
@@ -53,7 +53,7 @@
       "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
       "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
       "accepted": true,
-      "projectedNodes": 5,
+      "projectedNodes": 6,
       "modelPolicy": "{\"version\":1,\"primary\":{\"provider\":\"openai\",\"model\":\"gpt-6-astra\",\"effort\":\"low\"},\"fallback\":{\"provider\":\"gemini\",\"model\":\"gemini-3.8-flash\",\"effort\":\"low\"},\"forceFallback\":false,\"quotaThreshold\":3}",
       "calls": [
         {
@@ -65,12 +65,12 @@
             "effort": "low"
           },
           "status": "completed",
-          "latencyMs": 122984
+          "latencyMs": 123815
         }
       ],
       "result": {
         "citySlug": "saint-polycarpe",
-        "candidateHash": "sha256:8fd1e2f820121c6af6560d2f077c05fbda3d759c285263c46e9be123a65b9cc7",
+        "candidateHash": "sha256:1b7b89fd7ccd2d0c92e691b0b19b65b04267a3ed489fd87bc69a2594ad361fd6",
         "stateKey": "refresh/018/saint-polycarpe/runs/0697af769a79625d5499fc79daff91a171cb2a167f6a08807f74b9687a86015f/state.json",
         "inputHash": "11f883dbd08e553affe6f5bf7ef4eab9c85d6197ad2692403c5d2a1b4346e559"
       },
