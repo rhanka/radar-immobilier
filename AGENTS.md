@@ -37,6 +37,8 @@ project rules.
 
 ## Quick reference
 
+- Environment URLs: prod `https://immo.sent-tech.ca`, preprod `https://preprod.immo.sent-tech.ca` (see `rules/MASTER.md` § Environment URLs; never `immo-preprod`).
+
 - All commands via `make` targets only (no direct `npm` / `node` / `docker`).
 - `ENV=<env>` always last argument in `make` commands.
 - Branch work in repository-local `./tmp/<slug>` worktrees, never in system

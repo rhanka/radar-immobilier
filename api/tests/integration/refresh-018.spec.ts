@@ -12,6 +12,7 @@ import { createDb, type Database } from "../../src/db/client.js";
 import { graphEdges, graphNodes } from "../../src/db/schema.js";
 import { subgraphForCity, upsertGraphAtomic } from "../../src/services/graph/graph-store.js";
 import type { RefreshProfileContext } from "../../src/services/graph/refresh-profile.js";
+import { createRefreshModelPolicy } from "../../src/services/graph/refresh-model-policy.js";
 import { runPvRefresh, type RunPvRefreshOptions } from "../../src/services/graph/refresh-run.js";
 import { canonicalGraphKey } from "../../src/storage/object-store.js";
 import { getScrapeObjectStore, type S3ObjectStore } from "../../src/storage/s3-object-store.js";
@@ -62,8 +63,10 @@ async function fixture(city: string, afterGeneration?: () => Promise<void>) {
       calls += 1;
       const body = JSON.stringify(extraction);
       await input.validateResponse?.(body);
-      await mkdir(dirname(input.outputPath!), { recursive: true });
-      await writeFile(input.outputPath!, body);
+      if (input.outputPath) {
+        await mkdir(dirname(input.outputPath), { recursive: true });
+        await writeFile(input.outputPath, body);
+      }
       await afterGeneration?.();
       return { status: "completed", provider: "test", mode: "mesh", outputPath: input.outputPath!, audit: {} } as const;
     } } satisfies TextJsonGenerationClient;
@@ -82,6 +85,77 @@ function options(city: string, fx: Awaited<ReturnType<typeof fixture>>, targetDb
 }
 
 describe("refresh 0.18 real storage integration", () => {
+  it("restores Astra for an incomplete multichunk document after a process restart", async () => {
+    const city = `refresh-resume-${randomUUID()}`;
+    const fx = await fixture(city);
+    let primaryCalls = 0;
+    let fallbackCalls = 0;
+    const policy = () => createRefreshModelPolicy({
+      primary: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      fallback: { provider: "openai", model: "gpt-6-astra", effort: "low" },
+      timeoutMs: 1000, forceFallback: false, primaryQualityAttempts: 2,
+      createClient(model) {
+        return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(input) {
+          if (model.provider === "gemini") {
+            primaryCalls++;
+            throw Object.assign(new Error("quota"), { status: 429 });
+          }
+          if (++fallbackCalls === 2) throw new Error("injected interruption");
+          await input.validateResponse?.(JSON.stringify({ nodes: [], edges: [], input_tokens: 1, output_tokens: 1 }));
+          return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
+        } };
+      },
+    });
+    const configured = { ...options(city, fx, db), maximumAttempts: 1,
+      extractPdf: async () => `${"a".repeat(110_000)}\f${"b".repeat(110_000)}` };
+    try {
+      await expect(runPvRefresh({ ...configured, documentModels: policy() })).rejects.toThrow("injected interruption");
+      const result = await runPvRefresh({ ...configured, documentModels: policy() });
+      const state = JSON.parse(new TextDecoder().decode(await store.get(result.stateKey)));
+      expect(Object.keys(state.completedChunks)).toHaveLength(2);
+      expect(state.reservedCalls).toBe(9);
+      expect(primaryCalls).toBe(1);
+      expect(fallbackCalls).toBe(3);
+      expect(state.documentModels[fx.sha].at(-1)).toMatchObject({
+        modelUsed: { model: "gpt-6-astra" }, status: "completed", fallbackReason: "quota",
+      });
+    } finally { await clean(city); }
+  }, 60_000);
+
+  it("persists fallback model receipts and budget before resuming without generation", async () => {
+    const city = `refresh-astra-${randomUUID()}`;
+    const fx = await fixture(city);
+    let primaryCalls = 0;
+    const documentModels = createRefreshModelPolicy({
+      primary: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      fallback: { provider: "openai", model: "gpt-6-astra", effort: "low" },
+      timeoutMs: 1000, forceFallback: false, primaryQualityAttempts: 2,
+      createClient(model) {
+        if (model.provider === "openai") return { ...fx.textClient, async generateJson(input) {
+          return { ...await fx.textClient.generateJson(input), provider: model.provider, model: model.model };
+        } };
+        return { ...fx.textClient, async generateJson() {
+          primaryCalls++;
+          throw Object.assign(new Error("quota"), { status: 429 });
+        } };
+      },
+    });
+    const configured = { ...options(city, fx, db), maximumAttempts: 1, documentModels };
+    try {
+      const result = await runPvRefresh(configured);
+      const state = JSON.parse(new TextDecoder().decode(await store.get(result.stateKey)));
+      expect(state.reservedCalls).toBe(3);
+      expect(state.identity.modelPolicy).toBe(documentModels.policy);
+      expect(state.documentModels[fx.sha]).toMatchObject([
+        { modelUsed: { model: "gemini-3.8-flash", effort: "low" }, status: "failed", failureReason: "quota" },
+        { modelUsed: { model: "gpt-6-astra", effort: "low" }, status: "completed", fallbackReason: "quota" },
+      ]);
+      await runPvRefresh(configured);
+      expect(primaryCalls).toBe(1);
+      expect(fx.calls()).toBe(1);
+    } finally { await clean(city); }
+  }, 60_000);
+
   it("resumes PG after S3 publication without a second model call", async () => {
     const city = `refresh-018-${randomUUID()}`;
     const fx = await fixture(city);

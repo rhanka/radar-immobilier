@@ -87,6 +87,15 @@ this file and only add tooling glue on top of it.
 - When replacing a system, DELETE the old code in the same change. No dual paths, no temporary shims kept around "just in case".
 - Backwards-compatibility hacks (renamed `_var` placeholders, `// removed` comments, re-exports for unused types) are forbidden. Delete and move on.
 
+## Environment URLs (MANDATORY)
+
+Canonical hostnames — never guess or derive them, copy them from here:
+
+- prod immo: `https://immo.sent-tech.ca`
+- preprod immo: `https://preprod.immo.sent-tech.ca` (never `immo-preprod.sent-tech.ca`)
+- preprod geo API: `https://api.preprod.geo.sent-tech.ca`
+- auth: `https://auth.sent-tech.ca` (prod), `https://preprod.auth.sent-tech.ca` (preprod)
+
 ## Storage Policy
 - Raw documents (HTML, PDF, transcripts, captures) → **Object Storage** (Scaleway S3-compatible bucket `radar-immobilier-raw`, MinIO locally).
 - Structured metadata & scored entities → **Postgres**.
