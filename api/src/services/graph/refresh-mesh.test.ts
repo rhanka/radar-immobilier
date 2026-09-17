@@ -6,6 +6,8 @@ import {
   type GraphifyMesh,
 } from "@sentropic/graphify/llm-mesh";
 import {
+  CloudCodeRuntimeClient,
+  CodexRuntimeClient,
   DEFAULT_ROUTE_POLICY,
   type GenerateRequest,
   type GenerateResponse,
@@ -89,8 +91,95 @@ function runtimeHarness(generate: (request: GenerateRequest) => Promise<Generate
 }
 
 describe("refresh mesh", () => {
+  it("should request Gemini low through the tiered Cloud Code wire model", async () => {
+    const calls: Record<string, unknown>[] = [];
+    const client = new CloudCodeRuntimeClient(async (_url, init) => {
+      calls.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+      if (calls.length === 1) return Response.json({ models: { "gemini-3.8-flash-tiered": {} } });
+      return new Response('data: {"response":{"candidates":[{"content":{"parts":[{"text":"{}"}]},"finishReason":"STOP"}]}}\n\n',
+        { headers: { "content-type": "text/event-stream" } });
+    });
+    await client.generate({ providerId: "gemini", modelId: "gemini-3.8-flash", reasoning: { effort: "low" },
+      maxOutputTokens: 32768, messages: [] }, {
+      auth: { material: { type: "account-transport", provider: "cloud-code", accessToken: "fixture-token",
+        accountId: "fixture-account", metadata: { cloudaicompanionProject: "fixture-project" } },
+      descriptor: { sourceType: "account-transport", accountProviderId: "cloud-code" } },
+    });
+    expect(calls[1]).toMatchObject({ model: "gemini-3.8-flash-tiered", request: {
+      generationConfig: { maxOutputTokens: 32768, thinkingConfig: { thinkingLevel: "LOW" } },
+    } });
+  });
+
+  it("should omit max_output_tokens on the pinned Codex HTTP transport", async () => {
+    let body: Record<string, unknown> | undefined;
+    const client = new CodexRuntimeClient({ fetch: async (url, init) => {
+      expect(String(url)).toBe("https://chatgpt.com/backend-api/codex/responses");
+      body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return new Response('data: {"type":"response.output_text.delta","delta":"{}"}\n\n'
+        + 'data: {"type":"response.completed","response":{"status":"completed"}}\n\n',
+      { headers: { "content-type": "text/event-stream" } });
+    } });
+    const result = await client.generate({ providerId: "openai", modelId: "gpt-6-astra",
+      reasoning: { effort: "low" }, maxOutputTokens: 32768,
+      messages: [{ role: "user", content: "Extract" }] }, {
+      auth: { material: { type: "account-transport", provider: "codex", accessToken: "fixture-token",
+        accountId: "fixture-account" }, descriptor: { sourceType: "account-transport", accountProviderId: "codex" } },
+    });
+    expect(result.text).toBe("{}");
+    expect(body).toMatchObject({ model: "gpt-6-astra", reasoning: { effort: "low" } });
+    expect(body).not.toHaveProperty("max_output_tokens");
+  });
+
+  it("should cancel pending Gemini catalogue discovery at the run deadline", async () => {
+    const controller = new AbortController();
+    const fetchCatalogue = vi.fn<typeof fetch>((_url, init) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
+    }));
+    const client = new CloudCodeRuntimeClient(bindRefreshFetchSignal(fetchCatalogue, controller.signal));
+    const generated = client.generate({ providerId: "gemini", modelId: "gemini-3.8-flash",
+      reasoning: { effort: "medium" }, messages: [], signal: controller.signal }, {
+      auth: { material: { type: "account-transport", provider: "cloud-code",
+        accessToken: "fixture-token", accountId: "fixture-account",
+        metadata: { cloudaicompanionProject: "fixture-project" } },
+      descriptor: { sourceType: "account-transport", accountProviderId: "cloud-code" } },
+    });
+    expect(fetchCatalogue).toHaveBeenCalledTimes(1);
+    controller.abort();
+    await expect(generated).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it.each([true, false])("should resolve medium through the account catalogue or fail closed (%s)", async (available) => {
+    const calls: Record<string, unknown>[] = [];
+    const client = new CloudCodeRuntimeClient(async (_url, init) => {
+      calls.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+      if (calls.length === 1) return Response.json({ models: available
+        ? { "gemini-3.8-flash-tiered": {} } : { "gemini-3.8-flash-low": {} } });
+      return new Response(`data: ${JSON.stringify({ response: { candidates: [{
+        content: { parts: [{ text: "{}" }] }, finishReason: "STOP",
+      }] } })}\n\n`, { headers: { "content-type": "text/event-stream" } });
+    });
+    const generated = client.generate({ providerId: "gemini", modelId: "gemini-3.8-flash",
+      reasoning: { effort: "medium" }, maxOutputTokens: 32_768,
+      messages: [{ role: "user", content: "Extract municipal signals." }] }, {
+      auth: { material: { type: "account-transport", provider: "cloud-code",
+        accessToken: "fixture-token", accountId: "fixture-account",
+        metadata: { cloudaicompanionProject: "fixture-project" } },
+      descriptor: { sourceType: "account-transport", accountProviderId: "cloud-code" } },
+    });
+    if (!available) {
+      await expect(generated).rejects.toThrow("not available in this account's catalogue");
+      expect(calls).toHaveLength(1);
+      return;
+    }
+    expect((await generated).text).toBe("{}");
+    expect(calls[1]).toMatchObject({ model: "gemini-3.8-flash-tiered", request: {
+      generationConfig: { maxOutputTokens: 32_768, thinkingConfig: { thinkingLevel: "MEDIUM" } },
+    } });
+  });
+
   it("should fence planner retries to the job attempt budget", () => {
     expect(createRefreshRoutePolicyProfiles(2).active()?.policy.maxAttempts).toBe(2);
+    expect(createRefreshRoutePolicyProfiles(1).active()?.policy.allowEquivalentModels).toBe(false);
     expect(() => createRefreshRoutePolicyProfiles(9)).toThrow(
       "maxAttempts must be an integer between 1 and 8",
     );
@@ -138,11 +227,11 @@ describe("refresh mesh", () => {
       async stream() { throw new Error("not used"); },
     };
     const controller = new AbortController();
-    const bound = bindRefreshAbortSignal(fake, controller.signal, { effort: "high" });
+    const bound = bindRefreshAbortSignal(fake, controller.signal, { effort: "medium" });
     await bound.generate({ messages: [] });
     await bound.generateValidated({ messages: [] }, () => undefined);
     expect(seen).toEqual([controller.signal, controller.signal]);
-    expect(efforts).toEqual(["high", "high"]);
+    expect(efforts).toEqual(["medium", "medium"]);
   });
 
   it("should abort an active response stream through the bound transport fetch", async () => {
@@ -197,11 +286,11 @@ describe("refresh mesh", () => {
     await client.generateJson({
       schema,
       prompt: "Extract one municipal signal.",
-      maxOutputTokens: 345,
+      maxOutputTokens: 32_768,
       validateResponse() { harness.events.push("validate"); },
     });
     expect(captured?.messages[1]?.content).toContain(`Schema: ${schema}\n\n`);
-    expect(captured?.maxOutputTokens).toBe(345);
+    expect(captured?.maxOutputTokens).toBe(32_768);
     expect(harness.subjects).toEqual([subject, subject]);
     expect(harness.events).toEqual(["generate", "validate", "complete"]);
     expect(logged).not.toHaveBeenCalled();
