@@ -26,6 +26,7 @@ export interface RefreshModelPolicyOptions {
 export interface RefreshDocumentModels {
   readonly policy: string;
   forDocument(docSha: string, record: (receipt: RefreshModelReceipt) => Promise<void>): TextJsonGenerationClient;
+  completeDocument(docSha: string): void;
 }
 
 /** Inspect only for classification; never emit upstream messages or response bodies. */
@@ -48,6 +49,10 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
   return {
     policy: JSON.stringify({ version: 1, primary: options.primary, fallback: options.fallback,
       forceFallback: options.forceFallback, quotaThreshold: 3 }),
+    completeDocument(docSha) {
+      const document = documents.get(docSha);
+      if (document && !document.reason) consecutiveQuotaDocuments = 0;
+    },
     forDocument(docSha, record) {
       let document = documents.get(docSha);
       if (!document) {
@@ -102,7 +107,6 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
           if (!selected.reason) {
             const primary = await attempt(options.primary);
             if (!primary.failed || primary.qualityRefused) {
-              consecutiveQuotaDocuments = 0;
               if (primary.failed) throw primary.failure;
               return primary.result!;
             }

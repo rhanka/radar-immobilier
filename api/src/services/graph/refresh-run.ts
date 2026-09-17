@@ -215,6 +215,8 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
       context: options.profileContext, maxOutputTokens: options.maxOutputTokens }))[0]!;
     handle = await completeRefreshChunk(options.store, handle, chunk.id, result);
     profiled.push(result);
+    const document = corpus.documents.find((item) => item.sha256 === chunk.docSha);
+    if (document?.chunks.at(-1)?.id === chunk.id) options.documentModels?.completeDocument(chunk.docSha);
   }
   const extraction = profiled.map((item) => item.extraction).reduce(mergeExtractions);
   handle = await completeStage(options.store, handle, "profile", canonicalHash(extraction), now);

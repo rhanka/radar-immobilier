@@ -17,7 +17,7 @@ function fixture(generate: (model: RefreshModel, signal: AbortSignal) => Promise
         calls.push(model.model);
         const text = await generate(model, attemptSignal);
         await request.validateResponse?.(text);
-        return { status: "completed", mode: "mesh", provider: model.provider, model: model.model };
+        return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
       } };
     } });
   const document = (id: string) => policy.forDocument(id, async (receipt) => { receipts.push(receipt); });
@@ -83,7 +83,10 @@ describe("refresh model policy", () => {
       if (model === primary && ++primaryCalls !== 3) throw Object.assign(new Error("quota"), { status: 429 });
       return "{}";
     });
-    for (const id of ["a", "b", "c", "d", "e", "f", "g"]) await run.document(id).generateJson(input);
+    for (const id of ["a", "b", "c", "d", "e", "f", "g"]) {
+      await run.document(id).generateJson(input);
+      run.policy.completeDocument(id);
+    }
     expect(primaryCalls).toBe(6);
     expect(run.receipts.at(-1)?.fallbackReason).toBe("circuit-open");
   });
@@ -94,6 +97,22 @@ describe("refresh model policy", () => {
     expect(run.calls).toEqual([fallback.model]);
     expect(run.receipts[0]?.fallbackReason).toBe("forced");
     expect(run.policy.policy).not.toBe(fixture(async () => "{}").policy.policy);
+  });
+
+  it("should count quota documents even when their first chunks succeed", async () => {
+    let attempts = 0;
+    const run = fixture(async (model) => {
+      if (model === primary && ++attempts % 2 === 0) throw Object.assign(new Error("quota"), { status: 429 });
+      return "{}";
+    });
+    for (const id of ["a", "b", "c"]) {
+      await run.document(id).generateJson(input);
+      await run.document(id).generateJson(input);
+      run.policy.completeDocument(id);
+    }
+    await run.document("d").generateJson(input);
+    expect(attempts).toBe(6);
+    expect(run.receipts.at(-1)?.fallbackReason).toBe("circuit-open");
   });
 
   it("should propagate cycle cancellation without falling back", async () => {
