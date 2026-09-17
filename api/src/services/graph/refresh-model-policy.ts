@@ -1,3 +1,6 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+
 import type { TextJsonGenerationClient } from "@sentropic/graphify";
 
 import type { RefreshProvider } from "./refresh-mesh.js";
@@ -9,7 +12,7 @@ export interface RefreshModel {
 }
 export type RefreshFallbackReason = "quota" | "timeout" | "empty-output" | "transport" | "forced" | "circuit-open";
 export interface RefreshModelReceipt {
-  readonly modelUsed: RefreshModel;
+  readonly modelUsed: RefreshModel | null;
   readonly status: "completed" | "failed" | "quality-refused";
   readonly fallbackReason?: RefreshFallbackReason;
   readonly failureReason?: RefreshFallbackReason;
@@ -74,6 +77,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
         model: options.primary.model,
         async generateJson(input) {
           options.signal?.throwIfAborted();
+          const { outputPath, ...generationInput } = input;
           const attempt = async (model: RefreshModel, fallbackReason?: RefreshFallbackReason) => {
             const controller = new AbortController();
             const abort = () => controller.abort(options.signal?.reason);
@@ -82,39 +86,66 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
               options.timeoutMs);
             let qualityRefused = false;
             let responseValidated = false;
+            let terminalFailure = false;
+            let text: string | undefined;
             let failed = false;
             let failure: unknown;
             let result: Awaited<ReturnType<TextJsonGenerationClient["generateJson"]>> | undefined;
             const startedAt = Date.now();
+            let rejectDeadline: () => void = () => {};
+            const deadline = new Promise<never>((_resolve, reject) => {
+              rejectDeadline = () => reject(controller.signal.reason);
+              controller.signal.addEventListener("abort", rejectDeadline, { once: true });
+            });
             try {
-              result = await options.createClient(model, controller.signal).generateJson({ ...input,
-                async validateResponse(text) {
-                  if (!text.trim()) throw Object.assign(new Error("Empty refresh output"), { code: "REFRESH_EMPTY_OUTPUT" });
-                  try { await input.validateResponse?.(text); responseValidated = true; }
+              // Clients never write the shared output file: a late primary cannot overwrite fallback.
+              result = await Promise.race([deadline, options.createClient(model, controller.signal).generateJson({ ...generationInput,
+                async validateResponse(value) {
+                  controller.signal.throwIfAborted();
+                  if (!value.trim()) throw Object.assign(new Error("Empty refresh output"), { code: "REFRESH_EMPTY_OUTPUT" });
+                  text = value;
+                  try { await input.validateResponse?.(value); responseValidated = true; }
                   catch (error) { qualityRefused = true; throw error; }
-                } });
+                } })]);
+              controller.signal.throwIfAborted();
+              if (result.provider !== model.provider || result.model !== model.model) {
+                terminalFailure = true;
+                throw Object.assign(new Error("Refresh result identity mismatch"), { code: "REFRESH_MODEL_MISMATCH" });
+              }
+              if (result.status !== "completed" || text === undefined) {
+                throw Object.assign(new Error("Refresh output incomplete"), { code: "REFRESH_EMPTY_OUTPUT" });
+              }
             } catch (error) {
-              // The text client writes its output after validation. A local I/O failure is not a transport failure.
-              if (responseValidated) throw error;
+              if (responseValidated && !controller.signal.aborted) terminalFailure = true;
               failed = true; failure = error;
             }
             finally {
               clearTimeout(timeout);
               options.signal?.removeEventListener("abort", abort);
+              controller.signal.removeEventListener("abort", rejectDeadline);
             }
             const reason = controller.signal.aborted ? "timeout" : refreshFallbackReason(failure);
             // Persistence errors are deliberately outside the transport catch.
-            await record({ modelUsed: model, status: qualityRefused ? "quality-refused" : failed ? "failed" : "completed",
+            const modelUsed = result ? result.provider === model.provider && result.model === model.model
+              ? { ...model, model: result.model } : null : model;
+            await record({ modelUsed, status: qualityRefused ? "quality-refused" : failed ? "failed" : "completed",
               ...(fallbackReason ? { fallbackReason } : {}),
               ...(failed && !qualityRefused ? { failureReason: reason } : {}), latencyMs: Date.now() - startedAt });
             options.signal?.throwIfAborted();
-            return { failed, failure, qualityRefused, reason, result };
+            return { failed, failure, qualityRefused, terminalFailure, reason, result, text };
+          };
+          const finish = async (attempted: Awaited<ReturnType<typeof attempt>>) => {
+            if (outputPath) {
+              await mkdir(dirname(outputPath), { recursive: true });
+              await writeFile(outputPath, attempted.text!, "utf8");
+            }
+            return { ...attempted.result!, ...(outputPath ? { outputPath } : {}) };
           };
           if (!selected.reason) {
             const primary = await attempt(options.primary);
-            if (!primary.failed || primary.qualityRefused) {
+            if (!primary.failed || primary.qualityRefused || primary.terminalFailure) {
               if (primary.failed) throw primary.failure;
-              return primary.result!;
+              return finish(primary);
             }
             selected.reason = primary.reason;
             if (!selected.counted) {
@@ -125,7 +156,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
           }
           const fallback = await attempt(options.fallback, selected.reason);
           if (fallback.failed) throw fallback.failure;
-          return fallback.result!;
+          return finish(fallback);
         },
       };
     },
