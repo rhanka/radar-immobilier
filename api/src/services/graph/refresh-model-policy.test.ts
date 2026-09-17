@@ -58,6 +58,44 @@ describe("refresh model policy", () => {
     } finally { vi.useRealTimers(); }
   });
 
+  it("should enforce timeout even when primary ignores cancellation and resolves late", async () => {
+    vi.useFakeTimers();
+    try {
+      let finishPrimary: (value: string) => void = () => {};
+      const run = fixture(async (model) => model === primary
+        ? new Promise<string>((resolve) => { finishPrimary = resolve; }) : "{}");
+      const validate = vi.fn();
+      const pending = run.document("one").generateJson({ ...input, validateResponse: validate });
+      await vi.advanceTimersByTimeAsync(50);
+      await pending;
+      expect(run.receipts).toMatchObject([{ status: "failed", failureReason: "timeout" },
+        { status: "completed", fallbackReason: "timeout" }]);
+      finishPrimary('{"late":true}');
+      await vi.advanceTimersByTimeAsync(1);
+      expect(validate).toHaveBeenCalledTimes(1);
+      expect(validate).toHaveBeenCalledWith("{}");
+    } finally { vi.useRealTimers(); }
+  });
+
+  it.each(["failed-status", "wrong-model"])("should refuse a resolved invalid result (%s)", async (kind) => {
+    const receipts: RefreshModelReceipt[] = [];
+    let calls = 0;
+    const policy = createRefreshModelPolicy({ primary, fallback, forceFallback: false, timeoutMs: 1000,
+      createClient(model) {
+        return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(request) {
+          calls++;
+          await request.validateResponse?.("{}");
+          return { status: kind === "failed-status" ? "failed" : "completed", mode: "mesh",
+            provider: model.provider, model: kind === "wrong-model" ? "unexpected" : model.model, audit: {} };
+        } };
+      } });
+    await expect(policy.forDocument("one", async (receipt) => { receipts.push(receipt); })
+      .generateJson(input)).rejects.toThrow();
+    expect(calls).toBe(1);
+    expect(receipts[0]?.status).toBe("failed");
+    if (kind === "wrong-model") expect(receipts[0]?.modelUsed).toBeNull();
+  });
+
   it.each(["Invalid JSON", "Invalid profile extraction", "ungrounded PDF excerpt"])(
     "should retain quality refusal without fallback (%s)", async (message) => {
       const run = fixture(async () => "bad output");
