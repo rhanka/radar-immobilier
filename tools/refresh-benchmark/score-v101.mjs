@@ -91,7 +91,12 @@ export async function scoreArm(armName) {
 
   const documents = [];
   for (const document of manifest.documents) {
-    const decision = await resumeDecision(campaignRoot, document.id, armName);
+    let decision;
+    try { decision = await resumeDecision(campaignRoot, document.id, armName); }
+    catch (error) {
+      if (CAMPAIGN !== "v101b" || arm.lane !== "codex" || !String(error.message).startsWith("Uncertain in-flight state:")) throw error;
+      documents.push({ documentId: document.id, state: "not-terminal", strictAccepted: null, cPrimeAccepted: null }); continue;
+    }
     if (decision.action !== "skip") { documents.push({ documentId: document.id,
       state: "not-terminal", strictAccepted: null, cPrimeAccepted: null }); continue; }
     const receipt = decision.receipt;
@@ -99,7 +104,10 @@ export async function scoreArm(armName) {
       documents.push({ documentId: document.id, state: "transport-failed",
         strictAccepted: false, cPrimeAccepted: false }); continue;
     }
-    const raw = await readFile(receipt.artifacts.raw, "utf8");
+    const rawPath = CAMPAIGN === "v101b" && arm.lane === "codex"
+      ? receipt.artifacts.raw.replace(/^\/results\/campaign\//u, `${executionRoot}/campaign/`)
+      : receipt.artifacts.raw;
+    const raw = await readFile(rawPath, "utf8");
     let parsed;
     try { parsed = parseExtraction(raw); }
     catch { documents.push({ documentId: document.id, state: "unparsable",
