@@ -85,7 +85,7 @@ describe("refresh model policy", () => {
         return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(request) {
           calls++;
           await request.validateResponse?.("{}");
-          return { status: kind === "failed-status" ? "failed" : "completed", mode: "mesh",
+          return { status: kind === "failed-status" ? "instructions_written" : "completed", mode: "mesh",
             provider: model.provider, model: kind === "wrong-model" ? "unexpected" : model.model, audit: {} };
         } };
       } });

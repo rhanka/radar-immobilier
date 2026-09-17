@@ -85,6 +85,43 @@ function options(city: string, fx: Awaited<ReturnType<typeof fixture>>, targetDb
 }
 
 describe("refresh 0.18 real storage integration", () => {
+  it("restores Gemini for an incomplete multichunk document after a process restart", async () => {
+    const city = `refresh-resume-${randomUUID()}`;
+    const fx = await fixture(city);
+    let primaryCalls = 0;
+    let fallbackCalls = 0;
+    const policy = () => createRefreshModelPolicy({
+      primary: { provider: "openai", model: "gpt-6-astra", effort: "low" },
+      fallback: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      timeoutMs: 1000, forceFallback: false,
+      createClient(model) {
+        return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(input) {
+          if (model.provider === "openai") {
+            primaryCalls++;
+            throw Object.assign(new Error("quota"), { status: 429 });
+          }
+          if (++fallbackCalls === 2) throw new Error("injected interruption");
+          await input.validateResponse?.(JSON.stringify({ nodes: [], edges: [], input_tokens: 1, output_tokens: 1 }));
+          return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
+        } };
+      },
+    });
+    const configured = { ...options(city, fx, db), maximumAttempts: 1,
+      extractPdf: async () => `${"a".repeat(110_000)}\f${"b".repeat(110_000)}` };
+    try {
+      await expect(runPvRefresh({ ...configured, documentModels: policy() })).rejects.toThrow("injected interruption");
+      const result = await runPvRefresh({ ...configured, documentModels: policy() });
+      const state = JSON.parse(new TextDecoder().decode(await store.get(result.stateKey)));
+      expect(Object.keys(state.completedChunks)).toHaveLength(2);
+      expect(state.reservedCalls).toBe(6);
+      expect(primaryCalls).toBe(1);
+      expect(fallbackCalls).toBe(3);
+      expect(state.documentModels[fx.sha].at(-1)).toMatchObject({
+        modelUsed: { model: "gemini-3.8-flash" }, status: "completed", fallbackReason: "quota",
+      });
+    } finally { await clean(city); }
+  }, 60_000);
+
   it("persists fallback model receipts and budget before resuming without generation", async () => {
     const city = `refresh-astra-${randomUUID()}`;
     const fx = await fixture(city);

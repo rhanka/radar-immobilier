@@ -207,6 +207,8 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
     handle = reserved;
     if (!reserved.shouldCall) {
       profiled.push(await readCompletedRefreshChunk(options.store, handle, chunk.id));
+      const document = corpus.documents.find((item) => item.sha256 === chunk.docSha);
+      if (document?.chunks.at(-1)?.id === chunk.id) options.documentModels?.completeDocument(chunk.docSha);
       continue;
     }
     const textClient = options.documentModels?.forDocument(chunk.docSha, async (receipt) => {
