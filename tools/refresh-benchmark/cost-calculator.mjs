@@ -269,6 +269,16 @@ const SEAT_ARMS = Object.freeze({
   "gemini-low": { provider: "gemini" },
   "sol-medium": { provider: "chatgpt" },
   "luna-high": { provider: "chatgpt" },
+  "luna-low": { provider: "chatgpt" },
+  "luna-medium": { provider: "chatgpt" },
+  "luna-xhigh": { provider: "chatgpt" },
+  "sol-low": { provider: "chatgpt" },
+  "sol-high": { provider: "chatgpt" },
+  "sol-xhigh": { provider: "chatgpt" },
+  "astra-low": { provider: "chatgpt" },
+  "astra-medium": { provider: "chatgpt" },
+  "astra-high": { provider: "chatgpt" },
+  "astra-xhigh": { provider: "chatgpt" },
   "sonnet46-cloud-off": { provider: "claude" },
 });
 const OBSERVATION_FIELDS = new Set(["arm", "provider", "status", "reason", "method",
@@ -297,7 +307,7 @@ export function validateSeatObservations(value) {
       continue;
     }
     if (!["measured", "scenario"].includes(observation.status)
-      || !["controlled-burn", "account-percent/campaign-token-ratio"].includes(observation.method)
+      || !["controlled-burn", "account-percent/campaign-token-ratio", "passive-window-delta"].includes(observation.method)
       || observation.sourceStatus !== "observed"
       || !Number.isFinite(observation.windowMinutes) || observation.windowMinutes <= 0) {
       throw new Error(`Invalid capacity observation: ${observation.arm}`);
@@ -309,7 +319,7 @@ export function validateSeatObservations(value) {
     if (observation.method === "account-percent/campaign-token-ratio") {
       if (!(observation.usedPercent > 0 && observation.usedPercent <= 100)
         || !(observation.campaignTokens > 0)) throw new Error(`Invalid ratio data: ${observation.arm}`);
-    } else if (!(observation.quotaDeltaPercent > 0 && observation.quotaDeltaPercent <= 10)
+    } else if (!(observation.quotaDeltaPercent > 0 && observation.quotaDeltaPercent <= 100)
       || !(observation.documents > 0) || !(observation.tokens > 0)) {
       throw new Error(`Invalid controlled burn: ${observation.arm}`);
     }
@@ -323,12 +333,12 @@ function observedCapacity(arm, observation) {
   if (observation.windowMinutes !== 10_080) return { status: "N-A", reason: "non-weekly-window" };
   const tokensPerDocument = arm.documents ? arm.totalTokens / arm.documents : 0;
   if (!(tokensPerDocument > 0)) return { status: "N-A", reason: "missing-usage" };
-  const quotaFraction = (observation.method === "controlled-burn"
-    ? observation.quotaDeltaPercent : observation.usedPercent) / 100;
-  const docsPerWeek = observation.method === "controlled-burn"
-    ? observation.documents / quotaFraction
+  const documentDelta = ["controlled-burn", "passive-window-delta"].includes(observation.method);
+  const quotaFraction = (documentDelta ? observation.quotaDeltaPercent : observation.usedPercent) / 100;
+  const docsPerWeek = documentDelta
+    ? observation.tokens / quotaFraction / tokensPerDocument
     : observation.campaignTokens / quotaFraction / tokensPerDocument;
-  const tokensPerWeek = observation.method === "controlled-burn"
+  const tokensPerWeek = documentDelta
     ? observation.tokens / quotaFraction : observation.campaignTokens / quotaFraction;
   return { status: observation.status, method: observation.method,
     docsPerTenPercent: docsPerWeek / 10, docsPerWeek,
@@ -337,8 +347,10 @@ function observedCapacity(arm, observation) {
 
 export function buildSeatComparisons(arms, observations = []) {
   const byArm = new Map(observations.map((value) => [value.arm, value]));
+  const measuredByProvider = new Map(observations.filter((value) => value.status !== "N-A")
+    .map((value) => [value.provider, value]));
   const selected = arms.filter(({ arm }) => SEAT_ARMS[arm]).map((arm) => {
-    const observation = byArm.get(arm.arm);
+    const observation = byArm.get(arm.arm) ?? measuredByProvider.get(SEAT_ARMS[arm.arm].provider);
     const observed = observedCapacity(arm, observation);
     const acceptedRate = arm.attemptedDocuments ? arm.acceptedDocuments / arm.attemptedDocuments : null;
     const apiUsdPerDocument = arm.documents && arm.apiUsd !== null ? arm.apiUsd / arm.documents : null;
@@ -349,7 +361,7 @@ export function buildSeatComparisons(arms, observations = []) {
   });
   const rows = [];
   for (const arm of selected) {
-    const observation = byArm.get(arm.arm);
+    const observation = byArm.get(arm.arm) ?? measuredByProvider.get(SEAT_ARMS[arm.arm].provider);
     for (const [plan, details] of Object.entries(SUBSCRIPTION_PLANS[arm.provider])) {
       const base = observation?.basePlan ? SUBSCRIPTION_PLANS[arm.provider][observation.basePlan] : null;
       const scale = arm.observed.status === "N-A" ? null
