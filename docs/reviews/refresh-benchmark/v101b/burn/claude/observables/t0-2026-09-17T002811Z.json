@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-17T00:28:11Z",
+  "source": "claude-code /usage in tmux burn-claude",
+  "accountEmail": "fabien.antoine@gmail.com",
+  "plan": "Claude Max 20x",
+  "currentSession": { "percentUsed": 5, "resetTimezone": "America/Toronto", "resetLocal": "1:20am" },
+  "weeklyAllModels": { "percentUsed": 70, "resetTimezone": "America/Toronto", "resetLocal": "Sep 17, 5:59pm" },
+  "weeklyFable": { "percentUsed": 25, "resetTimezone": "America/Toronto", "resetLocal": "Sep 17, 5:59pm" },
+  "redaction": { "secretsIncluded": false }
+}
