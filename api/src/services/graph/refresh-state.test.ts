@@ -58,12 +58,12 @@ describe("refresh durable state", () => {
     handle = await reserveRefreshChunk(store, handle, "chunk.1", 2);
     const docSha = "a".repeat(64);
     handle = await recordRefreshModel(store, handle, docSha, "chunk.1", {
-      modelUsed: { provider: "openai", model: "gpt-6-astra", effort: "low" },
-      status: "failed", failureReason: "quota", latencyMs: 1,
+      modelUsed: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      status: "failed", attempt: 1, transition: "primary", failureReason: "quota", latencyMs: 1,
     });
     handle = await recordRefreshModel(store, handle, docSha, "chunk.1", {
-      modelUsed: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
-      status: "completed", fallbackReason: "quota", latencyMs: 2,
+      modelUsed: { provider: "openai", model: "gpt-6-astra", effort: "low" },
+      status: "completed", attempt: 2, transition: "fallback", fallbackReason: "quota", latencyMs: 2,
     });
     await completeRefreshChunk(store, handle, "chunk.1", { nodes: [] });
     const resumed = await openRefreshState(store, identity(), 2);
