@@ -49,7 +49,7 @@ export function createRefreshRoutePolicyProfiles(
   const profiles = new InMemoryRoutePolicyProfiles([{
     name: "refresh-run-budget",
     revision: "1",
-    policy: { ...DEFAULT_ROUTE_POLICY, maxAttempts: maximumAttempts },
+    policy: { ...DEFAULT_ROUTE_POLICY, maxAttempts: maximumAttempts, allowEquivalentModels: false },
   }]);
   profiles.activate("refresh-run-budget");
   return profiles;

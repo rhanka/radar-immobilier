@@ -238,3 +238,12 @@ store holds up to **N+1** objects per env at the peak (default `14` → up to `1
 The current backup is categorically the rollback point of the release being cut,
 so it is never counted against the retention budget — a deliberate one-object
 safety bias.
+# Astra low refresh rollout
+
+The PV CronJob uses Astra low through Codex, with Gemini 3.8 Flash low through
+Cloud Code as transport fallback. Both accounts must be enrolled under the
+runtime Secret's owner scope in the writable keyring PVC. The rollout order,
+forced-fallback proof and CronJob-specific rollback are documented in
+[`production-acceptance.md`](../../docs/reviews/refresh-astra/production-acceptance.md).
+The production overlay remains gated by `REFRESH_CRONJOB_PROD_ENABLED=true`
+and the `v*` release promotion; merging alone deploys preproduction.

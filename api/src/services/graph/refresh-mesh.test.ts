@@ -7,6 +7,7 @@ import {
 } from "@sentropic/graphify/llm-mesh";
 import {
   CloudCodeRuntimeClient,
+  CodexRuntimeClient,
   DEFAULT_ROUTE_POLICY,
   type GenerateRequest,
   type GenerateResponse,
@@ -90,6 +91,45 @@ function runtimeHarness(generate: (request: GenerateRequest) => Promise<Generate
 }
 
 describe("refresh mesh", () => {
+  it("should request Gemini low through the tiered Cloud Code wire model", async () => {
+    const calls: Record<string, unknown>[] = [];
+    const client = new CloudCodeRuntimeClient(async (_url, init) => {
+      calls.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+      if (calls.length === 1) return Response.json({ models: { "gemini-3.8-flash-tiered": {} } });
+      return new Response('data: {"response":{"candidates":[{"content":{"parts":[{"text":"{}"}]},"finishReason":"STOP"}]}}\n\n',
+        { headers: { "content-type": "text/event-stream" } });
+    });
+    await client.generate({ providerId: "gemini", modelId: "gemini-3.8-flash", reasoning: { effort: "low" },
+      maxOutputTokens: 32768, messages: [] }, {
+      auth: { material: { type: "account-transport", provider: "cloud-code", accessToken: "fixture-token",
+        accountId: "fixture-account", metadata: { cloudaicompanionProject: "fixture-project" } },
+      descriptor: { sourceType: "account-transport", accountProviderId: "cloud-code" } },
+    });
+    expect(calls[1]).toMatchObject({ model: "gemini-3.8-flash-tiered", request: {
+      generationConfig: { maxOutputTokens: 32768, thinkingConfig: { thinkingLevel: "LOW" } },
+    } });
+  });
+
+  it("should omit max_output_tokens on the pinned Codex HTTP transport", async () => {
+    let body: Record<string, unknown> | undefined;
+    const client = new CodexRuntimeClient({ fetch: async (url, init) => {
+      expect(String(url)).toBe("https://chatgpt.com/backend-api/codex/responses");
+      body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return new Response('data: {"type":"response.output_text.delta","delta":"{}"}\n\n'
+        + 'data: {"type":"response.completed","response":{"status":"completed"}}\n\n',
+      { headers: { "content-type": "text/event-stream" } });
+    } });
+    const result = await client.generate({ providerId: "openai", modelId: "gpt-6-astra",
+      reasoning: { effort: "low" }, maxOutputTokens: 32768,
+      messages: [{ role: "user", content: "Extract" }] }, {
+      auth: { material: { type: "account-transport", provider: "codex", accessToken: "fixture-token",
+        accountId: "fixture-account" }, descriptor: { sourceType: "account-transport", accountProviderId: "codex" } },
+    });
+    expect(result.text).toBe("{}");
+    expect(body).toMatchObject({ model: "gpt-6-astra", reasoning: { effort: "low" } });
+    expect(body).not.toHaveProperty("max_output_tokens");
+  });
+
   it("should cancel pending Gemini catalogue discovery at the run deadline", async () => {
     const controller = new AbortController();
     const fetchCatalogue = vi.fn<typeof fetch>((_url, init) => new Promise((_resolve, reject) => {
@@ -139,6 +179,7 @@ describe("refresh mesh", () => {
 
   it("should fence planner retries to the job attempt budget", () => {
     expect(createRefreshRoutePolicyProfiles(2).active()?.policy.maxAttempts).toBe(2);
+    expect(createRefreshRoutePolicyProfiles(1).active()?.policy.allowEquivalentModels).toBe(false);
     expect(() => createRefreshRoutePolicyProfiles(9)).toThrow(
       "maxAttempts must be an integer between 1 and 8",
     );
