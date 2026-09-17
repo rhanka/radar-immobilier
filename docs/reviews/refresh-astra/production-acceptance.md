@@ -23,13 +23,18 @@ trigger fallback. JSON, profile and provenance refusals stop without fallback.
 Fallback sticks to the remaining chunks of that document. After three distinct
 documents fall back for quota/429 consecutively, later documents skip Astra.
 A wholly successful primary document resets that count; successful intermediate
-chunks do not. The circuit resets next cycle. Current acquisition selects one
+chunks do not. The circuit resets next cycle; partial documents restore fallback
+from durable receipts. Current acquisition selects one
 PDF per city cycle; use two distinct cycles for two-document acceptance.
 
 `state.json` contains both models and forced mode in `identity.modelPolicy`.
 `documentModels[docSha][]` retains each chunk attempt's `modelUsed`, status,
 latency, `failureReason` and/or `fallbackReason`. A mixed document therefore
 retains both models. Completed chunks resume without duplicate generation.
+Returned provider/model/status are checked before recording completion; a
+returned identity mismatch stops with `modelUsed: null`. The deadline is enforced
+even for an uncooperative client. Late responses cannot validate or overwrite the
+selected output file, which only the policy writes after success.
 Logs emit the same safe metadata as `refresh-pv: model receipt`; no provider
 messages, prompts, credentials or account material are logged.
 
