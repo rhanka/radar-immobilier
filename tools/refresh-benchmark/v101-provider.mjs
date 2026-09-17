@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { spawn } from "node:child_process";
 
 import { endpointPath, safeUsage, textFromOpenAi } from "./v101-probe-lib.mjs";
 
@@ -55,6 +56,11 @@ function wireFields(arm, body) {
     effort: null, maxOutputTokens: body?.max_tokens ?? null };
   return { model: body?.model ?? null, effort: body?.reasoning?.effort ?? null,
     maxOutputTokens: body?.max_output_tokens ?? null };
+}
+
+export function cliUsage(payload) {
+  return normalizedUsage(payload?.usage) ?? normalizedUsage(payload?.modelUsage
+    ? Object.values(payload.modelUsage)[0] : null);
 }
 
 function normalizedUsage(value) {
@@ -118,7 +124,47 @@ function directRequest(arm, messages, maxOutputTokens) {
       response_format: { type: "json_object" } } };
 }
 
+export async function generateClaudeCli(messages, { beforeRequest, timeoutMs }) {
+  beforeRequest();
+  const started = Date.now();
+  const prompt = messages.map(({ role, content }) => `${role.toUpperCase()}: ${content}`).join("\n\n");
+  const result = await new Promise((resolveResult, reject) => {
+    const child = spawn("env", ["-u", "ANTHROPIC_BASE_URL", "-u", "ANTHROPIC_API_KEY", "claude",
+      "-p", "--model", "claude-opus-5", "--output-format", "json", prompt],
+    { env: process.env, stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = ""; let stderr = "";
+    const timer = setTimeout(() => child.kill("SIGTERM"), timeoutMs);
+    child.stdout.on("data", (chunk) => { stdout += chunk; });
+    child.stderr.on("data", (chunk) => { stderr += chunk; });
+    child.on("error", (error) => { clearTimeout(timer); reject(error); });
+    child.on("close", (code) => { clearTimeout(timer); if (code !== 0) {
+      reject(new ProviderError(`CLAUDE_CLI_EXIT_${code}`, { wire: { durationMs: Date.now() - started,
+        responseError: sanitize(stderr).slice(0, 512) } })); return; }
+      try {
+        const payload = JSON.parse(stdout);
+        if (payload.is_error) {
+          reject(new ProviderError(`CLAUDE_CLI_API_${payload.api_error_status ?? "ERROR"}`, {
+            httpStatus: Number.isInteger(payload.api_error_status) ? payload.api_error_status : null,
+            wire: { durationMs: Date.now() - started,
+              responseError: sanitize(payload.result ?? "Claude CLI error").slice(0, 512) } }));
+          return;
+        }
+        resolveResult(payload);
+      } catch { reject(new ProviderError("CLAUDE_CLI_INVALID_JSON")); }
+    });
+  });
+  const usage = cliUsage(result);
+  return { id: result.uuid ?? result.session_id ?? null,
+    modelId: result.model ?? Object.keys(result.modelUsage ?? {})[0] ?? "claude-opus-5",
+    text: result.result ?? "", finishReason: result.stop_reason ?? result.terminal_reason ?? null, usage,
+    wire: { endpoint: "claude-cli", method: "CLI", model: "claude-opus-5", effort: null,
+      maxOutputTokens: 32_768, httpStatus: 200, durationMs: Date.now() - started,
+      requestId: null, terminalSse: { expected: false, terminal: true }, headers: {} } };
+}
+
 export async function createProvider(arm, { beforeRequest, timeoutMs }) {
+  if (arm.transport === "claude-cli") return { accountPseudonym: "oauth:claude-code",
+    generate(messages) { return generateClaudeCli(messages, { beforeRequest, timeoutMs }); } };
   let facade = null; let account = null; let mesh = null; let recentWire = null;
   if (["codex", "cloud-code"].includes(arm.transport)) {
     const module = await import("/workspace/node_modules/@sentropic/llm-mesh/dist/index.js");

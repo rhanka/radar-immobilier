@@ -12,7 +12,7 @@ import { advanceCircuit, artifactPaths, classifyFailure, laneCircuitAction, lane
   resumeDecision, retryAt, updateGlobalStatus, writeImmutable, writeIntent }
   from "./v101-runner-state.mjs";
 import { cascade, discardDirect } from "./v101-score-lib.mjs";
-import { codexCapOption } from "./v101-provider.mjs";
+import { cliUsage, codexCapOption } from "./v101-provider.mjs";
 import { armExecutionRoot } from "./score-v101.mjs";
 import { timeoutMsForArm } from "./run-arm.mjs";
 import { circuitClosureFor, selectJudgeDocuments } from "./v101-judge-freeze.mjs";
@@ -22,9 +22,9 @@ import { acceptanceAdjustedF1, summarizeJudgeVerdicts, summarizeReceipts }
 import { microF1 } from "./v101-score-lib.mjs";
 
 test("should enumerate every addressable arm when Codex 5.3 is unavailable", () => {
-  assert.equal(Object.keys(arms).length, 26);
+  assert.equal(Object.keys(arms).length, 27);
   assert.deepEqual(Object.fromEntries(Object.entries(laneArms).map(([key, value]) =>
-    [key, value.length])), { cloud: 6, codex: 12, openai: 1, anthropic: 6, mistral: 1 });
+    [key, value.length])), { cloud: 6, codex: 12, openai: 1, anthropic: 6, mistral: 1, claude: 1 });
 });
 
 test("should keep lane concurrency defaults and accept a bounded override", () => {
@@ -71,6 +71,11 @@ test("should require an explicit cause before judging a circuit-closed gap", () 
   "sonnet46-cloud-high"), { cause: "network_error", measuredAt: "2026-09-16T04:00:00Z" });
   assert.throws(() => circuitClosureFor({ arms: {} }, "sonnet46-cloud-high"),
     /No measured circuit closure/u);
+});
+
+test("should normalize Claude CLI JSON usage", () => {
+  assert.deepEqual(cliUsage({ usage: { input_tokens: 12, output_tokens: 4 } }),
+    { inputTokens: 12, outputTokens: 4, totalTokens: 16 });
 });
 
 test("should calculate metered cost from normalized usage", () => {
