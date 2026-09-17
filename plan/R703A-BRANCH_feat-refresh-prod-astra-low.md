@@ -30,7 +30,8 @@
 - [x] Owner decision fixes models/transports; llm-mesh-refresh stays pinned at 0.19.2.
 - [x] Independent design reviews requested for transport and durable-state correctness.
 - [x] Exact-model routes only; mesh equivalent-model substitution is disabled for truthful receipts.
-- [ ] External consensus review blocked by automatic approval (private diff export); owner authorization requested.
+- [x] Initial review launches rejected as private-code export; GitHub proved public and public-diff retries were authorized.
+- [x] Runtime review findings fixed with regression tests; deployment scope disagreements reconciled in review-corrected.md.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single existing branch; two independent read-only reviewers.
@@ -43,7 +44,7 @@
 - [x] Lot 1 — Document-scoped fallback, bounded attempts and safe receipts.
 - [x] Lot 2 — Durable model trace and script wiring.
 - [x] Lot 3 — Manifest policy and deployment runbook.
-- [ ] Lot 4 — Unit/integration, static and harness gates; independent review reconciliation.
+- [x] Lot 4 — Unit/integration, static and harness gates; independent review reconciliation.
 - [ ] Lot 5 — Real local acceptance or measured credential gap; remove test volumes.
-- [ ] Lot 6 — French PR, green CI, conductor report.
+- [x] Lot 6 — French PR #714 open; final CI verdict and conductor report supplied in the lane handoff.
 - [ ] Merge and preprod/prod execution reserved to conductor/k8s lane.
