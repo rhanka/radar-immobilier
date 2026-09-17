@@ -39,6 +39,11 @@ reuse the test Compose volumes through `COMPOSE_RUN_API_NODEPS`; they run the
 same workspace scripts as their standard targets. Harness CLI checks are
 advisory scope/branch checks, not substitutes for actual test execution.
 
+Final verification: 131 tests across eight files passed, including six
+integration tests. Typecheck, lint, both overlay renders, harness static/unit
+and scope/branch checks, and `git diff --check` passed. The test Compose stack
+was removed with `down -v`, including PostgreSQL, MinIO and dependency volumes.
+
 Read-only preprod observation on 2026-09-17: image `3cf4f69`, PV active,
 legacy scrape/projection suspended. The cert-ro identity cannot create Jobs
 or read Secrets/PVCs. GitHub repository variable `REFRESH_CRONJOB_PROD_ENABLED`

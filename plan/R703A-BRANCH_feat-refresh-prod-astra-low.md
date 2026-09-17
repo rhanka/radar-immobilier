@@ -1,7 +1,7 @@
 # Feature: Astra low refresh with Gemini fallback
 
 ## Objective
-- [ ] Deliver the owner-approved Astra low / Gemini low policy for #703 and #697.
+- [x] Deliver the owner-approved Astra low / Gemini low policy for #703 and #697.
 
 ## Scope / Guardrails
 - [x] Existing branch `feat/refresh-prod-astra-low` and worktree only; no merge or cluster mutations.
@@ -45,6 +45,6 @@
 - [x] Lot 2 — Durable model trace and script wiring.
 - [x] Lot 3 — Manifest policy and deployment runbook.
 - [x] Lot 4 — Unit/integration, static and harness gates; independent review reconciliation.
-- [ ] Lot 5 — Real local acceptance or measured credential gap; remove test volumes.
+- [x] Lot 5 — Real local acceptance: Astra 2/2, forced Gemini 2/2; test stack and volumes removed.
 - [x] Lot 6 — French PR #714 open; final CI verdict and conductor report supplied in the lane handoff.
 - [ ] Merge and preprod/prod execution reserved to conductor/k8s lane.
