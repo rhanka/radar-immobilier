@@ -12,6 +12,7 @@ import { createDb, type Database } from "../../src/db/client.js";
 import { graphEdges, graphNodes } from "../../src/db/schema.js";
 import { subgraphForCity, upsertGraphAtomic } from "../../src/services/graph/graph-store.js";
 import type { RefreshProfileContext } from "../../src/services/graph/refresh-profile.js";
+import { createRefreshModelPolicy } from "../../src/services/graph/refresh-model-policy.js";
 import { runPvRefresh, type RunPvRefreshOptions } from "../../src/services/graph/refresh-run.js";
 import { canonicalGraphKey } from "../../src/storage/object-store.js";
 import { getScrapeObjectStore, type S3ObjectStore } from "../../src/storage/s3-object-store.js";
@@ -82,6 +83,38 @@ function options(city: string, fx: Awaited<ReturnType<typeof fixture>>, targetDb
 }
 
 describe("refresh 0.18 real storage integration", () => {
+  it("persists fallback model receipts and budget before resuming without generation", async () => {
+    const city = `refresh-astra-${randomUUID()}`;
+    const fx = await fixture(city);
+    let primaryCalls = 0;
+    const documentModels = createRefreshModelPolicy({
+      primary: { provider: "openai", model: "gpt-6-astra", effort: "low" },
+      fallback: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      timeoutMs: 1000, forceFallback: false,
+      createClient(model) {
+        if (model.provider === "gemini") return fx.textClient;
+        return { ...fx.textClient, async generateJson() {
+          primaryCalls++;
+          throw Object.assign(new Error("quota"), { status: 429 });
+        } };
+      },
+    });
+    const configured = { ...options(city, fx, db), maximumAttempts: 1, documentModels };
+    try {
+      const result = await runPvRefresh(configured);
+      const state = JSON.parse(new TextDecoder().decode(await store.get(result.stateKey)));
+      expect(state.reservedCalls).toBe(2);
+      expect(state.identity.modelPolicy).toBe(documentModels.policy);
+      expect(state.documentModels[fx.sha]).toMatchObject([
+        { modelUsed: { model: "gpt-6-astra", effort: "low" }, status: "failed", failureReason: "quota" },
+        { modelUsed: { model: "gemini-3.8-flash", effort: "low" }, status: "completed", fallbackReason: "quota" },
+      ]);
+      await runPvRefresh(configured);
+      expect(primaryCalls).toBe(1);
+      expect(fx.calls()).toBe(1);
+    } finally { await clean(city); }
+  }, 60_000);
+
   it("resumes PG after S3 publication without a second model call", async () => {
     const city = `refresh-018-${randomUUID()}`;
     const fx = await fixture(city);
