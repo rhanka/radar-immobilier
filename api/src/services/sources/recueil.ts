@@ -51,6 +51,10 @@ export interface RecueilOptions {
 export interface RecueilSuccess {
   readonly ok: true;
   readonly source: string;
+  /** Number of documents newly written to the raw CAS in this run. */
+  readonly newDocuments: number;
+  /** Number of documents whose raw CAS object was already present. */
+  readonly skippedExisting: number;
   readonly count: number;
   readonly rawDocIds: readonly string[];
   readonly records: readonly RawDocumentRecord[];
@@ -74,6 +78,30 @@ export interface RecueilFailure {
 
 export type RecueilOutcome = RecueilSuccess | RecueilFailure;
 
+export interface RecueilMetrics {
+  readonly newDocuments: number;
+  readonly skippedExisting: number;
+  /** Zero only when the final listed reference was reached; otherwise unknown. */
+  readonly remaining: number | null;
+}
+
+let metrics: RecueilMetrics = { newDocuments: 0, skippedExisting: 0, remaining: 0 };
+
+/** Reset the process-local worker counters before a live scrape run. */
+export function resetRecueilMetrics(): void {
+  metrics = { newDocuments: 0, skippedExisting: 0, remaining: 0 };
+}
+
+/** Return the process-local counters accumulated by completed RECUEIL calls. */
+export function recueilMetrics(): RecueilMetrics {
+  return metrics;
+}
+
+/** Machine-readable terminal summary emitted by worker-live. */
+export function recueilMetricsJson(): string {
+  return JSON.stringify(metrics);
+}
+
 /**
  * Collect raw documents for one source via its adapter.
  *
@@ -90,16 +118,22 @@ export async function runRecueil(
   const fetchedAt = new Date().toISOString();
   const records: RawDocumentRecord[] = [];
   const manifestEntries: RunManifestEntry[] = [];
+  // The live worker uses this cap to bound the memory-intensive new writes.
+  // Existing CAS objects do not consume it, so deterministic retries advance.
   const limit = options.limit ?? Number.POSITIVE_INFINITY;
+  let newDocuments = 0;
+  let skippedExisting = 0;
 
   try {
-    let processed = 0;
     const listOpts = {
       ...(adapter.city !== undefined ? { city: adapter.city } : {}),
       ...(options.signal !== undefined ? { signal: options.signal } : {}),
     };
     for await (const ref of adapter.list(listOpts)) {
-      if (processed >= limit) break;
+      if (newDocuments >= limit) {
+        metrics = { ...metrics, remaining: null };
+        break;
+      }
       if (options.signal?.aborted) break;
       if (options.acceptRef && !options.acceptRef(ref)) continue;
 
@@ -133,6 +167,11 @@ export async function runRecueil(
       const status: RunManifestEntry["status"] = existing ? "seen" : "new";
       if (!existing) {
         await store.put(record.storageKey, raw.body, record.contentType);
+        newDocuments += 1;
+        metrics = { ...metrics, newDocuments: metrics.newDocuments + 1 };
+      } else {
+        skippedExisting += 1;
+        metrics = { ...metrics, skippedExisting: metrics.skippedExisting + 1 };
       }
 
       // Persist the parseable text (pdftotext) BESIDE the binary body so
@@ -171,7 +210,6 @@ export async function runRecueil(
           ? { publishedAt: record.publishedAt }
           : {}),
       });
-      processed += 1;
     }
   } catch (e) {
     if (e instanceof SourceFetchError) {
@@ -191,6 +229,8 @@ export async function runRecueil(
   return {
     ok: true,
     source,
+    newDocuments,
+    skippedExisting,
     count: records.length,
     rawDocIds: records.map((r) => r.id),
     records,
