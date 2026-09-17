@@ -46,3 +46,24 @@ configMapGenerator:
     behavior: replace
     files:
       - default.conf=nginx/default.conf
+
+patches:
+  - target:
+      kind: CronJob
+      name: radar-db-backup
+    patch: |
+      - op: replace
+        path: /spec/suspend
+        value: false
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/initContainers/0/env/1/value
+        value: preprod
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/initContainers/0/env/2/value
+        value: radar-immobilier-backups-preprod
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/1/value
+        value: preprod
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/2/value
+        value: radar-immobilier-backups-preprod
