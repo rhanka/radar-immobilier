@@ -23,6 +23,8 @@ const entries = [
     [`opus5-${effort}`, { lane: "anthropic", transport: "anthropic-api",
       provider: "anthropic", model: "claude-opus-5",
       effort: effort === "off" ? null : effort, prices: [5, 25] }]),
+  ["opus5-cli-off", { lane: "claude", transport: "claude-cli",
+    provider: "claude", model: "claude-opus-5", effort: null }],
   ...codexEfforts.map((effort) =>
     [`sol-${effort}`, { lane: "codex", transport: "codex",
       provider: "openai", model: "gpt-5.6-sol", effort, capEnforced: false }]),
@@ -37,7 +39,7 @@ export const arms = Object.freeze(Object.fromEntries(entries.map(([name, arm]) =
   [name, Object.freeze({ name, ...arm })])));
 
 export const laneArms = Object.freeze(Object.fromEntries(
-  ["cloud", "codex", "openai", "anthropic", "mistral"].map((lane) =>
+  ["cloud", "codex", "openai", "anthropic", "mistral", "claude"].map((lane) =>
     [lane, Object.freeze(entries.filter(([, arm]) => arm.lane === lane).map(([name]) => name))]),
 ));
 
