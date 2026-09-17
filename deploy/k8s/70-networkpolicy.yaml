@@ -224,6 +224,10 @@ spec:
             matchLabels:
               app.kubernetes.io/name: radar-immobilier
               app.kubernetes.io/component: db-backup
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: db-restore-verify
       ports:
         - protocol: TCP
           port: 5432
