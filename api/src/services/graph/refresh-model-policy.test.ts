@@ -3,14 +3,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createRefreshModelPolicy, type RefreshModel, type RefreshModelReceipt } from "./refresh-model-policy.js";
 
-const primary: RefreshModel = { provider: "openai", model: "gpt-6-astra", effort: "low" };
-const fallback: RefreshModel = { provider: "gemini", model: "gemini-3.8-flash", effort: "low" };
+const primary: RefreshModel = { provider: "gemini", model: "gemini-3.8-flash", effort: "low" };
+const fallback: RefreshModel = { provider: "openai", model: "gpt-6-astra", effort: "low" };
 const input = { prompt: "Extract", schema: "{}", validateResponse: () => {} };
 function fixture(generate: (model: RefreshModel, signal: AbortSignal) => Promise<string>, forceFallback = false,
-  signal?: AbortSignal) {
+  signal?: AbortSignal, primaryQualityAttempts = 2) {
   const calls: string[] = [];
   const receipts: RefreshModelReceipt[] = [];
-  const policy = createRefreshModelPolicy({ primary, fallback, forceFallback, timeoutMs: 50,
+  const policy = createRefreshModelPolicy({ primary, fallback, forceFallback, primaryQualityAttempts, timeoutMs: 50,
     ...(signal ? { signal } : {}),
     createClient(model, attemptSignal): TextJsonGenerationClient {
       return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(request) {
@@ -80,7 +80,7 @@ describe("refresh model policy", () => {
   it.each(["failed-status", "wrong-model", "status-without-text"])("should refuse a resolved invalid result (%s)", async (kind) => {
     const receipts: RefreshModelReceipt[] = [];
     let calls = 0;
-    const policy = createRefreshModelPolicy({ primary, fallback, forceFallback: false, timeoutMs: 1000,
+    const policy = createRefreshModelPolicy({ primary, fallback, forceFallback: false, primaryQualityAttempts: 2, timeoutMs: 1000,
       createClient(model) {
         return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(request) {
           calls++;
@@ -100,14 +100,41 @@ describe("refresh model policy", () => {
     expect(calls).toBe(1);
   });
 
-  it.each(["Invalid JSON", "Invalid profile extraction", "ungrounded PDF excerpt"])(
-    "should retain quality refusal without fallback (%s)", async (message) => {
-      const run = fixture(async () => "bad output");
-      await expect(run.document("one").generateJson({ ...input,
-        validateResponse() { throw new Error(message); } })).rejects.toThrow(message);
-      expect(run.calls).toEqual([primary.model]);
-      expect(run.receipts[0]).toMatchObject({ modelUsed: primary, status: "quality-refused" });
-    });
+  it("should retry a quality refusal once on Gemini then fall back to Astra", async () => {
+    const run = fixture(async () => "bad output");
+    await expect(run.document("one").generateJson({ ...input,
+      validateResponse() { throw new Error("Invalid profile extraction"); } })).rejects.toThrow("Invalid profile extraction");
+    expect(run.calls).toEqual([primary.model, primary.model, fallback.model]);
+    expect(run.receipts).toMatchObject([
+      { modelUsed: primary, status: "quality-refused", attempt: 1, transition: "primary" },
+      { modelUsed: primary, status: "quality-refused", attempt: 2, transition: "same-model-retry" },
+      { modelUsed: fallback, status: "quality-refused", attempt: 3, transition: "fallback", fallbackReason: "quality" },
+    ]);
+  });
+
+  it("should fall back without a Gemini retry when quality attempts is one", async () => {
+    const run = fixture(async () => "bad output", false, undefined, 1);
+    await expect(run.document("one").generateJson({ ...input,
+      validateResponse() { throw new Error("Invalid JSON"); } })).rejects.toThrow("Invalid JSON");
+    expect(run.calls).toEqual([primary.model, fallback.model]);
+    expect(run.receipts).toMatchObject([
+      { attempt: 1, transition: "primary", status: "quality-refused" },
+      { attempt: 2, transition: "fallback", fallbackReason: "quality" },
+    ]);
+  });
+
+  it("should retain the bounded Gemini quality retry after durable resume", async () => {
+    const run = fixture(async () => "{}");
+    run.policy.restoreDocument("one", [
+      { modelUsed: primary, status: "quality-refused", attempt: 1, transition: "primary", latencyMs: 1 },
+      { modelUsed: primary, status: "quality-refused", attempt: 2, transition: "same-model-retry", latencyMs: 1 },
+    ]);
+    await run.document("one").generateJson(input);
+    expect(run.calls).toEqual([fallback.model]);
+    expect(run.receipts).toMatchObject([
+      { modelUsed: fallback, attempt: 3, transition: "fallback", fallbackReason: "quality", status: "completed" },
+    ]);
+  });
 
   it("should open the quota circuit after three distinct documents, not chunks", async () => {
     const run = fixture(async (model) => {
@@ -198,7 +225,8 @@ describe("refresh model policy", () => {
       return "{}";
     });
     for (const id of ["a", "b", "c"]) {
-      run.policy.restoreDocument(id, [{ modelUsed: primary, status: "completed", latencyMs: 1 }]);
+      run.policy.restoreDocument(id, [{ modelUsed: primary, status: "completed", attempt: 1,
+        transition: "primary", latencyMs: 1 }]);
       await run.document(id).generateJson(input);
       run.policy.completeDocument(id);
     }
@@ -209,7 +237,7 @@ describe("refresh model policy", () => {
 
   it("should not fall back when the validated output cannot be written", async () => {
     let calls = 0;
-    const policy = createRefreshModelPolicy({ primary, fallback, forceFallback: false, timeoutMs: 1000,
+    const policy = createRefreshModelPolicy({ primary, fallback, forceFallback: false, primaryQualityAttempts: 2, timeoutMs: 1000,
       createClient(model) {
         return { mode: "mesh", provider: model.provider, model: model.model,
           async generateJson(request) {

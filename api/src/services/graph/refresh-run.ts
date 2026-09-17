@@ -203,7 +203,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   const profiled: RefreshProfileChunk[] = [];
   for (const chunk of corpus.chunks) {
     const reserved = await reserveRefreshChunk(options.store, handle, chunk.id,
-      options.maximumAttempts * (options.documentModels ? 2 : 1));
+      options.maximumAttempts * (options.documentModels?.maximumAttempts ?? 1));
     handle = reserved;
     if (!reserved.shouldCall) {
       profiled.push(await readCompletedRefreshChunk(options.store, handle, chunk.id));
