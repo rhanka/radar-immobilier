@@ -127,4 +127,26 @@ describe("refresh model policy", () => {
     await expect(run.document("one").generateJson(input)).rejects.toThrow("network");
     expect(run.calls).toEqual([primary.model, fallback.model]);
   });
+
+  it("should not make another model call when durable receipt persistence fails", async () => {
+    const run = fixture(async () => "{}");
+    const client = run.policy.forDocument("one", async () => { throw new Error("store unavailable"); });
+    await expect(client.generateJson(input)).rejects.toThrow("store unavailable");
+    expect(run.calls).toEqual([primary.model]);
+  });
+
+  it("should not fall back when the validated output cannot be written", async () => {
+    let calls = 0;
+    const policy = createRefreshModelPolicy({ primary, fallback, forceFallback: false, timeoutMs: 1000,
+      createClient(model) {
+        return { mode: "mesh", provider: model.provider, model: model.model,
+          async generateJson(request) {
+            calls++;
+            await request.validateResponse?.("{}");
+            throw Object.assign(new Error("disk full"), { code: "ENOSPC" });
+          } };
+      } });
+    await expect(policy.forDocument("one", async () => {}).generateJson(input)).rejects.toThrow("disk full");
+    expect(calls).toBe(1);
+  });
 });
