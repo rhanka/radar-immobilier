@@ -81,7 +81,7 @@ export function markdown(rows: readonly ProofRow[]): string {
 }
 
 async function main(): Promise<void> {
-  const [input, idsArgument, origin = "https://immo-preprod.sent-tech.ca", output] = process.argv.slice(2);
+  const [input, idsArgument, origin = "https://preprod.immo.sent-tech.ca", output] = process.argv.slice(2);
   if (!input || !idsArgument) throw new Error("usage: prove-refresh-signals <export.ndjson> <id,...> [origin] [output.md]");
   const nodes = (await readFile(input, "utf8")).split("\n").filter(Boolean).map((line) => JSON.parse(line) as ExportedGraphNode);
   const report = markdown(proveRefreshSignals(nodes, idsArgument.split(","), origin));

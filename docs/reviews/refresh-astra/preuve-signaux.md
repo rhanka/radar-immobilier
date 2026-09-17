@@ -14,12 +14,12 @@ Le lien stable et ouvrable est donc la ville qui contient le nœud, avec la vue
 B activée:
 
 ```text
-https://immo-preprod.sent-tech.ca/geo/city/<citySlug>?mode=signal&filter.subset=b
+https://preprod.immo.sent-tech.ca/geo/city/<citySlug>?mode=signal&filter.subset=b
 https://immo.sent-tech.ca/geo/city/<citySlug>?mode=signal&filter.subset=b
 ```
 
 `deploy/k8s/60-ingress.yaml` fixe l'hôte prod `immo.sent-tech.ca`. En préprod,
-l'hôte demandé est `immo-preprod.sent-tech.ca`. `ui/src/lib/router/geo-route.ts`
+l'hôte demandé est `preprod.immo.sent-tech.ca`. `ui/src/lib/router/geo-route.ts`
 construit `/geo/city/<citySlug>` et sérialise `filter.subset=b`; `App.svelte`
 passe cette route à `SignauxMapView`, qui charge la ville. Le nœud précis est
 identifié dans le tableau de preuve par son `id` (la sélection URL par `id` n'est
@@ -79,7 +79,7 @@ N-A pour cette procédure).
    nœud exact.
 
 ```bash
-bash deploy/ci/prove-refresh-signals.sh /chemin/graph_nodes.ndjson "ID_1,ID_2" "https://immo-preprod.sent-tech.ca" /tmp/signaux.md
+bash deploy/ci/prove-refresh-signals.sh /chemin/graph_nodes.ndjson "ID_1,ID_2" "https://preprod.immo.sent-tech.ca" /tmp/signaux.md
 ```
 
 Pour prod, remplacer seulement l'origine par `https://immo.sent-tech.ca`.

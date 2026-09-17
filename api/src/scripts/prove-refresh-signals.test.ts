@@ -14,8 +14,8 @@ async function render(input: string, ids: string, origin: string): Promise<strin
 
 describe("proveRefreshSignals", () => {
   it("renders a hermetic B-prime proof from a graph export", async () => {
-    const report = await render(fixturePath, "proof-qualified,proof-excluded", "https://immo-preprod.sent-tech.ca");
-    expect(report).toContain("| proof-qualified | salaberry-de-valleyfield | Signal | B′ qualifié | https://immo-preprod.sent-tech.ca/geo/city/salaberry-de-valleyfield?mode=signal&filter.subset=b |");
+    const report = await render(fixturePath, "proof-qualified,proof-excluded", "https://preprod.immo.sent-tech.ca");
+    expect(report).toContain("| proof-qualified | salaberry-de-valleyfield | Signal | B′ qualifié | https://preprod.immo.sent-tech.ca/geo/city/salaberry-de-valleyfield?mode=signal&filter.subset=b |");
     expect(report).toContain("exclu (non_residentiel_franc)");
   });
 
