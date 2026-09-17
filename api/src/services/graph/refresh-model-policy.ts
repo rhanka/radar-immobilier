@@ -58,6 +58,8 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
       }
       const selected = document;
       return {
+        mode: "mesh",
+        provider: options.primary.provider,
         model: options.primary.model,
         async generateJson(input) {
           options.signal?.throwIfAborted();

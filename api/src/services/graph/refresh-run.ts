@@ -102,7 +102,7 @@ export interface RunPvRefreshOptions {
   readonly store: Graphify34SnapshotStore & ObjectStore;
   readonly db: Database;
   readonly profileContext: RefreshProfileContext;
-  readonly textClient: TextJsonGenerationClient;
+  readonly textClient?: TextJsonGenerationClient;
   readonly documentModels?: RefreshDocumentModels;
   readonly onModelReceipt?: (docSha: string, chunkId: string, receipt: RefreshModelReceipt) => void;
   readonly extractPdf: (bytes: Uint8Array, sourceUrl: string) => Promise<string>;
@@ -210,6 +210,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
       handle = await recordRefreshModel(options.store, handle, chunk.docSha, chunk.id, receipt);
       options.onModelReceipt?.(chunk.docSha, chunk.id, receipt);
     }) ?? options.textClient;
+    if (!textClient) throw new Error("Refresh requires a text client or document model policy");
     const result = (await extractRefreshProfile([chunk], { textClient,
       context: options.profileContext, maxOutputTokens: options.maxOutputTokens }))[0]!;
     handle = await completeRefreshChunk(options.store, handle, chunk.id, result);
