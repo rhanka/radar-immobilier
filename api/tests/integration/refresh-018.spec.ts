@@ -63,8 +63,10 @@ async function fixture(city: string, afterGeneration?: () => Promise<void>) {
       calls += 1;
       const body = JSON.stringify(extraction);
       await input.validateResponse?.(body);
-      await mkdir(dirname(input.outputPath!), { recursive: true });
-      await writeFile(input.outputPath!, body);
+      if (input.outputPath) {
+        await mkdir(dirname(input.outputPath), { recursive: true });
+        await writeFile(input.outputPath, body);
+      }
       await afterGeneration?.();
       return { status: "completed", provider: "test", mode: "mesh", outputPath: input.outputPath!, audit: {} } as const;
     } } satisfies TextJsonGenerationClient;
@@ -92,7 +94,9 @@ describe("refresh 0.18 real storage integration", () => {
       fallback: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
       timeoutMs: 1000, forceFallback: false,
       createClient(model) {
-        if (model.provider === "gemini") return fx.textClient;
+        if (model.provider === "gemini") return { ...fx.textClient, async generateJson(input) {
+          return { ...await fx.textClient.generateJson(input), provider: model.provider, model: model.model };
+        } };
         return { ...fx.textClient, async generateJson() {
           primaryCalls++;
           throw Object.assign(new Error("quota"), { status: 429 });
