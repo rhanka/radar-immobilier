@@ -75,7 +75,9 @@ async function main(): Promise<void> {
   const timeoutMs = positive("REFRESH_TIMEOUT_MS", 900_000, 3_600_000);
   const primary = selectedModel("REFRESH");
   const fallback = selectedModel("REFRESH_FALLBACK");
-  const maximumAttempts = positive("REFRESH_MAXIMUM_ATTEMPTS", 2, 8);
+  // Graphify retries validation refusals when multiple route attempts are allowed.
+  // The explicit policy owns the only retry: a transport-only fallback.
+  const maximumAttempts = positive("REFRESH_MAXIMUM_ATTEMPTS", 1, 1);
   const profileContext = loadRefreshProfileContext({ root: process.cwd(), profilePath,
     unregisteredOnly: true });
   const acquire = await seedSavedInput(store, city);
