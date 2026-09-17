@@ -11,12 +11,17 @@
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
   - `api/src/scripts/refresh-pv.ts`
+  - `api/src/scripts/prove-refresh-signals.ts`
+  - `api/src/scripts/prove-refresh-signals.test.ts`
+  - `api/src/scripts/fixtures/prove-refresh-signals.ndjson`
   - `api/src/services/graph/refresh-*.ts`
   - `api/tests/integration/refresh-018.spec.ts`
   - `deploy/k8s/34-refresh-cronjob.yaml`
   - `deploy/k8s/refresh-cronjobs*/**`
   - `deploy/k8s/secrets.example.yaml`
   - `deploy/ci/README.md`
+  - `deploy/ci/prove-refresh-signals.sh`
+  - `deploy/ci/prove-refresh-signals.test.sh`
   - `docs/reviews/refresh-astra/**`
   - `plan/R703A-BRANCH_feat-refresh-prod-astra-low.md`
 - **Forbidden Paths (must not change in this branch)**:
@@ -25,6 +30,9 @@
   - Other branch plans
 - **Conditional Paths**:
   - `.github/workflows/**`
+
+## Scope exception
+- [x] BR703-EX2: read-only graph-export proof tooling is required by owner #703; rollback removes the script, fixture and runbook only.
 
 ## Feedback Loop
 - [x] Owner decision fixes models/transports; llm-mesh-refresh stays pinned at 0.19.2.
