@@ -12,6 +12,7 @@
 - **Allowed Paths (implementation scope)**:
   - `api/src/scripts/refresh-pv.ts`
   - `api/src/services/graph/refresh-*.ts`
+  - `api/tests/integration/refresh-018.spec.ts`
   - `deploy/k8s/34-refresh-cronjob.yaml`
   - `deploy/k8s/refresh-cronjobs*/**`
   - `deploy/k8s/secrets.example.yaml`
@@ -39,7 +40,7 @@
 - [x] Lot 0 — Read rules, inspect transport and existing deployment path.
 - [x] Lot 1 — Document-scoped fallback, bounded attempts and safe receipts.
 - [x] Lot 2 — Durable model trace and script wiring.
-- [ ] Lot 3 — Manifest policy and deployment runbook.
+- [x] Lot 3 — Manifest policy and deployment runbook.
 - [ ] Lot 4 — Unit/integration, static and harness gates; independent review reconciliation.
 - [ ] Lot 5 — Real local acceptance or measured credential gap; remove test volumes.
 - [ ] Lot 6 — French PR, green CI, conductor report.
