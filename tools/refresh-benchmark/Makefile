@@ -1503,7 +1503,8 @@ run-v101-arm: t1-v100-snapshot check-v101-tools
 	  -e BENCHMARK_EXECUTION_ROOT=$(or $(RUN_ROOT),/results) \
 	  -e BENCHMARK_RETRY_NETWORK_TERMINAL \
 	  -e BENCHMARK_T1_ROOT=/workspace/t1 -e BENCHMARK_OWNER_SCOPE=$(OWNER_SCOPE) \
-	  -e BENCHMARK_SLICE='$(or $(SLICE),1-100)' -e BENCHMARK_CONCURRENCY=$(or $(CONCURRENCY),1) \
+	  -e BENCHMARK_SLICE='$(or $(SLICE),1-100)' -e BENCHMARK_DOCUMENT_IDS='$(DOCUMENT_IDS)' \
+  -e BENCHMARK_RETRY_QUALITY='$(or $(RETRY_QUALITY),0)' -e BENCHMARK_CONCURRENCY=$(or $(CONCURRENCY),1) \
 	  -e OPENAI_API_KEY -e ANTHROPIC_API_KEY -e MISTRAL_API_KEY \
 	  -w /src $(NODE_IMAGE) sh -c \
 	  'cp -a /keyring-source /run/benchmark-keyring && chmod -R u+rw /run/benchmark-keyring \

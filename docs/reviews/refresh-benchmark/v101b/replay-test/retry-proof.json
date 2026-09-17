@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 2,
+  "campaign": "v101b",
+  "status": "measured-partial",
+  "generatedAt": "2026-09-17T16:41:16.205489+00:00",
+  "callCap": 90,
+  "arms": {
+    "gemini-low": {
+      "n": 15,
+      "acceptedCumulative": [
+        3,
+        3,
+        3
+      ],
+      "marginal": [
+        3,
+        0,
+        0
+      ],
+      "recoveryRateAfter3": 0.2,
+      "additionalCallsMeasured": 20,
+      "documents": [
+        {
+          "documentId": "berthier-sur-mer-2026-03-24",
+          "originClass": "provenance",
+          "attempts": [
+            {
+              "attempt": 2,
+              "accepted": true,
+              "latencyMs": 27584,
+              "inputTokens": 30525,
+              "outputTokens": 8378,
+              "costUsd": null
+            }
+          ],
+          "acceptedAfter": 1,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.1"
+        },
+        {
+          "documentId": "boisbriand-2026-05-05",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.1"
+        },
+        {
+          "documentId": "chesterville-2026-03-02",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has invalid original PDF identity for chunk 27647c6e949d4c2676ce5f496f342e5125a555256bbcb19b8e3ab1c1149c8238.1"
+        },
+        {
+          "documentId": "coteau-du-lac-2026-02-10",
+          "originClass": "profil",
+          "attempts": [
+            {
+              "attempt": 2,
+              "accepted": false,
+              "latencyMs": 15053,
+              "inputTokens": 7939,
+              "outputTokens": 6117,
+              "costUsd": null
+            }
+          ],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid profile extraction for chunk 0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.1: inferred_relation_disallowed"
+        },
+        {
+          "documentId": "eastman-2026-06-01",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid Graphify extraction for chunk 30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.1: Edge 4 source 'source-30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf' does not match any node id"
+        },
+        {
+          "documentId": "frontenac-2026-03-10",
+          "originClass": "profil",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid profile extraction for chunk 068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.1: missing_evidence_ref"
+        },
+        {
+          "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Untyped node for chunk 25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.1"
+        },
+        {
+          "documentId": "potton-2026-01-05",
+          "originClass": "provenance",
+          "attempts": [
+            {
+              "attempt": 2,
+              "accepted": false,
+              "latencyMs": 13679,
+              "inputTokens": 44701,
+              "outputTokens": 4928,
+              "costUsd": null
+            }
+          ],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.1"
+        },
+        {
+          "documentId": "saint-etienne-de-bolton-2026-08-04",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.1"
+        },
+        {
+          "documentId": "saint-sylvere-2026-04-07",
+          "originClass": "profil",
+          "attempts": [
+            {
+              "attempt": 2,
+              "accepted": true,
+              "latencyMs": 18361,
+              "inputTokens": 13435,
+              "outputTokens": 7400,
+              "costUsd": null
+            }
+          ],
+          "acceptedAfter": 1,
+          "originExcerpt": "Invalid profile extraction for chunk 1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.1: missing_evidence_ref"
+        },
+        {
+          "documentId": "sainte-angele-de-monnoir-2026-01-13",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.1"
+        },
+        {
+          "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.1"
+        },
+        {
+          "documentId": "sainte-thecle-2026-03-09",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 28a899638b8055819735bf5cbe134875aefe14a4a336e883cd57a6a805ca9861.1"
+        },
+        {
+          "documentId": "stanstead-est-2026-04-13",
+          "originClass": "provenance",
+          "attempts": [
+            {
+              "attempt": 2,
+              "accepted": true,
+              "latencyMs": 14934,
+              "inputTokens": 21204,
+              "outputTokens": 6244,
+              "costUsd": null
+            }
+          ],
+          "acceptedAfter": 1,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.1"
+        },
+        {
+          "documentId": "waterville-2026-04-07",
+          "originClass": "profil",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid profile extraction for chunk 34023df9808cde3fb616c861e06d8b626ed9578e9b34f10d6537b5b65d99f974.1: missing_evidence_ref"
+        }
+      ]
+    },
+    "gemini-medium": {
+      "n": 21,
+      "acceptedCumulative": [
+        1,
+        1,
+        1
+      ],
+      "marginal": [
+        1,
+        0,
+        0
+      ],
+      "recoveryRateAfter3": 0.047619047619047616,
+      "additionalCallsMeasured": 18,
+      "documents": [
+        {
+          "documentId": "bedford--brome-missisquoi-2026-06-02",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 24ceaa070ae39d6eb889eebd90f6a964d06fa481b04ff054385ef09483d6653d.1"
+        },
+        {
+          "documentId": "beloeil-2026-03-23",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.1"
+        },
+        {
+          "documentId": "berthier-sur-mer-2026-03-24",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.1"
+        },
+        {
+          "documentId": "boisbriand-2026-05-05",
+          "originClass": "profil",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid profile extraction for chunk 34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.1: missing_evidence_ref"
+        },
+        {
+          "documentId": "contrecoeur-2026-04-14",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.1"
+        },
+        {
+          "documentId": "cookshire-eaton-2026-04-07",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 3f7e629c43f33b3716a45c73f6419170e2ddf2e9f9918a9e2b22f726961a0b1b.1"
+        },
+        {
+          "documentId": "dollard-des-ormeaux-2026-02-10",
+          "originClass": "profil",
+          "attempts": [
+            {
+              "attempt": 2,
+              "accepted": true,
+              "latencyMs": 37231,
+              "inputTokens": 8278,
+              "outputTokens": 9423,
+              "costUsd": null
+            }
+          ],
+          "acceptedAfter": 1,
+          "originExcerpt": "Invalid profile extraction for chunk 1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.1: inferred_relation_disallowed"
+        },
+        {
+          "documentId": "eastman-2026-06-01",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.1"
+        },
+        {
+          "documentId": "la-peche-2026-06-01",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid Graphify extraction for chunk 08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.1: Node 0 (id=\"source-08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c\") missing required field 'source_file'; Node 1 (id=\"bylaw-113-2025\") missing required field 'source_file'; Node 2 (id=\"bylaw-145-31-2025\") missing required field 'source_file'; Node 3 (id=\"bylaw-26-866\") missing required field 'source_file'; Node 4 (id=\"bylaw-26-867\") missing required field 'source_file'; Nod"
+        },
+        {
+          "documentId": "lac-brome-2026-04-07",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.1"
+        },
+        {
+          "documentId": "potton-2026-01-05",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.1"
+        },
+        {
+          "documentId": "richelieu-2026-02-03",
+          "originClass": "profil",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid profile extraction for chunk 37a6a33697d508d103d065138a4de89d33f300e671d02f7e00083d0c52c5be27.1: inferred_relation_disallowed"
+        },
+        {
+          "documentId": "saint-etienne-de-bolton-2026-08-04",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output violates entity_citation_excerpt_too_short for chunk 27799681a178dd23d99596d78811ff5c678be649901748e0eca3d9b0eb26c45d.1: an entity citation excerpt carries 12 code points and 8 once normalized, under the 20 the schema declares or the 12 normalized the page anchor requires. A field label such as \"Zone : RUR-12\" belongs to the node properties, never to excerpt; cite the decision sentence instead."
+        },
+        {
+          "documentId": "saint-sylvere-2026-04-07",
+          "originClass": "provenance",
+          "attempts": [
+            {
+              "attempt": 2,
+              "accepted": false,
+              "latencyMs": 36576,
+              "inputTokens": 13435,
+              "outputTokens": 10453,
+              "costUsd": null
+            }
+          ],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid Graphify extraction for chunk 1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.1: Node 0 (id=\"source-1b11e5\") missing required field 'source_file'; Node 1 (id=\"bylaw-247\") missing required field 'source_file'; Node 2 (id=\"bylaw-383\") missing required field 'source_file'; Node 3 (id=\"bylaw-384\") missing required field 'source_file'; Node 4 (id=\"event-2026-04-117\") missing required field 'source_file'; Node 5 (id=\"event-2026-04-120\") missing required field 'source_file'; No"
+        },
+        {
+          "documentId": "sainte-clotilde-2026-04-20",
+          "originClass": "profil",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid profile extraction for chunk 2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.1: missing_evidence_ref"
+        },
+        {
+          "documentId": "sainte-croix-2026-05-05",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has invalid original PDF identity for chunk 1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.1"
+        },
+        {
+          "documentId": "sainte-martine-2026-03-17",
+          "originClass": "provenance",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Model output has ungrounded PDF excerpt for chunk 0ba58d66ba281a250e563440e67a6a4ec988c677b9b33dac689fb64438f18aa1.1"
+        },
+        {
+          "documentId": "sainte-sophie-2026-06-02",
+          "originClass": "profil",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid profile extraction for chunk 09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.1: missing_evidence_ref"
+        },
+        {
+          "documentId": "val-dor-2026-06-01",
+          "originClass": "profil",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid profile extraction for chunk 14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.1: missing_evidence_ref"
+        },
+        {
+          "documentId": "wentworth-nord-2026-01-21",
+          "originClass": "profil",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid profile extraction for chunk 2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.1: missing_evidence_ref"
+        },
+        {
+          "documentId": "sainte-francoise--becancour-2026-05-04",
+          "originClass": "profil",
+          "attempts": [],
+          "acceptedAfter": null,
+          "originExcerpt": "Invalid profile extraction for chunk 127b1da7294a05f8e4d40bd2462f85109c9cd5b349a8b86cbf07431efa908f93.1: inferred_relation_disallowed, inferred_relation_disallowed"
+        }
+      ]
+    }
+  }
+}

@@ -37,3 +37,9 @@ Généré depuis `report-data.json` le 2026-09-17T09:20:11.394Z. Les 26 bras de 
 - Code 23 Codex : flux HTTP 200 terminé sans sortie exploitable sur documents lourds; classe backend définitive, distincte du transport, non rejouée.
 - Sonnet 4.6 Cloud Code : partiel, quota Google; F1 N-A. Les autres F1 N-A sont des source-gaps oracle et ne sont pas assimilés à zéro.
 - Sièges : Gemini AI Pro mesuré sur 260 documents; Codex passif et Claude CLI sont N-A pour une capacité publiable.
+
+| gemini-low → astra-low | mesuré partiel; 100/100 (fallback Astra) | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A |
+| gemini-medium → astra-low | mesuré partiel; 100/100 (fallback Astra) | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A |
+
+| gemini-low → astra-low | mesuré partiel; 100/100 (fallback Astra) | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A |
+| gemini-medium → astra-low | mesuré partiel; 100/100 (fallback Astra) | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A | N-A |
