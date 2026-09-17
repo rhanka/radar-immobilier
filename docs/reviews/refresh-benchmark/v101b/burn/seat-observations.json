@@ -16,26 +16,24 @@
       "t1Utc": "2026-09-17T01:33:00Z"
     },
     {
-      "arm": "sol-medium",
-      "provider": "chatgpt",
-      "status": "N-A",
-      "reason": "no-quota-delta",
-      "t0Utc": "2026-09-17T00:32:00Z",
-      "t1Utc": "2026-09-17T01:33:00Z"
-    },
-    {
-      "arm": "luna-high",
-      "provider": "chatgpt",
-      "status": "N-A",
-      "reason": "no-quota-delta",
-      "t0Utc": "2026-09-17T00:32:00Z",
-      "t1Utc": "2026-09-17T01:33:00Z"
-    },
-    {
       "arm": "sonnet46-cloud-off",
       "provider": "claude",
       "status": "N-A",
       "reason": "transport-mismatch"
+    },
+    {
+      "arm": "sol-medium",
+      "provider": "chatgpt",
+      "status": "measured",
+      "method": "passive-window-delta",
+      "sourceStatus": "observed",
+      "basePlan": "pro-20x",
+      "windowMinutes": 10080,
+      "quotaDeltaPercent": 12,
+      "documents": 207,
+      "tokens": 6348891,
+      "t0Utc": "2026-09-16T23:50:00Z",
+      "t1Utc": "2026-09-17T04:15:00Z"
     }
   ]
 }
