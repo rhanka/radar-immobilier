@@ -134,7 +134,7 @@ export async function runArm(armName, options = {}) {
     || from > to) throw new Error("BENCHMARK_SLICE must be a valid one-based range");
   const documents = manifest.documents.slice(from - 1, to);
   const concurrency = Number(options.concurrency ?? process.env.BENCHMARK_CONCURRENCY ?? "1");
-  const maximumConcurrency = arm.lane === "codex" ? 2 : 3;
+  const maximumConcurrency = arm.lane === "codex" ? 4 : 3;
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > maximumConcurrency) {
     throw new Error(`Concurrency must be between 1 and ${maximumConcurrency}`);
   }
