@@ -177,7 +177,7 @@ export function pdfToTextViaPoppler(url: string): PdfToText {
       child.stdin.on("error", () => {
         /* ignore EPIPE if poppler closes stdin early */
       });
-      child.stdin.write(Buffer.from(bytes));
+      child.stdin.write(bytes);
       child.stdin.end();
     });
 }
