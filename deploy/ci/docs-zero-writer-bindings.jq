@@ -8,23 +8,15 @@ def secret($workload; $container; $name; $secret; $key):
   env($workload; $container; $name) ==
     {name:$name,valueFrom:{secretKeyRef:{name:$secret,key:$key}}};
 
+# Inspect the full CronJob list: the causal refresh replaces the retired pair.
 INDEX(.items[]; .metadata.name) as $jobs
-| ($jobs["radar-refresh-scrape"] // null) as $scrape
-| ($jobs["radar-refresh-projection"] // null) as $projection
-| $scrape != null and $projection != null
-  and literal($scrape; "scrape"; "SCRAPE_S3_ENDPOINT";
+| ($jobs["radar-refresh-pv"] // null) as $refresh
+| $refresh != null
+  and literal($refresh; "refresh-pv"; "SCRAPE_S3_ENDPOINT";
     "https://s3.bhs.io.cloud.ovh.net")
-  and literal($scrape; "scrape"; "SCRAPE_S3_BUCKET";
+  and literal($refresh; "refresh-pv"; "SCRAPE_S3_BUCKET";
     "radar-immobilier-graph-preprod")
-  and secret($scrape; "scrape"; "SCRAPE_S3_ACCESS_KEY";
+  and secret($refresh; "refresh-pv"; "SCRAPE_S3_ACCESS_KEY";
     "radar-graph-s3-credentials"; "GRAPH_S3_ACCESS_KEY")
-  and secret($scrape; "scrape"; "SCRAPE_S3_SECRET_KEY";
-    "radar-graph-s3-credentials"; "GRAPH_S3_SECRET_KEY")
-  and literal($projection; "project-graph"; "GRAPH_S3_ENDPOINT";
-    "https://s3.bhs.io.cloud.ovh.net")
-  and literal($projection; "project-graph"; "GRAPH_S3_BUCKET";
-    "radar-immobilier-graph-preprod")
-  and secret($projection; "project-graph"; "GRAPH_S3_ACCESS_KEY";
-    "radar-graph-s3-credentials"; "GRAPH_S3_ACCESS_KEY")
-  and secret($projection; "project-graph"; "GRAPH_S3_SECRET_KEY";
+  and secret($refresh; "refresh-pv"; "SCRAPE_S3_SECRET_KEY";
     "radar-graph-s3-credentials"; "GRAPH_S3_SECRET_KEY")

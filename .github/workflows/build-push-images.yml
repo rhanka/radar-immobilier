@@ -985,7 +985,7 @@ jobs:
           kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api:${SHA}
           kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n "$NAMESPACE" apply -f -
           echo "refresh CronJobs deployed to ${NAMESPACE} (radar-api:${SHA}, suspend:false):"
-          kubectl -n "$NAMESPACE" get cronjob radar-refresh-scrape radar-refresh-projection -o wide || true
+          kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o wide || true
 
       - name: Deployment status — success (preprod)
         if: success() && steps.deployment.outputs.id != ''
@@ -1414,7 +1414,7 @@ jobs:
           kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api@${DIG_API}
           kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n radar-immobilier apply -f -
           echo "Causal PV refresh deployed to radar-immobilier (radar-api@${DIG_API}):"
-          kubectl -n radar-immobilier get cronjob radar-refresh-pv radar-refresh-scrape radar-refresh-projection -o wide
+          kubectl -n radar-immobilier get cronjob radar-refresh-pv -o wide
 
       - name: Wait for rollouts
         run: |

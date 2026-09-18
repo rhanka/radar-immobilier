@@ -56,7 +56,7 @@ routes, registres, navigateur…) sont des cartes A' comme les autres.
 | 1 | code, **à droite de l'icône** | 22 px gris | `PP-SCRAPE`, `EDGE`, `WS-OPS`… |
 | 2 | titre = rôle court, **à droite de l'icône**, gras | 32 px | « CronJob · collecte », « Base · préprod », « Bucket S3 · docs prod », « Navigateur » |
 | — | espace sous le titre | — | **6 px** (plus la ligne vide de la v9) |
-| 3 | nom | 24 px | nom Kubernetes / composant, ex. `radar-refresh-scrape` |
+| 3 | nom | 24 px | nom Kubernetes / composant, ex. `radar-refresh-pv` |
 | 4 | **un** détail métier | 24 px gris | CronJob : planning + étape · route · volume · moteur |
 | — | séparateur | — | filet 1 px, marge 4 px |
 | 5 | `repo:` | 24 px gras | `repo: radar-immobilier` |

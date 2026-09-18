@@ -3,9 +3,9 @@
 # Matérialise chaque nuit le snapshot batch PG `consistency_snapshots` utilisé par
 # la section Sources → « Cohérence E2E » (E0 PV→signaux + E1 signaux→zones).
 #
-# Cadence : 04:45 UTC, APRÈS `radar-refresh-projection` (04:30 UTC) car E0 lit
-# `graph_nodes` projetés en PG. Le job reste SUSPENDU tant que les refreshs
-# nightly 34-* sont suspendus (FinOps 2026-07-01) : réactiver ensemble.
+# Schedule: 04:45 UTC. This snapshot remains suspended independently of
+# radar-refresh-pv (05:17 UTC), which now owns acquisition and projection.
+# Reassess snapshot timing before activation: E0 reads projected graph_nodes.
 #
 # Dépendance honnête : E1 lit exclusivement la sortie du mapper #74
 # (`run-geo-mapper.ts` → `geo_resolutions`/`geo_unresolved`). Ce mapper n'est PAS
