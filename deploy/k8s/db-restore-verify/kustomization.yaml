@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: radar-immobilier-preprod
+resources:
+  - ../42-db-restore-verify-job.yaml
+# Settings and network come from backup-preprod. The proof runner resolves
+# the hashed ConfigMap name from that SAME branch render before creating a Job.

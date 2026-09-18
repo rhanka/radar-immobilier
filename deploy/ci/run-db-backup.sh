@@ -45,6 +45,9 @@ export S3_SECRET="${S3_SECRET:-radar-backup-s3-credentials}"
 export BACKUP_S3_REGION="${BACKUP_S3_REGION:-}"
 export TTL_SECONDS="${TTL_SECONDS:-3600}"
 BACKUP_RETAIN_COUNT="${BACKUP_RETAIN_COUNT:-14}"
+case "$BACKUP_RETAIN_COUNT" in
+  ''|*[!0-9]*) die "BACKUP_RETAIN_COUNT must be a non-negative integer" ;;
+esac
 BACKUP_PREFIX="${BACKUP_PREFIX:-db-backups}"
 WAIT_TIMEOUT="${BACKUP_WAIT_TIMEOUT:-900}"
 POLL_INTERVAL="${BACKUP_POLL_INTERVAL:-10}"
@@ -130,7 +133,7 @@ prune() {
   #     object we cannot time-order);
   #   - `LC_ALL=C sort` for a stable, locale-independent byte order.
   candidates="$(printf '%s\n' "$listing" \
-    | awk 'NF>=3 && $1 ~ /^[0-9]{4}\/[0-9]{2}\/[0-9]{2}$/ && $2 ~ /^[0-9]{2}:[0-9]{2}:[0-9]{2}$/ {print $1" "$2"\t"$NF}' \
+    | awk 'NF>=3 && $1 ~ /^[0-9][0-9][0-9][0-9]\/[0-9][0-9]\/[0-9][0-9]$/ && $2 ~ /^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$/ {print $1" "$2"\t"$NF}' \
     | { grep -vF -- "$cur" || :; } \
     | LC_ALL=C sort \
     | cut -f2-)"

@@ -103,6 +103,10 @@ nz "$code" "apply failure aborts"
 EXTRA='unset BACKUP_S3_BUCKET; export FAKE_JOB_SUCCEEDED=1'; run_case missing_env; code=$CODE
 nz "$code" "missing BACKUP_S3_BUCKET aborts"
 
+# 5b. a non-numeric retention value must fail before any release action.
+EXTRA='export BACKUP_RETAIN_COUNT=not-a-number; export FAKE_JOB_SUCCEEDED=1'; run_case invalid_retain; code=$CODE
+nz "$code" "non-numeric BACKUP_RETAIN_COUNT aborts"
+
 # 6. retention: 4 existing + keep 2 → prune 2 oldest, still exit 0.
 LS4="$(printf '%s\n' \
   '2024/01/01 00:00:00  10 preprod-t1-20240101T000000Z.sql.gz' \

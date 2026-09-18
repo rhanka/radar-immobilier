@@ -1,0 +1,25 @@
+# Operator-owned monitoring namespace/labels must match the tenant Prometheus.
+# Apply separately after checking the PrometheusRule CRD; not in app overlays.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: radar-backup-freshness
+spec:
+  groups:
+    - name: radar-backup-pra
+      rules:
+        - alert: RadarBackupFreshnessUnconfirmed
+          expr: |
+            (time() - kube_cronjob_status_last_successful_time{namespace=~"radar-immobilier(-preprod)?",cronjob="radar-backup-freshness"} > 5400)
+            or
+            (kube_cronjob_info{namespace=~"radar-immobilier(-preprod)?",cronjob="radar-backup-freshness"}
+            unless on(namespace,cronjob) kube_cronjob_status_last_successful_time{cronjob="radar-backup-freshness"})
+            or
+            absent(kube_cronjob_info{namespace="radar-immobilier",cronjob="radar-backup-freshness"})
+            or
+            absent(kube_cronjob_info{namespace="radar-immobilier-preprod",cronjob="radar-backup-freshness"})
+          for: 10m
+          labels: { severity: critical, owner: immo }
+          annotations:
+            summary: PostgreSQL recovery freshness is stale or unobservable
+            description: The hourly checker has no recent success. Check RPO breach, S3 access and scheduler health; run the documented catch-up and restore proof.

@@ -1,0 +1,115 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: radar-db-backup
+  namespace: radar-immobilier
+spec:
+  suspend: false
+  schedule: "15 2,14 * * *"
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 1800
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 3600
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: db-backup
+              radar-pra: "true"
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext: { runAsNonRoot: true, runAsUser: 999, runAsGroup: 999, fsGroup: 999, seccompProfile: { type: RuntimeDefault } }
+          volumes:
+            - { name: work, emptyDir: { sizeLimit: 2Gi } }
+            - { name: scratch, emptyDir: { sizeLimit: 6Gi } }
+
+          initContainers:
+            - name: dump
+              image: ghcr.io/rhanka/radar-backup:PIN-BEFORE-APPLY
+              args: [dump]
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+              resources:
+                requests: { cpu: 50m, memory: 64Mi, ephemeral-storage: 1Gi }
+                limits: { cpu: 500m, memory: 256Mi, ephemeral-storage: 8Gi }
+              envFrom: [{ configMapRef: { name: radar-pra-settings } }]
+              env:
+                - { name: PGHOST, value: radar-postgres }
+                - name: PGUSER
+                  valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+                - name: PGPASSWORD
+                  valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+                - name: PGDATABASE
+                  valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+              volumeMounts:
+                - { name: work, mountPath: /work }
+
+            - name: upload
+              image: ghcr.io/rhanka/radar-backup:PIN-BEFORE-APPLY
+              args: [upload]
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+              resources:
+                requests: { cpu: 50m, memory: 64Mi, ephemeral-storage: 1Gi }
+                limits: { cpu: 500m, memory: 128Mi, ephemeral-storage: 8Gi }
+              envFrom: [{ configMapRef: { name: radar-pra-settings } }]
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom: { secretKeyRef: { name: radar-pra-writer, key: S3_ACCESS_KEY } }
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: radar-pra-writer, key: S3_SECRET_KEY } }
+              volumeMounts:
+                - { name: work, mountPath: /work }
+
+            - name: restore-and-verify
+              image: ghcr.io/rhanka/radar-backup:PIN-BEFORE-APPLY
+              args: [restore]
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+              resources:
+                requests: { cpu: 50m, memory: 64Mi, ephemeral-storage: 1Gi }
+                limits: { cpu: 500m, memory: 512Mi, ephemeral-storage: 8Gi }
+              envFrom: [{ configMapRef: { name: radar-pra-settings } }]
+              env:
+                - name: JOB_UID
+                  valueFrom: { fieldRef: { fieldPath: "metadata.labels['batch.kubernetes.io/controller-uid']" } }
+              volumeMounts:
+                - { name: work, mountPath: /work }
+                - { name: scratch, mountPath: /scratch }
+
+            - name: report
+              image: ghcr.io/rhanka/radar-backup:PIN-BEFORE-APPLY
+              args: [report]
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+              resources:
+                requests: { cpu: 50m, memory: 64Mi, ephemeral-storage: 1Gi }
+                limits: { cpu: 500m, memory: 128Mi, ephemeral-storage: 8Gi }
+              envFrom: [{ configMapRef: { name: radar-pra-settings } }]
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom: { secretKeyRef: { name: radar-pra-writer, key: S3_ACCESS_KEY } }
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: radar-pra-writer, key: S3_SECRET_KEY } }
+              volumeMounts:
+                - { name: work, mountPath: /work }
+
+          containers:
+            - name: retain
+              image: ghcr.io/rhanka/radar-backup:PIN-BEFORE-APPLY
+              args: [retain]
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+              resources:
+                requests: { cpu: 50m, memory: 64Mi, ephemeral-storage: 1Gi }
+                limits: { cpu: 500m, memory: 128Mi, ephemeral-storage: 8Gi }
+              envFrom: [{ configMapRef: { name: radar-pra-settings } }]
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom: { secretKeyRef: { name: radar-pra-retainer, key: S3_ACCESS_KEY } }
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: radar-pra-retainer, key: S3_SECRET_KEY } }
+              volumeMounts:
+                - { name: work, mountPath: /work }

@@ -10,6 +10,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  backup-pra:
+    name: Backup and isolated recovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - run: make -f deploy/ci/backup-pra.mk backup-test ENV=test-backup-pra
   quality:
     name: Quality gates
     runs-on: ubuntu-latest

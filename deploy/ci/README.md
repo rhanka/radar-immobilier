@@ -241,3 +241,262 @@ safety bias.
 # Déploiement du rafraîchissement Gemini low puis Astra low
 
 Le CronJob PV utilise Gemini 3.8 Flash low avec deux essais maximum sur refus de qualité du contrat v9, puis Astra low comme repli. Les incidents transport, quota/429, délai et flux vide basculent immédiatement vers Astra. `REFRESH_FORCE_FALLBACK=1` est réservé aux recettes. Les deux comptes doivent être enrôlés sous le même owner scope du Secret runtime dans le PVC keyring inscriptible. L’owner enrôle les comptes localement (`make enroll-cloud-code` et `make enroll-codex`); pour un PVC déjà initialisé, la lane k8s rend puis applique le Job éphémère `make import-keyring-account`, sans remplacer l’autre compte. Pour un PVC neuf, le Secret bootstrap contient les deux comptes avant le premier bootstrap. La validation préproduction (purge `refresh/018/*`, cycle complet, mesures par document et liens B′) et la promotion par variable GitHub puis tag `v*` sont documentées dans [`production-acceptance.md`](../../docs/reviews/refresh-cascade/production-acceptance.md). Une fusion déploie la préproduction; la production reste protégée par `REFRESH_CRONJOB_PROD_ENABLED=true`.
+## Scheduled data backup and restore rehearsal (#698)
+
+The immo-owned [joint plan](../../docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md)
+covers PG, immo documents/graph/keyring and geo, consistency fencing, recovery
+order and paired acceptance. This executable path verifies **PostgreSQL only**.
+The separate pre-release runner above keeps its existing identity and contract.
+
+The image in `deploy/k8s/db-backup/Dockerfile` contains PG16/PostGIS 3.4 and the
+backup program. Every 12 hours, sequential stages export a snapshot, count exact
+rows within it, dump that same snapshot, upload, restore into an ephemeral local
+server, publish a verification receipt, then prune. No source read is required
+for restoration. A manifest is the last uploaded commit marker; restore checks
+its checksum/schema/identity and the dump checksum/size before starting PG.
+Verification receipts bind S3 object, manifest hash, snapshot time and Job UID.
+SHA-256 is corruption detection, not authentication against a compromised writer.
+
+Keep latest verified points for 7 represented UTC days, 4 represented ISO weeks,
+1 represented month (overlaps share one copy). A missing day does not expire old
+points. No extra weekly/monthly upload. Failed uploads/verification never publish
+a verified receipt. Lifecycle cleans abandoned multipart, deleted noncurrent
+versions and old exercise receipts; it does not expire current complete sets.
+
+**Provisioning — owner, before activation:** dedicated private buckets
+`radar-immobilier-backups-preprod` / `radar-immobilier-backups`, versioning enabled,
+public access denied, SSE AES256 observed on uploaded objects. Check the configured
+endpoint/region and actual DB name (`EXPECTED_DATABASE=radar`). Provision separate
+identities in EACH namespace using `backup-common/secrets.example.yaml`:
+
+| Secret | Required scope in that environment's bucket |
+|---|---|
+| `radar-pra-writer` | Scoped ListBucket; PutObject, AbortMultipartUpload, ListMultipartUploadParts under `postgres/<env>/`; uploads sets and verification receipts; no deletion |
+| `radar-pra-reader` | Scoped ListBucket; GetObject, GetObjectVersion under the prefix; GetBucketLocation, GetBucketVersioning, GetBucketPublicAccessBlock, GetBucketAcl, GetLifecycleConfiguration on this bucket; no writes |
+| `radar-pra-retainer` | Scoped ListBucket; GetObject, DeleteObject under the prefix; DeleteObjectVersion only under `exercises/_provision/` to remove its probe; no writes |
+
+Use `env=preprod` or `production`, not the overlay shorthand `prod`. Never reuse
+the pre-release `radar-backup-s3-credentials` identity. Deny other buckets/envs,
+ACL/public changes and lifecycle changes to scheduled identities; only retainer
+can delete, and none can delete versions of retained sets. The explicit denies
+also restrict inherited S3 grants from the OpenStack objectstore role.
+There are three S3 users per environment, six total. The old reporter's **read**
+duties belong to reader; its receipt **writes** use writer. The former settings
+resource is a non-secret ConfigMap, still named `radar-pra-settings`; reader receives
+bucket-configuration read permissions, not configuration-write permissions.
+The names `radar-pra-backup`, `radar-pra-restore`, `radar-pra-postgres` and
+`radar-pra-egress` remain unchanged.
+
+**One owner command per environment.** Run from this checkout, with Docker and
+kubectl installed. The command builds the local backup image if absent; Docker
+must then be able to pull its base images and install its pinned dependencies.
+Export these variables in the owner's shell using their normal secret manager;
+never place values in Make arguments, repository files or shell traces:
+
+- `OVH_APPLICATION_KEY`, `OVH_APPLICATION_SECRET`, `OVH_CONSUMER_KEY`:
+  OVH API credentials authorized to list/create project users, import/export their
+  storage policies, list/create S3 credentials and retrieve their existing secret.
+- `OVH_PROJECT_ID`: the Public Cloud project ID (32 hexadecimal characters).
+  `OVH_ENDPOINT=ovh-eu` (default) or `ovh-ca`, matching the account's API region.
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, optionally `AWS_SESSION_TOKEN`:
+  existing S3 administrator credentials for that project/region, with bucket
+  creation, ACL, public-block, versioning and lifecycle configuration permissions.
+  The OVH API application key is **not** an S3 administrator key.
+- `KUBECONFIG`: explicit owner configuration for the target cluster; namespaces
+  must already exist, with get/create/patch Secret permissions. Server defaults
+  to `https://hlhedx.c1.bhs5.k8s.ovh.net`; `PRA_EXPECTED_SERVER` is an explicit
+  override when the owner targets a different cluster.
+
+Preproduction, then production (separate owner authorization):
+
+```sh
+make -f deploy/ci/backup-pra.mk backup-provision BACKUP_IMAGE=radar-backup:test PRA_PROVISION_GO=1 BACKUP_ENV=preprod ENV=preprod
+make -f deploy/ci/backup-pra.mk backup-provision BACKUP_IMAGE=radar-backup:test PRA_PROVISION_GO=1 PRA_PRODUCTION_GO=1 BACKUP_ENV=production ENV=prod
+```
+
+The target checks cluster identity and Secret permissions, creates/reuses the
+private bucket, denies public access (private ACL; see the OVH BHS note below),
+enables versioning, applies and reads back
+policies, and creates/reuses users named `radar-pra-<env>-writer|reader|retainer`.
+It matches the exact OVH user **description** (OVH chooses the actual username),
+rejects duplicates or unexpected roles, and reuses the single existing S3 key.
+An interrupted Secret apply can be retried: OVH's secret-retrieval API recovers
+the same key without rotation. Run one provisioning invocation at a time per
+project; cross-host concurrent creation is not protected by a distributed lock.
+An ambiguous API create failure stops, so rerun only once the OVH user/key list
+has converged. Existing enabled, unmanaged lifecycle rules cause a stop for owner
+review; they are never silently replaced. Partial cloud configuration remains
+available for a later retry; there is no destructive rollback.
+
+Lifecycle installs daily=7 days, weekly=28 days (4 weeks), monthly=31 days (the
+explicit approximation of 1 month supported by S3), each under `postgres/<env>/`.
+Those tier prefixes are reserved: the current backup runner still writes one
+copy under `sets/`, retained by 7 represented days / 4 weeks / 1 month. The new
+rules do not claim to create tier copies or implement calendar-month expiration.
+They also clean abandoned multipart uploads after 1 day, noncurrent versions
+after 35 days, expired delete markers, and exercise receipts after 90 days.
+
+Before installing Secrets, a unique encrypted probe is written by writer, read
+by reader and its exact version removed by retainer. The command requires
+AccessDenied for writer deletion (including version deletion), writer setting a
+public object ACL, reader write and
+deletion, and every role listing another prefix. Reader reads back private ACL,
+public block, versioning and lifecycle. Any unsupported operation, unexpected
+error or successful forbidden operation fails the command. The output is a
+secret-free summary; Secret data is piped in memory directly to
+`kubectl apply --server-side --field-manager=radar-pra-provision`, with no
+`--force-conflicts`, temporary secret file or last-applied annotation. Do not
+redirect/tee the internal pipe. Docker receives credentials as environment
+variables: the owner's Docker daemon must be trusted. Kubernetes audit/redaction
+policy remains the owner's responsibility.
+
+It does **not** activate schedules, apply workloads/network policies, perform a
+database backup/restore, copy geo data, migrate/delete legacy users or Secrets,
+rotate keys, create namespaces, or prove disaster recovery. The build lane never
+runs this command against OVH or Kubernetes.
+
+**OVH support and manual fallback.** The public
+[cloud API schema](https://eu.api.ovh.com/1.0/cloud.json), checked 2026-09-18,
+declares POST/GET `/cloud/project/{serviceName}/user`, POST/GET
+`/user/{userId}/policy` (`policy` is a JSON string), GET/POST
+`/user/{userId}/s3Credentials`, and POST
+`/user/{userId}/s3Credentials/{access}/secret`. Policy/key endpoints are marked
+**BETA**. This verifies the API contract, not this project's entitlement, policy
+condition enforcement, propagation delay, BHS public-access-block support, or
+S3 versioning/lifecycle compatibility. No live OVH validation was performed.
+Failures are explicit; the command never substitutes broad permissions.
+
+**OVH BHS S3 public-access — validated live 2026-09-18 (preprod).** BHS returns
+`NotImplemented` (HTTP 501) for `Put/GetPublicAccessBlock` and for
+`Get/PutBucketPolicy`; it DOES support private bucket/object ACLs, versioning,
+lifecycle and SSE AES256. `PutPublicAccessBlock` is therefore skipped on a 501
+(`public_access_block_supported()` returns False; the readback is skipped too),
+and "no public access" rests on four things: the private canned ACL asserted at
+provisioning; the absence of any bucket-policy path to grant public access; the
+writer identity lacking `PutObjectAcl`, which the provisioning probe proves by
+asserting AccessDenied — so no RUNTIME identity can expose an object; and a
+CONTINUOUS control — `backup.py freshness` re-reads the bucket ACL every hour and
+pages if any non-owner/public grant appears. **What this no longer guarantees:** a
+manually-added public grant is DETECTED, not PREVENTED, within the freshness
+cadence (≤1h delay). Only the transitory administration identity
+(provisioning-time, never runtime) can set a public object ACL. Covering that one
+residual would require adding `GetObjectAcl` to the reader for sampled-object
+checks, with i-infra co-validation — deferred, not implicit.
+
+**OVH BHS platform constraints (measured 2026-09-18) and how the design lives within them.**
+The IAM user-policy schema is a subset: it **rejects `NotAction`/`NotResource`**
+(`additionalProperties:false`) and its Action enum **omits `s3:GetObjectVersion`,
+`s3:DeleteObjectVersion`, bucket-policy and public-access-block verbs**. There is
+**no read-only object-storage role** — every object role carries `objectstore_all` —
+so read/write separation is expressed by **policy, not role**. `policy()` therefore
+uses explicit enumerated `Deny` on recognized verbs (measured to contain the
+`objectstore_operator` base role: a scoped writer is denied read, delete, public
+ACL and versioning-suspend, and — being unlisted — version deletion). **Consequence
+for purge:** noncurrent-version cleanup relies on the retainer's current-object
+delete (a delete marker) plus **lifecycle expiry of noncurrent versions**, never on
+`s3:DeleteObjectVersion` (absent from the enum). **Object Lock** (immutability) IS
+available on BHS in GOVERNANCE and COMPLIANCE modes and is enforced (a locked
+version resists deletion without an explicit governance bypass), but it can only be
+enabled **at bucket creation** — an existing bucket without it must be recreated
+empty. `configure_bucket` creates the bucket with Object Lock enabled and refuses a
+pre-existing bucket that lacks it; the default retention **mode and duration are
+owner-chosen** (`OBJECT_LOCK_MODE` = GOVERNANCE|COMPLIANCE, `OBJECT_LOCK_DAYS`), not
+frozen in code, and are left unset until the owner decides. The provisioning probe
+proves the writer isolation above and that a governance-locked version resists
+deletion.
+
+If user creation is unavailable to the API token, the owner can use OVH Manager
+→ Public Cloud → project → Users & Roles to create the three users with the exact
+descriptions above and only ObjectStore operator, then rerun with policy/key API
+rights. For policies, use the OVH API console's import/export endpoints above
+with the exact document produced by `policy()` in `backup-provision.py`, including
+the prefix conditions and explicit denies. If the service itself does not support
+these policies, a broad role in Manager is **not** an equivalent: stop and have
+OVH enable prefix-scoped policies or select a compatible service. For bucket
+settings, use Manager → Object Storage → the dedicated bucket to enable private
+access/versioning and the documented lifecycle rules where available. If public
+block or a required readback is unavailable, obtain an OVH-supported equivalent
+and adapt/retest the provisioning contract before activation; do not bypass a
+failed guard or claim a completed provision.
+
+**Branch proof before merge — run by the authorized k8s lane in this worktree.**
+Commands require Docker, kubectl and jq, registry login provisioned out-of-band,
+and an explicit preproduction KUBECONFIG already set in the lane. The build lane
+does not execute publication, lifecycle or cluster actions. First test/build and
+publish the exact working-tree image (the command saves its immutable registry
+digest in `tmp/backup-pra-image.txt`). Verify the new GHCR package is pullable
+by cluster nodes (the existing runtime-image convention is public packages;
+otherwise infra must supply a pull identity before the proof):
+
+```sh
+make -f deploy/ci/backup-pra.mk backup-test BACKUP_IMAGE=radar-backup:test ENV=test-backup-pra
+make -f deploy/ci/backup-pra.mk backup-publish BACKUP_IMAGE=ghcr.io/rhanka/radar-backup:pra-712-v2 PRA_PUBLISH_GO=1 ENV=preprod
+make -f deploy/ci/backup-pra.mk backup-render ENV=both
+```
+
+After owner provisioning, with preprod secrets/lifecycle/network
+and quota capacity checked, execute the branch proof (no main dependency):
+
+```sh
+make -f deploy/ci/backup-pra.mk backup-proof PRA_CLUSTER_GO=1 ENV=preprod
+```
+
+This renders the branch overlay, server-validates/applies only its settings and
+network (no durable schedule before paired activation), creates unique `radar-pra-backup-*` and
+`radar-pra-restore-*` Jobs, selects the first Job's exact completed S3 object,
+downloads it into the second Job and compares restored counts to the manifest.
+It saves receipts and Job metadata under `tmp/backup-pra-render/`, deletes both
+Jobs after success and checks restore-pod cleanup. It is repeatable; no fixed
+Job name or placeholder survives. A failed wait exits nonzero and preserves the
+failed Job until its one-day TTL for diagnosis. Do not accept an old Job success.
+Record admission events, CNI DNS/HTTPS reachability, peak RSS/ephemeral bytes and
+timings externally: these are not supplied by a successful offline render.
+For the joint frozen exercise, the conductor passes the same `CYCLE_ID` and
+ISO-8601 `REFERENCE_TIME` as Make arguments to `backup-proof`; these reach only
+the dump stage. They label the PG component, without asserting the freeze or
+copying immo/geo objects. The final joint marker belongs to the coordinator.
+
+Memory limits: sequential restore 512 MiB, dump 256 MiB, S3 stages 128 MiB;
+freshness 128 MiB. Maximum scheduled overlap 640 MiB against ~768 MiB reported
+production margin, excluding unrelated Jobs. All containers declare CPU/memory
+and ephemeral requests/limits. Source PVC is never mounted. Check actual quota
+use and avoid refresh overlap. Pod networking allows cluster DNS, the source PG
+for dump, and public HTTPS; standard NetworkPolicy cannot restrict an OVH FQDN.
+Restore PG listens only on its local Unix socket. No service-account token mounts.
+
+**Activation on merge:** both overlays have `suspend:false`. Configure
+`BACKUP_PRA_ENABLED=true`, production environment approval and `PRA_KUBE_CONFIG`
+before merge. The image workflow's `deploy-backup-pra` waits for the new image,
+pins its digest, server-validates both overlays and applies both in a single
+paired operation. The kubeconfig grants get/create/patch on the two CronJobs,
+generated settings ConfigMap and two NetworkPolicies in each namespace; do not
+give it secrets or workload-exec rights. Production application is owner-approved.
+Authorized manual equivalent, using the same pinned image and a kubeconfig scoped
+to both namespaces:
+
+```sh
+make -f deploy/ci/backup-pra.mk backup-activate PRA_CLUSTER_GO=1 PRA_PRODUCTION_GO=1 ENV=both
+```
+
+Kubernetes has no cross-namespace transaction: inspect both outcomes on any apply
+failure and restore the pair under the conductor's owner-approved decision.
+Do not activate one environment and call the release complete. Production storage
+provisioning, paired geo PR acceptance and the premerge proof are release gates.
+
+**Monitoring:** hourly freshness fails if no verified snapshot is younger than
+24h, or receipt/manifest/dump binding fails. Infra installs
+`deploy/k8s/backup-common/alerts.yaml` into the actual monitoring namespace with
+the Prometheus selector labels and immo on-call route. This is separate from app
+overlays because CRD availability is operator-owned. Prove alert delivery before
+activation, including a stopped checker; a failed Job alone is not a delivered
+page. On failure preserve old points, diagnose quota/S3/scheduling, then rerun the
+preprod catch-up proof. The full joint cycle needs its own freshness measurement;
+PG health does not establish document/geo freshness.
+
+**Local checks:** `backup-test` uses network-disabled, automatically removed
+containers and real PG/PostGIS over private Unix sockets; no Compose stack or
+published port. It exercises concurrent source writes, unavailable source during
+restore, corruption, wrong/incomplete manifests, S3 failures, retention, freshness
+and manifest resource/credential guards, plus the existing pre-release tests.
+The isolated PG test verifies counts/extensions/index validity. Business reference
+closure, annotation/API-role access and whole-service RTO remain joint proof gates.
