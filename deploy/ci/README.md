@@ -315,7 +315,8 @@ make -f deploy/ci/backup-pra.mk backup-provision BACKUP_IMAGE=radar-backup:test 
 ```
 
 The target checks cluster identity and Secret permissions, creates/reuses the
-private bucket, blocks public access, enables versioning, applies and reads back
+private bucket, denies public access (private ACL; see the OVH BHS note below),
+enables versioning, applies and reads back
 policies, and creates/reuses users named `radar-pra-<env>-writer|reader|retainer`.
 It matches the exact OVH user **description** (OVH chooses the actual username),
 rejects duplicates or unexpected roles, and reuses the single existing S3 key.
@@ -337,7 +338,8 @@ after 35 days, expired delete markers, and exercise receipts after 90 days.
 
 Before installing Secrets, a unique encrypted probe is written by writer, read
 by reader and its exact version removed by retainer. The command requires
-AccessDenied for writer deletion (including version deletion), reader write and
+AccessDenied for writer deletion (including version deletion), writer setting a
+public object ACL, reader write and
 deletion, and every role listing another prefix. Reader reads back private ACL,
 public block, versioning and lifecycle. Any unsupported operation, unexpected
 error or successful forbidden operation fails the command. The output is a
@@ -363,6 +365,45 @@ declares POST/GET `/cloud/project/{serviceName}/user`, POST/GET
 condition enforcement, propagation delay, BHS public-access-block support, or
 S3 versioning/lifecycle compatibility. No live OVH validation was performed.
 Failures are explicit; the command never substitutes broad permissions.
+
+**OVH BHS S3 public-access — validated live 2026-09-18 (preprod).** BHS returns
+`NotImplemented` (HTTP 501) for `Put/GetPublicAccessBlock` and for
+`Get/PutBucketPolicy`; it DOES support private bucket/object ACLs, versioning,
+lifecycle and SSE AES256. `PutPublicAccessBlock` is therefore skipped on a 501
+(`public_access_block_supported()` returns False; the readback is skipped too),
+and "no public access" rests on four things: the private canned ACL asserted at
+provisioning; the absence of any bucket-policy path to grant public access; the
+writer identity lacking `PutObjectAcl`, which the provisioning probe proves by
+asserting AccessDenied — so no RUNTIME identity can expose an object; and a
+CONTINUOUS control — `backup.py freshness` re-reads the bucket ACL every hour and
+pages if any non-owner/public grant appears. **What this no longer guarantees:** a
+manually-added public grant is DETECTED, not PREVENTED, within the freshness
+cadence (≤1h delay). Only the transitory administration identity
+(provisioning-time, never runtime) can set a public object ACL. Covering that one
+residual would require adding `GetObjectAcl` to the reader for sampled-object
+checks, with i-infra co-validation — deferred, not implicit.
+
+**OVH BHS platform constraints (measured 2026-09-18) and how the design lives within them.**
+The IAM user-policy schema is a subset: it **rejects `NotAction`/`NotResource`**
+(`additionalProperties:false`) and its Action enum **omits `s3:GetObjectVersion`,
+`s3:DeleteObjectVersion`, bucket-policy and public-access-block verbs**. There is
+**no read-only object-storage role** — every object role carries `objectstore_all` —
+so read/write separation is expressed by **policy, not role**. `policy()` therefore
+uses explicit enumerated `Deny` on recognized verbs (measured to contain the
+`objectstore_operator` base role: a scoped writer is denied read, delete, public
+ACL and versioning-suspend, and — being unlisted — version deletion). **Consequence
+for purge:** noncurrent-version cleanup relies on the retainer's current-object
+delete (a delete marker) plus **lifecycle expiry of noncurrent versions**, never on
+`s3:DeleteObjectVersion` (absent from the enum). **Object Lock** (immutability) IS
+available on BHS in GOVERNANCE and COMPLIANCE modes and is enforced (a locked
+version resists deletion without an explicit governance bypass), but it can only be
+enabled **at bucket creation** — an existing bucket without it must be recreated
+empty. `configure_bucket` creates the bucket with Object Lock enabled and refuses a
+pre-existing bucket that lacks it; the default retention **mode and duration are
+owner-chosen** (`OBJECT_LOCK_MODE` = GOVERNANCE|COMPLIANCE, `OBJECT_LOCK_DAYS`), not
+frozen in code, and are left unset until the owner decides. The provisioning probe
+proves the writer isolation above and that a governance-locked version resists
+deletion.
 
 If user creation is unavailable to the API token, the owner can use OVH Manager
 → Public Cloud → project → Users & Roles to create the three users with the exact

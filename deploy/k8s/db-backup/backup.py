@@ -267,10 +267,28 @@ def retain():
                     client.delete_object(Bucket=bucket, Key=item["Key"])
 
 
+def bucket_public_grants(client, bucket):
+    """OVH BHS S3 implements neither PublicAccessBlock nor bucket policies, so
+    "no public access" rests on the private bucket ACL. Re-read it every cycle:
+    any grantee other than the bucket owner (a public AllUsers/AuthenticatedUsers
+    group carries a URI and no owner ID) is a public/third-party grant that must
+    not exist. This DETECTS a manual public grant within the freshness cadence; it
+    does not prevent one. No runtime identity can grant it (writer lacks PutObjectAcl)."""
+    acl = client.get_bucket_acl(Bucket=bucket)
+    owner = acl["Owner"]["ID"]
+    return [{"grantee": g["Grantee"].get("URI") or g["Grantee"].get("ID"), "permission": g["Permission"]}
+            for g in acl["Grants"] if g["Grantee"].get("ID") != owner]
+
+
 def freshness():
-    reports = verified_sets(s3(), os.environ["BACKUP_S3_BUCKET"])
+    client, bucket = s3(), os.environ["BACKUP_S3_BUCKET"]
+    public = bucket_public_grants(client, bucket)
+    print(json.dumps({"event": "backup_bucket_acl", "publicGrants": public}), flush=True)
+    reports = verified_sets(client, bucket)
     age = (now() - max(dt.datetime.fromisoformat(r["snapshotAt"]) for r in reports)).total_seconds() if reports else float("inf")
     print(json.dumps({"event": "backup_freshness", "ageSeconds": age if reports else None, "rpoSeconds": 86400}), flush=True)
+    if public:
+        raise ValueError("bucket ACL exposes a non-owner/public grant; revoke it immediately and page immo on-call")
     if age > 86400 or age < -300:
         raise ValueError("RPO exceeded: no complete verified backup within 24 hours; page immo on-call")
 

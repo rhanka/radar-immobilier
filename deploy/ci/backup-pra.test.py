@@ -26,6 +26,10 @@ class Store:
         self.data = {}
         self.fail = None
         self.uploads = []
+        self.grants = [{'Grantee': {'ID': 'owner'}, 'Permission': 'FULL_CONTROL'}]
+
+    def get_bucket_acl(self, Bucket):
+        return {'Owner': {'ID': 'owner'}, 'Grants': self.grants}
 
     def upload_file(self, path, bucket, key, **kwargs):
         if self.fail and key.endswith(self.fail):
@@ -200,6 +204,22 @@ class BackupTests(unittest.TestCase):
             b.freshness()
         old = [{'snapshotAt': (b.now()-dt.timedelta(hours=25)).isoformat()}]
         with patch.object(b, 'verified_sets', return_value=old), self.assertRaises(ValueError):
+            b.freshness()
+
+    def test_freshness_alerts_on_public_bucket_acl(self):
+        # OVH has no PublicAccessBlock: freshness re-reads the bucket ACL each cycle
+        # and fails (pages) if a non-owner/public grant appears, even when fresh.
+        fresh = [{'snapshotAt': b.now().isoformat()}]
+        self.store.grants = [{'Grantee': {'ID': 'owner'}, 'Permission': 'FULL_CONTROL'},
+                             {'Grantee': {'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'},
+                              'Permission': 'READ'}]
+        with patch.object(b, 'verified_sets', return_value=fresh):
+            with self.assertRaisesRegex(ValueError, 'ACL'):
+                b.freshness()
+
+    def test_freshness_passes_with_private_acl_and_fresh_point(self):
+        fresh = [{'snapshotAt': b.now().isoformat()}]
+        with patch.object(b, 'verified_sets', return_value=fresh):
             b.freshness()
 
     def test_secret_examples_have_exactly_three_identities_per_environment(self):
