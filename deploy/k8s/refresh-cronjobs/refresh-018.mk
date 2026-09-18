@@ -23,7 +23,7 @@ inspect-preprod: guard-preprod
 	@for check in 'get cronjobs.batch' 'create cronjobs.batch' 'create jobs.batch' 'get secrets' 'create secrets' 'get persistentvolumeclaims' 'create persistentvolumeclaims'; do \
 	  set -- $$check; printf '%-34s %s\n' "$$1 $$2" "$$($(K) auth can-i "$$1" "$$2")"; \
 	done
-	@$(K) get cronjob radar-refresh-scrape radar-refresh-projection radar-refresh-pv --ignore-not-found \
+	@$(K) get cronjob radar-refresh-pv --ignore-not-found \
 	  -o custom-columns=NAME:.metadata.name,SUSPEND:.spec.suspend,SCHEDULE:.spec.schedule,IMAGE:.spec.jobTemplate.spec.template.spec.containers[0].image
 	@if [ "$$($(K) auth can-i get secrets)" = yes ]; then \
 	  $(K) get secret radar-refresh-keyring-bootstrap radar-refresh-runtime --ignore-not-found -o name; \
@@ -136,13 +136,12 @@ verify-renders:
 	  for render in "$$tmp/preprod.yaml" "$$tmp/prod.yaml"; do \
 	    test -s "$$render" || { echo "empty refresh render: $$render" >&2; exit 1; }; \
 	    awk 'BEGIN{RS="\n---\n"} /[^[:space:]]/ { if ($$0 !~ /apiVersion:/ || $$0 !~ /kind:/) { print "missing apiVersion/kind in refresh render" > "/dev/stderr"; bad=1 } } END{ exit bad }' "$$render"; \
-	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 3 \
-	      || { echo "refresh render must contain exactly three CronJobs: $$render" >&2; exit 1; }; \
+	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 1 \
+	      || { echo "refresh render must contain exactly one CronJob: $$render" >&2; exit 1; }; \
 	    test "$$(grep -c '^kind: PersistentVolumeClaim$$' "$$render")" -eq 1; \
 	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ { \
 	      pv=($$0 ~ /name: radar-refresh-pv\n/); \
-	      if (pv && $$0 !~ /suspend: false/) exit 1; \
-	      if (!pv && $$0 !~ /suspend: true/) exit 1; \
+	      if (!pv || $$0 !~ /suspend: false/) exit 1; \
 	      if (pv && ($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: openai\n/ \
 	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_REASONING_EFFORT\n[ ]+value: low\n/ \

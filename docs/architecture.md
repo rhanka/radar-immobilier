@@ -1,5 +1,19 @@
 # Architecture de référence — hébergement et pipeline
 
+## Current refresh contract — 2026-09-18
+
+`deploy/k8s/34-refresh-cronjob.yaml` now declares only `radar-refresh-pv`
+(05:17 UTC): bounded PV acquisition, extraction, canonical publication and
+PostgreSQL projection in one workload. Both refresh overlays emit this CronJob
+and the keyring PVC. The base is suspended; both release overlays activate it.
+The on-demand bulk scrape Job `deploy/k8s/33-scrape-job.yaml` remains available.
+The consistency snapshot remains independently suspended. These are repository
+contracts, not a fresh cluster observation.
+
+The dated diagrams, Focus scenes and inspection tables below are historical
+snapshots (July through September 13); their former refresh pair and observed
+runtime states do not describe the current manifests.
+
 Source canonique des cinq scènes Focus et du rapport. Les cinq scènes dérivent
 du diagramme du dossier de décision `codex-13-sept`
 (`tmp/architecture-preprod-transition/docs/architecture/decision-focus.html`,
