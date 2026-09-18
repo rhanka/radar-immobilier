@@ -1,5 +1,5 @@
 # Activate only the causal PV-to-Signal refresh at 05:17 UTC.
-# Legacy scrape/projection stay suspended; storage comes from the base.
+# Storage comes from the base (legacy scrape/projection CronJobs removed 2026-09-18).
 #
 # Applied only by the gated promote-prod "Deploy refresh CronJobs (prod)" step.
 # The fail-loud image placeholder must be replaced by `kustomize edit set image`
