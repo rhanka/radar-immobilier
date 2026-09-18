@@ -64,8 +64,8 @@ spec:
           envFrom: [{ configMapRef: { name: radar-pra-settings } }]
           env:
             - name: AWS_ACCESS_KEY_ID
-              valueFrom: { secretKeyRef: { name: radar-pra-reporter, key: S3_ACCESS_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-pra-writer, key: S3_ACCESS_KEY } }
             - name: AWS_SECRET_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-pra-reporter, key: S3_SECRET_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-pra-writer, key: S3_SECRET_KEY } }
           volumeMounts:
             - { name: work, mountPath: /work }

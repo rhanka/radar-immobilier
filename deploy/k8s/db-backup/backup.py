@@ -275,23 +275,6 @@ def freshness():
         raise ValueError("RPO exceeded: no complete verified backup within 24 hours; page immo on-call")
 
 
-def lifecycle():
-    # No expiration of current complete sets: count-based pruning owns those.
-    policy = {"Rules": [{"ID": "postgres-abandoned-and-deleted", "Status": "Enabled",
-                         "Filter": {"Prefix": "postgres/"}, "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 1},
-                         "NoncurrentVersionExpiration": {"NoncurrentDays": 35},
-                         "Expiration": {"ExpiredObjectDeleteMarker": True}},
-                        {"ID": "exercise-receipts", "Status": "Enabled",
-                         "Filter": {"Prefix": "postgres/" + os.environ["BACKUP_ENV"] + "/exercises/"},
-                         "Expiration": {"Days": 90}}]}
-    client, bucket = s3(), os.environ["BACKUP_S3_BUCKET"]
-    client.put_bucket_lifecycle_configuration(Bucket=bucket, LifecycleConfiguration=policy)
-    actual = client.get_bucket_lifecycle_configuration(Bucket=bucket)
-    if actual["Rules"] != policy["Rules"]:
-        raise ValueError("lifecycle readback mismatch")
-    print(json.dumps({"bucket": bucket, "lifecycle": actual["Rules"]}))
-
-
 if __name__ == "__main__":
-    actions = {f.__name__: f for f in (dump, upload, download, restore, report, retain, freshness, lifecycle)}
+    actions = {f.__name__: f for f in (dump, upload, download, restore, report, retain, freshness)}
     actions[sys.argv[1]]()

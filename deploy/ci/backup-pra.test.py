@@ -51,12 +51,6 @@ class Store:
     def delete_object(self, Bucket, Key):
         del self.data[Key]
 
-    def put_bucket_lifecycle_configuration(self, Bucket, LifecycleConfiguration):
-        self.policy = LifecycleConfiguration
-
-    def get_bucket_lifecycle_configuration(self, Bucket):
-        return self.policy
-
 
 class BackupTests(unittest.TestCase):
     @classmethod
@@ -208,11 +202,11 @@ class BackupTests(unittest.TestCase):
         with patch.object(b, 'verified_sets', return_value=old), self.assertRaises(ValueError):
             b.freshness()
 
-    def test_lifecycle_never_expires_current_complete_sets(self):
-        b.lifecycle()
-        rule = self.store.policy['Rules'][0]
-        self.assertNotIn('Days', rule['Expiration'])
-        self.assertEqual(rule['AbortIncompleteMultipartUpload']['DaysAfterInitiation'], 1)
+    def test_secret_examples_have_exactly_three_identities_per_environment(self):
+        docs = list(yaml.safe_load_all((ROOT / 'deploy/k8s/backup-common/secrets.example.yaml').read_text()))
+        for ns in ('radar-immobilier', 'radar-immobilier-preprod'):
+            names = [d['metadata']['name'] for d in docs if d['metadata']['namespace'] == ns]
+            self.assertCountEqual(names, ['radar-pra-writer', 'radar-pra-reader', 'radar-pra-retainer'])
 
     def test_retention_only_deletes_expired_unverified_after_a_good_point(self):
         key = 'postgres/preprod/sets/orphan/backup.dump'
@@ -309,6 +303,12 @@ class ManifestTests(unittest.TestCase):
                 if container['name'] == 'restore-and-verify':
                     self.assertNotIn('PGPASSWORD', names)
                     self.assertNotIn('AWS_SECRET_ACCESS_KEY', names)
+                role = {'upload': 'writer', 'report': 'writer', 'download': 'reader',
+                        'freshness': 'reader', 'retain': 'retainer'}.get(container['name'])
+                if role:
+                    for entry in container['env']:
+                        if entry['name'].startswith('AWS_'):
+                            self.assertEqual(entry['valueFrom']['secretKeyRef']['name'], 'radar-pra-' + role)
             self.assertLessEqual(max(limits), 512)
             self.assertTrue(all('persistentVolumeClaim' not in v for v in pod['volumes']))
             if doc['kind'] == 'CronJob':

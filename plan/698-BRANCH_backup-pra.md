@@ -25,6 +25,10 @@
 - [ ] Lane k8s executes branch-rendered preproduction proof before merge; owner authorizes production application.
 
 ## Plan / Todo (lot-based)
+- [x] V3: consolidate S3 roles into writer (including receipt writes), read-only reader (including bucket settings), isolated retainer; preserve the non-secret settings ConfigMap and other non-S3 resource names.
+- [x] V3: owner-only idempotent backup-provision with OVH policy/key reuse, private versioned buckets, lifecycle, denial probes and server-side Secret apply through stdin.
+- [x] V3: offline backup-test passes 18 backup tests, 12 provisioning tests and 26 runner assertions; absent-guard/environment Make invocations fail before external commands. Docker-only tests use --rm with no Compose stack/volumes; no down -v needed.
+- [ ] V3: owner live OVH/cluster execution remains external; API policy/credential routes are BETA, project entitlement and S3 enforcement/public-block support remain unverified.
 - [x] Lot 0: read rules, complete brief and both contradictory reviews; inspect actual scripts and CD path.
 - [x] Lot 1: coherent dump manifest, isolated restore, retention, freshness and failure tests (18 tests + 26 existing assertions pass).
 - [x] Lot 2: resources, credentials, network, dedicated active overlays and branch proof commands; both overlays and base render offline.

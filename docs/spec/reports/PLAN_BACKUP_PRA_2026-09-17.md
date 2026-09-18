@@ -144,10 +144,15 @@ points. Prune only after a successful verification report; read/list/delete
 failures fail the Job. Incomplete/unverified attempts older than 48h are removed
 only when a verified point exists. Never sacrifice the last good point.
 
-Infra applies/readbacks the lifecycle using `make -f deploy/ci/backup-pra.mk
-backup-lifecycle` BEFORE activation. These dedicated buckets must not contain
-other applications' lifecycle rules. Current complete sets have NO age expiration.
-Execution owner: the k8s lane; accountable owner: immo conductor `i-cond`.
+The owner provisions each environment with `make -f deploy/ci/backup-pra.mk
+backup-provision` BEFORE activation (guards and exact commands in the runbook).
+Three S3 identities per environment: writer uploads sets/receipts without deletion,
+reader handles restore/freshness/configuration reads without writes, retainer alone
+deletes. Non-secret runtime configuration is `radar-pra-settings`.
+Unmanaged enabled lifecycle rules require owner review. Current complete sets
+have NO age expiration. Reserved daily/weekly/monthly prefixes expire after
+7/28/31 days; these do not change the current count-based sets layout.
+Execution owner: the infrastructure owner; accountable owner: immo conductor `i-cond`.
 Abort incomplete multipart uploads after one day, expire noncurrent versions after
 35 days and expired delete markers. Per-exercise receipts expire after 90 days;
 current verified receipts follow count retention. Not WORM. When no successful
