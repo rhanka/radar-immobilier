@@ -53,6 +53,35 @@ enroll-cloud-code:
 	  -v "$(OVERLAY)/enroll-cloud-code.mjs:/workspace/enroll-cloud-code.mjs:ro" "$(LOCAL_IMAGE)" \
 	  node /workspace/enroll-cloud-code.mjs
 
+.PHONY: enroll-codex
+enroll-codex:
+	@test "$(ENV)" = "test-refresh-018" || { echo "ENV=test-refresh-018 is required" >&2; exit 1; }
+	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
+	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
+	@test -n "$(REFRESH_OWNER_SCOPE_REF)" || { echo "REFRESH_OWNER_SCOPE_REF is required" >&2; exit 1; }
+	@docker run --rm --network host --user "$$(id -u):$$(id -g)" \
+	  -e REFRESH_OWNER_SCOPE_REF="$(REFRESH_OWNER_SCOPE_REF)" \
+	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
+	  -v "$(OVERLAY)/enroll-codex.mjs:/workspace/enroll-codex.mjs:ro" "$(LOCAL_IMAGE)" \
+	  node /workspace/enroll-codex.mjs
+
+.PHONY: import-keyring-account
+import-keyring-account:
+	@[[ "$(IMPORT_IMAGE_REF)" =~ ^ghcr\\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
+	  || { echo "IMPORT_IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
+	@test -d "$(IMPORT_SOURCE_DIR)" -a -f "$(IMPORT_SOURCE_DIR)/.key" \
+	  || { echo "IMPORT_SOURCE_DIR with .key is required" >&2; exit 1; }
+	@test -n "$(IMPORT_RENDER_OUT)" || { echo "IMPORT_RENDER_OUT is required" >&2; exit 1; }
+	@set -o pipefail; umask 077; { \
+	  kubectl create secret generic radar-refresh-keyring-account-import \
+	    --from-file="$(IMPORT_SOURCE_DIR)" --dry-run=client -o yaml; echo ---; \
+	  kubectl kustomize --load-restrictor LoadRestrictionsNone "$(OVERLAY)/keyring-import" \
+	    | sed "s#$(PLACEHOLDER)#$(IMPORT_IMAGE_REF)#g"; \
+	} > "$(IMPORT_RENDER_OUT)"
+	@test "$$(grep -c '^kind: Job$$' "$(IMPORT_RENDER_OUT)")" -eq 1
+	@test "$$(grep -c '^kind: Secret$$' "$(IMPORT_RENDER_OUT)")" -eq 1
+	@! grep -q 'PINNED-BY-CI\|radar-api:latest' "$(IMPORT_RENDER_OUT)"
+
 .PHONY: consent-cloud-code
 consent-cloud-code:
 	@test "$(ENV)" = "test-refresh-018" || { echo "ENV=test-refresh-018 is required" >&2; exit 1; }
@@ -114,9 +143,13 @@ verify-renders:
 	      pv=($$0 ~ /name: radar-refresh-pv\n/); \
 	      if (pv && $$0 !~ /suspend: false/) exit 1; \
 	      if (!pv && $$0 !~ /suspend: true/) exit 1; \
-	      if (pv && ($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: gemini\n/ \
-	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
-	        || $$0 !~ /name: REFRESH_REASONING_EFFORT\n[ ]+value: medium\n/ \
+	      if (pv && ($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: openai\n/ \
+	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gpt-6-astra\n/ \
+	        || $$0 !~ /name: REFRESH_REASONING_EFFORT\n[ ]+value: low\n/ \
+	        || $$0 !~ /name: REFRESH_PRIMARY_QUALITY_ATTEMPTS\n[ ]+value: "2"/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_MAX_OUTPUT_TOKENS\n[ ]+value: "32768"/)) exit 1; \
 	    }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
 	    awk 'function flush(){if(active && literal && reference){print "mixed value/valueFrom: " name > "/dev/stderr"; bad=1} literal=0; reference=0} \
@@ -184,7 +217,7 @@ observe-scheduled-preprod: guard-preprod
 	    -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.ownerReferences[0].name}{"\t"}{.metadata.creationTimestamp}{"\n"}{end}' \
 	    | awk '$$2 == "radar-refresh-pv" { print }' | sort -k3 | tail -1 | cut -f1)"; \
 	  test -n "$$job" || { echo "Scheduled Job owner reference not found" >&2; exit 1; }; \
-	  $(K) wait --for=condition=complete "job/$$job" --timeout=1200s; \
+	  $(K) wait --for=condition=complete "job/$$job" --timeout=2100s; \
 	  $(K) get "job/$$job" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,IMAGE:.spec.template.spec.containers[0].image,START:.status.startTime,END:.status.completionTime; \
 	  $(K) logs "job/$$job" --all-containers=true
 

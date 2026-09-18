@@ -1,0 +1,2 @@
+{"id":"proof-qualified","citySlug":"salaberry-de-valleyfield","type":"Signal","category":"rezonage","label":"Projet de règlement — 24 logements","description":"Usage résidentiel","etapeAnnote":"projet_reglement","props":{"properties":{"category":"rezonage","etape":"projet_reglement"}},"sourceRef":"raw/proof.pdf"}
+{"id":"proof-excluded","citySlug":"sainte-martine","type":"Signal","category":"rezonage","label":"Usages commerciaux zone C-8","etapeAnnote":"avis_motion","props":{"properties":{"category":"rezonage","etape":"avis_motion"}},"sourceRef":"raw/proof-2.pdf"}

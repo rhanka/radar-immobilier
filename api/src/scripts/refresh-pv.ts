@@ -11,6 +11,7 @@ import { createLogger } from "../logger.js";
 import {
   createRefreshMesh, refreshErrorDiagnostic, type RefreshProvider,
 } from "../services/graph/refresh-mesh.js";
+import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/refresh-model-policy.js";
 import { loadRefreshProfileContext } from "../services/graph/refresh-profile.js";
 import { runPvRefresh, type RefreshAcquire } from "../services/graph/refresh-run.js";
 import { canonicalHash } from "../services/graph/replay/canonical-json.js";
@@ -33,10 +34,14 @@ function positive(name: string, fallback: number, maximum: number): number {
   return value;
 }
 
-function provider(): RefreshProvider {
-  const value = required("REFRESH_PROVIDER");
-  if (value !== "openai" && value !== "gemini") throw new Error("REFRESH_PROVIDER must be openai or gemini");
-  return value;
+function selectedModel(prefix: string): RefreshModel {
+  const provider = required(`${prefix}_PROVIDER`);
+  if (provider !== "openai" && provider !== "gemini") throw new Error(`${prefix}_PROVIDER must be openai or gemini`);
+  const effort = required(`${prefix}_REASONING_EFFORT`);
+  if (!["minimal", "low", "medium", "high", "xhigh"].includes(effort)) {
+    throw new Error(`${prefix}_REASONING_EFFORT is invalid`);
+  }
+  return { provider: provider as RefreshProvider, model: required(`${prefix}_MODEL`), effort };
 }
 
 async function seedSavedInput(store: S3ObjectStore, city: string): Promise<RefreshAcquire | undefined> {
@@ -67,67 +72,54 @@ async function main(): Promise<void> {
   const logger = createLogger(config.LOG_LEVEL);
   const store = getScrapeObjectStore(config);
   const { db, pool } = createDb(config);
-  const controller = new AbortController();
   const timeoutMs = positive("REFRESH_TIMEOUT_MS", 900_000, 3_600_000);
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  const selectedProvider = provider();
-  const model = required("REFRESH_MODEL");
-  const effort = required("REFRESH_REASONING_EFFORT");
-  const maximumAttempts = positive("REFRESH_MAXIMUM_ATTEMPTS", 2, 8);
-  if (!["minimal", "low", "medium", "high", "xhigh"].includes(effort)) {
-    throw new Error("REFRESH_REASONING_EFFORT is invalid");
-  }
+  const primary = selectedModel("REFRESH");
+  const fallback = selectedModel("REFRESH_FALLBACK");
+  // The explicit policy owns bounded quality retries; Graphify gets one route attempt.
+  const maximumAttempts = positive("REFRESH_MAXIMUM_ATTEMPTS", 1, 1);
+  const primaryQualityAttempts = positive("REFRESH_PRIMARY_QUALITY_ATTEMPTS", 2, 10);
   const profileContext = loadRefreshProfileContext({ root: process.cwd(), profilePath,
     unregisteredOnly: true });
   const acquire = await seedSavedInput(store, city);
-  const bundle = createRefreshMesh({
+  const common = {
     routingSubject: { principalRef: required("REFRESH_PRINCIPAL_REF"),
       ownerScopeRef: required("REFRESH_OWNER_SCOPE_REF") },
     configResolver: { async resolveConfig() { return {}; } },
     keyring: new EncryptedFileKeyring(required("SENTROPIC_LLM_MESH_KEYRING_DIR")),
-    provider: selectedProvider, model, maximumAttempts,
-    reasoning: { effort: effort as "medium" }, signal: controller.signal,
+    maximumAttempts,
+  };
+  const documentModels = createRefreshModelPolicy({ primary, fallback, primaryQualityAttempts, timeoutMs,
+    forceFallback: process.env.REFRESH_FORCE_FALLBACK === "1",
+    createClient: (model, signal) => createRefreshMesh({ ...common,
+      provider: model.provider, model: model.model,
+      reasoning: { effort: model.effort as "low" }, signal }).textClient,
   });
   let modelCalls = 0;
-  const measuredTextClient = { ...bundle.textClient,
-    async generateJson(input: Parameters<typeof bundle.textClient.generateJson>[0]) {
-      modelCalls += 1;
-      const startedAt = Date.now();
-      const schemaSha256 = createHash("sha256").update(input.schema).digest("hex");
-      const promptSha256 = createHash("sha256").update(input.prompt).digest("hex");
-      const receipt = { modelCalls, provider: selectedProvider, model, effort, schemaSha256, promptSha256 };
-      try {
-        const result = await bundle.textClient.generateJson(input);
-        logger.info({ ...receipt, latencyMs: Date.now() - startedAt,
-          status: "completed" }, "refresh-pv: model call completed");
-        return result;
-      } catch (error) {
-        logger.warn({ ...receipt, latencyMs: Date.now() - startedAt, status: "failed",
-          aborted: controller.signal.aborted, ...refreshErrorDiagnostic(error) }, "refresh-pv: model call failed");
-        throw error;
-      }
-    } };
-  logger.info({ city, provider: selectedProvider, model, effort, maximumAttempts, timeoutMs },
+  logger.info({ city, modelPolicy: documentModels.policy, maximumAttempts, primaryQualityAttempts, timeoutMs },
     "refresh-pv: starting");
   try {
     const result = await runPvRefresh({ citySlug: city, store, db, profileContext,
-      textClient: measuredTextClient, extractPdf: async (bytes, url) => pdfToTextViaPoppler(url)(bytes, 30_000),
+      documentModels,
+      onModelReceipt(docSha, chunkId, receipt) {
+        modelCalls += 1;
+        logger.info({ docSha, chunkId, modelCalls, ...receipt }, "refresh-pv: model receipt");
+      },
+      extractPdf: async (bytes, url) => pdfToTextViaPoppler(url)(bytes, 30_000),
       profileHash: profileContext.profile.profile_hash,
       registryHash: canonicalHash(profileContext.registryExtraction), packageVersion: "0.18.0",
-      modelPolicy: `${selectedProvider}/${model}/${effort}`,
+      modelPolicy: documentModels.policy,
       budgetLimit: positive("REFRESH_BUDGET_LIMIT", 20_000, 1_000_000),
       maximumAttempts,
       maxOutputTokens: positive("REFRESH_MAX_OUTPUT_TOKENS", 32_768, 65_536),
-      acquisitionLimit: positive("REFRESH_ACQUISITION_LIMIT", 1, 100), signal: controller.signal,
+      acquisitionLimit: positive("REFRESH_ACQUISITION_LIMIT", 1, 100),
       ...(acquire ? { acquire } : {}) });
     logger.info({ ...result, modelCalls }, "refresh-pv: completed");
   } finally {
-    clearTimeout(timeout);
     await pool.end();
   }
 }
 
 main().catch((error: unknown) => {
-  console.error(error instanceof Error ? error.message : String(error));
+  console.error("refresh-pv: failed", refreshErrorDiagnostic(error));
   process.exitCode = 1;
 });
