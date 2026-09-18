@@ -24,6 +24,7 @@ import {
   type PdfToText,
   type PvCityConfig,
   type PvFetchLike,
+  type PvFetchDiagnostic,
   type RawDocumentRef,
 } from "@radar/sources";
 
@@ -39,6 +40,7 @@ import { runRecueilWithManifest } from "./recueil.js";
 
 /** Per-city outcome of a live scrape run. */
 export interface LiveScrapeCityRecap {
+  readonly fetchFailure?: PvFetchDiagnostic;
   /** City slug (e.g. "carignan"). */
   readonly city: string;
   /** Source id of the PV source (e.g. "proces-verbaux-carignan"). */
@@ -71,6 +73,9 @@ export interface LiveScrapeCityRecap {
 }
 
 export interface RunLiveScrapeOptions {
+  readonly onRequest?: (diagnostic: PvFetchDiagnostic & { city: string }) => void;
+  /** Negotiation experiment, disabled by default. */
+  readonly negotiateHeaders?: boolean;
   /** Scraping object store (use `getScrapeObjectStore(config)` in production). */
   readonly store: ObjectStore;
   /** Injected fetch for the PV adapter (tests). Defaults to globalThis.fetch. */
@@ -196,7 +201,7 @@ export async function runLiveScrape(
   citySlugs: readonly string[] | undefined,
   options: RunLiveScrapeOptions,
 ): Promise<LiveScrapeCityRecap[]> {
-  const { store, fetch, limit, acceptRef, beforeFetch, windowDays, now, signal,
+  const { store, fetch, limit, acceptRef, beforeFetch, windowDays, now, signal, onRequest,
     exploit, reexploit, db } =
     options;
   const { configs, unknown } = resolveConfigs(citySlugs);
@@ -290,6 +295,9 @@ export async function runLiveScrape(
     }
 
     const adapter = new ProcesVerbauxGenericAdapter(config, {
+      ...(onRequest ? { onRequest: (diagnostic: PvFetchDiagnostic) =>
+        onRequest({ city: config.citySlug, ...diagnostic }) } : {}),
+      ...(options.negotiateHeaders !== undefined ? { negotiateHeaders: options.negotiateHeaders } : {}),
       ...(fetch !== undefined ? { fetchImpl: fetch } : {}),
       ...(windowDays !== undefined ? { windowDays } : {}),
       ...(now !== undefined ? { now } : {}),
@@ -310,6 +318,7 @@ export async function runLiveScrape(
         casKeys: [],
         count: 0,
         error: `[${outcome.error}] ${outcome.detail}`,
+        ...(outcome.fetchFailure ? { fetchFailure: outcome.fetchFailure } : {}),
       });
       continue;
     }

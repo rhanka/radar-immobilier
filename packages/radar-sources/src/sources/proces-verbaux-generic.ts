@@ -26,6 +26,31 @@ export const PV_ADAPTER_VERSION = "0.1.0";
 export const PV_USER_AGENT =
   "radar-immobilier/0.1 (+https://github.com/rhanka/radar-immobilier)";
 
+/** Opt-in negotiation experiment; the identifiable agent never changes. */
+export function pvRequestHeaders(accept: string, negotiate = false): Record<string, string> {
+  const preferred = accept.split(",").filter((value) => value.trim() !== "*/*").join(",");
+  return {
+    "user-agent": PV_USER_AGENT,
+    accept: negotiate
+      ? `${preferred ? `${preferred},` : ""}application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`
+      : accept,
+    ...(negotiate ? { "accept-language": "fr-CA,fr;q=0.9" } : {}),
+  };
+}
+
+export type PvFetchPhase = "index" | "document";
+export type PvDiagnosticHeaders = Partial<Record<
+  "server" | "cf-ray" | "cf-mitigated" | "location" | "content-type", string
+>>;
+export interface PvFetchDiagnostic {
+  readonly url: string;
+  readonly phase: PvFetchPhase;
+  readonly httpStatus: number | null;
+  /** Time to response headers (or transport failure), excluding body download. */
+  readonly durationMs: number;
+  readonly headers: PvDiagnosticHeaders;
+}
+
 /** Hard cap per fetch so a slow/hanging source never blocks the request. */
 const FETCH_TIMEOUT_MS = 15_000;
 
@@ -152,6 +177,10 @@ export class PvSourceFetchError extends Error {
     readonly kind: PvSourceErrorKind,
     readonly detail: string,
     readonly url: string,
+    readonly phase: PvFetchPhase,
+    readonly httpStatus: number | null = null,
+    readonly headers: PvDiagnosticHeaders = {},
+    readonly durationMs: number = 0,
   ) {
     super(`[${kind}] ${detail}`);
     this.name = "PvSourceFetchError";
@@ -206,6 +235,10 @@ export interface PvCityConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface PvAdapterOptions {
+  /** Structured request telemetry; defaults to one JSON console line per fetch. */
+  readonly onRequest?: (diagnostic: PvFetchDiagnostic) => void;
+  /** Disabled by default until the preproduction probe establishes efficacy. */
+  readonly negotiateHeaders?: boolean;
   /** Inject a mock fetch in tests; defaults to globalThis.fetch. */
   readonly fetchImpl?: PvFetchLike;
   /** Per-fetch timeout in ms; defaults to FETCH_TIMEOUT_MS. */
@@ -247,6 +280,8 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
   private readonly timeoutMs: number;
   private readonly now: () => Date;
   private readonly windowDays: number;
+  private readonly onRequest: (diagnostic: PvFetchDiagnostic) => void;
+  private readonly negotiateHeaders: boolean;
 
   constructor(config: PvCityConfig, options: PvAdapterOptions = {}) {
     this.config = config;
@@ -256,6 +291,9 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
     this.timeoutMs = options.timeoutMs ?? FETCH_TIMEOUT_MS;
     this.now = options.now ?? (() => new Date());
     this.windowDays = options.windowDays ?? DEFAULT_WINDOW_DAYS;
+    this.onRequest = options.onRequest ?? ((diagnostic) =>
+      console.info(JSON.stringify({ event: "pv-fetch", city: this.city, ...diagnostic })));
+    this.negotiateHeaders = options.negotiateHeaders ?? false;
   }
 
   // ── helpers ────────────────────────────────────────────────────────────────
@@ -275,34 +313,47 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
    */
   private async fetchWithTimeout(
     url: string,
+    phase: PvFetchPhase,
     accept = "*/*",
   ): Promise<Awaited<ReturnType<PvFetchLike>>> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    const started = this.now().getTime();
+    let httpStatus: number | null = null;
+    const headers: PvDiagnosticHeaders = {};
     try {
       let res: Awaited<ReturnType<PvFetchLike>>;
       try {
         res = await this.fetchImpl(url, {
           signal: controller.signal,
-          headers: {
-            "user-agent": PV_USER_AGENT,
-            accept,
-          },
+          headers: pvRequestHeaders(accept, this.negotiateHeaders),
         });
       } catch (e) {
         const isAbort = e instanceof Error && e.name === "AbortError";
         throw new PvSourceFetchError(
           isAbort ? "timeout" : "network",
-          e instanceof Error ? e.message : String(e),
+          isAbort ? "Request timed out" : "Network request failed",
           url,
+          phase,
+          null,
+          headers,
+          Math.max(0, this.now().getTime() - started),
         );
       }
+      httpStatus = res.status;
+      for (const name of ["server", "cf-ray", "cf-mitigated", "location", "content-type"] as const) {
+        const value = res.headers.get(name);
+        if (value !== null) headers[name] = value;
+      }
       if (!res.ok) {
-        throw new PvSourceFetchError("http", `HTTP ${res.status}`, url);
+        throw new PvSourceFetchError("http", `HTTP ${res.status}`, url, phase,
+          httpStatus, headers, Math.max(0, this.now().getTime() - started));
       }
       return res;
     } finally {
       clearTimeout(timer);
+      this.onRequest({ url, phase, httpStatus, headers,
+        durationMs: Math.max(0, this.now().getTime() - started) });
     }
   }
 
@@ -351,11 +402,13 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
           "parse",
           "sitemap-driven discovery requires sitemapUrl",
           this.config.pvIndexUrl,
+          "index",
         );
       }
 
       const sitemapRes = await this.fetchWithTimeout(
         sitemapUrl,
+        "index",
         "application/xml,text/xml",
       );
       const sitemapXml = new TextDecoder("utf-8").decode(
@@ -374,7 +427,7 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
       for (const session of sessions) {
         if (opts.signal?.aborted) break;
 
-        const pageRes = await this.fetchWithTimeout(session.url, "text/html");
+        const pageRes = await this.fetchWithTimeout(session.url, "document", "text/html");
         const pageHtml = new TextDecoder("utf-8").decode(
           new Uint8Array(await pageRes.arrayBuffer()),
         );
@@ -396,6 +449,7 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
     //    failure; the RECUEIL job catches it — no wrapper needed here.
     const indexRes = await this.fetchWithTimeout(
       this.config.pvIndexUrl,
+      "index",
       "text/html",
     );
     const indexHtml = new TextDecoder("utf-8").decode(
@@ -436,7 +490,7 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
     const isPdf = ref.url.toLowerCase().endsWith(".pdf");
     const accept = isPdf ? "application/pdf" : "text/html,*/*";
 
-    const res = await this.fetchWithTimeout(ref.url, accept);
+    const res = await this.fetchWithTimeout(ref.url, "document", accept);
     const arrayBuffer = await res.arrayBuffer();
     const body = new Uint8Array(arrayBuffer);
     const contentType =

@@ -24,6 +24,33 @@ const base = {
 } as const;
 
 describe("assessJobHealth", () => {
+  it("should name every lost index below the rate thresholds", () => {
+    const h = assessJobHealth({ ...base, errorCount: 2, index404Cities: ["drummondville", "another-city"] });
+    expect(h).toEqual({
+      code: 0, warn: "elevated",
+      reason: "PV index HTTP 404 — entire source unavailable: drummondville, another-city",
+    });
+  });
+
+  it("should tolerate an isolated document 404 without claiming an index is lost", () => {
+    const h = assessJobHealth({ ...base, errorCount: 1, index404Cities: [] });
+    expect(h.code).toBe(0);
+    expect(h.warn).toBe("normal");
+    expect(h.reason).not.toContain("index");
+  });
+
+  it.each([
+    { errorCount: 500 },
+    { exploitRequested: true, pdftotextAvailable: false },
+    { feedExpected: true, upserted: 0 },
+  ])("should retain index warnings alongside systemic failure %j", (failure) => {
+    const h = assessJobHealth({ ...base, ...failure, index404Cities: ["drummondville"] });
+    expect(h.code).toBe(1);
+    expect(h.warn).toBe("elevated");
+    expect(h.reason).toContain("systemic");
+    expect(h.reason).toContain("PV index HTTP 404 — entire source unavailable: drummondville");
+  });
+
   it("cityCount 0 → 0 / none (no cities processed, not a failure)", () => {
     expect(assessJobHealth({ ...base, cityCount: 0 })).toEqual({
       code: 0,

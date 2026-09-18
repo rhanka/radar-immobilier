@@ -212,6 +212,7 @@ async function main(): Promise<number> {
     resetRecueilMetrics();
     const recap = await runLiveScrape(slugs, {
       store,
+      onRequest: (diagnostic) => logger.info(diagnostic, "worker-live: PV request"),
       ...(limit !== undefined && Number.isFinite(limit) ? { limit } : {}),
       ...(exploit ? { exploit: true } : {}),
       ...(reexploit ? { reexploit: true } : {}),
@@ -227,6 +228,7 @@ async function main(): Promise<number> {
             docs: r.count,
             signals: r.signals,
             error: r.error ?? r.exploitError,
+            ...r.fetchFailure,
           },
           `worker-live: ${r.city} → ${r.status}`,
         ),
@@ -282,6 +284,8 @@ async function main(): Promise<number> {
       feedExpected: pgFeed.feed,
       upserted,
       pdftotextAvailable,
+      index404Cities: recap.filter((r) => r.fetchFailure?.phase === "index" &&
+        r.fetchFailure.httpStatus === 404).map((r) => r.city),
     });
 
     if (health.code === 1) {
