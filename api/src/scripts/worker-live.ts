@@ -44,7 +44,8 @@
  * of per-city errors is logged as NORMAL tolerated data-quality.
  *
  * Env:
- *   LIVE_SCRAPE_LIMIT    optional per-city cap on the number of docs collected.
+ *   LIVE_SCRAPE_LIMIT    optional per-city cap on newly written raw documents;
+ *                        existing CAS documents are skipped before it is consumed.
  *   LIVE_SCRAPE_EXPLOIT  when "1"/"true", also run EXPLOITATION after each
  *                        city's RECUEIL: PARSE the raw PV (pdftotext via poppler)
  *                        + project the real DesignationEvents into the per-city
@@ -67,6 +68,7 @@ import { loadConfig } from "../config.js";
 import { createDb, type DbHandle } from "../db/client.js";
 import { createLogger } from "../logger.js";
 import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "../services/sources/live-scrape.js";
+import { recueilMetrics, recueilMetricsJson, resetRecueilMetrics } from "../services/sources/recueil.js";
 import { getScrapeObjectStore } from "../storage/s3-object-store.js";
 import { assessJobHealth } from "./job-health.js";
 import { decidePgFeed } from "./pg-feed-decision.js";
@@ -198,6 +200,7 @@ async function main(): Promise<number> {
       );
     }
 
+    resetRecueilMetrics();
     const recap = await runLiveScrape(slugs, {
       store,
       ...(limit !== undefined && Number.isFinite(limit) ? { limit } : {}),
@@ -229,8 +232,11 @@ async function main(): Promise<number> {
       (r) => r.signals !== undefined && r.exploitError === undefined,
     ).length;
 
+    const collection = recueilMetrics();
+    // Machine-readable terminal line consumed by the in-container chunk loop.
+    console.log(recueilMetricsJson());
     logger.info(
-      { cities: recap.length, new: newCount, seen: seenCount, errors: errors.length },
+      { cities: recap.length, new: newCount, seen: seenCount, errors: errors.length, ...collection },
       "worker-live: done",
     );
     logger.info(

@@ -14,7 +14,12 @@ import {
 } from "@radar/sources";
 
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
-import { runRecueil, runRecueilWithManifest } from "./recueil.js";
+import {
+  recueilMetricsJson,
+  resetRecueilMetrics,
+  runRecueil,
+  runRecueilWithManifest,
+} from "./recueil.js";
 import { manifestKey } from "./run-manifest.js";
 
 class MemoryStore implements ObjectStore {
@@ -83,7 +88,56 @@ function fakeAdapter(
   };
 }
 
+function manyDocumentsAdapter(count: number): SourceAdapter {
+  const refs = Array.from({ length: count }, (_, i): RawDocumentRef => ({
+    sourceKind: "pv",
+    city: "testville",
+    url: `https://testville.qc.ca/pv-${i}.pdf`,
+    discoveredAt: "2026-06-08T00:00:00.000Z",
+    contentType: "application/pdf",
+  }));
+  return {
+    kind: "pv", city: "testville", version: "1.0.0",
+    async *list() { yield* refs; },
+    async fetch(ref) {
+      return {
+        ref, sourceKind: "pv", city: "testville", url: ref.url,
+        fetchedAt: "2026-06-08T09:30:00.000Z", contentType: "application/pdf",
+        body: new TextEncoder().encode(ref.url),
+        provenance: { adapterVersion: "1.0.0", fetchedViaObscura: false },
+      };
+    },
+    hash() { return "unused"; },
+  };
+}
+
 describe("runRecueil — raw bytes + sidecar meta.json", () => {
+  it("emits the exact terminal JSON for a no-new-documents run", async () => {
+    const store = new MemoryStore();
+    const adapter = manyDocumentsAdapter(1);
+    await runRecueil("proces-verbaux-testville", adapter, store);
+    resetRecueilMetrics();
+    await runRecueil("proces-verbaux-testville", adapter, store, { limit: 25 });
+    expect(recueilMetricsJson()).toBe(
+      '{"newDocuments":0,"skippedExisting":1,"remaining":0}',
+    );
+  });
+
+  it("caps only newly written documents and progresses past existing CAS objects", async () => {
+    const store = new MemoryStore();
+    const adapter = manyDocumentsAdapter(60);
+    const seeded = await runRecueil("proces-verbaux-testville", adapter, store, { limit: 10 });
+    expect(seeded.ok && seeded.newDocuments).toBe(10);
+
+    const first = await runRecueil("proces-verbaux-testville", adapter, store, { limit: 25 });
+    const second = await runRecueil("proces-verbaux-testville", adapter, store, { limit: 25 });
+    const final = await runRecueil("proces-verbaux-testville", adapter, store, { limit: 25 });
+
+    expect(first.ok && { new: first.newDocuments, seen: first.skippedExisting }).toEqual({ new: 25, seen: 10 });
+    expect(second.ok && { new: second.newDocuments, seen: second.skippedExisting }).toEqual({ new: 25, seen: 35 });
+    expect(final.ok && { new: final.newDocuments, seen: final.skippedExisting }).toEqual({ new: 0, seen: 60 });
+  });
+
   it("filters index representations before the limit and paces the selected fetch", async () => {
     const store = new MemoryStore();
     const indexRef: RawDocumentRef = {
