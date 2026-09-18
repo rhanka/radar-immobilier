@@ -1,4 +1,5 @@
 import type { ObjectStore } from "../../storage/object-store.js";
+import type { RefreshModelReceipt } from "./refresh-model-policy.js";
 import { canonicalHash, canonicalJson } from "./replay/canonical-json.js";
 
 export interface RefreshRunIdentity {
@@ -38,12 +39,22 @@ export interface RefreshState {
   readonly reservations: Readonly<Record<string, number>>;
   readonly completedChunks: Readonly<Record<string, { readonly key: string; readonly hash: string }>>;
   readonly receipts: Readonly<Partial<Record<RefreshStage, RefreshStageReceipt>>>;
+  readonly documentModels?: Readonly<Record<string, readonly (RefreshModelReceipt & { readonly chunkId: string })[]>>;
   readonly candidate?: { readonly key: string; readonly hash: string };
 }
 
 export interface RefreshStateHandle {
   readonly key: string;
   readonly state: RefreshState;
+}
+
+export async function recordRefreshModel(store: ObjectStore, handle: RefreshStateHandle,
+  docSha: string, chunkId: string, receipt: RefreshModelReceipt): Promise<RefreshStateHandle> {
+  if (!/^[0-9a-f]{64}$/.test(docSha)) throw new Error("Invalid refresh document hash");
+  return persist(store, handle.key, { ...handle.state, documentModels: {
+    ...handle.state.documentModels,
+    [docSha]: [...(handle.state.documentModels?.[docSha] ?? []), { ...receipt, chunkId }],
+  } });
 }
 
 export type RefreshPublishedSelector = Omit<RefreshRunIdentity, "baselineHash"> & {
