@@ -263,7 +263,7 @@ points. No extra weekly/monthly upload. Failed uploads/verification never publis
 a verified receipt. Lifecycle cleans abandoned multipart, deleted noncurrent
 versions and old exercise receipts; it does not expire current complete sets.
 
-**Provisioning — infra/k8s lane, before activation:** dedicated private buckets
+**Provisioning — owner, before activation:** dedicated private buckets
 `radar-immobilier-backups-preprod` / `radar-immobilier-backups`, versioning enabled,
 public access denied, SSE AES256 observed on uploaded objects. Check the configured
 endpoint/region and actual DB name (`EXPECTED_DATABASE=radar`). Provision separate
@@ -271,17 +271,112 @@ identities in EACH namespace using `backup-common/secrets.example.yaml`:
 
 | Secret | Required scope in that environment's bucket |
 |---|---|
-| `radar-pra-writer` | PutObject on `postgres/<env>/sets/*`; multipart upload/abort rights there |
-| `radar-pra-reader` | ListBucket limited to `postgres/<env>/`; GetObject on sets/verified |
-| `radar-pra-reporter` | PutObject on `postgres/<env>/verified/*` and `exercises/*` only |
-| `radar-pra-retainer` | Scoped ListBucket; GetObject/head on sets/verified; DeleteObject on sets/verified |
+| `radar-pra-writer` | Scoped ListBucket; PutObject, AbortMultipartUpload, ListMultipartUploadParts under `postgres/<env>/`; uploads sets and verification receipts; no deletion |
+| `radar-pra-reader` | Scoped ListBucket; GetObject, GetObjectVersion under the prefix; GetBucketLocation, GetBucketVersioning, GetBucketPublicAccessBlock, GetBucketAcl, GetLifecycleConfiguration on this bucket; no writes |
+| `radar-pra-retainer` | Scoped ListBucket; GetObject, DeleteObject under the prefix; DeleteObjectVersion only under `exercises/_provision/` to remove its probe; no writes |
 
 Use `env=preprod` or `production`, not the overlay shorthand `prod`. Never reuse
 the pre-release `radar-backup-s3-credentials` identity. Deny other buckets/envs,
-ACL/public changes, lifecycle changes and DeleteObjectVersion to scheduled
-identities; backup writer cannot delete retained history. Lifecycle-admin rights
-stay with infra and are used only for the provisioning command below. Confirm
-negative access tests and bucket policy readbacks without logging credentials.
+ACL/public changes and lifecycle changes to scheduled identities; only retainer
+can delete, and none can delete versions of retained sets. The explicit denies
+also restrict inherited S3 grants from the OpenStack objectstore role.
+There are three S3 users per environment, six total. The old reporter's **read**
+duties belong to reader; its receipt **writes** use writer. The former settings
+resource is a non-secret ConfigMap, still named `radar-pra-settings`; reader receives
+bucket-configuration read permissions, not configuration-write permissions.
+The names `radar-pra-backup`, `radar-pra-restore`, `radar-pra-postgres` and
+`radar-pra-egress` remain unchanged.
+
+**One owner command per environment.** Run from this checkout, with Docker and
+kubectl installed. The command builds the local backup image if absent; Docker
+must then be able to pull its base images and install its pinned dependencies.
+Export these variables in the owner's shell using their normal secret manager;
+never place values in Make arguments, repository files or shell traces:
+
+- `OVH_APPLICATION_KEY`, `OVH_APPLICATION_SECRET`, `OVH_CONSUMER_KEY`:
+  OVH API credentials authorized to list/create project users, import/export their
+  storage policies, list/create S3 credentials and retrieve their existing secret.
+- `OVH_PROJECT_ID`: the Public Cloud project ID (32 hexadecimal characters).
+  `OVH_ENDPOINT=ovh-eu` (default) or `ovh-ca`, matching the account's API region.
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, optionally `AWS_SESSION_TOKEN`:
+  existing S3 administrator credentials for that project/region, with bucket
+  creation, ACL, public-block, versioning and lifecycle configuration permissions.
+  The OVH API application key is **not** an S3 administrator key.
+- `KUBECONFIG`: explicit owner configuration for the target cluster; namespaces
+  must already exist, with get/create/patch Secret permissions. Server defaults
+  to `https://hlhedx.c1.bhs5.k8s.ovh.net`; `PRA_EXPECTED_SERVER` is an explicit
+  override when the owner targets a different cluster.
+
+Preproduction, then production (separate owner authorization):
+
+```sh
+make -f deploy/ci/backup-pra.mk backup-provision BACKUP_IMAGE=radar-backup:test PRA_PROVISION_GO=1 BACKUP_ENV=preprod ENV=preprod
+make -f deploy/ci/backup-pra.mk backup-provision BACKUP_IMAGE=radar-backup:test PRA_PROVISION_GO=1 PRA_PRODUCTION_GO=1 BACKUP_ENV=production ENV=prod
+```
+
+The target checks cluster identity and Secret permissions, creates/reuses the
+private bucket, blocks public access, enables versioning, applies and reads back
+policies, and creates/reuses users named `radar-pra-<env>-writer|reader|retainer`.
+It matches the exact OVH user **description** (OVH chooses the actual username),
+rejects duplicates or unexpected roles, and reuses the single existing S3 key.
+An interrupted Secret apply can be retried: OVH's secret-retrieval API recovers
+the same key without rotation. Run one provisioning invocation at a time per
+project; cross-host concurrent creation is not protected by a distributed lock.
+An ambiguous API create failure stops, so rerun only once the OVH user/key list
+has converged. Existing enabled, unmanaged lifecycle rules cause a stop for owner
+review; they are never silently replaced. Partial cloud configuration remains
+available for a later retry; there is no destructive rollback.
+
+Lifecycle installs daily=7 days, weekly=28 days (4 weeks), monthly=31 days (the
+explicit approximation of 1 month supported by S3), each under `postgres/<env>/`.
+Those tier prefixes are reserved: the current backup runner still writes one
+copy under `sets/`, retained by 7 represented days / 4 weeks / 1 month. The new
+rules do not claim to create tier copies or implement calendar-month expiration.
+They also clean abandoned multipart uploads after 1 day, noncurrent versions
+after 35 days, expired delete markers, and exercise receipts after 90 days.
+
+Before installing Secrets, a unique encrypted probe is written by writer, read
+by reader and its exact version removed by retainer. The command requires
+AccessDenied for writer deletion (including version deletion), reader write and
+deletion, and every role listing another prefix. Reader reads back private ACL,
+public block, versioning and lifecycle. Any unsupported operation, unexpected
+error or successful forbidden operation fails the command. The output is a
+secret-free summary; Secret data is piped in memory directly to
+`kubectl apply --server-side --field-manager=radar-pra-provision`, with no
+`--force-conflicts`, temporary secret file or last-applied annotation. Do not
+redirect/tee the internal pipe. Docker receives credentials as environment
+variables: the owner's Docker daemon must be trusted. Kubernetes audit/redaction
+policy remains the owner's responsibility.
+
+It does **not** activate schedules, apply workloads/network policies, perform a
+database backup/restore, copy geo data, migrate/delete legacy users or Secrets,
+rotate keys, create namespaces, or prove disaster recovery. The build lane never
+runs this command against OVH or Kubernetes.
+
+**OVH support and manual fallback.** The public
+[cloud API schema](https://eu.api.ovh.com/1.0/cloud.json), checked 2026-09-18,
+declares POST/GET `/cloud/project/{serviceName}/user`, POST/GET
+`/user/{userId}/policy` (`policy` is a JSON string), GET/POST
+`/user/{userId}/s3Credentials`, and POST
+`/user/{userId}/s3Credentials/{access}/secret`. Policy/key endpoints are marked
+**BETA**. This verifies the API contract, not this project's entitlement, policy
+condition enforcement, propagation delay, BHS public-access-block support, or
+S3 versioning/lifecycle compatibility. No live OVH validation was performed.
+Failures are explicit; the command never substitutes broad permissions.
+
+If user creation is unavailable to the API token, the owner can use OVH Manager
+→ Public Cloud → project → Users & Roles to create the three users with the exact
+descriptions above and only ObjectStore operator, then rerun with policy/key API
+rights. For policies, use the OVH API console's import/export endpoints above
+with the exact document produced by `policy()` in `backup-provision.py`, including
+the prefix conditions and explicit denies. If the service itself does not support
+these policies, a broad role in Manager is **not** an equivalent: stop and have
+OVH enable prefix-scoped policies or select a compatible service. For bucket
+settings, use Manager → Object Storage → the dedicated bucket to enable private
+access/versioning and the documented lifecycle rules where available. If public
+block or a required readback is unavailable, obtain an OVH-supported equivalent
+and adapt/retest the provisioning contract before activation; do not bypass a
+failed guard or claim a completed provision.
 
 **Branch proof before merge — run by the authorized k8s lane in this worktree.**
 Commands require Docker, kubectl and jq, registry login provisioned out-of-band,
@@ -298,18 +393,7 @@ make -f deploy/ci/backup-pra.mk backup-publish BACKUP_IMAGE=ghcr.io/rhanka/radar
 make -f deploy/ci/backup-pra.mk backup-render ENV=both
 ```
 
-Infra supplies its S3 lifecycle-admin credentials as environment variables,
-not command-line values. On these dedicated buckets this command REPLACES their
-whole lifecycle policy and reads it back; first confirm no unrelated rules exist.
-It never changes current complete-set expiry. Save the JSON readback as evidence:
-
-```sh
-make -f deploy/ci/backup-pra.mk backup-lifecycle PRA_LIFECYCLE_GO=1 BACKUP_ENV=preprod BACKUP_S3_BUCKET=radar-immobilier-backups-preprod BACKUP_S3_ENDPOINT=https://s3.bhs.io.cloud.ovh.net AWS_DEFAULT_REGION=bhs ENV=preprod
-make -f deploy/ci/backup-pra.mk backup-lifecycle PRA_LIFECYCLE_GO=1 BACKUP_ENV=production BACKUP_S3_BUCKET=radar-immobilier-backups BACKUP_S3_ENDPOINT=https://s3.bhs.io.cloud.ovh.net AWS_DEFAULT_REGION=bhs ENV=prod
-```
-
-The second command requires the production storage owner's GO; the lane uses the
-appropriate admin identity per bucket. With preprod secrets/lifecycle/network
+After owner provisioning, with preprod secrets/lifecycle/network
 and quota capacity checked, execute the branch proof (no main dependency):
 
 ```sh
