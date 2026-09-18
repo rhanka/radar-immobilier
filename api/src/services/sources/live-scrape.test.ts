@@ -15,7 +15,7 @@
  * No real network: the adapter's `fetch` is injected (PvFetchLike). Storage is
  * an in-memory MemoryStore (patron recueil.test.ts).
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   ALL_PV_CITIES,
@@ -29,6 +29,8 @@ import {
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
 import { projectStateKey } from "../exploitation/project-state.js";
 import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "./live-scrape.js";
+import { recueilMetrics, recueilMetricsJson, resetRecueilMetrics } from "./recueil.js";
+import { assessJobHealth } from "../../scripts/job-health.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // In-memory object store (patron recueil.test.ts)
@@ -148,6 +150,44 @@ function fakeFetchForSlugs(slugs: readonly string[], pdfBody: string): PvFetchLi
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("runLiveScrape — config-only PV cities → object store", () => {
+  it.each(["index", "document"] as const)("should preserve %s 404 diagnostics through RECUEIL, metrics and onCity", async (phase) => {
+    resetRecueilMetrics();
+    const city = phase === "index" ? "drummondville" : "saint-henri";
+    const config = ALL_PV_CITIES.find((c) => c.config.citySlug === city)!.config;
+    const documentUrl = new URL("/pv/2026-06-05.pdf", config.pvIndexUrl).href;
+    const onCity = vi.fn();
+    const onRequest = vi.fn();
+    const recap = await runLiveScrape([city], {
+      store: new MemoryStore(), onCity, onRequest,
+      now: () => new Date("2026-06-10T00:00:00Z"),
+      fetch: async (url) => phase === "document" && url === config.pvIndexUrl
+        ? htmlResponse(`<a href="${documentUrl}">Procès-verbal du 2026-06-05</a>`)
+        : {
+          ok: false, status: 404,
+          headers: new Headers({ server: "cloudflare", "cf-ray": "ray", authorization: "SECRET" }),
+          arrayBuffer: async () => { throw new Error("Must not read error bodies"); },
+        },
+    });
+    expect(recap[0]).toMatchObject({ city, status: "error", error: "[http] HTTP 404", fetchFailure: {
+      url: phase === "index" ? config.pvIndexUrl : documentUrl,
+      phase, httpStatus: 404, durationMs: 0, headers: { server: "cloudflare", "cf-ray": "ray" },
+    } });
+    expect(onCity).toHaveBeenCalledExactlyOnceWith(recap[0]);
+    expect(onRequest).toHaveBeenLastCalledWith({ city, ...recap[0]!.fetchFailure });
+    expect(recueilMetrics()).toMatchObject({ index404: phase === "index" ? 1 : 0, document404: phase === "document" ? 1 : 0 });
+    expect(JSON.parse(recueilMetricsJson())).toEqual(recueilMetrics());
+    expect(JSON.stringify([recap, onRequest.mock.calls, onCity.mock.calls])).not.toContain("SECRET");
+    const health = assessJobHealth({
+      cityCount: 528, errorCount: 1, maxErrorRate: 0.9, elevatedWarnRate: 0.5,
+      exploitRequested: false, feedExpected: false, upserted: 0, pdftotextAvailable: true,
+      index404Cities: recap.filter((r) => r.fetchFailure?.phase === "index" && r.fetchFailure.httpStatus === 404).map((r) => r.city),
+    });
+    expect(health.warn).toBe(phase === "index" ? "elevated" : "normal");
+    if (phase === "index") expect(health.reason).toContain(city);
+    resetRecueilMetrics();
+    expect(recueilMetrics()).toMatchObject({ index404: 0, document404: 0 });
+  });
+
   it("scrapes a subset of cities and writes CAS + meta + run manifest, reporting new", async () => {
     const slugs = configOnlySlugs(2);
     expect(slugs.length).toBe(2);

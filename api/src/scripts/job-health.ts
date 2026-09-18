@@ -21,14 +21,14 @@
  *         run erroring points at infra / network / a source-provider outage, not
  *         at individual unreachable cities).
  *   - `warn` ("none"|"normal"|"elevated") — the fetch-degradation TIER, reported
- *     truthfully regardless of `code`. "elevated" (rate ≥ `elevatedWarnRate`) is
+ *     truthfully regardless of `code`. "elevated" (index 404 or rate ≥ `elevatedWarnRate`) is
  *     an alertable degradation that is not yet fatal; "normal" is the routine
  *     handful of per-city source errors; "none" is a clean fetch axis. The two
  *     axes are independent: a run can be `code:1` (exploitation broken) with
  *     `warn:"none"` (fetch axis clean), or `code:0` with `warn:"elevated"`.
  *
- * Logic order is first-match-wins for `code`; `warn` is the fetch tier and is
- * always the truthful degradation level for the given error rate.
+ * Logic order is first-match-wins for `code`; `warn` is the fetch tier and
+ * includes entire sources lost to index 404s even below the rate thresholds.
  *
  * Pure/deterministic: the caller passes the thresholds and preflight facts
  * (parsed / probed at the edge), so this reads no environment and is
@@ -49,6 +49,7 @@ export function assessJobHealth(input: {
   readonly feedExpected: boolean; // pgFeed.feed — a direct PG feed was wired.
   readonly upserted: number; // cities whose graph was upserted to PG.
   readonly pdftotextAvailable: boolean; // poppler present (exploitation can extract).
+  readonly index404Cities?: readonly string[];
 }): JobHealth {
   const {
     errorCount,
@@ -66,10 +67,17 @@ export function assessJobHealth(input: {
   }
 
   const errorRate = errorCount / cityCount;
+  const index404Cities = input.index404Cities ?? [];
+  const indexWarning = index404Cities.length > 0
+    ? `PV index HTTP 404 — entire source unavailable: ${index404Cities.join(", ")}`
+    : "";
   const fetched = cityCount - errorCount;
   // Fetch-degradation tier — truthful for the given rate, independent of `code`.
   const warn: JobHealth["warn"] =
-    errorRate >= elevatedWarnRate ? "elevated" : errorCount > 0 ? "normal" : "none";
+    indexWarning || errorRate >= elevatedWarnRate
+      ? "elevated"
+      : errorCount > 0 ? "normal" : "none";
+  const indexSuffix = indexWarning ? `; ${indexWarning}` : "";
 
   // EXPLOITATION axis (systemic, exit 1) — first match wins.
   if (exploitRequested && !pdftotextAvailable) {
@@ -78,14 +86,14 @@ export function assessJobHealth(input: {
       warn,
       reason:
         "systemic: pdftotext (poppler) missing — exploitation yields 0 signal " +
-        "for every city (misconfigured image)",
+        "for every city (misconfigured image)" + indexSuffix,
     };
   }
   if (feedExpected && fetched > 0 && upserted === 0) {
     return {
       code: 1,
       warn,
-      reason: `systemic: exploitation produced nothing — ${fetched} cities fetched, 0 upserted (broken exploitation/PG-write path)`,
+      reason: `systemic: exploitation produced nothing — ${fetched} cities fetched, 0 upserted (broken exploitation/PG-write path)` + indexSuffix,
     };
   }
 
@@ -94,11 +102,12 @@ export function assessJobHealth(input: {
     return {
       code: 1,
       warn,
-      reason: `systemic fetch failure: ${errorCount}/${cityCount} errored (rate ${errorRate} ≥ ${maxErrorRate})`,
+      reason: `systemic fetch failure: ${errorCount}/${cityCount} errored (rate ${errorRate} ≥ ${maxErrorRate})` + indexSuffix,
     };
   }
 
   // Non-fatal (exit 0), by degradation tier.
+  if (indexWarning) return { code: 0, warn: "elevated", reason: indexWarning };
   if (warn === "elevated") {
     return {
       code: 0,

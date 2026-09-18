@@ -119,7 +119,7 @@ describe("runRecueil — raw bytes + sidecar meta.json", () => {
     resetRecueilMetrics();
     await runRecueil("proces-verbaux-testville", adapter, store, { limit: 25 });
     expect(recueilMetricsJson()).toBe(
-      '{"newDocuments":0,"skippedExisting":1,"remaining":0}',
+      '{"newDocuments":0,"skippedExisting":1,"remaining":0,"index404":0,"document404":0}',
     );
   });
 
