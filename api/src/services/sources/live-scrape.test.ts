@@ -396,6 +396,26 @@ function makeThrowingFetch(): { fetch: PvFetchLike; calls: () => number } {
 }
 
 describe("runLiveScrape — reexploit (replay from stored raw, NO scrape)", () => {
+  it("shares one parse budget across cities and publishes only completed cities", async () => {
+    const cities = configOnlySlugs(2);
+    const store = new MemoryStore();
+    for (const city of cities) {
+      await seedRawPvForCity(store, city, "one");
+      await seedRawPvForCity(store, city, "two");
+    }
+    const { fetch, calls } = makeThrowingFetch();
+    const options = { store, fetch, reexploit: true, limit: 1, pdfToText: zonagePdfToText };
+    const expectedRemaining = [3, 2, 1, 0];
+    for (const remaining of expectedRemaining) {
+      const recap = await runLiveScrape(cities, options);
+      expect(recap.reduce((n, city) => n + city.reexploitProgress!.newDocuments, 0)).toBe(1);
+      expect(recap.reduce((n, city) => n + city.reexploitProgress!.remaining, 0)).toBe(remaining);
+      if (remaining === 3) expect(recap.every((city) => city.signals === undefined)).toBe(true);
+    }
+    expect(calls()).toBe(0);
+    for (const city of cities) expect(store.objects.has(projectStateKey(city))).toBe(true);
+  });
+
   it("re-exploits a seen city from the store, projects signals, and NEVER calls fetch", async () => {
     const [city] = configOnlySlugs(1);
     const store = new MemoryStore();
