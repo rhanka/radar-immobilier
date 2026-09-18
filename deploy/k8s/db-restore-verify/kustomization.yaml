@@ -1,12 +1,7 @@
-# Owner-only renderer for a one-shot preprod restore rehearsal.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: radar-immobilier-preprod
 resources:
   - ../42-db-restore-verify-job.yaml
-configMapGenerator:
-  - name: radar-db-backup-scripts
-    files:
-      - ../db-backup/dump.sh
-      - ../db-backup/upload.sh
-      - ../db-backup/restore-verify.sh
+# Settings and network come from backup-preprod. The proof runner resolves
+# the hashed ConfigMap name from that SAME branch render before creating a Job.

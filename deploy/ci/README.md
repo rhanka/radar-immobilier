@@ -243,30 +243,135 @@ safety bias.
 Le CronJob PV utilise Gemini 3.8 Flash low avec deux essais maximum sur refus de qualité du contrat v9, puis Astra low comme repli. Les incidents transport, quota/429, délai et flux vide basculent immédiatement vers Astra. `REFRESH_FORCE_FALLBACK=1` est réservé aux recettes. Les deux comptes doivent être enrôlés sous le même owner scope du Secret runtime dans le PVC keyring inscriptible. L’owner enrôle les comptes localement (`make enroll-cloud-code` et `make enroll-codex`); pour un PVC déjà initialisé, la lane k8s rend puis applique le Job éphémère `make import-keyring-account`, sans remplacer l’autre compte. Pour un PVC neuf, le Secret bootstrap contient les deux comptes avant le premier bootstrap. La validation préproduction (purge `refresh/018/*`, cycle complet, mesures par document et liens B′) et la promotion par variable GitHub puis tag `v*` sont documentées dans [`production-acceptance.md`](../../docs/reviews/refresh-cascade/production-acceptance.md). Une fusion déploie la préproduction; la production reste protégée par `REFRESH_CRONJOB_PROD_ENABLED=true`.
 ## Scheduled data backup and restore rehearsal (#698)
 
-`deploy/k8s/41-db-backup-cronjob.yaml` is the durable logical backup for the
-radar PostgreSQL/PostGIS database, including Steve's annotations. It takes a
-PostgreSQL 16 custom dump, records SHA-256 and a manifest, and uploads the
-three-object set to the OVH S3 backup bucket. It retains the newest **7 daily,
-4 weekly, and 1 monthly** complete sets per environment. Retention values reject
-non-numeric input; its portable `awk` deliberately avoids `{n}` intervals.
+The immo-owned [joint plan](../../docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md)
+covers PG, immo documents/graph/keyring and geo, consistency fencing, recovery
+order and paired acceptance. This executable path verifies **PostgreSQL only**.
+The separate pre-release runner above keeps its existing identity and contract.
 
-The base (production) CronJob is `suspend: true`. The preproduction overlay
-activates it and uses its distinct bucket. An owner provisions
-`radar-backup-s3-credentials` out-of-band with an identity restricted to that
-environment's `postgres/` prefix; no value belongs in Git.
+The image in `deploy/k8s/db-backup/Dockerfile` contains PG16/PostGIS 3.4 and the
+backup program. Every 12 hours, sequential stages export a snapshot, count exact
+rows within it, dump that same snapshot, upload, restore into an ephemeral local
+server, publish a verification receipt, then prune. No source read is required
+for restoration. A manifest is the last uploaded commit marker; restore checks
+its checksum/schema/identity and the dump checksum/size before starting PG.
+Verification receipts bind S3 object, manifest hash, snapshot time and Job UID.
+SHA-256 is corruption detection, not authentication against a compromised writer.
 
-The isolated rehearsal Job is `deploy/k8s/42-db-restore-verify-job.yaml`. It is
-not a permanent resource and its placeholder backup stem is fail-loud. On owner
-GO, the k8s lane patches `BACKUP_OBJECT`, applies it to preprod, then reads its
-report:
+Keep latest verified points for 7 represented UTC days, 4 represented ISO weeks,
+1 represented month (overlaps share one copy). A missing day does not expire old
+points. No extra weekly/monthly upload. Failed uploads/verification never publish
+a verified receipt. Lifecycle cleans abandoned multipart, deleted noncurrent
+versions and old exercise receipts; it does not expire current complete sets.
+
+**Provisioning — infra/k8s lane, before activation:** dedicated private buckets
+`radar-immobilier-backups-preprod` / `radar-immobilier-backups`, versioning enabled,
+public access denied, SSE AES256 observed on uploaded objects. Check the configured
+endpoint/region and actual DB name (`EXPECTED_DATABASE=radar`). Provision separate
+identities in EACH namespace using `backup-common/secrets.example.yaml`:
+
+| Secret | Required scope in that environment's bucket |
+|---|---|
+| `radar-pra-writer` | PutObject on `postgres/<env>/sets/*`; multipart upload/abort rights there |
+| `radar-pra-reader` | ListBucket limited to `postgres/<env>/`; GetObject on sets/verified |
+| `radar-pra-reporter` | PutObject on `postgres/<env>/verified/*` and `exercises/*` only |
+| `radar-pra-retainer` | Scoped ListBucket; GetObject/head on sets/verified; DeleteObject on sets/verified |
+
+Use `env=preprod` or `production`, not the overlay shorthand `prod`. Never reuse
+the pre-release `radar-backup-s3-credentials` identity. Deny other buckets/envs,
+ACL/public changes, lifecycle changes and DeleteObjectVersion to scheduled
+identities; backup writer cannot delete retained history. Lifecycle-admin rights
+stay with infra and are used only for the provisioning command below. Confirm
+negative access tests and bucket policy readbacks without logging credentials.
+
+**Branch proof before merge — run by the authorized k8s lane in this worktree.**
+Commands require Docker, kubectl and jq, registry login provisioned out-of-band,
+and an explicit preproduction KUBECONFIG already set in the lane. The build lane
+does not execute publication, lifecycle or cluster actions. First test/build and
+publish the exact working-tree image (the command saves its immutable registry
+digest in `tmp/backup-pra-image.txt`). Verify the new GHCR package is pullable
+by cluster nodes (the existing runtime-image convention is public packages;
+otherwise infra must supply a pull identity before the proof):
 
 ```sh
-kubectl kustomize --load-restrictor LoadRestrictionsNone deploy/k8s/db-restore-verify | kubectl -n radar-immobilier-preprod apply -f -
-kubectl -n radar-immobilier-preprod wait --for=condition=complete job/radar-db-restore-verify --timeout=3700s
-kubectl -n radar-immobilier-preprod logs job/radar-db-restore-verify -c restore-and-verify
+make -f deploy/ci/backup-pra.mk backup-test BACKUP_IMAGE=radar-backup:test ENV=test-backup-pra
+make -f deploy/ci/backup-pra.mk backup-publish BACKUP_IMAGE=ghcr.io/rhanka/radar-backup:pra-712-v2 PRA_PUBLISH_GO=1 ENV=preprod
+make -f deploy/ci/backup-pra.mk backup-render ENV=both
 ```
 
-It verifies the downloaded SHA-256, restores with `pg_restore --exit-on-error`
-into `radar_restore_verify` (never the source database), compares source and scratch table-count lists, and reports the hash and table
-total. It drops/recreates only that scratch database; a
-future production swap is out of scope.
+Infra supplies its S3 lifecycle-admin credentials as environment variables,
+not command-line values. On these dedicated buckets this command REPLACES their
+whole lifecycle policy and reads it back; first confirm no unrelated rules exist.
+It never changes current complete-set expiry. Save the JSON readback as evidence:
+
+```sh
+make -f deploy/ci/backup-pra.mk backup-lifecycle PRA_LIFECYCLE_GO=1 BACKUP_ENV=preprod BACKUP_S3_BUCKET=radar-immobilier-backups-preprod BACKUP_S3_ENDPOINT=https://s3.bhs.io.cloud.ovh.net AWS_DEFAULT_REGION=bhs ENV=preprod
+make -f deploy/ci/backup-pra.mk backup-lifecycle PRA_LIFECYCLE_GO=1 BACKUP_ENV=production BACKUP_S3_BUCKET=radar-immobilier-backups BACKUP_S3_ENDPOINT=https://s3.bhs.io.cloud.ovh.net AWS_DEFAULT_REGION=bhs ENV=prod
+```
+
+The second command requires the production storage owner's GO; the lane uses the
+appropriate admin identity per bucket. With preprod secrets/lifecycle/network
+and quota capacity checked, execute the branch proof (no main dependency):
+
+```sh
+make -f deploy/ci/backup-pra.mk backup-proof PRA_CLUSTER_GO=1 ENV=preprod
+```
+
+This renders the branch overlay, server-validates/applies only its settings and
+network (no durable schedule before paired activation), creates unique `radar-pra-backup-*` and
+`radar-pra-restore-*` Jobs, selects the first Job's exact completed S3 object,
+downloads it into the second Job and compares restored counts to the manifest.
+It saves receipts and Job metadata under `tmp/backup-pra-render/`, deletes both
+Jobs after success and checks restore-pod cleanup. It is repeatable; no fixed
+Job name or placeholder survives. A failed wait exits nonzero and preserves the
+failed Job until its one-day TTL for diagnosis. Do not accept an old Job success.
+Record admission events, CNI DNS/HTTPS reachability, peak RSS/ephemeral bytes and
+timings externally: these are not supplied by a successful offline render.
+For the joint frozen exercise, the conductor passes the same `CYCLE_ID` and
+ISO-8601 `REFERENCE_TIME` as Make arguments to `backup-proof`; these reach only
+the dump stage. They label the PG component, without asserting the freeze or
+copying immo/geo objects. The final joint marker belongs to the coordinator.
+
+Memory limits: sequential restore 512 MiB, dump 256 MiB, S3 stages 128 MiB;
+freshness 128 MiB. Maximum scheduled overlap 640 MiB against ~768 MiB reported
+production margin, excluding unrelated Jobs. All containers declare CPU/memory
+and ephemeral requests/limits. Source PVC is never mounted. Check actual quota
+use and avoid refresh overlap. Pod networking allows cluster DNS, the source PG
+for dump, and public HTTPS; standard NetworkPolicy cannot restrict an OVH FQDN.
+Restore PG listens only on its local Unix socket. No service-account token mounts.
+
+**Activation on merge:** both overlays have `suspend:false`. Configure
+`BACKUP_PRA_ENABLED=true`, production environment approval and `PRA_KUBE_CONFIG`
+before merge. The image workflow's `deploy-backup-pra` waits for the new image,
+pins its digest, server-validates both overlays and applies both in a single
+paired operation. The kubeconfig grants get/create/patch on the two CronJobs,
+generated settings ConfigMap and two NetworkPolicies in each namespace; do not
+give it secrets or workload-exec rights. Production application is owner-approved.
+Authorized manual equivalent, using the same pinned image and a kubeconfig scoped
+to both namespaces:
+
+```sh
+make -f deploy/ci/backup-pra.mk backup-activate PRA_CLUSTER_GO=1 PRA_PRODUCTION_GO=1 ENV=both
+```
+
+Kubernetes has no cross-namespace transaction: inspect both outcomes on any apply
+failure and restore the pair under the conductor's owner-approved decision.
+Do not activate one environment and call the release complete. Production storage
+provisioning, paired geo PR acceptance and the premerge proof are release gates.
+
+**Monitoring:** hourly freshness fails if no verified snapshot is younger than
+24h, or receipt/manifest/dump binding fails. Infra installs
+`deploy/k8s/backup-common/alerts.yaml` into the actual monitoring namespace with
+the Prometheus selector labels and immo on-call route. This is separate from app
+overlays because CRD availability is operator-owned. Prove alert delivery before
+activation, including a stopped checker; a failed Job alone is not a delivered
+page. On failure preserve old points, diagnose quota/S3/scheduling, then rerun the
+preprod catch-up proof. The full joint cycle needs its own freshness measurement;
+PG health does not establish document/geo freshness.
+
+**Local checks:** `backup-test` uses network-disabled, automatically removed
+containers and real PG/PostGIS over private Unix sockets; no Compose stack or
+published port. It exercises concurrent source writes, unavailable source during
+restore, corruption, wrong/incomplete manifests, S3 failures, retention, freshness
+and manifest resource/credential guards, plus the existing pre-release tests.
+The isolated PG test verifies counts/extensions/index validity. Business reference
+closure, annotation/API-role access and whole-service RTO remain joint proof gates.

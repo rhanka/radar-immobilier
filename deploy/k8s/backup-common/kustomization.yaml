@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../41-db-backup-cronjob.yaml
+  - ../43-backup-freshness-cronjob.yaml
+  - network.yaml
+configMapGenerator:
+  - name: radar-pra-settings
+    literals:
+      - BACKUP_ENV=production
+      - BACKUP_S3_BUCKET=radar-immobilier-backups
+      - BACKUP_S3_ENDPOINT=https://s3.bhs.io.cloud.ovh.net
+      - EXPECTED_DATABASE=radar
+      - AWS_DEFAULT_REGION=bhs

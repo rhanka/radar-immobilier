@@ -53,7 +53,6 @@ resources:
   # créés + pinnés UNIQUEMENT par la CI via `kustomize build … refresh-cronjobs`
   # (le grant batch/cronjobs inclut `create` pour le 1er apply). Ne PAS re-lister.
   - 35-consistency-snapshot-cronjob.yaml
-  - 41-db-backup-cronjob.yaml
   - 35-obscura.yaml
   - 40-maildev.yaml
   - 50-ui.yaml
@@ -78,8 +77,3 @@ configMapGenerator:
   - name: radar-ui-nginx
     files:
       - default.conf=nginx/default.conf
-  - name: radar-db-backup-scripts
-    files:
-      - db-backup/dump.sh
-      - db-backup/upload.sh
-      - db-backup/restore-verify.sh
