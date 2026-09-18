@@ -2,6 +2,8 @@ import {
   buildRawDocumentRecord,
   rawMetaKey,
   SourceFetchError,
+  PvSourceFetchError,
+  type PvFetchDiagnostic,
   type RawDocumentRecord,
   type RawDocumentRef,
   type SourceAdapter,
@@ -69,6 +71,7 @@ export interface RecueilSuccess {
 }
 
 export interface RecueilFailure {
+  readonly fetchFailure?: PvFetchDiagnostic;
   readonly ok: false;
   readonly source: string;
   readonly error: SourceErrorKind;
@@ -79,17 +82,19 @@ export interface RecueilFailure {
 export type RecueilOutcome = RecueilSuccess | RecueilFailure;
 
 export interface RecueilMetrics {
+  readonly index404: number;
+  readonly document404: number;
   readonly newDocuments: number;
   readonly skippedExisting: number;
   /** Zero only when the final listed reference was reached; otherwise unknown. */
   readonly remaining: number | null;
 }
 
-let metrics: RecueilMetrics = { newDocuments: 0, skippedExisting: 0, remaining: 0 };
+let metrics: RecueilMetrics = { newDocuments: 0, skippedExisting: 0, remaining: 0, index404: 0, document404: 0 };
 
 /** Reset the process-local worker counters before a live scrape run. */
 export function resetRecueilMetrics(): void {
-  metrics = { newDocuments: 0, skippedExisting: 0, remaining: 0 };
+  metrics = { newDocuments: 0, skippedExisting: 0, remaining: 0, index404: 0, document404: 0 };
 }
 
 /** Return the process-local counters accumulated by completed RECUEIL calls. */
@@ -212,6 +217,15 @@ export async function runRecueil(
       });
     }
   } catch (e) {
+    if (e instanceof PvSourceFetchError) {
+      const { url, phase, httpStatus, headers, durationMs } = e;
+      if (httpStatus === 404) {
+        const counter = phase === "index" ? "index404" : "document404";
+        metrics = { ...metrics, [counter]: metrics[counter] + 1 };
+      }
+      return { ok: false, source, error: e.kind, detail: e.detail, fetchedAt,
+        fetchFailure: { url, phase, httpStatus, headers, durationMs } };
+    }
     if (e instanceof SourceFetchError) {
       return { ok: false, source, error: e.kind, detail: e.detail, fetchedAt };
     }
