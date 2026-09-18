@@ -86,7 +86,9 @@ spec:
               image: ghcr.io/rhanka/radar-api:latest
               imagePullPolicy: IfNotPresent
               workingDir: /workspace/api
-              command: ["node", "dist/scripts/worker-live.js"]
+              # Traitement par tranches (#663/#713) : même boucle que le Job ponctuel
+              # 33-scrape-job.yaml, pour tenir dans 768 Mi sur les villes lourdes.
+              command: ["sh", "/opt/scrape/run-chunks.sh", "node", "dist/scripts/worker-live.js"]
               envFrom:
                 - configMapRef:
                     name: radar-api
@@ -119,6 +121,14 @@ spec:
                   valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
                 - name: SCRAPE_S3_FORCE_PATH_STYLE
                   valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_FORCE_PATH_STYLE } }
+                - name: SCRAPE_CHUNK_SIZE
+                  value: "25"
+                - name: SCRAPE_CHUNK_MAX_ITERATIONS
+                  value: "100"
+              volumeMounts:
+                - name: scrape-chunk-loop
+                  mountPath: /opt/scrape
+                  readOnly: true
               resources:
                 # 256Mi structurally too low (node heap ~240-280Mi + poppler/pdftotext
                 # in the same cgroup) — this is the latent OOM masked while the CronJob
@@ -126,6 +136,11 @@ spec:
                 # NODE_OPTIONS max-old-space-size=512 pairs with the 768Mi limit.
                 requests: { cpu: 50m, memory: 256Mi }
                 limits: { cpu: 150m, memory: 768Mi }
+          volumes:
+            - name: scrape-chunk-loop
+              configMap:
+                name: radar-scrape-chunk-loop
+                defaultMode: 0555
 ---
 apiVersion: batch/v1
 kind: CronJob
