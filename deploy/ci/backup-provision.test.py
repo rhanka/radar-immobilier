@@ -80,6 +80,8 @@ class Bucket:
         self.rules = []
         self.block = {}
         self.versioning = {}
+        self.object_lock = False
+        self.lock_config = None
 
     def head_bucket(self, **kw):
         if not self.exists:
@@ -89,6 +91,19 @@ class Bucket:
         assert kw['ACL'] == 'private'
         self.exists = True
         self.creates += 1
+        if kw.get('ObjectLockEnabledForBucket'):
+            self.object_lock = True
+
+    def get_object_lock_configuration(self, **kw):
+        if not self.object_lock:
+            raise error('ObjectLockConfigurationNotFoundError')
+        cfg = {'ObjectLockEnabled': 'Enabled'}
+        if self.lock_config:
+            cfg['Rule'] = self.lock_config
+        return {'ObjectLockConfiguration': cfg}
+
+    def put_object_lock_configuration(self, **kw):
+        self.lock_config = kw['ObjectLockConfiguration']['Rule']
 
     def put_public_access_block(self, **kw):
         self.block = kw['PublicAccessBlockConfiguration']
@@ -199,26 +214,41 @@ class ProvisionTests(unittest.TestCase):
         with self.assertRaises(p.ProvisionError):
             p.identity(api, 'project', 'bucket', 'preprod', 'writer')
 
-    def test_policies_deny_forbidden_rights_even_with_inherited_full_access(self):
+    def test_policies_deny_forbidden_rights_with_explicit_denies(self):
+        # OVH subset: no NotAction/NotResource, so each role's forbidden recognized
+        # verbs are denied EXPLICITLY. Verbs absent from the enum (e.g.
+        # DeleteObjectVersion) are contained by OVH default-deny, verified live, not here.
+        granted = {'writer': ['s3:PutObject'], 'reader': ['s3:GetObject'],
+                   'retainer': ['s3:GetObject', 's3:DeleteObject']}
         for env in ('preprod', 'production'):
             bucket, _ = p.settings(env)
             arn = 'arn:aws:s3:::' + bucket
             obj = arn + f'/postgres/{env}/sets/example'
             for role in p.ROLES:
-                policy = p.policy(role, bucket, env)
-                for action in ('s3:PutObject', 's3:GetObject', 's3:DeleteObject', 's3:DeleteObjectVersion'):
-                    expected = action in {'writer': ['s3:PutObject'], 'reader': ['s3:GetObject'],
-                                          'retainer': ['s3:GetObject', 's3:DeleteObject']}[role]
-                    self.assertEqual(allowed(policy, action, obj), expected, (role, action))
-                    self.assertFalse(allowed(policy, action, 'arn:aws:s3:::other-bucket/postgres/' + env + '/test'))
-                    self.assertFalse(allowed(policy, action, arn + '/postgres/other/test'))
-                self.assertTrue(allowed(policy, 's3:ListBucket', arn, f'postgres/{env}/sets/'))
+                pol = p.policy(role, bucket, env)
+                forbidden = [a for a in p.DANGER_ACTIONS if a not in granted[role]]
+                for action in forbidden:
+                    self.assertFalse(allowed(pol, action, obj), (role, action, 'obj'))
+                    self.assertFalse(allowed(pol, action, arn), (role, action, 'bucket'))
+                for action in granted[role]:
+                    self.assertTrue(allowed(pol, action, obj), (role, action))
+                # No runtime identity may expose an object or suspend versioning.
+                self.assertFalse(allowed(pol, 's3:PutObjectAcl', obj))
+                self.assertFalse(allowed(pol, 's3:PutBucketVersioning', arn))
+                # ListBucket is confined to the prefix by condition.
+                self.assertTrue(allowed(pol, 's3:ListBucket', arn, f'postgres/{env}/sets/'))
                 for prefix in ('', 'postgres/', 'postgres/other/'):
-                    self.assertFalse(allowed(policy, 's3:ListBucket', arn, prefix))
-                for action in ('s3:PutBucketPolicy', 's3:DeleteBucket', 's3:PutLifecycleConfiguration'):
-                    self.assertFalse(allowed(policy, action, arn))
-                self.assertFalse(allowed(policy, 's3:PutObjectAcl', obj))
-                self.assertEqual(allowed(policy, 's3:GetBucketVersioning', arn), role == 'reader')
+                    self.assertFalse(allowed(pol, 's3:ListBucket', arn, prefix))
+
+    def test_policy_uses_only_ovh_supported_shape(self):
+        for env in ('preprod', 'production'):
+            bucket, _ = p.settings(env)
+            for role in p.ROLES:
+                for st in p.policy(role, bucket, env)['Statement']:
+                    self.assertLessEqual(set(st), {'Sid', 'Effect', 'Action', 'Resource', 'Condition'}, (role, st))
+                    self.assertIn(st['Effect'], ('Allow', 'Deny'))
+                    for act in (st['Action'] if isinstance(st['Action'], list) else [st['Action']]):
+                        self.assertIn(act, p.OVH_POLICY_ACTIONS, (role, act))
 
     def test_lifecycle_scopes_7_4_1_without_expiring_complete_sets(self):
         rules = p.lifecycle_rules('preprod')
@@ -243,22 +273,61 @@ class ProvisionTests(unittest.TestCase):
             p.configure_bucket(bucket, 'bucket', 'preprod')
         self.assertEqual(bucket.creates, 0)
 
-    def test_live_probe_checks_denials_and_retainer_cleanup(self):
+    def test_live_probe_asserts_writer_isolation_and_locked_version_resists_deletion(self):
         clients = {r: Mock() for r in p.ROLES}
-        clients['writer'].put_object.return_value = {'VersionId': 'version'}
-        clients['reader'].get_object.side_effect = [
-            {'Body': io.BytesIO(b'PRA access probe'), 'ServerSideEncryption': 'AES256'}, error('NoSuchVersion')]
-        for role, operation in [('writer', 'delete_object'), ('reader', 'put_object'), ('reader', 'delete_object')]:
-            getattr(clients[role], operation).side_effect = error('AccessDenied')
+        admin = Mock()
+        clients['writer'].put_object.return_value = {'VersionId': 'v'}
+        clients['reader'].get_object.return_value = {'Body': io.BytesIO(b'PRA access probe'),
+                                                     'ServerSideEncryption': 'AES256'}
+        admin.put_object.return_value = {'VersionId': 'lv'}
+        for role, op in [('writer', 'get_object'), ('writer', 'delete_object'), ('writer', 'put_object_acl'),
+                         ('writer', 'put_bucket_versioning'), ('reader', 'put_object'), ('reader', 'delete_object')]:
+            getattr(clients[role], op).side_effect = error('AccessDenied')
         for client in clients.values():
             client.list_objects_v2.side_effect = error('AccessDenied')
+        # governance-locked version: delete denied, then bypass cleanup, then probe cleanup
+        admin.delete_object.side_effect = [error('AccessDenied'), None, None]
         with patch.object(p, 'verify_bucket') as verify:
-            p.probe(clients, 'bucket', 'preprod')
-        self.assertEqual(clients['writer'].delete_object.call_count, 2)
-        clients['reader'].put_object.assert_called_once()
-        clients['retainer'].delete_object.assert_called_once()
-        self.assertEqual(clients['retainer'].delete_object.call_args.kwargs['VersionId'], 'version')
-        verify.assert_called_once_with(clients['reader'], 'bucket', 'preprod')
+            p.probe(clients, admin, 'bucket', 'preprod')
+        clients['writer'].get_object.assert_called_once()
+        clients['writer'].put_object_acl.assert_called_once()
+        clients['writer'].put_bucket_versioning.assert_called_once()
+        self.assertEqual(admin.put_object.call_args.kwargs['ObjectLockMode'], 'GOVERNANCE')
+        self.assertEqual(admin.delete_object.call_count, 3)  # denied + bypass cleanup + probe cleanup
+        self.assertTrue(admin.delete_object.call_args_list[1].kwargs.get('BypassGovernanceRetention'))
+        verify.assert_called_once_with(clients['reader'], 'bucket', 'preprod', True)
+
+    def test_public_access_block_unsupported_falls_back_to_private_acl(self):
+        # OVH BHS returns 501 for (Put/Get)PublicAccessBlock: configure must not fail,
+        # the readback must be skipped, and the private-ACL guarantee must remain.
+        bucket = Bucket()
+        bucket.put_public_access_block = Mock(side_effect=error('NotImplemented'))
+        bucket.get_public_access_block = Mock(side_effect=error('NotImplemented'))
+        self.assertFalse(p.configure_bucket(bucket, 'bucket', 'preprod'))
+        self.assertTrue(bucket.exists)
+        self.assertEqual(bucket.versioning, {'Status': 'Enabled'})
+
+    def test_public_access_block_supported_is_applied_and_verified(self):
+        bucket = Bucket()
+        self.assertTrue(p.configure_bucket(bucket, 'bucket', 'preprod'))
+        self.assertEqual(bucket.block, p.PUBLIC_BLOCK)
+
+    def test_public_access_block_non_501_error_is_not_tolerated(self):
+        bucket = Bucket()
+        bucket.put_public_access_block = Mock(side_effect=error('AccessDenied'))
+        with self.assertRaises(ClientError):
+            p.configure_bucket(bucket, 'bucket', 'preprod')
+
+    def test_verify_skips_block_readback_but_still_requires_private_acl(self):
+        bucket = Bucket()
+        bucket.exists, bucket.versioning, bucket.rules = True, {'Status': 'Enabled'}, p.lifecycle_rules('preprod')
+        bucket.object_lock = True
+        bucket.get_public_access_block = Mock(side_effect=AssertionError('must not read block when unsupported'))
+        p.verify_bucket(bucket, 'bucket', 'preprod', pab=False)  # private ACL default: passes
+        bucket.get_bucket_acl = lambda **kw: {'Owner': {'ID': 'owner'}, 'Grants': [
+            {'Grantee': {'ID': 'owner'}}, {'Grantee': {'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'}}]}
+        with self.assertRaises(p.ProvisionError):
+            p.verify_bucket(bucket, 'bucket', 'preprod', pab=False)
 
     def test_network_error_or_other_403_is_not_a_successful_denial(self):
         for exception in (OSError('transport'), error('InvalidAccessKeyId'), error('SignatureDoesNotMatch')):
