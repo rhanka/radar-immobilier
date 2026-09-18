@@ -1,6 +1,6 @@
-# refresh-cronjobs — Kustomize overlay that deploys the two refresh CronJobs to
+# refresh-cronjobs — Kustomize overlay that deploys the refresh CronJob to
 # PREPROD (radar-immobilier-preprod), pinned to the release image and
-# with only the causal PV-to-Signal refresh UN-SUSPENDED. Production uses the
+# with the causal PV-to-Signal refresh UN-SUSPENDED. Production uses the
 # separate refresh-cronjobs-prod twin,
 # independently gated in the promote-prod path.
 #
@@ -20,7 +20,7 @@
 # NB command: `kubectl apply -k` can NOT be used — the base CronJob lives one dir
 # up (../34) and kustomize's default load-restrictor forbids a parent-dir
 # resource. `kustomize build --load-restrictor LoadRestrictionsNone` still emits
-# ONLY the two CronJobs (never the full bundle).
+# ONLY the refresh CronJob and its keyring PVC (never the full bundle).
 #
 # The `newTag` placeholder is FAIL-LOUD: building/applying this overlay WITHOUT
 # the `kustomize edit set image` step yields an unpullable tag (not :latest), so
@@ -44,9 +44,8 @@ images:
     newTag: PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
 
 patches:
-  # The old scrape/direct-PG and independent projection schedules remain
-  # suspended. One causally ordered acquisition -> Graphify -> publish -> PG
-  # workload is the only active preprod refresh.
+  # One causally ordered acquisition -> Graphify -> publish -> PG workload is
+  # the only preprod refresh (legacy scrape/projection CronJobs removed 2026-09-18).
   - target:
       kind: CronJob
       name: radar-refresh-pv
@@ -79,142 +78,3 @@ patches:
                         valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_ACCESS_KEY } }
                       - name: SCRAPE_S3_SECRET_KEY
                         valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_SECRET_KEY } }
-
-  # PREPROD GRAPH ALIGNMENT — keep the projection on the dedicated OVH graph
-  # bucket and identity rather than inheriting the production coordinates.
-  - target:
-      kind: CronJob
-      name: radar-refresh-projection
-    patch: |
-      apiVersion: batch/v1
-      kind: CronJob
-      metadata:
-        name: radar-refresh-projection
-      spec:
-        jobTemplate:
-          spec:
-            template:
-              spec:
-                containers:
-                  - name: project-graph
-                    env:
-                      - name: GRAPH_S3_ENDPOINT
-                        value: https://s3.bhs.io.cloud.ovh.net
-                        valueFrom: null
-                      - name: GRAPH_S3_BUCKET
-                        value: radar-immobilier-graph-preprod
-                        valueFrom: null
-                      - name: GRAPH_S3_REGION
-                        value: bhs
-                        valueFrom: null
-                      - name: GRAPH_S3_ACCESS_KEY
-                        valueFrom:
-                          secretKeyRef:
-                            name: radar-graph-s3-credentials
-                            key: GRAPH_S3_ACCESS_KEY
-                      - name: GRAPH_S3_SECRET_KEY
-                        valueFrom:
-                          secretKeyRef:
-                            name: radar-graph-s3-credentials
-                            key: GRAPH_S3_SECRET_KEY
-                      - name: GRAPH_S3_FORCE_PATH_STYLE
-                        value: "false"
-                        valueFrom: null
-
-  # PREPROD SCRAPE ALIGNMENT — use the same OVH store as the app and projection,
-  # with virtual-host addressing, for the preprod refresh pipeline.
-  #
-  # FIX du patch d'alignement (remplace l'ancien JSON6902 indices 4/5/9, devenu
-  # STALE depuis #629 qui a inséré POSTGRES_USER/PASSWORD/DB en 2-4 et décalé
-  # SCRAPE_S3_ENDPOINT à l'index 7 : l'ancien patch clobbait POSTGRES_DB(4) +
-  # S3_ACCESS_KEY(5), dupliquait ENDPOINT/BUCKET (value shadowé par le valueFrom
-  # base = last-wins → alignement ineffectif) et FORCE_PATH_STYLE "true"(9) shadowé
-  # par "false"(12) → path-style OFF).
-  #
-  # Mécanisme = strategic-merge PAR NOM (index-free) → robuste au ré-ordonnancement
-  # FUTUR de la base : aucun index à maintenir (c'était la cause racine du bug).
-  # `valueFrom: null` supprime le secretKeyRef de base pour rendre une entrée
-  # value-only propre (un `value:` seul créerait un env INVALIDE value+valueFrom,
-  # rejeté par kubectl — la raison du JSON6902 d'origine ; `valueFrom: null` lève
-  # cette contrainte). Rendu VÉRIFIÉ : ENDPOINT/BUCKET/FORCE_PATH_STYLE en value
-  # propre UNIQUE (0 doublon, 0 entrée value+valueFrom), path-style "true", et
-  # POSTGRES_DB / S3_ACCESS_KEY / SCRAPE_S3_REGION (secretKeyRef) INTACTS. NB : le
-  # strategic-merge ré-ordonne cosmétiquement l'env (entrées mergées en tête) —
-  # sémantiquement inerte, AUCUN nom dupliqué.
-  #
-  # NIGHTLY MEM+CPU BUMP (scrape) foldé dans le même patch :
-  #  - mémoire évidencée (saint-henri 199 docs OOM@512Mi, succès@3Gi au run r4) ;
-  #    heap 2560 < 3Gi ; requests 768Mi scheduling.
-  #  - CPU évidencé par le run r4 (radar-refresh-all-r4 : 528 villes en 80 min à
-  #    100m/500m, << deadline 7200s ; le 150m base throttlerait le scrape
-  #    séquentiel) → requests.cpu 100m / limits.cpu 500m. Tient dans le quota
-  #    préprod ACTUEL (co-check k8s) → 0 relèvement de quota namespace.
-  #
-  # PROJECTION : PAS de patch resources ici — sa mesure est MOOT (input-starved :
-  # 1 seule ville a graph/<ville>/latest.json en préprod), on ne la dimensionne
-  # pas. Elle reste à la base (256Mi/96Mi, 150m/50m, heap200) ; seul son patch
-  # GRAPH_S3 d'alignement bucket (ci-dessus) s'applique.
-  #
-  # NIGHTLY BACKOFF+DEADLINE (scrape) foldé dans le même patch :
-  #  - base 34 ship backoffLimit:1. L'interim backoffLimit:0 (#633) évitait un
-  #    RE-scrape nocturne gaspilleur quand worker-live sortait exit 1 sur des
-  #    source-errors par-ville TOLÉRABLES (APRÈS un done + upsert PG réussi). Ce
-  #    bug app est CORRIGÉ : le fix exit-code worker-live (#637, exit-code=
-  #    job-health : source-errors tolérables → exit 0 → Job=Complete) est mergé,
-  #    déployé ET run-validé sur la nightly (Job=Complete, 90/528 source-errors
-  #    tolérées) → on REVERT backoffLimit 0→1 : un seul retry ne se déclenche plus
-  #    que sur un échec transitoire GÉNUIN (blip S3/PG/réseau), plus sur des
-  #    source-errors par-ville tolérables. Le filet retry est restauré.
-  #  - activeDeadlineSeconds 7200→10800 CONSERVÉ : temps de run unique observé =
-  #    80–110min sur les runs r4 et manual-0905 ; 7200s (120min) tombe DANS cette
-  #    variance → deadline 10800s (3h) GARDÉE pour qu'un run un peu plus lent
-  #    atteigne quand même done + feed PG avant la deadline.
-  - target:
-      kind: CronJob
-      name: radar-refresh-scrape
-    patch: |
-      apiVersion: batch/v1
-      kind: CronJob
-      metadata:
-        name: radar-refresh-scrape
-      spec:
-        jobTemplate:
-          spec:
-            backoffLimit: 1
-            activeDeadlineSeconds: 10800
-            template:
-              spec:
-                containers:
-                  - name: scrape
-                    env:
-                      - name: NODE_OPTIONS
-                        value: "--max-old-space-size=2560 --dns-result-order=ipv4first"
-                      - name: SCRAPE_S3_ENDPOINT
-                        value: "https://s3.bhs.io.cloud.ovh.net"
-                        valueFrom: null
-                      - name: SCRAPE_S3_BUCKET
-                        value: "radar-immobilier-graph-preprod"
-                        valueFrom: null
-                      - name: SCRAPE_S3_REGION
-                        value: "bhs"
-                        valueFrom: null
-                      - name: SCRAPE_S3_FORCE_PATH_STYLE
-                        value: "false"
-                        valueFrom: null
-                      - name: SCRAPE_S3_ACCESS_KEY
-                        valueFrom:
-                          secretKeyRef:
-                            name: radar-graph-s3-credentials
-                            key: GRAPH_S3_ACCESS_KEY
-                      - name: SCRAPE_S3_SECRET_KEY
-                        valueFrom:
-                          secretKeyRef:
-                            name: radar-graph-s3-credentials
-                            key: GRAPH_S3_SECRET_KEY
-                    resources:
-                      requests:
-                        cpu: 100m
-                        memory: 768Mi
-                      limits:
-                        cpu: 500m
-                        memory: 3Gi
