@@ -1,0 +1,601 @@
+{
+ "documentId": "waterloo-2026-08-18",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "d96135bbf8011012cfd4f4cca8e7f532c40b7d550d6753964ef022522cdab0fa",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-26-956-2"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "26-956-2 — Encadrement des projets intégrés",
+     "stage": "adoption",
+     "objet": "26-956-2",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant\nle règlement de zonage afin de modifier l'encadrement des projets\nintégrés tel que soumis;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-26-957-1"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "26-957-1 — Lotissement et sites patrimoniaux",
+     "stage": "adoption",
+     "objet": "26-957-1",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Que le conseil municipal adopte le Règlement 26-957-1 sur le\nlotissement en lien avec certains sites patrimoniaux tel que soumis;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-26-972"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "26-972 — Réaménagement du 415, rue de la Cour",
+     "stage": "adoption",
+     "objet": "26-972",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le Conseil municipal adopte le Règlement parapluie 26972 décrétant des dépenses et un emprunt de 1 360 000 $\npour le réaménagement et la mise à niveau des locaux du 415,\nrue de la Cour;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-2026-107"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 80, rue Yves-Malouin",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée,\nnotamment pour l'implantation et la marge arrière du 80, rue YvesMalouin."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-2026-108"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 82, rue Yves-Malouin",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée,\nnotamment pour l'implantation et la marge arrière du 82, rue YvesMalouin."
+      },
+      {
+       "page": 11,
+       "excerpt": "ATTENDU QUE l'implantation proposée respecte généralement\nl'implantation des bâtiments existants dans le secteur (ancienne zone\nR-37) et ne va pas créer de préjudice au voisinage."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-2026-110"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 153, rue du Manège",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "Que le Conseil, sur recommandation du CCU approuve la dérogation\nmineure pour le 153, rue du Manège, telle que demandée,"
+      },
+      {
+       "page": 12,
+       "excerpt": "ATTENDU QUE la demande respecte la demande antérieure (CCU\n2026-078) pour le même genre de construction et devrait être\nmodifié par une future modification aux normes de la zone H-92."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-2026-111"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 155, rue du Manège",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "Que le Conseil, sur recommandation du CCU approuve la dérogation\nmineure pour le 155, rue du Manège, telle que demandée,"
+      },
+      {
+       "page": 12,
+       "excerpt": "ATTENDU QUE la demande respecte la demande antérieure (CCU\n2026-078) pour le même genre de construction et se verra corrigé par\nune future modification aux normes de la zone H-92;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-2026-105"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Enseigne au 4906, rue Foster",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "Que le conseil approuve l'ajout de lettrage en façade, tel que\nprésenté, pour le 4906, rue Foster."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-2026-106"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Rénovation extérieure au 5, rue Nord",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "Que le Conseil approuve le projet de rénovation extérieure au 5 rue\nNord, tel que présenté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-2026-109"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Construction neuve au 80-82, rue Yves-Malouin",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "Que le conseil municipal approuve la demande PIIA pour une\nconstruction neuve au 80-82, rue Yves-Malouin, tel que\ndemandé,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-2026-112"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Construction résidentielle au 153 et 155, rue du Manège",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "Que le conseil approuve le projet de construction résidentielle neuve\nau 153 et 155, rue du Manège, tel que présenté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-bell"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Accord de principe — Tour Bell dans le secteur du 6400, rue Foster",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "Le conseil donne son accord de principe à l'implantation d'une\ntour de télécommunications d'une hauteur maximale de 40\nmètres,"
+      },
+      {
+       "page": 10,
+       "excerpt": "Le conseil confirme que la réglementation d'urbanisme devra\nêtre modifiée en temps opportun pour permettre la réalisation\ndu projet;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-clsc"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Contrat de réaménagement du futur CLSC",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Que le conseil octroie le contrat à Construction MELMA Inc., au\nmontant de 1 089 963,00 $ taxes incluses, conditionnellement à\nl'entrée en vigueur du règlement d'emprunt 26-972"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "signal-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Autorisation de vente pour taxes — 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "Que la Ville de Waterloo autorise la greffière à effectuer et\nsigner individuellement toute démarche et à signer tout\ndocument dans le but de mener à terme la vente pour taxes"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "signal-beauregard"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Préparation des travaux d'infrastructures — Secteur Beauregard",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "Que le conseil autorise le chargé de projet à réaliser un appel\nd'offres sur invitation ou une procédure ouverte pour obtenir\ndes soumissions de firmes en ingénierie"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A16",
+   "nodeIds": [
+    "signal-foster"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Études géotechniques — Rue Foster",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "Que le conseil octroie le contrat à l'entreprise\nEnvironnement LCL Inc., plus bas soumissionnaire\nconforme,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A17",
+   "nodeIds": [
+    "signal-facade"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Opération façade — 5700 à 5702, rue Foster",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Que le conseil, accepte la demande de subvention faite au\nprogramme d'aide financière Opération façade, et autorise\nle paiement de 10 000 $,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A18",
+   "nodeIds": [
+    "signal-nadeau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Servitude Hydro-Québec — Rue Nadeau",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "Le conseil autorise la signature d'une servitude réelle et\nperpétuelle en faveur d'Hydro-Québec de la manière prévue\nau document joint à la présente résolution"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le Règlement 26-956-2 modifiant le règlement de zonage.\",\"excerpt\":\"Que le conseil municipal adopte le Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés tel que soumis;\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le Règlement 26-957-1 sur le lotissement.\",\"excerpt\":\"Que le conseil municipal adopte le Règlement 26-957-1 sur le lotissement en lien avec certains sites patrimoniaux tel que soumis;\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement d'emprunt parapluie 26-972.\",\"excerpt\":\"Que le Conseil municipal adopte le Règlement parapluie 26972 décrétant des dépenses et un emprunt de 1 360 000 $ pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour;\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accorde la dérogation mineure pour le 80, rue Yves-Malouin.\",\"excerpt\":\"Que le Conseil accorde la dérogation mineure, telle que présentée, notamment pour l'implantation et la marge arrière du 80, rue YvesMalouin.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accorde la dérogation mineure pour le 82, rue Yves-Malouin.\",\"excerpt\":\"Que le Conseil accorde la dérogation mineure, telle que présentée, notamment pour l'implantation et la marge arrière du 82, rue YvesMalouin.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la dérogation mineure pour le 153, rue du Manège.\",\"excerpt\":\"Que le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 153, rue du Manège, telle que demandée,\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la dérogation mineure pour le 155, rue du Manège.\",\"excerpt\":\"Que le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 155, rue du Manège, telle que demandée,\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la demande de PIIA pour le 4906, rue Foster.\",\"excerpt\":\"Que le conseil approuve l'ajout de lettrage en façade, tel que présenté, pour le 4906, rue Foster.\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve le projet sous PIIA au 5, rue Nord.\",\"excerpt\":\"Que le Conseil approuve le projet de rénovation extérieure au 5 rue Nord, tel que présenté.\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la demande de PIIA au 80-82, rue Yves-Malouin.\",\"excerpt\":\"Que le conseil municipal approuve la demande PIIA pour une construction neuve au 80-82, rue Yves-Malouin, tel que demandé,\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve le projet sous PIIA au 153 et 155, rue du Manège.\",\"excerpt\":\"Que le conseil approuve le projet de construction résidentielle neuve au 153 et 155, rue du Manège, tel que présenté.\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil donne son accord de principe et mentionne l'ajustement à venir de la réglementation d'urbanisme.\",\"excerpt\":\"Le conseil donne son accord de principe à l'implantation d'une tour de télécommunications d'une hauteur maximale de 40 mètres,\"},{\"act\":\"A13\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple octroi de contrat de construction/services, relevant des exclusions.\",\"excerpt\":\"\"},{\"act\":\"A14\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une procédure administrative de vente pour défaut de paiement de taxes, relevant des exclusions financières/administratives.\",\"excerpt\":\"\"},{\"act\":\"A15\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une autorisation de lancer un appel d'offres pour des services professionnels en ingénierie, relevant des exclusions.\",\"excerpt\":\"\"},{\"act\":\"A16\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un contrat de services professionnels d'études géotechniques, sans acte d'urbanisme direct.\",\"excerpt\":\"\"},{\"act\":\"A17\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accorde une aide financière du programme d'urbanisme patrimonial Opération façade suite à une recommandation PIIA.\",\"excerpt\":\"Que le conseil, accepte la demande de subvention faite au programme d'aide financière Opération façade, et autorise le paiement de 10 000 $,\"},{\"act\":\"A18\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise l'établissement d'une servitude réelle et perpétuelle foncière.\",\"excerpt\":\"Le conseil autorise la signature d'une servitude réelle et perpétuelle en faveur d'Hydro-Québec de la manière prévue au document joint à la présente résolution\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le Règlement 26-956-2 modifiant le règlement de zonage.",
+   "excerpt": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés tel que soumis;"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le Règlement 26-957-1 sur le lotissement.",
+   "excerpt": "Que le conseil municipal adopte le Règlement 26-957-1 sur le lotissement en lien avec certains sites patrimoniaux tel que soumis;"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement d'emprunt parapluie 26-972.",
+   "excerpt": "Que le Conseil municipal adopte le Règlement parapluie 26972 décrétant des dépenses et un emprunt de 1 360 000 $ pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour;"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil accorde la dérogation mineure pour le 80, rue Yves-Malouin.",
+   "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée, notamment pour l'implantation et la marge arrière du 80, rue YvesMalouin."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil accorde la dérogation mineure pour le 82, rue Yves-Malouin.",
+   "excerpt": "Que le Conseil accorde la dérogation mineure, telle que présentée, notamment pour l'implantation et la marge arrière du 82, rue YvesMalouin."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la dérogation mineure pour le 153, rue du Manège.",
+   "excerpt": "Que le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 153, rue du Manège, telle que demandée,"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la dérogation mineure pour le 155, rue du Manège.",
+   "excerpt": "Que le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 155, rue du Manège, telle que demandée,"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la demande de PIIA pour le 4906, rue Foster.",
+   "excerpt": "Que le conseil approuve l'ajout de lettrage en façade, tel que présenté, pour le 4906, rue Foster."
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve le projet sous PIIA au 5, rue Nord.",
+   "excerpt": "Que le Conseil approuve le projet de rénovation extérieure au 5 rue Nord, tel que présenté."
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la demande de PIIA au 80-82, rue Yves-Malouin.",
+   "excerpt": "Que le conseil municipal approuve la demande PIIA pour une construction neuve au 80-82, rue Yves-Malouin, tel que demandé,"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve le projet sous PIIA au 153 et 155, rue du Manège.",
+   "excerpt": "Que le conseil approuve le projet de construction résidentielle neuve au 153 et 155, rue du Manège, tel que présenté."
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Le conseil donne son accord de principe et mentionne l'ajustement à venir de la réglementation d'urbanisme.",
+   "excerpt": "Le conseil donne son accord de principe à l'implantation d'une tour de télécommunications d'une hauteur maximale de 40 mètres,"
+  },
+  {
+   "act": "A13",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple octroi de contrat de construction/services, relevant des exclusions.",
+   "excerpt": ""
+  },
+  {
+   "act": "A14",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une procédure administrative de vente pour défaut de paiement de taxes, relevant des exclusions financières/administratives.",
+   "excerpt": ""
+  },
+  {
+   "act": "A15",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une autorisation de lancer un appel d'offres pour des services professionnels en ingénierie, relevant des exclusions.",
+   "excerpt": ""
+  },
+  {
+   "act": "A16",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un contrat de services professionnels d'études géotechniques, sans acte d'urbanisme direct.",
+   "excerpt": ""
+  },
+  {
+   "act": "A17",
+   "verdict": "soutenu",
+   "reason": "Le conseil accorde une aide financière du programme d'urbanisme patrimonial Opération façade suite à une recommandation PIIA.",
+   "excerpt": "Que le conseil, accepte la demande de subvention faite au programme d'aide financière Opération façade, et autorise le paiement de 10 000 $,"
+  },
+  {
+   "act": "A18",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise l'établissement d'une servitude réelle et perpétuelle foncière.",
+   "excerpt": "Le conseil autorise la signature d'une servitude réelle et perpétuelle en faveur d'Hydro-Québec de la manière prévue au document joint à la présente résolution"
+  }
+ ],
+ "filter": {
+  "acts": 18,
+  "removed": [
+   {
+    "act": "A13",
+    "reason": "Il s'agit d'un simple octroi de contrat de construction/services, relevant des exclusions."
+   },
+   {
+    "act": "A14",
+    "reason": "Il s'agit d'une procédure administrative de vente pour défaut de paiement de taxes, relevant des exclusions financières/administratives."
+   },
+   {
+    "act": "A15",
+    "reason": "Il s'agit d'une autorisation de lancer un appel d'offres pour des services professionnels en ingénierie, relevant des exclusions."
+   },
+   {
+    "act": "A16",
+    "reason": "Il s'agit d'un contrat de services professionnels d'études géotechniques, sans acte d'urbanisme direct."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le Règlement 26-956-2 modifiant le règlement de zonage."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil adopte le Règlement 26-957-1 sur le lotissement."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte le règlement d'emprunt parapluie 26-972."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil accorde la dérogation mineure pour le 80, rue Yves-Malouin."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil accorde la dérogation mineure pour le 82, rue Yves-Malouin."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil approuve la dérogation mineure pour le 153, rue du Manège."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil approuve la dérogation mineure pour le 155, rue du Manège."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil approuve la demande de PIIA pour le 4906, rue Foster."
+   },
+   {
+    "act": "A09",
+    "reason": "Le conseil approuve le projet sous PIIA au 5, rue Nord."
+   },
+   {
+    "act": "A10",
+    "reason": "Le conseil approuve la demande de PIIA au 80-82, rue Yves-Malouin."
+   },
+   {
+    "act": "A11",
+    "reason": "Le conseil approuve le projet sous PIIA au 153 et 155, rue du Manège."
+   },
+   {
+    "act": "A12",
+    "reason": "Le conseil donne son accord de principe et mentionne l'ajustement à venir de la réglementation d'urbanisme."
+   },
+   {
+    "act": "A17",
+    "reason": "Le conseil accorde une aide financière du programme d'urbanisme patrimonial Opération façade suite à une recommandation PIIA."
+   },
+   {
+    "act": "A18",
+    "reason": "Le conseil autorise l'établissement d'une servitude réelle et perpétuelle foncière."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3840,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 16253,
+   "outputTokens": 1231,
+   "totalTokens": 17484
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3695
+  },
+  "inputSha256": "d9e3e8c0396573acf82625b26f9257865bf75e9cadb5f58377f97e527887d992"
+ }
+}

@@ -1,0 +1,100 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "4ed3478f674f30796abf8eaa9483b57afddcd46aeced0b635394e2896f556053",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Demande d’information sur la vente de terrain — rang St-Isidore\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"RANG ST-ISIDORE\",\n        \"page\": 2,\n        \"citation\": \"VENTE DE\\nTERRAIN – RANG ST-ISIDORE\\nLes élus demandent plus d’information, dont la valeur du terrain.\",\n        \"anchor\": \"RANG ST-ISIDORE\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les retours à la ligne de la page 2 sont rétablis, sans modifier l’étape de demande d’information.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Demande de révision du règlement exigeant une bande boisée de 20 mètres\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"règlement de déboisement\",\n        \"page\": 7,\n        \"citation\": \"IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\\nrèglement soit revu en tenant compte des éléments soulevés.\",\n        \"anchor\": \"règlement soit revu\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les retours à la ligne de la résolution sont rétablis, celle-ci demandant une révision sans adopter de modification réglementaire.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Acceptation de la déclaration de compétence de la MRC de Montmagny — autorisations en milieux hydriques\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"déclaration de compétence\",\n        \"page\": 8,\n        \"citation\": \"accepte et se déclare favorable à l’intention de déclaration\\nde compétence de la MRC de Montmagny concernant la délivrance de\\ncertaines autorisations en vertu du Règlement sur l’encadrement\",\n        \"anchor\": \"déclaration\\nde compétence de la MRC\"\n      },\n      \"reason\": \"La citation est rétablie à l’identique du texte de la page 8 et l’ancre est corrigée pour en être une sous-chaîne exacte.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Demande d’information sur la vente de terrain — rang St-Isidore",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "RANG ST-ISIDORE",
+    "page": 2,
+    "citation": "VENTE DE\nTERRAIN – RANG ST-ISIDORE\nLes élus demandent plus d’information, dont la valeur du terrain.",
+    "anchor": "RANG ST-ISIDORE"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les retours à la ligne de la page 2 sont rétablis, sans modifier l’étape de demande d’information."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Demande de révision du règlement exigeant une bande boisée de 20 mètres",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "règlement de déboisement",
+    "page": 7,
+    "citation": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\nrèglement soit revu en tenant compte des éléments soulevés.",
+    "anchor": "règlement soit revu"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les retours à la ligne de la résolution sont rétablis, celle-ci demandant une révision sans adopter de modification réglementaire."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Acceptation de la déclaration de compétence de la MRC de Montmagny — autorisations en milieux hydriques",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "déclaration de compétence",
+    "page": 8,
+    "citation": "accepte et se déclare favorable à l’intention de déclaration\nde compétence de la MRC de Montmagny concernant la délivrance de\ncertaines autorisations en vertu du Règlement sur l’encadrement",
+    "anchor": "déclaration\nde compétence de la MRC"
+   },
+   "reason": "La citation est rétablie à l’identique du texte de la page 8 et l’ancre est corrigée pour en être une sous-chaîne exacte."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "VENTE DE\nTERRAIN – RANG ST-ISIDORE\nLes élus demandent plus d’information, dont la valeur du terrain."
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 7,
+   "citation": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\nrèglement soit revu en tenant compte des éléments soulevés."
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 8,
+   "citation": "accepte et se déclare favorable à l’intention de déclaration\nde compétence de la MRC de Montmagny concernant la délivrance de\ncertaines autorisations en vertu du Règlement sur l’encadrement"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

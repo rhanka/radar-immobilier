@@ -1,0 +1,51 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "638f58c73d3253faa109d65d15cdb3049a3d7c044a5978af7e7b940173cebbd3",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-04-062 (section Administration, p. 14) accorde un prêt gratuit d'un local municipal à un organisme communautaire selon des modalités à convenir : ce n'est ni un objet réglementaire ni un acte foncier (aucune vente, acquisition, servitude ou zonage), donc fait complémentaire hors gold selon les exclusions du corrigé.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le texte atteste p. 15 « 2026-04-063 Adoption du règlement numéro 263-2026 relatif à l'occupation et l'entretien des bâtiments patrimoniaux » sous URBANISME ET ENVIRONNEMENT, adopté à l'unanimité ; l'avis de motion et le projet du 13 janvier 2026 sont des rappels historiques qui ne créent pas d'unité supplémentaire.\"},{\"item\":\"i03\",\"choice\":\"v2\",\"reason\":\"Le conseil « appuie et recommande ladite demande d'autorisation » à la CPTAQ pour les lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311 (p. 22-23) ; la citation de v2 reproduit exactement l'intitulé « Québec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311 du cadastre du Québec dans la circonscription foncière de Gatineau », alors que v1 tronque/altère le segment du titre entre « (aliénation temporaire) » et « Commission ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La résolution 2026-04-062 (section Administration, p. 14) accorde un prêt gratuit d'un local municipal à un organisme communautaire selon des modalités à convenir : ce n'est ni un objet réglementaire ni un acte foncier (aucune vente, acquisition, servitude ou zonage), donc fait complémentaire hors gold selon les exclusions du corrigé."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le texte atteste p. 15 « 2026-04-063 Adoption du règlement numéro 263-2026 relatif à l'occupation et l'entretien des bâtiments patrimoniaux » sous URBANISME ET ENVIRONNEMENT, adopté à l'unanimité ; l'avis de motion et le projet du 13 janvier 2026 sont des rappels historiques qui ne créent pas d'unité supplémentaire."
+  },
+  {
+   "item": "i03",
+   "choice": "v2",
+   "reason": "Le conseil « appuie et recommande ladite demande d'autorisation » à la CPTAQ pour les lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311 (p. 22-23) ; la citation de v2 reproduit exactement l'intitulé « Québec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311 du cadastre du Québec dans la circonscription foncière de Gatineau », alors que v1 tronque/altère le segment du titre entre « (aliénation temporaire) » et « Commission »."
+  }
+ ]
+}

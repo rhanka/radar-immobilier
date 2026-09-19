@@ -1,0 +1,111 @@
+{
+ "documentId": "saint-barthelemy-2026-09-08",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "8942644f3bccd5757ec4286a05384d385cab43e5f710cac83f6a72b8a6fb882a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-09-189 en page 3 adopte le règlement 738-26 (« soit et est adopté ») après avis de motion du 7 juillet et consultation; citation, étape adoption, objet 738-26 et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 4, résolution 2026-09-190 : « Un avis de motion est donné » pour un projet amendant le règlement de zonage 288-90 (zones R-7 et R-8); avis de motion et projet sont des unités distinctes selon les règles.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 4-5, résolution 2026-09-191 : « le premier projet de règlement 739-26 ... soit et est adopté »; étape projet_reglement, objet 739-26 et citation du titre 4.3 exacts.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 6, résolution 2026-09-194 autorise la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695 avec interdiction d'aménagements permanents; acte foncier explicite, objet désigné comme matricule et non comme lot.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Même résolution 2026-09-194 page 6 pour le second matricule 3220-73-6695, unité distincte explicitement nommée; l'ancre v1 est le matricule lui-même, présent tel quel dans la citation.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Page 7, résolution 2026-09-195 autorise « l'achat de l'immeuble identifié par le matricule 2723-93-7328 » (portion de la Montée du Lac-Robert) pour faciliter le développement du secteur; acte foncier explicite, citation et page exactes.\"},{\"item\":\"i07\",\"choice\":\"v2\",\"reason\":\"Page 7, résolution 2026-09-196 autorise la vente du matricule 3418-41-5276 et le texte précise « interdit d'y implanter des aménagements permanents à moins que des travaux de correction majeurs de la pente » : v2 reprend cette contrainte de pente que la règle interdit de contredire, comme les libellés i04/i05.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 8, résolution 2026-09-197 : « le conseil municipal autorise la vente de l'immeuble 6 621 027 de Chéné Immobilier Inc. à Hulix S.E.N.C. » sous condition de transfert des clauses de préemption; acte foncier non résidentiel inclus par les règles.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Page 10, résolution 2026-09-203 accepte le prolongement du réseau d'aqueduc pour desservir des résidences supplémentaires; développement explicite, donc hors de l'exclusion « entretiens de voirie sans développement explicite », citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v2"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-09-189 en page 3 adopte le règlement 738-26 (« soit et est adopté ») après avis de motion du 7 juillet et consultation; citation, étape adoption, objet 738-26 et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 4, résolution 2026-09-190 : « Un avis de motion est donné » pour un projet amendant le règlement de zonage 288-90 (zones R-7 et R-8); avis de motion et projet sont des unités distinctes selon les règles."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 4-5, résolution 2026-09-191 : « le premier projet de règlement 739-26 ... soit et est adopté »; étape projet_reglement, objet 739-26 et citation du titre 4.3 exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 6, résolution 2026-09-194 autorise la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695 avec interdiction d'aménagements permanents; acte foncier explicite, objet désigné comme matricule et non comme lot."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Même résolution 2026-09-194 page 6 pour le second matricule 3220-73-6695, unité distincte explicitement nommée; l'ancre v1 est le matricule lui-même, présent tel quel dans la citation."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Page 7, résolution 2026-09-195 autorise « l'achat de l'immeuble identifié par le matricule 2723-93-7328 » (portion de la Montée du Lac-Robert) pour faciliter le développement du secteur; acte foncier explicite, citation et page exactes."
+  },
+  {
+   "item": "i07",
+   "choice": "v2",
+   "reason": "Page 7, résolution 2026-09-196 autorise la vente du matricule 3418-41-5276 et le texte précise « interdit d'y implanter des aménagements permanents à moins que des travaux de correction majeurs de la pente » : v2 reprend cette contrainte de pente que la règle interdit de contredire, comme les libellés i04/i05."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 8, résolution 2026-09-197 : « le conseil municipal autorise la vente de l'immeuble 6 621 027 de Chéné Immobilier Inc. à Hulix S.E.N.C. » sous condition de transfert des clauses de préemption; acte foncier non résidentiel inclus par les règles."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Page 10, résolution 2026-09-203 accepte le prolongement du réseau d'aqueduc pour desservir des résidences supplémentaires; développement explicite, donc hors de l'exclusion « entretiens de voirie sans développement explicite », citation et page exactes."
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "e78d3f75e31ac3660021332ac0c6fe69f606369cd99f27c3d820e3606a7f8aee",
+ "inputSha256": "0aae1e065d5c584c2741d654600d5009a9c6fddea6933e0cf351074a869ed3c7",
+ "responseSha256": "4de13dbaabdd19fb268063a9f7af3d7737e313762220f48ad17151364d84e335",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 271548,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 19280,
+  "outputTokens": 8976,
+  "totalTokens": 28256
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 271535,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:46:22.826Z"
+}

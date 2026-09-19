@@ -1,0 +1,19 @@
+{
+ "documentId": "cookshire-eaton-2026-04-07",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dcef823e0abf9b897d88bdb82b1720374565a8af97cb1bd96327247ddafd2b5b",
+ "verificationSha256": "a93dd15a8013b6d6fd0d2b94fec91d71e7a72bc4f91077e5628863325836f53a",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

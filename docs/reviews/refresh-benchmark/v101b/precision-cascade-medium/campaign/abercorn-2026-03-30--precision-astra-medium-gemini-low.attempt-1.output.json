@@ -1,0 +1,131 @@
+{
+ "nodes": [
+  {
+   "id": "source-2026-03-30",
+   "label": "Procès-verbal de la séance extraordinaire d’Abercorn du 30 mars 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "status": "candidate",
+   "properties": {
+    "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+    "date": "2026-03-30",
+    "municipality": "abercorn",
+    "url": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+    "sourceKind": "pv",
+    "format": "pdf"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance extraordinaire du conseil du Village d’Abercorn,\ntenue le 30 mars 2026, à 19 h, à la salle du Conseil, au 10, rue des Églises",
+     "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+     "rawRef": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+     "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+     "sourceUrl": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-tecq",
+   "label": "Approbation de la programmation de travaux TECQ 2024-2028",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "infrastructures",
+    "kind": "programmation_travaux",
+    "date": "2026-03-30",
+    "municipality": "abercorn",
+    "resolution": "053-03-2026",
+    "description": "Approbation du contenu et autorisation de transmission de la programmation de travaux TECQ 2024-2028 au ministère des Affaires municipales et de l’Habitation. Engagement à actualiser annuellement la programmation et à réaliser les investissements autonomes imposés.",
+    "scope": "local",
+    "outcome": "Adopté à l’unanimité"
+   },
+   "evidence_refs": [
+    "ev-tecq",
+    "ev-tecq-engagements"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Que la Municipalité approuve le contenu et autorise l’envoi au ministère\ndes Aﬀaires municipales et de l’Habitation de la programmation de travaux",
+     "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+     "rawRef": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+     "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+     "sourceUrl": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 4,
+     "excerpt": "Que la Municipalité s’engage à réaliser les investissements autonomes qui\nlui sont imposés pour l’ensemble des cinq années du programme;",
+     "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+     "rawRef": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+     "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+     "sourceUrl": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-2026-03-30",
+   "target": "signal-tecq",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "evidence_refs": [
+    "ev-tecq"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Que la Municipalité approuve le contenu et autorise l’envoi au ministère\ndes Aﬀaires municipales et de l’Habitation de la programmation de travaux",
+     "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+     "rawRef": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+     "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+     "sourceUrl": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-rues",
+   "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "rawRef": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+   "sourceUrl": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "D’adhérer au réseau Rues Principales au prix de 630 $ et d’autoriser\nmadame la conseillère Annik Alder à participer au colloque qui se tiendra à\nMontréal le 15 avril prochain et de rembourser les frais de participation à\ncette activité conformément à la réglementation."
+  },
+  {
+   "id": "ev-tecq",
+   "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "rawRef": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+   "sourceUrl": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "Que la Municipalité approuve le contenu et autorise l’envoi au ministère\ndes Aﬀaires municipales et de l’Habitation de la programmation de travaux\nci-jointe et de tous les autres documents exigés par le Ministère en vue de"
+  },
+  {
+   "id": "ev-tecq-engagements",
+   "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "rawRef": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+   "sourceUrl": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Que la Municipalité s’engage à déposer annuellement une mise à jour de\nsa programmation de travaux durant la période du 1er octobre au 15\nfévrier inclusivement;\nQue la Municipalité s’engage à réaliser les investissements autonomes qui\nlui sont imposés pour l’ensemble des cinq années du programme;"
+  }
+ ],
+ "input_tokens": 7950,
+ "output_tokens": 2570
+}

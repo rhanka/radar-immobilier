@@ -1,0 +1,74 @@
+{
+ "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2682ee80973aff453d0d3ecba1df0137b9f1210f5181954b28fcfda77ccb4701",
+ "verificationSha256": "7f8b45f6bfcf671d839a31dba237c63c09baef3eb01e08a4e8f7a323f154267b",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La règle exige un « objet réglementaire ou foncier explicite » ; or la résolution 2026-04-50 ne vise que « les immeubles identifiés en annexe » (annexe absente du texte), sans lot, matricule ni adresse, et le point 5.4 est intitulé « Autorisation de renchérir – Nomination » : il désigne la directrice générale (et le maire comme substitut) pour enchérir éventuellement le 11 juin 2026, ce qui relève des « simples nominations » exclues du rappel et non d’un acte foncier constaté. Les positions A et C sont écartées car l’acquisition reste conditionnelle et son objet non explicite ; ce fait peut au plus être signalé séparément « sans retoucher le dénominateur ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir des immeubles pour taxes impayées — vente du 11 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "immeubles identifiés en annexe",
+      "page": 4,
+      "citation": "la directrice générale à enchérir au nom de la Municipalité et à acquérir les immeubles identifiés en annexe sur lesquels des taxes demeurent impayées au moment de la vente",
+      "anchor": "immeubles identifiés en annexe",
+      "spanStart": 1515,
+      "spanEnd": 1687
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-50, page 4, autorise expressément à enchérir et à acquérir les immeubles identifiés en annexe lors de la vente du 11 juin 2026 : il s’agit d’une autorisation foncière adoptée, et non d’une simple nomination."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-04-50 (page 4) autorise la directrice générale « à enchérir au nom de la Municipalité et à acquérir les immeubles identifiés en annexe sur lesquels des taxes demeurent impayées » : acte foncier inclus par la règle « petits PIIA et actes fonciers, même non résidentiels », citation et page exactes."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Il s'agit d'une simple nomination/autorisation de renchérir pour recouvrement de taxes, sans objet foncier explicite dans le texte, ce qui relève des exclusions du rappel."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La règle exige un « objet réglementaire ou foncier explicite » ; or la résolution 2026-04-50 ne vise que « les immeubles identifiés en annexe » (annexe absente du texte), sans lot, matricule ni adresse, et le point 5.4 est intitulé « Autorisation de renchérir – Nomination » : il désigne la directrice générale (et le maire comme substitut) pour enchérir éventuellement le 11 juin 2026, ce qui relève des « simples nominations » exclues du rappel et non d’un acte foncier constaté. Les positions A et C sont écartées car l’acquisition reste conditionnelle et son objet non explicite ; ce fait peut au plus être signalé séparément « sans retoucher le dénominateur »."
+  }
+ ]
+}

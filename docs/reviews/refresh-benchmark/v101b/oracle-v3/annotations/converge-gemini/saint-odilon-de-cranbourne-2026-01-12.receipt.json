@@ -1,0 +1,37 @@
+{
+ "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1e90d3d566980812a2f7b3bc5a30ff52d2c50694c4b8a0a1df6b085c1082b0f7",
+ "inputSha256": "dfe04fe2ac57087f0b1ce5bb9925dae5a7401eee25d0103677cd6a620695705a",
+ "responseSha256": "fd7f30bbfe56869ea3114e74972f4f1c14fbdd202c6b7d9a0e89a091a4fb5839",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 13105,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 15288,
+  "outputTokens": 110,
+  "totalTokens": 19613,
+  "thoughtsTokenCount": 4215
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 12872,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:52:03.152Z"
+}

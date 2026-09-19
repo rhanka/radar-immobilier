@@ -1,0 +1,101 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "bb96389f138a3f206d64d8dcac29fb7d776e86c78fec7fe79bbdedb91bbe60bc",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v2\",\n      \"reason\": \"La page 5 autorise explicitement cette location immobilière, incluse parmi les actes fonciers, mais ne constate aucune adoption de règlement, d’où l’étape « inconnu ».\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 106-05-2026, page 6, fixe la consultation sur le projet de règlement 079-2026 au 13 juillet 2026 à 18 h 30, sans constater sa tenue ni l’adoption du règlement.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"absent\",\n      \"reason\": \"L’intitulé cité page 6 ne constitue pas une unité distincte de la demande de suspension et de révision formulée page 8 et retenue en i06.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 8 constate expressément le dépôt de l’avis spécial relatif à l’abrogation du règlement 046-2023, sans le présenter comme un avis de motion ou une adoption.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette autorisation de location est le même acte foncier que celui retenu en i01, et la règle exclut le crédit d’un doublon du même fait.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 107-05-2026 demande expressément, page 8, de suspendre et de réviser le projet de règlement sur les pratiques agroenvironnementales, sans constater sa suspension effective ni son adoption.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition répète l’autorisation de location déjà retenue en i01 et ne correspond donc pas à une unité gold distincte.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition reproduit la même demande, la même étape et la même citation que l’unité retenue en i06, constituant un doublon non crédité.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "absent"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v2",
+   "reason": "La page 5 autorise explicitement cette location immobilière, incluse parmi les actes fonciers, mais ne constate aucune adoption de règlement, d’où l’étape « inconnu »."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 106-05-2026, page 6, fixe la consultation sur le projet de règlement 079-2026 au 13 juillet 2026 à 18 h 30, sans constater sa tenue ni l’adoption du règlement."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "L’intitulé cité page 6 ne constitue pas une unité distincte de la demande de suspension et de révision formulée page 8 et retenue en i06."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 8 constate expressément le dépôt de l’avis spécial relatif à l’abrogation du règlement 046-2023, sans le présenter comme un avis de motion ou une adoption."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "Cette autorisation de location est le même acte foncier que celui retenu en i01, et la règle exclut le crédit d’un doublon du même fait."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 107-05-2026 demande expressément, page 8, de suspendre et de réviser le projet de règlement sur les pratiques agroenvironnementales, sans constater sa suspension effective ni son adoption."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Cette proposition répète l’autorisation de location déjà retenue en i01 et ne correspond donc pas à une unité gold distincte."
+  },
+  {
+   "item": "i08",
+   "choice": "absent",
+   "reason": "Cette proposition reproduit la même demande, la même étape et la même citation que l’unité retenue en i06, constituant un doublon non crédité."
+  }
+ ]
+}

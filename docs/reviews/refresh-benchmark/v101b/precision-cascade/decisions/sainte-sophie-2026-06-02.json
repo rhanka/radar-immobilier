@@ -1,0 +1,591 @@
+{
+ "documentId": "sainte-sophie-2026-06-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "adf2a31c98009393b3a4aa2bccdb23b9de445d7bc5f2feffbddecf35a1b8ac49",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-sp-2026-14"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "SP-2026-14 — Second projet de modification du zonage",
+     "stage": "2e_projet",
+     "objet": "SP-2026-14",
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-14 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER"
+      },
+      {
+       "page": 13,
+       "excerpt": "3. L’annexe 2 - « Plan de zonage » est modifié par l’agrandissement de la zone\n« CH-219 » au détriment des zones « CH-217 » et « CH-220 »."
+      },
+      {
+       "page": 14,
+       "excerpt": "5. L’annexe 2 - « Plan de zonage » est modifié par l’agrandissement de la zone\n« U-705 » au détriment de la zone « U-701 »."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-sp-2026-15"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "SP-2026-15 — Modification des usages de V-802",
+     "stage": "2e_projet",
+     "objet": "SP-2026-15",
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-15 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER\nL’ANNEXE 3 - GRILLE DES SPÉCIFICATIONS, ZONE V-802"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-1297-2020"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "1297-2020 — Règlement de zonage",
+     "stage": null,
+     "objet": "1297-2020",
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-14 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-1470-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "1470-2026 — Conformité du plan d'urbanisme",
+     "stage": null,
+     "objet": "1470-2026",
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "RÈGLEMENT 1470-2026 - AMENDEMENT AU RÈGLEMENT 1296-2020\nRELATIF AU PLAN D’URBANISME AFIN D’ASSURER SA CONFORMITÉ AU"
+      },
+      {
+       "page": 17,
+       "excerpt": "5. Le plan 2 « Affectation du sol » de ce règlement est modifié par :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-1471-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "1471-2026 — Conformité du zonage et nouvelles zones",
+     "stage": null,
+     "objet": "1471-2026",
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "RÈGLEMENT 1471-2026\n\nAMENDEMENT AU RÈGLEMENT 1297-2020\nRELATIF AU ZONAGE AFIN D’ASSURER SA"
+      },
+      {
+       "page": 26,
+       "excerpt": "7. L’annexe 2 « Plan de zonage » de ce règlement est modifiée par :"
+      },
+      {
+       "page": 27,
+       "excerpt": "6° À la grille correspondant à la zone IND-407 :\na) Le remplacement du nom de la grille par « U-721 »;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-1472-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "1472-2026 — Études acoustiques pour permis et certificats",
+     "stage": null,
+     "objet": "1472-2026",
+     "citations": [
+      {
+       "page": 41,
+       "excerpt": "RÈGLEMENT 1472-2026 - AMENDEMENT AU RÈGLEMENT 1299-2020\nRELATIF AUX PERMIS ET CERTIFICATS AFIN D’ASSURER SA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-1473-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "1473-2026 — Suppression de dispositions PIIA relatives au bruit",
+     "stage": null,
+     "objet": "1473-2026",
+     "citations": [
+      {
+       "page": 42,
+       "excerpt": "RÈGLEMENT 1473-2026 - AMENDEMENT AU RÈGLEMENT 1300-2020\nRELATIF\nAU\nPLAN\nD’IMPLANTATION\nET\nD’INTÉGRATION"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-piia-new-glasgow"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA — 799, rue de New Glasgow",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Demande de plan d'implantation et d'intégration architecturale (PIIA) - 799, rue de New\nGlasgow"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-derogation-achigan"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 537, chemin de l'Achigan Ouest",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Dérogation mineure - 537, chemin de l'Achigan Ouest"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-derogation-abercrombie"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 318-318 A, chemin Abercrombie",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Dérogation mineure - 318-318 A, chemin Abercrombie"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "signal-conservation"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de réduction d'une aire d'affectation Conservation",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Demande de modification au règlement 188-07 relatif au schéma d'aménagement et de\ndéveloppement révisé afin de réduire la superficie de l'aire d'affectation « Conservation"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-agricultural-deadline"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Prolongation du délai de conformité du lotissement agricole",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Demande de prolongation de délai auprès du ministre des Affaires municipales et de\nl'Habitation – Mise en conformité aux normes de lotissement en zone agricole découlant"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-servitude-samson"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Servitude de tolérance — Rue Samson",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Servitude de tolérance pour l'empiètement d'un mur de soutènement en roche dans\nl'emprise de la rue Samson sur une parcelle du lot 4 037 185"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "bylaw-p-2026-16"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "P-2026-16 — Modification de la taxe spéciale du règlement 957",
+     "stage": "projet",
+     "objet": "P-2026-16",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "DÉPÔT DU PROJET DE RÈGLEMENT P-2026-16 - AMENDEMENT AU\nRÈGLEMENT 957 RELATIF À LA CONSTRUCTION D’UN RÉSERVOIR"
+      },
+      {
+       "page": 4,
+       "excerpt": "L’article 4 est modifié par l’insertion, après le deuxième alinéa, du suivant :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "bylaw-p-2026-17"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "P-2026-17 — Modification de la taxe spéciale du règlement 1001",
+     "stage": "projet",
+     "objet": "P-2026-17",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "DÉPÔT DU PROJET DE RÈGLEMENT P-2026-17 - AMENDEMENT AU\nRÈGLEMENT 1001 RELATIF À L’AMÉLIORATION DES ÉQUIPEMENTS DE"
+      },
+      {
+       "page": 6,
+       "excerpt": "L’article 4 est modifié par l’insertion, après le deuxième alinéa, du suivant :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A16",
+   "nodeIds": [
+    "bylaw-p-2026-18"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "P-2026-18 — Modification de la taxe spéciale du règlement 1023",
+     "stage": "projet",
+     "objet": "P-2026-18",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "DÉPÔT DU PROJET DE RÈGLEMENT P-2026-18 - AMENDEMENT AU\nRÈGLEMENT 1023 RELATIF À LA CONSTRUCTION D’UNE USINE DE"
+      },
+      {
+       "page": 8,
+       "excerpt": "L’article 4 est modifié par l’insertion, après le deuxième alinéa, du suivant :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A17",
+   "nodeIds": [
+    "bylaw-p-2026-19"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "P-2026-19 — Modification de la taxe spéciale du règlement 1029",
+     "stage": "projet",
+     "objet": "P-2026-19",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "DÉPÔT DU PROJET DE RÈGLEMENT P-2026-19 - AMENDEMENT AU\nRÈGLEMENT 1029 RELATIF DES TRAVAUX D’ENTRETIEN GÉNÉRAL À"
+      },
+      {
+       "page": 10,
+       "excerpt": "L’article 4 est modifié par l’insertion, après le deuxième alinéa, du suivant :"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le document présente l'adoption du second projet de règlement SP-2026-14 modifiant le zonage.\",\"excerpt\":\"SECOND PROJET DE RÈGLEMENT SP-2026-14 - AMENDEMENT AU\\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le document présente l'adoption du second projet de règlement SP-2026-15 modifiant la grille de la zone V-802.\",\"excerpt\":\"SECOND PROJET DE RÈGLEMENT SP-2026-15 - AMENDEMENT AU\\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER\\nL’ANNEXE 3 - GRILLE DES SPÉCIFICATIONS, ZONE V-802\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 1297-2020 est le règlement de zonage initial cité en référence et ne fait pas l'objet d'un acte propre dans cette séance.\",\"excerpt\":\"AMENDEMENT AU RÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le document inclut le texte et l'adoption du règlement 1470-2026 modifiant le plan d'urbanisme.\",\"excerpt\":\"RÈGLEMENT 1470-2026 - AMENDEMENT AU RÈGLEMENT 1296-2020\\nRELATIF AU PLAN D’URBANISME AFIN D’ASSURER SA CONFORMITÉ AU\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le document contient le texte et l'adoption du règlement 1471-2026 modifiant le règlement de zonage.\",\"excerpt\":\"RÈGLEMENT 1471-2026\\n\\nAMENDEMENT AU RÈGLEMENT 1297-2020\\nRELATIF AU ZONAGE AFIN D’ASSURER SA\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le document présente le règlement 1472-2026 modifiant les permis et certificats pour exiger des études acoustiques.\",\"excerpt\":\"RÈGLEMENT 1472-2026 - AMENDEMENT AU RÈGLEMENT 1299-2020\\nRELATIF AUX PERMIS ET CERTIFICATS AFIN D’ASSURER SA\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le document contient l'adoption du règlement 1473-2026 modifiant le règlement sur les PIIA.\",\"excerpt\":\"RÈGLEMENT 1473-2026 - AMENDEMENT AU RÈGLEMENT 1300-2020\\nRELATIF\\nAU\\nPLAN\\nD’IMPLANTATION\\nET\\nD’INTÉGRATION\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit le traitement d'une demande de PIIA au 799, rue de New Glasgow.\",\"excerpt\":\"Demande de plan d'implantation et d'intégration architecturale (PIIA) - 799, rue de New\\nGlasgow\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit le traitement d'une dérogation mineure pour le 537, chemin de l'Achigan Ouest.\",\"excerpt\":\"Dérogation mineure - 537, chemin de l'Achigan Ouest\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit le traitement d'une dérogation mineure au 318-318 A, chemin Abercrombie.\",\"excerpt\":\"Dérogation mineure - 318-318 A, chemin Abercrombie\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit une demande de modification au schéma d'aménagement révisé pour réduire une aire de conservation.\",\"excerpt\":\"Demande de modification au règlement 188-07 relatif au schéma d'aménagement et de\\ndéveloppement révisé afin de réduire la superficie de l'aire d'affectation « Conservation\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour inscrit une demande de prolongation de délai pour la mise en conformité au lotissement agricole.\",\"excerpt\":\"Demande de prolongation de délai auprès du ministre des Affaires municipales et de\\nl'Habitation – Mise en conformité aux normes de lotissement en zone agricole découlant\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour mentionne l'octroi ou l'examen d'une servitude de tolérance d'empiètement sur la rue Samson.\",\"excerpt\":\"Servitude de tolérance pour l'empiètement d'un mur de soutènement en roche dans\\nl'emprise de la rue Samson sur une parcelle du lot 4 037 185\"},{\"act\":\"A14\",\"verdict\":\"non_soutenu\",\"reason\":\"Ce règlement d'emprunt et de taxation spéciale pour aqueduc/égouts relève des exclusions financières/fiscales.\",\"excerpt\":\"CONSIDÉRANT QU’en vertu de l’article 1077 du Code municipal du Québec, le conseil peut, par règlement qui ne requiert que l'approbation du ministre des Affaires municipales et de l’Habitation, modifier ou remplacer une taxe spéciale\"},{\"act\":\"A15\",\"verdict\":\"non_soutenu\",\"reason\":\"Ce projet de règlement relève des matières financières et fiscales d'emprunt (taxe spéciale), exclues du champ de l'urbanisme.\",\"excerpt\":\"CONSIDÉRANT QU’en vertu de l’article 1077 du Code municipal du Québec, le conseil peut, par règlement qui ne requiert que l'approbation du ministre des Affaires municipales et de l’Habitation, modifier ou remplacer une taxe spéciale\"},{\"act\":\"A16\",\"verdict\":\"non_soutenu\",\"reason\":\"Ce projet de règlement modifie une taxe spéciale liée à un emprunt, ce qui relève des exclusions financières.\",\"excerpt\":\"CONSIDÉRANT QU’en vertu de l’article 1077 du Code municipal du Québec, le conseil peut, par règlement qui ne requiert que l'approbation du ministre des Affaires municipales et de l’Habitation, modifier ou remplacer une taxe spéciale\"},{\"act\":\"A17\",\"verdict\":\"non_soutenu\",\"reason\":\"Ce projet de règlement modifie une taxe spéciale d'emprunt pour des travaux d'usine, relevant des exclusions fiscales/financières.\",\"excerpt\":\"CONSIDÉRANT QU’en vertu de l’article 1077 du Code municipal du Québec, le conseil peut, par règlement qui ne requiert que l'approbation du ministre des Affaires municipales et de l’Habitation, modifier ou remplacer une taxe spéciale\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le document présente l'adoption du second projet de règlement SP-2026-14 modifiant le zonage.",
+   "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-14 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le document présente l'adoption du second projet de règlement SP-2026-15 modifiant la grille de la zone V-802.",
+   "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-15 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER\nL’ANNEXE 3 - GRILLE DES SPÉCIFICATIONS, ZONE V-802"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1297-2020 est le règlement de zonage initial cité en référence et ne fait pas l'objet d'un acte propre dans cette séance.",
+   "excerpt": "AMENDEMENT AU RÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le document inclut le texte et l'adoption du règlement 1470-2026 modifiant le plan d'urbanisme.",
+   "excerpt": "RÈGLEMENT 1470-2026 - AMENDEMENT AU RÈGLEMENT 1296-2020\nRELATIF AU PLAN D’URBANISME AFIN D’ASSURER SA CONFORMITÉ AU"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le document contient le texte et l'adoption du règlement 1471-2026 modifiant le règlement de zonage.",
+   "excerpt": "RÈGLEMENT 1471-2026\n\nAMENDEMENT AU RÈGLEMENT 1297-2020\nRELATIF AU ZONAGE AFIN D’ASSURER SA"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le document présente le règlement 1472-2026 modifiant les permis et certificats pour exiger des études acoustiques.",
+   "excerpt": "RÈGLEMENT 1472-2026 - AMENDEMENT AU RÈGLEMENT 1299-2020\nRELATIF AUX PERMIS ET CERTIFICATS AFIN D’ASSURER SA"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le document contient l'adoption du règlement 1473-2026 modifiant le règlement sur les PIIA.",
+   "excerpt": "RÈGLEMENT 1473-2026 - AMENDEMENT AU RÈGLEMENT 1300-2020\nRELATIF\nAU\nPLAN\nD’IMPLANTATION\nET\nD’INTÉGRATION"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit le traitement d'une demande de PIIA au 799, rue de New Glasgow.",
+   "excerpt": "Demande de plan d'implantation et d'intégration architecturale (PIIA) - 799, rue de New\nGlasgow"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit le traitement d'une dérogation mineure pour le 537, chemin de l'Achigan Ouest.",
+   "excerpt": "Dérogation mineure - 537, chemin de l'Achigan Ouest"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit le traitement d'une dérogation mineure au 318-318 A, chemin Abercrombie.",
+   "excerpt": "Dérogation mineure - 318-318 A, chemin Abercrombie"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit une demande de modification au schéma d'aménagement révisé pour réduire une aire de conservation.",
+   "excerpt": "Demande de modification au règlement 188-07 relatif au schéma d'aménagement et de\ndéveloppement révisé afin de réduire la superficie de l'aire d'affectation « Conservation"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour inscrit une demande de prolongation de délai pour la mise en conformité au lotissement agricole.",
+   "excerpt": "Demande de prolongation de délai auprès du ministre des Affaires municipales et de\nl'Habitation – Mise en conformité aux normes de lotissement en zone agricole découlant"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour mentionne l'octroi ou l'examen d'une servitude de tolérance d'empiètement sur la rue Samson.",
+   "excerpt": "Servitude de tolérance pour l'empiètement d'un mur de soutènement en roche dans\nl'emprise de la rue Samson sur une parcelle du lot 4 037 185"
+  },
+  {
+   "act": "A14",
+   "verdict": "non_soutenu",
+   "reason": "Ce règlement d'emprunt et de taxation spéciale pour aqueduc/égouts relève des exclusions financières/fiscales.",
+   "excerpt": "CONSIDÉRANT QU’en vertu de l’article 1077 du Code municipal du Québec, le conseil peut, par règlement qui ne requiert que l'approbation du ministre des Affaires municipales et de l’Habitation, modifier ou remplacer une taxe spéciale"
+  },
+  {
+   "act": "A15",
+   "verdict": "non_soutenu",
+   "reason": "Ce projet de règlement relève des matières financières et fiscales d'emprunt (taxe spéciale), exclues du champ de l'urbanisme.",
+   "excerpt": "CONSIDÉRANT QU’en vertu de l’article 1077 du Code municipal du Québec, le conseil peut, par règlement qui ne requiert que l'approbation du ministre des Affaires municipales et de l’Habitation, modifier ou remplacer une taxe spéciale"
+  },
+  {
+   "act": "A16",
+   "verdict": "non_soutenu",
+   "reason": "Ce projet de règlement modifie une taxe spéciale liée à un emprunt, ce qui relève des exclusions financières.",
+   "excerpt": "CONSIDÉRANT QU’en vertu de l’article 1077 du Code municipal du Québec, le conseil peut, par règlement qui ne requiert que l'approbation du ministre des Affaires municipales et de l’Habitation, modifier ou remplacer une taxe spéciale"
+  },
+  {
+   "act": "A17",
+   "verdict": "non_soutenu",
+   "reason": "Ce projet de règlement modifie une taxe spéciale d'emprunt pour des travaux d'usine, relevant des exclusions fiscales/financières.",
+   "excerpt": "CONSIDÉRANT QU’en vertu de l’article 1077 du Code municipal du Québec, le conseil peut, par règlement qui ne requiert que l'approbation du ministre des Affaires municipales et de l’Habitation, modifier ou remplacer une taxe spéciale"
+  }
+ ],
+ "filter": {
+  "acts": 17,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 1297-2020 est le règlement de zonage initial cité en référence et ne fait pas l'objet d'un acte propre dans cette séance."
+   },
+   {
+    "act": "A14",
+    "reason": "Ce règlement d'emprunt et de taxation spéciale pour aqueduc/égouts relève des exclusions financières/fiscales."
+   },
+   {
+    "act": "A15",
+    "reason": "Ce projet de règlement relève des matières financières et fiscales d'emprunt (taxe spéciale), exclues du champ de l'urbanisme."
+   },
+   {
+    "act": "A16",
+    "reason": "Ce projet de règlement modifie une taxe spéciale liée à un emprunt, ce qui relève des exclusions financières."
+   },
+   {
+    "act": "A17",
+    "reason": "Ce projet de règlement modifie une taxe spéciale d'emprunt pour des travaux d'usine, relevant des exclusions fiscales/financières."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le document présente l'adoption du second projet de règlement SP-2026-14 modifiant le zonage."
+   },
+   {
+    "act": "A02",
+    "reason": "Le document présente l'adoption du second projet de règlement SP-2026-15 modifiant la grille de la zone V-802."
+   },
+   {
+    "act": "A04",
+    "reason": "Le document inclut le texte et l'adoption du règlement 1470-2026 modifiant le plan d'urbanisme."
+   },
+   {
+    "act": "A05",
+    "reason": "Le document contient le texte et l'adoption du règlement 1471-2026 modifiant le règlement de zonage."
+   },
+   {
+    "act": "A06",
+    "reason": "Le document présente le règlement 1472-2026 modifiant les permis et certificats pour exiger des études acoustiques."
+   },
+   {
+    "act": "A07",
+    "reason": "Le document contient l'adoption du règlement 1473-2026 modifiant le règlement sur les PIIA."
+   },
+   {
+    "act": "A08",
+    "reason": "L'ordre du jour prévoit le traitement d'une demande de PIIA au 799, rue de New Glasgow."
+   },
+   {
+    "act": "A09",
+    "reason": "L'ordre du jour prévoit le traitement d'une dérogation mineure pour le 537, chemin de l'Achigan Ouest."
+   },
+   {
+    "act": "A10",
+    "reason": "L'ordre du jour prévoit le traitement d'une dérogation mineure au 318-318 A, chemin Abercrombie."
+   },
+   {
+    "act": "A11",
+    "reason": "L'ordre du jour prévoit une demande de modification au schéma d'aménagement révisé pour réduire une aire de conservation."
+   },
+   {
+    "act": "A12",
+    "reason": "L'ordre du jour inscrit une demande de prolongation de délai pour la mise en conformité au lotissement agricole."
+   },
+   {
+    "act": "A13",
+    "reason": "L'ordre du jour mentionne l'octroi ou l'examen d'une servitude de tolérance d'empiètement sur la rue Samson."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 5669,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 24048,
+   "outputTokens": 1590,
+   "totalTokens": 25638
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 5509
+  },
+  "inputSha256": "6db7a2a19441bdb55aa5a72f98e4d8e5ba1690ff4f3309da23e949ef0654a417"
+ }
+}

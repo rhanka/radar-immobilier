@@ -1,0 +1,386 @@
+{
+ "documentId": "tadoussac-2026-01-13",
+ "nextId": 11,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de vente par invitation à soumissionner du lot 4 342 594",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 342 594",
+    "page": 5,
+    "citation": "QUE le Conseil autorise la vente du lot 4 342 594 du cadastre du Québec par une invitation à soumissionner",
+    "anchor": "lot 4 342 594",
+    "spanStart": 1905,
+    "spanEnd": 2011
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de vente par invitation à soumissionner du lot 4 342 594",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "4 342 594",
+      "page": 5,
+      "citation": "QUE le Conseil autorise la vente du lot 4 342 594 du cadastre du Québec par une invitation à soumissionner",
+      "anchor": "lot 4 342 594",
+      "spanStart": 1905,
+      "spanEnd": 2011
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-01-06 autorise actuellement la vente de ce lot, ce qui constitue un acte foncier décidé."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 419 — agriculture sans élevage à l’intérieur des bâtiments de la zone 31-C",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "419",
+    "page": 8,
+    "citation": "AVIS DE MOTION DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE L’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DES BÂTIMENTS DE LA ZONE 31C",
+    "anchor": "RÈGLEMENT NO 419",
+    "spanStart": 159,
+    "spanEnd": 314
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 419 — agriculture sans élevage à l’intérieur des bâtiments de la zone 31-C",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "419",
+      "page": 8,
+      "citation": "AVIS DE MOTION DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE L’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DES BÂTIMENTS DE LA ZONE 31C",
+      "anchor": "RÈGLEMENT NO 419",
+      "spanStart": 159,
+      "spanEnd": 314
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion est donné le 13 janvier 2026 et constitue une unité distincte du premier projet du même règlement."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet du règlement 419 — agriculture sans élevage à l’intérieur des bâtiments de la zone 31-C",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "419",
+    "page": 8,
+    "citation": "ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE L’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE 31-C",
+    "anchor": "RÈGLEMENT NO 419",
+    "spanStart": 1257,
+    "spanEnd": 1413
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet du règlement 419 — agriculture sans élevage à l’intérieur des bâtiments de la zone 31-C",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "419",
+      "page": 8,
+      "citation": "ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE L’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE 31-C",
+      "anchor": "RÈGLEMENT NO 419",
+      "spanStart": 1257,
+      "spanEnd": 1413
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-01-15 adopte le premier projet du règlement 419, étape actuelle distincte de l’avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Refus de la demande d’amendement au zonage — 247, rue des Forgerons",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "247, rue des Forgerons",
+    "page": 10,
+    "citation": "QUE le conseil refuse la demande d’amendement au zonage 253 aux fins de transiter le 247, rue des Forgerons dans la zone 21­CH afin de leur permettre d’opérer une boutique souvenir",
+    "anchor": "247, rue des Forgerons",
+    "spanStart": 1081,
+    "spanEnd": 1261
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de la demande d’amendement au zonage — 247, rue des Forgerons",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "247, rue des Forgerons",
+      "page": 10,
+      "citation": "QUE le conseil refuse la demande d’amendement au zonage 253 aux fins de transiter le 247, rue des Forgerons dans la zone 21­CH afin de leur permettre d’opérer une boutique souvenir",
+      "anchor": "247, rue des Forgerons",
+      "spanStart": 1081,
+      "spanEnd": 1261
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-01-16 refuse explicitement une demande d’amendement au zonage, refus à conserver sans le transformer en adoption d’un règlement."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Refus de la demande de PPCMOI — 176, rue du Bord-de-l’Eau",
+    "stage": "inconnu",
+    "procedure": "ppcmoi",
+    "objet": "176, RUE DU BORD-DE-L’EAU",
+    "page": 10,
+    "citation": "PPCMOI - 176, RUE DU BORD-DE-L’EAU",
+    "anchor": "176, RUE DU BORD-DE-L’EAU",
+    "spanStart": 1287,
+    "spanEnd": 1321
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de la demande de PPCMOI — 176, rue du Bord-de-l’Eau",
+      "stage": "inconnu",
+      "procedure": "ppcmoi",
+      "objet": "176, RUE DU BORD-DE-L’EAU",
+      "page": 10,
+      "citation": "PPCMOI - 176, RUE DU BORD-DE-L’EAU",
+      "anchor": "176, RUE DU BORD-DE-L’EAU",
+      "spanStart": 1287,
+      "spanEnd": 1321
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-01-17 refuse la demande de PPCMOI pour l’hébergement touristique et commercial, sans constater l’adoption d’un projet ou l’octroi du PPCMOI."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Fermeture et cession gratuite au MELCCFP du lot 4 344 119 — chemin du Moulin-à-Baude",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 344 119",
+    "page": 14,
+    "citation": "les lots 4 344 119 et 6 683 045 du cadastre du Québec ; QUE le Conseil municipal cède ces portions de chemin à titre gratuit au",
+    "anchor": "lots 4 344 119",
+    "spanStart": 818,
+    "spanEnd": 945
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Fermeture et cession gratuite au MELCCFP du lot 4 344 119 — chemin du Moulin-à-Baude",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "4 344 119",
+      "page": 14,
+      "citation": "les lots 4 344 119 et 6 683 045 du cadastre du Québec ; QUE le Conseil municipal cède ces portions de chemin à titre gratuit au",
+      "anchor": "lots 4 344 119",
+      "spanStart": 818,
+      "spanEnd": 945
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-01-31 décide actuellement la fermeture et la cession gratuite de la portion de chemin correspondant à ce lot, malgré son renvoi à une résolution antérieure."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Fermeture et cession gratuite au MELCCFP du lot 6 683 045 — chemin du Moulin-à-Baude",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 683 045",
+    "page": 14,
+    "citation": "les lots 4 344 119 et 6 683 045 du cadastre du Québec ; QUE le Conseil municipal cède ces portions de chemin à titre gratuit au",
+    "anchor": "et 6 683 045 du cadastre",
+    "spanStart": 818,
+    "spanEnd": 945
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Fermeture et cession gratuite au MELCCFP du lot 6 683 045 — chemin du Moulin-à-Baude",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 683 045",
+      "page": 14,
+      "citation": "les lots 4 344 119 et 6 683 045 du cadastre du Québec ; QUE le Conseil municipal cède ces portions de chemin à titre gratuit au",
+      "anchor": "et 6 683 045 du cadastre",
+      "spanStart": 818,
+      "spanEnd": 945
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Ce second lot est explicitement visé par la fermeture et la cession gratuite décidées dans la résolution 2026-01-31 et constitue un objet foncier distinct."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Autorisation d’une servitude d’aqueduc en faveur de Tadoussac sur les portions de chemin cédées",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "réseau d'aqueduc",
+    "page": 14,
+    "citation": "QUE le réseau d'aqueduc situé sur les lots visés fera l'objet d'une servitude en faveur de la municipalité de Tadoussac",
+    "anchor": "réseau d'aqueduc",
+    "spanStart": 1107,
+    "spanEnd": 1226
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation d’une servitude d’aqueduc en faveur de Tadoussac sur les portions de chemin cédées",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "réseau d'aqueduc",
+      "page": 14,
+      "citation": "QUE le réseau d'aqueduc situé sur les lots visés fera l'objet d'une servitude en faveur de la municipalité de Tadoussac",
+      "anchor": "réseau d'aqueduc",
+      "spanStart": 1107,
+      "spanEnd": 1226
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dispositif de la résolution 2026-01-31 prévoit expressément une servitude d’aqueduc en faveur de la Municipalité, acte foncier distinct des cessions."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Cession gratuite au MELCCFP du barrage de la rivière du Moulin-à-Baude — acte no 62 447",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "62 447",
+    "page": 14,
+    "citation": "QUE le Conseil municipal accepte de céder le barrage de la rivière du Moulin­à­Baude (immeubles se rapportant à l'acte no. 62 447 publié le 2 décembre 1968) à titre gratuit au MELCCFP",
+    "anchor": "l'acte no. 62 447",
+    "spanStart": 1229,
+    "spanEnd": 1412
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Cession gratuite au MELCCFP du barrage de la rivière du Moulin-à-Baude — acte no 62 447",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "62 447",
+      "page": 14,
+      "citation": "QUE le Conseil municipal accepte de céder le barrage de la rivière du Moulin­à­Baude (immeubles se rapportant à l'acte no. 62 447 publié le 2 décembre 1968) à titre gratuit au MELCCFP",
+      "anchor": "l'acte no. 62 447",
+      "spanStart": 1229,
+      "spanEnd": 1412
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-01-31 décide la cession du barrage, objet foncier distinct des portions de chemin et de la servitude d’aqueduc."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 415 — citation patrimoniale de la Maison du Tourisme, 197, rue des Pionniers",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "415",
+    "page": 15,
+    "citation": "D’adopter le règlement no 415 ayant pour objet la citation de la Maison du Tourisme située au 197, Rue des Pionniers, à titre d’immeubles patrimonial",
+    "anchor": "règlement no 415",
+    "spanStart": 0,
+    "spanEnd": 149
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 415 — citation patrimoniale de la Maison du Tourisme, 197, rue des Pionniers",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "415",
+      "page": 15,
+      "citation": "D’adopter le règlement no 415 ayant pour objet la citation de la Maison du Tourisme située au 197, Rue des Pionniers, à titre d’immeubles patrimonial",
+      "anchor": "règlement no 415",
+      "spanStart": 0,
+      "spanEnd": 149
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-01-32 adopte le règlement de citation patrimoniale 415, objet réglementaire d’urbanisme explicitement traité."
+    }
+   ]
+  }
+ ]
+}

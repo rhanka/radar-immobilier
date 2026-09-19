@@ -1,0 +1,81 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "bf397f78f6d48c200398bc12ea46a5585b2c57a87b2a1fa4f9de1c84dac5668f",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v2\",\n      \"reason\": \"La résolution 104-05-2026, page 5, autorise la location immobilière au 366, rue Principale, soit un acte foncier inclus, mais non une adoption de règlement.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 106-05-2026, page 6, fixe au 13 juillet 2026 la consultation sur le règlement 079-2026, sans présenter cette consultation comme déjà tenue.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"absent\",\n      \"reason\": \"Le titre cité page 6 appartient à la même résolution que la demande attestée page 8 et retenue en i06, et un doublon du même fait ne constitue pas une unité supplémentaire.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 8 constate expressément la présentation et le dépôt de l’avis spécial relatif à l’abrogation du règlement 046-2023, sans constater l’adoption de cette abrogation.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette autorisation de location est exactement le même acte foncier que celui retenu en i01, et la règle exclut le double comptage du même fait.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 107-05-2026, page 8, demande à la ministre de suspendre et de réviser le projet de règlement sur les pratiques agroenvironnementales, sans affirmer que cette suspension est acquise.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "absent"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v2",
+   "reason": "La résolution 104-05-2026, page 5, autorise la location immobilière au 366, rue Principale, soit un acte foncier inclus, mais non une adoption de règlement."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 106-05-2026, page 6, fixe au 13 juillet 2026 la consultation sur le règlement 079-2026, sans présenter cette consultation comme déjà tenue."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "Le titre cité page 6 appartient à la même résolution que la demande attestée page 8 et retenue en i06, et un doublon du même fait ne constitue pas une unité supplémentaire."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 8 constate expressément la présentation et le dépôt de l’avis spécial relatif à l’abrogation du règlement 046-2023, sans constater l’adoption de cette abrogation."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "Cette autorisation de location est exactement le même acte foncier que celui retenu en i01, et la règle exclut le double comptage du même fait."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 107-05-2026, page 8, demande à la ministre de suspendre et de réviser le projet de règlement sur les pratiques agroenvironnementales, sans affirmer que cette suspension est acquise."
+  }
+ ]
+}

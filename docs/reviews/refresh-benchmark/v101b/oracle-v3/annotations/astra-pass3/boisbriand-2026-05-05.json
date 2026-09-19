@@ -1,0 +1,100 @@
+{
+ "documentId": "boisbriand-2026-05-05",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "b46e8622dc0bbd2c1eb74fabd0f09e5769b8117a82da9ebb9e1ab216106c7b39",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption du projet de règlement RV-1446-005 — dérogations mineures\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"RV-1446-005\",\n        \"page\": 2,\n        \"citation\": \"D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\\nRèglement RV-1446 sur les dérogations mineures\",\n        \"anchor\": \"règlement RV-1446-005\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : le texte comporte un saut de ligne entre « du » et « Règlement RV-1446 ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Appui à la demande CPTAQ — opération cadastrale des lots 6 489 085 et 6 489 086 en zone agricole permanente\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"6 489 086\",\n        \"page\": 15,\n        \"citation\": \"D'appuyer la demande présentée à la Commission de protection du territoire agricole du\\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot\\n6 489 086\",\n        \"anchor\": \"subdivision du lot\\n6 489 086\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne du document et l'ancre doit être une sous-chaîne exacte, notamment entre « lot » et « 6 489 086 ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA — modification de l'espace tampon, 150, rue Chauvin\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"150, RUE CHAUVIN\",\n        \"page\": 16,\n        \"citation\": \"APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE PROJET DE MODIFICATION D'UN ESPACE TAMPON ENTRE LES ZONES P-2 212 ET\\nR-1 210 - 150, RUE CHAUVIN\",\n        \"anchor\": \"150, RUE CHAUVIN\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : l'intitulé comporte un saut de ligne entre « ET » et « R-1 210 ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption du projet de règlement RV-1446-005 — dérogations mineures",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "RV-1446-005",
+    "page": 2,
+    "citation": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures",
+    "anchor": "règlement RV-1446-005"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le texte comporte un saut de ligne entre « du » et « Règlement RV-1446 »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Appui à la demande CPTAQ — opération cadastrale des lots 6 489 085 et 6 489 086 en zone agricole permanente",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "6 489 086",
+    "page": 15,
+    "citation": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot\n6 489 086",
+    "anchor": "subdivision du lot\n6 489 086"
+   },
+   "reason": "La citation doit conserver les sauts de ligne du document et l'ancre doit être une sous-chaîne exacte, notamment entre « lot » et « 6 489 086 »."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Approbation du PIIA — modification de l'espace tampon, 150, rue Chauvin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "150, RUE CHAUVIN",
+    "page": 16,
+    "citation": "APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE PROJET DE MODIFICATION D'UN ESPACE TAMPON ENTRE LES ZONES P-2 212 ET\nR-1 210 - 150, RUE CHAUVIN",
+    "anchor": "150, RUE CHAUVIN"
+   },
+   "reason": "La citation doit être recopiée à l'identique : l'intitulé comporte un saut de ligne entre « ET » et « R-1 210 »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "projet_reglement",
+   "page": 2,
+   "citation": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 15,
+   "citation": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot\n6 489 086"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "piia",
+   "page": 16,
+   "citation": "APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE PROJET DE MODIFICATION D'UN ESPACE TAMPON ENTRE LES ZONES P-2 212 ET\nR-1 210 - 150, RUE CHAUVIN"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

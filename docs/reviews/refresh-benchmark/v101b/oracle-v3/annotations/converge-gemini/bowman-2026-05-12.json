@@ -1,0 +1,41 @@
+{
+ "documentId": "bowman-2026-05-12",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "96b3bbd4341598c96b0769d2638ac422258189938435b7069c90508288aac6c7",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-085 à la page 6 accorde explicitement la dérogation mineure pour le 2, chemin du Lac-Morin.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-086 à la page 7 accorde explicitement la dérogation mineure pour le 115 B, route 307.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-085 à la page 6 accorde explicitement la dérogation mineure pour le 2, chemin du Lac-Morin."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-086 à la page 7 accorde explicitement la dérogation mineure pour le 115 B, route 307."
+  }
+ ]
+}

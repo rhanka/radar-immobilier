@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "2759234a8f671344aa2391dce7ce53eb04eb2c82b55aa6ba5a630338a2dc585d",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 5-01-2026, intitulée à la page 3 « Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021 », est déclarée adoptée à la page 4.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 6-01-2026 commence à la page 4 et adopte le règlement 438-2025, dont le texte précise à la page 5 l’agrandissement de la zone M-77 et l’abrogation de la zone Rm-93.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 12-01-2026 refuse explicitement à la page 16 le remboursement des pénalités contractuelles liées au terrain acquis pour un immeuble multilogement, constituant une décision foncière dont le refus est correctement conservé.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 5-01-2026, intitulée à la page 3 « Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021 », est déclarée adoptée à la page 4."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 6-01-2026 commence à la page 4 et adopte le règlement 438-2025, dont le texte précise à la page 5 l’agrandissement de la zone M-77 et l’abrogation de la zone Rm-93."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 12-01-2026 refuse explicitement à la page 16 le remboursement des pénalités contractuelles liées au terrain acquis pour un immeuble multilogement, constituant une décision foncière dont le refus est correctement conservé."
+  }
+ ]
+}

@@ -1,0 +1,178 @@
+{
+ "documentId": "ogden-2026-03-09",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1164b01f7be18a11e9d25f30bcc979b5c5a89e7cd2c523722c986f7ea1695d48",
+ "verificationSha256": "baec494a24a5b73fad0b1481f071168fb3794a920313f953632015f7bf4165c8",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"Le point 6.6 prévoit le « Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme » : l’objet réglementaire collectif et le dépôt prévu sont explicites. L’absence de numéros de règlement ne justifie pas l’exclusion de cette étape de conformité, qui reste prévue et ne constitue pas une adoption.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"Le point 6.7 prévoit le dépôt du certificat relatif à la « procédure d’enregistrement des personnes habiles à voter sur le Règlement de zonage no. 2025-05 », soit une étape actuelle concernant un objet réglementaire précisément nommé. Le millésime 2025 du règlement ne transforme pas ce dépôt prévu en simple rappel historique ; l’étape « inconnu » évite de lui attribuer une adoption non attestée.\"},{\"item\":\"a03\",\"choice\":\"absent\",\"reason\":\"Le point 9.4 se limite à une « Liste des propriétés à vendre pour défaut de paiement de taxes », sans identifier de propriété ni préciser d’acte foncier soumis au conseil. Contrairement à la lecture inclusive, cette liste générale ne suffit pas à établir une unité répondant à l’exigence d’un « objet réglementaire ou foncier explicite ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u04",
+   "verificationItem": "i04",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Dépôt prévu des certificats de conformité des règlements d’urbanisme",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "règlements d’urbanisme",
+      "page": 1,
+      "citation": "Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme",
+      "anchor": "règlements d’urbanisme",
+      "spanStart": 808,
+      "spanEnd": 885
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 6.6, page 1, prévoit le dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme, ce qui atteste l’objet réglementaire et le dépôt prévu sans établir une adoption."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 6.6 page 1 : « Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme » ; étape réglementaire d'urbanisme attestée, objet nommé dans le texte, étape inconnu appropriée pour un dépôt prévu."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Simple dépôt de certificats de conformité de la MRC sans objet réglementaire explicite, non admissible comme DesignationEvent."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Dépôt prévu du certificat d’enregistrement relatif au règlement de zonage 2025-05",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2025-05",
+      "page": 1,
+      "citation": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​ ​personnes habiles à voter sur le Règlement de zonage no. 2025-05",
+      "anchor": "Règlement de zonage no. 2025-05",
+      "spanStart": 888,
+      "spanEnd": 1034
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 6.7, page 1, prévoit le dépôt du certificat relatif à la procédure d’enregistrement des personnes habiles à voter sur le règlement de zonage 2025-05."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 6.7 page 1 : dépôt du certificat d'enregistrement des personnes habiles à voter sur le « Règlement de zonage no. 2025-05 » ; objet réglementaire explicite, étape inconnu et page exactes."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Simple dépôt administratif d'un certificat d'enregistrement sur un règlement antérieur de 2025, ne constituant pas une étape réglementaire active au sens du profil."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Point prévu sur la liste des propriétés à vendre pour défaut de paiement de taxes",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "propriétés à vendre",
+      "page": 1,
+      "citation": "Liste des propriétés à vendre pour défaut de paiement de taxes",
+      "anchor": "propriétés à vendre",
+      "spanStart": 1847,
+      "spanEnd": 1909
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 9.4, page 1, inscrit une liste de propriétés à vendre pour défaut de paiement de taxes, soit un objet foncier prévu et non une vente déjà réalisée."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "Point 9.4 sous Finances : « Liste des propriétés à vendre pour défaut de paiement de taxes » n'identifie aucun objet foncier explicite (aucune propriété, lot ou adresse) et relève du recouvrement fiscal, hors unité gold."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Point de finances relatif à la vente pour non-paiement de taxes sans objet foncier explicite, exclu du rappel."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "Le point 6.6 prévoit le « Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme » : l’objet réglementaire collectif et le dépôt prévu sont explicites. L’absence de numéros de règlement ne justifie pas l’exclusion de cette étape de conformité, qui reste prévue et ne constitue pas une adoption."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "Le point 6.7 prévoit le dépôt du certificat relatif à la « procédure d’enregistrement des personnes habiles à voter sur le Règlement de zonage no. 2025-05 », soit une étape actuelle concernant un objet réglementaire précisément nommé. Le millésime 2025 du règlement ne transforme pas ce dépôt prévu en simple rappel historique ; l’étape « inconnu » évite de lui attribuer une adoption non attestée."
+  },
+  {
+   "item": "a03",
+   "choice": "absent",
+   "reason": "Le point 9.4 se limite à une « Liste des propriétés à vendre pour défaut de paiement de taxes », sans identifier de propriété ni préciser d’acte foncier soumis au conseil. Contrairement à la lecture inclusive, cette liste générale ne suffit pas à établir une unité répondant à l’exigence d’un « objet réglementaire ou foncier explicite »."
+  }
+ ]
+}

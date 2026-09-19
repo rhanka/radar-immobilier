@@ -1,0 +1,13 @@
+{
+ "id": "saint-lin-laurentides-2026-06-09",
+ "rc": 0,
+ "latencyMs": 164446,
+ "inputTokens": 2,
+ "outputTokens": 18100,
+ "cacheRead": 0,
+ "cacheCreate": 5025,
+ "costUsd": 0.506008,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 30731
+}

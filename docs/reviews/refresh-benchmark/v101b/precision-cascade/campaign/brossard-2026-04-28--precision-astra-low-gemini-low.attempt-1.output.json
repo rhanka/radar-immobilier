@@ -1,0 +1,440 @@
+{
+ "nodes": [
+  {
+   "id": "event-096",
+   "label": "Dérogations mineures approuvées — 5641, rue Aline",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "status": "candidate",
+   "municipality": "brossard",
+   "date": "2026-04-28",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-04-28",
+   "decision": "approuvé",
+   "resolution": "260428-096",
+   "zone_ref": "Ha-219",
+   "no_lot": "6720588",
+   "reglement_number": "REG-362",
+   "superficie_m2": 280.2,
+   "description": "Approbation, pour le lot projeté 6 720 588, d'une largeur de 10,74 mètres au lieu du minimum de 12 mètres et d'une superficie de 280,2 mètres carrés au lieu du minimum de 360 mètres carrés.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588, ayant pour effet de permettre :",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-096"
+   ]
+  },
+  {
+   "id": "zone-ha219",
+   "label": "Ha-219",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "status": "candidate",
+   "municipality": "brossard",
+   "code": "Ha-219",
+   "bylaw": "REG-362",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Une largeur de lot de 10,74 mètres, alors que la grille des usages et normes de la\nzone Ha-219 du règlement de zonage REG-362 prescrit une largeur de lot minimale\nde 12 mètres;",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zone-ha219"
+   ]
+  },
+  {
+   "id": "event-097",
+   "label": "Approbation des recommandations PIIA du CCU du 11 mars 2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "status": "candidate",
+   "municipality": "brossard",
+   "date": "2026-04-28",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-28",
+   "decision": "approuvé",
+   "resolution": "260428-097",
+   "description": "Entérinement des recommandations favorables du CCU concernant les constructions multifamiliales de quatre étages aux 3605 et 3665, rue de Châteauneuf (2025-00304 et 2025-00305); les constructions unifamiliales aux 5892, rue Alexandre et 5641, rue Aline; les agrandissements aux 3280, rue Bahamas, 2010, croissant Tourangeau et 7670, place Trudel; la transformation au 5890, rue Bretagne; les transformations non résidentielles aux 5770, rue Aline, 9550, boulevard Leduc, local 20, 9750, boulevard Leduc, locaux 25 et 30, 1520, avenue des Lumières, local 25 et 1040, rue du Lux, local 15; ainsi que les neuf dossiers d'enseignes énumérés aux pages 3 et 4.",
+   "conditions": [
+    "Selon les recommandations et conditions consignées au procès-verbal du CCU du 11 mars 2026."
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "D’entériner les recommandations du comité consultatif d’urbanisme émanant du procèsverbal de la réunion tenue le 11 mars 2026,",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-097"
+   ]
+  },
+  {
+   "id": "bylaw-434-01",
+   "label": "REG-434-01 — Commerces de prêts sur gages et articles d'occasion",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "status": "candidate",
+   "municipality": "brossard",
+   "numero": "REG-434-01",
+   "stage": "projet",
+   "meetingDate": "2026-04-28",
+   "title": "Modification du règlement sur les commerces de prêts sur gages et autres articles d'occasion",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "La conseillère Sophie Allard dépose le projet de règlement REG-434-01.",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-101",
+   "label": "PPCMOI-2026-001 — 3605-3665, rue de Châteauneuf",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "status": "candidate",
+   "municipality": "brossard",
+   "date": "2026-04-28",
+   "kind": "ppcmoi",
+   "etape": "adoption",
+   "etape_date": "2026-04-28",
+   "decision": "approuvé",
+   "dossier": "PPCMOI-2026-001",
+   "resolution": "260428-101",
+   "zone_ref": "Hc-316",
+   "no_lot": "6052495",
+   "reglement_number": "REG-362",
+   "description": "Adoption sans modification du PPCMOI permettant un maximum de 105 logements par bâtiment multifamilial isolé, de 53 logements par bâtiment multifamilial jumelé avec marge latérale de 0 mètre et marges latérales totales minimales de 6 mètres, et de 210 logements dans l'ensemble de la zone Hc-316.",
+   "conditions": [
+    "Minimum de 21 logements abordables dès l'occupation selon les critères de la SCHL pour le programme APH Select.",
+    "Approbation de la demande de PIIA et obtention du permis de construction dans les 24 mois suivant l'adoption, à défaut de quoi la résolution deviendra nulle et sans effet."
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367),",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 7,
+     "excerpt": "et de l'obtention du permis de construction dans les 24 mois suivant l’adoption de la présente\nrésolution, à défaut de quoi celle-ci deviendra nulle et sans effet.",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-101"
+   ]
+  },
+  {
+   "id": "zone-hc316",
+   "label": "Hc-316",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "status": "candidate",
+   "municipality": "brossard",
+   "code": "Hc-316",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "permettre un maximum de 210 logements dans l’ensemble de la zone Hc-316;",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-hc316"
+   ]
+  },
+  {
+   "id": "signal-housing",
+   "label": "20 logements supplémentaires autorisés — Châteauneuf",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "status": "candidate",
+   "municipality": "brossard",
+   "date": "2026-04-28",
+   "category": "densification_residentielle",
+   "etape": "adoption",
+   "etape_date": "2026-04-28",
+   "resolution": "260428-101",
+   "zone_ref": "Hc-316",
+   "no_lot": "6052495",
+   "nb_unites_max": 210,
+   "description": "PPCMOI autorisant 20 logements supplémentaires aux 190 déjà autorisés, pour un maximum de 210 logements locatifs TOD. Minimum de 21 logements abordables exigé dès l'occupation.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-101",
+    "ev-hc316"
+   ]
+  },
+  {
+   "id": "signal-pandora",
+   "label": "Pandora Matte Self-Storage — Entente de travaux municipaux",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "status": "candidate",
+   "municipality": "brossard",
+   "date": "2026-04-28",
+   "category": "developpement_immobilier",
+   "resolution": "260428-104",
+   "description": "Autorisation de signature de l'entente relative aux travaux municipaux du projet Pandora Matte Self-Storage au 3505, boulevard Matte.",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative\naux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage,",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-plana",
+   "label": "Plan A — Accord de développement du site chemin des Prairies",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "status": "candidate",
+   "municipality": "brossard",
+   "date": "2026-04-28",
+   "category": "developpement_immobilier",
+   "resolution": "260428-105",
+   "description": "Approbation de l'accord de développement du projet Plan A, site chemin des Prairies, avec le promoteur 9520-8732 Québec inc. et autorisation de signature.",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à\nintervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec\ninc.,",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-plana-eau",
+   "label": "Plan A — Démarches environnementales pour prolongements des réseaux",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "status": "candidate",
+   "municipality": "brossard",
+   "date": "2026-04-28",
+   "category": "infrastructures",
+   "resolution": "260428-122",
+   "description": "Autorisation de présenter au MELCCFP une demande d'autorisation ministérielle pour le prolongement de l'égout pluvial et une déclaration de conformité pour le prolongement de l'aqueduc du projet Plan A, site chemin des Prairies. Engagement à transmettre une attestation d'ingénieur dans les 60 jours après les travaux et à prendre possession et entretenir les infrastructures municipales.",
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "D’autoriser le directeur de la Direction des affaires stratégiques et développement, ou toute\npersonne qu’il désigne, à présenter, pour et au nom de la Ville de Brossard, une demande",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-096",
+   "target": "zone-ha219",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "evidence_refs": [
+    "ev-096",
+    "ev-zone-ha219"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588, ayant pour effet de permettre :",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-101",
+   "target": "zone-hc316",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "evidence_refs": [
+    "ev-101",
+    "ev-hc316"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "permettre un maximum de 210 logements dans l’ensemble de la zone Hc-316;",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-101",
+   "target": "signal-housing",
+   "relation": "raises_signal",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "evidence_refs": [
+    "ev-101",
+    "ev-hc316"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "signal-housing",
+   "target": "zone-hc316",
+   "relation": "concerns",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "evidence_refs": [
+    "ev-hc316"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "permettre un maximum de 210 logements dans l’ensemble de la zone Hc-316;",
+     "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+     "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+     "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-096",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+   "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588, ayant pour effet de permettre :"
+  },
+  {
+   "id": "ev-zone-ha219",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+   "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Une largeur de lot de 10,74 mètres, alors que la grille des usages et normes de la\nzone Ha-219 du règlement de zonage REG-362 prescrit une largeur de lot minimale\nde 12 mètres;"
+  },
+  {
+   "id": "ev-097",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+   "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "D’entériner les recommandations du comité consultatif d’urbanisme émanant du procèsverbal de la réunion tenue le 11 mars 2026, en ce qui concerne les plans d’implantation et\nd’intégration architecturale précisés ci-dessous, selon les recommandations et conditions\nconsignées audit procès-verbal."
+  },
+  {
+   "id": "ev-101",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+   "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367), pour l'immeuble situé aux 3605-3665, rue de Châteauneuf, lot 6 052 495, à certaines\nconditions et visant à :"
+  },
+  {
+   "id": "ev-hc316",
+   "source_file": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "rawRef": "raw/proces-verbaux-brossard/cas/04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c.pdf",
+   "docSha": "04edd5ab32ac9a19e79a08e56fb7e2e0c49c4032bcd703be48a8adcb3979913c",
+   "sourceUrl": "https://brossard.ca/app/uploads/2026/01/20260428_Proces-verbal_CM_Ratifie.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "permettre un maximum de 210 logements dans l’ensemble de la zone Hc-316;"
+  }
+ ],
+ "input_tokens": 18100,
+ "output_tokens": 6200
+}

@@ -1,0 +1,19 @@
+{
+ "documentId": "pincourt-2026-01-20",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4644266b4db74f8b4ea604f712dacd090d8584bccbc2048a38d7b6ed508cb231",
+ "verificationSha256": "8a2bbe1dab97979a0cfe6e201e890d476729dde1c757ffc71be26a0ddcf95946",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

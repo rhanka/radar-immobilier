@@ -1,0 +1,234 @@
+{
+ "documentId": "mcmasterville-2026-02-02",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation prévue d'un versement à des fins de parcs — 141, rue de Bretagne",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "141, rue de Bretagne",
+    "page": 2,
+    "citation": "Autorisation – Versement à des fins de parcs, de terrains de jeu ou pour le maintien d'un espace naturel – Projet de redéveloppement – Adresse projetée 141, rue de Bretagne",
+    "anchor": "141, rue de Bretagne",
+    "spanStart": 9,
+    "spanEnd": 181
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation prévue d'un versement à des fins de parcs — 141, rue de Bretagne",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "141, rue de Bretagne",
+      "page": 2,
+      "citation": "Autorisation – Versement à des fins de parcs, de terrains de jeu ou pour le maintien d'un espace naturel – Projet de redéveloppement – Adresse projetée 141, rue de Bretagne",
+      "anchor": "141, rue de Bretagne",
+      "spanStart": 9,
+      "spanEnd": 181
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.2 prévoit l'autorisation d'une contribution pour parcs liée à un redéveloppement, objet urbanistique inclus, sans attester une décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure prévue — stationnement, 938, rue Bernard-Pilon, lot 5 754 418",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "938, rue Bernard-Pilon",
+    "page": 2,
+    "citation": "Demande de dérogation mineure – Stationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4",
+    "anchor": "938, rue Bernard-Pilon",
+    "spanStart": 229,
+    "spanEnd": 328
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure prévue — stationnement, 938, rue Bernard-Pilon, lot 5 754 418",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "938, rue Bernard-Pilon",
+      "page": 2,
+      "citation": "Demande de dérogation mineure – Stationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4",
+      "anchor": "938, rue Bernard-Pilon",
+      "spanStart": 229,
+      "spanEnd": 328
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.3 inscrit une demande explicite de dérogation mineure à l'ordre du jour, ce qui constitue une unité prévue sans présumer son acceptation."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu d'une demande d'exemption de cases de stationnement — 938, rue Bernard-Pilon",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "938, rue Bernard-Pilon",
+    "page": 2,
+    "citation": "Demande d'exemption de fournir et de maintenir des cases de stationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4",
+    "anchor": "938, rue Bernard-Pilon",
+    "spanStart": 335,
+    "spanEnd": 462
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu d'une demande d'exemption de cases de stationnement — 938, rue Bernard-Pilon",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "938, rue Bernard-Pilon",
+      "page": 2,
+      "citation": "Demande d'exemption de fournir et de maintenir des cases de stationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4",
+      "anchor": "938, rue Bernard-Pilon",
+      "spanStart": 335,
+      "spanEnd": 462
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.4 prévoit une demande urbanistique distincte de la dérogation mineure, mais ne précise pas une étape relevant des autres valeurs du vocabulaire."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Modification prévue de la résolution 2025-184 — révision de démolition CD-2025-03, 129, rue de Bretagne",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2025-184",
+    "page": 2,
+    "citation": "Modification – Résolution 2025-184 – Demande de révision – Décision du comité de démolition CD-2025-03 – Demande de démolition – Bâtiment principal – Lot 4 494 281 – 129, rue de Bretagne – Zone R-8",
+    "anchor": "Résolution 2025-184",
+    "spanStart": 469,
+    "spanEnd": 666
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Modification prévue de la résolution 2025-184 — révision de démolition CD-2025-03, 129, rue de Bretagne",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2025-184",
+      "page": 2,
+      "citation": "Modification – Résolution 2025-184 – Demande de révision – Décision du comité de démolition CD-2025-03 – Demande de démolition – Bâtiment principal – Lot 4 494 281 – 129, rue de Bretagne – Zone R-8",
+      "anchor": "Résolution 2025-184",
+      "spanStart": 469,
+      "spanEnd": 666
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.5 prévoit une modification actuelle de la résolution sur la révision d'une décision de démolition, et non un simple rappel historique."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Modification prévue de la résolution 2025-185 — révision de démolition CD-2025-04, 143, rue de Bretagne",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2025-185",
+    "page": 2,
+    "citation": "Modification – Résolution 2025-185 – Demande de révision – Décision du comité de démolition CD-2025-04 – Demande de démolition – Bâtiment principal – Lot 4 494 279 – 143, rue de Bretagne – Zone R-8",
+    "anchor": "Résolution 2025-185",
+    "spanStart": 673,
+    "spanEnd": 870
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Modification prévue de la résolution 2025-185 — révision de démolition CD-2025-04, 143, rue de Bretagne",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2025-185",
+      "page": 2,
+      "citation": "Modification – Résolution 2025-185 – Demande de révision – Décision du comité de démolition CD-2025-04 – Demande de démolition – Bâtiment principal – Lot 4 494 279 – 143, rue de Bretagne – Zone R-8",
+      "anchor": "Résolution 2025-185",
+      "spanStart": 673,
+      "spanEnd": 870
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.6 prévoit la modification d'une autre résolution concernant une demande de démolition distincte, ce qui exige une unité propre."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Autorisation prévue d'un projet résidentiel multifamilial — 141, rue de Bretagne, lots 4 494 279 et 4 494 281",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "141, rue de Bretagne",
+    "page": 2,
+    "citation": "Autorisation d'un projet de construction d'un bâtiment résidentiel multifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 – Zone R-8",
+    "anchor": "141, rue de Bretagne",
+    "spanStart": 877,
+    "spanEnd": 1021
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation prévue d'un projet résidentiel multifamilial — 141, rue de Bretagne, lots 4 494 279 et 4 494 281",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "141, rue de Bretagne",
+      "page": 2,
+      "citation": "Autorisation d'un projet de construction d'un bâtiment résidentiel multifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 – Zone R-8",
+      "anchor": "141, rue de Bretagne",
+      "spanStart": 877,
+      "spanEnd": 1021
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.7 prévoit l'autorisation d'un projet de construction explicite, distincte du versement pour parcs, sans préciser une procédure de PPCMOI ou d'usage conditionnel."
+    }
+   ]
+  }
+ ]
+}

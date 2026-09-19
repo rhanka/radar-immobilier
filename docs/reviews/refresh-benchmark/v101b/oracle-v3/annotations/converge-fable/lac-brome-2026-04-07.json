@@ -1,0 +1,111 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c71cd359cd133021bc4dac4793b39d1015e23185e50f317a26f81884bf00faa1",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 20 atteste « le Conseil adopte le règlement résiduel Règlement 596-20 modifiant le règlement de zonage 596 » : adoption d'un règlement de zonage, objet et citation exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 21 atteste l'adoption du règlement distinct 596-21 (définitions de hauteur et de pourcentage d'occupation du terrain) ; citation, étape adoption et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 23 atteste « le Conseil adopte le règlement distinct Règlement 596-22 … dans la Zone UV4-I12) modifiant le règlement de zonage 596 » ; citation conforme au texte, objet et page exacts.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 24 atteste l'adoption du règlement distinct 596-23 concernant la Zone UV-14-J13 ; citation, étape et page exactes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 25, résolution 2026-04-102 : « le Conseil accorde le PIIA-2 … au 9, chemin Frank-Santerre, lot #6 129 412, zone UC-2-N3 » ; petit PIIA inclus par la règle, citation exacte.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Page 26, résolution 2026-04-103 : « le Conseil accorde le PIIA-3 … 753, chemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15 » ; PIIA non résidentiel inclus par la règle, citation et lot exacts.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Page 21 atteste une décision distincte de l'adoption : « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-21 » ; fait différent du même règlement, étape hors liste donc inconnu.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 23 atteste « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-22 » ; décision de registre distincte de l'adoption, non un doublon du même fait.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Page 24 atteste « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-23 » ; décision de registre distincte, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 20 atteste « le Conseil adopte le règlement résiduel Règlement 596-20 modifiant le règlement de zonage 596 » : adoption d'un règlement de zonage, objet et citation exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 21 atteste l'adoption du règlement distinct 596-21 (définitions de hauteur et de pourcentage d'occupation du terrain) ; citation, étape adoption et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 23 atteste « le Conseil adopte le règlement distinct Règlement 596-22 … dans la Zone UV4-I12) modifiant le règlement de zonage 596 » ; citation conforme au texte, objet et page exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 24 atteste l'adoption du règlement distinct 596-23 concernant la Zone UV-14-J13 ; citation, étape et page exactes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 25, résolution 2026-04-102 : « le Conseil accorde le PIIA-2 … au 9, chemin Frank-Santerre, lot #6 129 412, zone UC-2-N3 » ; petit PIIA inclus par la règle, citation exacte."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Page 26, résolution 2026-04-103 : « le Conseil accorde le PIIA-3 … 753, chemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15 » ; PIIA non résidentiel inclus par la règle, citation et lot exacts."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Page 21 atteste une décision distincte de l'adoption : « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-21 » ; fait différent du même règlement, étape hors liste donc inconnu."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 23 atteste « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-22 » ; décision de registre distincte de l'adoption, non un doublon du même fait."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Page 24 atteste « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-23 » ; décision de registre distincte, citation et page exactes."
+  }
+ ]
+}

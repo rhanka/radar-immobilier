@@ -1,0 +1,91 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fa4ca07d51ec4c04f34ef69add32b03bdd44df7a665d8a649157a7dbade61b1e",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"La vente pour défaut de paiement de taxes est une mesure financière de recouvrement sans objet foncier explicite ni lien avec l'urbanisme.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'adoption finale du PPCMOI-2025-07 est attestée à la page 10 avec citation, objet et étape conformes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'adoption finale du PPCMOI-2025-08 est attestée à la page 11 avec citation, objet et étape conformes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'adoption finale du PPCMOI-2025-09 est attestée à la page 12 avec citation, objet et étape conformes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'appui à la demande CPTAQ pour le 2860, chemin des Patriotes est attesté à la page 13 sous la rubrique Urbanisme avec citation et objet exacts.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Le règlement 26-R-285 sur l'épandage de déjections animales relève de la Loi sur les compétences municipales et non de l'urbanisme, restant hors gold.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"La vente d'immeubles pour non-paiement de taxes est une procédure financière exclue et dépourvue d'objet foncier explicite.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La vente pour défaut de paiement de taxes est une mesure financière de recouvrement sans objet foncier explicite ni lien avec l'urbanisme."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'adoption finale du PPCMOI-2025-07 est attestée à la page 10 avec citation, objet et étape conformes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'adoption finale du PPCMOI-2025-08 est attestée à la page 11 avec citation, objet et étape conformes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'adoption finale du PPCMOI-2025-09 est attestée à la page 12 avec citation, objet et étape conformes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'appui à la demande CPTAQ pour le 2860, chemin des Patriotes est attesté à la page 13 sous la rubrique Urbanisme avec citation et objet exacts."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Le règlement 26-R-285 sur l'épandage de déjections animales relève de la Loi sur les compétences municipales et non de l'urbanisme, restant hors gold."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "La vente d'immeubles pour non-paiement de taxes est une procédure financière exclue et dépourvue d'objet foncier explicite."
+  }
+ ]
+}

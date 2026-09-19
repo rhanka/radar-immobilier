@@ -1,0 +1,421 @@
+{
+ "documentId": "sainte-croix-2026-05-05",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "909de5c31593fd7456c9ba5dbd42dfa8669939fe1db41dcbf74b667691baaaf5",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-760-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "760-2026 — Modification du plan d'urbanisme : grandes affectations",
+     "stage": "adoption",
+     "objet": "760-2026",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "QUE le règlement #760-2026 intitulé « Règlement modifiant le plan d'urbanisme\n#387-2007 - Grandes affectations », soit adopté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-387-2007"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "387-2007 — Plan d'urbanisme",
+     "stage": null,
+     "objet": "387-2007",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE le Règlement relatif au plan d’urbanisme 387-2007 de la\nMunicipalité de Sainte-Croix est en vigueur depuis le 17 décembre 2007 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-761-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "761-2026 — Usages de la zone 14-I et création de la zone 21-H",
+     "stage": "adoption",
+     "objet": "761-2026",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-389-2007"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "389-2007 — Règlement de zonage",
+     "stage": null,
+     "objet": "389-2007",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE le Règlement de zonage 389-2007 de la Municipalité de Sainte-Croix\nest en vigueur depuis le 9 janvier 2008 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-119-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du changement de zonage 761-2026",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-120-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbation du plan de lotissement — Rue Thibodeau",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "D'APPROUVER le plan d'aménagement produit par la firme « Giroux Arpentage »,\nconcernant le développement du lot 3 592 103 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-126-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbation des plans et devis préliminaires — Rue Thibodeau",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "D'APPROUVER au promoteur les plans et devis préliminaires de l'entreprise\n« Apex Expert Conseil inc. », concernant le développement du lot 3 592 103 ;"
+      },
+      {
+       "page": 17,
+       "excerpt": "QUE la présente acceptation ne certifie en aucun cas la conformité du projet pas la\nconformité du projet aux exigences municipales qui seront précisés à la signature\nde l'entente"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-121-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Recommandation municipale à la CPTAQ — Projet éolien Lotbinière Ndakina",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "QUE la Municipalité de Sainte-Croix recommande à la Commission d’approuver la\nDemande étant donné que, selon l’appréciation de la Municipalité, cette dernière"
+      },
+      {
+       "page": 11,
+       "excerpt": "ATTENDU QUE Parc éolien Lotbinière Ndakina S.E.C. (Demanderesse) vise\nl’implantation d’un parc éolien d’une puissance de 100 MW"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-vente-bateau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente potentielle d'une partie du lot 6 191 770",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "DE TRANSMETTRE une lettre d'intention pour la signature éventuelle d'une\npromesse de vente et d'achat pour une partie du lot 6 191 770 à l'entreprise ;"
+      },
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE la Municipalité a retenu un projet et désire confirmer son intention\nde vendre, au prix de 500 000 $, le lot à être créé au promoteur"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "signal-requalification"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Requalification potentielle du secteur des Industries de la Rive-Sud",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Monsieur le maire termine en questionnant les citoyens à savoir si cette fermeture\npourrait représenter une opportunité de requalifier ce secteur et d'écrire une nouvelle\npage d'histoire."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "signal-capacite-eau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Évaluation de la capacité des puits pour planifier le développement",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D'OCTROYER un mandat supplémentaire à l'entreprise « Groupe Conseil UDA »\nau montant de 20 143 $ taxes en sus pour l'ensemble des travaux"
+      },
+      {
+       "page": 15,
+       "excerpt": "ATTENDU QUE la Municipalité désire octroyer un mandat afin d'évaluer la capacité\ndes puits en eau potable dans un optique de planification de son développement ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-etudes-3590823"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Études géotechniques et environnementales — Lot 3 590 823",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D'OCTROYER un mandat à l'entreprise « Laboratoires d'expertises de Québec ltée\n(LEQ) » au montant de 24 300.00 $ taxes en sus pour la réalisation des services"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement 760-2026 modifiant le plan d'urbanisme est formellement adopté par la résolution 118-2026.\",\"excerpt\":\"QUE le règlement #760-2026 intitulé « Règlement modifiant le plan d'urbanisme\\n#387-2007 - Grandes affectations », soit adopté\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 387-2007 n'est mentionné que dans un préambule historique de mise en vigueur sans faire l'objet d'un acte procédural propre lors de cette séance.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement 761-2026 modifiant le zonage est formellement adopté par la résolution 119-2026.\",\"excerpt\":\"QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\\nla zone 21-H », soit adopté\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 389-2007 n'est qu'un rappel historique de mise en vigueur dans les attendus.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 119-2026 adopte formellement la modification de zonage créant la zone 21-H et modifiant les usages de la zone 14-I.\",\"excerpt\":\"QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\\nla zone 21-H », soit adopté\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution 120-2026 approuvant le plan d'aménagement/lotissement pour le lot 3 592 103.\",\"excerpt\":\"D'APPROUVER le plan d'aménagement produit par la firme « Giroux Arpentage »,\\nconcernant le développement du lot 3 592 103 ;\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution 126-2026 approuvant les plans et devis préliminaires pour le lot 3 592 103.\",\"excerpt\":\"D'APPROUVER au promoteur les plans et devis préliminaires de l'entreprise\\n« Apex Expert Conseil inc. », concernant le développement du lot 3 592 103 ;\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution 121-2026 recommandant l'approbation de la demande à la CPTAQ pour le projet de parc éolien.\",\"excerpt\":\"QUE la Municipalité de Sainte-Croix recommande à la Commission d’approuver la\\nDemande étant donné que, selon l’appréciation de la Municipalité, cette dernière\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise par la résolution 117-2026 la transmission d'une lettre d'intention en vue de la vente d'une partie du lot 6 191 770.\",\"excerpt\":\"DE TRANSMETTRE une lettre d'intention pour la signature éventuelle d'une\\npromesse de vente et d'achat pour une partie du lot 6 191 770 à l'entreprise ;\"},{\"act\":\"A10\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple commentaire du maire formulé lors du mot d'ouverture et non d'un acte officiel de décision ou de délibération du conseil.\",\"excerpt\":\"Monsieur le maire termine en questionnant les citoyens à savoir si cette fermeture\\npourrait représenter une opportunité de requalifier ce secteur et d'écrire une nouvelle\\npage d'histoire.\"},{\"act\":\"A11\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un octroi de contrat de services professionnels techniques pour l'évaluation des puits, ce qui constitue une exclusion.\",\"excerpt\":\"D'OCTROYER un mandat supplémentaire à l'entreprise « Groupe Conseil UDA »\\nau montant de 20 143 $ taxes en sus pour l'ensemble des travaux\"},{\"act\":\"A12\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un contrat de services professionnels d'études géotechniques et environnementales, relevant des exclusions de contrats de services.\",\"excerpt\":\"D'OCTROYER un mandat à l'entreprise « Laboratoires d'expertises de Québec ltée\\n(LEQ) » au montant de 24 300.00 $ taxes en sus pour la réalisation des services\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le règlement 760-2026 modifiant le plan d'urbanisme est formellement adopté par la résolution 118-2026.",
+   "excerpt": "QUE le règlement #760-2026 intitulé « Règlement modifiant le plan d'urbanisme\n#387-2007 - Grandes affectations », soit adopté"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 387-2007 n'est mentionné que dans un préambule historique de mise en vigueur sans faire l'objet d'un acte procédural propre lors de cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le règlement 761-2026 modifiant le zonage est formellement adopté par la résolution 119-2026.",
+   "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 389-2007 n'est qu'un rappel historique de mise en vigueur dans les attendus.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "La résolution 119-2026 adopte formellement la modification de zonage créant la zone 21-H et modifiant les usages de la zone 14-I.",
+   "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution 120-2026 approuvant le plan d'aménagement/lotissement pour le lot 3 592 103.",
+   "excerpt": "D'APPROUVER le plan d'aménagement produit par la firme « Giroux Arpentage »,\nconcernant le développement du lot 3 592 103 ;"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution 126-2026 approuvant les plans et devis préliminaires pour le lot 3 592 103.",
+   "excerpt": "D'APPROUVER au promoteur les plans et devis préliminaires de l'entreprise\n« Apex Expert Conseil inc. », concernant le développement du lot 3 592 103 ;"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution 121-2026 recommandant l'approbation de la demande à la CPTAQ pour le projet de parc éolien.",
+   "excerpt": "QUE la Municipalité de Sainte-Croix recommande à la Commission d’approuver la\nDemande étant donné que, selon l’appréciation de la Municipalité, cette dernière"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise par la résolution 117-2026 la transmission d'une lettre d'intention en vue de la vente d'une partie du lot 6 191 770.",
+   "excerpt": "DE TRANSMETTRE une lettre d'intention pour la signature éventuelle d'une\npromesse de vente et d'achat pour une partie du lot 6 191 770 à l'entreprise ;"
+  },
+  {
+   "act": "A10",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple commentaire du maire formulé lors du mot d'ouverture et non d'un acte officiel de décision ou de délibération du conseil.",
+   "excerpt": "Monsieur le maire termine en questionnant les citoyens à savoir si cette fermeture\npourrait représenter une opportunité de requalifier ce secteur et d'écrire une nouvelle\npage d'histoire."
+  },
+  {
+   "act": "A11",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un octroi de contrat de services professionnels techniques pour l'évaluation des puits, ce qui constitue une exclusion.",
+   "excerpt": "D'OCTROYER un mandat supplémentaire à l'entreprise « Groupe Conseil UDA »\nau montant de 20 143 $ taxes en sus pour l'ensemble des travaux"
+  },
+  {
+   "act": "A12",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un contrat de services professionnels d'études géotechniques et environnementales, relevant des exclusions de contrats de services.",
+   "excerpt": "D'OCTROYER un mandat à l'entreprise « Laboratoires d'expertises de Québec ltée\n(LEQ) » au montant de 24 300.00 $ taxes en sus pour la réalisation des services"
+  }
+ ],
+ "filter": {
+  "acts": 12,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 387-2007 n'est mentionné que dans un préambule historique de mise en vigueur sans faire l'objet d'un acte procédural propre lors de cette séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 389-2007 n'est qu'un rappel historique de mise en vigueur dans les attendus."
+   },
+   {
+    "act": "A10",
+    "reason": "Il s'agit d'un simple commentaire du maire formulé lors du mot d'ouverture et non d'un acte officiel de décision ou de délibération du conseil."
+   },
+   {
+    "act": "A11",
+    "reason": "Il s'agit d'un octroi de contrat de services professionnels techniques pour l'évaluation des puits, ce qui constitue une exclusion."
+   },
+   {
+    "act": "A12",
+    "reason": "Il s'agit d'un contrat de services professionnels d'études géotechniques et environnementales, relevant des exclusions de contrats de services."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le règlement 760-2026 modifiant le plan d'urbanisme est formellement adopté par la résolution 118-2026."
+   },
+   {
+    "act": "A03",
+    "reason": "Le règlement 761-2026 modifiant le zonage est formellement adopté par la résolution 119-2026."
+   },
+   {
+    "act": "A05",
+    "reason": "La résolution 119-2026 adopte formellement la modification de zonage créant la zone 21-H et modifiant les usages de la zone 14-I."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil adopte la résolution 120-2026 approuvant le plan d'aménagement/lotissement pour le lot 3 592 103."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil adopte la résolution 126-2026 approuvant les plans et devis préliminaires pour le lot 3 592 103."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil adopte la résolution 121-2026 recommandant l'approbation de la demande à la CPTAQ pour le projet de parc éolien."
+   },
+   {
+    "act": "A09",
+    "reason": "Le conseil autorise par la résolution 117-2026 la transmission d'une lettre d'intention en vue de la vente d'une partie du lot 6 191 770."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3266,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 21892,
+   "outputTokens": 1103,
+   "totalTokens": 22995
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3137
+  },
+  "inputSha256": "a19de6bf823e3791a5dc06bd6b4f34930204d4752fc9ea898ed4a9d529542595"
+ }
+}

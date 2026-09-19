@@ -1,0 +1,91 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4379fc60f9b0423ee4f1fcbe4e45632ff075e83f84ece97381a698efdc225824",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"La citation provient d'un considérant historique rappelant une résolution de 2025 dans une résolution de crédit de taxes, ce qui enfreint la règle interdisant les mentions historiques.\"},{\"item\":\"i02\",\"choice\":\"absent\",\"reason\":\"L'autorisation générale d'enchérir pour défaut de paiement de taxes ne comporte aucun objet foncier explicite et relève des exclusions administratives.\"},{\"item\":\"i03\",\"choice\":\"absent\",\"reason\":\"La modification du nom du signataire pour une résolution antérieure est une simple désignation administrative exclue du rappel.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'adoption du second projet du règlement 268-2025 modifiant le zonage de la zone H-06 est attestée à la page 15 avec l'étape, la citation et l'objet exacts.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'acte foncier d'autorisation de mise en vente du terrain municipal au 620, rang Haut de la Rivière est attesté à la page 17 avec une citation et un objet conformes.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Cette mesure générale d'autorisation d'enchérir à la vente pour taxes ne porte sur aucun objet foncier explicite.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Doublon textuel de l'item i06 ne désignant aucun objet foncier explicite.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La citation provient d'un considérant historique rappelant une résolution de 2025 dans une résolution de crédit de taxes, ce qui enfreint la règle interdisant les mentions historiques."
+  },
+  {
+   "item": "i02",
+   "choice": "absent",
+   "reason": "L'autorisation générale d'enchérir pour défaut de paiement de taxes ne comporte aucun objet foncier explicite et relève des exclusions administratives."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "La modification du nom du signataire pour une résolution antérieure est une simple désignation administrative exclue du rappel."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'adoption du second projet du règlement 268-2025 modifiant le zonage de la zone H-06 est attestée à la page 15 avec l'étape, la citation et l'objet exacts."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'acte foncier d'autorisation de mise en vente du terrain municipal au 620, rang Haut de la Rivière est attesté à la page 17 avec une citation et un objet conformes."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Cette mesure générale d'autorisation d'enchérir à la vente pour taxes ne porte sur aucun objet foncier explicite."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Doublon textuel de l'item i06 ne désignant aucun objet foncier explicite."
+  }
+ ]
+}

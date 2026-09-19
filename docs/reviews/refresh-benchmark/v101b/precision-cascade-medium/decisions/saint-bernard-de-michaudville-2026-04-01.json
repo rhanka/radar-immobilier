@@ -1,0 +1,226 @@
+{
+ "documentId": "saint-bernard-de-michaudville-2026-04-01",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "dae603ddad22cd4cd248bf691cc6d46e9340d8f02db9196f7afac36833552035",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-01 — Tarification et frais administratifs",
+     "stage": "adoption",
+     "objet": "2026-01",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’ADOPTER le Règlement No 2026-01 de tarification et de frais administratif pour la fourniture\nde biens et services"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2025-11"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2025-11 — Tarification et frais administratifs",
+     "stage": null,
+     "objet": "2025-11",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "CONSIDÉRANT QU'il y a lieu de modifier et remplacer le règlement 2025-11 concernant la\ntarification et les frais administratifs pour la fourniture de biens et de services"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2026-02"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-02 — Code d’éthique et de déontologie des élus municipaux",
+     "stage": "adoption",
+     "objet": "2026-02",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’ADOPTER le Règlement numéro 2026-02 édictant le code d’éthique et de déontologie des\nélus municipaux tel que déposé."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-parcours-nourricier"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Parcours nourricier — Mandat de planification de la phase 1",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "D’ACCEPTER l’offre de services du CCCPEM, datée de mars 2026, pour la phase 1 – Évaluation\ndes travaux du projet de parcours nourricier, telle que déposée ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-surpresseur"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Station d’épuration — Remplacement d’un surpresseur",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’ACCEPTER l’offre de service au montant de 5 975.00 $ taxes en sus de l’entreprise\nSurpresseur 4S Inc. ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-permis-mars"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Dépôt du rapport des permis émis en mars 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Le rapport de Gestim inc. et le rapport des permis émis en mars 2026 ont été remis à chacun des\nmembres du conseil."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte formellement le Règlement No 2026-01 de tarification et de frais administratifs.\",\"excerpt\":\"D’ADOPTER le Règlement No 2026-01 de tarification et de frais administratif pour la fourniture de biens et services\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2025-11 n'est mentionné que dans un préambule comme le règlement remplacé/modifié (rappel historique sans acte propre).\",\"excerpt\":\"CONSIDÉRANT QU'il y a lieu de modifier et remplacer le règlement 2025-11 concernant la tarification et les frais administratifs pour la fourniture de biens et de services\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le Règlement numéro 2026-02 édictant le code d’éthique et de déontologie des élus municipaux.\",\"excerpt\":\"D’ADOPTER le Règlement numéro 2026-02 édictant le code d’éthique et de déontologie des élus municipaux tel que déposé.\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit de l'octroi d'un contrat de services d'accompagnement et de planification, ce qui relève des contrats de services exclus.\",\"excerpt\":\"D’ACCEPTER l’offre de services du CCCPEM, datée de mars 2026, pour la phase 1 – Évaluation des travaux du projet de parcours nourricier, telle que déposée ;\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple contrat de services/achat d'équipement pour la réparation ou l'entretien d'une station d'épuration, sans acte réglementaire ou d'urbanisme.\",\"excerpt\":\"D’ACCEPTER l’offre de service au montant de 5 975.00 $ taxes en sus de l’entreprise Surpresseur 4S Inc. ;\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple dépôt d'information/rapport de permis sans acte décisionnel ni réglementaire.\",\"excerpt\":\"Le rapport de Gestim inc. et le rapport des permis émis en mars 2026 ont été remis à chacun des membres du conseil.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte formellement le Règlement No 2026-01 de tarification et de frais administratifs.",
+   "excerpt": "D’ADOPTER le Règlement No 2026-01 de tarification et de frais administratif pour la fourniture de biens et services"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2025-11 n'est mentionné que dans un préambule comme le règlement remplacé/modifié (rappel historique sans acte propre).",
+   "excerpt": "CONSIDÉRANT QU'il y a lieu de modifier et remplacer le règlement 2025-11 concernant la tarification et les frais administratifs pour la fourniture de biens et de services"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le Règlement numéro 2026-02 édictant le code d’éthique et de déontologie des élus municipaux.",
+   "excerpt": "D’ADOPTER le Règlement numéro 2026-02 édictant le code d’éthique et de déontologie des élus municipaux tel que déposé."
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit de l'octroi d'un contrat de services d'accompagnement et de planification, ce qui relève des contrats de services exclus.",
+   "excerpt": "D’ACCEPTER l’offre de services du CCCPEM, datée de mars 2026, pour la phase 1 – Évaluation des travaux du projet de parcours nourricier, telle que déposée ;"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple contrat de services/achat d'équipement pour la réparation ou l'entretien d'une station d'épuration, sans acte réglementaire ou d'urbanisme.",
+   "excerpt": "D’ACCEPTER l’offre de service au montant de 5 975.00 $ taxes en sus de l’entreprise Surpresseur 4S Inc. ;"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple dépôt d'information/rapport de permis sans acte décisionnel ni réglementaire.",
+   "excerpt": "Le rapport de Gestim inc. et le rapport des permis émis en mars 2026 ont été remis à chacun des membres du conseil."
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 2025-11 n'est mentionné que dans un préambule comme le règlement remplacé/modifié (rappel historique sans acte propre)."
+   },
+   {
+    "act": "A04",
+    "reason": "Il s'agit de l'octroi d'un contrat de services d'accompagnement et de planification, ce qui relève des contrats de services exclus."
+   },
+   {
+    "act": "A05",
+    "reason": "Il s'agit d'un simple contrat de services/achat d'équipement pour la réparation ou l'entretien d'une station d'épuration, sans acte réglementaire ou d'urbanisme."
+   },
+   {
+    "act": "A06",
+    "reason": "Il s'agit d'un simple dépôt d'information/rapport de permis sans acte décisionnel ni réglementaire."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte formellement le Règlement No 2026-01 de tarification et de frais administratifs."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte le Règlement numéro 2026-02 édictant le code d’éthique et de déontologie des élus municipaux."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2085,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10206,
+   "outputTokens": 507,
+   "totalTokens": 10713
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1923
+  },
+  "inputSha256": "ebc89c99506a1a0a0c1754db62cbe3fe1644b4b08d2b21663350ee8519926b74"
+ }
+}

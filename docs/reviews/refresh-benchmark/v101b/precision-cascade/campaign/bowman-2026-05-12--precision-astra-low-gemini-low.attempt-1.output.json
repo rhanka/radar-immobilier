@@ -1,0 +1,228 @@
+{
+ "nodes": [
+  {
+   "id": "zone-2-F",
+   "label": "Zone 2-F",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "status": "candidate",
+   "code": "2-F",
+   "municipality": "bowman",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "CONSIDÉRANT QUE la demande de dérogation mineure concerne la propriété située au\n2, chemin du Lac-Morin, dans la zone 2-F;",
+     "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zone-2-F"
+   ]
+  },
+  {
+   "id": "zone-3-V",
+   "label": "Zone 3-V",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "status": "candidate",
+   "code": "3-V",
+   "municipality": "bowman",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "CONSIDÉRANT QUE la demande de dérogation mineure concerne la propriété située au\n115 B, route 307, dans la zone 3-V;",
+     "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zone-3-V"
+   ]
+  },
+  {
+   "id": "derogation-085",
+   "label": "Dérogation mineure acceptée — 2, chemin du Lac-Morin",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "status": "candidate",
+   "date": "2026-05-12",
+   "meetingDate": "2026-05-12",
+   "municipality": "bowman",
+   "decision": "approuvé",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-05-12",
+   "resolution": "2026-05-085",
+   "zone_ref": "2-F",
+   "reglement_number": "2022-02-05Z",
+   "description": "Installation d’une remise en cour avant au 2, chemin du Lac-Morin, avec réduction de la marge avant minimale de 6 mètres à 4,55 mètres.",
+   "motif": "La topographie du terrain limite les possibilités d’implantation; recommandation favorable du CCU du 20 avril 2026.",
+   "conditions": [
+    "Respect de toute autre réglementation municipale applicable."
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation\nmineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée;",
+     "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-085"
+   ]
+  },
+  {
+   "id": "derogation-086",
+   "label": "Dérogation mineure acceptée — 115 B, route 307",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "status": "candidate",
+   "date": "2026-05-12",
+   "meetingDate": "2026-05-12",
+   "municipality": "bowman",
+   "decision": "approuvé",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-05-12",
+   "resolution": "2026-05-086",
+   "zone_ref": "3-V",
+   "reglement_number": "2022-02-05Z",
+   "description": "Déplacement autorisé d’un bâtiment complémentaire au 115 B, route 307, dans la marge avant devant le bâtiment principal. Le bâtiment était déjà visé par une dérogation mineure antérieure.",
+   "motif": "Nouvel emplacement adjacent à un bâtiment complémentaire existant et jugé moins impactant visuellement; recommandation favorable du CCU du 20 avril 2026.",
+   "conditions": [
+    "Déplacement conformément à la demande présentée.",
+    "Respect de toute autre réglementation municipale applicable."
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de\ndérogation mineure pour la propriété située au 115 B, route 307;",
+     "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-086"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "derogation-085",
+   "target": "zone-2-F",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "evidence_refs": [
+    "ev-zone-2-F",
+    "ev-085"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "CONSIDÉRANT QUE la demande de dérogation mineure concerne la propriété située au\n2, chemin du Lac-Morin, dans la zone 2-F;",
+     "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "derogation-086",
+   "target": "zone-3-V",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "evidence_refs": [
+    "ev-zone-3-V",
+    "ev-086"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "CONSIDÉRANT QUE la demande de dérogation mineure concerne la propriété située au\n115 B, route 307, dans la zone 3-V;",
+     "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+     "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-bylaw",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "CONSIDÉRANT QUE le règlement de zonage no 2022-02-05Z prescrit une marge avant\nminimale de 6 mètres;"
+  },
+  {
+   "id": "ev-zone-2-F",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "CONSIDÉRANT QUE la demande de dérogation mineure concerne la propriété située au\n2, chemin du Lac-Morin, dans la zone 2-F;"
+  },
+  {
+   "id": "ev-zone-3-V",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "CONSIDÉRANT QUE la demande de dérogation mineure concerne la propriété située au\n115 B, route 307, dans la zone 3-V;"
+  },
+  {
+   "id": "ev-085",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation\nmineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée;\n\nQUE cette dérogation permette une marge avant réduite à 4,55 mètres pour l’implantation\nd’une remise.\nQUE la présente résolution est conditionnelle au respect de toute autre réglementation\nmunicipale applicable."
+  },
+  {
+   "id": "ev-086",
+   "source_file": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "rawRef": "raw/proces-verbaux-bowman/cas/35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47.pdf",
+   "docSha": "35e5242361d2a0d92bb4f5513f7a72389135c45184d0e06a808b4d88888d2b47",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de\ndérogation mineure pour la propriété située au 115 B, route 307;\n\nQUE le déplacement du bâtiment complémentaire soit autorisé conformément à la\ndemande présentée.\n\nQUE la présente résolution est conditionnelle au respect de toute autre réglementation\nmunicipale applicable."
+  }
+ ],
+ "input_tokens": 11200,
+ "output_tokens": 3500
+}

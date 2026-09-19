@@ -1,0 +1,111 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c71cd359cd133021bc4dac4793b39d1015e23185e50f317a26f81884bf00faa1",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 20 atteste explicitement l’adoption du règlement résiduel 596-20 modifiant le règlement de zonage 596.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 21 atteste l’adoption du règlement distinct 596-21 concernant les définitions de hauteur d’un bâtiment et de pourcentage d’occupation du terrain.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 23 atteste l’adoption du règlement distinct 596-22 concernant la marge latérale minimale et le pourcentage maximal d’occupation du bâtiment principal dans la zone UV-4-I12.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 24 atteste l’adoption du règlement distinct 596-23 concernant le pourcentage maximal d’occupation du bâtiment principal dans la zone UV-14-J13.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 25 accorde explicitement le PIIA-2 pour la construction d’un abri d’auto résidentiel au 9, chemin Frank-Santerre, sur le lot 6 129 412.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 26 accorde explicitement le PIIA-3 pour la demande révisée de bâtiment principal commercial au 753, chemin Lakeside, sur le lot 6 643 103.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 21 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-21, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 23 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-22, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 24 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-23, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 20 atteste explicitement l’adoption du règlement résiduel 596-20 modifiant le règlement de zonage 596."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 21 atteste l’adoption du règlement distinct 596-21 concernant les définitions de hauteur d’un bâtiment et de pourcentage d’occupation du terrain."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 23 atteste l’adoption du règlement distinct 596-22 concernant la marge latérale minimale et le pourcentage maximal d’occupation du bâtiment principal dans la zone UV-4-I12."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 24 atteste l’adoption du règlement distinct 596-23 concernant le pourcentage maximal d’occupation du bâtiment principal dans la zone UV-14-J13."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 25 accorde explicitement le PIIA-2 pour la construction d’un abri d’auto résidentiel au 9, chemin Frank-Santerre, sur le lot 6 129 412."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La page 26 accorde explicitement le PIIA-3 pour la demande révisée de bâtiment principal commercial au 753, chemin Lakeside, sur le lot 6 643 103."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La page 21 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-21, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 23 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-22, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La page 24 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-23, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu."
+  }
+ ]
+}

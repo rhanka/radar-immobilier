@@ -1,0 +1,448 @@
+{
+ "nodes": [
+  {
+   "id": "zone-r8",
+   "label": "Zone R-8",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "status": "candidate",
+   "code": "R-8",
+   "municipality": "mcmasterville",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Autorisation d'un projet de construction d'un bâtiment résidentiel\nmultifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 –\nZone R-8",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-7"
+   ]
+  },
+  {
+   "id": "zone-mxt4",
+   "label": "Zone MXT-4",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "status": "candidate",
+   "code": "MXT-4",
+   "municipality": "mcmasterville",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de dérogation mineure – Stationnement – Lot 5 754 418 –\n938, rue Bernard-Pilon – Zone MXT-4",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-3"
+   ]
+  },
+  {
+   "id": "event-7-2",
+   "label": "Versement à des fins de parcs — Projet de redéveloppement, 141, rue de Bretagne",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "status": "candidate",
+   "municipality": "mcmasterville",
+   "meetingDate": "2026-02-02",
+   "zone_ref": "R-8",
+   "etape": "inconnu",
+   "description": "Autorisation inscrite au projet d'ordre du jour : versement à des fins de parcs, de terrains de jeu ou pour le maintien d'un espace naturel dans le cadre du projet de redéveloppement à l'adresse projetée 141, rue de Bretagne, lots 4 494 279 et 4 494 281. Aucune décision prise n'est attestée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Autorisation – Versement à des fins de parcs, de terrains de jeu ou pour\nle maintien d'un espace naturel – Projet de redéveloppement",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-2"
+   ]
+  },
+  {
+   "id": "event-7-3",
+   "label": "Dérogation mineure — Stationnement, 938, rue Bernard-Pilon",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "status": "candidate",
+   "municipality": "mcmasterville",
+   "meetingDate": "2026-02-02",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "zone_ref": "MXT-4",
+   "no_lot": "5754418",
+   "description": "Demande de dérogation mineure relative au stationnement inscrite au projet d'ordre du jour. Aucune décision prise n'est attestée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de dérogation mineure – Stationnement – Lot 5 754 418 –\n938, rue Bernard-Pilon – Zone MXT-4",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-3"
+   ]
+  },
+  {
+   "id": "event-7-4",
+   "label": "Exemption de cases de stationnement — 938, rue Bernard-Pilon",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "status": "candidate",
+   "municipality": "mcmasterville",
+   "meetingDate": "2026-02-02",
+   "etape": "inconnu",
+   "zone_ref": "MXT-4",
+   "no_lot": "5754418",
+   "description": "Demande d'exemption de fournir et de maintenir des cases de stationnement inscrite au projet d'ordre du jour. Aucune décision prise n'est attestée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande d'exemption de fournir et de maintenir des cases de\nstationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-4"
+   ]
+  },
+  {
+   "id": "event-7-5",
+   "label": "Modification de la résolution 2025-184 — Démolition, 129, rue de Bretagne",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "status": "candidate",
+   "municipality": "mcmasterville",
+   "meetingDate": "2026-02-02",
+   "etape": "inconnu",
+   "zone_ref": "R-8",
+   "no_lot": "4494281",
+   "description": "Modification de la résolution 2025-184 inscrite au projet d'ordre du jour, concernant une demande de révision de la décision du comité de démolition CD-2025-03 et la démolition du bâtiment principal au 129, rue de Bretagne. Aucune décision prise n'est attestée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Modification – Résolution 2025-184 – Demande de révision – Décision du\ncomité de démolition CD-2025-03 – Demande de démolition",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-5"
+   ]
+  },
+  {
+   "id": "event-7-6",
+   "label": "Modification de la résolution 2025-185 — Démolition, 143, rue de Bretagne",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "status": "candidate",
+   "municipality": "mcmasterville",
+   "meetingDate": "2026-02-02",
+   "etape": "inconnu",
+   "zone_ref": "R-8",
+   "no_lot": "4494279",
+   "description": "Modification de la résolution 2025-185 inscrite au projet d'ordre du jour, concernant une demande de révision de la décision du comité de démolition CD-2025-04 et la démolition du bâtiment principal au 143, rue de Bretagne. Aucune décision prise n'est attestée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Modification – Résolution 2025-185 – Demande de révision – Décision du\ncomité de démolition CD-2025-04 – Demande de démolition",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-6"
+   ]
+  },
+  {
+   "id": "event-7-7",
+   "label": "Projet de bâtiment résidentiel multifamilial — 141, rue de Bretagne",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "status": "candidate",
+   "municipality": "mcmasterville",
+   "meetingDate": "2026-02-02",
+   "etape": "inconnu",
+   "zone_ref": "R-8",
+   "description": "Autorisation d'un projet de construction résidentielle multifamiliale sur les lots 4 494 279 et 4 494 281 et abrogation des résolutions 2025-154, 2025-229 et 2025-251 inscrites au projet d'ordre du jour. Aucune autorisation ni abrogation effective n'est attestée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Autorisation d'un projet de construction d'un bâtiment résidentiel\nmultifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 –\nZone R-8",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-7"
+   ]
+  },
+  {
+   "id": "bylaw-29-26",
+   "label": "Règlement 29-26 — Conduite maîtresse d'eau potable",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "status": "candidate",
+   "numero": "29-26",
+   "municipality": "mcmasterville",
+   "meetingDate": "2026-02-02",
+   "objet": "Approbation prévue à l'ordre du jour du règlement de la RIEVR décrétant une dépense et un emprunt de 9 960 000 $ pour l'installation d'une conduite maîtresse d'eau potable à McMasterville.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Approbation – Règlement numéro 29-26 décrétant une dépense de\n9 960 000 $ et un emprunt de 9 960 000 $ pour la réalisation de travaux",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-water"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-7-2",
+   "target": "zone-r8",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "evidence_refs": [
+    "ev-2"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Autorisation – Versement à des fins de parcs, de terrains de jeu ou pour\nle maintien d'un espace naturel – Projet de redéveloppement",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-7-3",
+   "target": "zone-mxt4",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "evidence_refs": [
+    "ev-3"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de dérogation mineure – Stationnement – Lot 5 754 418 –\n938, rue Bernard-Pilon – Zone MXT-4",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-7-4",
+   "target": "zone-mxt4",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "evidence_refs": [
+    "ev-4"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande d'exemption de fournir et de maintenir des cases de\nstationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-7-5",
+   "target": "zone-r8",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "evidence_refs": [
+    "ev-5"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Modification – Résolution 2025-184 – Demande de révision – Décision du\ncomité de démolition CD-2025-03 – Demande de démolition",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-7-6",
+   "target": "zone-r8",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "evidence_refs": [
+    "ev-6"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Modification – Résolution 2025-185 – Demande de révision – Décision du\ncomité de démolition CD-2025-04 – Demande de démolition",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-7-7",
+   "target": "zone-r8",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "evidence_refs": [
+    "ev-7"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Autorisation d'un projet de construction d'un bâtiment résidentiel\nmultifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 –\nZone R-8",
+     "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+     "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+     "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-2",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+   "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Autorisation – Versement à des fins de parcs, de terrains de jeu ou pour\nle maintien d'un espace naturel – Projet de redéveloppement – Adresse\nprojetée 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 – Zone R-8"
+  },
+  {
+   "id": "ev-3",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+   "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Demande de dérogation mineure – Stationnement – Lot 5 754 418 –\n938, rue Bernard-Pilon – Zone MXT-4"
+  },
+  {
+   "id": "ev-4",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+   "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Demande d'exemption de fournir et de maintenir des cases de\nstationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4"
+  },
+  {
+   "id": "ev-5",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+   "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Modification – Résolution 2025-184 – Demande de révision – Décision du\ncomité de démolition CD-2025-03 – Demande de démolition – Bâtiment\nprincipal – Lot 4 494 281 – 129, rue de Bretagne – Zone R-8"
+  },
+  {
+   "id": "ev-6",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+   "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Modification – Résolution 2025-185 – Demande de révision – Décision du\ncomité de démolition CD-2025-04 – Demande de démolition – Bâtiment\nprincipal – Lot 4 494 279 – 143, rue de Bretagne – Zone R-8"
+  },
+  {
+   "id": "ev-7",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+   "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Autorisation d'un projet de construction d'un bâtiment résidentiel\nmultifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 –\nZone R-8 – Abrogation des résolutions 2025-154, 2025-229 et 2025-251"
+  },
+  {
+   "id": "ev-water",
+   "source_file": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "rawRef": "raw/proces-verbaux-mcmasterville/cas/26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba.pdf",
+   "docSha": "26f0d3e45b216abf04e565e240d5eca1ceef53eddbf31a96ba03e405cf1ec8ba",
+   "sourceUrl": "https://www.mcmasterville.ca/wp-content/uploads/2026/01/odj-seance-2-fevrier-2026-internet.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Approbation – Règlement numéro 29-26 décrétant une dépense de\n9 960 000 $ et un emprunt de 9 960 000 $ pour la réalisation de travaux\nd’installation de conduite maîtresse d’eau potable à McMasterville –\nRégie intermunicipale de l'Eau de la Vallée du Richelieu (RIEVR)"
+  }
+ ],
+ "input_tokens": 7890,
+ "output_tokens": 5830
+}

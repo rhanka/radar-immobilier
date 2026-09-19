@@ -1,0 +1,244 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "989616eafaf923bd0e695e7ec7d6c8d7b007f17bb14b464a269d45c7fe15b9b5",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Autorisation de servitude de passage et droit de premier refus — lot 6 164 031, Sablière Martel\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 164 031\",\n        \"page\": 10,\n        \"citation\": \"ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et\\npersonnelle de passage, droit de premier refus pour le lot 6 164 031\",\n        \"anchor\": \"lot 6 164 031\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte de la page 10 comporte un saut de ligne entre « et » et « personnelle ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — 2, rue du Garbin, conversion de l’abri d’auto en garage\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2, rue Garbin\",\n        \"page\": 20,\n        \"citation\": \"ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri\\nd’auto en garage privé attenant pour la propriété sise au 2, rue Garbin\",\n        \"anchor\": \"2, rue Garbin\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « l’abri » et « d’auto » pour reproduire à l’identique la résolution de la page 20.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — lot 6 621 589, largeur de 27,20 mètres\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"6 621 589\",\n        \"page\": 21,\n        \"citation\": \"ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot\\nd’angle 6 621 589 d’une largeur de 27,20 mètres\",\n        \"anchor\": \"d’angle 6 621 589\"\n      },\n      \"reason\": \"La citation courante remplace par une espace le saut de ligne après « lot », contrairement à l’exigence de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Approbation de subdivision — parcelle du lot 6 141 355, site patrimonial du manoir Juchereau-Duchesnay\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 141 355\",\n        \"page\": 22,\n        \"citation\": \"ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que\\nprésenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi\",\n        \"anchor\": \"lot 6 141 355\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « que » et « présenté » figurant dans la résolution de la page 22.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Addenda à l’entente Groupe Castella — prolongement de l’avenue des Catherine, échéance reportée au 31 octobre 2026\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"entente Groupe Castella\",\n        \"page\": 23,\n        \"citation\": \"ET RÉSOLU d’amender l’article 6.7 de l’entente conclue avec Groupe Castella 2 inc.\\nafin de repousser la date de fin des travaux au 31 octobre 2026\",\n        \"anchor\": \"l’entente conclue avec Groupe Castella 2 inc\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique le saut de ligne après « inc. » dans la décision de report des travaux.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Modification du PIIA « Le Ste-4 » — résolution 344-2024, garantie de 35 000 $ pour chacune des phases 1A et 1B\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"344-2024\",\n        \"page\": 24,\n        \"citation\": \"ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux\\nderniers alinéas par les alinéas suivants\",\n        \"anchor\": \"résolution numéro 344-2024\"\n      },\n      \"reason\": \"La citation courante omet le saut de ligne entre « deux » et « derniers » et doit être corrigée pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Avis de motion — modification du zonage 1259-2014, zones 115-H et 145-H\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"1259-2014\",\n        \"page\": 24,\n        \"citation\": \"AVIS DE MOTION CONCERNANT UN RÈGLEMENT MODIFIANT LE RÈGLEMENT\\nDE ZONAGE NUMÉRO 1259-2014 VISANT À DÉPLACER LES LIMITES DES\\nZONES 115-H ET 145-H ET D'EN PRÉCISER LES USAGES ET LES NORMES\",\n        \"anchor\": \"ZONAGE NUMÉRO 1259-2014\"\n      },\n      \"reason\": \"Le titre attestant l’avis de motion est réparti sur trois lignes dans le document, dont les sauts doivent être conservés dans la citation exacte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet APR-423-2026 — modification du zonage, zones 115-H et 145-H\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"APR-423-2026\",\n        \"page\": 24,\n        \"citation\": \"ADOPTION DE L'AVANT-PROJET DE RÈGLEMENT NUMÉRO APR-423-2026\\nMODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 1259-2014 VISANT À\\nDÉPLACER LES LIMITES DES ZONES 115-H ET 145-H\",\n        \"anchor\": \"RÈGLEMENT NUMÉRO APR-423-2026\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne du titre de la résolution 117-2026 pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Autorisation de location à Yogi Nomade — bâtiment et emplacement au parc du Grand-Héron, été 2026\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"parc du Grand-Héron\",\n        \"page\": 29,\n        \"citation\": \"ET RÉSOLU d’autoriser le directeur du Service sports, loisirs, culture et vie\\ncommunautaire à signer un contrat de location d’un bâtiment et d’un emplacement\\ndans le parc du Grand-Héron\",\n        \"anchor\": \"parc du Grand-Héron\"\n      },\n      \"reason\": \"La citation doit restituer les sauts de ligne après « vie » et « emplacement » présents dans l’autorisation de location immobilière.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Autorisation de servitude de passage et droit de premier refus — lot 6 164 031, Sablière Martel",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 164 031",
+    "page": 10,
+    "citation": "ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et\npersonnelle de passage, droit de premier refus pour le lot 6 164 031",
+    "anchor": "lot 6 164 031"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 10 comporte un saut de ligne entre « et » et « personnelle »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Dérogation mineure accordée — 2, rue du Garbin, conversion de l’abri d’auto en garage",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2, rue Garbin",
+    "page": 20,
+    "citation": "ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri\nd’auto en garage privé attenant pour la propriété sise au 2, rue Garbin",
+    "anchor": "2, rue Garbin"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « l’abri » et « d’auto » pour reproduire à l’identique la résolution de la page 20."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Dérogation mineure accordée — lot 6 621 589, largeur de 27,20 mètres",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "6 621 589",
+    "page": 21,
+    "citation": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot\nd’angle 6 621 589 d’une largeur de 27,20 mètres",
+    "anchor": "d’angle 6 621 589"
+   },
+   "reason": "La citation courante remplace par une espace le saut de ligne après « lot », contrairement à l’exigence de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Approbation de subdivision — parcelle du lot 6 141 355, site patrimonial du manoir Juchereau-Duchesnay",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 141 355",
+    "page": 22,
+    "citation": "ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que\nprésenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi",
+    "anchor": "lot 6 141 355"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « que » et « présenté » figurant dans la résolution de la page 22."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Addenda à l’entente Groupe Castella — prolongement de l’avenue des Catherine, échéance reportée au 31 octobre 2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "entente Groupe Castella",
+    "page": 23,
+    "citation": "ET RÉSOLU d’amender l’article 6.7 de l’entente conclue avec Groupe Castella 2 inc.\nafin de repousser la date de fin des travaux au 31 octobre 2026",
+    "anchor": "l’entente conclue avec Groupe Castella 2 inc"
+   },
+   "reason": "La citation doit reproduire à l’identique le saut de ligne après « inc. » dans la décision de report des travaux."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Modification du PIIA « Le Ste-4 » — résolution 344-2024, garantie de 35 000 $ pour chacune des phases 1A et 1B",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "344-2024",
+    "page": 24,
+    "citation": "ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux\nderniers alinéas par les alinéas suivants",
+    "anchor": "résolution numéro 344-2024"
+   },
+   "reason": "La citation courante omet le saut de ligne entre « deux » et « derniers » et doit être corrigée pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Avis de motion — modification du zonage 1259-2014, zones 115-H et 145-H",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1259-2014",
+    "page": 24,
+    "citation": "AVIS DE MOTION CONCERNANT UN RÈGLEMENT MODIFIANT LE RÈGLEMENT\nDE ZONAGE NUMÉRO 1259-2014 VISANT À DÉPLACER LES LIMITES DES\nZONES 115-H ET 145-H ET D'EN PRÉCISER LES USAGES ET LES NORMES",
+    "anchor": "ZONAGE NUMÉRO 1259-2014"
+   },
+   "reason": "Le titre attestant l’avis de motion est réparti sur trois lignes dans le document, dont les sauts doivent être conservés dans la citation exacte."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Adoption du premier projet APR-423-2026 — modification du zonage, zones 115-H et 145-H",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "APR-423-2026",
+    "page": 24,
+    "citation": "ADOPTION DE L'AVANT-PROJET DE RÈGLEMENT NUMÉRO APR-423-2026\nMODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 1259-2014 VISANT À\nDÉPLACER LES LIMITES DES ZONES 115-H ET 145-H",
+    "anchor": "RÈGLEMENT NUMÉRO APR-423-2026"
+   },
+   "reason": "La citation doit conserver les sauts de ligne du titre de la résolution 117-2026 pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Autorisation de location à Yogi Nomade — bâtiment et emplacement au parc du Grand-Héron, été 2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "parc du Grand-Héron",
+    "page": 29,
+    "citation": "ET RÉSOLU d’autoriser le directeur du Service sports, loisirs, culture et vie\ncommunautaire à signer un contrat de location d’un bâtiment et d’un emplacement\ndans le parc du Grand-Héron",
+    "anchor": "parc du Grand-Héron"
+   },
+   "reason": "La citation doit restituer les sauts de ligne après « vie » et « emplacement » présents dans l’autorisation de location immobilière."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 10,
+   "citation": "ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et\npersonnelle de passage, droit de premier refus pour le lot 6 164 031"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "derogation_mineure",
+   "page": 20,
+   "citation": "ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri\nd’auto en garage privé attenant pour la propriété sise au 2, rue Garbin"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "derogation_mineure",
+   "page": 21,
+   "citation": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot\nd’angle 6 621 589 d’une largeur de 27,20 mètres"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "adoption",
+   "page": 22,
+   "citation": "ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que\nprésenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "inconnu",
+   "page": 23,
+   "citation": "ET RÉSOLU d’amender l’article 6.7 de l’entente conclue avec Groupe Castella 2 inc.\nafin de repousser la date de fin des travaux au 31 octobre 2026"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "piia",
+   "page": 24,
+   "citation": "ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux\nderniers alinéas par les alinéas suivants"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "avis_motion",
+   "page": 24,
+   "citation": "AVIS DE MOTION CONCERNANT UN RÈGLEMENT MODIFIANT LE RÈGLEMENT\nDE ZONAGE NUMÉRO 1259-2014 VISANT À DÉPLACER LES LIMITES DES\nZONES 115-H ET 145-H ET D'EN PRÉCISER LES USAGES ET LES NORMES"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "projet_reglement",
+   "page": 24,
+   "citation": "ADOPTION DE L'AVANT-PROJET DE RÈGLEMENT NUMÉRO APR-423-2026\nMODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 1259-2014 VISANT À\nDÉPLACER LES LIMITES DES ZONES 115-H ET 145-H"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "inconnu",
+   "page": 29,
+   "citation": "ET RÉSOLU d’autoriser le directeur du Service sports, loisirs, culture et vie\ncommunautaire à signer un contrat de location d’un bâtiment et d’un emplacement\ndans le parc du Grand-Héron"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 10
+}

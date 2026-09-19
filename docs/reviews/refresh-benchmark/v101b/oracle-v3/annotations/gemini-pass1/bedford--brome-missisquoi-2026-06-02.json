@@ -1,0 +1,46 @@
+{
+ "documentId": "bedford--brome-missisquoi-2026-06-02",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "cab32fb2bee7996bd37f716a9a028e9ff5266f3b7190875a9bd477a0bd1595e3",
+ "rawText": "{\"operations\":[{\"op\":\"correct\",\"id\":\"u10\",\"unit\":{\"label\":\"Autorisation de signature de l’addenda au bail – Bibliothèque, 52, rue du Pont, local #105\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"52, rue du Pont\",\"page\":11,\"citation\":\"Autorisation de signature de l’addenda au bail de location pour la bibliothèque Considérant que la Ville de Bedford loue le local #105 de l’immeuble situé au 52, rue du Pont à Bedford\",\"anchor\":\"52, rue du Pont\"},\"reason\":\"Correction du saut de ligne accidentel dans le champ objet pour normaliser l'adresse en « 52, rue du Pont ».\"}]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Autorisation de signature de l’addenda au bail – Bibliothèque, 52, rue du Pont, local #105",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "52, rue du Pont",
+    "page": 11,
+    "citation": "Autorisation de signature de l’addenda au bail de location pour la bibliothèque Considérant que la Ville de Bedford loue le local #105 de l’immeuble situé au 52, rue du Pont à Bedford",
+    "anchor": "52, rue du Pont"
+   },
+   "reason": "Correction du saut de ligne accidentel dans le champ objet pour normaliser l'adresse en « 52, rue du Pont »."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u10"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 12
+}

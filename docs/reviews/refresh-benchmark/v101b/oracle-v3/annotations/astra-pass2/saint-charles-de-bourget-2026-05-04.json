@@ -1,0 +1,76 @@
+{
+ "documentId": "saint-charles-de-bourget-2026-05-04",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "e7e8a29a1debee533e2558886cbf6e9897fe363620f2e4d3ae773b5e9df81f20",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du règlement 446.26 concernant le droit de préemption\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"446.26\",\n        \"page\": 1,\n        \"citation\": \"ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\\nPRÉEMPTION PAR LA MUNICIPALITÉ\",\n        \"anchor\": \"RÈGLEMENT NO446.26\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique du document, y compris le saut de ligne entre « DE » et « PRÉEMPTION ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Examen prévu de la demande d’autorisation à la CPTAQ pour aliéner le lot 5 682 717\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"5 682 717\",\n        \"page\": 1,\n        \"citation\": \"DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\\nFINS D’AGRICULTURE\",\n        \"anchor\": \"LOT 5 682 717\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique du document, y compris le saut de ligne entre « À » et « FINS D’AGRICULTURE ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption prévue du règlement 446.26 concernant le droit de préemption",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "446.26",
+    "page": 1,
+    "citation": "ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\nPRÉEMPTION PAR LA MUNICIPALITÉ",
+    "anchor": "RÈGLEMENT NO446.26"
+   },
+   "reason": "La citation doit être recopiée à l’identique du document, y compris le saut de ligne entre « DE » et « PRÉEMPTION »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Examen prévu de la demande d’autorisation à la CPTAQ pour aliéner le lot 5 682 717",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5 682 717",
+    "page": 1,
+    "citation": "DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\nFINS D’AGRICULTURE",
+    "anchor": "LOT 5 682 717"
+   },
+   "reason": "La citation doit être recopiée à l’identique du document, y compris le saut de ligne entre « À » et « FINS D’AGRICULTURE »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 1,
+   "citation": "ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\nPRÉEMPTION PAR LA MUNICIPALITÉ"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 1,
+   "citation": "DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\nFINS D’AGRICULTURE"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

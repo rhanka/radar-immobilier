@@ -1,0 +1,19 @@
+{
+ "documentId": "beaupre-2026-03-02",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ba56fc293b175ddf19038dc81fdfc716da44090247d83e585740d2095735a01b",
+ "verificationSha256": "5a6fee16c4e9ea2c103436d4a01b3d239d361d945a93f9e8476cee7be2c35b92",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

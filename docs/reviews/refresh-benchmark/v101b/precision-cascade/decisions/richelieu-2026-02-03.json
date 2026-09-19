@@ -1,0 +1,256 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ab20010a95b1517fb545ed94f78242c4d12c7b1f8c7c186d41310b9c771f1557",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-26-R-285"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 26-R-285 — interdiction d'épandage à des dates prédéterminées",
+     "stage": "adoption",
+     "objet": "26-R-285",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "En conséquence, il est proposé par Joël Caisse, appuyé par Charles Fraser-Guay et\nrésolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé :"
+      },
+      {
+       "page": 3,
+       "excerpt": "En conséquence, il est proposé par Joël Caisse, appuyé par Charles Fraser-Guay et\nrésolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-vente-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente d'immeubles pour défaut de paiement de taxes — 15 avril 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\npublique, dans la salle du conseil de l'hôtel de ville située au 200, boulevard Richelieu,"
+      },
+      {
+       "page": 6,
+       "excerpt": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\npublique, dans la salle du conseil de l'hôtel de ville située au 200, boulevard Richelieu,\nle 15 avril 2026 à 10h00, les immeubles apparaissant au rapport de la trésorière\nprésentement soumis sur lesquels des arrérages de taxes sont dus;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-PPCMOI-2025-07"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbation finale du PPCMOI-2025-07",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :"
+      },
+      {
+       "page": 10,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :\nArticle 1.\nAutoriser deux (2) bâtiments principaux résidentiels. Le nombre de bâtiments\nprincipaux sera de deux (2) au lieu d'un (1) seul (article 11.1 du Règlement\nd'urbanisme numéro 14-R-186)."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-PPCMOI-2025-08"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbation finale du PPCMOI-2025-08",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :"
+      },
+      {
+       "page": 11,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :\nArticle 1.\nAutoriser deux (2) bâtiments principaux résidentiels. Le nombre de bâtiments\nprincipaux sera de deux (2) au lieu d'un (1) seul (article 11.1 du Règlement\nd'urbanisme numéro 14-R-186)."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-PPCMOI-2025-09"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbation finale du PPCMOI-2025-09",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :"
+      },
+      {
+       "page": 12,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :\nArticle 1.\nAutoriser trois (3) bâtiments principaux résidentiels. Le nombre de bâtiments\nprincipaux sera de trois (3) au lieu d'un (1) seul (article 11.1 du Règlement\nd'urbanisme numéro 14-R-186)."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-appui-cptaq"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui municipal à la demande CPTAQ — 2860, chemin des Patriotes",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "En conséquence, il est proposé par Lise Ferland, appuyé par Michel Beaudoin et\nrésolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour"
+      },
+      {
+       "page": 13,
+       "excerpt": "En conséquence, il est proposé par Lise Ferland, appuyé par Michel Beaudoin et\nrésolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\nnuméro 5 891 123 du cadastre du Québec."
+      },
+      {
+       "page": 12,
+       "excerpt": "CONSIDÉRANT\n\nque le demandeur doit s'adresser à la Commission\nde protection du territoire agricole du Québec\n(CPTAQ) pour l'utilisation à des fins autres\nqu'agricoles du lot 5 891 123 du cadastre du\nQuébec;\n\nCONSIDÉRANT\n\nque la superficie totale faisant l'objet de la demande\nest de 809,2 mètres carrés;"
+      },
+      {
+       "page": 13,
+       "excerpt": "CONSIDÉRANT\n\nque l'immeuble est situé dans la zone 529, sur le\nchemin des Patriotes et de maisons construites de\npart et d'autre;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte le règlement numéro 26-R-285.\",\"excerpt\":\"résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé :\\n« Règlement interdisant l'épandage de déjections animales ou de boues à des dates\\nprédéterminées entre le 31 mai et le 1er\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal ordonne la vente à l'enchère publique d'immeubles pour défaut de paiement de taxes le 15 avril 2026.\",\"excerpt\":\"ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\\npublique, dans la salle du conseil de l'hôtel de ville située au 200, boulevard Richelieu,\\nle 15 avril 2026 à 10h00\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve la résolution finale de la demande PPCMOI-2025-07.\",\"excerpt\":\"Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve la résolution finale de la demande PPCMOI-2025-08.\",\"excerpt\":\"Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve la résolution finale de la demande PPCMOI-2025-09.\",\"excerpt\":\"Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal appuie la demande auprès de la CPTAQ pour la construction d'une maison unifamiliale au 2860, chemin des Patriotes.\",\"excerpt\":\"résolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour\\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\\nnuméro 5 891 123\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte le règlement numéro 26-R-285.",
+   "excerpt": "résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé :\n« Règlement interdisant l'épandage de déjections animales ou de boues à des dates\nprédéterminées entre le 31 mai et le 1er"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal ordonne la vente à l'enchère publique d'immeubles pour défaut de paiement de taxes le 15 avril 2026.",
+   "excerpt": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\npublique, dans la salle du conseil de l'hôtel de ville située au 200, boulevard Richelieu,\nle 15 avril 2026 à 10h00"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve la résolution finale de la demande PPCMOI-2025-07.",
+   "excerpt": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve la résolution finale de la demande PPCMOI-2025-08.",
+   "excerpt": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve la résolution finale de la demande PPCMOI-2025-09.",
+   "excerpt": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal appuie la demande auprès de la CPTAQ pour la construction d'une maison unifamiliale au 2860, chemin des Patriotes.",
+   "excerpt": "résolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\nnuméro 5 891 123"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal adopte le règlement numéro 26-R-285."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil municipal ordonne la vente à l'enchère publique d'immeubles pour défaut de paiement de taxes le 15 avril 2026."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil municipal approuve la résolution finale de la demande PPCMOI-2025-07."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil municipal approuve la résolution finale de la demande PPCMOI-2025-08."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil municipal approuve la résolution finale de la demande PPCMOI-2025-09."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil municipal appuie la demande auprès de la CPTAQ pour la construction d'une maison unifamiliale au 2860, chemin des Patriotes."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2532,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 12832,
+   "outputTokens": 580,
+   "totalTokens": 13412
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2385
+  },
+  "inputSha256": "84a0f75a18254f041d454779bd739fe9bef95dcf1deabd04e31bdc8e3f55d428"
+ }
+}

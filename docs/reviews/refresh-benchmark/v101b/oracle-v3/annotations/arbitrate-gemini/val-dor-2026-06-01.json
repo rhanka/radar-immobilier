@@ -1,0 +1,19 @@
+{
+ "documentId": "val-dor-2026-06-01",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "35fd5eb75f529c39565ab7bbd7eb6f6a6e1ad33545e6d828d78448e105e36685",
+ "verificationSha256": "1aca70cae40c393fec0601e380cc430a53e3b9fada69d44cc85956881be73993",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

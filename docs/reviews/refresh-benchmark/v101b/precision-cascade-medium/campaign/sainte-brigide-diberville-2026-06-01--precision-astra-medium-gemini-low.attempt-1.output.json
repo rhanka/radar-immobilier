@@ -1,0 +1,221 @@
+{
+ "nodes": [
+  {
+   "id": "source-1",
+   "label": "Ordre du jour du 1er juin 2026 — Sainte-Brigide-d’Iberville",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "status": "candidate",
+   "date": "2026-06-01",
+   "municipality": "sainte-brigide-diberville",
+   "format": "pdf",
+   "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+   "url": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Ordre du jour de la séance ordinaire du lundi 1er juin 2026",
+     "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+     "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-489",
+   "label": "Règlement 2026-489 — Gestion quantitative des eaux pluviales",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "status": "candidate",
+   "numero": "2026-489",
+   "title": "Règlement 2026-489 sur la gestion quantitative des eaux pluviales",
+   "stage": "adoption prévue à l’ordre du jour",
+   "meetingDate": "2026-06-01",
+   "municipality": "sainte-brigide-diberville",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption",
+     "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+     "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-402-6",
+   "label": "Règlement 2026-402-6 — Réserve financière pour l’égout et l’aqueduc",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "status": "candidate",
+   "numero": "2026-402-6",
+   "objet": "Modification du règlement 2012-402 concernant la réserve financière pour l’égout et l’aqueduc.",
+   "stage": "avis de motion prévu à l’ordre du jour",
+   "meetingDate": "2026-06-01",
+   "municipality": "sainte-brigide-diberville",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "5.2 Règlement 2026-402-6 Règlement modifiant le règlement 2012-402 concernant la\nréserve financière pour l’égout et l’aqueduc : avis de motion",
+     "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+     "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-derogation-4390294",
+   "label": "Dérogation mineure prévue — Lot 4 390 294, Rang de la Rivière Ouest",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "meetingDate": "2026-06-01",
+   "municipality": "sainte-brigide-diberville",
+   "no_lot": "4390294",
+   "description": "Dérogation mineure concernant le lot 4 390 294, Rang de la Rivière Ouest, inscrite à l’ordre du jour; aucune décision rapportée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest",
+     "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+     "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-1",
+   "target": "bylaw-2026-489",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "evidence_refs": [
+    "ev-1"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption",
+     "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+     "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "bylaw-2026-402-6",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "evidence_refs": [
+    "ev-2"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "5.2 Règlement 2026-402-6 Règlement modifiant le règlement 2012-402 concernant la\nréserve financière pour l’égout et l’aqueduc : avis de motion",
+     "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+     "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-derogation-4390294",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "evidence_refs": [
+    "ev-3"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest",
+     "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+     "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+     "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-1",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+   "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption"
+  },
+  {
+   "id": "ev-2",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+   "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "5.2 Règlement 2026-402-6 Règlement modifiant le règlement 2012-402 concernant la\nréserve financière pour l’égout et l’aqueduc : avis de motion"
+  },
+  {
+   "id": "ev-3",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+   "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest"
+  },
+  {
+   "id": "ev-4",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+   "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet\néolien : demande de prolongation à la CPTAQ"
+  },
+  {
+   "id": "ev-5",
+   "source_file": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-brigide-diberville/cas/33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34.pdf",
+   "docSha": "33d03985660679d3762329e936a795e6a7d0b0261ba312acda7c594b8dcb1c34",
+   "sourceUrl": "https://www.sainte-brigide.qc.ca/fichiersUpload/fichiers/20260602162414-2026-06-01-ordre-du-jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "14.1 Vente d’immeubles pour défaut de paiement des taxes"
+  }
+ ],
+ "input_tokens": 7100,
+ "output_tokens": 4600
+}

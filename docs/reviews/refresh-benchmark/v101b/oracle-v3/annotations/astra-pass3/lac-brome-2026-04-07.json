@@ -1,0 +1,244 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "c71cd359cd133021bc4dac4793b39d1015e23185e50f317a26f81884bf00faa1",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement résiduel de zonage 596-20\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"596-20\",\n        \"page\": 20,\n        \"citation\": \"le Conseil adopte le règlement résiduel Règlement 596-20\\nmodifiant le règlement de zonage 596.\",\n        \"anchor\": \"Règlement 596-20\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 20 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement distinct 596-21 — définitions de hauteur et d'occupation du terrain\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"596-21\",\n        \"page\": 21,\n        \"citation\": \"le Conseil adopte le règlement distinct Règlement 596-21\\n(concernant les définitions de «Hauteur d'un bâtiment (en\\nmètre)» et de «Pourcentage d'occupation du terrain»)\",\n        \"anchor\": \"Règlement 596-21\"\n      },\n      \"reason\": \"La citation courante supprime les retours à la ligne de la résolution; l’extrait corrigé reproduit exactement le texte de la page 21.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement distinct 596-22 — marge latérale et occupation du bâtiment principal, zone UV-4-I12\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"596-22\",\n        \"page\": 23,\n        \"citation\": \"le Conseil adopte le règlement distinct Règlement 596-22\\n(concernant la marge latérale minimale et le pourcentage\\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)\",\n        \"anchor\": \"Règlement 596-22\"\n      },\n      \"reason\": \"L’exigence de citation à l’identique impose de rétablir les retours à la ligne de la page 23, en conservant la graphie « UV4-I12 » de cet extrait.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement distinct 596-23 — occupation du bâtiment principal, zone UV-14-J13\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"596-23\",\n        \"page\": 24,\n        \"citation\": \"le Conseil adopte le règlement distinct Règlement 596-23\\n(concernant le pourcentage maximal d'occupation du\\nbâtiment principal dans la Zone UV-14-J13) modifiant le\\nrèglement de zonage 596;\",\n        \"anchor\": \"Règlement 596-23\"\n      },\n      \"reason\": \"La citation doit reproduire les retours à la ligne du texte de la page 24, conformément à la règle de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — abri d'auto au 9, chemin Frank-Santerre\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"9, chemin Frank-Santerre\",\n        \"page\": 25,\n        \"citation\": \"le Conseil accorde le PIIA-2 concernant la demande de\\nconstruction d’un bâtiment accessoire de type abri d'auto\\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\\nUC-2-N3.\",\n        \"anchor\": \"9, chemin Frank-Santerre\"\n      },\n      \"reason\": \"La décision est correctement identifiée, mais sa citation doit conserver les retours à la ligne de la page 25 pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — demande révisée de bâtiment commercial au 753, chemin Lakeside\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 643 103\",\n        \"page\": 26,\n        \"citation\": \"le Conseil accorde le PIIA-3 concernant la demande révisée\\nde construction d’un bâtiment principal commercial au 753,\\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15.\",\n        \"anchor\": \"lot #6 643 103\"\n      },\n      \"reason\": \"La citation courante remplace les retours à la ligne par des espaces; l’extrait corrigé respecte la reproduction à l’identique de la page 26.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Tenue d'une procédure d'enregistrement ordonnée — règlement 596-21\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"596-21\",\n        \"page\": 21,\n        \"citation\": \"le Conseil ordonne au greffier de tenir une procédure\\nd'enregistrement des personnes habiles à voter afin de\\ndéterminer si un scrutin référendaire doit être tenu pour le\\nrèglement 596-21.\",\n        \"anchor\": \"règlement 596-21\"\n      },\n      \"reason\": \"Cette étape est bien ordonnée dans le document, mais sa citation doit rétablir les retours à la ligne de la page 21 pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Tenue d'une procédure d'enregistrement ordonnée — règlement 596-22\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"596-22\",\n        \"page\": 23,\n        \"citation\": \"le Conseil ordonne au greffier de tenir une procédure\\nd'enregistrement des personnes habiles à voter afin de\\ndéterminer si un scrutin référendaire doit être tenu pour le\\nrèglement 596-22.\",\n        \"anchor\": \"règlement 596-22\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne de la résolution de la page 23, conformément à l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Tenue d'une procédure d'enregistrement ordonnée — règlement 596-23\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"596-23\",\n        \"page\": 24,\n        \"citation\": \"le Conseil ordonne au greffier de tenir une procédure\\nd'enregistrement des personnes habiles à voter afin de\\ndéterminer si un scrutin référendaire doit être tenu pour le\\nrèglement 596-23.\",\n        \"anchor\": \"règlement 596-23\"\n      },\n      \"reason\": \"La citation courante supprime les retours à la ligne du document; l’extrait corrigé reproduit exactement la décision de la page 24.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption du règlement résiduel de zonage 596-20",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "596-20",
+    "page": 20,
+    "citation": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596.",
+    "anchor": "Règlement 596-20"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 20 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Adoption du règlement distinct 596-21 — définitions de hauteur et d'occupation du terrain",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "596-21",
+    "page": 21,
+    "citation": "le Conseil adopte le règlement distinct Règlement 596-21\n(concernant les définitions de «Hauteur d'un bâtiment (en\nmètre)» et de «Pourcentage d'occupation du terrain»)",
+    "anchor": "Règlement 596-21"
+   },
+   "reason": "La citation courante supprime les retours à la ligne de la résolution; l’extrait corrigé reproduit exactement le texte de la page 21."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du règlement distinct 596-22 — marge latérale et occupation du bâtiment principal, zone UV-4-I12",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "596-22",
+    "page": 23,
+    "citation": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)",
+    "anchor": "Règlement 596-22"
+   },
+   "reason": "L’exigence de citation à l’identique impose de rétablir les retours à la ligne de la page 23, en conservant la graphie « UV4-I12 » de cet extrait."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Adoption du règlement distinct 596-23 — occupation du bâtiment principal, zone UV-14-J13",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "596-23",
+    "page": 24,
+    "citation": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;",
+    "anchor": "Règlement 596-23"
+   },
+   "reason": "La citation doit reproduire les retours à la ligne du texte de la page 24, conformément à la règle de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "PIIA accordé — abri d'auto au 9, chemin Frank-Santerre",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "9, chemin Frank-Santerre",
+    "page": 25,
+    "citation": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3.",
+    "anchor": "9, chemin Frank-Santerre"
+   },
+   "reason": "La décision est correctement identifiée, mais sa citation doit conserver les retours à la ligne de la page 25 pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "PIIA accordé — demande révisée de bâtiment commercial au 753, chemin Lakeside",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 643 103",
+    "page": 26,
+    "citation": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15.",
+    "anchor": "lot #6 643 103"
+   },
+   "reason": "La citation courante remplace les retours à la ligne par des espaces; l’extrait corrigé respecte la reproduction à l’identique de la page 26."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Tenue d'une procédure d'enregistrement ordonnée — règlement 596-21",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "596-21",
+    "page": 21,
+    "citation": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-21.",
+    "anchor": "règlement 596-21"
+   },
+   "reason": "Cette étape est bien ordonnée dans le document, mais sa citation doit rétablir les retours à la ligne de la page 21 pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Tenue d'une procédure d'enregistrement ordonnée — règlement 596-22",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "596-22",
+    "page": 23,
+    "citation": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-22.",
+    "anchor": "règlement 596-22"
+   },
+   "reason": "La citation doit conserver les retours à la ligne de la résolution de la page 23, conformément à l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Tenue d'une procédure d'enregistrement ordonnée — règlement 596-23",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "596-23",
+    "page": 24,
+    "citation": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-23.",
+    "anchor": "règlement 596-23"
+   },
+   "reason": "La citation courante supprime les retours à la ligne du document; l’extrait corrigé reproduit exactement la décision de la page 24."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 20,
+   "citation": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596."
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 21,
+   "citation": "le Conseil adopte le règlement distinct Règlement 596-21\n(concernant les définitions de «Hauteur d'un bâtiment (en\nmètre)» et de «Pourcentage d'occupation du terrain»)"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 23,
+   "citation": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 24,
+   "citation": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "piia",
+   "page": 25,
+   "citation": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3."
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "piia",
+   "page": 26,
+   "citation": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15."
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "inconnu",
+   "page": 21,
+   "citation": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-21."
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "inconnu",
+   "page": 23,
+   "citation": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-22."
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "inconnu",
+   "page": 24,
+   "citation": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-23."
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9
+}

@@ -1,0 +1,81 @@
+{
+ "documentId": "bolton-est-2026-01-12",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "f971f04a3adffc7cd458fc798258875999b81d9567226b126177a8929ad29eff",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Point 7.3 de l'ordre du jour cite mot pour mot « Dérogation mineure – Lot 6 116 054 – 4 Impasse des Châtelains » en page 1 ; un point d'ordre du jour est une unité « prévue » avec objet foncier explicite et étape derogation_mineure exacte.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Point 7.4 « Demande de PIIA – Lot 4 860 343 – 5 rue Castel » en page 1 atteste un petit PIIA prévu (inclusion explicite des petits PIIA), citation, objet et étape piia exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Point 7.5 « Demande de PIIA – Lot 4 860 346 – 7 rue Castel » en page 1 atteste un PIIA prévu sur un lot distinct ; citation, objet et étape piia exacts.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 7.6 « Demande de PIIA – Lot 4 860 502 – 19 rue Horse Shoe » en page 1 atteste un PIIA prévu sur un lot distinct ; citation, objet et étape piia exacts.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Point 7.7 « Demande de PIIA – Lot 6 465 655 – 74 rue de Lac-Spring » en page 1 atteste un PIIA prévu sur un lot distinct ; citation, objet et étape piia exacts.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Point 7.8 « Demande de PIIA – Lot 6 668 264-P » en page 1 atteste un PIIA prévu sur un lot explicitement nommé ; citation, objet et étape piia exacts.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Point 7.3 de l'ordre du jour cite mot pour mot « Dérogation mineure – Lot 6 116 054 – 4 Impasse des Châtelains » en page 1 ; un point d'ordre du jour est une unité « prévue » avec objet foncier explicite et étape derogation_mineure exacte."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Point 7.4 « Demande de PIIA – Lot 4 860 343 – 5 rue Castel » en page 1 atteste un petit PIIA prévu (inclusion explicite des petits PIIA), citation, objet et étape piia exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Point 7.5 « Demande de PIIA – Lot 4 860 346 – 7 rue Castel » en page 1 atteste un PIIA prévu sur un lot distinct ; citation, objet et étape piia exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 7.6 « Demande de PIIA – Lot 4 860 502 – 19 rue Horse Shoe » en page 1 atteste un PIIA prévu sur un lot distinct ; citation, objet et étape piia exacts."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Point 7.7 « Demande de PIIA – Lot 6 465 655 – 74 rue de Lac-Spring » en page 1 atteste un PIIA prévu sur un lot distinct ; citation, objet et étape piia exacts."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Point 7.8 « Demande de PIIA – Lot 6 668 264-P » en page 1 atteste un PIIA prévu sur un lot explicitement nommé ; citation, objet et étape piia exacts."
+  }
+ ]
+}

@@ -1,0 +1,91 @@
+{
+ "documentId": "beaupre-2026-03-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ba56fc293b175ddf19038dc81fdfc716da44090247d83e585740d2095735a01b",
+ "rawText": "{\"votes\":[\n {\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 11982-020326 autorise la signature d'un protocole d'entente pour des travaux municipaux de prolongement de rues liés au développement Horizon Boréal, ce qui constitue un acte d'urbanisme/développement conforme et exactement attesté en page 5.\"},\n {\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 11983-020326 approuve le projet PIIA au 200, rue de Véga conformément au texte en page 5.\"},\n {\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 11984-020326 approuve le projet PIIA au 155, rue de Cassiopée conformément au texte en page 5.\"},\n {\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 11985-020326 approuve le projet PIIA au 145, rue de Cassiopée conformément au texte en page 6.\"},\n {\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La résolution 11986-020326 refuse le projet PIIA au 150, rue de l’Aurore-Boréale conformément au texte en page 6 et à la règle voulant que les refus restent des refus.\"},\n {\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Le prêt ponctuel d'une salle communautaire pour deux heures relève de la vie communautaire/loisirs et ne constitue ni un acte d'urbanisme ni un acte foncier.\"},\n {\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Le prêt ponctuel d'une salle municipale pour deux heures est exclu des faits d'urbanisme et des actes fonciers.\"}\n]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 11982-020326 autorise la signature d'un protocole d'entente pour des travaux municipaux de prolongement de rues liés au développement Horizon Boréal, ce qui constitue un acte d'urbanisme/développement conforme et exactement attesté en page 5."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 11983-020326 approuve le projet PIIA au 200, rue de Véga conformément au texte en page 5."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 11984-020326 approuve le projet PIIA au 155, rue de Cassiopée conformément au texte en page 5."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 11985-020326 approuve le projet PIIA au 145, rue de Cassiopée conformément au texte en page 6."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 11986-020326 refuse le projet PIIA au 150, rue de l’Aurore-Boréale conformément au texte en page 6 et à la règle voulant que les refus restent des refus."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Le prêt ponctuel d'une salle communautaire pour deux heures relève de la vie communautaire/loisirs et ne constitue ni un acte d'urbanisme ni un acte foncier."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Le prêt ponctuel d'une salle municipale pour deux heures est exclu des faits d'urbanisme et des actes fonciers."
+  }
+ ]
+}

@@ -1,0 +1,165 @@
+{
+ "documentId": "saint-charles-de-bourget-2026-05-04",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "415f27bc67970eaeb12b2adb024c27d6b19405a467bfd27f8afd68e6298c2be7",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-446-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 446.26 — Droit de préemption",
+     "stage": null,
+     "objet": "446.26",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\nPRÉEMPTION PAR LA MUNICIPALITÉ"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-derogation"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure — 237, chemin Maltais-Laberge",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "DEMANDE DE DÉROGATION MINEURE – 237, CHEMIN MALTAIS-LABERGE"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-cptaq"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande d’autorisation à la CPTAQ — Aliénation du lot 5 682 717",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\nFINS D’AGRICULTURE"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-447-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement omnibus municipal 447.26",
+     "stage": "projet",
+     "objet": "447.26",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT OMNIBUS MUNICIPAL\nNO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.3 de l'ordre du jour prévoit expressément l'adoption du règlement no 446.26 sur le droit de préemption.\",\"excerpt\":\"ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\\nPRÉEMPTION PAR LA MUNICIPALITÉ\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.1 de l'ordre du jour concerne explicitement le traitement d'une demande de dérogation mineure pour le 237, chemin Maltais-Laberge.\",\"excerpt\":\"DEMANDE DE DÉROGATION MINEURE – 237, CHEMIN MALTAIS-LABERGE\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.2 de l'ordre du jour porte sur une demande d'autorisation à la CPTAQ pour l'aliénation d'un lot agricole.\",\"excerpt\":\"DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\\nFINS D’AGRICULTURE\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement no 447.26 est relatif à la paix, à l'ordre et à la sécurité publique, ce qui ne relève pas de l'urbanisme ou de l'aménagement du territoire.\",\"excerpt\":\"AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT OMNIBUS MUNICIPAL\\nNO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 6.3 de l'ordre du jour prévoit expressément l'adoption du règlement no 446.26 sur le droit de préemption.",
+   "excerpt": "ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\nPRÉEMPTION PAR LA MUNICIPALITÉ"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 8.1 de l'ordre du jour concerne explicitement le traitement d'une demande de dérogation mineure pour le 237, chemin Maltais-Laberge.",
+   "excerpt": "DEMANDE DE DÉROGATION MINEURE – 237, CHEMIN MALTAIS-LABERGE"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 8.2 de l'ordre du jour porte sur une demande d'autorisation à la CPTAQ pour l'aliénation d'un lot agricole.",
+   "excerpt": "DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\nFINS D’AGRICULTURE"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement no 447.26 est relatif à la paix, à l'ordre et à la sécurité publique, ce qui ne relève pas de l'urbanisme ou de l'aménagement du territoire.",
+   "excerpt": "AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT OMNIBUS MUNICIPAL\nNO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [
+   {
+    "act": "A04",
+    "reason": "Le règlement no 447.26 est relatif à la paix, à l'ordre et à la sécurité publique, ce qui ne relève pas de l'urbanisme ou de l'aménagement du territoire."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 6.3 de l'ordre du jour prévoit expressément l'adoption du règlement no 446.26 sur le droit de préemption."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 8.1 de l'ordre du jour concerne explicitement le traitement d'une demande de dérogation mineure pour le 237, chemin Maltais-Laberge."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 8.2 de l'ordre du jour porte sur une demande d'autorisation à la CPTAQ pour l'aliénation d'un lot agricole."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1682,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2077,
+   "outputTokens": 367,
+   "totalTokens": 2444
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1529
+  },
+  "inputSha256": "ddd58339051c41855a564080700c053f736f74592f8b798795513b1a8dc54ba6"
+ }
+}

@@ -1,0 +1,464 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c3439c75af500f458fb5943e95c03e72a58c3cdd3e76204888f7020529a5e958",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-645"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 645 sur l’entretien et l’occupation des bâtiments",
+     "stage": "adoption",
+     "objet": "645",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-626"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 626 — promenade sur la rue Principale Nord",
+     "stage": null,
+     "objet": "626",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présent d’autoriser la modification de\nl’article 6"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-646"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 646 — délégation de pouvoirs",
+     "stage": "projet",
+     "objet": "646",
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "Un projet de règlement intitulé « Règlement numéro 646 intitulé délégation\nde pouvoir » est déposé séance tenante."
+      },
+      {
+       "page": 12,
+       "excerpt": "Je soussigné, M. Pierre-Marc Boulianne, conseiller, donne avis par la présente\nqu’il sera soumis lors d’une prochaine séance, le règlement 646 sur la\ndélégation de pouvoirs."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-agroenvironnement"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de suspension et de révision du projet de règlement agroenvironnemental",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les\nChangements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de\nsuspendre le processus d’adoption de ce règlement"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-rue-dufour"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Développement du secteur de la rue Dufour — estimation d’ingénierie",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des conseillers présents, d’accepter l’offre de service de\nStantec au montant de 977,29 $, taxes incluses,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-permis-avril"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Dépôt du rapport des permis d’avril 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "Les membres du conseil et les citoyens présents à la séance sont informés\ndu dépôt du rapport des permis émis en avril 2026."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-186"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI 2026-009 — usage bifamilial isolé",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présents, d’autoriser par projet de\nrésolution la demande numéro 2026-009"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-187"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-010 — reconstruction d’une maison",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010"
+      },
+      {
+       "page": 20,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\nzone 40-REC."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-188"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-008 — maison au chemin du Fjord",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-008"
+      },
+      {
+       "page": 20,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-189"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-007 — verrière trois saisons",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Paul J. Choquette et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-007"
+      },
+      {
+       "page": 21,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Paul J. Choquette et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche\ndans la zone 40-REC pour en faire une verrière trois saisons."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-190"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-006 — agrandissement de patio",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-006"
+      },
+      {
+       "page": 21,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\ndu patio à la place de la terrasse actuelle au 295 chemin de\nL’Anse de Roche dans la zone 40-REC."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "event-191"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — Société des frais funéraires de Sacré-Cœur",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Guy Brisson et résolu, à\nl’unanimité des conseillers présents, d’autoriser la demande de dérogation\nmineure numéro 20226-009"
+      },
+      {
+       "page": 21,
+       "excerpt": "Demande de dérogation mineure de la Société des frais funéraires de\nSacré-Cœur sur le lot 4 700 841 du cadastre du Québec"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "event-192"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-011 — marge arrière d’un garage",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu, à l’unanimité des conseillers présents, d’autoriser la demande de\ndérogation mineure numéro 2026-011"
+      },
+      {
+       "page": 22,
+       "excerpt": "Demande de dérogation mineure de monsieur Yannick Hovington\nsur le lot 4 701 026 du cadastre du Québec"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement numéro 645 sur l'entretien et l'occupation des bâtiments est formellement adopté par la résolution 2026-05-167.\",\"excerpt\":\"PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\\nunanimement que le règlement portant le numéro 645 suivant soit\\nadopté :\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une modification financière (terme d'emprunt) d'un règlement d'emprunt déjà en vigueur, ne constituant pas un acte réglementaire d'urbanisme.\",\"excerpt\":\"PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\\net résolu à l’unanimité des conseillers présent d’autoriser la modification de\\nl’article 6 de façon à modifier le terme de l’emprunt à dix (10) ans\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 646 concerne la délégation de pouvoirs administratifs internes, ce qui relève des exclusions de gouvernance/gestion interne.\",\"excerpt\":\"Je soussigné, M. Pierre-Marc Boulianne, conseiller, donne avis par la présente\\nqu’il sera soumis lors d’une prochaine séance, le règlement 646 sur la\\ndélégation de pouvoirs.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Résolution formelle demandant la suspension et la révision d'un projet gouvernemental de règlement ayant un impact direct sur l'aménagement du territoire et les bandes riveraines.\",\"excerpt\":\"DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les\\nChangements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de\\nsuspendre le processus d’adoption de ce règlement\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple octroi de mandat d'ingénierie/service professionnel (devis de coûts), relevant des contrats de services exclus.\",\"excerpt\":\"d’accepter l’offre de service de\\nStantec au montant de 977,29 $, taxes incluses, le coût étant approprié à\\nmême le budget régulier.\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Le simple dépôt d'un rapport statistique mensuel de permis sans décision foncière ou réglementaire relève des dépôts et correspondances exclus.\",\"excerpt\":\"Les membres du conseil et les citoyens présents à la séance sont informés\\ndu dépôt du rapport des permis émis en avril 2026.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution autorisant une demande de PPCMOI pour un usage bifamilial isolé.\",\"excerpt\":\"d’autoriser par projet de\\nrésolution la demande numéro 2026-009 de M. Mario Bédard aux fins\\nd’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la demande de PIIA numéro 2026-010 pour la reconstruction d'une maison.\",\"excerpt\":\"d’autoriser la demande de PIIA numéro\\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\\nzone 40-REC.\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la demande de PIIA numéro 2026-008 pour la construction d'une maison.\",\"excerpt\":\"d’autoriser la demande de PIIA\\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC.\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la demande de PIIA numéro 2026-007 pour l'ajout d'une verrière trois saisons.\",\"excerpt\":\"d’autoriser la demande de PIIA\\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche\\ndans la zone 40-REC\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la demande de PIIA numéro 2026-006 pour l'agrandissement d'un patio.\",\"excerpt\":\"d’autoriser la demande de PIIA numéro\\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\\ndu patio à la place de la terrasse actuelle au 295 chemin de\\nL’Anse de Roche dans la zone 40-REC.\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accorde la dérogation mineure visant la réduction d'une marge de recul arrière pour la Société des frais funéraires.\",\"excerpt\":\"d’autoriser la demande de dérogation\\nmineure numéro 20226-009 soumise par la Société des frais funéraires de\\nSacré-Cœur inc., aux fins de réduire la marge de recul arrière de huit mètres\\nà deux mètres.\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la dérogation mineure 2026-011 régularisant une marge de recul arrière pour un garage.\",\"excerpt\":\"d’autoriser la demande de\\ndérogation mineure numéro 2026-011 soumise par monsieur Yannick\\nHovington, aux fins de réduire la marge de recul arrière de huit mètres à\\n6,25 mètres derrière le garage attenant.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le règlement numéro 645 sur l'entretien et l'occupation des bâtiments est formellement adopté par la résolution 2026-05-167.",
+   "excerpt": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté :"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une modification financière (terme d'emprunt) d'un règlement d'emprunt déjà en vigueur, ne constituant pas un acte réglementaire d'urbanisme.",
+   "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présent d’autoriser la modification de\nl’article 6 de façon à modifier le terme de l’emprunt à dix (10) ans"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 646 concerne la délégation de pouvoirs administratifs internes, ce qui relève des exclusions de gouvernance/gestion interne.",
+   "excerpt": "Je soussigné, M. Pierre-Marc Boulianne, conseiller, donne avis par la présente\nqu’il sera soumis lors d’une prochaine séance, le règlement 646 sur la\ndélégation de pouvoirs."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Résolution formelle demandant la suspension et la révision d'un projet gouvernemental de règlement ayant un impact direct sur l'aménagement du territoire et les bandes riveraines.",
+   "excerpt": "DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les\nChangements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de\nsuspendre le processus d’adoption de ce règlement"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple octroi de mandat d'ingénierie/service professionnel (devis de coûts), relevant des contrats de services exclus.",
+   "excerpt": "d’accepter l’offre de service de\nStantec au montant de 977,29 $, taxes incluses, le coût étant approprié à\nmême le budget régulier."
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le simple dépôt d'un rapport statistique mensuel de permis sans décision foncière ou réglementaire relève des dépôts et correspondances exclus.",
+   "excerpt": "Les membres du conseil et les citoyens présents à la séance sont informés\ndu dépôt du rapport des permis émis en avril 2026."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution autorisant une demande de PPCMOI pour un usage bifamilial isolé.",
+   "excerpt": "d’autoriser par projet de\nrésolution la demande numéro 2026-009 de M. Mario Bédard aux fins\nd’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la demande de PIIA numéro 2026-010 pour la reconstruction d'une maison.",
+   "excerpt": "d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\nzone 40-REC."
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la demande de PIIA numéro 2026-008 pour la construction d'une maison.",
+   "excerpt": "d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC."
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la demande de PIIA numéro 2026-007 pour l'ajout d'une verrière trois saisons.",
+   "excerpt": "d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche\ndans la zone 40-REC"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la demande de PIIA numéro 2026-006 pour l'agrandissement d'un patio.",
+   "excerpt": "d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\ndu patio à la place de la terrasse actuelle au 295 chemin de\nL’Anse de Roche dans la zone 40-REC."
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Le conseil accorde la dérogation mineure visant la réduction d'une marge de recul arrière pour la Société des frais funéraires.",
+   "excerpt": "d’autoriser la demande de dérogation\nmineure numéro 20226-009 soumise par la Société des frais funéraires de\nSacré-Cœur inc., aux fins de réduire la marge de recul arrière de huit mètres\nà deux mètres."
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la dérogation mineure 2026-011 régularisant une marge de recul arrière pour un garage.",
+   "excerpt": "d’autoriser la demande de\ndérogation mineure numéro 2026-011 soumise par monsieur Yannick\nHovington, aux fins de réduire la marge de recul arrière de huit mètres à\n6,25 mètres derrière le garage attenant."
+  }
+ ],
+ "filter": {
+  "acts": 13,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Il s'agit d'une modification financière (terme d'emprunt) d'un règlement d'emprunt déjà en vigueur, ne constituant pas un acte réglementaire d'urbanisme."
+   },
+   {
+    "act": "A03",
+    "reason": "Le règlement 646 concerne la délégation de pouvoirs administratifs internes, ce qui relève des exclusions de gouvernance/gestion interne."
+   },
+   {
+    "act": "A05",
+    "reason": "Il s'agit d'un simple octroi de mandat d'ingénierie/service professionnel (devis de coûts), relevant des contrats de services exclus."
+   },
+   {
+    "act": "A06",
+    "reason": "Le simple dépôt d'un rapport statistique mensuel de permis sans décision foncière ou réglementaire relève des dépôts et correspondances exclus."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le règlement numéro 645 sur l'entretien et l'occupation des bâtiments est formellement adopté par la résolution 2026-05-167."
+   },
+   {
+    "act": "A04",
+    "reason": "Résolution formelle demandant la suspension et la révision d'un projet gouvernemental de règlement ayant un impact direct sur l'aménagement du territoire et les bandes riveraines."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil adopte une résolution autorisant une demande de PPCMOI pour un usage bifamilial isolé."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil autorise la demande de PIIA numéro 2026-010 pour la reconstruction d'une maison."
+   },
+   {
+    "act": "A09",
+    "reason": "Le conseil autorise la demande de PIIA numéro 2026-008 pour la construction d'une maison."
+   },
+   {
+    "act": "A10",
+    "reason": "Le conseil autorise la demande de PIIA numéro 2026-007 pour l'ajout d'une verrière trois saisons."
+   },
+   {
+    "act": "A11",
+    "reason": "Le conseil autorise la demande de PIIA numéro 2026-006 pour l'agrandissement d'un patio."
+   },
+   {
+    "act": "A12",
+    "reason": "Le conseil accorde la dérogation mineure visant la réduction d'une marge de recul arrière pour la Société des frais funéraires."
+   },
+   {
+    "act": "A13",
+    "reason": "Le conseil autorise la dérogation mineure 2026-011 régularisant une marge de recul arrière pour un garage."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4058,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 22091,
+   "outputTokens": 1363,
+   "totalTokens": 23454
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3899
+  },
+  "inputSha256": "04828f323517301401d4c757c68f22bfc467ab2bd11e609fe4afe117ff0327ae"
+ }
+}

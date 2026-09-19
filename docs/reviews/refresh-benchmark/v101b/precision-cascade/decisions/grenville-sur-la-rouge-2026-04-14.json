@@ -1,0 +1,255 @@
+{
+ "documentId": "grenville-sur-la-rouge-2026-04-14",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "0303d972f32b6a91b4e3eebe9bb3284643ad328b59cfa1a61a64160b09cc4377",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-don-6209933"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acceptation du don du lot 6 209 933",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-vente-6095015"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Autorisation de vente du lot municipal 6 095 015",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$,\ncorrespondant à sa valeur marchande."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-piia-donald-campbell"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Refus du PIIA au 47, rue Donald Campbell",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-piia-route-148"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA accordé pour une résidence au 1417, route 148",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417,\nroute 148."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-renofacade"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de développement économique RénoFaçade",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Adoption du règlement de développement économique RénoFaçade."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-modifications-plan-urbanisme"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement modifiant le plan d’urbanisme",
+     "stage": "projet",
+     "objet": "Modifications au plan d’urbanisme : avis de motion et adoption de projet.",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-plan-directeur-aqueduc"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mandat de plan directeur du réseau d’aqueduc",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Octroi d’un mandat pour la réalisation d’un plan directeur du réseau d’aqueduc et d’un\nbalancement hydraulique à la compagnie Groupe Tanguay, pour un montant de 9000$ plus\ntaxes."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le document mentionne explicitement l'acceptation du don gratuit du lot 6 209 933.\",\"excerpt\":\"Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La vente du lot municipal 6 095 015 est explicitement autorisée.\",\"excerpt\":\"Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$,\\ncorrespondant à sa valeur marchande.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le refus de la demande de PIIA au 47, rue Donald Campbell est explicitement acté.\",\"excerpt\":\"Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\\nd’accorder la demande de dérogation mineure\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA pour le 1417, route 148 a été accordée par le conseil.\",\"excerpt\":\"Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417,\\nroute 148.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement RénoFaçade est explicitement mentionnée dans la section Règlementation.\",\"excerpt\":\"Adoption du règlement de développement économique RénoFaçade.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et l'adoption de projets de règlements modifiant le plan d'urbanisme sont attestés.\",\"excerpt\":\"Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\\npublication des avis publics et à des modiﬁcations au plan d’urbanisme.\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple contrat de services professionnels / étude technique d'aqueduc, exclu des actes d'urbanisme.\",\"excerpt\":\"Octroi d’un mandat pour la réalisation d’un plan directeur du réseau d’aqueduc et d’un\\nbalancement hydraulique à la compagnie Groupe Tanguay\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le document mentionne explicitement l'acceptation du don gratuit du lot 6 209 933.",
+   "excerpt": "Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La vente du lot municipal 6 095 015 est explicitement autorisée.",
+   "excerpt": "Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$,\ncorrespondant à sa valeur marchande."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le refus de la demande de PIIA au 47, rue Donald Campbell est explicitement acté.",
+   "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA pour le 1417, route 148 a été accordée par le conseil.",
+   "excerpt": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417,\nroute 148."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement RénoFaçade est explicitement mentionnée dans la section Règlementation.",
+   "excerpt": "Adoption du règlement de développement économique RénoFaçade."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et l'adoption de projets de règlements modifiant le plan d'urbanisme sont attestés.",
+   "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme."
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple contrat de services professionnels / étude technique d'aqueduc, exclu des actes d'urbanisme.",
+   "excerpt": "Octroi d’un mandat pour la réalisation d’un plan directeur du réseau d’aqueduc et d’un\nbalancement hydraulique à la compagnie Groupe Tanguay"
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [
+   {
+    "act": "A07",
+    "reason": "Il s'agit d'un simple contrat de services professionnels / étude technique d'aqueduc, exclu des actes d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le document mentionne explicitement l'acceptation du don gratuit du lot 6 209 933."
+   },
+   {
+    "act": "A02",
+    "reason": "La vente du lot municipal 6 095 015 est explicitement autorisée."
+   },
+   {
+    "act": "A03",
+    "reason": "Le refus de la demande de PIIA au 47, rue Donald Campbell est explicitement acté."
+   },
+   {
+    "act": "A04",
+    "reason": "La demande de PIIA pour le 1417, route 148 a été accordée par le conseil."
+   },
+   {
+    "act": "A05",
+    "reason": "L'adoption du règlement RénoFaçade est explicitement mentionnée dans la section Règlementation."
+   },
+   {
+    "act": "A06",
+    "reason": "L'avis de motion et l'adoption de projets de règlements modifiant le plan d'urbanisme sont attestés."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1993,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3319,
+   "outputTokens": 501,
+   "totalTokens": 3820
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1842
+  },
+  "inputSha256": "681481dc3334f8a29f8146650a365c0a3da72b3be37cc0db6f6893987aace6c7"
+ }
+}

@@ -1,0 +1,61 @@
+{
+ "documentId": "lorraine-2026-01-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "ef0331425b92a0039b4068244592edd94d52873d828fbc33e45411b8aab44774",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La page 3 accorde explicitement la dérogation mineure au 4, rue de Souilly, lot 2 323 270, pour autoriser une marge de recul avant de 6,39 mètres.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La page 3 accorde explicitement la dérogation mineure au 12, place de Liverdun, lot 5 061 778, pour permettre une largeur de stationnement de 15,21 mètres.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La page 4 accorde explicitement la dérogation mineure au 9, place de Charmois, lot 2 323 185, concernant la marge avant du bâtiment et celle de l’agrandissement au-dessus du garage.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La page 5 approuve explicitement la demande d’agrandissement 2025-0069 au 9, place de Charmois après analyse des objectifs et critères du règlement URB-08 relatif aux PIIA.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 3 accorde explicitement la dérogation mineure au 4, rue de Souilly, lot 2 323 270, pour autoriser une marge de recul avant de 6,39 mètres."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 3 accorde explicitement la dérogation mineure au 12, place de Liverdun, lot 5 061 778, pour permettre une largeur de stationnement de 15,21 mètres."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 4 accorde explicitement la dérogation mineure au 9, place de Charmois, lot 2 323 185, concernant la marge avant du bâtiment et celle de l’agrandissement au-dessus du garage."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 5 approuve explicitement la demande d’agrandissement 2025-0069 au 9, place de Charmois après analyse des objectifs et critères du règlement URB-08 relatif aux PIIA."
+  }
+ ]
+}

@@ -1,0 +1,235 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-778-03",
+   "label": "Règlement 778-03 — concordance au schéma d'aménagement",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "status": "candidate",
+   "numero": "778-03",
+   "municipality": "pincourt",
+   "meetingDate": "2026-01-20",
+   "objet": "Concordance au schéma d'aménagement et de développement révisé 3e génération de la MRC de Vaudreuil-Soulanges; adoption inscrite à l'ordre du jour, non confirmée par ce document.",
+   "evidence_refs": [
+    "ev-concordance"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE",
+     "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+     "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-779-03",
+   "label": "Règlement 779-03 — concordance au schéma d'aménagement",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "status": "candidate",
+   "numero": "779-03",
+   "municipality": "pincourt",
+   "meetingDate": "2026-01-20",
+   "objet": "Concordance au schéma d'aménagement et de développement révisé 3e génération de la MRC de Vaudreuil-Soulanges; adoption inscrite à l'ordre du jour, non confirmée par ce document.",
+   "evidence_refs": [
+    "ev-concordance"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE",
+     "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+     "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-780-28",
+   "label": "Règlement 780-28 — concordance au schéma d'aménagement",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "status": "candidate",
+   "numero": "780-28",
+   "municipality": "pincourt",
+   "meetingDate": "2026-01-20",
+   "objet": "Concordance au schéma d'aménagement et de développement révisé 3e génération de la MRC de Vaudreuil-Soulanges; adoption inscrite à l'ordre du jour, non confirmée par ce document.",
+   "evidence_refs": [
+    "ev-concordance"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE",
+     "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+     "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-784-09",
+   "label": "Règlement 784-09 — concordance au schéma d'aménagement",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "status": "candidate",
+   "numero": "784-09",
+   "municipality": "pincourt",
+   "meetingDate": "2026-01-20",
+   "objet": "Concordance au schéma d'aménagement et de développement révisé 3e génération de la MRC de Vaudreuil-Soulanges; adoption inscrite à l'ordre du jour, non confirmée par ce document.",
+   "evidence_refs": [
+    "ev-concordance"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE",
+     "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+     "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-780-32",
+   "label": "Règlement 780-32 — modification du règlement de zonage et de PIIA",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "status": "candidate",
+   "numero": "780-32",
+   "municipality": "pincourt",
+   "meetingDate": "2026-01-20",
+   "objet": "Modification du règlement de zonage et de plans d'implantation et d'intégration architecturale no 780, tel qu'amendé; adoption inscrite à l'ordre du jour, non confirmée par ce document.",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ",
+     "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+     "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-931-04",
+   "label": "Projet de règlement 931-04 (RMH 450) — nuisances",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "status": "candidate",
+   "numero": "931-04",
+   "municipality": "pincourt",
+   "meetingDate": "2026-01-20",
+   "stage": "projet",
+   "objet": "Modification du règlement no 931 relatif aux nuisances (RMH 450); avis de motion et dépôt du projet inscrits à l'ordre du jour.",
+   "evidence_refs": [
+    "ev-nuisances"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES",
+     "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+     "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-autoroute-20",
+   "label": "Demande d'inscription au PQI du projet d'optimisation de l'autoroute 20",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "status": "candidate",
+   "category": "infrastructures",
+   "kind": "transport",
+   "municipality": "pincourt",
+   "meetingDate": "2026-01-20",
+   "scope": "regional",
+   "description": "Demande au gouvernement du Québec d'ajouter au PQI le projet d'optimisation de l'autoroute 20 à Vaudreuil-Dorion et sur l'île Perrot, inscrite à l'ordre du jour. Aucune décision ni réalisation n'est confirmée.",
+   "evidence_refs": [
+    "ev-autoroute"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "2.10 DEMANDE AU GOUVERNEMENT DU QUÉBEC D'AJOUTER AU PQI LE PROJET DE D'OPTIMISATION DE\nL'AUTOROUTE 20 À VAUDREUIL-DORION ET SUR L'ÎLE PERROT",
+     "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+     "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+     "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-concordance",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+   "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+  },
+  {
+   "id": "ev-zonage",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+   "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+  },
+  {
+   "id": "ev-nuisances",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+   "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+  },
+  {
+   "id": "ev-autoroute",
+   "source_file": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "rawRef": "raw/proces-verbaux-pincourt/cas/1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7.pdf",
+   "docSha": "1bf4d391b45c9f083392a64a3a0b3ffb53ef163a5e55ddff11108a18c0859bd7",
+   "sourceUrl": "https://www.villepincourt.qc.ca/uploads/ordre%20du%20jour/2026/2026-01-20_-_ODJ.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "2.10 DEMANDE AU GOUVERNEMENT DU QUÉBEC D'AJOUTER AU PQI LE PROJET DE D'OPTIMISATION DE\nL'AUTOROUTE 20 À VAUDREUIL-DORION ET SUR L'ÎLE PERROT"
+  }
+ ],
+ "input_tokens": 7900,
+ "output_tokens": 4700
+}

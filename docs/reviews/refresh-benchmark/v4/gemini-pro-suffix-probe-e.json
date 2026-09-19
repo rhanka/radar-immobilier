@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "ping": "E",
+  "startedAt": "2026-09-14T05:35:16.856Z",
+  "completedAt": "2026-09-14T05:35:17.478Z",
+  "durationMs": 622,
+  "project": "default-cli-project",
+  "requested": {
+    "package": "@sentropic/llm-mesh@0.19.1",
+    "transport": "CloudCodeRuntimeClient unchanged",
+    "model": "gemini-3.8-flash-low",
+    "providerEffort": "LOW",
+    "maxOutputTokens": 64
+  },
+  "request": {
+    "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse",
+    "method": "POST",
+    "headers": {
+      "Authorization": "Bearer [REDACTED]",
+      "User-Agent": "antigravity/cli/1.1.10 (aidev_client; os_type=linux; arch=amd64; auth_method=consumer)",
+      "Content-Type": "application/json",
+      "Accept": "text/event-stream"
+    },
+    "envelope": {
+      "project": "default-cli-project",
+      "requestId": "[REDACTED_REQUEST_ID]",
+      "model": "gemini-3.8-flash-low",
+      "userAgent": "antigravity",
+      "request": {
+        "contents": [
+          {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Reply with PING_OK only."
+              }
+            ]
+          }
+        ],
+        "generationConfig": {
+          "maxOutputTokens": 64,
+          "thinkingConfig": {
+            "thinkingLevel": "LOW"
+          }
+        },
+        "systemInstruction": {
+          "parts": []
+        }
+      }
+    },
+    "networkRequestOrdinal": 4,
+    "httpStatus": 404,
+    "statusText": "Not Found"
+  },
+  "httpStatus": 404,
+  "message": "Requested entity was not found.",
+  "actual": {
+    "output": "",
+    "pingExact": false
+  },
+  "localError": "Cloud Code HTTP error (404)",
+  "networkRequestsSoFar": 4
+}

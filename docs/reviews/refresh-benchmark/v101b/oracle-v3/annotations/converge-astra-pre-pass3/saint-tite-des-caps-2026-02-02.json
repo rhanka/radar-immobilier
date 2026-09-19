@@ -1,0 +1,91 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "23b20cf2e1e78a31dc7a9cd791230f0f01b983dcd20fdfd683f4aba63d1ccf7a",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 12945 accepte explicitement, en page 5, la demande de permis d’agrandissement en zone PIIA pour le lot 6 213 140.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La demande décrite en page 5 comprend la modification cadastrale, la démolition et la construction, et son acceptation en zone PIIA pour le lot 6 212 400 figure en page 6.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 12947 accepte explicitement, en page 6, la demande de permis de construction en zone PIIA pour la maison unifamiliale du lot 6 213 540.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 12948 accepte explicitement, en page 7, la demande de permis de construction en zone PIIA pour la maison unifamiliale du lot 6 425 190.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v3\",\n      \"reason\": \"La citation reproduit l’avis de motion donné par Magaly Leclerc en page 2 pour le règlement sur l’épandage en 2026, distinct du projet 591-2026 adopté à la même séance.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 12940 adopte explicitement, en page 2, le projet de règlement 591-2026 interdisant l’épandage certains jours de 2026, ce qui atteste l’étape projet_reglement et non l’adoption définitive.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le suivi des comités rapporte explicitement, en page 2, le renouvellement automatique de la demande de BEX de la carrière du TNO Saut-au-Cochon, objet foncier présenté comme information et non comme décision du Conseil.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v3"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 12945 accepte explicitement, en page 5, la demande de permis d’agrandissement en zone PIIA pour le lot 6 213 140."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La demande décrite en page 5 comprend la modification cadastrale, la démolition et la construction, et son acceptation en zone PIIA pour le lot 6 212 400 figure en page 6."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 12947 accepte explicitement, en page 6, la demande de permis de construction en zone PIIA pour la maison unifamiliale du lot 6 213 540."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 12948 accepte explicitement, en page 7, la demande de permis de construction en zone PIIA pour la maison unifamiliale du lot 6 425 190."
+  },
+  {
+   "item": "i05",
+   "choice": "v3",
+   "reason": "La citation reproduit l’avis de motion donné par Magaly Leclerc en page 2 pour le règlement sur l’épandage en 2026, distinct du projet 591-2026 adopté à la même séance."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 12940 adopte explicitement, en page 2, le projet de règlement 591-2026 interdisant l’épandage certains jours de 2026, ce qui atteste l’étape projet_reglement et non l’adoption définitive."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le suivi des comités rapporte explicitement, en page 2, le renouvellement automatique de la demande de BEX de la carrière du TNO Saut-au-Cochon, objet foncier présenté comme information et non comme décision du Conseil."
+  }
+ ]
+}

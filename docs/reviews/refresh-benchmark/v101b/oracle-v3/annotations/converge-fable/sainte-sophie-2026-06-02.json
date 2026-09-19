@@ -1,0 +1,141 @@
+{
+ "documentId": "sainte-sophie-2026-06-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b12e935d6f4ef979a86094865d8385d31cb11d7e3c998e244e25419e22ffee56",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Point 1.10 de l'ordre du jour (page 1) atteste le second projet SP-2026-14 comme point prévu, confirmé page 14 par « Adoption du second projet de règlement SP-2026-14 … 2 juin 2026 » ; citation, étape second_projet, objet et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Point 1.11 (page 1) atteste le second projet SP-2026-15 sur la grille de la zone V-802, confirmé page 15 par la ligne « Adoption du second projet … 2 juin 2026 » ; unité prévue d'un ordre du jour, citation exacte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Point 1.12 (page 1) prévoit le règlement 1470-2026 et la chronologie de la page 17 indique « Adoption du règlement … 2 juin 2026 », donc étape adoption prévue exacte, citation conforme au texte.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 1.13 (page 1) prévoit le règlement 1471-2026 de zonage ; page 28 indique « Adoption du règlement, résolution no xx-06-26 … 2 juin 2026 », étape adoption prévue et citation exactes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Point 1.14 (page 1) prévoit le règlement 1472-2026 sur les permis et certificats ; page 41 confirme l'adoption prévue le 2 juin 2026 ; citation et page exactes.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Point 1.15 (page 1) prévoit le règlement 1473-2026 modifiant le règlement 1300-2020 sur les PIIA ; page 42 confirme « Adoption du règlement … 2 juin 2026 » ; citation, objet et étape exacts.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Point 1.16 (page 2) est un point prévu d'urbanisme explicite (mise en conformité aux normes de lotissement en zone agricole découlant du règlement 399-25) ; étape inconnu appropriée pour une demande au ministre, citation exacte.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Point 1.20 (page 2) prévoit une demande de modification du règlement 188-07 (schéma d'aménagement) pour réduire l'aire « Conservation », objet réglementaire explicite d'urbanisme ; étape inconnu et citation exactes.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Point 6.3 (page 2) est un acte foncier explicite inclus par la règle (« actes fonciers, même non résidentiels ») visant le lot 4 037 185 ; point prévu d'ordre du jour, citation et page exactes.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Point 9.1 (page 3) atteste une demande de PIIA au 799, rue de New Glasgow comme point prévu ; étape piia, objet et citation exacts.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Point 9.2 (page 3) « Dérogation mineure - 537, chemin de l'Achigan Ouest » est un point prévu ; étape derogation_mineure, objet et page exacts.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Point 9.3 (page 3) « Dérogation mineure - 318-318 A, chemin Abercrombie » est un point prévu distinct ; étape derogation_mineure, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Point 1.10 de l'ordre du jour (page 1) atteste le second projet SP-2026-14 comme point prévu, confirmé page 14 par « Adoption du second projet de règlement SP-2026-14 … 2 juin 2026 » ; citation, étape second_projet, objet et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Point 1.11 (page 1) atteste le second projet SP-2026-15 sur la grille de la zone V-802, confirmé page 15 par la ligne « Adoption du second projet … 2 juin 2026 » ; unité prévue d'un ordre du jour, citation exacte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Point 1.12 (page 1) prévoit le règlement 1470-2026 et la chronologie de la page 17 indique « Adoption du règlement … 2 juin 2026 », donc étape adoption prévue exacte, citation conforme au texte."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 1.13 (page 1) prévoit le règlement 1471-2026 de zonage ; page 28 indique « Adoption du règlement, résolution no xx-06-26 … 2 juin 2026 », étape adoption prévue et citation exactes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Point 1.14 (page 1) prévoit le règlement 1472-2026 sur les permis et certificats ; page 41 confirme l'adoption prévue le 2 juin 2026 ; citation et page exactes."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Point 1.15 (page 1) prévoit le règlement 1473-2026 modifiant le règlement 1300-2020 sur les PIIA ; page 42 confirme « Adoption du règlement … 2 juin 2026 » ; citation, objet et étape exacts."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Point 1.16 (page 2) est un point prévu d'urbanisme explicite (mise en conformité aux normes de lotissement en zone agricole découlant du règlement 399-25) ; étape inconnu appropriée pour une demande au ministre, citation exacte."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Point 1.20 (page 2) prévoit une demande de modification du règlement 188-07 (schéma d'aménagement) pour réduire l'aire « Conservation », objet réglementaire explicite d'urbanisme ; étape inconnu et citation exactes."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Point 6.3 (page 2) est un acte foncier explicite inclus par la règle (« actes fonciers, même non résidentiels ») visant le lot 4 037 185 ; point prévu d'ordre du jour, citation et page exactes."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Point 9.1 (page 3) atteste une demande de PIIA au 799, rue de New Glasgow comme point prévu ; étape piia, objet et citation exacts."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Point 9.2 (page 3) « Dérogation mineure - 537, chemin de l'Achigan Ouest » est un point prévu ; étape derogation_mineure, objet et page exacts."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Point 9.3 (page 3) « Dérogation mineure - 318-318 A, chemin Abercrombie » est un point prévu distinct ; étape derogation_mineure, citation et page exactes."
+  }
+ ]
+}

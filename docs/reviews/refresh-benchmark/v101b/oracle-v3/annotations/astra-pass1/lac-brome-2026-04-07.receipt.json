@@ -1,0 +1,36 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "471528c6be25ea2bffb377539173da3d962c744a0e7192753f517fe61ffce007",
+ "inputSha256": "8ef20f1ba88081186bc424d1423f14663f79631eedacc7f765676e5aac21e368",
+ "responseSha256": "f80ecc40c8ba353dcc2b1707b37f84cae3af0a4442eb0dc8f30453972b006c70",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 191206,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 17362,
+  "outputTokens": 6271,
+  "totalTokens": 23633
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 191200,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:48:33.747Z"
+}

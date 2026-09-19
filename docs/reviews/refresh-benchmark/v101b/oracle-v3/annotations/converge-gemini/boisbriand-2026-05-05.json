@@ -1,0 +1,81 @@
+{
+ "documentId": "boisbriand-2026-05-05",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b46e8622dc0bbd2c1eb74fabd0f09e5769b8117a82da9ebb9e1ab216106c7b39",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'adoption du projet de règlement RV-1446-005 sur les dérogations mineures est attestée à la page 2 avec les métadonnées exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'appui à la demande d'opération cadastrale auprès de la CPTAQ pour le lot 6 489 086 est explicitement attesté à la page 15.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA pour le 7232, rue Jean-Claude-Langlois est attestée à la page 15.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA pour le 7225, rue Jean-Claude-Langlois est attestée avec son titre en page 15.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA pour la terrasse au 2860, promenade Saint-Honoré est attestée à la page 16.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA pour la modification d'un espace tampon au 150, rue Chauvin est attestée à la page 16.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'adoption du projet de règlement RV-1446-005 sur les dérogations mineures est attestée à la page 2 avec les métadonnées exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'appui à la demande d'opération cadastrale auprès de la CPTAQ pour le lot 6 489 086 est explicitement attesté à la page 15."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA pour le 7232, rue Jean-Claude-Langlois est attestée à la page 15."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA pour le 7225, rue Jean-Claude-Langlois est attestée avec son titre en page 15."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA pour la terrasse au 2860, promenade Saint-Honoré est attestée à la page 16."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA pour la modification d'un espace tampon au 150, rue Chauvin est attestée à la page 16."
+  }
+ ]
+}

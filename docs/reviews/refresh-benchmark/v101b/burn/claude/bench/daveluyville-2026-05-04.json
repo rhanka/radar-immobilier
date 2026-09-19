@@ -1,0 +1,13 @@
+{
+ "id": "daveluyville-2026-05-04",
+ "rc": 0,
+ "latencyMs": 289086,
+ "inputTokens": 2,
+ "outputTokens": 30788,
+ "cacheRead": 0,
+ "cacheCreate": 15316,
+ "costUsd": 0.9339799999999998,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 50878
+}

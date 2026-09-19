@@ -1,0 +1,61 @@
+{
+ "documentId": "lorraine-2026-01-13",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ef0331425b92a0039b4068244592edd94d52873d828fbc33e45411b8aab44774",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 3 atteste « D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de Souilly, lot 2 323 270, cadastre du Québec » : objet foncier explicite, étape derogation_mineure, citation et page exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 3 atteste « D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place de Liverdun, lot numéro 5 061 778, cadastre du Québec » : lot explicite, étape derogation_mineure, citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 4 atteste « D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place de Charmois, lot numéro 2 323 185, cadastre du Québec » : lot explicite, étape derogation_mineure, citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 5 atteste « D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro 2025-0069 situé au 9, place de Charmois » assujetti au Règlement URB-08 relatif aux PIIA : petit PIIA inclus par la règle, unité distincte de la dérogation mineure (2026-01-6) car type différent, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 3 atteste « D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de Souilly, lot 2 323 270, cadastre du Québec » : objet foncier explicite, étape derogation_mineure, citation et page exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 3 atteste « D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place de Liverdun, lot numéro 5 061 778, cadastre du Québec » : lot explicite, étape derogation_mineure, citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 4 atteste « D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place de Charmois, lot numéro 2 323 185, cadastre du Québec » : lot explicite, étape derogation_mineure, citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 5 atteste « D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro 2025-0069 situé au 9, place de Charmois » assujetti au Règlement URB-08 relatif aux PIIA : petit PIIA inclus par la règle, unité distincte de la dérogation mineure (2026-01-6) car type différent, citation et page exactes."
+  }
+ ]
+}

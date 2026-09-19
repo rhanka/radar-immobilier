@@ -1,0 +1,268 @@
+{
+ "nodes": [
+  {
+   "id": "source-1",
+   "label": "Projet d’ordre du jour du 16 mars 2026 — Acton Vale",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+   "date": "2026-03-12",
+   "municipality": "acton-vale",
+   "url": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+   "format": "pdf",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "VILLE D’ACTON VALE\nPROJET D’ORDRE DU JOUR\nSÉANCE ORDINAIRE DU 16 MARS 2026",
+     "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+     "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-ppcmoi",
+   "label": "PPCMOI-001-2026 — 1050, rue Dubois — adoption finale prévue",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "municipality": "acton-vale",
+   "meetingDate": "2026-03-16",
+   "dossier": "PPCMOI-001-2026",
+   "etape": "ppcmoi",
+   "description": "Adoption de la résolution finale inscrite au projet d’ordre du jour pour le projet particulier au 1050, rue Dubois. Aucune décision prise n’est attestée par ce document.",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-1"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois.",
+     "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+     "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-cptaq-1",
+   "label": "Demande à la CPTAQ — Ferme Guilmette Inc.",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "municipality": "acton-vale",
+   "meetingDate": "2026-03-16",
+   "kind": "cptaq",
+   "etape": "inconnu",
+   "demandeur_corporate": "Ferme Guilmette Inc.",
+   "description": "Résolution relative à une demande à la CPTAQ inscrite au projet d’ordre du jour; issue non indiquée.",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-2"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.).",
+     "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+     "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-cptaq-2",
+   "label": "Demande à la CPTAQ — particulier anonymisé",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "municipality": "acton-vale",
+   "meetingDate": "2026-03-16",
+   "kind": "cptaq",
+   "etape": "inconnu",
+   "demandeur": "Particulier anonymisé",
+   "description": "Résolution relative à une demande à la CPTAQ inscrite au point 18.3 du projet d’ordre du jour; issue non indiquée.",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-3"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec",
+     "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+     "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-prhlm",
+   "label": "Entente PRHLM — rénovation des habitations à loyer modique",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "municipality": "acton-vale",
+   "meetingDate": "2026-03-16",
+   "category": "renovation_logement_social",
+   "description": "Désignation des signataires d’une entente PRHLM, volet 1, inscrite au projet d’ordre du jour pour soutenir des travaux de rénovation.",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-4"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "5.2 - Désignation des signataires – Entente relative au Programme de rénovation\ndes habitations à loyer modique (PRHLM) – Volet 1 – Soutien à des travaux\nde rénovation.",
+     "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+     "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-1",
+   "target": "event-ppcmoi",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "evidence_refs": [
+    "ev-1"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois.",
+     "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+     "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-cptaq-1",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "evidence_refs": [
+    "ev-2"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.).",
+     "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+     "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-cptaq-2",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "evidence_refs": [
+    "ev-3"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec",
+     "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+     "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "signal-prhlm",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "evidence_refs": [
+    "ev-4"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "5.2 - Désignation des signataires – Entente relative au Programme de rénovation\ndes habitations à loyer modique (PRHLM) – Volet 1 – Soutien à des travaux\nde rénovation.",
+     "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+     "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+     "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-1",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+   "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+  },
+  {
+   "id": "ev-2",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+   "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+  },
+  {
+   "id": "ev-3",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+   "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec"
+  },
+  {
+   "id": "ev-4",
+   "source_file": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "rawRef": "raw/proces-verbaux-acton-vale/cas/2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4.pdf",
+   "docSha": "2cc698c84c7b304e373f4968ff0eac8c40173d529245b04296e6d2c8bc0be3f4",
+   "sourceUrl": "https://ville.actonvale.qc.ca/wp-content/uploads/2026/01/oj20260316.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "5.2 - Désignation des signataires – Entente relative au Programme de rénovation\ndes habitations à loyer modique (PRHLM) – Volet 1 – Soutien à des travaux\nde rénovation."
+  }
+ ],
+ "input_tokens": 6800,
+ "output_tokens": 3300
+}

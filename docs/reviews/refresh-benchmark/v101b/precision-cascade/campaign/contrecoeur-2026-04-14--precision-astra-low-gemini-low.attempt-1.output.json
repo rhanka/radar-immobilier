@@ -1,0 +1,577 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-u102",
+   "label": "Projet U-102 — Comité consultatif en urbanisme",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "numero": "U-102",
+   "title": "Constituant le comité consultatif en urbanisme et abrogeant le Règlement 147-82",
+   "stage": "projet",
+   "municipality": "contrecoeur",
+   "meetingDate": "2026-04-14",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "QU’à une séance subséquente de ce conseil tenue à un jour ultérieur, il sera présenté\nen vue de son adoption, le Règlement U-102 constituant le comité consultatif en",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 4,
+     "excerpt": "Ledit membre du conseil présente et dépose le projet de règlement visé.",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-u100-1",
+   "label": "U-100-1 — Second projet de modification du zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "numero": "U-100-1",
+   "title": "Modifiant le Règlement U-100 relatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de l’annexe B",
+   "stage": "2e_projet",
+   "municipality": "contrecoeur",
+   "meetingDate": "2026-04-14",
+   "resolution": "2026-04-057",
+   "zone_cible": "P2-51",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\nl’annexe B.",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-u100-1-second",
+   "label": "Adoption du second projet U-100-1",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "municipality": "contrecoeur",
+   "date": "2026-04-14",
+   "decision": "approuvé",
+   "etape": "second_projet",
+   "etape_date": "2026-04-14",
+   "reglement_number": "U-100-1",
+   "zone_ref": "P2-51",
+   "resolution": "2026-04-057",
+   "description": "Adoption du second projet corrigeant des dispositions des annexes A et B du règlement de zonage U-100. Une modification concerne la grille des usages et des normes de P2-51. Le premier projet a été adopté le 10 mars 2026, résolution 2026-03-037; la consultation publique a eu lieu le 30 mars 2026.",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\nl’annexe B.",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 5,
+     "excerpt": "CONSIDÉRANT QU'une modification a été apportée au règlement relatif à la grille\ndes usages et des normes de la zone P2-51;",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-p2-51",
+   "label": "P2-51",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "code": "P2-51",
+   "municipality": "contrecoeur",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "CONSIDÉRANT QU'une modification a été apportée au règlement relatif à la grille\ndes usages et des normes de la zone P2-51;",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-u101",
+   "label": "U-101 — Contrôle intérimaire du secteur industriel",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "numero": "U-101",
+   "title": "Contrôle intérimaire relatif au secteur industriel",
+   "stage": "adoption",
+   "date": "2026-04-14",
+   "municipality": "contrecoeur",
+   "resolution": "2026-04-058",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur\nindustriel.",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-009",
+   "label": "PIIA 2026-009 — 4270, rue des Patriotes, suite 101",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "dossier": "2026-009",
+   "date": "2026-04-14",
+   "etape": "piia",
+   "etape_date": "2026-04-14",
+   "decision": "approuvé",
+   "resolution": "2026-04-071",
+   "municipality": "contrecoeur",
+   "zone_ref": "C6-18",
+   "no_lot": "6652234",
+   "description": "Installation d’une enseigne commerciale sur bâtiment et ajout d’une enseigne sur le poteau autoroutier au 4270, rue des Patriotes, suite 101.",
+   "conditions": [
+    "Conformément aux plans et dessins préparés par Accès et déposés au Service de l’urbanisme et de l’environnement."
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-c6-18",
+   "label": "C6-18",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "code": "C6-18",
+   "municipality": "contrecoeur",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-012",
+   "label": "PIIA 2026-012 — 5725, rue Moreau",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "dossier": "2026-012",
+   "date": "2026-04-14",
+   "etape": "piia",
+   "etape_date": "2026-04-14",
+   "decision": "approuvé",
+   "resolution": "2026-04-072",
+   "municipality": "contrecoeur",
+   "no_lot": "6382589",
+   "description": "Construction d’un bâtiment résidentiel unifamilial isolé au 5725, rue Moreau, dans le secteur Est assujetti au PIIA.",
+   "conditions": [
+    "Conformément aux plans réalisés par Dessins Drummond, datés du 19 mars 2026 et déposés au Service de l’urbanisme et de l’environnement."
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un\nbâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589 au",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-dm-011",
+   "label": "Dérogation mineure 2026-011 — Rue Papin",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "dossier": "2026-011",
+   "date": "2026-04-14",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-04-14",
+   "decision": "approuvé",
+   "resolution": "2026-04-073",
+   "municipality": "contrecoeur",
+   "zone_ref": "C3-58",
+   "description": "Modification des lots 4813320 et 4813323 aux 360-366 et 398-400, rue Papin : profondeurs respectives de 51,73 m et 52,41 m plutôt que le minimum de 80 m; superficies respectives de 1 163,4 m² et 1 214,4 m² plutôt que le minimum de 3 000 m².",
+   "conditions": [
+    "Selon les documents et les plans déposés au Service de l’urbanisme et de l’environnement."
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-c3-58",
+   "label": "C3-58",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "code": "C3-58",
+   "municipality": "contrecoeur",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-dm-020",
+   "label": "Dérogation mineure 2026-020 — 275, rue de l’Église",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "dossier": "2026-020",
+   "date": "2026-04-14",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-04-14",
+   "decision": "approuvé",
+   "resolution": "2026-04-074",
+   "municipality": "contrecoeur",
+   "zone_ref": "P2-174",
+   "no_lot": "6607642",
+   "description": "Dérogations aux articles 677, 450 et 509 du règlement de zonage : exemption de plantation d’un arbre tous les 7 m dans l’aire d’isolement entre l’allée d’accès et le stationnement; équipement accessoire en cour avant; implantation à 1,50 m de la ligne de terrain plutôt que 2 m.",
+   "conditions": [
+    "Selon les documents et les plans déposés au Service de l’urbanisme et de l’environnement."
+   ],
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-p2-174",
+   "label": "P2-174",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "code": "P2-174",
+   "municipality": "contrecoeur",
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-halte",
+   "label": "Entente pour une halte routière — Picard Construction",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "category": "developpement_immobilier",
+   "date": "2026-04-14",
+   "municipality": "contrecoeur",
+   "resolution": "2026-04-075",
+   "description": "Autorisation de signature d’un protocole avec Picard Construction pour une halte routière sur la montée de la Pomme d’Or. Le projet comprend un réseau d’égout sanitaire, une conduite de refoulement, un poste de pompage et des travaux connexes.",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "D’AUTORISER la mairesse, ou, en son absence le maire suppléant, et la directrice\ndes Services juridiques et greffe, ou, en son absence la greffière adjointe, à signer,",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-septiques",
+   "label": "Participation au projet régional de conformité des installations septiques",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "category": "conformite_environnementale",
+   "date": "2026-04-14",
+   "municipality": "contrecoeur",
+   "scope": "regional",
+   "resolution": "2026-04-069",
+   "description": "Participation à la mise en commun des services de conformité des installations septiques de la MRC de Marguerite-D’Youville, désignée responsable du projet. Acceptation d’une partie des coûts selon des modalités à établir.",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "DE S’ENGAGER à participer au projet de mise en commun des services visant à\nassurer la conformité des installations septiques sur le territoire de la MRC de\nMarguerite-D’Youville;",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-air-port",
+   "label": "Demande de surveillance de la qualité de l’air liée à l’expansion portuaire",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "category": "enjeu_environnemental",
+   "date": "2026-04-14",
+   "municipality": "contrecoeur",
+   "resolution": "2026-04-090",
+   "description": "Demande au gouvernement du Québec de poursuivre et, au besoin, intensifier la surveillance de la qualité de l’air, installer des stations permanentes et mettre en place des méthodes complémentaires de mesure pendant la construction et l’exploitation du terminal portuaire.",
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "DE DEMANDER au gouvernement du Québec, par l’entremise du ministère de\nl’Environnement, de la Lutte contre les changements climatiques, de la Faune et des",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-permis-port",
+   "label": "Réitération de la demande de permis municipaux — Expansion du Port de Montréal",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "status": "candidate",
+   "category": "enjeu_reglementaire",
+   "date": "2026-04-14",
+   "municipality": "contrecoeur",
+   "resolution": "2026-04-091",
+   "description": "La Ville réitère sa demande de permis municipaux pour les travaux de l’Administration portuaire de Montréal. Le PV rapporte un refus de l’Administration en septembre 2025 invoquant la compétence fédérale maritime et l’inapplicabilité de la réglementation municipale.",
+   "citations": [
+    {
+     "page": 25,
+     "excerpt": "DE RÉITÉRER formellement sa demande auprès de l’Administration portuaire de\nMontréal afin que soient obtenus les permis municipaux requis pour l’ensemble des\ntravaux réalisés sur son territoire;",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-u100-1-second",
+   "target": "zone-p2-51",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "evidence_refs": [
+    "ev-p2-51"
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "CONSIDÉRANT QU'une modification a été apportée au règlement relatif à la grille\ndes usages et des normes de la zone P2-51;",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-piia-009",
+   "target": "zone-c6-18",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "evidence_refs": [
+    "ev-piia009"
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-dm-011",
+   "target": "zone-c3-58",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "evidence_refs": [
+    "ev-dm011"
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-dm-020",
+   "target": "zone-p2-174",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "evidence_refs": [
+    "ev-dm020"
+   ],
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière",
+     "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+     "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+     "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-amend",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+   "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\nl’annexe B."
+  },
+  {
+   "id": "ev-p2-51",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+   "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "CONSIDÉRANT QU'une modification a été apportée au règlement relatif à la grille\ndes usages et des normes de la zone P2-51;"
+  },
+  {
+   "id": "ev-piia009",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+   "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 13,
+   "excerpt": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau\nautoroutier au 4270, rue des Patriotes, suite 101, sur le lot 6 652 234 au cadastre du\nQuébec, circonscription foncière de Verchères, zone C6-18, conformément aux plans\net dessins préparés par Accès et déposés au Service de l’urbanisme et de\nl’environnement."
+  },
+  {
+   "id": "ev-dm011",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+   "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 14,
+   "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre\ndu Québec, circonscription foncière de Verchères, zone C3-58 visant à permettre :"
+  },
+  {
+   "id": "ev-dm020",
+   "source_file": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "rawRef": "raw/proces-verbaux-contrecoeur/cas/04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d.pdf",
+   "docSha": "04f86d55ab2bfe6ddd1f1238ca16cc1ffce31645067c443edfb3c0c4ccd56a7d",
+   "sourceUrl": "https://www.ville.contrecoeur.qc.ca/storage/app/media/ville/democratie/proces-verbaux/2026/pv-14-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 15,
+   "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière\nde Verchères, zone P2-174 visant à permettre :"
+  }
+ ],
+ "input_tokens": 19300,
+ "output_tokens": 7800
+}

@@ -1,0 +1,283 @@
+{
+ "nodes": [
+  {
+   "id": "source-1",
+   "label": "Projet d'ordre du jour du 2 mars 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "status": "candidate",
+   "date": "2026-03-02",
+   "municipality": "saint-henri",
+   "format": "pdf",
+   "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+   "url": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Séance ordinaire du 2 mars 2026,\nà 20h00, à la salle du conseil municipal",
+     "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+     "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-1"
+   ]
+  },
+  {
+   "id": "bylaw-741-26",
+   "label": "Règlement no 741-26 sur l'occupation et l'entretien des bâtiments",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "status": "candidate",
+   "numero": "741-26",
+   "title": "Règlement sur l'occupation et l'entretien des bâtiments",
+   "municipality": "saint-henri",
+   "meetingDate": "2026-03-02",
+   "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26",
+     "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+     "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-2"
+   ]
+  },
+  {
+   "id": "event-741-26",
+   "label": "Consultation et adoption prévues du règlement no 741-26",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "status": "candidate",
+   "municipality": "saint-henri",
+   "meetingDate": "2026-03-02",
+   "reglement_number": "741-26",
+   "description": "Assemblée de consultation et adoption du règlement sur l'occupation et l'entretien des bâtiments inscrites au projet d'ordre du jour. Aucune décision prise n'est attestée par ce document.",
+   "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26",
+     "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+     "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-2"
+   ]
+  },
+  {
+   "id": "event-derogation-trait-carre",
+   "label": "Demande de dérogation mineure au 1096 chemin du Trait-Carré",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "status": "candidate",
+   "municipality": "saint-henri",
+   "meetingDate": "2026-03-02",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "no_lot": "2360482",
+   "description": "Demande de dérogation mineure au 1096 chemin du Trait-Carré, lot 2 360 482, inscrite au projet d'ordre du jour. Aucune décision ni condition n'est indiquée.",
+   "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)",
+     "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+     "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-3"
+   ]
+  },
+  {
+   "id": "signal-comite-demolition",
+   "label": "Constitution prévue du Comité de démolition",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "status": "candidate",
+   "category": "demolition",
+   "kind": "gouvernance",
+   "municipality": "saint-henri",
+   "meetingDate": "2026-03-02",
+   "description": "Constitution du Comité de démolition et désignation du responsable du traitement des demandes de démolition inscrites au projet d'ordre du jour.",
+   "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Constitution du Comité de démolition et désignation du responsable du traitement des\ndemandes de démolition",
+     "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+     "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-4"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-1",
+   "target": "bylaw-741-26",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "evidence_refs": [
+    "ev-2"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26",
+     "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+     "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-741-26",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "evidence_refs": [
+    "ev-2"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26",
+     "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+     "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-derogation-trait-carre",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "evidence_refs": [
+    "ev-3"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)",
+     "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+     "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "signal-comite-demolition",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "evidence_refs": [
+    "ev-4"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Constitution du Comité de démolition et désignation du responsable du traitement des\ndemandes de démolition",
+     "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+     "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+     "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-1",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+   "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Séance ordinaire du 2 mars 2026,\nà 20h00, à la salle du conseil municipal"
+  },
+  {
+   "id": "ev-2",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+   "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+  },
+  {
+   "id": "ev-3",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+   "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)"
+  },
+  {
+   "id": "ev-4",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+   "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Constitution du Comité de démolition et désignation du responsable du traitement des\ndemandes de démolition"
+  },
+  {
+   "id": "ev-5",
+   "source_file": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "rawRef": "raw/proces-verbaux-saint-henri/cas/088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638.pdf",
+   "docSha": "088f79ff45ec9f7b88c22bae39b41f6dac1ed954b320867c2ed12cc4e4b63638",
+   "sourceUrl": "https://www.saint-henri.ca/wp-content/uploads/2026/02/Projet-dordre-du-jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "5.5 Dépôt du certificat relatif à la procédure d'enregistrement sur le Règlement no 739-26"
+  }
+ ],
+ "input_tokens": 6900,
+ "output_tokens": 4100
+}

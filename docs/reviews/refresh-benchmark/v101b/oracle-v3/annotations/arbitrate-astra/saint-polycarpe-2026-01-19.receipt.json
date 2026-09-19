@@ -1,0 +1,37 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab7f365aea8bbf9f79e4bcc5b9eb9134a19b1ef80095576db2136355d052218d",
+ "verificationSha256": "e20df81da49b71101f52b21e6121dc87525ca431af1a2eb84118e692de98c03c",
+ "inputSha256": "c6550316e9db96f38fafcac3fad20c19688e884bb6a4b0bfe40c2b77cc0caa5e",
+ "responseSha256": "7f7ebdff63134c955c00a4e7397aeb23b456f543053f78233cef8f935f6e9d29",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 59457,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 3251,
+  "outputTokens": 1901,
+  "totalTokens": 5152
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 59450,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:55:33.870Z"
+}

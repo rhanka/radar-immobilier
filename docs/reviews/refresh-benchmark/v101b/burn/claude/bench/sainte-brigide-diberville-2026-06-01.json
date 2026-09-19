@@ -1,0 +1,13 @@
+{
+ "id": "sainte-brigide-diberville-2026-06-01",
+ "rc": 0,
+ "latencyMs": 135603,
+ "inputTokens": 2,
+ "outputTokens": 14772,
+ "cacheRead": 0,
+ "cacheCreate": 3416,
+ "costUsd": 0.40541800000000006,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 29572
+}

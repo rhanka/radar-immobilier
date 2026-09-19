@@ -1,0 +1,157 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-5005-024",
+   "label": "Règlement 5005-024 — exigences d’études et de mitigation",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "numero": "5005-024",
+   "municipality": "candiac",
+   "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+   "objet": "Modifier le règlement relatif aux permis et certificats afin de revoir les exigences en matière d’études et de mesures de mitigation, notamment en bordure d’autoroute, et exiger la construction des ouvrages requis avant l’émission d’un permis de construction.",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats.",
+     "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+     "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+     "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+     "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-1"
+   ]
+  },
+  {
+   "id": "constraint-rail",
+   "label": "Études et mitigation à proximité des voies ferrées",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "constraintType": "autre",
+   "municipality": "candiac",
+   "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+   "loi": "Règlement 5005-024, articles 2 et 3",
+   "description": "Le texte prévoit, pour les lotissements résidentiels ou sensibles, une étude acoustique à 300 m ou moins d’une ligne principale, 250 m ou moins d’une ligne secondaire ou d’un embranchement et 1 000 m ou moins d’un triage; des mesures sont à prévoir au-delà de 55 dBA Leq24h. À 75 m ou moins de toute ligne ferroviaire, une étude de vibrations est requise, avec mesures d’isolement au-delà de 0,14 mm/s. Plans et devis et engagement de réaliser les travaux avant le dépôt de la demande de permis sont requis. L’article 3 étend les documents requis à certaines constructions et implantations d’usages.",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "L’article 23 est modifié par le remplacement du paragraphe 8° par le\nsuivant :",
+     "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+     "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+     "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+     "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-2"
+   ]
+  },
+  {
+   "id": "constraint-highway",
+   "label": "Mitigation sonore préalable au permis en bordure d’autoroute",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "constraintType": "autre",
+   "municipality": "candiac",
+   "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+   "loi": "Règlement 5005-024, article 3",
+   "description": "Pour les terrains en tout ou en partie dans une zone de niveau sonore élevé générée par une autoroute, le texte prévoit une étude acoustique pour la construction d’un bâtiment d’habitation ou l’implantation d’un nouvel usage sensible, des mesures visant un maximum de 55 dBA Leq24h, des plans et devis professionnels et la réalisation des ouvrages de mitigation avant l’émission des permis, attestée par un professionnel à la satisfaction de la Ville.",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "c) Préalablement à l’émission du ou des permis de\nconstruction pour les bâtiments projetés, les ouvrages et\nconstructions de mitigation doivent être réalisés.",
+     "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+     "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+     "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+     "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-3"
+   ]
+  },
+  {
+   "id": "constraint-attestation",
+   "label": "Attestation de conformité des mesures de mitigation",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "constraintType": "autre",
+   "municipality": "candiac",
+   "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+   "loi": "Règlement 5005-024, article 4",
+   "description": "Ajout prévu à l’article 35 d’une attestation professionnelle confirmant la réalisation conforme des mesures sonores, vibratoires ou de sécurité ferroviaire requises. Les mesures liées à l’enveloppe ou aux fondations du futur bâtiment doivent plutôt être intégrées aux plans et devis de construction.",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "L’article 35 est modifié par l’ajout du paragraphe 19° suivant :",
+     "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+     "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+     "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+     "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-4"
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-1",
+   "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+   "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+  },
+  {
+   "id": "ev-2",
+   "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+   "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "L’article 23 est modifié par le remplacement du paragraphe 8° par le\nsuivant :\n« 8° dans le cas d’un projet de lotissement destiné à un usage résidentiel\nou sensible dans l’aire d’influence d’une voie ferrée, les documents\nsuivants :"
+  },
+  {
+   "id": "ev-3",
+   "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+   "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "c) Préalablement à l’émission du ou des permis de\nconstruction pour les bâtiments projetés, les ouvrages et\nconstructions de mitigation doivent être réalisés. Une\nattestation de conformité, délivrée par un professionnel\nmembre en règle d’un ordre professionnel compétent et\nconfirmant la réalisation conforme des mesures prévues,\ndoit être déposée à la satisfaction de la Ville."
+  },
+  {
+   "id": "ev-4",
+   "source_file": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "rawRef": "raw/proces-verbaux-candiac/cas/1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61.pdf",
+   "docSha": "1638d9a0e4a138a131d77c688db6cc52e04a71bfdcc5810265f5c84cf8f91e61",
+   "sourceUrl": "https://candiac.ca/uploads/Documents/Juridiques/2026/2026-05-25/5005-024_avis_motion.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "L’article 35 est modifié par l’ajout du paragraphe 19° suivant :\n« 19° le cas échéant, une attestation de conformité délivrée par un\nprofessionnel compétent en la matière, membre en règle d’un ordre\nprofessionnel, indiquant que les mesures de mitigation sonores,\nvibratoires et/ou de sécurité ferroviaire requises, ont été complétées\net réalisées conformément aux recommandations des études et aux\nplans et devis, a été déposée à la Ville, sauf pour toutes les mesures\nreliées à l’enveloppe ou aux fondations du futur bâtiment qui doivent,\nquant à elles, être intégrées aux plans et devis de la construction. »"
+  }
+ ],
+ "input_tokens": 7800,
+ "output_tokens": 3600
+}

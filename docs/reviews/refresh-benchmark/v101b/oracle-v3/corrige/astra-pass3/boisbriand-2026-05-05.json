@@ -1,0 +1,234 @@
+{
+ "documentId": "boisbriand-2026-05-05",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet de règlement RV-1446-005 — dérogations mineures",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "RV-1446-005",
+    "page": 2,
+    "citation": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du Règlement RV-1446 sur les dérogations mineures",
+    "anchor": "règlement RV-1446-005",
+    "spanStart": 1051,
+    "spanEnd": 1177
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet de règlement RV-1446-005 — dérogations mineures",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "RV-1446-005",
+      "page": 2,
+      "citation": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du Règlement RV-1446 sur les dérogations mineures",
+      "anchor": "règlement RV-1446-005",
+      "spanStart": 1051,
+      "spanEnd": 1177
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-232 adopte le projet modifiant le règlement sur les dérogations mineures, ce qui constitue une unité au stade projet_reglement et non une adoption finale."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Appui à la demande CPTAQ — opération cadastrale des lots 6 489 085 et 6 489 086 en zone agricole permanente",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "6 489 086",
+    "page": 15,
+    "citation": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du Québec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot 6 489 086",
+    "anchor": "subdivision du lot 6 489 086",
+    "spanStart": 222,
+    "spanEnd": 410
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui à la demande CPTAQ — opération cadastrale des lots 6 489 085 et 6 489 086 en zone agricole permanente",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "6 489 086",
+      "page": 15,
+      "citation": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du Québec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot 6 489 086",
+      "anchor": "subdivision du lot 6 489 086",
+      "spanStart": 222,
+      "spanEnd": 410
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-259 appuie et autorise le dépôt d'une demande unique de subdivision, d'aliénation et de fusion en zone agricole permanente, sans constituer une autorisation acquise de la CPTAQ."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA — 7232, rue Jean-Claude-Langlois, construction unifamiliale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "7232, RUE JEAN-CLAUDE-LANGLOIS",
+    "page": 15,
+    "citation": "APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE LES BOISÉS DION - 7232, RUE JEAN-CLAUDE-LANGLOIS - ZONE R-3 483",
+    "anchor": "7232, RUE JEAN-CLAUDE-LANGLOIS",
+    "spanStart": 1026,
+    "spanEnd": 1158
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA — 7232, rue Jean-Claude-Langlois, construction unifamiliale",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "7232, RUE JEAN-CLAUDE-LANGLOIS",
+      "page": 15,
+      "citation": "APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE LES BOISÉS DION - 7232, RUE JEAN-CLAUDE-LANGLOIS - ZONE R-3 483",
+      "anchor": "7232, RUE JEAN-CLAUDE-LANGLOIS",
+      "spanStart": 1026,
+      "spanEnd": 1158
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-260 approuve le PIIA de construction d'un bâtiment unifamilial isolé à cette adresse, conditionnellement au dépôt d'une garantie financière de 9 500 $."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA — 7225, rue Jean-Claude-Langlois, construction unifamiliale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "7225, RUE JEAN-CLAUDE-LANGLOIS",
+    "page": 15,
+    "citation": "APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE LES BOISÉS DION - 7225, RUE JEAN-CLAUDE-LANGLOIS - ZONE R-3 483",
+    "anchor": "7225, RUE JEAN-CLAUDE-LANGLOIS",
+    "spanStart": 2144,
+    "spanEnd": 2276
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA — 7225, rue Jean-Claude-Langlois, construction unifamiliale",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "7225, RUE JEAN-CLAUDE-LANGLOIS",
+      "page": 15,
+      "citation": "APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE LES BOISÉS DION - 7225, RUE JEAN-CLAUDE-LANGLOIS - ZONE R-3 483",
+      "anchor": "7225, RUE JEAN-CLAUDE-LANGLOIS",
+      "spanStart": 2144,
+      "spanEnd": 2276
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-261 approuve une demande de PIIA distincte pour cette construction unifamiliale, conditionnellement au dépôt d'une garantie financière de 9 000 $."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA — terrasse du restaurant Escondite, 2860, promenade Saint-Honoré",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2860, PROMENADE SAINT-HONORÉ",
+    "page": 16,
+    "citation": "APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE PROJET D'AMÉNAGEMENT D'UNE TERRASSE EXTÉRIEURE - RESTAURANT ESCONDITE 2860, PROMENADE SAINT-HONORÉ - ZONE C-3 405",
+    "anchor": "2860, PROMENADE SAINT-HONORÉ",
+    "spanStart": 1057,
+    "spanEnd": 1239
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA — terrasse du restaurant Escondite, 2860, promenade Saint-Honoré",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2860, PROMENADE SAINT-HONORÉ",
+      "page": 16,
+      "citation": "APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE PROJET D'AMÉNAGEMENT D'UNE TERRASSE EXTÉRIEURE - RESTAURANT ESCONDITE 2860, PROMENADE SAINT-HONORÉ - ZONE C-3 405",
+      "anchor": "2860, PROMENADE SAINT-HONORÉ",
+      "spanStart": 1057,
+      "spanEnd": 1239
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-262 approuve le PIIA d'une terrasse extérieure, et les petits PIIA non résidentiels sont expressément inclus."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA — modification de l'espace tampon, 150, rue Chauvin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "150, RUE CHAUVIN",
+    "page": 16,
+    "citation": "APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE PROJET DE MODIFICATION D'UN ESPACE TAMPON ENTRE LES ZONES P-2 212 ET R-1 210 - 150, RUE CHAUVIN",
+    "anchor": "150, RUE CHAUVIN",
+    "spanStart": 1781,
+    "spanEnd": 1945
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA — modification de l'espace tampon, 150, rue Chauvin",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "150, RUE CHAUVIN",
+      "page": 16,
+      "citation": "APPROBATION D'UN PLAN D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE PROJET DE MODIFICATION D'UN ESPACE TAMPON ENTRE LES ZONES P-2 212 ET R-1 210 - 150, RUE CHAUVIN",
+      "anchor": "150, RUE CHAUVIN",
+      "spanStart": 1781,
+      "spanEnd": 1945
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-263 approuve le PIIA de modification de l'espace tampon entre les zones P-2 212 et R-1 210 dans le cadre de l'agrandissement du bâtiment principal."
+    }
+   ]
+  }
+ ]
+}

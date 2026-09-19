@@ -1,0 +1,34 @@
+{
+ "documentId": "bowman-2026-05-12",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "60da7ee2e8d32e2a836fd01d70cb42079ac719a042ad2d0cf13f359064df0e2c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-low output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1342,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 6736,
+   "outputTokens": 281,
+   "totalTokens": 7017
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1182
+  },
+  "inputSha256": "96bc7a18768f7d96adb426a50631b02630df04c45ea27cd5e7475919cc920cc5"
+ },
+ "at": "2026-09-19T02:37:06.404Z"
+}

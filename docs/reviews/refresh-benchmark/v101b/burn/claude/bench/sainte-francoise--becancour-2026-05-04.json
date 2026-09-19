@@ -1,0 +1,13 @@
+{
+ "id": "sainte-francoise--becancour-2026-05-04",
+ "rc": 0,
+ "latencyMs": 224854,
+ "inputTokens": 2,
+ "outputTokens": 24834,
+ "cacheRead": 0,
+ "cacheCreate": 13762,
+ "costUsd": 0.767917,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 49991
+}

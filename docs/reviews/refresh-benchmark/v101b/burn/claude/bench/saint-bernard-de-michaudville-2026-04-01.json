@@ -1,0 +1,13 @@
+{
+ "id": "saint-bernard-de-michaudville-2026-04-01",
+ "rc": 0,
+ "latencyMs": 216785,
+ "inputTokens": 2,
+ "outputTokens": 24014,
+ "cacheRead": 0,
+ "cacheCreate": 15203,
+ "costUsd": 0.762848,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 45748
+}

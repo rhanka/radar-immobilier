@@ -1,0 +1,310 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "bb96389f138a3f206d64d8dcac29fb7d776e86c78fec7fe79bbdedb91bbe60bc",
+ "verificationSha256": "a801c08cbb0a976a96560312ebdaeef195b564018db70752cd4796514fc1723a",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v2\",\"reason\":\"La résolution 104-05-2026 « autorise la location du garage situé au 366, rue Principale » : cet acte foncier explicite est inclus, même si sa finalité est l’entreposage d’un camion de déneigement, et ne se réduit pas à un entretien de voirie. L’autorisation porte sur une location, non sur l’adoption d’un règlement : l’étape « inconnu » convient donc plutôt qu’« adoption ».\"},{\"item\":\"a02\",\"choice\":\"absent\",\"reason\":\"L’intitulé « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES », page 6, ouvre la résolution 107-05-2026 dont la demande explicite figure page 8 et est retenue en a04. Il ne constate pas une étape distincte et ne justifie donc aucune unité gold supplémentaire, même si l’objet réglementaire est admissible.\"},{\"item\":\"a03\",\"choice\":\"absent\",\"reason\":\"La citation « autorise la location du garage situé au 366, rue Principale » renvoie exactement à la même autorisation de la résolution 104-05-2026, déjà retenue en a01. L’étape « inconnu » décrit correctement ce fait, mais ne crée pas une deuxième unité : le rappel porte sur une « unité gold distincte ».\"},{\"item\":\"a04\",\"choice\":\"v1\",\"reason\":\"La résolution 107-05-2026 demande à la ministre de « suspendre le processus d’adoption de ce règlement afin de le réviser significativement » et de lier l’augmentation des superficies en culture au « processus d’aménagement du territoire ». Cet objet réglementaire explicite relève bien de l’aménagement, sans exclusion des règlements provinciaux dans les règles fournies ; seule la demande est constatée, d’où l’étape « inconnu », sans présumer une suspension effective.\"},{\"item\":\"a05\",\"choice\":\"absent\",\"reason\":\"La demande de « suspendre le processus d’adoption de ce règlement afin de le réviser significativement » reproduit la même résolution 107-05-2026, la même étape et la même citation que l’unité retenue en a04. Son exactitude textuelle ne justifie pas un second crédit au rappel : c’est un doublon, et non un nouvel objet ou une nouvelle étape.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de location du garage au 366, rue Principale",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "366, rue Principale",
+      "page": 5,
+      "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement",
+      "anchor": "366, rue Principale",
+      "spanStart": 870,
+      "spanEnd": 1049
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Contrat de location du garage au 366, rue Principale pour l’entreposage du camion de déneigement",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "366, rue Principale",
+      "page": 5,
+      "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement",
+      "anchor": "366, rue Principale",
+      "spanStart": 870,
+      "spanEnd": 1049
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v2",
+     "reason": "La page 5 autorise explicitement cette location immobilière, incluse parmi les actes fonciers, mais ne constate aucune adoption de règlement, d’où l’étape « inconnu »."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v2",
+     "reason": "La résolution 104-05-2026 (p. 5) autorise la location du garage au 366, rue Principale, acte foncier explicite inclus; ce n'est pas l'adoption d'un règlement, donc l'étape est « inconnu » et non « adoption »."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La location temporaire d'un garage pour l'entreposage d'un camion de déneigement relève de l'entretien de voirie sans développement explicite, exclu du rappel."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "pratiques agroenvironnementales",
+      "page": 6,
+      "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES",
+      "anchor": "PRATIQUES AGROENVIRONNEMENTALES",
+      "spanStart": 1776,
+      "spanEnd": 1858
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "L’intitulé cité page 6 ne constitue pas une unité distincte de la demande de suspension et de révision formulée page 8 et retenue en i06."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le point 6.2 (p. 6, en-tête « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES ») ouvre la résolution 107-05-2026 demandant la suspension et la révision de ce projet de règlement, objet réglementaire explicite en urbanisme/environnement; citation et page exactes."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Cette demande politique adressée au gouvernement provincial concernant un règlement ministériel ne constitue pas un objet réglementaire ou foncier municipal correspondant au profil."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de location du garage au 366, rue Principale pour l’entreposage du camion de déneigement",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "366, rue Principale",
+      "page": 5,
+      "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement",
+      "anchor": "366, rue Principale",
+      "spanStart": 870,
+      "spanEnd": 1049
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Autorisation de location du garage au 366, rue Principale pour l’entreposage du camion de déneigement",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "366, rue Principale",
+      "page": 5,
+      "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement",
+      "anchor": "366, rue Principale",
+      "spanStart": 870,
+      "spanEnd": 1049
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Cette autorisation de location est le même acte foncier que celui retenu en i01, et la règle exclut le crédit d’un doublon du même fait."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v2",
+     "reason": "Même acte foncier attesté p. 5 (location du garage au 366, rue Principale); l'étape exacte est « inconnu » car il s'agit d'une résolution de location et non de l'adoption d'un règlement."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La location d'un garage pour le camion de déneigement est une mesure de voirie exclue du rappel et constitue un doublon non crédité."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a04",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "règlement sur les pratiques agroenvironnementales",
+      "page": 8,
+      "citation": "suspendre le processus d’adoption de ce règlement afin de le réviser significativement en associant cette fois-ci le milieu municipal au processus",
+      "anchor": "suspendre le processus d’adoption",
+      "spanStart": 281,
+      "spanEnd": 427
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 107-05-2026 demande expressément, page 8, de suspendre et de réviser le projet de règlement sur les pratiques agroenvironnementales, sans constater sa suspension effective ni son adoption."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "La résolution 107-05-2026 (p. 8) demande à la ministre de « suspendre le processus d'adoption de ce règlement afin de le réviser significativement », objet réglementaire explicite; citation, page et étape inconnu exactes."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Une prise de position municipale sollicitant la suspension d'un règlement provincial n'est pas un acte réglementaire ou foncier municipal admissible."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a05",
+   "kind": "split",
+   "unitId": "u08",
+   "verificationItem": "i08",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "règlement sur les pratiques agroenvironnementales",
+      "page": 8,
+      "citation": "suspendre le processus d’adoption de ce règlement afin de le réviser significativement en associant cette fois-ci le milieu municipal au processus",
+      "anchor": "suspendre le processus d’adoption",
+      "spanStart": 281,
+      "spanEnd": 427
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Cette proposition reproduit la même demande, la même étape et la même citation que l’unité retenue en i06, constituant un doublon non crédité."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Citation exacte de la résolution 107-05-2026 (p. 8) demandant la suspension et la révision du projet de règlement sur les pratiques agroenvironnementales; objet réglementaire explicite, étape inconnu."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Cette résolution concernant un projet de règlement du gouvernement du Québec ne constitue pas un objet réglementaire municipal et fait doublon."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v2",
+   "reason": "La résolution 104-05-2026 « autorise la location du garage situé au 366, rue Principale » : cet acte foncier explicite est inclus, même si sa finalité est l’entreposage d’un camion de déneigement, et ne se réduit pas à un entretien de voirie. L’autorisation porte sur une location, non sur l’adoption d’un règlement : l’étape « inconnu » convient donc plutôt qu’« adoption »."
+  },
+  {
+   "item": "a02",
+   "choice": "absent",
+   "reason": "L’intitulé « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES », page 6, ouvre la résolution 107-05-2026 dont la demande explicite figure page 8 et est retenue en a04. Il ne constate pas une étape distincte et ne justifie donc aucune unité gold supplémentaire, même si l’objet réglementaire est admissible."
+  },
+  {
+   "item": "a03",
+   "choice": "absent",
+   "reason": "La citation « autorise la location du garage situé au 366, rue Principale » renvoie exactement à la même autorisation de la résolution 104-05-2026, déjà retenue en a01. L’étape « inconnu » décrit correctement ce fait, mais ne crée pas une deuxième unité : le rappel porte sur une « unité gold distincte »."
+  },
+  {
+   "item": "a04",
+   "choice": "v1",
+   "reason": "La résolution 107-05-2026 demande à la ministre de « suspendre le processus d’adoption de ce règlement afin de le réviser significativement » et de lier l’augmentation des superficies en culture au « processus d’aménagement du territoire ». Cet objet réglementaire explicite relève bien de l’aménagement, sans exclusion des règlements provinciaux dans les règles fournies ; seule la demande est constatée, d’où l’étape « inconnu », sans présumer une suspension effective."
+  },
+  {
+   "item": "a05",
+   "choice": "absent",
+   "reason": "La demande de « suspendre le processus d’adoption de ce règlement afin de le réviser significativement » reproduit la même résolution 107-05-2026, la même étape et la même citation que l’unité retenue en a04. Son exactitude textuelle ne justifie pas un second crédit au rappel : c’est un doublon, et non un nouvel objet ou une nouvelle étape."
+  }
+ ]
+}

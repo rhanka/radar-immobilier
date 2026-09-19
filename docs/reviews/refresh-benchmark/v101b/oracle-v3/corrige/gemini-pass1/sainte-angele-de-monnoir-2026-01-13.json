@@ -1,0 +1,120 @@
+{
+ "documentId": "sainte-angele-de-monnoir-2026-01-13",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 599-26 interdisant l’épandage à certaines dates en 2026",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "599-26",
+    "page": 8,
+    "citation": "Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés par Mme Johanne Lacourse, conseillère au poste # 3",
+    "anchor": "Règlement numéro 599-26",
+    "spanStart": 1994,
+    "spanEnd": 2117
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 599-26 interdisant l’épandage à certaines dates en 2026",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "599-26",
+      "page": 8,
+      "citation": "Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés par Mme Johanne Lacourse, conseillère au poste # 3",
+      "anchor": "Règlement numéro 599-26",
+      "spanStart": 1994,
+      "spanEnd": 2117
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion du règlement encadrant l’épandage est donné pendant cette séance et constitue une unité distincte du dépôt du projet."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement 599-26 interdisant l’épandage à certaines dates en 2026",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "599-26",
+    "page": 8,
+    "citation": "Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés par Mme Johanne Lacourse, conseillère au poste # 3",
+    "anchor": "Règlement numéro 599-26",
+    "spanStart": 1994,
+    "spanEnd": 2117
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement 599-26 interdisant l’épandage à certaines dates en 2026",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "599-26",
+      "page": 8,
+      "citation": "Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés par Mme Johanne Lacourse, conseillère au poste # 3",
+      "anchor": "Règlement numéro 599-26",
+      "spanStart": 1994,
+      "spanEnd": 2117
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dépôt actuel du projet de règlement 599-26 est expressément constaté et doit être compté séparément de l’avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA au 152, rue Principale — permis 2025-85, modification des portes et fenêtres",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "152, rue Principale",
+    "page": 12,
+    "citation": "PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation à la condition que toutes les autres dispositions du règlement d’urbanisme soient respectées",
+    "anchor": "152, rue Principale",
+    "spanStart": 57,
+    "spanEnd": 234
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA au 152, rue Principale — permis 2025-85, modification des portes et fenêtres",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "152, rue Principale",
+      "page": 12,
+      "citation": "PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation à la condition que toutes les autres dispositions du règlement d’urbanisme soient respectées",
+      "anchor": "152, rue Principale",
+      "spanStart": 57,
+      "spanEnd": 234
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-01-015 accepte cette demande de PIIA et autorise le certificat sous réserve du respect des autres dispositions du règlement d’urbanisme."
+    }
+   ]
+  }
+ ]
+}

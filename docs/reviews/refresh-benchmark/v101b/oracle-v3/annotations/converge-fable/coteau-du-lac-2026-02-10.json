@@ -1,0 +1,81 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "157c64fb15e859bcb2fca8cebab1e81f23e96302883248d5c021b7c8c5853839",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Acte foncier explicite attesté page 2 (« Autorisation de signature acte d’achat d’une partie du lot 6 025 922 (1 rue Dollard) »), point d’ordre du jour donc « prévu » comme le dit le label, et la résolution d’autorisation constitue l’étape décisionnelle du dossier ; citation, objet et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le texte page 2 atteste « Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2 045 370 (Terrain Juteau) » : acte foncier explicite prévu, étape inconnu appropriée faute d’étape réglementaire, citation et objet exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Point 8.2 a) page 3 « Pour le 3, rue Principale (enseigne sur vitrage) » sous « Demande d’approbation de PIIA » : petit PIIA inclus par la règle « petits PIIA... même non résidentiels », étape piia et citation exactes, unité prévue à l’ordre du jour.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 8.2 b) page 3 « Pour le 9, rue Principale (modification enseigne sur poteau) » : PIIA distinct du 3, rue Principale, objet, page, étape piia et citation conformes au texte.\"},{\"item\":\"i05\",\"choice\":\"v3\",\"reason\":\"Le texte page 3 dit seulement « Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes » sans « adoption » ni « de principe » : v1 contredit l’étape (l’adoption du premier projet de résolution vient au point b), v2 ajoute une qualification non attestée, v3 reste fidèle au texte avec étape inconnu.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Point 8.3 b) page 3 « Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue des Chutes » : premier projet distinct de l’approbation selon la règle « avis de motion, projet... adoption d’un même règlement sont des unités distinctes », étape projet_reglement et citation exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v3"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Acte foncier explicite attesté page 2 (« Autorisation de signature acte d’achat d’une partie du lot 6 025 922 (1 rue Dollard) »), point d’ordre du jour donc « prévu » comme le dit le label, et la résolution d’autorisation constitue l’étape décisionnelle du dossier ; citation, objet et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le texte page 2 atteste « Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2 045 370 (Terrain Juteau) » : acte foncier explicite prévu, étape inconnu appropriée faute d’étape réglementaire, citation et objet exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Point 8.2 a) page 3 « Pour le 3, rue Principale (enseigne sur vitrage) » sous « Demande d’approbation de PIIA » : petit PIIA inclus par la règle « petits PIIA... même non résidentiels », étape piia et citation exactes, unité prévue à l’ordre du jour."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 8.2 b) page 3 « Pour le 9, rue Principale (modification enseigne sur poteau) » : PIIA distinct du 3, rue Principale, objet, page, étape piia et citation conformes au texte."
+  },
+  {
+   "item": "i05",
+   "choice": "v3",
+   "reason": "Le texte page 3 dit seulement « Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes » sans « adoption » ni « de principe » : v1 contredit l’étape (l’adoption du premier projet de résolution vient au point b), v2 ajoute une qualification non attestée, v3 reste fidèle au texte avec étape inconnu."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Point 8.3 b) page 3 « Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue des Chutes » : premier projet distinct de l’approbation selon la règle « avis de motion, projet... adoption d’un même règlement sont des unités distinctes », étape projet_reglement et citation exactes."
+  }
+ ]
+}

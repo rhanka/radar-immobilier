@@ -1,0 +1,435 @@
+{
+ "nodes": [
+  {
+   "id": "piia-12945",
+   "label": "PIIA approuvé — agrandissement, lot 6213140",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "status": "candidate",
+   "municipality": "saint-tite-des-caps",
+   "date": "2026-02-02",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-02-02",
+   "decision": "approuvé",
+   "resolution": "12945",
+   "no_lot": "6213140",
+   "zone_ref": "V-17",
+   "reglement_number": "500-2017",
+   "description": "Acceptation du permis d’agrandissement d’une maison unifamiliale, chemin Ceinture du Lac. Agrandissement projeté de 3,73 mètres sur 3,89 mètres, implanté à 9,54 mètres de la ligne latérale touchée.",
+   "evidence_refs": [
+    "ev-12945",
+    "ev-v17"
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\nPIIA faite par la propriétaire du lot 6 213 140.",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-12946",
+   "label": "PIIA approuvé — construction, lot 6212400",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "status": "candidate",
+   "municipality": "saint-tite-des-caps",
+   "date": "2026-02-02",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-02-02",
+   "decision": "approuvé",
+   "resolution": "12946",
+   "no_lot": "6212400",
+   "reglement_number": "500-2017",
+   "description": "Acceptation du permis de construction en zone PIIA, boulevard 138. La demande vise une modification du cadastre, la démolition d’une résidence principale et la construction d’une résidence unifamiliale. Le lot projeté a une superficie de 801,2 mètres carrés.",
+   "superficie_m2": 801.2,
+   "evidence_refs": [
+    "ev-12946"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 212 400.",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 5,
+     "excerpt": "Considérant que la demande de permis vise une modification du cadastre, la\ndémolition d’une résidence principale et la construction d’une résidence\nunifamiliale sur le lot 6 212 400 ;",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-12947",
+   "label": "PIIA approuvé — construction, lot 6213540",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "status": "candidate",
+   "municipality": "saint-tite-des-caps",
+   "date": "2026-02-02",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-02-02",
+   "decision": "approuvé",
+   "resolution": "12947",
+   "no_lot": "6213540",
+   "zone_ref": "Va-47",
+   "reglement_number": "500-2017",
+   "description": "Acceptation du permis de construction d’une résidence unifamiliale, chemin du Boisé. Construction projetée de 18,14 mètres sur 9,75 mètres, d’une hauteur de 6,23 mètres depuis le sommet du toit.",
+   "evidence_refs": [
+    "ev-12947",
+    "ev-va47"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 213 540.",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-12948",
+   "label": "PIIA approuvé — construction, lot 6425190",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "status": "candidate",
+   "municipality": "saint-tite-des-caps",
+   "date": "2026-02-02",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-02-02",
+   "decision": "approuvé",
+   "resolution": "12948",
+   "no_lot": "6425190",
+   "zone_ref": "Va-88",
+   "reglement_number": "500-2017",
+   "description": "Acceptation du permis de construction d’une résidence unifamiliale, rue de la Traverse. Construction projetée de 9,14 mètres sur 8,53 mètres, d’une hauteur de 7,24 mètres depuis le sommet du toit.",
+   "evidence_refs": [
+    "ev-12948",
+    "ev-va88"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 425 190.",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-v17",
+   "label": "Zone V-17",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "status": "candidate",
+   "municipality": "saint-tite-des-caps",
+   "code": "V-17",
+   "description": "Secteur de villégiature.",
+   "evidence_refs": [
+    "ev-v17"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Considérant que la construction projetée sera située en zone V-17, dans un secteur\nde villégiature ;",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-va47",
+   "label": "Zone Va-47",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "status": "candidate",
+   "municipality": "saint-tite-des-caps",
+   "code": "Va-47",
+   "description": "Secteur de villégiature à consolider.",
+   "evidence_refs": [
+    "ev-va47"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Considérant que la construction projetée sera située en zone Va-47, dans un secteur\nde villégiature à consolider ;",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-va88",
+   "label": "Zone Va-88",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "status": "candidate",
+   "municipality": "saint-tite-des-caps",
+   "code": "Va-88",
+   "description": "Secteur de villégiature à consolider.",
+   "evidence_refs": [
+    "ev-va88"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Considérant que la construction projetée sera située en zone Va-88, dans un secteur\nde villégiature à consolider ;",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-591-2026",
+   "label": "Projet de règlement 591-2026 — épandage en 2026",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "status": "candidate",
+   "municipality": "saint-tite-des-caps",
+   "numero": "591-2026",
+   "title": "Épandage en 2026",
+   "stage": "projet",
+   "meetingDate": "2026-02-02",
+   "resolution": "12940",
+   "objet": "Projet adopté pour interdire l’épandage de déjections animales, de boues ou de résidus provenant d’une fabrique de pâtes et papiers les 23, 24 et 25 juin, les 29 juin, 1er juillet et 3 juillet, et les 5, 6 et 7 septembre 2026.",
+   "evidence_refs": [
+    "ev-591"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains\njours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté.",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "piia-12945",
+   "target": "zone-v17",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "evidence_refs": [
+    "ev-v17",
+    "ev-12945"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Considérant que la construction projetée sera située en zone V-17, dans un secteur\nde villégiature ;",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "piia-12947",
+   "target": "zone-va47",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "evidence_refs": [
+    "ev-va47",
+    "ev-12947"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Considérant que la construction projetée sera située en zone Va-47, dans un secteur\nde villégiature à consolider ;",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "piia-12948",
+   "target": "zone-va88",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "evidence_refs": [
+    "ev-va88",
+    "ev-12948"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Considérant que la construction projetée sera située en zone Va-88, dans un secteur\nde villégiature à consolider ;",
+     "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+     "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+     "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-12945",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\nPIIA faite par la propriétaire du lot 6 213 140."
+  },
+  {
+   "id": "ev-12946",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 212 400."
+  },
+  {
+   "id": "ev-12947",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 213 540."
+  },
+  {
+   "id": "ev-12948",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 425 190."
+  },
+  {
+   "id": "ev-v17",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Considérant que la construction projetée sera située en zone V-17, dans un secteur\nde villégiature ;"
+  },
+  {
+   "id": "ev-va47",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "Considérant que la construction projetée sera située en zone Va-47, dans un secteur\nde villégiature à consolider ;"
+  },
+  {
+   "id": "ev-va88",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "Considérant que la construction projetée sera située en zone Va-88, dans un secteur\nde villégiature à consolider ;"
+  },
+  {
+   "id": "ev-500",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Considérant que l’agrandissement d’un bâtiment principal, sur tout terrain en zone\nde villégiature est assujetti au règlement # 500-2017, via l’article 8.2-6 ;"
+  },
+  {
+   "id": "ev-591",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains\njours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté.\nLes jours, où il est interdit de faire l’épandage de déjections animales, de boues ou\nde résidus provenant d’une fabrique de pâtes et papiers, sont les suivants :\n- Les 23, 24 et 25 juin ;\n- Les 29 juin, 1er juillet et 3 juillet ;\n- Les 5, 6 et 7 septembre."
+  },
+  {
+   "id": "ev-taxes",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Le Conseil municipal demande qu’un dernier avis écrit soit transmis à tous les\ncontribuables visés par le processus de vente d’immeubles pour défaut de paiement\nde taxes."
+  },
+  {
+   "id": "ev-montagne",
+   "source_file": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-tite-des-caps/cas/3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c.pdf",
+   "docSha": "3ecbf7ae9e8a9d9632e56227d7d41b72d24dacfc968966d084a5f8ac64ae084c",
+   "sourceUrl": "https://sainttitedescaps.com/wp-content/uploads/2026/04/02-pv-du-2026-02-02.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "- Une lettre du Ministère des Transports et de la Mobilité durable (MTMD) qui\ninforme la Municipalité que sa demande d’aide financière pour la réfection de\nl’avenue de la Montagne est refusée."
+  }
+ ],
+ "input_tokens": 12400,
+ "output_tokens": 6800
+}

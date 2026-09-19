@@ -1,0 +1,13 @@
+{
+ "id": "dosquet-2026-01-13",
+ "rc": 0,
+ "latencyMs": 156809,
+ "inputTokens": 2,
+ "outputTokens": 17079,
+ "cacheRead": 0,
+ "cacheCreate": 13466,
+ "costUsd": 0.5709529999999999,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 33153
+}

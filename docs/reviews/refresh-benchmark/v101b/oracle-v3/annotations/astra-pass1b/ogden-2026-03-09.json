@@ -1,0 +1,125 @@
+{
+ "documentId": "ogden-2026-03-09",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "af5a4faf465dc6252e49aef5f4261fc3c0b0a03d18233192992631d9539e0d3c",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Dépôt prévu du certificat d’enregistrement relatif au règlement de zonage 2025-05\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2025-05\",\n        \"page\": 1,\n        \"citation\": \"Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des\\u200b\\n\\u200bpersonnes habiles à voter sur le Règlement de zonage no. 2025-05\",\n        \"anchor\": \"Règlement de zonage no. 2025-05\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte comporte un saut de ligne, et non un espace, entre « des » et « personnes ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du règlement 2026.03 relatif au comité consultatif d’urbanisme\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026.03\",\n        \"page\": 1,\n        \"citation\": \"Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au\\u200b\\n\\u200bcomité consultatif d’urbanisme et ses amendements\",\n        \"anchor\": \"Règlement no. 2026.03\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte comporte un saut de ligne, et non un espace, entre « au » et « comité ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Avis de motion prévu du règlement 2026.05 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"2026.05\",\n        \"page\": 1,\n        \"citation\": \"Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des\\u200b\\n\\u200bbâtiments\",\n        \"anchor\": \"Règlement no. 2026.05\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte comporte un saut de ligne, et non un espace, entre « des » et « bâtiments ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du projet de règlement 2026.05 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"2026.05\",\n        \"page\": 2,\n        \"citation\": \"Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des\\u200b\\n\\u200bbâtiments\",\n        \"anchor\": \"Projet de règlement no. 2026.05\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte comporte un saut de ligne, et non un espace, entre « des » et « bâtiments ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Dépôt prévu du certificat d’enregistrement relatif au règlement de zonage 2025-05",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2025-05",
+    "page": 1,
+    "citation": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05",
+    "anchor": "Règlement de zonage no. 2025-05"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte comporte un saut de ligne, et non un espace, entre « des » et « personnes »."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Adoption prévue du règlement 2026.03 relatif au comité consultatif d’urbanisme",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026.03",
+    "page": 1,
+    "citation": "Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au​\n​comité consultatif d’urbanisme et ses amendements",
+    "anchor": "Règlement no. 2026.03"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte comporte un saut de ligne, et non un espace, entre « au » et « comité »."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Avis de motion prévu du règlement 2026.05 sur l’occupation et l’entretien des bâtiments",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2026.05",
+    "page": 1,
+    "citation": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments",
+    "anchor": "Règlement no. 2026.05"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte comporte un saut de ligne, et non un espace, entre « des » et « bâtiments »."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Adoption prévue du projet de règlement 2026.05 sur l’occupation et l’entretien des bâtiments",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2026.05",
+    "page": 2,
+    "citation": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments",
+    "anchor": "Projet de règlement no. 2026.05"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte comporte un saut de ligne, et non un espace, entre « des » et « bâtiments »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 1,
+   "citation": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "adoption",
+   "page": 1,
+   "citation": "Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au​\n​comité consultatif d’urbanisme et ses amendements"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "avis_motion",
+   "page": 1,
+   "citation": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "projet_reglement",
+   "page": 2,
+   "citation": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9,
+ "relabeledFrom": "astra-pass2"
+}

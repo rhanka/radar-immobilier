@@ -1,0 +1,37 @@
+{
+ "documentId": "bedford--brome-missisquoi-2026-06-02",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "cab32fb2bee7996bd37f716a9a028e9ff5266f3b7190875a9bd477a0bd1595e3",
+ "inputSha256": "c4c986fe3d8b02800965521fd4d2f90acf7154c41d2d251b2f10aa42aebf3a0a",
+ "responseSha256": "77ee7035b6732eabddc120a77476ac15d131a843c2b8354f25a84b791af0584b",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 84331,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 13311,
+  "outputTokens": 112,
+  "totalTokens": 42562,
+  "thoughtsTokenCount": 29139
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 83469,
+  "requestId": null
+ },
+ "at": "2026-09-18T14:01:32.813Z"
+}

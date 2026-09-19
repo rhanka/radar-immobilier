@@ -1,0 +1,196 @@
+{
+ "documentId": "pincourt-2026-01-20",
+ "nextId": 6,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 778-03 — concordance au schéma d'aménagement",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "778-03",
+    "page": 2,
+    "citation": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+    "anchor": "RÈGLEMENTS NOS 778-03",
+    "spanStart": 1651,
+    "spanEnd": 1839
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 778-03 — concordance au schéma d'aménagement",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "778-03",
+      "page": 2,
+      "citation": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+      "anchor": "RÈGLEMENTS NOS 778-03",
+      "spanStart": 1651,
+      "spanEnd": 1839
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 8.2 prévoit l'adoption du règlement 778-03; chaque règlement explicitement nommé constitue une unité distincte, qualifiée de prévue dans cet ordre du jour."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 779-03 — concordance au schéma d'aménagement",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "779-03",
+    "page": 2,
+    "citation": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+    "anchor": "778-03, 779-03",
+    "spanStart": 1651,
+    "spanEnd": 1839
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 779-03 — concordance au schéma d'aménagement",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "779-03",
+      "page": 2,
+      "citation": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+      "anchor": "778-03, 779-03",
+      "spanStart": 1651,
+      "spanEnd": 1839
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement 779-03 est explicitement nommé au point 8.2 et doit avoir sa propre unité d'adoption prévue malgré son regroupement avec trois autres règlements."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 780-28 — concordance au schéma d'aménagement",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "780-28",
+    "page": 2,
+    "citation": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+    "anchor": "779-03, 780-28",
+    "spanStart": 1651,
+    "spanEnd": 1839
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 780-28 — concordance au schéma d'aménagement",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "780-28",
+      "page": 2,
+      "citation": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+      "anchor": "779-03, 780-28",
+      "spanStart": 1651,
+      "spanEnd": 1839
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 8.2 prévoit l'adoption du règlement 780-28, ce qui constitue une unité distincte selon la règle d'une unité par objet explicitement nommé."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 784-09 — concordance au schéma d'aménagement",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "784-09",
+    "page": 2,
+    "citation": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+    "anchor": "780-28 ET 784-09",
+    "spanStart": 1651,
+    "spanEnd": 1839
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 784-09 — concordance au schéma d'aménagement",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "784-09",
+      "page": 2,
+      "citation": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE AU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE VAUDREUIL-SOULANGES",
+      "anchor": "780-28 ET 784-09",
+      "spanStart": 1651,
+      "spanEnd": 1839
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement 784-09 est un objet explicitement nommé au point 8.2 et son adoption prévue doit être comptée séparément de celle des autres règlements."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 780-32 modifiant le règlement de zonage et de PIIA",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "780-32",
+    "page": 2,
+    "citation": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ",
+    "anchor": "RÈGLEMENT NO 780-32",
+    "spanStart": 1840,
+    "spanEnd": 1989
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 780-32 modifiant le règlement de zonage et de PIIA",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "780-32",
+      "page": 2,
+      "citation": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ",
+      "anchor": "RÈGLEMENT NO 780-32",
+      "spanStart": 1840,
+      "spanEnd": 1989
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 8.3 prévoit explicitement l'adoption d'un règlement modifiant le zonage et les PIIA, sans attester une décision déjà acquise."
+    }
+   ]
+  }
+ ]
+}

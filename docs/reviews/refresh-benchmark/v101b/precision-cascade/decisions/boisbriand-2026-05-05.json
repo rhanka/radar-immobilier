@@ -1,0 +1,285 @@
+{
+ "documentId": "boisbriand-2026-05-05",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "1d21f207ca754d028be1b9b586e06d123ce61bfff53bf8e8d792f1b3dfa21f2e",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-rv-1787-1"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "RV-1787-1 — Crédit de taxes pour certains terrains vagues",
+     "stage": "adoption",
+     "objet": "RV-1787-1",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "D'adopter le Règlement RV-1787-1 modifiant le Règlement RV-1787 sur le financement des\ndépenses et sur l’imposition des taxes et compensations pour l’exercice financier 2026 en"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-rv-1446-005"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "RV-1446-005 — Projet modifiant les dérogations mineures",
+     "stage": "projet",
+     "objet": "RV-1446-005",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-permis-mars-2026"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Permis de construction — Mars 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D'accuser réception des statistiques des permis de construction émis au cours du mois de\nmars 2026 montrant un total mensuel de 8 143 667 $ et un cumulatif annuel de\n11 015 406 $."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-2026-05-259"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui à une demande CPTAQ — Fiducie agroécologique de Boisbriand",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-2026-05-260"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — 7232, rue Jean-Claude-Langlois",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249, le plan d'implantation et"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-2026-05-261"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — 7225, rue Jean-Claude-Langlois",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5250, le plan d'implantation et"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-2026-05-262"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — Terrasse du restaurant Escondite",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251, le plan d'implantation et"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-2026-05-263"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — Espace tampon au 150, rue Chauvin",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement RV-1787-1 est adopté par la résolution 2026-05-230.\",\"excerpt\":\"D'adopter le Règlement RV-1787-1 modifiant le Règlement RV-1787 sur le financement des\\ndépenses et sur l’imposition des taxes et compensations pour l’exercice financier 2026 en\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement RV-1446-005 est adopté par la résolution 2026-05-232.\",\"excerpt\":\"D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\\nRèglement RV-1446 sur les dérogations mineures.\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple dépôt et accusé de réception de statistiques administratives mensuelles sans décision ni acte d'urbanisme.\",\"excerpt\":\"D'accuser réception des statistiques des permis de construction émis au cours du mois de\\nmars 2026\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil appuie formellement une demande d'opération cadastrale auprès de la CPTAQ par la résolution 2026-05-259.\",\"excerpt\":\"D'appuyer la demande présentée à la Commission de protection du territoire agricole du\\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour le 7232, rue Jean-Claude-Langlois est approuvé par la résolution 2026-05-260.\",\"excerpt\":\"D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249, le plan d'implantation et\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour le 7225, rue Jean-Claude-Langlois est approuvé par la résolution 2026-05-261.\",\"excerpt\":\"D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5250, le plan d'implantation et\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour le restaurant Escondite est approuvé par la résolution 2026-05-262.\",\"excerpt\":\"D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251, le plan d'implantation et\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour le 150, rue Chauvin est approuvé par la résolution 2026-05-263.\",\"excerpt\":\"D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le règlement RV-1787-1 est adopté par la résolution 2026-05-230.",
+   "excerpt": "D'adopter le Règlement RV-1787-1 modifiant le Règlement RV-1787 sur le financement des\ndépenses et sur l’imposition des taxes et compensations pour l’exercice financier 2026 en"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement RV-1446-005 est adopté par la résolution 2026-05-232.",
+   "excerpt": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures."
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple dépôt et accusé de réception de statistiques administratives mensuelles sans décision ni acte d'urbanisme.",
+   "excerpt": "D'accuser réception des statistiques des permis de construction émis au cours du mois de\nmars 2026"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil appuie formellement une demande d'opération cadastrale auprès de la CPTAQ par la résolution 2026-05-259.",
+   "excerpt": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour le 7232, rue Jean-Claude-Langlois est approuvé par la résolution 2026-05-260.",
+   "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249, le plan d'implantation et"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour le 7225, rue Jean-Claude-Langlois est approuvé par la résolution 2026-05-261.",
+   "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5250, le plan d'implantation et"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour le restaurant Escondite est approuvé par la résolution 2026-05-262.",
+   "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251, le plan d'implantation et"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour le 150, rue Chauvin est approuvé par la résolution 2026-05-263.",
+   "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et"
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Il s'agit d'un simple dépôt et accusé de réception de statistiques administratives mensuelles sans décision ni acte d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le règlement RV-1787-1 est adopté par la résolution 2026-05-230."
+   },
+   {
+    "act": "A02",
+    "reason": "Le projet de règlement RV-1446-005 est adopté par la résolution 2026-05-232."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil appuie formellement une demande d'opération cadastrale auprès de la CPTAQ par la résolution 2026-05-259."
+   },
+   {
+    "act": "A05",
+    "reason": "Le PIIA pour le 7232, rue Jean-Claude-Langlois est approuvé par la résolution 2026-05-260."
+   },
+   {
+    "act": "A06",
+    "reason": "Le PIIA pour le 7225, rue Jean-Claude-Langlois est approuvé par la résolution 2026-05-261."
+   },
+   {
+    "act": "A07",
+    "reason": "Le PIIA pour le restaurant Escondite est approuvé par la résolution 2026-05-262."
+   },
+   {
+    "act": "A08",
+    "reason": "Le PIIA pour le 150, rue Chauvin est approuvé par la résolution 2026-05-263."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2921,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 14969,
+   "outputTokens": 760,
+   "totalTokens": 15729
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2380
+  },
+  "inputSha256": "0ae03d4f855f0cc9e22925116117d3be0a6de35769c34aa0d94f3a5b0a37f5db"
+ }
+}

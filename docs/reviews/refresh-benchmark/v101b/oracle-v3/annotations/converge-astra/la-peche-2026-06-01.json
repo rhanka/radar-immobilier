@@ -1,0 +1,101 @@
+{
+ "documentId": "la-peche-2026-06-01",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1bf30d4e86757ad7bd1cc2edc48b5f7efb22e8cdb823706f4efae97ba9488853",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"L’intitulé cité figure page 7 et la résolution se poursuit page 8 en accordant la dérogation pour le bâtiment accessoire au 30, chemin Albert-Labelle.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution de la page 8 accorde explicitement la dérogation mineure au 14, chemin Guertin, sur le lot 2 685 566.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 9 accorde l’usage d’hébergement touristique au 75, chemin du Lac-Chip, lot 3 390 978, conformément au règlement 145.31-2025 et sous les conditions énumérées.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 10 accorde l’usage d’hébergement touristique au 5, chemin Vaillant, lot 3 390 175, conformément au règlement 145.31-2025 et sous les conditions énumérées.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 11 autorise expressément la servitude de tolérance d’empiètement au bénéfice du propriétaire du lot 3 391 753, au 741, chemin Riverside, ce qui constitue un acte foncier inclus.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La rubrique 9a, page 14, porte l’intitulé cité d’adoption du règlement 26-866 et contient la résolution correspondante, l’avis de motion et le dépôt du projet étant rappelés comme antérieurs, au 4 mai 2026.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"L’intitulé d’adoption du règlement 26-867 figure page 14 et la résolution correspondante, poursuivie page 15, porte sur la création du programme d’aide à la mise aux normes des installations septiques.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La rubrique 9c commence page 15 avec l’intitulé cité et se conclut page 16 par la résolution d’adoption du règlement 26-868 finançant la mise aux normes des installations septiques par une dépense et un emprunt de 5 737 912 $.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L’intitulé cité figure page 7 et la résolution se poursuit page 8 en accordant la dérogation pour le bâtiment accessoire au 30, chemin Albert-Labelle."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution de la page 8 accorde explicitement la dérogation mineure au 14, chemin Guertin, sur le lot 2 685 566."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 9 accorde l’usage d’hébergement touristique au 75, chemin du Lac-Chip, lot 3 390 978, conformément au règlement 145.31-2025 et sous les conditions énumérées."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 10 accorde l’usage d’hébergement touristique au 5, chemin Vaillant, lot 3 390 175, conformément au règlement 145.31-2025 et sous les conditions énumérées."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 11 autorise expressément la servitude de tolérance d’empiètement au bénéfice du propriétaire du lot 3 391 753, au 741, chemin Riverside, ce qui constitue un acte foncier inclus."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La rubrique 9a, page 14, porte l’intitulé cité d’adoption du règlement 26-866 et contient la résolution correspondante, l’avis de motion et le dépôt du projet étant rappelés comme antérieurs, au 4 mai 2026."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L’intitulé d’adoption du règlement 26-867 figure page 14 et la résolution correspondante, poursuivie page 15, porte sur la création du programme d’aide à la mise aux normes des installations septiques."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La rubrique 9c commence page 15 avec l’intitulé cité et se conclut page 16 par la résolution d’adoption du règlement 26-868 finançant la mise aux normes des installations septiques par une dépense et un emprunt de 5 737 912 $."
+  }
+ ]
+}

@@ -1,0 +1,35 @@
+{
+ "documentId": "blue-sea-2026-02-03",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "7903950ee276c7d8c45abdb7160c4e8b0ea03e32e9f6f377f62da56104c93172",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1931,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 6311,
+   "outputTokens": 155,
+   "totalTokens": 6466
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1766
+  },
+  "inputSha256": "6d2e8433df403848b00314589e14a25680c4550b7b3cf0dc54ee02d4ee2f2a4a"
+ },
+ "at": "2026-09-19T03:22:31.019Z"
+}

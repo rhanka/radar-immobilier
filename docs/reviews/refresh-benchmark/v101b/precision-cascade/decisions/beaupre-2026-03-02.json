@@ -1,0 +1,249 @@
+{
+ "documentId": "beaupre-2026-03-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ae29021431a00bfc1edbfa7ce1bf5185a47ef1b9faeb52a25c1c9b12a0158b64",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-horizon-boreal"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Horizon Boréal — prolongement de rues",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "Il est proposé par Monsieur Christian Blouin et résolu unanimement\nd’autoriser le maire ou la mairesse suppléante et la greffière, Mme\nJohanne Gagnon à signer tous les documents nécessaires"
+      },
+      {
+       "page": 5,
+       "excerpt": "Il est proposé par Monsieur Christian Blouin et résolu unanimement\nd’autoriser le maire ou la mairesse suppléante et la greffière, Mme\nJohanne Gagnon à signer tous les documents nécessaires aux travaux\nmunicipaux de prolongement de la rue Belhumeur et autre rue ainsi que\ntous les documents nécessaires à cet effet."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-1196"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1196 sur les PIIA",
+     "stage": null,
+     "objet": "1196",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "ATTENDU qu’en vertu du Règlement 1196 sur les plans d’implantation et\nd’intégration architecturale, section 5 du chapitre 3, le projet de\nconstruction est assujetti à l’approbation"
+      },
+      {
+       "page": 5,
+       "excerpt": "ATTENDU qu’en vertu du Règlement 1196 sur les plans d’implantation et\nd’intégration architecturale, section 5 du chapitre 3, le projet de\nconstruction est assujetti à l’approbation par le conseil municipal suivant\nles objectifs et les critères énoncés;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-11983"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — 200, rue de Véga",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés"
+      },
+      {
+       "page": 5,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés à la recommandation 26-07\ndu CCU du 17 février."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-11984"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — 155, rue de Cassiopée",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés"
+      },
+      {
+       "page": 6,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés à la recommandation 26-08\ndu CCU du 17 février."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-11985"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — 145, rue de Cassiopée",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés"
+      },
+      {
+       "page": 6,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés à la recommandation 26-09\ndu CCU du 17 février."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-11986"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA refusé — 150, rue de l’Aurore-Boréale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement de refuser le projet de construction tel que présenté"
+      },
+      {
+       "page": 7,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement de refuser le projet de construction tel que présenté\npuisque ce projet ne satisfait pas adéquatement aux objectifs et critères\nd’intégration architecturale prévus au règlement sur les PIIA no 1196 et de\nses amendements suivant la recommandation 26-10 du CCU du 17 février."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 11982-020326 autorise la signature d'une entente pour les travaux municipaux de prolongement de la rue Belhumeur et autre rue (Horizon Boréal).\",\"excerpt\":\"autoriser le maire ou la mairesse suppléante et la greffière, Mme Johanne Gagnon à signer tous les documents nécessaires aux travaux municipaux de prolongement de la rue Belhumeur et autre rue\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 1196 n'est mentionné que comme référence réglementaire applicable aux PIIA sans faire l'objet d'un acte de procédure dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 11983-020326 approuve le projet PIIA de construction unifamiliale au 200, rue de Véga.\",\"excerpt\":\"d’approuver le projet de construction de la maison unifamiliale isolée suivant les plans déposés à la recommandation 26-07 du CCU du 17 février.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 11984-020326 approuve le projet PIIA de construction unifamiliale au 155, rue de Cassiopée.\",\"excerpt\":\"d’approuver le projet de construction de la maison unifamiliale isolée suivant les plans déposés à la recommandation 26-08 du CCU du 17 février.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 11985-020326 approuve le projet PIIA de construction unifamiliale au 145, rue de Cassiopée.\",\"excerpt\":\"d’approuver le projet de construction de la maison unifamiliale isolée suivant les plans déposés à la recommandation 26-09 du CCU du 17 février.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 11986-020326 refuse le projet PIIA de construction au 150, rue de l'Aurore-Boréale.\",\"excerpt\":\"résolu unanimement de refuser le projet de construction tel que présenté puisque ce projet ne satisfait pas adéquatement aux objectifs et critères d’intégration architecturale\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La résolution 11982-020326 autorise la signature d'une entente pour les travaux municipaux de prolongement de la rue Belhumeur et autre rue (Horizon Boréal).",
+   "excerpt": "autoriser le maire ou la mairesse suppléante et la greffière, Mme Johanne Gagnon à signer tous les documents nécessaires aux travaux municipaux de prolongement de la rue Belhumeur et autre rue"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1196 n'est mentionné que comme référence réglementaire applicable aux PIIA sans faire l'objet d'un acte de procédure dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La résolution 11983-020326 approuve le projet PIIA de construction unifamiliale au 200, rue de Véga.",
+   "excerpt": "d’approuver le projet de construction de la maison unifamiliale isolée suivant les plans déposés à la recommandation 26-07 du CCU du 17 février."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "La résolution 11984-020326 approuve le projet PIIA de construction unifamiliale au 155, rue de Cassiopée.",
+   "excerpt": "d’approuver le projet de construction de la maison unifamiliale isolée suivant les plans déposés à la recommandation 26-08 du CCU du 17 février."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "La résolution 11985-020326 approuve le projet PIIA de construction unifamiliale au 145, rue de Cassiopée.",
+   "excerpt": "d’approuver le projet de construction de la maison unifamiliale isolée suivant les plans déposés à la recommandation 26-09 du CCU du 17 février."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "La résolution 11986-020326 refuse le projet PIIA de construction au 150, rue de l'Aurore-Boréale.",
+   "excerpt": "résolu unanimement de refuser le projet de construction tel que présenté puisque ce projet ne satisfait pas adéquatement aux objectifs et critères d’intégration architecturale"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 1196 n'est mentionné que comme référence réglementaire applicable aux PIIA sans faire l'objet d'un acte de procédure dans cette séance."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La résolution 11982-020326 autorise la signature d'une entente pour les travaux municipaux de prolongement de la rue Belhumeur et autre rue (Horizon Boréal)."
+   },
+   {
+    "act": "A03",
+    "reason": "La résolution 11983-020326 approuve le projet PIIA de construction unifamiliale au 200, rue de Véga."
+   },
+   {
+    "act": "A04",
+    "reason": "La résolution 11984-020326 approuve le projet PIIA de construction unifamiliale au 155, rue de Cassiopée."
+   },
+   {
+    "act": "A05",
+    "reason": "La résolution 11985-020326 approuve le projet PIIA de construction unifamiliale au 145, rue de Cassiopée."
+   },
+   {
+    "act": "A06",
+    "reason": "La résolution 11986-020326 refuse le projet PIIA de construction au 150, rue de l'Aurore-Boréale."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2400,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 8436,
+   "outputTokens": 525,
+   "totalTokens": 8961
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2255
+  },
+  "inputSha256": "14807e501efd6e52eeae7bbf80d05fc7561e704ef1c2c359ae3a46eb7ed0fd69"
+ }
+}

@@ -1,0 +1,282 @@
+{
+ "documentId": "waterloo-2026-08-18",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b77427cfb49b8a86baf404098dbeb0941f95bb02f69826c603ec1e14494bfea4",
+ "verificationSha256": "e1c4c9776e77d0dd3c26125ede525439ef563890c8b34dbeb8f0868471d6c12c",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"Page 2, point 26.08.21.2 : « Le certificat de résultat pour le processus d'approbation par les personnes habiles à voter relié au Règlement 26-956-2 [...] est déposé. Aucune demande ou signature n'a été reçue. » — objet réglementaire explicite et étape constatée dans CE document (dépôt du certificat de registre), distincte de l'adoption du même règlement (26.08.22.1) qui ne mentionne pas ce registre ; ce n'est ni un rappel historique ni une table des matières, donc l'argument de B (« ne multiplie pas le rappel ») ne correspond pas à la règle.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"Page 2, point 26.08.21.3 : « Le procès-verbal de l'assemblée publique de consultation sur le projet de règlement de lotissement 26-957-1, qui s'est tenue le 3 août 2026, est déposé. » — acte de dépôt accompli à cette séance sur un objet réglementaire explicite, étape « inconnu » constatée dans ce document et séparée de l'adoption (26.08.22.2) ; la consultation du 3 août n'est pas présentée comme nouvelle, seul le dépôt est l'unité, ce qui écarte la qualification de « mention historique » avancée par B.\"},{\"item\":\"a03\",\"choice\":\"v1\",\"reason\":\"Page 3-4, 26.08.22.3 : « Que le Conseil municipal adopte le Règlement parapluie 26-972 décrétant des dépenses et un emprunt de 1 360 000 $ pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour » — règlement explicite avec étape d'adoption, portant sur un projet de réaménagement immobilier à une adresse précise (« aménager l'endroit pour accueillir le CLSC »), soit un développement explicite ; les exclusions du rappel (nominations, comptes, marchés de services, loisirs, voirie sans développement) ne visent pas un règlement d'emprunt pour travaux d'aménagement d'un immeuble, contrairement à ce qu'avance B.\"},{\"item\":\"a04\",\"choice\":\"absent\",\"reason\":\"Page 5-6, 26.08.23.3 : la résolution vise « la vente pour taxes des immeubles visés dans la liste jointe » sans nommer aucun lot ni adresse dans le texte — pas d'objet foncier explicite — et il s'agit d'un recouvrement « pour défaut de paiement des impôts fonciers » relevant de l'exclusion « comptes » ; de plus l'étape « adoption » proposée ne correspond pas à une résolution administrative, ce qui écarte la position de C.\"},{\"item\":\"a05\",\"choice\":\"absent\",\"reason\":\"Page 8, 26.08.25.2 « Entente d'utilisation de locaux - Télévision communautaire de Waterloo » : un « prêt temporaire [...] à titre gratuit, pour une durée d'un an, d'un espace de rangement clôturé » à un « organisme reconnu » est une entente d'usage de locaux en soutien communautaire, sans transfert ni constitution de droit réel sur l'immeuble, donc ni acte foncier ni objet d'urbanisme au sens des inclusions (comparer avec la servitude réelle et perpétuelle de 26.08.25.3) ; l'adresse explicite invoquée par C ne suffit pas à en faire un acte foncier.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Dépôt du certificat de résultat d'approbation référendaire — règlement 26-956-2",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "26-956-2",
+      "page": 2,
+      "citation": "Dépôt du certificat de résultat - Processus d'approbation par les personnes habiles à voter - Règlement 26-956-2",
+      "anchor": "Règlement 26-956-2",
+      "spanStart": 721,
+      "spanEnd": 833
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 2 constate le dépôt actuel du certificat de résultat relatif au règlement 26-956-2, en précisant qu'aucune demande ou signature n'a été reçue."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 2, point 26.08.21.2 : le certificat de résultat du processus d'approbation par les personnes habiles à voter relié au Règlement 26-956-2 est déposé (aucune signature reçue) — objet réglementaire explicite et étape constatée dans ce document, distincte de l'adoption."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le dépôt d'un certificat de résultat d'approbation référendaire ne constitue pas une étape réglementaire distincte et ne multiplie pas le rappel du règlement adopté à la même séance."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Dépôt du procès-verbal de consultation publique — règlement 26-957-1",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "26-957-1",
+      "page": 2,
+      "citation": "Le procès-verbal de l'assemblée publique de consultation sur le projet de règlement de lotissement 26-957-1, qui s'est tenue le 3 août 2026, est déposé",
+      "anchor": "règlement de lotissement 26-957-1",
+      "spanStart": 1336,
+      "spanEnd": 1487
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La citation figure page 2 et atteste le dépôt actuel du procès-verbal de consultation relatif au règlement 26-957-1, sans présenter la consultation du 3 août comme une nouvelle consultation."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 2, point 26.08.21.3 : le procès-verbal de l'assemblée publique de consultation sur le projet de règlement de lotissement 26-957-1 tenue le 3 août 2026 est déposé — citation exacte, objet explicite, étape de consultation constatée séparément de l'adoption."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le dépôt du procès-verbal d'une assemblée de consultation tenue antérieurement est une mention procédurale historique qui ne constitue pas une unité distincte de l'adoption du règlement."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption du règlement 26-972 — réaménagement du 415, rue de la Cour pour le CLSC",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "26-972",
+      "page": 3,
+      "citation": "Adoption - Règlement parapluie 26-972 décrétant des dépenses et un emprunt de 1 360 000 $ pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour",
+      "anchor": "Règlement parapluie 26-972",
+      "spanStart": 1341,
+      "spanEnd": 1506
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "L'intitulé cité figure page 3 et la résolution poursuivie page 4 adopte le règlement 26-972 pour réaménager le 415, rue de la Cour afin d'accueillir le CLSC."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 3, titre 26.08.22.3 « Adoption - Règlement parapluie 26-972 ... pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour », adopté à l'unanimité page 4 — objet réglementaire explicite avec étape d'adoption, ne relève pas des exclusions (nominations, comptes, services, loisirs, voirie)."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Ce règlement d'emprunt pour le réaménagement intérieur de locaux municipaux relève des finances et des comptes, et est exclu du périmètre de l'urbanisme."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a04",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de vente pour taxes — immeubles de la liste annexée, 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "vente pour taxes",
+      "page": 6,
+      "citation": "Que la Ville de Waterloo autorise la greffière à effectuer et signer individuellement toute démarche et à signer tout document dans le but de mener à terme la vente pour taxes",
+      "anchor": "vente pour taxes",
+      "spanStart": 85,
+      "spanEnd": 260
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution adoptée page 6 autorise les démarches de vente pour taxes des immeubles de la liste jointe, ce qui constitue un acte foncier sans attester une vente déjà réalisée."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La vente pour taxes vise des immeubles seulement énumérés dans une liste annexée non reproduite : aucun objet foncier explicite, et le recouvrement de taxes relève de l'exclusion « comptes »; l'étape « adoption » ne correspond pas à une résolution administrative."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La vente pour taxes est un acte de recouvrement fiscal exclu (comptes) et son étape n'est pas une adoption."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a05",
+   "kind": "split",
+   "unitId": "u07",
+   "verificationItem": "i07",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Prêt à usage gratuit d'un espace au 417, rue de la Cour — Télévision communautaire",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "417, rue de la Cour",
+      "page": 8,
+      "citation": "à titre gratuit, pour une durée d'un an, d'un espace de rangement clôturé situé au rez-de-chaussée du garage détaché municipal du 417, rue de la Cour",
+      "anchor": "417, rue de la Cour",
+      "spanStart": 1865,
+      "spanEnd": 2014
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 8 autorise expressément le prêt gratuit d'un espace immobilier au 417, rue de la Cour pour un an, conformément à l'inclusion des actes fonciers même non résidentiels."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "L'entente de prêt temporaire à titre gratuit d'un espace de rangement à un organisme communautaire (page 8) est une entente d'utilisation de locaux, non un acte foncier ni un objet d'urbanisme; elle relève du soutien aux organismes exclu du rappel."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le prêt à usage d'un espace de rangement dans un garage municipal à un organisme local relève de la gestion interne et de la vie communautaire, et non d'un acte foncier d'urbanisme."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "Page 2, point 26.08.21.2 : « Le certificat de résultat pour le processus d'approbation par les personnes habiles à voter relié au Règlement 26-956-2 [...] est déposé. Aucune demande ou signature n'a été reçue. » — objet réglementaire explicite et étape constatée dans CE document (dépôt du certificat de registre), distincte de l'adoption du même règlement (26.08.22.1) qui ne mentionne pas ce registre ; ce n'est ni un rappel historique ni une table des matières, donc l'argument de B (« ne multiplie pas le rappel ») ne correspond pas à la règle."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "Page 2, point 26.08.21.3 : « Le procès-verbal de l'assemblée publique de consultation sur le projet de règlement de lotissement 26-957-1, qui s'est tenue le 3 août 2026, est déposé. » — acte de dépôt accompli à cette séance sur un objet réglementaire explicite, étape « inconnu » constatée dans ce document et séparée de l'adoption (26.08.22.2) ; la consultation du 3 août n'est pas présentée comme nouvelle, seul le dépôt est l'unité, ce qui écarte la qualification de « mention historique » avancée par B."
+  },
+  {
+   "item": "a03",
+   "choice": "v1",
+   "reason": "Page 3-4, 26.08.22.3 : « Que le Conseil municipal adopte le Règlement parapluie 26-972 décrétant des dépenses et un emprunt de 1 360 000 $ pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour » — règlement explicite avec étape d'adoption, portant sur un projet de réaménagement immobilier à une adresse précise (« aménager l'endroit pour accueillir le CLSC »), soit un développement explicite ; les exclusions du rappel (nominations, comptes, marchés de services, loisirs, voirie sans développement) ne visent pas un règlement d'emprunt pour travaux d'aménagement d'un immeuble, contrairement à ce qu'avance B."
+  },
+  {
+   "item": "a04",
+   "choice": "absent",
+   "reason": "Page 5-6, 26.08.23.3 : la résolution vise « la vente pour taxes des immeubles visés dans la liste jointe » sans nommer aucun lot ni adresse dans le texte — pas d'objet foncier explicite — et il s'agit d'un recouvrement « pour défaut de paiement des impôts fonciers » relevant de l'exclusion « comptes » ; de plus l'étape « adoption » proposée ne correspond pas à une résolution administrative, ce qui écarte la position de C."
+  },
+  {
+   "item": "a05",
+   "choice": "absent",
+   "reason": "Page 8, 26.08.25.2 « Entente d'utilisation de locaux - Télévision communautaire de Waterloo » : un « prêt temporaire [...] à titre gratuit, pour une durée d'un an, d'un espace de rangement clôturé » à un « organisme reconnu » est une entente d'usage de locaux en soutien communautaire, sans transfert ni constitution de droit réel sur l'immeuble, donc ni acte foncier ni objet d'urbanisme au sens des inclusions (comparer avec la servitude réelle et perpétuelle de 26.08.25.3) ; l'adresse explicite invoquée par C ne suffit pas à en faire un acte foncier."
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+ "documentId": "arundel-2026-07-31",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "12d93e61bac9f641799398316817d7dcf9cd535d65f53ab01a2d9a52fce57c36",
+ "verificationSha256": "5c7fef655159dadaee5db3694a0e85d28f704c6959aa08e4d85d8b7d8f90ee78",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

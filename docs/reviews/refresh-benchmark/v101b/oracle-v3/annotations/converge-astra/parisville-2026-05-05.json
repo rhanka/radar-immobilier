@@ -1,0 +1,41 @@
+{
+ "documentId": "parisville-2026-05-05",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2aa5234b8f9ef2dd8ca8992165af580158825b1851a5554d291351cb6b12579a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 73-05-26, dont l’intitulé cité figure en page 3, confirme en page 4 l’adoption du règlement 432-2026 modifiant le règlement de zonage 308-2011.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 74-05-26 et son intitulé cité figurent en page 4 et attestent l’adoption du règlement 433-2026 modifiant le règlement de lotissement 311-2011.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 73-05-26, dont l’intitulé cité figure en page 3, confirme en page 4 l’adoption du règlement 432-2026 modifiant le règlement de zonage 308-2011."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 74-05-26 et son intitulé cité figurent en page 4 et attestent l’adoption du règlement 433-2026 modifiant le règlement de lotissement 311-2011."
+  }
+ ]
+}

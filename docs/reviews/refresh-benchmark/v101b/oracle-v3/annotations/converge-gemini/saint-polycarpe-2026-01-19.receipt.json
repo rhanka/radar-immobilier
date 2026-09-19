@@ -1,0 +1,37 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab7f365aea8bbf9f79e4bcc5b9eb9134a19b1ef80095576db2136355d052218d",
+ "inputSha256": "0541789ff4d52ab7ecbd4eeba73da143373c36d749663ff6c6df1940e5132457",
+ "responseSha256": "f5eac92bf8ba403e511671cc446133dcd85fa9b4bb993fe545f6779f6fd3c268",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 56581,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 3374,
+  "outputTokens": 282,
+  "totalTokens": 24509,
+  "thoughtsTokenCount": 20853
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 56084,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:43:57.303Z"
+}

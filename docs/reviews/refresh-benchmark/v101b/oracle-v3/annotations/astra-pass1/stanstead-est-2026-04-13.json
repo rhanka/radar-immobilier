@@ -1,0 +1,147 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "5701efb5fb1cfe7f1435eecbe685792996977b2bd02bb99dbfbab82f491d6835",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Appui à la demande CPTAQ d’acquisition de 54 acres du lot 6 374 262\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"6 374 262\",\n        \"page\": 2,\n        \"citation\": \"QUE la municipalité de Stanstead-Est appuie la demande déposée par\\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\\nd’une superficie de 54 acres du lot 6 374 262.\",\n        \"anchor\": \"lot 6 374 262\"\n      },\n      \"reason\": \"La résolution constate un appui municipal à une demande foncière explicite, sans constituer elle-même l’autorisation de la CPTAQ ou la réalisation de l’acquisition.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Appui CPTAQ — lot 5 417 438, nouvelle résidence sous condition de démolition et de remise en culture\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"5 417 438\",\n        \"page\": 2,\n        \"citation\": \"QUE la municipalité de Stanstead-Est appuie la demande déposée à la\\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\\nconstruction d’une nouvelle résidence\",\n        \"anchor\": \"lot 5 417 438\"\n      },\n      \"reason\": \"La résolution 2026-04-04 appuie cette demande d’urbanisme à condition de démolir la résidence actuelle et de remettre cette portion en culture, sans accorder l’autorisation relevant de la CPTAQ.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation d’assujettissement au droit de préemption — lot 5 416 383, pour dix ans\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 416 383\",\n        \"page\": 10,\n        \"citation\": \"RÉSOLUTION AVIS D’ASSUJETTISSEMENT – LOT 5 416 383\",\n        \"anchor\": \"LOT 5 416 383\"\n      },\n      \"reason\": \"Le conseil autorise l’inscription au registre foncier d’un avis d’assujettissement de dix ans sur ce lot, ce qui constitue un acte foncier décidé distinct du règlement de préemption rappelé historiquement.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation d’assujettissement au droit de préemption — lot 5 416 384, pour dix ans\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 416 384\",\n        \"page\": 10,\n        \"citation\": \"8.2 RÉSOLUTION AVIS D’ASSUJETTISSEMENT – LOT 5 416 384\",\n        \"anchor\": \"LOT 5 416 384\"\n      },\n      \"reason\": \"La résolution poursuivie en page 11 autorise un avis d’assujettissement de dix ans pour ce second lot explicitement nommé, qui forme une unité foncière distincte.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Appui à la demande CPTAQ d’agrandissement du lieu d’enfouissement — lot 2 935 698\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2 935 698\",\n        \"page\": 13,\n        \"citation\": \"des fins autres qu’agricoles, d’une partie du lot 2 935 698 du\\ncadastre du Québec, circonscription foncière de Coaticook, soit\\npour l’agrandissement de son lieu d’enfouissement technique.\",\n        \"anchor\": \"lot 2 935 698\"\n      },\n      \"reason\": \"Le conseil appuie actuellement la demande d’utilisation non agricole pour agrandir le lieu d’enfouissement, tandis que l’orientation préliminaire défavorable de la CPTAQ est seulement rappelée et ne constitue pas un refus décidé à cette séance.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Location autorisée du garage au 1420 chemin Ball brook pour douze mois\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"1420 chemin Ball brook\",\n        \"page\": 13,\n        \"citation\": \"location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de\\n1 350 $;\",\n        \"anchor\": \"1420 chemin Ball brook\"\n      },\n      \"reason\": \"La location approuvée porte sur l’usage d’un immeuble explicitement identifié et relève des conventions foncières à inclure, plutôt que des marchés de services exclus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-04 modifiant la tarification des permis et certificats\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-04\",\n        \"page\": 18,\n        \"citation\": \"D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\\nsur la tarification des permis et certificats ;\",\n        \"anchor\": \"numéro 2026-04\"\n      },\n      \"reason\": \"Le règlement sur la tarification des permis et certificats est adopté dans cette séance, tandis que son avis de motion du 2 mars 2026 est un rappel historique ne créant aucune unité supplémentaire.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Appui à la demande CPTAQ d’acquisition de 54 acres du lot 6 374 262",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "6 374 262",
+    "page": 2,
+    "citation": "QUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262.",
+    "anchor": "lot 6 374 262"
+   },
+   "reason": "La résolution constate un appui municipal à une demande foncière explicite, sans constituer elle-même l’autorisation de la CPTAQ ou la réalisation de l’acquisition."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Appui CPTAQ — lot 5 417 438, nouvelle résidence sous condition de démolition et de remise en culture",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5 417 438",
+    "page": 2,
+    "citation": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence",
+    "anchor": "lot 5 417 438"
+   },
+   "reason": "La résolution 2026-04-04 appuie cette demande d’urbanisme à condition de démolir la résidence actuelle et de remettre cette portion en culture, sans accorder l’autorisation relevant de la CPTAQ."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation d’assujettissement au droit de préemption — lot 5 416 383, pour dix ans",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 416 383",
+    "page": 10,
+    "citation": "RÉSOLUTION AVIS D’ASSUJETTISSEMENT – LOT 5 416 383",
+    "anchor": "LOT 5 416 383"
+   },
+   "reason": "Le conseil autorise l’inscription au registre foncier d’un avis d’assujettissement de dix ans sur ce lot, ce qui constitue un acte foncier décidé distinct du règlement de préemption rappelé historiquement."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation d’assujettissement au droit de préemption — lot 5 416 384, pour dix ans",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 416 384",
+    "page": 10,
+    "citation": "8.2 RÉSOLUTION AVIS D’ASSUJETTISSEMENT – LOT 5 416 384",
+    "anchor": "LOT 5 416 384"
+   },
+   "reason": "La résolution poursuivie en page 11 autorise un avis d’assujettissement de dix ans pour ce second lot explicitement nommé, qui forme une unité foncière distincte."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Appui à la demande CPTAQ d’agrandissement du lieu d’enfouissement — lot 2 935 698",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2 935 698",
+    "page": 13,
+    "citation": "des fins autres qu’agricoles, d’une partie du lot 2 935 698 du\ncadastre du Québec, circonscription foncière de Coaticook, soit\npour l’agrandissement de son lieu d’enfouissement technique.",
+    "anchor": "lot 2 935 698"
+   },
+   "reason": "Le conseil appuie actuellement la demande d’utilisation non agricole pour agrandir le lieu d’enfouissement, tandis que l’orientation préliminaire défavorable de la CPTAQ est seulement rappelée et ne constitue pas un refus décidé à cette séance."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Location autorisée du garage au 1420 chemin Ball brook pour douze mois",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "1420 chemin Ball brook",
+    "page": 13,
+    "citation": "location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de\n1 350 $;",
+    "anchor": "1420 chemin Ball brook"
+   },
+   "reason": "La location approuvée porte sur l’usage d’un immeuble explicitement identifié et relève des conventions foncières à inclure, plutôt que des marchés de services exclus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 2026-04 modifiant la tarification des permis et certificats",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-04",
+    "page": 18,
+    "citation": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;",
+    "anchor": "numéro 2026-04"
+   },
+   "reason": "Le règlement sur la tarification des permis et certificats est adopté dans cette séance, tandis que son avis de motion du 2 mars 2026 est un rappel historique ne créant aucune unité supplémentaire."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 7
+}

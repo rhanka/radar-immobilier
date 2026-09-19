@@ -1,0 +1,211 @@
+{
+ "documentId": "saint-lin-laurentides-2026-06-09",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "078c235b2de7896a0e3c1790e777f3bb2ca17e540bace0933f6c1edb783788a8",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Dérogation mineure prévue au 1510, route 335 explicitement mentionnée au point 4.2 en page 1.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Dérogation mineure prévue au 70, route 335 explicitement mentionnée au point 4.3 en page 1.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Dérogation mineure prévue au 31, rue Cliche explicitement mentionnée au point 4.4 en page 1.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"PIIA prévu pour l'agrandissement commercial au 1510, route 335 attesté au point 4.5 en page 1.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"PIIA prévu pour les enseignes de Planète Piscine au 70, route 335 attesté au point 4.6 en page 1.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"PIIA prévu pour les enseignes d'Allô mon Coco au 70, route 335 attesté au point 4.7 en page 1.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'engagement d'acquisition pour le 60, rue Lacroix figurant au point 4.8 en page 1.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'offre de cession visant le lot 6 553 599 mentionné au point 4.10 en page 2.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'offre de cession visant le lot 5 137 605 mentionné au point 4.10 en page 2.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'offre de cession visant le lot 5 137 606 mentionné au point 4.10 en page 2.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'offre de cession visant le lot 5 429 185 mentionné au point 4.10 en page 2.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'offre de cession visant le lot 5 137 659 mentionné au point 4.10 en page 2.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'offre de cession visant le lot 5 429 209 mentionné au point 4.10 en page 2.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'offre de cession visant le lot 5 137 708 mentionné au point 4.10 en page 2.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'offre de cession visant le lot 6 553 600 mentionné au point 4.10 en page 2.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'offre de cession visant le lot 6 553 597 mentionné au point 4.10 en page 2.\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"Acte foncier de vente pour le lot 3 570 038 attesté au point 4.11 en page 2.\"},{\"item\":\"i18\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'achat pour le lot 3 568 198 attesté au point 4.12 en page 2.\"},{\"item\":\"i19\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'octroi de servitude d'égout pluvial attesté au point 4.13 en page 2.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Dérogation mineure prévue au 1510, route 335 explicitement mentionnée au point 4.2 en page 1."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Dérogation mineure prévue au 70, route 335 explicitement mentionnée au point 4.3 en page 1."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Dérogation mineure prévue au 31, rue Cliche explicitement mentionnée au point 4.4 en page 1."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "PIIA prévu pour l'agrandissement commercial au 1510, route 335 attesté au point 4.5 en page 1."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "PIIA prévu pour les enseignes de Planète Piscine au 70, route 335 attesté au point 4.6 en page 1."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "PIIA prévu pour les enseignes d'Allô mon Coco au 70, route 335 attesté au point 4.7 en page 1."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Acte foncier d'engagement d'acquisition pour le 60, rue Lacroix figurant au point 4.8 en page 1."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Acte foncier d'offre de cession visant le lot 6 553 599 mentionné au point 4.10 en page 2."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Acte foncier d'offre de cession visant le lot 5 137 605 mentionné au point 4.10 en page 2."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Acte foncier d'offre de cession visant le lot 5 137 606 mentionné au point 4.10 en page 2."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Acte foncier d'offre de cession visant le lot 5 429 185 mentionné au point 4.10 en page 2."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Acte foncier d'offre de cession visant le lot 5 137 659 mentionné au point 4.10 en page 2."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "Acte foncier d'offre de cession visant le lot 5 429 209 mentionné au point 4.10 en page 2."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Acte foncier d'offre de cession visant le lot 5 137 708 mentionné au point 4.10 en page 2."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Acte foncier d'offre de cession visant le lot 6 553 600 mentionné au point 4.10 en page 2."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "Acte foncier d'offre de cession visant le lot 6 553 597 mentionné au point 4.10 en page 2."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "Acte foncier de vente pour le lot 3 570 038 attesté au point 4.11 en page 2."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "Acte foncier d'achat pour le lot 3 568 198 attesté au point 4.12 en page 2."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "Acte foncier d'octroi de servitude d'égout pluvial attesté au point 4.13 en page 2."
+  }
+ ]
+}

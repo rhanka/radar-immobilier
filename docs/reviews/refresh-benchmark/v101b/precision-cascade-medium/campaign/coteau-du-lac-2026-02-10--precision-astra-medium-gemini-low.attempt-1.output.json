@@ -1,0 +1,159 @@
+{
+ "nodes": [
+  {
+   "id": "signal-acquisition-6025922",
+   "label": "Modification prévue de l’autorisation d’achat d’une partie du lot 6 025 922",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+   "status": "candidate",
+   "municipality": "coteau-du-lac",
+   "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+   "meetingDate": "2026-02-10",
+   "category": "transaction_fonciere",
+   "no_lot": "6025922",
+   "description": "Point inscrit à l’ordre du jour : modification de la résolution #425-10-2025 concernant l’autorisation de signature de l’acte d’achat d’une partie du lot 6 025 922, au 1 rue Dollard. Aucune décision prise n’est attestée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat\nd’une partie du lot 6 025 922 (1 rue Dollard)",
+     "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+     "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-terrain-juteau",
+   "label": "Abrogation prévue du choix du proposant pour le terrain Juteau",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+   "status": "candidate",
+   "municipality": "coteau-du-lac",
+   "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+   "meetingDate": "2026-02-10",
+   "category": "transaction_fonciere",
+   "no_lot": "2045370",
+   "description": "Point inscrit à l’ordre du jour : abrogation de la résolution #375-09-2025 relative à l’acceptation du choix du proposant pour le terrain Juteau. L’abrogation effective n’est pas attestée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "b) Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2\n045 370 (Terrain Juteau)",
+     "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+     "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-3-principale",
+   "label": "Demande de PIIA — 3, rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+   "status": "candidate",
+   "municipality": "coteau-du-lac",
+   "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+   "meetingDate": "2026-02-10",
+   "kind": "piia",
+   "etape": "piia",
+   "description": "Demande d’approbation de PIIA pour une enseigne sur vitrage au 3, rue Principale, inscrite à l’ordre du jour. L’issue de la demande n’est pas indiquée.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)",
+     "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+     "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-9-principale",
+   "label": "Demande de PIIA — 9, rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+   "status": "candidate",
+   "municipality": "coteau-du-lac",
+   "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+   "meetingDate": "2026-02-10",
+   "kind": "piia",
+   "etape": "piia",
+   "description": "Demande d’approbation de PIIA pour la modification d’une enseigne sur poteau au 9, rue Principale, inscrite à l’ordre du jour. L’issue de la demande n’est pas indiquée.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "b) Pour le 9, rue Principale (modification enseigne sur poteau)",
+     "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+     "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-ppcmoi-25-chutes-approbation",
+   "label": "Approbation prévue d’un PPCMOI — 25, rue des Chutes",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+   "status": "candidate",
+   "municipality": "coteau-du-lac",
+   "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+   "meetingDate": "2026-02-10",
+   "kind": "ppcmoi",
+   "etape": "ppcmoi",
+   "description": "Approbation d’une demande de PPCMOI pour un agrandissement résidentiel au 25, rue des Chutes inscrite à l’ordre du jour, sans attestation d’une décision prise.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)",
+     "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+     "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-ppcmoi-25-chutes-premier-projet",
+   "label": "Premier projet de résolution prévu — PPCMOI du 25, rue des Chutes",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+   "status": "candidate",
+   "municipality": "coteau-du-lac",
+   "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+   "meetingDate": "2026-02-10",
+   "kind": "ppcmoi",
+   "etape": "ppcmoi",
+   "description": "Adoption du premier projet de résolution concernant le PPCMOI pour un agrandissement résidentiel au 25, rue des Chutes inscrite à l’ordre du jour. L’adoption effective n’est pas attestée.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)",
+     "source_file": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "rawRef": "raw/proces-verbaux-coteau-du-lac/cas/0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537.pdf",
+     "docSha": "0dac4552278ec509ca78336dc865f3b4896fc2645b95b4370d31b7b7f9471537",
+     "sourceUrl": "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/ordre-du-jour/2026/ODJ_SO10fevrier2026-pdf.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [],
+ "input_tokens": 6700,
+ "output_tokens": 2050
+}

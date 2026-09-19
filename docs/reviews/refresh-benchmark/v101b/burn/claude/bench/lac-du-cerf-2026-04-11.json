@@ -1,0 +1,13 @@
+{
+ "id": "lac-du-cerf-2026-04-11",
+ "rc": 0,
+ "latencyMs": 124532,
+ "inputTokens": 2,
+ "outputTokens": 13601,
+ "cacheRead": 0,
+ "cacheCreate": 3530,
+ "costUsd": 0.377329,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 23454
+}

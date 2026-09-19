@@ -1,0 +1,41 @@
+{
+ "documentId": "saint-constant-2026-01-20",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "22aa9a1d4882c0f2c9dfcc8d997f212da35a0d18e6c2e463b7efae5fff67dc9b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La page 5 atteste mot pour mot « D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la demande d’autorisation de PPCMOI numéro 2025-00114 » (résolution 037-01-26, 42, montée Saint-Régis), objet réglementaire explicite à l'étape du premier projet, conforme à la règle « projet actuel » comme unité distincte.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'avis public en page 1 atteste mot pour mot « CONSULTATION PUBLIQUE SUR LE PREMIER PROJET DE RÉSOLUTION NUMÉRO 037-01-26 VISANT UNE DEMANDE D’AUTORISATION D’UN PROJET PARTICULIER », avec consultation prévue le 3 mars 2026 (page 2) ; c'est un fait distinct de l'adoption du premier projet (étape prévue, non historique), donc une unité séparée et non un doublon du même fait.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 5 atteste mot pour mot « D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la demande d’autorisation de PPCMOI numéro 2025-00114 » (résolution 037-01-26, 42, montée Saint-Régis), objet réglementaire explicite à l'étape du premier projet, conforme à la règle « projet actuel » comme unité distincte."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'avis public en page 1 atteste mot pour mot « CONSULTATION PUBLIQUE SUR LE PREMIER PROJET DE RÉSOLUTION NUMÉRO 037-01-26 VISANT UNE DEMANDE D’AUTORISATION D’UN PROJET PARTICULIER », avec consultation prévue le 3 mars 2026 (page 2) ; c'est un fait distinct de l'adoption du premier projet (étape prévue, non historique), donc une unité séparée et non un doublon du même fait."
+  }
+ ]
+}

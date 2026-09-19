@@ -1,0 +1,13 @@
+{
+ "id": "richelieu-2026-02-03",
+ "rc": 0,
+ "latencyMs": 248901,
+ "inputTokens": 2,
+ "outputTokens": 27776,
+ "cacheRead": 0,
+ "cacheCreate": 17764,
+ "costUsd": 0.884607,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 54241
+}

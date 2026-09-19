@@ -1,0 +1,41 @@
+{
+ "documentId": "saint-zephirin-de-courval-2026-03-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "97f7e0b7e51578bbfebf6ce80068634ffb184b229280037be9abe204a107acd4",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le texte des pages 3-4 atteste la résolution 45-04-2026 recommandant à la CPTAQ d'autoriser l'aliénation des lots 5 884 262, 5 885 277, 5 885 261, 5 885 276 (dossier 453592), acte foncier explicite inclus au rappel, citation et page exactes, étape non réglementaire donc « inconnu » acceptable.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 46-04-2026 (page 5) décide « D'acquérir pour la somme de 15 000 $ [...] le terrain portant le numéro 5 885 286 du Cadastre du Québec », adoptée à l'unanimité : acte foncier explicite avec objet, citation et page exacts.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le texte des pages 3-4 atteste la résolution 45-04-2026 recommandant à la CPTAQ d'autoriser l'aliénation des lots 5 884 262, 5 885 277, 5 885 261, 5 885 276 (dossier 453592), acte foncier explicite inclus au rappel, citation et page exactes, étape non réglementaire donc « inconnu » acceptable."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 46-04-2026 (page 5) décide « D'acquérir pour la somme de 15 000 $ [...] le terrain portant le numéro 5 885 286 du Cadastre du Québec », adoptée à l'unanimité : acte foncier explicite avec objet, citation et page exacts."
+  }
+ ]
+}

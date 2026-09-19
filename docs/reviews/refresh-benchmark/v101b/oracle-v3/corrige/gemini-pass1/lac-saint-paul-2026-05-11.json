@@ -1,0 +1,187 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "nextId": 5,
+ "units": [
+  {
+   "id": "u01",
+   "status": "removed",
+   "current": {
+    "label": "Contrat de location du garage au 366, rue Principale pour l’entreposage du camion de déneigement",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "366, rue Principale",
+    "page": 5,
+    "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement",
+    "anchor": "366, rue Principale",
+    "spanStart": 870,
+    "spanEnd": 1049
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de location du garage au 366, rue Principale",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "366, rue Principale",
+      "page": 5,
+      "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement",
+      "anchor": "366, rue Principale",
+      "spanStart": 870,
+      "spanEnd": 1049
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Contrat de location du garage au 366, rue Principale pour l’entreposage du camion de déneigement",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "366, rue Principale",
+      "page": 5,
+      "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement",
+      "anchor": "366, rue Principale",
+      "spanStart": 870,
+      "spanEnd": 1049
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 104-05-2026 autorise la location d’un immeuble identifié, soit un acte foncier décidé à inclure même s’il est non résidentiel."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "La résolution 104-05-2026 autorise une location (bail de six mois) et non une vente, acquisition, cession ou servitude ; le vocabulaire réserve « adoption » aux actes fonciers de ce type et classe les conventions d'usage d'un immeuble (prêt à usage) sous « inconnu »."
+    },
+    {
+     "step": "gemini-pass1",
+     "op": "remove",
+     "reason": "La location temporaire d’un garage pour l’entreposage d’un camion de déneigement relève de l’entretien de voirie sans développement explicite et ne constitue pas un acte foncier admissible (vente, acquisition, cession, échange, servitude, lotissement)."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Consultation publique prévue le 13 juillet 2026 sur le règlement 079-2026 abrogeant la citation patrimoniale de l’église Saint-Paul",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "079-2026",
+    "page": 6,
+    "citation": "consultation publique soit tenue le 13 juillet 2026 à 18 h 30 à la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour présenter et expliquer le projet de règlement numéro 079-2026",
+    "anchor": "règlement numéro 079-2026",
+    "spanStart": 1488,
+    "spanEnd": 1688
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Consultation publique prévue le 13 juillet 2026 sur le règlement 079-2026 abrogeant la citation patrimoniale de l’église Saint-Paul",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "079-2026",
+      "page": 6,
+      "citation": "consultation publique soit tenue le 13 juillet 2026 à 18 h 30 à la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour présenter et expliquer le projet de règlement numéro 079-2026",
+      "anchor": "règlement numéro 079-2026",
+      "spanStart": 1488,
+      "spanEnd": 1688
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 106-05-2026 fixe une consultation publique sur un règlement explicite, sans constater la tenue de cette consultation ni l’adoption du règlement."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "removed",
+   "current": {
+    "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "pratiques agroenvironnementales",
+    "page": 6,
+    "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES",
+    "anchor": "PRATIQUES AGROENVIRONNEMENTALES",
+    "spanStart": 1776,
+    "spanEnd": 1858
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "pratiques agroenvironnementales",
+      "page": 6,
+      "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES",
+      "anchor": "PRATIQUES AGROENVIRONNEMENTALES",
+      "spanStart": 1776,
+      "spanEnd": 1858
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 107-05-2026 demande la suspension et la révision de ce projet réglementaire touchant l’aménagement du territoire, ce qui constitue une intervention actuelle sur un objet explicite sans adoption du règlement."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "remove",
+     "reason": "Le point 6.2 vise le projet de règlement provincial sur les pratiques agroenvironnementales du ministère de l'Environnement (visant à remplacer le REA) : ce n'est ni un règlement d'urbanisme municipal ni un acte foncier, et la résolution 107-05-2026 est une demande de suspension adressée à la ministre, non une étape de procédure réglementaire constatée pour un objet du profil Signal/DesignationEvent."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Dépôt de l’avis spécial d’abrogation du règlement 046-2023 citant l’église Saint-Paul comme immeuble patrimonial",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "046-2023",
+    "page": 8,
+    "citation": "le greffier-trésorier présente et dépose l’avis spécial relatif à l’abrogation du règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial",
+    "anchor": "règlement numéro 046-2023",
+    "spanStart": 1453,
+    "spanEnd": 1638
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt de l’avis spécial d’abrogation du règlement 046-2023 citant l’église Saint-Paul comme immeuble patrimonial",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "046-2023",
+      "page": 8,
+      "citation": "le greffier-trésorier présente et dépose l’avis spécial relatif à l’abrogation du règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial",
+      "anchor": "règlement numéro 046-2023",
+      "spanStart": 1453,
+      "spanEnd": 1638
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le texte constate le dépôt actuel d’un avis spécial visant l’abrogation d’un règlement patrimonial précis, et non un avis public générique ou un rappel historique."
+    }
+   ]
+  }
+ ]
+}

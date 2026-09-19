@@ -1,0 +1,472 @@
+{
+ "nodes": [
+  {
+   "id": "source",
+   "label": "Procès-verbal du 4 mai 2026 — Barnston-Ouest",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "status": "candidate",
+   "date": "2026-05-04",
+   "municipality": "barnston-ouest",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "url": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire des membres du conseil de la Municipalité\nde Barnston-Ouest tenue le 4 mai 2026",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-325",
+   "label": "Projet de règlement 325-2026 — Plan d’urbanisme",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "status": "candidate",
+   "numero": "325-2026",
+   "title": "Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme",
+   "stage": "projet",
+   "municipality": "barnston-ouest",
+   "meetingDate": "2026-05-04",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "Le projet de règlement numéro 325-2026 est présenté par la directrice générale",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-326",
+   "label": "Projet de règlement 326-2026 — Zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "status": "candidate",
+   "numero": "326-2026",
+   "title": "Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage",
+   "stage": "projet",
+   "municipality": "barnston-ouest",
+   "meetingDate": "2026-05-04",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Le projet de règlement numéro 326-2026 est présenté par la directrice générale",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-327",
+   "label": "Projet de règlement 327-2026 — Lotissement",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "status": "candidate",
+   "numero": "327-2026",
+   "title": "Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement",
+   "stage": "projet",
+   "municipality": "barnston-ouest",
+   "meetingDate": "2026-05-04",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Le projet de règlement numéro 327-2026 est présenté par la directrice générale",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-328",
+   "label": "Projet de règlement 328-2026 — PIIA",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "status": "candidate",
+   "numero": "328-2026",
+   "title": "Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale",
+   "stage": "projet",
+   "municipality": "barnston-ouest",
+   "meetingDate": "2026-05-04",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Le projet de règlement numéro 328-2026 est présenté par la directrice générale",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "motion-325",
+   "label": "Avis de motion — 325-2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "status": "candidate",
+   "category": "modification_reglementaire",
+   "description": "Avis de motion pour une modification du Plan d’urbanisme; adoption annoncée pour une prochaine séance.",
+   "date": "2026-05-04",
+   "municipality": "barnston-ouest",
+   "resolution": "26 05 056",
+   "etape": "avis_motion",
+   "etape_date": "2026-05-04",
+   "reglement_number": "325-2026",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "motion-326",
+   "label": "Avis de motion — 326-2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "status": "candidate",
+   "category": "modification_reglementaire",
+   "description": "Avis de motion pour une modification du règlement de zonage; adoption annoncée pour une prochaine séance.",
+   "date": "2026-05-04",
+   "municipality": "barnston-ouest",
+   "resolution": "26 05 057",
+   "etape": "avis_motion",
+   "etape_date": "2026-05-04",
+   "reglement_number": "326-2026",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "motion-327",
+   "label": "Avis de motion — 327-2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "status": "candidate",
+   "category": "modification_reglementaire",
+   "description": "Avis de motion pour une modification du règlement de lotissement; adoption annoncée pour une prochaine séance.",
+   "date": "2026-05-04",
+   "municipality": "barnston-ouest",
+   "resolution": "26 05 058",
+   "etape": "avis_motion",
+   "etape_date": "2026-05-04",
+   "reglement_number": "327-2026",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "motion-328",
+   "label": "Avis de motion — 328-2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "status": "candidate",
+   "category": "modification_reglementaire",
+   "description": "Avis de motion pour une modification du règlement sur les PIIA; adoption annoncée pour une prochaine séance.",
+   "date": "2026-05-04",
+   "municipality": "barnston-ouest",
+   "resolution": "26 05 059",
+   "etape": "avis_motion",
+   "etape_date": "2026-05-04",
+   "reglement_number": "328-2026",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-verdissement",
+   "label": "Verdissement du Sentier Onès-Cloutier",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "status": "candidate",
+   "category": "amenagement_municipal",
+   "date": "2026-05-04",
+   "municipality": "barnston-ouest",
+   "resolution": "26 05 051",
+   "description": "Acceptation de la proposition de Plantations Évolu-vert pour le projet de verdissement municipal, sur le site priorisé du Sentier Onès-Cloutier. Réservation de 10 941 $, équivalant à 50 % du coût total.",
+   "no_lot": "5076432",
+   "amount_cad": 10941,
+   "outcome": "Proposition acceptée à l’unanimité",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil de la Municipalité accepte la proposition de Plantations Évoluvert, telle que présentée dans le cadre du projet de verdissement municipal.",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source",
+   "target": "motion-325",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "evidence_refs": [
+    "ev-motion-325"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "motion-326",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "evidence_refs": [
+    "ev-motion-326"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "motion-327",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "evidence_refs": [
+    "ev-motion-327"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "motion-328",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "evidence_refs": [
+    "ev-motion-328"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "signal-verdissement",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "evidence_refs": [
+    "ev-verdissement"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil de la Municipalité accepte la proposition de Plantations Évoluvert, telle que présentée dans le cadre du projet de verdissement municipal.",
+     "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+     "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+     "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-325",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "6.2.3. Dépôt et présentation du Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme"
+  },
+  {
+   "id": "ev-326",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "6.2.5. Dépôt et présentation du Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage"
+  },
+  {
+   "id": "ev-327",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "6.2.7. Dépôt et présentation du Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement"
+  },
+  {
+   "id": "ev-328",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "6.2.9. Dépôt et présentation du Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’intégration\narchitecturale"
+  },
+  {
+   "id": "ev-motion-325",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme."
+  },
+  {
+   "id": "ev-motion-326",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage."
+  },
+  {
+   "id": "ev-motion-327",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement."
+  },
+  {
+   "id": "ev-motion-328",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’intégration\narchitecturale."
+  },
+  {
+   "id": "ev-verdissement",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Que le conseil de la Municipalité accepte la proposition de Plantations Évoluvert, telle que présentée dans le cadre du projet de verdissement municipal.\nDe réserver un budget équivalent à 50% du coût total du projet de verdissement\nmunicipal soit 10 941$."
+  },
+  {
+   "id": "ev-carriere",
+   "source_file": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "rawRef": "raw/proces-verbaux-barnston-ouest/cas/22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5.pdf",
+   "docSha": "22a060f083cd9a553c26a6266c1d90520976d96419b6db47452fdff9ad8cf6f5",
+   "sourceUrl": "https://www.barnston-ouest.ca/upload/documents/Proces-verbaux/pv-2026-05-2.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "Monsieur Guy Provencher du 711, chemin Stage aimerait relancer son projet\nde carrière sur le chemin Stage. La mairesse lui recommande de faire les\ndémarches nécessaires auprès de l’inspecteur en bâtiment de la Municipalité."
+  }
+ ],
+ "input_tokens": 11900,
+ "output_tokens": 7300
+}

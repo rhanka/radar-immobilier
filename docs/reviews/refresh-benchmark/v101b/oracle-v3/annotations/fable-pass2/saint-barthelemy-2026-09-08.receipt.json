@@ -1,0 +1,75 @@
+{
+ "documentId": "saint-barthelemy-2026-09-08",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "8942644f3bccd5757ec4286a05384d385cab43e5f710cac83f6a72b8a6fb882a",
+ "inputSha256": "26da43e76e6451b4f27dcd23823cde4b6ae70877287e650dbbb7aef525bba15a",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "rc": 0,
+ "latencyMs": 45072,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "79cdaff2-9524-4142-a82d-834e7f44400e",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 3386,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 17902,
+   "webSearchRequests": 0,
+   "costUSD": 0.52803325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 3376,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 17902,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 3386,
+  "output_tokens_details": {
+   "thinking_tokens": 3376
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 17902,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 3386,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 17902,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 17902
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.52803325,
+ "durationApiMs": 43268,
+ "stderrTail": "",
+ "at": "2026-09-18T17:57:21.871Z"
+}

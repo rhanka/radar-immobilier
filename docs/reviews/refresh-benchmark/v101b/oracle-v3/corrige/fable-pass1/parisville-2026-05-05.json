@@ -1,0 +1,82 @@
+{
+ "documentId": "parisville-2026-05-05",
+ "nextId": 3,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 432-2026 modifiant le règlement de zonage 308-2011",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "432-2026",
+    "page": 3,
+    "citation": "6.1. AVIS D'ADOPTION_RÈGLEMENT 432-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE # 308-2011",
+    "anchor": "RÈGLEMENT 432-2026",
+    "spanStart": 650,
+    "spanEnd": 733
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 432-2026 modifiant le règlement de zonage 308-2011",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "432-2026",
+      "page": 3,
+      "citation": "6.1. AVIS D'ADOPTION_RÈGLEMENT 432-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE # 308-2011",
+      "anchor": "RÈGLEMENT 432-2026",
+      "spanStart": 650,
+      "spanEnd": 733
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 73-05-26 adopte ce règlement de zonage; les avis de motion, projets et consultation antérieurs sont des rappels historiques qui ne créent pas d’unités supplémentaires."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 433-2026 modifiant le règlement de lotissement 311-2011",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "433-2026",
+    "page": 4,
+    "citation": "6.2. AVIS D'ADOPTION_RÈGLEMENT 433-2026 MODIFIANT LE RÈGLEMENT DE LOTISSEMENT # 311-2011",
+    "anchor": "RÈGLEMENT 433-2026",
+    "spanStart": 141,
+    "spanEnd": 229
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 433-2026 modifiant le règlement de lotissement 311-2011",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "433-2026",
+      "page": 4,
+      "citation": "6.2. AVIS D'ADOPTION_RÈGLEMENT 433-2026 MODIFIANT LE RÈGLEMENT DE LOTISSEMENT # 311-2011",
+      "anchor": "RÈGLEMENT 433-2026",
+      "spanStart": 141,
+      "spanEnd": 229
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 74-05-26 adopte ce règlement de lotissement permettant le remembrement d’un terrain; les étapes antérieures mentionnées dans les considérants ne constituent pas de nouvelles unités."
+    }
+   ]
+  }
+ ]
+}

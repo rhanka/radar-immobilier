@@ -1,0 +1,147 @@
+{
+ "documentId": "lac-du-cerf-2026-04-11",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "7f7b5ee188a883920b9637b9c9140f1e69f92a4827b5e90e863e6e7e975fb360",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-lotissement"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis"
+      },
+      {
+       "page": 1,
+       "excerpt": "8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-nuisances"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Renforcement prévu de l’application du règlement sur les nuisances",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "8.2 Renforcement de l’application du règlement sur les nuisances pour la saison estivale"
+      },
+      {
+       "page": 1,
+       "excerpt": "8.2 Renforcement de l’application du règlement sur les nuisances pour la saison estivale"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-427-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 427-2026 — Gestion contractuelle",
+     "stage": "projet",
+     "objet": "427-2026",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "10.1 Avis de motion pour le projet de règlement # 427-2026 abrogeant les règlements 412-2024 et 389-2023\nrelatifs à la gestion contractuelle"
+      },
+      {
+       "page": 1,
+       "excerpt": "10.1 Avis de motion pour le projet de règlement # 427-2026 abrogeant les règlements 412-2024 et 389-2023\nrelatifs à la gestion contractuelle"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple octroi de contrat de services professionnels pour de l'évaluation, ce qui relève des exclusions.\",\"excerpt\":\"8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le point concerne une mesure générale d'application policière/administrative d'un règlement sur les nuisances, exclue du champ de l'urbanisme et de l'aménagement du territoire.\",\"excerpt\":\"8.2 Renforcement de l’application du règlement sur les nuisances pour la saison estivale\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement porte sur la gestion contractuelle (marchés publics), ce qui est exclu du domaine de l'urbanisme et de l'aménagement.\",\"excerpt\":\"10.1 Avis de motion pour le projet de règlement # 427-2026 abrogeant les règlements 412-2024 et 389-2023\\nrelatifs à la gestion contractuelle\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple octroi de contrat de services professionnels pour de l'évaluation, ce qui relève des exclusions.",
+   "excerpt": "8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le point concerne une mesure générale d'application policière/administrative d'un règlement sur les nuisances, exclue du champ de l'urbanisme et de l'aménagement du territoire.",
+   "excerpt": "8.2 Renforcement de l’application du règlement sur les nuisances pour la saison estivale"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement porte sur la gestion contractuelle (marchés publics), ce qui est exclu du domaine de l'urbanisme et de l'aménagement.",
+   "excerpt": "10.1 Avis de motion pour le projet de règlement # 427-2026 abrogeant les règlements 412-2024 et 389-2023\nrelatifs à la gestion contractuelle"
+  }
+ ],
+ "filter": {
+  "acts": 3,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Il s'agit d'un simple octroi de contrat de services professionnels pour de l'évaluation, ce qui relève des exclusions."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point concerne une mesure générale d'application policière/administrative d'un règlement sur les nuisances, exclue du champ de l'urbanisme et de l'aménagement du territoire."
+   },
+   {
+    "act": "A03",
+    "reason": "Le règlement porte sur la gestion contractuelle (marchés publics), ce qui est exclu du domaine de l'urbanisme et de l'aménagement."
+   }
+  ],
+  "kept": [],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1468,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 1950,
+   "outputTokens": 239,
+   "totalTokens": 2189
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1334
+  },
+  "inputSha256": "b77956c9b02f77ca532609aa4bf64756c6d965e968712c38262095b71af1af05"
+ }
+}

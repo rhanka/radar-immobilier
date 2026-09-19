@@ -1,0 +1,35 @@
+{
+ "documentId": "arundel-2026-07-31",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "9e11784810127bf26bbcdb59856ec38fdbc70b002f126fb354d3f33c3980e12f",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1785,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 5908,
+   "outputTokens": 402,
+   "totalTokens": 6310
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1618
+  },
+  "inputSha256": "ea5dbdd0dd77e601b13e3a14ecd572e7809beae01e48b3c4edb7a0f6c49ba660"
+ },
+ "at": "2026-09-19T03:22:19.543Z"
+}

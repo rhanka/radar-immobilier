@@ -1,0 +1,372 @@
+{
+ "nodes": [
+  {
+   "id": "event-albert-labelle",
+   "label": "Dérogation mineure — 30, chemin Albert-Labelle",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "status": "needs_review",
+   "municipality": "la-peche",
+   "meetingDate": "2026-06-01",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "no_lot": "4455724",
+   "reglement_number": "113-2025",
+   "description": "Demande pour construire un bâtiment accessoire détaché : réduction de la marge latérale sur rue de 10,00 m à 6,70 m (article 74) et augmentation de la superficie cumulative des ouvrages accessoires dans la zone tampon de 45,00 m² à 51,57 m² (article 228). Le texte prévoit d'accorder la demande sur recommandation du CCU du 14 mai 2026; les champs de proposition, d'appui et de résolution sont incomplets.",
+   "motif": "Les contraintes du lot ne permettent pas d'implanter la construction ailleurs; les autres normes seraient respectées et la demande ne porterait pas atteinte aux droits des voisins.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "Demande de dérogation mineure au règlement de zonage numéro 113-2025\n– 30, chemin Albert-Labelle",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 8,
+     "excerpt": "ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité\nconsultatif d’urbanisme et accorde la demande d’une dérogation mineure au",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-guertin",
+   "label": "Dérogation mineure — 14, chemin Guertin",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "status": "needs_review",
+   "municipality": "la-peche",
+   "meetingDate": "2026-06-01",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "no_lot": "2685566",
+   "reglement_number": "113-2025",
+   "description": "Demande de réduction de la marge latérale sur rue de 10 m à 5 m pour construire un bâtiment accessoire détaché. Le texte prévoit d'accorder la demande sur recommandation du CCU du 14 mai 2026; les champs de proposition, d'appui et de résolution sont incomplets.",
+   "motif": "Les contraintes du lot ne permettent pas d'implanter la construction ailleurs; les autres normes seraient respectées et la demande ne porterait pas atteinte aux droits des voisins.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Demande de dérogation mineure au règlement de zonage numéro 113-2025\n– 14, chemin Guertin",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 8,
+     "excerpt": "CONSIDÉRANT QU’une demande de dérogation mineure a été déposée, pour le\nlot numéro 2 685 566 du cadastre du Québec situé au 14, chemin Guertin visant",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-lac-chip",
+   "label": "Usage conditionnel touristique — 75, chemin du Lac-Chip",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "status": "needs_review",
+   "municipality": "la-peche",
+   "meetingDate": "2026-06-01",
+   "kind": "usage_conditionnel",
+   "etape": "usage_conditionnel",
+   "no_lot": "3390978",
+   "reglement_number": "145.31-2025",
+   "description": "Demande d'autorisation d'un hébergement touristique de type établissement de résidence principale. Le texte prévoit une autorisation conditionnelle; les champs de proposition, d'appui et de résolution sont incomplets. Le site est déclaré hors d'une zone de mouvement de masse à risque élevé ou moyen.",
+   "conditions": [
+    "Respecter la jouissance et les droits de propriété des voisins.",
+    "Ne pas engendrer de nuisances, de bruit excessif, de va-et-vient fréquents ou de perte de tranquillité.",
+    "Ne pas causer de nuisance perceptible hors des limites du terrain affectant la quiétude du voisinage.",
+    "Aucune réception, fête, évènement ou feu d'artifice sans autorisation expresse du conseil.",
+    "L'exploitant ou son répondant doit être joignable lorsqu'une chambre est louée.",
+    "L'affichage publicitaire doit annoncer l'interdiction des VTT, motos-cross, motoneiges et embarcations à moteur.",
+    "Les embarcations non motorisées doivent être lavées avant et après la mise à l'eau."
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Demande d’usage conditionnel - hébergement touristique de type,\nétablissement de résidence principale – 75, chemin du Lac-Chip",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 9,
+     "excerpt": "ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité\nconsultatif d’urbanisme et accorde la demande d’usage d’hébergement",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-vaillant",
+   "label": "Usage conditionnel touristique — 5, chemin Vaillant",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "status": "needs_review",
+   "municipality": "la-peche",
+   "meetingDate": "2026-06-01",
+   "kind": "usage_conditionnel",
+   "etape": "usage_conditionnel",
+   "no_lot": "3390175",
+   "reglement_number": "145.31-2025",
+   "description": "Demande d'autorisation d'un hébergement touristique de type établissement de résidence principale. Le texte prévoit une autorisation conditionnelle; les champs de proposition, d'appui et de résolution sont incomplets. Le site est déclaré hors d'une zone de mouvement de masse à risque élevé ou moyen.",
+   "conditions": [
+    "Respecter la jouissance et les droits de propriété des voisins.",
+    "Ne pas engendrer de nuisances, de bruit excessif, de va-et-vient fréquents ou de perte de tranquillité.",
+    "Ne pas causer de nuisance perceptible hors des limites du terrain affectant la quiétude du voisinage.",
+    "Aucune réception, fête, évènement ou feu d'artifice sans autorisation expresse du conseil.",
+    "L'exploitant ou son répondant doit être joignable lorsqu'une chambre est louée.",
+    "L'affichage publicitaire doit annoncer l'interdiction des VTT, motos-cross, motoneiges et embarcations à moteur.",
+    "Les embarcations non motorisées doivent être lavées avant et après la mise à l'eau."
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "Demande d’usage conditionnel – hébergement touristique de type,\nétablissement de résidence principale – 5, chemin Vaillant",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 10,
+     "excerpt": "ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité\nconsultatif d’urbanisme et accorde la demande d’usage d’hébergement",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-servitude-riverside",
+   "label": "Servitude de tolérance d'empiètement — 741, chemin Riverside",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "status": "needs_review",
+   "municipality": "la-peche",
+   "meetingDate": "2026-06-01",
+   "category": "servitude",
+   "scope": "local",
+   "no_lot": "3391753",
+   "description": "Demande de la Banque nationale du Canada pour régulariser l'empiètement d'un escalier, d'une rampe pour personne à mobilité réduite et d'une base de béton sur le lot municipal 3654294, chemin Riverside. Le texte prévoit l'autorisation d'une servitude et la signature d'un acte notarié, aux frais professionnels du demandeur. La référence au plan reste à compléter et les champs de résolution sont incomplets.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "Servitude de tolérance d’empiètement : 741, chemin Riverside",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 11,
+     "excerpt": "ET RÉSOLU QUE ce Conseil municipal autorise une servitude de tolérance\nd’empiètement au bénéfice du propriétaire du lot 3 391 753, du cadastre du",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-26-866",
+   "label": "26-866 — Bon fonctionnement des installations septiques",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "status": "needs_review",
+   "numero": "26-866",
+   "title": "Règlement relatif au bon fonctionnement des installations septiques",
+   "municipality": "la-peche",
+   "meetingDate": "2026-06-01",
+   "stage": "projet",
+   "objet": "Maintien, inspection, remplacement et mise aux normes des installations septiques sur tout le territoire municipal. Adoption inscrite à l'ordre du jour; le dispositif parle d'adopter le projet et les champs de résolution sont incomplets. Avis de motion et dépôt du projet mentionnés au 4 mai 2026.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "Adoption du règlement numéro 26-866 relatif au bon fonctionnement des\ninstallations septiques",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 14,
+     "excerpt": "ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26866 relatif au bon fonctionnement des installations septiques tel que déposé à",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-26-867",
+   "label": "26-867 — Aide financière pour les installations septiques",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "status": "needs_review",
+   "numero": "26-867",
+   "title": "Règlement relatif à la création d'un programme d’aide financière pour la mise aux normes des installations septiques",
+   "municipality": "la-peche",
+   "meetingDate": "2026-06-01",
+   "stage": "projet",
+   "objet": "Programme pour les installations antérieures au 12 août 1981 admissibles au PUIT, desservant une résidence principale de six chambres ou moins. Subvention provinciale maximale de 50 % des travaux, plafonnée à 15 000 $, et prêt municipal du solde remboursable sur dix ans au compte de taxes. Programme conditionné à l'entrée en vigueur du règlement d'emprunt, se terminant le 31 mars 2028. Adoption inscrite à l'ordre du jour; dispositif d'adoption du projet et champs de résolution incomplets. Avis de motion et dépôt mentionnés au 4 mai 2026.",
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26867 relatif à la création d’un programme d’aide financière pour la mise aux normes",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 27,
+     "excerpt": "Le conseil décrète un programme d’aide financière visant la protection de\nl'environnement par la mise aux normes des installations de traitement individuel",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-26-868",
+   "label": "26-868 — Emprunt pour la mise aux normes des installations septiques",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "status": "needs_review",
+   "numero": "26-868",
+   "title": "Règlement autorisant une dépense de 5 737 912 $ et un emprunt de 5 737 912 $ aux fins du financement du programme d’aide financière pour la mise aux normes des installations septiques",
+   "municipality": "la-peche",
+   "meetingDate": "2026-06-01",
+   "stage": "projet",
+   "objet": "Financement du programme 26-867 par un emprunt sur dix ans; compensation annuelle exigée des propriétaires bénéficiaires proportionnellement aux avances reçues. Adoption inscrite à l'ordre du jour; dispositif d'adoption du projet et champs de résolution incomplets. Avis de motion et dépôt mentionnés au 4 mai 2026.",
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "Adoption du règlement numéro 26-868 autorisant une dépense de\n5 737 912 $ et un emprunt de 5 737 912 $ aux fins du financement du",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 16,
+     "excerpt": "ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26868 autorisant une dépense de 5 737 912 $ et un emprunt de 5 737 912 $ aux",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-septic-inspection",
+   "label": "Obligations d'inspection et de mise aux normes septiques",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "status": "candidate",
+   "constraintType": "autre",
+   "municipality": "la-peche",
+   "loi": "Règlement 26-866, articles 11 à 16; Règlement sur l'évacuation et le traitement des eaux usées des résidences isolées (Q-2, r. 22)",
+   "organisme": "Municipalité de La Pêche",
+   "description": "Dispositions du texte annexé, sans entrée en vigueur établie : inspection par un tiers qualifié entre le 1er mai et le 30 novembre sans neige au sol; rapport sous cinq jours ouvrables en cas de rejet direct ou de contamination; correction des déficiences et permis municipal si remplacement nécessaire. Pour une installation de trente ans ou plus ou d'âge inconnu présentant des signes de dysfonctionnement ou de pollution, rapport dans les trois mois suivant avis; renouvellement tous les quatre ans pour une résidence principale et six ans pour une résidence secondaire si l'installation n'a pas été remplacée ou présente des signes de dysfonctionnement ou polluants.",
+   "evidence_refs": [
+    "ev-septic"
+   ],
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "L’inspection par un « tiers qualifié » doit être réalisée entre le 1er mai et le 30 novembre, à un\nmoment où le sol n’est pas recouvert de neige.",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 23,
+     "excerpt": "Le propriétaire d’une installation septique construite ou installée depuis 30 ans et plus de la date\nd’entrée en vigueur du présent règlement, ou dont la date de construction ou d’installation est",
+     "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+     "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+     "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-amendment-1",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+   "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "CONSIDÉRANT QUE le projet de Règlement no.113-001-2026 modifiant le\nRèglement de zonage 113-2025 est adopté conformément à loi;"
+  },
+  {
+   "id": "ev-amendment-2",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+   "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "CONSIDÉRANT QUE le projet de Règlement no.113-002-2026 modifiant le\nRèglement de zonage 113-2025 est adopté conformément à loi;"
+  },
+  {
+   "id": "ev-septic",
+   "source_file": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "rawRef": "raw/proces-verbaux-la-peche/cas/08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c.pdf",
+   "docSha": "08b1c72c50c0f2ef2b2d8919dd42a59c920fdee1a731d385362addc667c0d34c",
+   "sourceUrl": "https://www.villelapeche.qc.ca/wp-content/uploads/2026/05/000-20260601-PR-CON-PV_VADM_Public.pdf",
+   "modality": "pdf",
+   "page": 23,
+   "excerpt": "Le propriétaire d’une installation septique construite ou installée depuis 30 ans et plus de la date\nd’entrée en vigueur du présent règlement, ou dont la date de construction ou d’installation est\ninconnue, présentant des signes de dysfonctionnement ou de pollution, doit fournir un rapport\nd’inspection, selon l’article 16 du présent règlement, attestant du bon fonctionnement et de la\nconformité au Règlement provincial, préparé par un « tiers qualifié » dans les 3 mois à compter\nde la date de réception d’un avis à cet effet.\nDes rapports sont ensuite requis tous les 4 ans, pour une résidence principale, et tous les 6 ans\npour une résidence secondaire, si l’installation septique n’a pas été remplacée ou qu’elle\nprésente des signes de dysfonctionnement ou polluants."
+  }
+ ],
+ "input_tokens": 20300,
+ "output_tokens": 6250
+}

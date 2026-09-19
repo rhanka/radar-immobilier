@@ -1,0 +1,71 @@
+{
+ "documentId": "saint-sylvere-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "8b7b8350fdc54fe2c7ab617f2069ef5c4429b9fb958955266415f48aae00735a",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 6 atteste l’avis de motion donné par Gabrielle Gauthier pour le règlement 383 modifiant le règlement de zonage 247, distinct du premier projet.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-117, en page 7, dépose et adopte explicitement le premier projet du règlement 383 modifiant le zonage 247, ce qui correspond à l’étape projet_reglement.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 7 atteste l’avis de motion de Yan Dagenais pour le règlement 384 concernant les projets particuliers de construction, de modification ou d’occupation d’un immeuble.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-119, en page 8, dépose et adopte le premier projet du règlement 384 sur les PPCMOI, sans constituer l’adoption définitive du règlement.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-120, adoptée à l’unanimité en page 8, atteste l’appui municipal à la demande de lotissement 453952 visant un échange de parcelles entre les lots 5 652 594 et 5 889 436.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 6 atteste l’avis de motion donné par Gabrielle Gauthier pour le règlement 383 modifiant le règlement de zonage 247, distinct du premier projet."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-117, en page 7, dépose et adopte explicitement le premier projet du règlement 383 modifiant le zonage 247, ce qui correspond à l’étape projet_reglement."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 7 atteste l’avis de motion de Yan Dagenais pour le règlement 384 concernant les projets particuliers de construction, de modification ou d’occupation d’un immeuble."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-119, en page 8, dépose et adopte le premier projet du règlement 384 sur les PPCMOI, sans constituer l’adoption définitive du règlement."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-120, adoptée à l’unanimité en page 8, atteste l’appui municipal à la demande de lotissement 453952 visant un échange de parcelles entre les lots 5 652 594 et 5 889 436."
+  }
+ ]
+}

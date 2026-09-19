@@ -1,0 +1,34 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "5289416f298d43210ac02d839e5bae413603a20d59e24eb1776894a6691f207d",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-low output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3368,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 16404,
+   "outputTokens": 1381,
+   "totalTokens": 17785
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3233
+  },
+  "inputSha256": "35d66af98a33f82f43010a1f4eb39eed77d64fe35f75202dc7021f9dcaf10a80"
+ },
+ "at": "2026-09-19T02:37:43.052Z"
+}

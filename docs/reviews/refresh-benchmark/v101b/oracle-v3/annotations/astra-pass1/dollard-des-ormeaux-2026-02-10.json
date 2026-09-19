@@ -1,0 +1,130 @@
+{
+ "documentId": "dollard-des-ormeaux-2026-02-10",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "715033ef23ac74d33702607ab0162ab8a466ac5017c7f1daa1771d2e2ad52b25",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation prévue de signature du bail de location d’entrepôt avec Timex Reality Corp. (2025-004 GG)\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2025-004 GG\",\n        \"page\": 1,\n        \"citation\": \"Autorisation de signature d’un bail avec Timex Reality Corp. pour la location\\nd'entrepôt (2025-004 GG) (SD2026-500-2811)\",\n        \"anchor\": \"d'entrepôt (2025-004 GG)\"\n      },\n      \"reason\": \"La signature prévue d’un bail de location d’entrepôt porte sur un objet foncier explicite, à inclure même s’il est non résidentiel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion prévu du Règlement R-2026-199-1 modifiant le zonage\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-199-1\",\n        \"page\": 2,\n        \"citation\": \"Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux\",\n        \"anchor\": \"Règlement R-2026-199-1\"\n      },\n      \"reason\": \"Le point 50.1 prévoit un avis de motion pour ce règlement de zonage, unité distincte du premier projet.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du premier projet du Règlement R-2026-199-1 modifiant le zonage\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-199-1\",\n        \"page\": 2,\n        \"citation\": \"Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers\",\n        \"anchor\": \"Règlement R-2026-199-1\"\n      },\n      \"reason\": \"Le point 50.2 prévoit l’adoption du premier projet, distincte de l’avis de motion mais sans multiplier les unités pour le dépôt du même premier projet annoncé au point 50.1.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion prévu du Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-084-1\",\n        \"page\": 2,\n        \"citation\": \"Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\\nRèglement R-2014-084 sur l’utilisation des égouts\",\n        \"anchor\": \"Règlement R-2026-084-1\"\n      },\n      \"reason\": \"Le point 50.3 prévoit un avis de motion pour un règlement précisant les dispositions relatives à la rétention des eaux de ruissellement.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt prévu du projet de Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-084-1\",\n        \"page\": 2,\n        \"citation\": \"Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\\nRèglement R-2014-084 sur l’utilisation des égouts\",\n        \"anchor\": \"Règlement R-2026-084-1\"\n      },\n      \"reason\": \"Le dépôt prévu du projet au point 50.3 constitue une unité distincte de l’avis de motion du même règlement.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du règlement R-2026-216 sur les ententes pour travaux municipaux\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-216\",\n        \"page\": 2,\n        \"citation\": \"Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux\",\n        \"anchor\": \"règlement R-2026-216\"\n      },\n      \"reason\": \"Le point 50.4 prévoit l’adoption d’un règlement sur les ententes pour travaux municipaux, sans attester une décision déjà acquise.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation prévue de signature du bail de location d’entrepôt avec Timex Reality Corp. (2025-004 GG)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2025-004 GG",
+    "page": 1,
+    "citation": "Autorisation de signature d’un bail avec Timex Reality Corp. pour la location\nd'entrepôt (2025-004 GG) (SD2026-500-2811)",
+    "anchor": "d'entrepôt (2025-004 GG)"
+   },
+   "reason": "La signature prévue d’un bail de location d’entrepôt porte sur un objet foncier explicite, à inclure même s’il est non résidentiel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion prévu du Règlement R-2026-199-1 modifiant le zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "R-2026-199-1",
+    "page": 2,
+    "citation": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux",
+    "anchor": "Règlement R-2026-199-1"
+   },
+   "reason": "Le point 50.1 prévoit un avis de motion pour ce règlement de zonage, unité distincte du premier projet."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption prévue du premier projet du Règlement R-2026-199-1 modifiant le zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "R-2026-199-1",
+    "page": 2,
+    "citation": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers",
+    "anchor": "Règlement R-2026-199-1"
+   },
+   "reason": "Le point 50.2 prévoit l’adoption du premier projet, distincte de l’avis de motion mais sans multiplier les unités pour le dépôt du même premier projet annoncé au point 50.1."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion prévu du Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "R-2026-084-1",
+    "page": 2,
+    "citation": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts",
+    "anchor": "Règlement R-2026-084-1"
+   },
+   "reason": "Le point 50.3 prévoit un avis de motion pour un règlement précisant les dispositions relatives à la rétention des eaux de ruissellement."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt prévu du projet de Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "R-2026-084-1",
+    "page": 2,
+    "citation": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts",
+    "anchor": "Règlement R-2026-084-1"
+   },
+   "reason": "Le dépôt prévu du projet au point 50.3 constitue une unité distincte de l’avis de motion du même règlement."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption prévue du règlement R-2026-216 sur les ententes pour travaux municipaux",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "R-2026-216",
+    "page": 2,
+    "citation": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux",
+    "anchor": "règlement R-2026-216"
+   },
+   "reason": "Le point 50.4 prévoit l’adoption d’un règlement sur les ententes pour travaux municipaux, sans attester une décision déjà acquise."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

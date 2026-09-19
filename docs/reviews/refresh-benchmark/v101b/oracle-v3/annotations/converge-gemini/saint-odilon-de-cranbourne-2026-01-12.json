@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1e90d3d566980812a2f7b3bc5a30ff52d2c50694c4b8a0a1df6b085c1082b0f7",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement 437-2025 modifiant le plan d'urbanisme est attestée à la page 3 par la résolution 5-01-2026.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement de zonage 438-2025 est attestée à la page 4 par la résolution 6-01-2026.\"},{\"item\":\"i03\",\"choice\":\"absent\",\"reason\":\"Le refus de rembourser des pénalités contractuelles de construction est une décision financière et non un acte foncier ou un objet d'urbanisme correspondant au profil.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'adoption du règlement 437-2025 modifiant le plan d'urbanisme est attestée à la page 3 par la résolution 5-01-2026."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'adoption du règlement de zonage 438-2025 est attestée à la page 4 par la résolution 6-01-2026."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "Le refus de rembourser des pénalités contractuelles de construction est une décision financière et non un acte foncier ou un objet d'urbanisme correspondant au profil."
+  }
+ ]
+}

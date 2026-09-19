@@ -1,0 +1,37 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "e896da47182098f2426a6bae2497828c8ac6dac7f4fa07bf42244fd6018bdd6b",
+ "rawText": "{\"operations\":[{\"op\":\"remove\",\"id\":\"u06\",\"reason\":\"L'autorisation générale d'enchérir lors d'une vente pour défaut de paiement de taxes ne porte sur aucun bien ou lot explicite et relève du recouvrement fiscal administratif plutôt que d'un acte foncier d'urbanisme.\"}]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u06",
+   "reason": "L'autorisation générale d'enchérir lors d'une vente pour défaut de paiement de taxes ne porte sur aucun bien ou lot explicite et relève du recouvrement fiscal administratif plutôt que d'un acte foncier d'urbanisme."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 5
+}

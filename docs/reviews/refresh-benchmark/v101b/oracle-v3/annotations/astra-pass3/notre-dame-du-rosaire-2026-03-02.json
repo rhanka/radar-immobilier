@@ -1,0 +1,196 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "284ee220fe486f61e7cd108aa9b318d40b04767e6fdc298ec8d61395c1ba5810",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Fixation du prix et mise en vente du lot 6 714 200, rue Morin — 19 999 $ plus taxes\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 714 200\",\n        \"page\": 19,\n        \"citation\": \"6 714 200 :19 999 $ plus taxes\\n6 714 201 :19 999 $plus taxes\\n6 714 202 22 499 $ plus taxes\\n\\nQUE le conseil municipal autorise la mise en vente desdits terrains\",\n        \"anchor\": \"6 714 200 :19 999\"\n      },\n      \"reason\": \"L’unité est fondée, mais la citation doit conserver les sauts de ligne de la page 19 pour respecter la reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Fixation du prix et mise en vente du lot 6 714 201, rue Morin — 19 999 $ plus taxes\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 714 201\",\n        \"page\": 19,\n        \"citation\": \"6 714 201 :19 999 $plus taxes\\n6 714 202 22 499 $ plus taxes\\n\\nQUE le conseil municipal autorise la mise en vente desdits terrains\",\n        \"anchor\": \"6 714 201 :19 999\"\n      },\n      \"reason\": \"La citation actuelle remplace les sauts de ligne par des espaces, contrairement à l’exigence d’un extrait recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Fixation du prix et mise en vente du lot 6 714 202, rue Morin — 22 499 $ plus taxes\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 714 202\",\n        \"page\": 19,\n        \"citation\": \"6 714 202 22 499 $ plus taxes\\n\\nQUE le conseil municipal autorise la mise en vente desdits terrains\",\n        \"anchor\": \"6 714 202 22 499\"\n      },\n      \"reason\": \"La citation doit restituer la séparation de paragraphes entre le prix du lot et l’autorisation de mise en vente.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Vente du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger, conditionnelle à une construction dans les deux ans\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 714 202\",\n        \"page\": 20,\n        \"citation\": \"QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\\n714 202 du cadastre du Québec\",\n        \"anchor\": \"lot numéro 6\\n714 202\"\n      },\n      \"reason\": \"Le numéro cadastral est coupé par un saut de ligne dans la page 20, lequel doit être conservé dans la citation et dans son ancre exacte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Conclusion autorisée de l’entente avec le CAD encadrant la mise à disposition d’un local municipal\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"Entente de collaboration\",\n        \"page\": 21,\n        \"citation\": \"QUE le conseil municipal autorise la conclusion de l’Entente de collaboration entre la Municipalité\\nde Notre-Dame-du-Rosaire et le Comité d’action et de développement (CAD), telle que présentée\",\n        \"anchor\": \"l’Entente de collaboration\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne après « Municipalité » pour être identique au texte de la page 21.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 2026-04 modifiant le règlement de zonage 90-01\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"2026-04\",\n        \"page\": 22,\n        \"citation\": \"Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\\nsera présenté et adopté le premier projet de règlement 2026-04\",\n        \"anchor\": \"règlement 2026-04\"\n      },\n      \"reason\": \"La citation doit restituer le saut de ligne après la date; seul l’avis de motion est actuel, la présentation et l’adoption du premier projet étant expressément reportées à la prochaine séance.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Engagement d’installation des réseaux électrique et d’aqueduc desservant les terrains de la rue Morin\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"Desserte des terrains\",\n        \"page\": 19,\n        \"citation\": \"QUE la municipalité s’engage à procéder à l’installation de la ligne électrique et du réseau\\nd’aqueduc desservant lesdits lots\",\n        \"anchor\": \"la ligne électrique et du réseau\\nd’aqueduc\"\n      },\n      \"reason\": \"La citation et l’ancre doivent conserver le saut de ligne entre « réseau » et « d’aqueduc » pour respecter les exigences de reproduction exacte.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Fixation du prix et mise en vente du lot 6 714 200, rue Morin — 19 999 $ plus taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 200",
+    "page": 19,
+    "citation": "6 714 200 :19 999 $ plus taxes\n6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains",
+    "anchor": "6 714 200 :19 999"
+   },
+   "reason": "L’unité est fondée, mais la citation doit conserver les sauts de ligne de la page 19 pour respecter la reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Fixation du prix et mise en vente du lot 6 714 201, rue Morin — 19 999 $ plus taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 201",
+    "page": 19,
+    "citation": "6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains",
+    "anchor": "6 714 201 :19 999"
+   },
+   "reason": "La citation actuelle remplace les sauts de ligne par des espaces, contrairement à l’exigence d’un extrait recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Fixation du prix et mise en vente du lot 6 714 202, rue Morin — 22 499 $ plus taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 202",
+    "page": 19,
+    "citation": "6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains",
+    "anchor": "6 714 202 22 499"
+   },
+   "reason": "La citation doit restituer la séparation de paragraphes entre le prix du lot et l’autorisation de mise en vente."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Vente du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger, conditionnelle à une construction dans les deux ans",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 202",
+    "page": 20,
+    "citation": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\n714 202 du cadastre du Québec",
+    "anchor": "lot numéro 6\n714 202"
+   },
+   "reason": "Le numéro cadastral est coupé par un saut de ligne dans la page 20, lequel doit être conservé dans la citation et dans son ancre exacte."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Conclusion autorisée de l’entente avec le CAD encadrant la mise à disposition d’un local municipal",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Entente de collaboration",
+    "page": 21,
+    "citation": "QUE le conseil municipal autorise la conclusion de l’Entente de collaboration entre la Municipalité\nde Notre-Dame-du-Rosaire et le Comité d’action et de développement (CAD), telle que présentée",
+    "anchor": "l’Entente de collaboration"
+   },
+   "reason": "La citation doit conserver le saut de ligne après « Municipalité » pour être identique au texte de la page 21."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Avis de motion du règlement 2026-04 modifiant le règlement de zonage 90-01",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2026-04",
+    "page": 22,
+    "citation": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04",
+    "anchor": "règlement 2026-04"
+   },
+   "reason": "La citation doit restituer le saut de ligne après la date; seul l’avis de motion est actuel, la présentation et l’adoption du premier projet étant expressément reportées à la prochaine séance."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Engagement d’installation des réseaux électrique et d’aqueduc desservant les terrains de la rue Morin",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Desserte des terrains",
+    "page": 19,
+    "citation": "QUE la municipalité s’engage à procéder à l’installation de la ligne électrique et du réseau\nd’aqueduc desservant lesdits lots",
+    "anchor": "la ligne électrique et du réseau\nd’aqueduc"
+   },
+   "reason": "La citation et l’ancre doivent conserver le saut de ligne entre « réseau » et « d’aqueduc » pour respecter les exigences de reproduction exacte."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 19,
+   "citation": "6 714 200 :19 999 $ plus taxes\n6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 19,
+   "citation": "6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 19,
+   "citation": "6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 20,
+   "citation": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\n714 202 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 21,
+   "citation": "QUE le conseil municipal autorise la conclusion de l’Entente de collaboration entre la Municipalité\nde Notre-Dame-du-Rosaire et le Comité d’action et de développement (CAD), telle que présentée"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "avis_motion",
+   "page": 22,
+   "citation": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "adoption",
+   "page": 19,
+   "citation": "QUE la municipalité s’engage à procéder à l’installation de la ligne électrique et du réseau\nd’aqueduc desservant lesdits lots"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 7
+}

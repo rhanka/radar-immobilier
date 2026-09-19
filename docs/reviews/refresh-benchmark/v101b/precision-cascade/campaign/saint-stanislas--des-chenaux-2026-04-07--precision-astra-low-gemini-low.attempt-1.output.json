@@ -1,0 +1,169 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-2009-474-06",
+   "label": "Projet de règlement 2009-474-06 — Plan d’urbanisme",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "status": "needs_review",
+   "numero": "2009-474-06",
+   "title": "Modification du règlement 2009-474 sur le plan d’urbanisme",
+   "stage": "projet",
+   "meetingDate": "2026-04-07",
+   "resolution": "2026-04-51",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "Projet de règlement numéro 2009-474-06 modifiant le règlement\n2009-474 sur le plan d’urbanisme – Adoption",
+     "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+     "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2009-475-04",
+   "label": "Projet de règlement 2009-475-04 — Permis et certificats",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "status": "candidate",
+   "numero": "2009-475-04",
+   "title": "Modification du règlement 2009-475 relatif aux permis et certificats",
+   "stage": "projet",
+   "meetingDate": "2026-04-07",
+   "resolution": "2026-04-52",
+   "objet": "Concordance avec le SADR et exigences de documents spécifiques pour les demandes de permis relatives aux éoliennes commerciales.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Projet de règlement numéro 2009-475-04 modifiant le règlement\n2009-475 relatif aux permis et certificats – Adoption",
+     "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+     "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2009-476-14",
+   "label": "Projet de règlement 2009-476-14 — Zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "status": "candidate",
+   "numero": "2009-476-14",
+   "title": "Modification du règlement de zonage 2009-476",
+   "stage": "projet",
+   "meetingDate": "2026-04-07",
+   "resolution": "2026-04-53",
+   "objet": "Concordance avec le SADR, identification des aires de protection des captages d’eaux souterraines et intégration de dispositions relatives aux éoliennes commerciales.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "Projet de règlement numéro 2009-476-14 modifiant le règlement de\nzonage 2009-476 – Adoption",
+     "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+     "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-opposition-eoliennes",
+   "label": "Appui à la demande de résiliation de l’entente avec TES Mauricie H2 inc.",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "status": "candidate",
+   "category": "opposition_projet",
+   "date": "2026-04-07",
+   "resolution": "2026-04-62",
+   "description": "Le conseil appuie la résolution 2026-03-32 de Saint-Séverin-de-Proulxville demandant à la MRC de Mékinac de résilier l’entente avec TES Mauricie H2 inc. Le procès-verbal rappelle l’opposition municipale à l’implantation d’éoliennes sur son territoire.",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "CONSIDÉRANT la volonté clairement exprimée par la Municipalité\nde Saint-Stanislas de s’opposer au projet d’implantation d’éoliennes sur\nson territoire ;",
+     "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+     "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 11,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas appuie la résolution 2026-03-32",
+     "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+     "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-vente-taxes",
+   "label": "Autorisation d’enchérir à la vente pour taxes du 11 juin 2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "status": "candidate",
+   "category": "vente_pour_taxes",
+   "date": "2026-04-07",
+   "resolution": "2026-04-50",
+   "description": "Autorisation donnée à la directrice générale, ou au maire comme substitut, d’enchérir et d’acquérir les immeubles identifiés en annexe dont les taxes demeurent impayées à la vente du 11 juin 2026, selon les maximums indiqués en annexe. Les immeubles et montants ne sont pas détaillés dans le texte fourni.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par Dominique Cossette et\nrésolu à l’unanimité des conseillers présents que la Municipalité de\nSaint-Stanislas autorise:",
+     "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+     "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+     "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-474",
+   "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+   "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "Projet de règlement numéro 2009-474-06 modifiant le règlement\n2009-474 sur le plan d’urbanisme – Adoption"
+  },
+  {
+   "id": "ev-475",
+   "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+   "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "Projet de règlement numéro 2009-475-04 modifiant le règlement\n2009-475 relatif aux permis et certificats – Adoption"
+  },
+  {
+   "id": "ev-476",
+   "source_file": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "rawRef": "raw/proces-verbaux-saint-stanislas--des-chenaux/cas/0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab.pdf",
+   "docSha": "0f3149bf08da39ceb9a0db01bd18a432f26586aa7017a1b265f13de4a08e22ab",
+   "sourceUrl": "https://www.saint-stanislas.ca/upload/seances-du-conseil/proces-verbaux/pv_-2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "Projet de règlement numéro 2009-476-14 modifiant le règlement de\nzonage 2009-476 – Adoption"
+  }
+ ],
+ "input_tokens": 13500,
+ "output_tokens": 3900
+}

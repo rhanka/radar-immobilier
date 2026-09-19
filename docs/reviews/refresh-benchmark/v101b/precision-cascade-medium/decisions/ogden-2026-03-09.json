@@ -1,0 +1,325 @@
+{
+ "documentId": "ogden-2026-03-09",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ec1f0eed925cd2a76450c15421b032f40f683a400a6ee68d8fbf861c51405b52",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "derogations-905-descente-2"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de deux dérogations mineures au 905 Descente 2",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Demande de deux (2) dérogations mineures au 905 Descente 2"
+      },
+      {
+       "page": 1,
+       "excerpt": "Demande de deux (2) dérogations mineures au 905 Descente 2"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "piia-2050-marlington"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+      },
+      {
+       "page": 1,
+       "excerpt": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "piia-3695-stanstead"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+      },
+      {
+       "page": 1,
+       "excerpt": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2025-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage no. 2025-05",
+     "stage": null,
+     "objet": "2025-05",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+      },
+      {
+       "page": 1,
+       "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-enregistrement-2025-05"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Dépôt prévu du certificat de procédure d’enregistrement — zonage 2025-05",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+      },
+      {
+       "page": 1,
+       "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-2026-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement no. 2026.05 sur l’occupation et l’entretien des bâtiments",
+     "stage": "projet",
+     "objet": "2026.05",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+      },
+      {
+       "page": 2,
+       "excerpt": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+      },
+      {
+       "page": 1,
+       "excerpt": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+      },
+      {
+       "page": 2,
+       "excerpt": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-conformite-urbanisme"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Dépôt prévu des certificats de conformité de la MRC",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme"
+      },
+      {
+       "page": 1,
+       "excerpt": "Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-vente-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Liste prévue des propriétés à vendre pour défaut de paiement de taxes",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Liste des propriétés à vendre pour défaut de paiement de taxes"
+      },
+      {
+       "page": 1,
+       "excerpt": "Liste des propriétés à vendre pour défaut de paiement de taxes"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.3 de l'ordre du jour prévoit l'examen d'une demande de deux dérogations mineures au 905 Descente 2.\",\"excerpt\":\"Demande de deux (2) dérogations mineures au 905 Descente 2\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.4 de l'ordre du jour concerne une demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington.\",\"excerpt\":\"Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.5 de l'ordre du jour concerne une demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead.\",\"excerpt\":\"Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.7 mentionne le dépôt du certificat de procédure d'enregistrement sur le règlement de zonage 2025-05.\",\"excerpt\":\"Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des\\npersonnes habiles à voter sur le Règlement de zonage no. 2025-05\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour atteste la formalité prévue du dépôt du certificat d'enregistrement pour le règlement de zonage 2025-05.\",\"excerpt\":\"Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des\\npersonnes habiles à voter sur le Règlement de zonage no. 2025-05\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Les points 13.3 et 13.4 prévoient l'avis de motion et l'adoption du projet de règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments.\",\"excerpt\":\"Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des\\nbâtiments\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.6 prévoit le dépôt des certificats de conformité de la MRC pour les règlements d'urbanisme.\",\"excerpt\":\"Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le point 9.4 prévoit le dépôt ou traitement de la liste des propriétés à vendre pour défaut de paiement de taxes.\",\"excerpt\":\"Liste des propriétés à vendre pour défaut de paiement de taxes\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 6.3 de l'ordre du jour prévoit l'examen d'une demande de deux dérogations mineures au 905 Descente 2.",
+   "excerpt": "Demande de deux (2) dérogations mineures au 905 Descente 2"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 6.4 de l'ordre du jour concerne une demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington.",
+   "excerpt": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 6.5 de l'ordre du jour concerne une demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead.",
+   "excerpt": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 6.7 mentionne le dépôt du certificat de procédure d'enregistrement sur le règlement de zonage 2025-05.",
+   "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des\npersonnes habiles à voter sur le Règlement de zonage no. 2025-05"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour atteste la formalité prévue du dépôt du certificat d'enregistrement pour le règlement de zonage 2025-05.",
+   "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des\npersonnes habiles à voter sur le Règlement de zonage no. 2025-05"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Les points 13.3 et 13.4 prévoient l'avis de motion et l'adoption du projet de règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments.",
+   "excerpt": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des\nbâtiments"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le point 6.6 prévoit le dépôt des certificats de conformité de la MRC pour les règlements d'urbanisme.",
+   "excerpt": "Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le point 9.4 prévoit le dépôt ou traitement de la liste des propriétés à vendre pour défaut de paiement de taxes.",
+   "excerpt": "Liste des propriétés à vendre pour défaut de paiement de taxes"
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 6.3 de l'ordre du jour prévoit l'examen d'une demande de deux dérogations mineures au 905 Descente 2."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 6.4 de l'ordre du jour concerne une demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 6.5 de l'ordre du jour concerne une demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 6.7 mentionne le dépôt du certificat de procédure d'enregistrement sur le règlement de zonage 2025-05."
+   },
+   {
+    "act": "A05",
+    "reason": "L'ordre du jour atteste la formalité prévue du dépôt du certificat d'enregistrement pour le règlement de zonage 2025-05."
+   },
+   {
+    "act": "A06",
+    "reason": "Les points 13.3 et 13.4 prévoient l'avis de motion et l'adoption du projet de règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments."
+   },
+   {
+    "act": "A07",
+    "reason": "Le point 6.6 prévoit le dépôt des certificats de conformité de la MRC pour les règlements d'urbanisme."
+   },
+   {
+    "act": "A08",
+    "reason": "Le point 9.4 prévoit le dépôt ou traitement de la liste des propriétés à vendre pour défaut de paiement de taxes."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4148,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3558,
+   "outputTokens": 578,
+   "totalTokens": 4136
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3992
+  },
+  "inputSha256": "dd5c1d71d2352e22c0be485d25f13f3ac990ae284fc68f01d836b1137c16f7d7"
+ }
+}

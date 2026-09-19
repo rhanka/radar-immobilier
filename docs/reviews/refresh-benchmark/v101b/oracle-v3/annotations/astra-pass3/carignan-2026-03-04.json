@@ -1,0 +1,478 @@
+{
+ "documentId": "carignan-2026-03-04",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "e9910d7e6cb4ece190c5439a6d363bba8126bec835eff740f5efb8254153653c",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis favorable sous réserves — Planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"Planification des besoins d'espace 2026\",\n        \"page\": 6,\n        \"citation\": \"QUE le Conseil municipal donne un avis favorable au projet de\\nPlanification des besoins d'espace 2026 du Centre de services\\nscolaire des Patriotes, sous réserves des clarifications\\ndemandées :\",\n        \"anchor\": \"Planification des besoins d'espace 2026\"\n      },\n      \"reason\": \"La résolution constate un avis favorable sous réserves dans le processus de planification des acquisitions et cessions d'immeubles scolaires décrit aux pages 5 et 6, sans autoriser encore une cession.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Autorisation de l'acte de vente définitif — lots 2 597 876, 2 598 251 et 2 599 459\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2 597 876, 2 598 251 et 2 599 459\",\n        \"page\": 14,\n        \"citation\": \"D'AUTORISER le maire ou en son absence, la mairesse\\nsuppléante, et la greffière à signer pour et au nom de la Ville, l'acte\\nde vente définitif des lots 2 597 876, 2 598 251 et 2 599 459\",\n        \"anchor\": \"lots 2 597 876, 2 598 251 et 2 599 459\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne du texte pour être recopiée à l'identique; les lots indiqués dans la décision demeurent inchangés.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Autorisation de l'acte de vente définitif — lot 6 504 999\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 504 999\",\n        \"page\": 14,\n        \"citation\": \"D'AUTORISER le maire ou en son absence, la mairesse\\nsuppléante, et la greffière à signer pour et au nom de la Ville, l'acte\\nde vente définitif du lot 6 504 999\",\n        \"anchor\": \"lot 6 504 999\"\n      },\n      \"reason\": \"La citation actuelle remplace les sauts de ligne par des espaces, contrairement à l'exigence de reproduction à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Approbation de la dérogation mineure 2026-007 — remise en cour avant au 1621, rue des Roses\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-007\",\n        \"page\": 20,\n        \"citation\": \"D'APPROUVER la demande de de dérogation mineure 2026-007\\ndans le but d'autoriser l'implantation d'une remise en cour avant\\nde la résidence située du 1621, rue des Roses, sur le lot\\n2 600 386\",\n        \"anchor\": \"dérogation mineure 2026-007\"\n      },\n      \"reason\": \"La citation doit reproduire les sauts de ligne de la décision, y compris celui précédant le numéro de lot.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Approbation conditionnelle de la dérogation mineure 2026-013 — conteneurs au 150, rue de l'Aigle\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-013\",\n        \"page\": 21,\n        \"citation\": \"D'APPROUVER la demande de dérogation mineure 2026-013\\nconcernant l'installation de conteneurs semi-enfouis en cour avant\\nde la propriété située au 150, rue de l'Aigle, sur le lot 6 630 145\",\n        \"anchor\": \"dérogation mineure 2026-013\"\n      },\n      \"reason\": \"La citation actuelle n'est pas identique au texte fourni puisque ses sauts de ligne ont été remplacés par des espaces.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Approbation de la dérogation mineure 2025-113 — emprise au sol de 24 % au 2157, rue des Roses\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2025-113\",\n        \"page\": 22,\n        \"citation\": \"D'APPROUVER la demande de dérogation mineure 2025-113\\ndans le but de permettre un coefficient d'emprise au sol de 24 %\",\n        \"anchor\": \"dérogation mineure 2025-113\"\n      },\n      \"reason\": \"La citation est rétablie à l'identique avec son saut de ligne et prolongée jusqu'au signe de pourcentage pour attester clairement la valeur autorisée.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Approbation conditionnelle du PIIA 2025-015 — agrandissement au 2157, rue des Roses\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-015\",\n        \"page\": 22,\n        \"citation\": \"D'APPROUVER la demande de PIIA 2025-015 concernant\\nl'agrandissement de la résidence unifamiliale isolée située au\\n2157, rue des Roses, sur le lot 2 600 450\",\n        \"anchor\": \"demande de PIIA 2025-015\"\n      },\n      \"reason\": \"Les sauts de ligne doivent être conservés pour respecter la règle de citation recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2025-121 — rénovations au 2167, rue des Roses\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-121\",\n        \"page\": 22,\n        \"citation\": \"D'APPROUVER la demande de PIIA 2025-121 concernant les\\nrénovations de la résidence unifamiliale isolée située au 2167, rue\\ndes Roses, sur le lot 2 600 445\",\n        \"anchor\": \"demande de PIIA 2025-121\"\n      },\n      \"reason\": \"La citation actuelle normalise les sauts de ligne alors que l'extrait doit être reproduit à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2025-125 — revêtements extérieurs au 4400, chemin Bellerive\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-125\",\n        \"page\": 23,\n        \"citation\": \"D'APPROUVER la demande de PIIA 2025-125 concernant le\\nremplacement de certains revêtements extérieurs de la résidence\\nsituée au 4400, chemin Bellerive, sur le lot 5 357 275\",\n        \"anchor\": \"demande de PIIA 2025-125\"\n      },\n      \"reason\": \"La correction restitue les sauts de ligne requis par l'exigence de citation à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2025-126 — revêtement extérieur au 1463, rue Marie-Gendron\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-126\",\n        \"page\": 23,\n        \"citation\": \"D'APPROUVER la demande de PIIA 2025-126 concernant le\\nremplacement du revêtement léger extérieur de la résidence\\nsituée au 1463, rue Marie-Gendron, sur le lot 2 601 260\",\n        \"anchor\": \"demande de PIIA 2025-126\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne présents dans la décision.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u11\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2025-128 — bâtiment patrimonial au 3968, chemin Sainte-Thérèse\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-128\",\n        \"page\": 24,\n        \"citation\": \"D'APPROUVER la demande de PIIA 2025-128 concernant le\\nremplacement du revêtement extérieur sur un bâtiment\\npatrimonial située au 3968, chemin Sainte-Thérèse, sur le lot 2\\n344 856\",\n        \"anchor\": \"demande de PIIA 2025-128\"\n      },\n      \"reason\": \"L'extrait doit être recopié à l'identique, notamment avec le saut de ligne à l'intérieur du numéro de lot.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u12\",\n      \"unit\": {\n        \"label\": \"Refus du PIIA 2026-001 — revêtement et fenêtres au 4639, rue de l'Île-Sainte-Marie\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-001\",\n        \"page\": 24,\n        \"citation\": \"DE REFUSER la demande de PIIA 2026-001 consistant au\\nremplacement du revêtement en clin par un revêtement\\nd'acrylique ainsi que le remplacement de deux fenêtres\",\n        \"anchor\": \"demande de PIIA 2026-001\"\n      },\n      \"reason\": \"La correction rétablit uniquement les sauts de ligne de la citation, en conservant le refus explicitement décidé.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u13\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-002 — résidence avec studio au 2014-2016, rue Étienne-Provost\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-002\",\n        \"page\": 25,\n        \"citation\": \"D'APPROUVER la demande de PIIA 2026-002 concernant la\\nconstruction d'une résidence unifamiliale isolée comprenant une\\nunité d'habitation accessoire attachée de type studio\",\n        \"anchor\": \"demande de PIIA 2026-002\"\n      },\n      \"reason\": \"La citation doit reproduire les sauts de ligne du document plutôt que les remplacer par des espaces.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u14\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-004 — résidence avec studio au 2018-2020, rue Étienne-Provost\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-004\",\n        \"page\": 25,\n        \"citation\": \"D'APPROUVER la demande de PIIA 2026-004 concernant la\\nconstruction d'une résidence unifamiliale isolée comprenant une\\nunité d'habitation accessoire attachée de type studio\",\n        \"anchor\": \"demande de PIIA 2026-004\"\n      },\n      \"reason\": \"La correction restitue les sauts de ligne pour rendre la citation identique au texte fourni.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u15\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-005 — résidence avec studio au 2011-2013, rue Liliane Ouest\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-005\",\n        \"page\": 26,\n        \"citation\": \"D'APPROUVER la demande de PIIA 2026-005 concernant la\\nconstruction d'une résidence unifamiliale isolée comprenant une\\nunité d'habitation accessoire attachée de type studio\",\n        \"anchor\": \"demande de PIIA 2026-005\"\n      },\n      \"reason\": \"Les sauts de ligne de l'extrait doivent être conservés conformément à la règle de reproduction à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u16\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-006 — résidence avec studio au 2015-2017, rue Liliane Ouest\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-006\",\n        \"page\": 26,\n        \"citation\": \"D'APPROUVER la demande de PIIA 2026-006 concernant la\\nconstruction d'une résidence unifamiliale isolée comprenant une\\nunité d'habitation accessoire attachée de type studio\",\n        \"anchor\": \"demande de PIIA 2026-006\"\n      },\n      \"reason\": \"La citation actuelle remplace les sauts de ligne par des espaces et doit donc être rétablie à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u17\",\n      \"unit\": {\n        \"label\": \"Autorisation du protocole d'utilisation des immeubles — Centre de services scolaire des Patriotes\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"utilisation des immeubles\",\n        \"page\": 29,\n        \"citation\": \"à signer pour et au nom de la Ville de\\nCarignan, le protocole d'entente d'utilisation des immeubles et de\\nl'équipement à des fins sportives, récréatives, culturelles et\\ncommunautaires\",\n        \"anchor\": \"protocole d'entente d'utilisation des immeubles\"\n      },\n      \"reason\": \"La citation du protocole d'utilisation immobilière doit conserver les sauts de ligne du texte fourni.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u18\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 483-41-U — sécurité des piscines et usages des zones IDI-489 et IDI-490\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"483-41-U\",\n        \"page\": 33,\n        \"citation\": \"D'ADOPTER, pour valoir à toutes fins que de droit, le Règlement\\nnuméro 483-41-U modifiant le règlement de zonage numéro 483U\",\n        \"anchor\": \"numéro 483-41-U\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne après « Règlement » pour être identique à la décision.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u19\",\n      \"unit\": {\n        \"label\": \"Acceptation de l'offre de GemDev et autorisation de vente — lots 2 597 589 et 6 508 688\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2 597 589 et 6 508 688\",\n        \"page\": 34,\n        \"citation\": \"D'AUTORISER le maire ou en son absence, la mairesse\\nsuppléante, et la greffière à signer pour et au nom de la Ville,\\nl'offre d'achat et l'acte de vente des lots 2 597 589 et 6 508 688\",\n        \"anchor\": \"lots 2 597 589 et 6 508 688\"\n      },\n      \"reason\": \"La correction rétablit les sauts de ligne de l'autorisation afin de respecter l'exigence de citation recopiée à l'identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis favorable sous réserves — Planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Planification des besoins d'espace 2026",
+    "page": 6,
+    "citation": "QUE le Conseil municipal donne un avis favorable au projet de\nPlanification des besoins d'espace 2026 du Centre de services\nscolaire des Patriotes, sous réserves des clarifications\ndemandées :",
+    "anchor": "Planification des besoins d'espace 2026"
+   },
+   "reason": "La résolution constate un avis favorable sous réserves dans le processus de planification des acquisitions et cessions d'immeubles scolaires décrit aux pages 5 et 6, sans autoriser encore une cession."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Autorisation de l'acte de vente définitif — lots 2 597 876, 2 598 251 et 2 599 459",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2 597 876, 2 598 251 et 2 599 459",
+    "page": 14,
+    "citation": "D'AUTORISER le maire ou en son absence, la mairesse\nsuppléante, et la greffière à signer pour et au nom de la Ville, l'acte\nde vente définitif des lots 2 597 876, 2 598 251 et 2 599 459",
+    "anchor": "lots 2 597 876, 2 598 251 et 2 599 459"
+   },
+   "reason": "La citation doit conserver les sauts de ligne du texte pour être recopiée à l'identique; les lots indiqués dans la décision demeurent inchangés."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Autorisation de l'acte de vente définitif — lot 6 504 999",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 504 999",
+    "page": 14,
+    "citation": "D'AUTORISER le maire ou en son absence, la mairesse\nsuppléante, et la greffière à signer pour et au nom de la Ville, l'acte\nde vente définitif du lot 6 504 999",
+    "anchor": "lot 6 504 999"
+   },
+   "reason": "La citation actuelle remplace les sauts de ligne par des espaces, contrairement à l'exigence de reproduction à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Approbation de la dérogation mineure 2026-007 — remise en cour avant au 1621, rue des Roses",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-007",
+    "page": 20,
+    "citation": "D'APPROUVER la demande de de dérogation mineure 2026-007\ndans le but d'autoriser l'implantation d'une remise en cour avant\nde la résidence située du 1621, rue des Roses, sur le lot\n2 600 386",
+    "anchor": "dérogation mineure 2026-007"
+   },
+   "reason": "La citation doit reproduire les sauts de ligne de la décision, y compris celui précédant le numéro de lot."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Approbation conditionnelle de la dérogation mineure 2026-013 — conteneurs au 150, rue de l'Aigle",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-013",
+    "page": 21,
+    "citation": "D'APPROUVER la demande de dérogation mineure 2026-013\nconcernant l'installation de conteneurs semi-enfouis en cour avant\nde la propriété située au 150, rue de l'Aigle, sur le lot 6 630 145",
+    "anchor": "dérogation mineure 2026-013"
+   },
+   "reason": "La citation actuelle n'est pas identique au texte fourni puisque ses sauts de ligne ont été remplacés par des espaces."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Approbation de la dérogation mineure 2025-113 — emprise au sol de 24 % au 2157, rue des Roses",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2025-113",
+    "page": 22,
+    "citation": "D'APPROUVER la demande de dérogation mineure 2025-113\ndans le but de permettre un coefficient d'emprise au sol de 24 %",
+    "anchor": "dérogation mineure 2025-113"
+   },
+   "reason": "La citation est rétablie à l'identique avec son saut de ligne et prolongée jusqu'au signe de pourcentage pour attester clairement la valeur autorisée."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA 2025-015 — agrandissement au 2157, rue des Roses",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-015",
+    "page": 22,
+    "citation": "D'APPROUVER la demande de PIIA 2025-015 concernant\nl'agrandissement de la résidence unifamiliale isolée située au\n2157, rue des Roses, sur le lot 2 600 450",
+    "anchor": "demande de PIIA 2025-015"
+   },
+   "reason": "Les sauts de ligne doivent être conservés pour respecter la règle de citation recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Approbation du PIIA 2025-121 — rénovations au 2167, rue des Roses",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-121",
+    "page": 22,
+    "citation": "D'APPROUVER la demande de PIIA 2025-121 concernant les\nrénovations de la résidence unifamiliale isolée située au 2167, rue\ndes Roses, sur le lot 2 600 445",
+    "anchor": "demande de PIIA 2025-121"
+   },
+   "reason": "La citation actuelle normalise les sauts de ligne alors que l'extrait doit être reproduit à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Approbation du PIIA 2025-125 — revêtements extérieurs au 4400, chemin Bellerive",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-125",
+    "page": 23,
+    "citation": "D'APPROUVER la demande de PIIA 2025-125 concernant le\nremplacement de certains revêtements extérieurs de la résidence\nsituée au 4400, chemin Bellerive, sur le lot 5 357 275",
+    "anchor": "demande de PIIA 2025-125"
+   },
+   "reason": "La correction restitue les sauts de ligne requis par l'exigence de citation à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Approbation du PIIA 2025-126 — revêtement extérieur au 1463, rue Marie-Gendron",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-126",
+    "page": 23,
+    "citation": "D'APPROUVER la demande de PIIA 2025-126 concernant le\nremplacement du revêtement léger extérieur de la résidence\nsituée au 1463, rue Marie-Gendron, sur le lot 2 601 260",
+    "anchor": "demande de PIIA 2025-126"
+   },
+   "reason": "La citation doit conserver les sauts de ligne présents dans la décision."
+  },
+  {
+   "op": "correct",
+   "id": "u11",
+   "unit": {
+    "label": "Approbation du PIIA 2025-128 — bâtiment patrimonial au 3968, chemin Sainte-Thérèse",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-128",
+    "page": 24,
+    "citation": "D'APPROUVER la demande de PIIA 2025-128 concernant le\nremplacement du revêtement extérieur sur un bâtiment\npatrimonial située au 3968, chemin Sainte-Thérèse, sur le lot 2\n344 856",
+    "anchor": "demande de PIIA 2025-128"
+   },
+   "reason": "L'extrait doit être recopié à l'identique, notamment avec le saut de ligne à l'intérieur du numéro de lot."
+  },
+  {
+   "op": "correct",
+   "id": "u12",
+   "unit": {
+    "label": "Refus du PIIA 2026-001 — revêtement et fenêtres au 4639, rue de l'Île-Sainte-Marie",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-001",
+    "page": 24,
+    "citation": "DE REFUSER la demande de PIIA 2026-001 consistant au\nremplacement du revêtement en clin par un revêtement\nd'acrylique ainsi que le remplacement de deux fenêtres",
+    "anchor": "demande de PIIA 2026-001"
+   },
+   "reason": "La correction rétablit uniquement les sauts de ligne de la citation, en conservant le refus explicitement décidé."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "Approbation du PIIA 2026-002 — résidence avec studio au 2014-2016, rue Étienne-Provost",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-002",
+    "page": 25,
+    "citation": "D'APPROUVER la demande de PIIA 2026-002 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio",
+    "anchor": "demande de PIIA 2026-002"
+   },
+   "reason": "La citation doit reproduire les sauts de ligne du document plutôt que les remplacer par des espaces."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "Approbation du PIIA 2026-004 — résidence avec studio au 2018-2020, rue Étienne-Provost",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-004",
+    "page": 25,
+    "citation": "D'APPROUVER la demande de PIIA 2026-004 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio",
+    "anchor": "demande de PIIA 2026-004"
+   },
+   "reason": "La correction restitue les sauts de ligne pour rendre la citation identique au texte fourni."
+  },
+  {
+   "op": "correct",
+   "id": "u15",
+   "unit": {
+    "label": "Approbation du PIIA 2026-005 — résidence avec studio au 2011-2013, rue Liliane Ouest",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-005",
+    "page": 26,
+    "citation": "D'APPROUVER la demande de PIIA 2026-005 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio",
+    "anchor": "demande de PIIA 2026-005"
+   },
+   "reason": "Les sauts de ligne de l'extrait doivent être conservés conformément à la règle de reproduction à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u16",
+   "unit": {
+    "label": "Approbation du PIIA 2026-006 — résidence avec studio au 2015-2017, rue Liliane Ouest",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-006",
+    "page": 26,
+    "citation": "D'APPROUVER la demande de PIIA 2026-006 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio",
+    "anchor": "demande de PIIA 2026-006"
+   },
+   "reason": "La citation actuelle remplace les sauts de ligne par des espaces et doit donc être rétablie à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u17",
+   "unit": {
+    "label": "Autorisation du protocole d'utilisation des immeubles — Centre de services scolaire des Patriotes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "utilisation des immeubles",
+    "page": 29,
+    "citation": "à signer pour et au nom de la Ville de\nCarignan, le protocole d'entente d'utilisation des immeubles et de\nl'équipement à des fins sportives, récréatives, culturelles et\ncommunautaires",
+    "anchor": "protocole d'entente d'utilisation des immeubles"
+   },
+   "reason": "La citation du protocole d'utilisation immobilière doit conserver les sauts de ligne du texte fourni."
+  },
+  {
+   "op": "correct",
+   "id": "u18",
+   "unit": {
+    "label": "Adoption du règlement 483-41-U — sécurité des piscines et usages des zones IDI-489 et IDI-490",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "483-41-U",
+    "page": 33,
+    "citation": "D'ADOPTER, pour valoir à toutes fins que de droit, le Règlement\nnuméro 483-41-U modifiant le règlement de zonage numéro 483U",
+    "anchor": "numéro 483-41-U"
+   },
+   "reason": "La citation doit conserver le saut de ligne après « Règlement » pour être identique à la décision."
+  },
+  {
+   "op": "correct",
+   "id": "u19",
+   "unit": {
+    "label": "Acceptation de l'offre de GemDev et autorisation de vente — lots 2 597 589 et 6 508 688",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2 597 589 et 6 508 688",
+    "page": 34,
+    "citation": "D'AUTORISER le maire ou en son absence, la mairesse\nsuppléante, et la greffière à signer pour et au nom de la Ville,\nl'offre d'achat et l'acte de vente des lots 2 597 589 et 6 508 688",
+    "anchor": "lots 2 597 589 et 6 508 688"
+   },
+   "reason": "La correction rétablit les sauts de ligne de l'autorisation afin de respecter l'exigence de citation recopiée à l'identique."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u20"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 14,
+   "citation": "D'AUTORISER le maire ou en son absence, la mairesse\nsuppléante, et la greffière à signer pour et au nom de la Ville, l'acte\nde vente définitif des lots 2 597 876, 2 598 251 et 2 599 459"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 14,
+   "citation": "D'AUTORISER le maire ou en son absence, la mairesse\nsuppléante, et la greffière à signer pour et au nom de la Ville, l'acte\nde vente définitif du lot 6 504 999"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "derogation_mineure",
+   "page": 20,
+   "citation": "D'APPROUVER la demande de de dérogation mineure 2026-007\ndans le but d'autoriser l'implantation d'une remise en cour avant\nde la résidence située du 1621, rue des Roses, sur le lot\n2 600 386"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "derogation_mineure",
+   "page": 21,
+   "citation": "D'APPROUVER la demande de dérogation mineure 2026-013\nconcernant l'installation de conteneurs semi-enfouis en cour avant\nde la propriété située au 150, rue de l'Aigle, sur le lot 6 630 145"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "derogation_mineure",
+   "page": 22,
+   "citation": "D'APPROUVER la demande de dérogation mineure 2025-113\ndans le but de permettre un coefficient d'emprise au sol de 24 %"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "piia",
+   "page": 22,
+   "citation": "D'APPROUVER la demande de PIIA 2025-015 concernant\nl'agrandissement de la résidence unifamiliale isolée située au\n2157, rue des Roses, sur le lot 2 600 450"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "piia",
+   "page": 22,
+   "citation": "D'APPROUVER la demande de PIIA 2025-121 concernant les\nrénovations de la résidence unifamiliale isolée située au 2167, rue\ndes Roses, sur le lot 2 600 445"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "piia",
+   "page": 23,
+   "citation": "D'APPROUVER la demande de PIIA 2025-125 concernant le\nremplacement de certains revêtements extérieurs de la résidence\nsituée au 4400, chemin Bellerive, sur le lot 5 357 275"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "piia",
+   "page": 23,
+   "citation": "D'APPROUVER la demande de PIIA 2025-126 concernant le\nremplacement du revêtement léger extérieur de la résidence\nsituée au 1463, rue Marie-Gendron, sur le lot 2 601 260"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u11",
+   "stage": "piia",
+   "page": 24,
+   "citation": "D'APPROUVER la demande de PIIA 2025-128 concernant le\nremplacement du revêtement extérieur sur un bâtiment\npatrimonial située au 3968, chemin Sainte-Thérèse, sur le lot 2\n344 856"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u12",
+   "stage": "piia",
+   "page": 24,
+   "citation": "DE REFUSER la demande de PIIA 2026-001 consistant au\nremplacement du revêtement en clin par un revêtement\nd'acrylique ainsi que le remplacement de deux fenêtres"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 12,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "piia",
+   "page": 25,
+   "citation": "D'APPROUVER la demande de PIIA 2026-002 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 13,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "piia",
+   "page": 25,
+   "citation": "D'APPROUVER la demande de PIIA 2026-004 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 14,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u15",
+   "stage": "piia",
+   "page": 26,
+   "citation": "D'APPROUVER la demande de PIIA 2026-005 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 15,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u16",
+   "stage": "piia",
+   "page": 26,
+   "citation": "D'APPROUVER la demande de PIIA 2026-006 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 16,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u17",
+   "stage": "inconnu",
+   "page": 29,
+   "citation": "à signer pour et au nom de la Ville de\nCarignan, le protocole d'entente d'utilisation des immeubles et de\nl'équipement à des fins sportives, récréatives, culturelles et\ncommunautaires"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 17,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u18",
+   "stage": "adoption",
+   "page": 33,
+   "citation": "D'ADOPTER, pour valoir à toutes fins que de droit, le Règlement\nnuméro 483-41-U modifiant le règlement de zonage numéro 483U"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 18,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u19",
+   "stage": "adoption",
+   "page": 34,
+   "citation": "D'AUTORISER le maire ou en son absence, la mairesse\nsuppléante, et la greffière à signer pour et au nom de la Ville,\nl'offre d'achat et l'acte de vente des lots 2 597 589 et 6 508 688"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 19
+}

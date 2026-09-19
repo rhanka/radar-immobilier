@@ -1,0 +1,101 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "5f1bbf77aaa39f7204ab1991b2718224156c3ee2009dc6d1c608098c890f4d79",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-59 approuve, page 43, le PIIA de l’aire de stationnement du lot 6 474 528 sous condition de gestion des eaux pluviales, sans étendre le PIIA aux bâtiments.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-60 approuve, page 45, les rénovations au 2197-2199, chemin du Parc, conditionnellement au dépôt d’un plan d’aménagement paysager avant la délivrance du permis ou du certificat.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le tableau de la résolution 2026-03-61, adoptée page 46, nomme explicitement le lot 6 521 680 parmi les lots assujettis à une contribution exigée en argent.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le lot 6 449 130 est explicitement nommé dans le tableau des contributions exigées en argent de la résolution 2026-03-61, adoptée page 46.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le dispositif de la résolution 2026-03-62 demande expressément, page 47, la modification du RCI 16-21 pour intégrer le lot 3 787 898 au secteur de consolidation, sans constater l’adoption de cette modification.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le schéma d’aménagement est identifié comme le Règlement 16-23 dans la citation de la page 46, et sa modification pour intégrer le lot 3 787 898 est expressément demandée dans le dispositif de la page 47.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-46 autorise, page 5, la transmission de la liste des immeubles admissibles à la vente pour taxes, ce qui atteste une étape de procédure foncière et non une vente déjà réalisée.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-47, adoptée page 5, autorise expressément la greffière ou le directeur général à enchérir et à acquérir des immeubles lors de la vente pour taxes du 11 juin 2026, sans affirmer qu’une acquisition a déjà eu lieu.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "absent"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-59 approuve, page 43, le PIIA de l’aire de stationnement du lot 6 474 528 sous condition de gestion des eaux pluviales, sans étendre le PIIA aux bâtiments."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-60 approuve, page 45, les rénovations au 2197-2199, chemin du Parc, conditionnellement au dépôt d’un plan d’aménagement paysager avant la délivrance du permis ou du certificat."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le tableau de la résolution 2026-03-61, adoptée page 46, nomme explicitement le lot 6 521 680 parmi les lots assujettis à une contribution exigée en argent."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le lot 6 449 130 est explicitement nommé dans le tableau des contributions exigées en argent de la résolution 2026-03-61, adoptée page 46."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 2026-03-62 demande expressément, page 47, la modification du RCI 16-21 pour intégrer le lot 3 787 898 au secteur de consolidation, sans constater l’adoption de cette modification."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le schéma d’aménagement est identifié comme le Règlement 16-23 dans la citation de la page 46, et sa modification pour intégrer le lot 3 787 898 est expressément demandée dans le dispositif de la page 47."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-46 autorise, page 5, la transmission de la liste des immeubles admissibles à la vente pour taxes, ce qui atteste une étape de procédure foncière et non une vente déjà réalisée."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-47, adoptée page 5, autorise expressément la greffière ou le directeur général à enchérir et à acquérir des immeubles lors de la vente pour taxes du 11 juin 2026, sans affirmer qu’une acquisition a déjà eu lieu."
+  }
+ ]
+}

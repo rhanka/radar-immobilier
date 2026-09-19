@@ -1,0 +1,41 @@
+{
+ "documentId": "lac-etchemin-2026-02-03",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "d35ebfd9a268081ce8cb8d54fd89837c3d38338f1e6f32a84ad088f635486153",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 045-02-2026 approuve explicitement la dérogation mineure 2026-175 à la page 10, et son intitulé à la page 9 confirme le 304, avenue du Ruisseau et le lot 3 601 426.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 046-02-2026, à la page 10, est explicitement intitulée « Adoption d’un projet de résolution » et contient la citation proposée concernant le PPCMOI 2026-157 pour la vente de trailers et remorques au 1646, route 277, ce qui atteste l’étape de projet plutôt qu’une autorisation définitive.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 045-02-2026 approuve explicitement la dérogation mineure 2026-175 à la page 10, et son intitulé à la page 9 confirme le 304, avenue du Ruisseau et le lot 3 601 426."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 046-02-2026, à la page 10, est explicitement intitulée « Adoption d’un projet de résolution » et contient la citation proposée concernant le PPCMOI 2026-157 pour la vente de trailers et remorques au 1646, route 277, ce qui atteste l’étape de projet plutôt qu’une autorisation définitive."
+  }
+ ]
+}

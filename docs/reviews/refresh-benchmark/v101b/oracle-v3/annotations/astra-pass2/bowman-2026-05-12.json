@@ -1,0 +1,76 @@
+{
+ "documentId": "bowman-2026-05-12",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "96b3bbd4341598c96b0769d2638ac422258189938435b7069c90508288aac6c7",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure acceptée — 2, chemin du Lac-Morin — marge avant de 4,55 mètres pour une remise\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2, chemin du Lac-Morin\",\n        \"page\": 6,\n        \"citation\": \"QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation\\nmineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée\",\n        \"anchor\": \"2, chemin du Lac-Morin\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte de la page 6 comporte un saut de ligne entre « dérogation » et « mineure ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure acceptée — 115 B, route 307 — déplacement d’un bâtiment complémentaire\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"115 B, route 307\",\n        \"page\": 7,\n        \"citation\": \"QUE le conseil municipal de la Municipalité de Bowman accepte la demande de\\ndérogation mineure pour la propriété située au 115 B, route 307\",\n        \"anchor\": \"115 B, route 307\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte de la page 7 comporte un saut de ligne entre « demande de » et « dérogation mineure ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Dérogation mineure acceptée — 2, chemin du Lac-Morin — marge avant de 4,55 mètres pour une remise",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2, chemin du Lac-Morin",
+    "page": 6,
+    "citation": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation\nmineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée",
+    "anchor": "2, chemin du Lac-Morin"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 6 comporte un saut de ligne entre « dérogation » et « mineure »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Dérogation mineure acceptée — 115 B, route 307 — déplacement d’un bâtiment complémentaire",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "115 B, route 307",
+    "page": 7,
+    "citation": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de\ndérogation mineure pour la propriété située au 115 B, route 307",
+    "anchor": "115 B, route 307"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 7 comporte un saut de ligne entre « demande de » et « dérogation mineure »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "derogation_mineure",
+   "page": 6,
+   "citation": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation\nmineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "derogation_mineure",
+   "page": 7,
+   "citation": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de\ndérogation mineure pour la propriété située au 115 B, route 307"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 2
+}

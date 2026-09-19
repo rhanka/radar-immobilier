@@ -1,0 +1,191 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dbb8601a27768bf3efa9e573dfd219a14a6d99a501dc980f410fefeaa4b1a383",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-04 modifiant le plan d’urbanisme 2014-04.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-05 modifiant le zonage 2014-05.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-06 modifiant le lotissement 2014-06.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-07 modifiant le règlement de construction 2014-08.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-08 modifiant le règlement de PIIA 2014-09.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-09 modifiant le règlement de permis et certificats 2014-10.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-10 modifiant le règlement de dérogation mineure 2008-06.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-08-151, à la page 10, adopte expressément le règlement 2025-11 sur l’occupation et l’entretien des bâtiments.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-08-152, à la page 11, adopte expressément le règlement 2026-14 modifiant le règlement 2008-04 sur les usages conditionnels.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 11, le règlement 2010-11 est explicitement visé par la résolution 2026-08-153 sur la non-modification pour concordance au schéma, avec transmission à la MRC et avis public.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 11, le règlement 2014-11 est explicitement visé par la résolution 2026-08-153 sur la non-modification pour concordance au schéma, avec transmission à la MRC et avis public.\"\n    },\n    {\n      \"item\": \"i12\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 11, le règlement 2023-02 est explicitement visé par la résolution 2026-08-153 sur la non-modification pour concordance au schéma, avec transmission à la MRC et avis public.\"\n    },\n    {\n      \"item\": \"i13\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-08-154, à la page 12, autorise l’ajout d’une toiture protégeant la chambre froide au 12, rue Principale, après étude des critères du PIIA.\"\n    },\n    {\n      \"item\": \"i14\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-08-155, à la page 12, autorise le garage attaché remplaçant l’abri automobile au 24, Allée des Sommets, après étude des critères du PIIA.\"\n    },\n    {\n      \"item\": \"i15\",\n      \"choice\": \"absent\",\n      \"reason\": \"La citation de la page 2 appartient à l’ordre du jour et atteste un point prévu, tandis que le refus acquis est prononcé par la résolution 2026-08-156 à la page 13.\"\n    },\n    {\n      \"item\": \"i16\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-08-157, à la page 14, refuse expressément la dérogation permettant l’abattage d’arbres hors période de gel sur le lot 5 191 546 du chemin de la Tour.\"\n    },\n    {\n      \"item\": \"i17\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-08-158, à la page 14, autorise le remplacement de la toiture au 572, 1er Rang par un revêtement en tôle gris foncé, après étude des critères du PIIA.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-04 modifiant le plan d’urbanisme 2014-04."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-05 modifiant le zonage 2014-05."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-06 modifiant le lotissement 2014-06."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-07 modifiant le règlement de construction 2014-08."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-08 modifiant le règlement de PIIA 2014-09."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-09 modifiant le règlement de permis et certificats 2014-10."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "À la page 10, la résolution 2026-08-150 adopte les règlements énumérés, dont le règlement 2026-10 modifiant le règlement de dérogation mineure 2008-06."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La résolution 2026-08-151, à la page 10, adopte expressément le règlement 2025-11 sur l’occupation et l’entretien des bâtiments."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 2026-08-152, à la page 11, adopte expressément le règlement 2026-14 modifiant le règlement 2008-04 sur les usages conditionnels."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "À la page 11, le règlement 2010-11 est explicitement visé par la résolution 2026-08-153 sur la non-modification pour concordance au schéma, avec transmission à la MRC et avis public."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "À la page 11, le règlement 2014-11 est explicitement visé par la résolution 2026-08-153 sur la non-modification pour concordance au schéma, avec transmission à la MRC et avis public."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "À la page 11, le règlement 2023-02 est explicitement visé par la résolution 2026-08-153 sur la non-modification pour concordance au schéma, avec transmission à la MRC et avis public."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "La résolution 2026-08-154, à la page 12, autorise l’ajout d’une toiture protégeant la chambre froide au 12, rue Principale, après étude des critères du PIIA."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "La résolution 2026-08-155, à la page 12, autorise le garage attaché remplaçant l’abri automobile au 24, Allée des Sommets, après étude des critères du PIIA."
+  },
+  {
+   "item": "i15",
+   "choice": "absent",
+   "reason": "La citation de la page 2 appartient à l’ordre du jour et atteste un point prévu, tandis que le refus acquis est prononcé par la résolution 2026-08-156 à la page 13."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "La résolution 2026-08-157, à la page 14, refuse expressément la dérogation permettant l’abattage d’arbres hors période de gel sur le lot 5 191 546 du chemin de la Tour."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "La résolution 2026-08-158, à la page 14, autorise le remplacement de la toiture au 572, 1er Rang par un revêtement en tôle gris foncé, après étude des critères du PIIA."
+  }
+ ]
+}

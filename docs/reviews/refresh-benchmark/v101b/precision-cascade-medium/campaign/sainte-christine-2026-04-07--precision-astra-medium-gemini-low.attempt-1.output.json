@@ -1,0 +1,177 @@
+{
+ "nodes": [
+  {
+   "id": "source-2026-04-07",
+   "label": "Procès-verbal de Sainte-Christine du 7 avril 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "status": "candidate",
+   "date": "2026-04-07",
+   "municipality": "sainte-christine",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+   "url": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire tenue le 7 avril 2026 à 19h30 à la\nsalle du conseil sise au 629, rue des Loisirs à Sainte-Christine.",
+     "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+     "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+     "sourceUrl": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-source"
+   ]
+  },
+  {
+   "id": "event-071-04-2026",
+   "label": "Autorisation de signature des documents cadastraux — route 116",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "status": "candidate",
+   "date": "2026-04-07",
+   "meetingDate": "2026-04-07",
+   "municipality": "sainte-christine",
+   "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+   "resolution": "071-04-2026",
+   "decision": "approuvé",
+   "kind": "modification_cadastrale",
+   "etape": "inconnu",
+   "description": "Autorisation donnée à la directrice générale et greffière-trésorière ainsi qu’au maire ou au maire suppléant de signer les documents cadastraux liés au projet de modification du cadastre concernant la route 116, dans le dossier du pont de la rivière Le Renne. L’opération vise une portion de l’emprise routière de propriété municipale sous gestion du ministère des Transports et de la Mobilité durable.",
+   "conditions": [
+    "Obtention de tous les permis d’urbanisme requis."
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\nnom de la municipalité, tous les documents cadastraux requ",
+     "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+     "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+     "sourceUrl": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-cadastre"
+   ]
+  },
+  {
+   "id": "signal-074-04-2026",
+   "label": "Demande d’abrogation de l’article 245.1 de la Loi sur l’aménagement et l’urbanisme",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "status": "candidate",
+   "date": "2026-04-07",
+   "meetingDate": "2026-04-07",
+   "municipality": "sainte-christine",
+   "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+   "resolution": "074-04-2026",
+   "category": "legislation_amenagement",
+   "kind": "demande_modification_legislative",
+   "etape": "inconnu",
+   "description": "La Municipalité demande un amendement au projet de loi no 22 pour abroger l’article 245.1 de la Loi sur l’aménagement et l’urbanisme, relatif aux avis aux propriétaires concernés par la protection des milieux humides et hydriques. Il s’agit d’une demande municipale, et non d’une abrogation adoptée.",
+   "outcome": "Résolution de demande adoptée à l’unanimité.",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "Que la Municipalité de Sainte-Christine demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi",
+     "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+     "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+     "sourceUrl": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-demande"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-2026-04-07",
+   "target": "event-071-04-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "evidence_refs": [
+    "ev-cadastre"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\nnom de la municipalité, tous les documents cadastraux requ",
+     "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+     "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+     "sourceUrl": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-04-07",
+   "target": "signal-074-04-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "evidence_refs": [
+    "ev-demande"
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "Que la Municipalité de Sainte-Christine demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi",
+     "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+     "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+     "sourceUrl": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-source",
+   "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+   "sourceUrl": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Procès-verbal de la séance ordinaire tenue le 7 avril 2026 à 19h30 à la\nsalle du conseil sise au 629, rue des Loisirs à Sainte-Christine."
+  },
+  {
+   "id": "ev-cadastre",
+   "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+   "sourceUrl": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\nnom de la municipalité, tous les documents cadastraux requis dans le\ncadre de l’opération cadastrale liée au projet de modification du\ncadastre concernant la route 116, conditionnellement à l’obtention de\ntous les permis d’urbanisme requis."
+  },
+  {
+   "id": "ev-demande",
+   "source_file": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-christine/cas/338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e.pdf",
+   "docSha": "338f56a1ffabafe080923fa18d30b3a4e940d7f259b7d87c66b2b170dda5d29e",
+   "sourceUrl": "https://ste-christine.com/wp-content/uploads/2026/05/2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 13,
+   "excerpt": "Que la Municipalité de Sainte-Christine demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi\nno 22 abrogeant l’article 245.1 de la Loi sur l’aménagement et\nl’urbanisme afin de respecter le consensus établi entre le ministère et\nses partenaires municipaux;"
+  }
+ ],
+ "input_tokens": 14000,
+ "output_tokens": 2900
+}

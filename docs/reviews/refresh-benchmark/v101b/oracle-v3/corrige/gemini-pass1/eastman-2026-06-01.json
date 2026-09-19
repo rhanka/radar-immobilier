@@ -1,0 +1,1189 @@
+{
+ "documentId": "eastman-2026-06-01",
+ "nextId": 32,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — règlement 2026-07 sur le stationnement et la gestion des voies publiques",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2026-07",
+    "page": 4,
+    "citation": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté pour adoption, lors d’une prochaine séance du conseil municipal, le règlement no 2026-07",
+    "anchor": "règlement no 2026-07",
+    "spanStart": 1006,
+    "spanEnd": 1181
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — règlement 2026-07 sur le stationnement et la gestion des voies publiques",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "2026-07",
+      "page": 4,
+      "citation": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté pour adoption, lors d’une prochaine séance du conseil municipal, le règlement no 2026-07",
+      "anchor": "règlement no 2026-07",
+      "spanStart": 1006,
+      "spanEnd": 1181
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 5.4 constate un avis de motion actuel concernant la réglementation du stationnement et des voies publiques, distinct de la présentation du projet."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Présentation du projet de règlement 2026-07 — stationnement et gestion des voies publiques",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2026-07",
+    "page": 4,
+    "citation": "Avis de motion et présentation du projet de règlement no 2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et à la gestion des voies publiques",
+    "anchor": "règlement no 2026-07",
+    "spanStart": 835,
+    "spanEnd": 1004
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Présentation du projet de règlement 2026-07 — stationnement et gestion des voies publiques",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "2026-07",
+      "page": 4,
+      "citation": "Avis de motion et présentation du projet de règlement no 2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et à la gestion des voies publiques",
+      "anchor": "règlement no 2026-07",
+      "spanStart": 835,
+      "spanEnd": 1004
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 5.4 présente le projet et constate sa remise aux membres du conseil; le projet actuel constitue une unité distincte de l’avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Renouvellement du bail de La Corde-à-linge — juillet 2026 à juin 2027",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "La Corde-à-linge",
+    "page": 4,
+    "citation": "DE renouveler le bail de location de La Corde-à-linge pour une période de douze (12) mois, soit du 1er juillet 2026 au 30 juin 2027",
+    "anchor": "La Corde-à-linge",
+    "spanStart": 1711,
+    "spanEnd": 1842
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Renouvellement du bail de La Corde-à-linge — juillet 2026 à juin 2027",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "La Corde-à-linge",
+      "page": 4,
+      "citation": "DE renouveler le bail de location de La Corde-à-linge pour une période de douze (12) mois, soit du 1er juillet 2026 au 30 juin 2027",
+      "anchor": "La Corde-à-linge",
+      "spanStart": 1711,
+      "spanEnd": 1842
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-122 renouvelle une convention locative, objet foncier inclus même non résidentiel et classé à l’étape « inconnu »."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 2026-05 — annexion d’une partie du territoire du Canton d’Orford",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-05",
+    "page": 5,
+    "citation": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante",
+    "anchor": "Règlement no 2026-05",
+    "spanStart": 2911,
+    "spanEnd": 3079
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 2026-05 — annexion d’une partie du territoire du Canton d’Orford",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-05",
+      "page": 5,
+      "citation": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante",
+      "anchor": "Règlement no 2026-05",
+      "spanStart": 2911,
+      "spanEnd": 3079
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-125 adopte expressément le règlement d’annexion territoriale; l’avis de motion et le projet du 4 mai sont seulement historiques."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de modifier l’acte de vente 19 377 959 — lots 4 380 408 et 4 380 601",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "19 377 959",
+    "page": 7,
+    "citation": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots 4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions suivantes",
+    "anchor": "acte de vente 19 377 959",
+    "spanStart": 63,
+    "spanEnd": 234
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de modifier l’acte de vente 19 377 959 — lots 4 380 408 et 4 380 601",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "19 377 959",
+      "page": 7,
+      "citation": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots 4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions suivantes",
+      "anchor": "acte de vente 19 377 959",
+      "spanStart": 63,
+      "spanEnd": 234
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-127 autorise actuellement la modification conditionnelle d’un acte foncier, sans constater que la vente future des lots est déjà réalisée."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Autorisation conditionnelle de servitude publique et perpétuelle — passage piétonnier de 3 m, lot 4 380 408",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 380 408",
+    "page": 7,
+    "citation": "3- Établissement d’une servitude publique et perpétuelle de passage piétonnier, d'une largeur de trois (3) mètres en bordure du chemin George-Bonnallie, grevant le lot 4 380 408",
+    "anchor": "lot 4 380 408",
+    "spanStart": 423,
+    "spanEnd": 600
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation conditionnelle de servitude publique et perpétuelle — passage piétonnier de 3 m, lot 4 380 408",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "4 380 408",
+      "page": 7,
+      "citation": "3- Établissement d’une servitude publique et perpétuelle de passage piétonnier, d'une largeur de trois (3) mètres en bordure du chemin George-Bonnallie, grevant le lot 4 380 408",
+      "anchor": "lot 4 380 408",
+      "spanStart": 423,
+      "spanEnd": 600
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution prévoit expressément une servitude piétonnière publique et perpétuelle de trois mètres, acte foncier distinct parmi les conditions de modification."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Cession par don à la Municipalité — lots 5 235 794 et 4 380 417, sous conditions",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 235 794 et 4 380 417",
+    "page": 7,
+    "citation": "4- Le don des lots 5 235 794 et 4 380 417 par le propriétaire au bénéfice de la Municipalité. Il est entendu que ces lots",
+    "anchor": "lots 5 235 794 et 4 380 417",
+    "spanStart": 757,
+    "spanEnd": 878
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Cession par don à la Municipalité — lots 5 235 794 et 4 380 417, sous conditions",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 235 794 et 4 380 417",
+      "page": 7,
+      "citation": "4- Le don des lots 5 235 794 et 4 380 417 par le propriétaire au bénéfice de la Municipalité. Il est entendu que ces lots",
+      "anchor": "lots 5 235 794 et 4 380 417",
+      "spanStart": 757,
+      "spanEnd": 878
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution prévoit le don des deux lots à la Municipalité comme condition de l’entente, constituant un acte de cession distinct portant conjointement sur ces lots."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Servitude de circulation et de stationnement autorisée — en faveur du lot 4 380 420",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 380 420",
+    "page": 7,
+    "citation": "Consentir à une servitude de circulation et de stationnement en faveur du fond dominant situé sur le lot 4 380 420 pour le nombre de cases requises",
+    "anchor": "lot 4 380 420",
+    "spanStart": 1357,
+    "spanEnd": 1504
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Servitude de circulation et de stationnement autorisée — en faveur du lot 4 380 420",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "4 380 420",
+      "page": 7,
+      "citation": "Consentir à une servitude de circulation et de stationnement en faveur du fond dominant situé sur le lot 4 380 420 pour le nombre de cases requises",
+      "anchor": "lot 4 380 420",
+      "spanStart": 1357,
+      "spanEnd": 1504
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution consent une servitude distincte sur les futurs lots municipaux 5 235 794 et 4 380 417, au bénéfice du lot 4 380 420 et selon les besoins réglementaires de stationnement."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Refus de dérogation mineure — 70 chemin de la Traverse, réduction de la marge latérale droite",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "4 380 003",
+    "page": 12,
+    "citation": "attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin de la Traverse, zone V-10, PIIA-4 - Corridor visuel d'intérêt supérieur",
+    "anchor": "lot 4 380 003",
+    "spanStart": 340,
+    "spanEnd": 497
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de dérogation mineure — 70 chemin de la Traverse, réduction de la marge latérale droite",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "4 380 003",
+      "page": 12,
+      "citation": "attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin de la Traverse, zone V-10, PIIA-4 - Corridor visuel d'intérêt supérieur",
+      "anchor": "lot 4 380 003",
+      "spanStart": 340,
+      "spanEnd": 497
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-140 refuse explicitement cette dérogation pour un garage attenant; le refus demeure une unité et la mention du secteur PIIA ne crée pas une demande supplémentaire."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Refus de dérogation mineure — 152 chemin Bellevue, coupe d’arbres au-delà du déboisement maximal",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "152 chemin Bellevue",
+    "page": 12,
+    "citation": "déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et 4 380 322, 152 chemin Bellevue, zone V-2",
+    "anchor": "152 chemin Bellevue",
+    "spanStart": 1315,
+    "spanEnd": 1435
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de dérogation mineure — 152 chemin Bellevue, coupe d’arbres au-delà du déboisement maximal",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "152 chemin Bellevue",
+      "page": 12,
+      "citation": "déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et 4 380 322, 152 chemin Bellevue, zone V-2",
+      "anchor": "152 chemin Bellevue",
+      "spanStart": 1315,
+      "spanEnd": 1435
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-141 refuse une seule demande visant les deux lots, notamment parce qu’elle porte essentiellement sur un usage."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure acceptée — 6 chemin de la Mésange, bâtiment accessoire en cour avant",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "6 chemin de la Mésange",
+    "page": 13,
+    "citation": "construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot 2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely, Parker et d’Argent",
+    "anchor": "6 chemin de la Mésange",
+    "spanStart": 548,
+    "spanEnd": 733
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure acceptée — 6 chemin de la Mésange, bâtiment accessoire en cour avant",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "6 chemin de la Mésange",
+      "page": 13,
+      "citation": "construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot 2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely, Parker et d’Argent",
+      "anchor": "6 chemin de la Mésange",
+      "spanStart": 548,
+      "spanEnd": 733
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-142 accepte explicitement la demande de dérogation pour construire un bâtiment accessoire en cour avant."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 627 628, chemin Gilbert",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 627 628",
+    "page": 13,
+    "citation": "La construction d’un bâtiment principal sur le lot 6 627 628, chemin Gilbert",
+    "anchor": "lot 6 627 628",
+    "spanStart": 1405,
+    "spanEnd": 1481
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 627 628, chemin Gilbert",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 627 628",
+      "page": 13,
+      "citation": "La construction d’un bâtiment principal sur le lot 6 627 628, chemin Gilbert",
+      "anchor": "lot 6 627 628",
+      "spanStart": 1405,
+      "spanEnd": 1481
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-143 nomme cette construction parmi les demandes de PIIA acceptées, ce qui constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u13",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — changement de couleur du bâtiment principal, 42 chemin de Petite-Rivière",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 239 886",
+    "page": 13,
+    "citation": "Le changement de couleur du revêtement extérieur du bâtiment principal sis sur le lot 2 239 886, 42 chemin de Petite-Rivière",
+    "anchor": "lot 2 239 886",
+    "spanStart": 1483,
+    "spanEnd": 1607
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — changement de couleur du bâtiment principal, 42 chemin de Petite-Rivière",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2 239 886",
+      "page": 13,
+      "citation": "Le changement de couleur du revêtement extérieur du bâtiment principal sis sur le lot 2 239 886, 42 chemin de Petite-Rivière",
+      "anchor": "lot 2 239 886",
+      "spanStart": 1483,
+      "spanEnd": 1607
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le changement de couleur est une demande de PIIA acceptée explicitement distincte de la construction accessoire sur le même lot."
+    }
+   ]
+  },
+  {
+   "id": "u14",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — construction d’un bâtiment accessoire, 42 chemin de Petite-Rivière",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 239 886",
+    "page": 13,
+    "citation": "La construction d’un bâtiment accessoire sur le lot 2 239 886, 42 chemin de Petite-Rivière",
+    "anchor": "lot 2 239 886",
+    "spanStart": 1609,
+    "spanEnd": 1699
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — construction d’un bâtiment accessoire, 42 chemin de Petite-Rivière",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2 239 886",
+      "page": 13,
+      "citation": "La construction d’un bâtiment accessoire sur le lot 2 239 886, 42 chemin de Petite-Rivière",
+      "anchor": "lot 2 239 886",
+      "spanStart": 1609,
+      "spanEnd": 1699
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La construction accessoire est nommée séparément dans les PIIA acceptés et forme une unité distincte du changement de couleur au même endroit."
+    }
+   ]
+  },
+  {
+   "id": "u15",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — construction d’un bâtiment principal, 88 chemin de l’Escalade",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 236 143",
+    "page": 13,
+    "citation": "La construction d’un bâtiment principal sur le lot 2 236 143, 88 chemin de l’Escalade",
+    "anchor": "lot 2 236 143",
+    "spanStart": 1701,
+    "spanEnd": 1786
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — construction d’un bâtiment principal, 88 chemin de l’Escalade",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2 236 143",
+      "page": 13,
+      "citation": "La construction d’un bâtiment principal sur le lot 2 236 143, 88 chemin de l’Escalade",
+      "anchor": "lot 2 236 143",
+      "spanStart": 1701,
+      "spanEnd": 1786
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-143 accepte explicitement cette demande de construction soumise au PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u16",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — rénovation du bâtiment principal, 50 chemin de la Feuillade",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 240 000",
+    "page": 13,
+    "citation": "La rénovation du bâtiment principal sis sur le lot 2 240 000, 50 chemin de la Feuillade",
+    "anchor": "lot 2 240 000",
+    "spanStart": 1788,
+    "spanEnd": 1875
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — rénovation du bâtiment principal, 50 chemin de la Feuillade",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2 240 000",
+      "page": 13,
+      "citation": "La rénovation du bâtiment principal sis sur le lot 2 240 000, 50 chemin de la Feuillade",
+      "anchor": "lot 2 240 000",
+      "spanStart": 1788,
+      "spanEnd": 1875
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La rénovation du bâtiment principal est une demande acceptée distincte de celle concernant le bâtiment accessoire sur ce lot."
+    }
+   ]
+  },
+  {
+   "id": "u17",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — rénovation du bâtiment accessoire, 50 chemin de la Feuillade",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 240 000",
+    "page": 13,
+    "citation": "La rénovation du bâtiment accessoire sis sur le lot 2 240 000, 50 chemin de la Feuillade",
+    "anchor": "lot 2 240 000",
+    "spanStart": 1877,
+    "spanEnd": 1965
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — rénovation du bâtiment accessoire, 50 chemin de la Feuillade",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2 240 000",
+      "page": 13,
+      "citation": "La rénovation du bâtiment accessoire sis sur le lot 2 240 000, 50 chemin de la Feuillade",
+      "anchor": "lot 2 240 000",
+      "spanStart": 1877,
+      "spanEnd": 1965
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La rénovation du bâtiment accessoire est nommée séparément parmi les demandes acceptées et ne doit pas être fusionnée avec celle du bâtiment principal."
+    }
+   ]
+  },
+  {
+   "id": "u18",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — rénovation du bâtiment principal, 103 chemin du Lac-d’Argent",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 239 703",
+    "page": 13,
+    "citation": "La rénovation du bâtiment principal sis sur le lot 2 239 703, 103 chemin du Lac-d’Argent",
+    "anchor": "lot 2 239 703",
+    "spanStart": 1967,
+    "spanEnd": 2055
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — rénovation du bâtiment principal, 103 chemin du Lac-d’Argent",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2 239 703",
+      "page": 13,
+      "citation": "La rénovation du bâtiment principal sis sur le lot 2 239 703, 103 chemin du Lac-d’Argent",
+      "anchor": "lot 2 239 703",
+      "spanStart": 1967,
+      "spanEnd": 2055
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-143 accepte explicitement cette demande de rénovation soumise au PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u19",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — agrandissement du bâtiment principal, 9 rue des Jacinthes",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 239 988",
+    "page": 13,
+    "citation": "L’agrandissement du bâtiment principal sis sur le lot 2 239 988, 9 rue des Jacinthes",
+    "anchor": "lot 2 239 988",
+    "spanStart": 2057,
+    "spanEnd": 2141
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — agrandissement du bâtiment principal, 9 rue des Jacinthes",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2 239 988",
+      "page": 13,
+      "citation": "L’agrandissement du bâtiment principal sis sur le lot 2 239 988, 9 rue des Jacinthes",
+      "anchor": "lot 2 239 988",
+      "spanStart": 2057,
+      "spanEnd": 2141
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cet agrandissement est explicitement nommé dans la liste des demandes de PIIA acceptées."
+    }
+   ]
+  },
+  {
+   "id": "u20",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 597 767, rue de la Butte",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 597 767",
+    "page": 13,
+    "citation": "La construction d’un bâtiment principal sur le lot 6 597 767, rue de la Butte",
+    "anchor": "lot 6 597 767",
+    "spanStart": 2143,
+    "spanEnd": 2220
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 597 767, rue de la Butte",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 597 767",
+      "page": 13,
+      "citation": "La construction d’un bâtiment principal sur le lot 6 597 767, rue de la Butte",
+      "anchor": "lot 6 597 767",
+      "spanStart": 2143,
+      "spanEnd": 2220
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-143 accepte cette demande de PIIA portant sur un lot explicitement identifié."
+    }
+   ]
+  },
+  {
+   "id": "u21",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 720 154, chemin des Étangs",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 720 154",
+    "page": 13,
+    "citation": "La construction d’un bâtiment principal sur le lot 6 720 154, chemin des Étangs",
+    "anchor": "lot 6 720 154",
+    "spanStart": 2222,
+    "spanEnd": 2301
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 720 154, chemin des Étangs",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 720 154",
+      "page": 13,
+      "citation": "La construction d’un bâtiment principal sur le lot 6 720 154, chemin des Étangs",
+      "anchor": "lot 6 720 154",
+      "spanStart": 2222,
+      "spanEnd": 2301
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La construction sur ce lot constitue une demande de PIIA explicitement acceptée et distincte des autres constructions énumérées."
+    }
+   ]
+  },
+  {
+   "id": "u22",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — agrandissement du bâtiment principal, 21 rue Lapointe",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "4 380 205",
+    "page": 13,
+    "citation": "L’agrandissement du bâtiment principal sis sur le lot 4 380 205, 21 rue Lapointe",
+    "anchor": "lot 4 380 205",
+    "spanStart": 2303,
+    "spanEnd": 2383
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — agrandissement du bâtiment principal, 21 rue Lapointe",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "4 380 205",
+      "page": 13,
+      "citation": "L’agrandissement du bâtiment principal sis sur le lot 4 380 205, 21 rue Lapointe",
+      "anchor": "lot 4 380 205",
+      "spanStart": 2303,
+      "spanEnd": 2383
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-143 nomme cet agrandissement parmi les demandes de PIIA acceptées."
+    }
+   ]
+  },
+  {
+   "id": "u23",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — installation d’une enseigne, 1167 chemin des Diligences",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 235 611",
+    "page": 13,
+    "citation": "L’installation d’une enseigne sur le lot 2 235 611, 1167 chemin des Diligences",
+    "anchor": "lot 2 235 611",
+    "spanStart": 2385,
+    "spanEnd": 2463
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — installation d’une enseigne, 1167 chemin des Diligences",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2 235 611",
+      "page": 13,
+      "citation": "L’installation d’une enseigne sur le lot 2 235 611, 1167 chemin des Diligences",
+      "anchor": "lot 2 235 611",
+      "spanStart": 2385,
+      "spanEnd": 2463
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’installation de l’enseigne est expressément acceptée au titre du PIIA, les petits PIIA étant inclus dans le corrigé."
+    }
+   ]
+  },
+  {
+   "id": "u24",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — rénovation du bâtiment principal, 151 rue Martin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 237 223",
+    "page": 13,
+    "citation": "La rénovation du bâtiment principal sis sur le lot 2 237 223, 151 rue Martin",
+    "anchor": "lot 2 237 223",
+    "spanStart": 2465,
+    "spanEnd": 2541
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — rénovation du bâtiment principal, 151 rue Martin",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2 237 223",
+      "page": 13,
+      "citation": "La rénovation du bâtiment principal sis sur le lot 2 237 223, 151 rue Martin",
+      "anchor": "lot 2 237 223",
+      "spanStart": 2465,
+      "spanEnd": 2541
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette rénovation est une demande explicitement nommée dans la liste des PIIA acceptés."
+    }
+   ]
+  },
+  {
+   "id": "u25",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 291 859, chemin des Diligences",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 291 859",
+    "page": 13,
+    "citation": "La construction d’un bâtiment principal pour la propriété sise sur le lot 6 291 859, chemin des Diligences",
+    "anchor": "lot 6 291 859",
+    "spanStart": 2543,
+    "spanEnd": 2649
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 291 859, chemin des Diligences",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 291 859",
+      "page": 13,
+      "citation": "La construction d’un bâtiment principal pour la propriété sise sur le lot 6 291 859, chemin des Diligences",
+      "anchor": "lot 6 291 859",
+      "spanStart": 2543,
+      "spanEnd": 2649
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-143 accepte explicitement cette construction sur le lot identifié, distincte de la demande d’enseigne sur le même chemin."
+    }
+   ]
+  },
+  {
+   "id": "u26",
+   "status": "active",
+   "current": {
+    "label": "PIIA accepté — rénovation du bâtiment principal, 14 rue Martin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "14 rue Martin",
+    "page": 14,
+    "citation": "La rénovation du bâtiment principal pour la propriété sise sur le lot 4 380 241, 14 rue Martin",
+    "anchor": "14 rue Martin",
+    "spanStart": 3,
+    "spanEnd": 97
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accepté — rénovation du bâtiment principal, 14 rue Martin",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "14 rue Martin",
+      "page": 14,
+      "citation": "La rénovation du bâtiment principal pour la propriété sise sur le lot 4 380 241, 14 rue Martin",
+      "anchor": "14 rue Martin",
+      "spanStart": 3,
+      "spanEnd": 97
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette rénovation poursuit la liste des demandes de PIIA acceptées commencée à la page précédente."
+    }
+   ]
+  },
+  {
+   "id": "u27",
+   "status": "active",
+   "current": {
+    "label": "Refus de PIIA — construction d’un bâtiment principal, lot 6 627 707, chemin de la Corniche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 627 707",
+    "page": 14,
+    "citation": "La construction d’un bâtiment principal sur le lot 6 627 707, chemin de la Corniche puisque l’étude d’impact visuel mentionne la possibilité que le bâtiment soit partiellement visible",
+    "anchor": "lot 6 627 707",
+    "spanStart": 181,
+    "spanEnd": 364
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de PIIA — construction d’un bâtiment principal, lot 6 627 707, chemin de la Corniche",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 627 707",
+      "page": 14,
+      "citation": "La construction d’un bâtiment principal sur le lot 6 627 707, chemin de la Corniche puisque l’étude d’impact visuel mentionne la possibilité que le bâtiment soit partiellement visible",
+      "anchor": "lot 6 627 707",
+      "spanStart": 181,
+      "spanEnd": 364
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution refuse cette demande de PIIA en raison de la visibilité partielle possible depuis des points stratégiques; le refus doit être conservé comme tel."
+    }
+   ]
+  },
+  {
+   "id": "u28",
+   "status": "active",
+   "current": {
+    "label": "Refus de PIIA — construction d’un bâtiment accessoire, 93 chemin du Cèdre",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 238 228",
+    "page": 14,
+    "citation": "La construction d’un bâtiment accessoire sur le lot 2 238 228, 93 chemin du Cèdre puisque l’emplacement et l’orientation visés n’ont pas été clairement démontrés",
+    "anchor": "lot 2 238 228",
+    "spanStart": 398,
+    "spanEnd": 559
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de PIIA — construction d’un bâtiment accessoire, 93 chemin du Cèdre",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2 238 228",
+      "page": 14,
+      "citation": "La construction d’un bâtiment accessoire sur le lot 2 238 228, 93 chemin du Cèdre puisque l’emplacement et l’orientation visés n’ont pas été clairement démontrés",
+      "anchor": "lot 2 238 228",
+      "spanStart": 398,
+      "spanEnd": 559
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La demande est explicitement refusée parce que l’emplacement et l’orientation du bâtiment accessoire ne sont pas clairement démontrés."
+    }
+   ]
+  },
+  {
+   "id": "u29",
+   "status": "active",
+   "current": {
+    "label": "Refus de PIIA — installation d’une murale, 412 rue Principale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "412 rue Principale",
+    "page": 14,
+    "citation": "L’installation d’une murale sur le bâtiment principal sis sur le lot 4 380 220, 412 rue Principale",
+    "anchor": "412 rue Principale",
+    "spanStart": 561,
+    "spanEnd": 659
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de PIIA — installation d’une murale, 412 rue Principale",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "412 rue Principale",
+      "page": 14,
+      "citation": "L’installation d’une murale sur le bâtiment principal sis sur le lot 4 380 220, 412 rue Principale",
+      "anchor": "412 rue Principale",
+      "spanStart": 561,
+      "spanEnd": 659
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution refuse cette demande de PIIA parce que la Municipalité souhaite d’abord se doter d’une politique encadrant l’art urbain."
+    }
+   ]
+  },
+  {
+   "id": "u30",
+   "status": "removed",
+   "current": {
+    "label": "Consultation publique tenue — règlement 2026-03 sur l’occupation et l’entretien des bâtiments",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "2026-03",
+    "page": 14,
+    "citation": "ATTENDU QU’une séance de consultation publique a été tenue le 1er juin 2026; En conséquence, il est proposé par la conseillère Agnès Mager Grandmaison D'adopter le règlement no 2026-03",
+    "anchor": "règlement no 2026-03",
+    "spanStart": 2168,
+    "spanEnd": 2352
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Consultation publique tenue — règlement 2026-03 sur l’occupation et l’entretien des bâtiments",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "2026-03",
+      "page": 14,
+      "citation": "ATTENDU QU’une séance de consultation publique a été tenue le 1er juin 2026; En conséquence, il est proposé par la conseillère Agnès Mager Grandmaison D'adopter le règlement no 2026-03",
+      "anchor": "règlement no 2026-03",
+      "spanStart": 2168,
+      "spanEnd": 2352
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le document atteste une consultation publique tenue à la date même de la séance, étape actuelle distincte de l’adoption et relevant du stade « inconnu »."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "remove",
+     "reason": "Règle 4 : la consultation publique n'est constatée que dans un « considérant » de la résolution 2026-06-144 (au même titre que l'avis de motion du 7 avril et le projet du 4 mai, non retenus) ; ce rappel du même dossier ne crée pas d'unité en plus de l'adoption du règlement 2026-03 (u31)."
+    }
+   ]
+  },
+  {
+   "id": "u31",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 2026-03 — occupation et entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-03",
+    "page": 14,
+    "citation": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont copie est jointe aux présentes pour en faire partie intégrante",
+    "anchor": "règlement no 2026-03",
+    "spanStart": 2319,
+    "spanEnd": 2466
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 2026-03 — occupation et entretien des bâtiments",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-03",
+      "page": 14,
+      "citation": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont copie est jointe aux présentes pour en faire partie intégrante",
+      "anchor": "règlement no 2026-03",
+      "spanStart": 2319,
+      "spanEnd": 2466
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-06-144 adopte expressément ce règlement d’urbanisme, tandis que l’avis de motion du 7 avril et le projet du 4 mai demeurent des rappels historiques."
+    }
+   ]
+  }
+ ]
+}

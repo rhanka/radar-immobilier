@@ -1,0 +1,310 @@
+{
+ "documentId": "orford-2026-03-02",
+ "nextId": 9,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA — aire de stationnement en pente, lot 6 474 528",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 474 528",
+    "page": 43,
+    "citation": "Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38. De FAIRE parvenir la présente résolution à Mme Genevieve Lacroix. ADOPTÉE À L'UNANIMITÉ",
+    "anchor": "lot numéro 6 474 528",
+    "spanStart": 2377,
+    "spanEnd": 2539
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA — aire de stationnement en pente, lot 6 474 528",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 474 528",
+      "page": 43,
+      "citation": "Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38. De FAIRE parvenir la présente résolution à Mme Genevieve Lacroix. ADOPTÉE À L'UNANIMITÉ",
+      "anchor": "lot numéro 6 474 528",
+      "spanStart": 2377,
+      "spanEnd": 2539
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-59 approuve le PIIA de l'aire de stationnement en pente d'au plus 18,7 %, conditionnellement à un aménagement de gestion des eaux pluviales, sans assujettir les bâtiments au PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA — rénovation au 2197-2199, chemin du Parc",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2197-2199, chemin du Parc",
+    "page": 45,
+    "citation": "Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 – Zone C3. De FAIRE parvenir la présente résolution à M. Eric Graveson. ADOPTÉE À L'UNANIMITÉ",
+    "anchor": "2197-2199, chemin du Parc",
+    "spanStart": 540,
+    "spanEnd": 710
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA — rénovation au 2197-2199, chemin du Parc",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2197-2199, chemin du Parc",
+      "page": 45,
+      "citation": "Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 – Zone C3. De FAIRE parvenir la présente résolution à M. Eric Graveson. ADOPTÉE À L'UNANIMITÉ",
+      "anchor": "2197-2199, chemin du Parc",
+      "spanStart": 540,
+      "spanEnd": 710
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-60 approuve les travaux de rénovation sous réserve du dépôt d'un plan d'aménagement paysager avant la délivrance du permis ou du certificat."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Contribution pour parcs exigée en argent — lot 6 521 680",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 521 680",
+    "page": 46,
+    "citation": "6 521 680 0 m2 Chemin des Nénuphars 6 449 130 Montant à payer au fonds de parcs, de terrains de jeux et d'espaces naturels (10 %) Contribution exigée en argent",
+    "anchor": "6 521 680 0 m2",
+    "spanStart": 880,
+    "spanEnd": 1042
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Contribution pour parcs exigée en argent — lot 6 521 680",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 521 680",
+      "page": 46,
+      "citation": "6 521 680 0 m2 Chemin des Nénuphars 6 449 130 Montant à payer au fonds de parcs, de terrains de jeux et d'espaces naturels (10 %) Contribution exigée en argent",
+      "anchor": "6 521 680 0 m2",
+      "spanStart": 880,
+      "spanEnd": 1042
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-61 exige une contribution pour parcs en argent et nomme explicitement le lot 6 521 680, à distinguer de l'autre objet foncier visé."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Contribution pour parcs exigée en argent — lot 6 449 130",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 449 130",
+    "page": 46,
+    "citation": "Chemin des Nénuphars 6 449 130 Montant à payer au fonds de parcs, de terrains de jeux et d'espaces naturels (10 %) Contribution exigée en argent",
+    "anchor": "Nénuphars 6 449 130",
+    "spanStart": 897,
+    "spanEnd": 1042
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Contribution pour parcs exigée en argent — lot 6 449 130",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 449 130",
+      "page": 46,
+      "citation": "Chemin des Nénuphars 6 449 130 Montant à payer au fonds de parcs, de terrains de jeux et d'espaces naturels (10 %) Contribution exigée en argent",
+      "anchor": "Nénuphars 6 449 130",
+      "spanStart": 897,
+      "spanEnd": 1042
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-61 nomme également le lot 6 449 130 parmi les terrains soumis à la contribution, ce qui justifie une unité distincte pour cet objet explicite."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Demande de modification du RCI 16-21 — intégration du lot 3 787 898 au secteur de consolidation",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "16-21",
+    "page": 47,
+    "citation": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle intérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur",
+    "anchor": "intérimaire numéro 16-21",
+    "spanStart": 1428,
+    "spanEnd": 1580
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de modification du RCI 16-21 — intégration du lot 3 787 898 au secteur de consolidation",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "16-21",
+      "page": 47,
+      "citation": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle intérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur",
+      "anchor": "intérimaire numéro 16-21",
+      "spanStart": 1428,
+      "spanEnd": 1580
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-62 demande à la MRC une modification du RCI 16-21, sans constater l'adoption de cette modification ni autoriser immédiatement le prolongement de rue."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Demande de modification du schéma d'aménagement 16-23 — intégration du lot 3 787 898",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "16-23",
+    "page": 46,
+    "citation": "schéma d'aménagement de la MRC de Memphrémagog (Règlement numéro 16-23",
+    "anchor": "Règlement numéro 16-23",
+    "spanStart": 1501,
+    "spanEnd": 1571
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de modification du schéma d'aménagement 16-23 — intégration du lot 3 787 898",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "16-23",
+      "page": 46,
+      "citation": "schéma d'aménagement de la MRC de Memphrémagog (Règlement numéro 16-23",
+      "anchor": "Règlement numéro 16-23",
+      "spanStart": 1501,
+      "spanEnd": 1571
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La demande formulée page 47 vise aussi le schéma d'aménagement identifié ici comme règlement 16-23, qui constitue un second objet réglementaire distinct du RCI 16-21."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de transmission à la MRC des immeubles à vendre pour taxes impayées",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "immeubles pour taxes impayées",
+    "page": 5,
+    "citation": "D’AUTORISER la greffière ou le directeur général à transmettre à la MRC de Memphrémagog la liste des immeubles dont les taxes n’auront pas été payées avant le 19 mars 2026",
+    "anchor": "la liste des immeubles",
+    "spanStart": 818,
+    "spanEnd": 989
+   },
+   "versions": [
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Autorisation de transmission à la MRC des immeubles à vendre pour taxes impayées",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "immeubles pour taxes impayées",
+      "page": 5,
+      "citation": "D’AUTORISER la greffière ou le directeur général à transmettre à la MRC de Memphrémagog la liste des immeubles dont les taxes n’auront pas été payées avant le 19 mars 2026",
+      "anchor": "la liste des immeubles",
+      "spanStart": 818,
+      "spanEnd": 989
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass2",
+     "op": "add",
+     "reason": "La résolution 2026-03-46 constate une étape foncière actuelle de transmission des immeubles aux fins de vente pour taxes, sans constater une vente déjà réalisée."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Autorisation d'enchérir et d'acquérir des immeubles à la vente pour taxes du 11 juin 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "immeubles vendus pour taxes",
+    "page": 5,
+    "citation": "D’AUTORISER la greffière ou le directeur général à enchérir et à acquérir des immeubles vendus sur le territoire de la Municipalité du Canton d’Orford par la MRC",
+    "anchor": "immeubles vendus",
+    "spanStart": 1635,
+    "spanEnd": 1796
+   },
+   "versions": [
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Autorisation d'enchérir et d'acquérir des immeubles à la vente pour taxes du 11 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "immeubles vendus pour taxes",
+      "page": 5,
+      "citation": "D’AUTORISER la greffière ou le directeur général à enchérir et à acquérir des immeubles vendus sur le territoire de la Municipalité du Canton d’Orford par la MRC",
+      "anchor": "immeubles vendus",
+      "spanStart": 1635,
+      "spanEnd": 1796
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass2",
+     "op": "add",
+     "reason": "La résolution 2026-03-47 autorise expressément à enchérir et à acquérir des immeubles, ce qui dépasse une simple nomination et constitue une autorisation foncière distincte."
+    }
+   ]
+  }
+ ]
+}

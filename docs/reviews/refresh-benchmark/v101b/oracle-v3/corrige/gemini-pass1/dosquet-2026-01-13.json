@@ -1,0 +1,139 @@
+{
+ "documentId": "dosquet-2026-01-13",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de signature d’un bail pour le service de garde — 368 route 116",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "368 route 116",
+    "page": 3,
+    "citation": "à signer pour et au nom de la municipalité un bail liant la municipalité et les responsables de garde qui utiliseront les locaux dédiés à ce service au 368 route 116",
+    "anchor": "au 368 route 116",
+    "spanStart": 1445,
+    "spanEnd": 1610
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de signature d’un bail pour le service de garde — 368 route 116",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "368 route 116",
+      "page": 3,
+      "citation": "à signer pour et au nom de la municipalité un bail liant la municipalité et les responsables de garde qui utiliseront les locaux dédiés à ce service au 368 route 116",
+      "anchor": "au 368 route 116",
+      "spanStart": 1445,
+      "spanEnd": 1610
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-01-04 autorise une convention de location immobilière explicite, incluse au titre des actes fonciers même non résidentiels."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Appui à la demande CPTAQ — extension du droit résidentiel en zone agricole, lot 6 274 449",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "6 274 449",
+    "page": 8,
+    "citation": "ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit résidentiel à la partie du lot située en zone agricole",
+    "anchor": "lot 6 274 449",
+    "spanStart": 1497,
+    "spanEnd": 1623
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui à la demande CPTAQ — droit résidentiel au lot 6 274 449 et aliénation des lots 5 376 188 et 4 819 191",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "6 274 449",
+      "page": 8,
+      "citation": "ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit résidentiel à la partie du lot située en zone agricole",
+      "anchor": "lot 6 274 449",
+      "spanStart": 1497,
+      "spanEnd": 1623
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Appui à la demande CPTAQ — extension du droit résidentiel en zone agricole, lot 6 274 449",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "6 274 449",
+      "page": 8,
+      "citation": "ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit résidentiel à la partie du lot située en zone agricole",
+      "anchor": "lot 6 274 449",
+      "spanStart": 1497,
+      "spanEnd": 1623
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-01-08 appuie une même demande foncière portant sur l’extension du droit résidentiel et l’aliénation de deux lots dont l’usage agricole sera préservé, sans constater une autorisation de la CPTAQ."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "Règle 3 (une unité par objet foncier explicitement nommé dans une même résolution) : la résolution 26-01-08 vise deux objets distincts, l'extension du droit résidentiel sur le lot 6 274 449 et l'aliénation des lots 5 376 188 et 4 819 191 ; u02 est restreinte au premier objet, le second devenant une unité séparée."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Appui à la demande CPTAQ — aliénation des lots 5 376 188 et 4 819 191",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5 376 188 et 4 819 191",
+    "page": 8,
+    "citation": "ATTENDU QUE le propriétaire souhaite également aliéner les lots 5 376 188 et 4 819 191, d’une superficie totale de 107,9684 hectares",
+    "anchor": "aliéner les lots 5 376 188 et 4 819 191",
+    "spanStart": 1759,
+    "spanEnd": 1891
+   },
+   "versions": [
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Appui à la demande CPTAQ — aliénation des lots 5 376 188 et 4 819 191",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "5 376 188 et 4 819 191",
+      "page": 8,
+      "citation": "ATTENDU QUE le propriétaire souhaite également aliéner les lots 5 376 188 et 4 819 191, d’une superficie totale de 107,9684 hectares",
+      "anchor": "aliéner les lots 5 376 188 et 4 819 191",
+      "spanStart": 1759,
+      "spanEnd": 1891
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "fable-pass1",
+     "op": "add",
+     "reason": "Règle 3 : l'aliénation des lots 5 376 188 et 4 819 191 (acte foncier explicitement nommé, 107,9684 ha) est un objet distinct de l'extension du droit résidentiel dans la même résolution 26-01-08 d'appui à la CPTAQ ; l'étape (appui municipal à une demande CPTAQ) n'entre dans aucune valeur définie, d'où « inconnu »."
+    }
+   ]
+  }
+ ]
+}

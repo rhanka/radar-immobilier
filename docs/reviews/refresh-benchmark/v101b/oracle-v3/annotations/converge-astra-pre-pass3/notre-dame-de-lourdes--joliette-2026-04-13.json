@@ -1,0 +1,81 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "64645cf466b0c1b2febbbb61b67c06d9e0db8809b661c84d8b327a54f1b29f6b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-049, page 4, autorise explicitement la dérogation mineure 2025-0157 pour le 5580 rue Principale.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-050, page 5, refuse explicitement la dérogation mineure 2026-0003 au 3791-3791A rang Sainte-Rose, conformément à la règle selon laquelle un refus reste un refus.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution figurant à la page 6 autorise la dérogation mineure 2026-0002 pour une largeur avant de 30 mètres sur la rue Maria, concernant le lot 6 658 131 identifié à la page 5.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 8.4, page 6, identifie la demande 2026-0005 au 3741 rue Principale et sa résolution autorise la clôture de 1,52 mètre, malgré la mention discordante « 2025-0005 » dans le dispositif.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 10.1, page 7, est explicitement intitulé « Adoption du second projet de règlement numéro 03-2026 » et précise que la modification du zonage concerne les habitations multifamiliales dans la zone U-41.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-055, adoptée à la page 8, autorise expressément à enchérir et à acquérir des immeubles lors de la vente pour taxes du 11 juin 2026, ce qui relève des actes fonciers inclus.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-049, page 4, autorise explicitement la dérogation mineure 2025-0157 pour le 5580 rue Principale."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-050, page 5, refuse explicitement la dérogation mineure 2026-0003 au 3791-3791A rang Sainte-Rose, conformément à la règle selon laquelle un refus reste un refus."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution figurant à la page 6 autorise la dérogation mineure 2026-0002 pour une largeur avant de 30 mètres sur la rue Maria, concernant le lot 6 658 131 identifié à la page 5."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 8.4, page 6, identifie la demande 2026-0005 au 3741 rue Principale et sa résolution autorise la clôture de 1,52 mètre, malgré la mention discordante « 2025-0005 » dans le dispositif."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 10.1, page 7, est explicitement intitulé « Adoption du second projet de règlement numéro 03-2026 » et précise que la modification du zonage concerne les habitations multifamiliales dans la zone U-41."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-055, adoptée à la page 8, autorise expressément à enchérir et à acquérir des immeubles lors de la vente pour taxes du 11 juin 2026, ce qui relève des actes fonciers inclus."
+  }
+ ]
+}

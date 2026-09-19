@@ -1,0 +1,35 @@
+{
+ "documentId": "val-dor-2026-06-01",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "b4722fe3a2e3c1db46637c288ddf69fa7f5c65677ac97055cb3661d4050c8948",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1987,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2388,
+   "outputTokens": 405,
+   "totalTokens": 2793
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1814
+  },
+  "inputSha256": "268d0efa326287a55a41c9e189cec9660a1eeb851853c3c2de3594ca3ca6fdaa"
+ },
+ "at": "2026-09-19T03:22:15.410Z"
+}

@@ -1,0 +1,36 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "f281c67375de2ce5c722a366d3b436c8b4451be98ed99b320fe007c8bf84b718",
+ "inputSha256": "ae1f8ed0b8595d8a289ce4c0dce1e913c64dc08a2b8bac663b524f0496b9c4e7",
+ "responseSha256": "c971ad48498bc323600ac974d008ec947b31f37b05b7e5e4a668cbe77c43b510",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 35329,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 8446,
+  "outputTokens": 1073,
+  "totalTokens": 9519
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 35325,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:14:18.658Z"
+}

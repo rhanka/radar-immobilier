@@ -1,0 +1,653 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "5fd58922c559657c07c5b3db6200954e57690d2d4298c3a0c6a91cde43ffcb32",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-434-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "434-2026 — Deuxième projet : production d’énergie commerciale",
+     "stage": "2e_projet",
+     "objet": "434-2026",
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est unanimement résolu que le conseil\nadopte le 2e projet de règlement 434-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-435-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "435-2026 — Occupation et entretien des bâtiments",
+     "stage": "1er_projet",
+     "objet": "435-2026",
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Jacques Tessier et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 435-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-436-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "436-2026 — Hébergement touristique",
+     "stage": "1er_projet",
+     "objet": "436-2026",
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 436-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-437-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "437-2026 — Transmission des demandes de dérogation mineure",
+     "stage": "1er_projet",
+     "objet": "437-2026",
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 437-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-438-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "438-2026 — Dispositions relatives aux autres permis",
+     "stage": "projet",
+     "objet": "438-2026",
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "dépose le projet de règlement 438-2026 modifiant les règlements 429-2025, 395-2023\net 333-2016 concernant les dispositions relatives aux autres permis."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-440-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "440-2026 — Zone 96-Rc et définition d’un conteneur",
+     "stage": "1er_projet",
+     "objet": "440-2026",
+     "citations": [
+      {
+       "page": 26,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est unanimement résolu que le conseil\nadopte le 1er projet de règlement 440-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-consultation-435"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation programmée — 435-2026",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Frédéric Lapointe et il est résolu unanimement que le\nconseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h00"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-consultation-436"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation programmée — 436-2026",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Jacques Tessier et il est résolu unanimement que le conseil\nmunicipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h05"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-consultation-437"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation programmée — 437-2026",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Frédéric Lapointe et il est résolu unanimement que le\nconseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h10"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-consultation-440"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation programmée — 440-2026",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 26,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est résolu unanimement que le conseil\nmunicipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h15"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-072"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Déplacement demandé d’un conteneur — lot 4757089",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Roxanne Bureau-Grenier et il est résolu unanimement\nque le conseil de la municipalité de Sainte-Thècle demande au propriétaire du lot 4 757 089 de"
+      },
+      {
+       "page": 18,
+       "excerpt": "déplacer son conteneur maritime dans la zone 22-AF(4HA) située au nord de son terrain."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "event-085"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui municipal à une demande CPTAQ — Ferme Michel Lebel SENC",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 26,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est résolu unanimement que le conseil\nmunicipal appuie la demande de la Ferme Michel Lebel SENC"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "event-086"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation approuvée — 250-252, rue Notre-Dame",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 27,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Roxanne Bureau-Grenier et il est résolu unanimement\nque le conseil municipal accepte la demande de dérogation mineure pour le 250-252, rue NotreDame"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "event-087-superficie"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation refusée — Superficie du garage au 500, rue Bédard",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 27,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est résolu unanimement que le conseil\nmunicipal refuse la demande de dérogation mineure pour la construction d’un garage"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "event-087-marge"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation conditionnelle — Marge du garage au 500, rue Bédard",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 27,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Daniel Bacon et il est résolu unanimement que le conseil\nmunicipal refuse la demande de dérogation mineure pour la construction d’un garage"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A16",
+   "nodeIds": [
+    "signal-073"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Opposition municipale aux éoliennes du Projet Mauricie",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "NE SOUTIENT PAS l’implantation d’éoliennes sur son territoire dans le cadre du Projet\nMauricie;"
+      },
+      {
+       "page": 18,
+       "excerpt": "DEMANDE formellement au promoteur de retirer le territoire de Sainte-Thècle du\npérimètre considéré;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A17",
+   "nodeIds": [
+    "signal-082"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de suspension des activités — Projet d’aire protégée des lacs Grandbois",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "EN CONSÉQUENCE, il proposé par Marco Bacon et résolu à l’unanimité que le conseil de la\nmunicipalité de Sainte-Thècle appuie la demande d’un engagement officiel des ministères"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A18",
+   "nodeIds": [
+    "signal-091"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Projet de parc régional sur terres publiques",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 29,
+       "excerpt": "EN CONSÉQUENCE, il est proposé Marco Bacon et il est unanimement résolu que le conseil de la\nmunicipalité de Sainte-Thècle dépose une demande dans le cadre du Fonds de soutien à"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A19",
+   "nodeIds": [
+    "signal-071"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Financement municipal d’un nouvel écocentre",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "MODIFIE la résolution 2026-02-034 afin d’AUTORISER la Municipalité de SainteThècle à financer le PROJET, en y investissant un montant maximal de 86 000 $"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A20",
+   "nodeIds": [
+    "signal-062"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de financement — Scène extérieure au parc Saint-Jean-Optimiste",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Marco Bacon et il est résolu unanimement que le conseil\nde la municipalité de Sainte-Thècle dépose une demande d’aide financière"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le 2e projet de règlement 434-2026.\",\"excerpt\":\"adopte le 2e projet de règlement 434-2026\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le 1er projet de règlement 435-2026.\",\"excerpt\":\"adopte le 1er projet de règlement 435-2026\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le 1er projet de règlement 436-2026.\",\"excerpt\":\"adopte le 1er projet de règlement 436-2026\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le 1er projet de règlement 437-2026.\",\"excerpt\":\"adopte le 1er projet de règlement 437-2026\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Jacques Tessier donne avis de motion et dépose le projet de règlement 438-2026.\",\"excerpt\":\"dépose le projet de règlement 438-2026 modifiant les règlements 429-2025, 395-2023 et 333-2016\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le 1er projet de règlement 440-2026.\",\"excerpt\":\"adopte le 1er projet de règlement 440-2026\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil convoque une assemblée publique de consultation pour le règlement 435-2026.\",\"excerpt\":\"tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h00 concernant le règlement 435-2026\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil convoque une assemblée publique de consultation pour le règlement 436-2026.\",\"excerpt\":\"tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h05 concernant le règlement 436-2026\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil convoque une assemblée publique de consultation pour le règlement 437-2026.\",\"excerpt\":\"tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h10 concernant le règlement 437-2026\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil convoque une assemblée publique de consultation pour le règlement 440-2026.\",\"excerpt\":\"tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h15 concernant le règlement 440-2026\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil demande au propriétaire de déplacer son conteneur maritime dans une zone spécifique.\",\"excerpt\":\"demande au propriétaire du lot 4 757 089 de déplacer son conteneur maritime dans la zone 22-AF(4HA) située au nord de son terrain.\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil appuie la demande CPTAQ de la Ferme Michel Lebel SENC.\",\"excerpt\":\"appuie la demande de la Ferme Michel Lebel SENC pour l’acquisition d’une partie du lot 4 756 274 d’environ 4,6 acres.\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la demande de dérogation mineure pour le 250-252, rue Notre-Dame.\",\"excerpt\":\"accepte la demande de dérogation mineure pour le 250-252, rue Notre-Dame afin de lotir la partie arrière du terrain\"},{\"act\":\"A14\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil refuse la dérogation mineure quant à la superficie maximale du garage au 500, rue Bédard.\",\"excerpt\":\"refuse la demande de dérogation mineure pour la construction d’un garage dépassant la superficie maximale permise de 150 mètres carrés\"},{\"act\":\"A15\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise sous condition la dérogation mineure pour la marge latérale gauche du garage au 500, rue Bédard.\",\"excerpt\":\"autorise la dérogation mineure concernant la marge de recul latérale gauche à 1,25 mètres pour la reconstruction du garage, conditionnellement\"},{\"act\":\"A16\",\"verdict\":\"soutenu\",\"reason\":\"La municipalité adopte une résolution d'opposition formelle au projet d'implantation d'éoliennes sur son territoire.\",\"excerpt\":\"NE SOUTIENT PAS l’implantation d’éoliennes sur son territoire dans le cadre du Projet Mauricie; DEMANDE formellement au promoteur de retirer le territoire de Sainte-Thècle du périmètre considéré\"},{\"act\":\"A17\",\"verdict\":\"soutenu\",\"reason\":\"La municipalité résout d'appuyer la demande de suspension de mise en valeur des ressources naturelles dans l'aire protégée visée.\",\"excerpt\":\"appuie la demande d’un engagement officiel des ministères concernés pour qu’aucune nouvelle activité de mise en valeur des ressources naturelles (forestière, acéricole, minière), incluant l’aménagement\"},{\"act\":\"A18\",\"verdict\":\"soutenu\",\"reason\":\"La municipalité exprime sa volonté de créer un parc régional sur terres publiques et sollicite une aide d'accompagnement.\",\"excerpt\":\"CONSIDÉRANT que la Municipalité de Sainte-Thècle désire créer un parc régional sur les terres publiques présentes sur le territoire;\"},{\"act\":\"A19\",\"verdict\":\"soutenu\",\"reason\":\"Il s'agit d'une simple décision financière et d'administration d'un projet d'écocentre, exclue du champ d'urbanisme.\",\"excerpt\":\"\"},{\"act\":\"A20\",\"verdict\":\"non_soutenu\",\"reason\":\"L'aménagement d'une scène de spectacle relève des loisirs et de la culture, exclus de l'urbanisme et de l'aménagement réglementaire du territoire.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le 2e projet de règlement 434-2026.",
+   "excerpt": "adopte le 2e projet de règlement 434-2026"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le 1er projet de règlement 435-2026.",
+   "excerpt": "adopte le 1er projet de règlement 435-2026"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le 1er projet de règlement 436-2026.",
+   "excerpt": "adopte le 1er projet de règlement 436-2026"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le 1er projet de règlement 437-2026.",
+   "excerpt": "adopte le 1er projet de règlement 437-2026"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Jacques Tessier donne avis de motion et dépose le projet de règlement 438-2026.",
+   "excerpt": "dépose le projet de règlement 438-2026 modifiant les règlements 429-2025, 395-2023 et 333-2016"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le 1er projet de règlement 440-2026.",
+   "excerpt": "adopte le 1er projet de règlement 440-2026"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil convoque une assemblée publique de consultation pour le règlement 435-2026.",
+   "excerpt": "tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h00 concernant le règlement 435-2026"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil convoque une assemblée publique de consultation pour le règlement 436-2026.",
+   "excerpt": "tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h05 concernant le règlement 436-2026"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le conseil convoque une assemblée publique de consultation pour le règlement 437-2026.",
+   "excerpt": "tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h10 concernant le règlement 437-2026"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le conseil convoque une assemblée publique de consultation pour le règlement 440-2026.",
+   "excerpt": "tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h15 concernant le règlement 440-2026"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le conseil demande au propriétaire de déplacer son conteneur maritime dans une zone spécifique.",
+   "excerpt": "demande au propriétaire du lot 4 757 089 de déplacer son conteneur maritime dans la zone 22-AF(4HA) située au nord de son terrain."
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Le conseil appuie la demande CPTAQ de la Ferme Michel Lebel SENC.",
+   "excerpt": "appuie la demande de la Ferme Michel Lebel SENC pour l’acquisition d’une partie du lot 4 756 274 d’environ 4,6 acres."
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la demande de dérogation mineure pour le 250-252, rue Notre-Dame.",
+   "excerpt": "accepte la demande de dérogation mineure pour le 250-252, rue Notre-Dame afin de lotir la partie arrière du terrain"
+  },
+  {
+   "act": "A14",
+   "verdict": "soutenu",
+   "reason": "Le conseil refuse la dérogation mineure quant à la superficie maximale du garage au 500, rue Bédard.",
+   "excerpt": "refuse la demande de dérogation mineure pour la construction d’un garage dépassant la superficie maximale permise de 150 mètres carrés"
+  },
+  {
+   "act": "A15",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise sous condition la dérogation mineure pour la marge latérale gauche du garage au 500, rue Bédard.",
+   "excerpt": "autorise la dérogation mineure concernant la marge de recul latérale gauche à 1,25 mètres pour la reconstruction du garage, conditionnellement"
+  },
+  {
+   "act": "A16",
+   "verdict": "soutenu",
+   "reason": "La municipalité adopte une résolution d'opposition formelle au projet d'implantation d'éoliennes sur son territoire.",
+   "excerpt": "NE SOUTIENT PAS l’implantation d’éoliennes sur son territoire dans le cadre du Projet Mauricie; DEMANDE formellement au promoteur de retirer le territoire de Sainte-Thècle du périmètre considéré"
+  },
+  {
+   "act": "A17",
+   "verdict": "soutenu",
+   "reason": "La municipalité résout d'appuyer la demande de suspension de mise en valeur des ressources naturelles dans l'aire protégée visée.",
+   "excerpt": "appuie la demande d’un engagement officiel des ministères concernés pour qu’aucune nouvelle activité de mise en valeur des ressources naturelles (forestière, acéricole, minière), incluant l’aménagement"
+  },
+  {
+   "act": "A18",
+   "verdict": "soutenu",
+   "reason": "La municipalité exprime sa volonté de créer un parc régional sur terres publiques et sollicite une aide d'accompagnement.",
+   "excerpt": "CONSIDÉRANT que la Municipalité de Sainte-Thècle désire créer un parc régional sur les terres publiques présentes sur le territoire;"
+  },
+  {
+   "act": "A19",
+   "verdict": "soutenu",
+   "reason": "Il s'agit d'une simple décision financière et d'administration d'un projet d'écocentre, exclue du champ d'urbanisme.",
+   "excerpt": ""
+  },
+  {
+   "act": "A20",
+   "verdict": "non_soutenu",
+   "reason": "L'aménagement d'une scène de spectacle relève des loisirs et de la culture, exclus de l'urbanisme et de l'aménagement réglementaire du territoire.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 20,
+  "removed": [
+   {
+    "act": "A20",
+    "reason": "L'aménagement d'une scène de spectacle relève des loisirs et de la culture, exclus de l'urbanisme et de l'aménagement réglementaire du territoire."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le 2e projet de règlement 434-2026."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil adopte le 1er projet de règlement 435-2026."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte le 1er projet de règlement 436-2026."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte le 1er projet de règlement 437-2026."
+   },
+   {
+    "act": "A05",
+    "reason": "Jacques Tessier donne avis de motion et dépose le projet de règlement 438-2026."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil adopte le 1er projet de règlement 440-2026."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil convoque une assemblée publique de consultation pour le règlement 435-2026."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil convoque une assemblée publique de consultation pour le règlement 436-2026."
+   },
+   {
+    "act": "A09",
+    "reason": "Le conseil convoque une assemblée publique de consultation pour le règlement 437-2026."
+   },
+   {
+    "act": "A10",
+    "reason": "Le conseil convoque une assemblée publique de consultation pour le règlement 440-2026."
+   },
+   {
+    "act": "A11",
+    "reason": "Le conseil demande au propriétaire de déplacer son conteneur maritime dans une zone spécifique."
+   },
+   {
+    "act": "A12",
+    "reason": "Le conseil appuie la demande CPTAQ de la Ferme Michel Lebel SENC."
+   },
+   {
+    "act": "A13",
+    "reason": "Le conseil municipal accepte la demande de dérogation mineure pour le 250-252, rue Notre-Dame."
+   },
+   {
+    "act": "A14",
+    "reason": "Le conseil refuse la dérogation mineure quant à la superficie maximale du garage au 500, rue Bédard."
+   },
+   {
+    "act": "A15",
+    "reason": "Le conseil autorise sous condition la dérogation mineure pour la marge latérale gauche du garage au 500, rue Bédard."
+   },
+   {
+    "act": "A16",
+    "reason": "La municipalité adopte une résolution d'opposition formelle au projet d'implantation d'éoliennes sur son territoire."
+   },
+   {
+    "act": "A17",
+    "reason": "La municipalité résout d'appuyer la demande de suspension de mise en valeur des ressources naturelles dans l'aire protégée visée."
+   },
+   {
+    "act": "A18",
+    "reason": "La municipalité exprime sa volonté de créer un parc régional sur terres publiques et sollicite une aide d'accompagnement."
+   },
+   {
+    "act": "A19",
+    "reason": "Il s'agit d'une simple décision financière et d'administration d'un projet d'écocentre, exclue du champ d'urbanisme."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 2,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3989,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 23055,
+   "outputTokens": 1419,
+   "totalTokens": 24474
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3845
+  },
+  "inputSha256": "391dc35505836b1a436adb7680021c582cf274ae85770a02b8c2db79673cec91"
+ }
+}

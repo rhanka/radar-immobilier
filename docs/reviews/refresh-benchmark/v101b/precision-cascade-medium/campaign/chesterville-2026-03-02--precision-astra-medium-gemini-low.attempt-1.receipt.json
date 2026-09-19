@@ -1,0 +1,35 @@
+{
+ "documentId": "chesterville-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "28db2b5670392bdbe520f7a29b7a5a997459bb03bdd1d319b9d48b2c713b1c8f",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2486,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2068,
+   "outputTokens": 423,
+   "totalTokens": 2491
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2352
+  },
+  "inputSha256": "e00597f352b3e1b1bab6d14e2370d55858cf3e63c4ef6acdc0ea06b5d93f6b51"
+ },
+ "at": "2026-09-19T03:22:22.066Z"
+}

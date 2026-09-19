@@ -1,0 +1,19 @@
+{
+ "documentId": "ayers-cliff-2026-03-02",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "e43e04d14aef91ebfa21d77900784f41178e841a79d4d579077be5e017cb1d1b",
+ "verificationSha256": "a36d4806adec24ac7c6a653b256af21b603845757da18c3d6ea7b0335028bacc",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

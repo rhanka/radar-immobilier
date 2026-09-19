@@ -1,0 +1,81 @@
+{
+ "documentId": "warden-2026-04-08",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "c8a31d25a47bb2fca7dc9c87cb1fdeca738889ce0bacd1e88c4a63c8e391eaa4",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La page 4 constate explicitement l'avis de motion donné par Martin Labrecque pour le règlement 2026-184 relatif aux TIAM.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La page 4 atteste le dépôt et l'adoption du projet de règlement 2026-184, unité distincte de l'avis de motion selon les règles.\"},{\"item\":\"i03\",\"choice\":\"v2\",\"reason\":\"La page 6 accepte explicitement le bail au 1-5383, rue Foster pour relocaliser temporairement les bureaux municipaux : cet acte foncier est inclus, avec l'étape « inconnu » plutôt qu'une adoption réglementaire.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-062, en page 12, adopte le règlement 2026-180 sur les immeubles patrimoniaux et les mandats du comité consultatif d'urbanisme.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le titre cité figure bien en page 12 dans la résolution 2026-04-063, dont la suite en page 13 confirme l'adoption du règlement 2026-181 relatif à la démolition d'immeubles.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La page 13 contient le titre cité et la résolution 2026-04-064 adoptant le règlement 2026-182 relatif à l'occupation et à l'entretien des bâtiments.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v2"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 4 constate explicitement l'avis de motion donné par Martin Labrecque pour le règlement 2026-184 relatif aux TIAM."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 4 atteste le dépôt et l'adoption du projet de règlement 2026-184, unité distincte de l'avis de motion selon les règles."
+  },
+  {
+   "item": "i03",
+   "choice": "v2",
+   "reason": "La page 6 accepte explicitement le bail au 1-5383, rue Foster pour relocaliser temporairement les bureaux municipaux : cet acte foncier est inclus, avec l'étape « inconnu » plutôt qu'une adoption réglementaire."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-062, en page 12, adopte le règlement 2026-180 sur les immeubles patrimoniaux et les mandats du comité consultatif d'urbanisme."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le titre cité figure bien en page 12 dans la résolution 2026-04-063, dont la suite en page 13 confirme l'adoption du règlement 2026-181 relatif à la démolition d'immeubles."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La page 13 contient le titre cité et la résolution 2026-04-064 adoptant le règlement 2026-182 relatif à l'occupation et à l'entretien des bâtiments."
+  }
+ ]
+}

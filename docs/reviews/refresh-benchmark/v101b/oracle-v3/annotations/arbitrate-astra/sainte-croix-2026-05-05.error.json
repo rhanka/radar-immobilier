@@ -1,0 +1,25 @@
+{
+ "documentId": "sainte-croix-2026-05-05",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "99b86b2c262f1b2a6ed341d6b6085222101383467151687495d2b29b3300191c",
+ "verificationSha256": "69abcb3b20db74c97fece2cfe4610f31e5e3e0b22f55e76bb34f5781a8ac2400",
+ "error": "MESH_FAILED ECONNRESET",
+ "receipt": {
+  "transport": "codex",
+  "latencyMs": 605275,
+  "code": "ECONNRESET",
+  "httpStatus": 200,
+  "responseError": null
+ },
+ "at": "2026-09-18T21:07:12.653Z"
+}

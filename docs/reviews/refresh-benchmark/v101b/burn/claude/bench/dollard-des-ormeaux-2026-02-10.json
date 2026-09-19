@@ -1,0 +1,13 @@
+{
+ "id": "dollard-des-ormeaux-2026-02-10",
+ "rc": 0,
+ "latencyMs": 105174,
+ "inputTokens": 2,
+ "outputTokens": 12718,
+ "cacheRead": 0,
+ "cacheCreate": 4434,
+ "costUsd": 0.364969,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 23099
+}

@@ -1,0 +1,13 @@
+{
+ "id": "potton-2026-01-05",
+ "rc": 0,
+ "latencyMs": 564399,
+ "inputTokens": 6,
+ "outputTokens": 84284,
+ "cacheRead": 60495,
+ "cacheCreate": 124560,
+ "costUsd": 3.4277725000000006,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 44354
+}

@@ -1,0 +1,61 @@
+{
+ "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "9d523d36752582a0448cd5695ff41c885691c4b98d0a03b9df489ebd43629e93",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement no 50907-04-26 modifiant le plan d'urbanisme est explicitement consigné à la page 3.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement no 51007-04-26 modifiant le règlement de zonage est textuellement mentionné à la page 3.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'adoption du 1er projet de règlement numéro 509-07-04-26 modifiant le zonage est adoptée à la résolution 26-04-04 en page 3.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'adoption du 1er projet de règlement no 510-07-04-26 modifiant le plan d'urbanisme est adoptée à la résolution 26-04-05 en page 10.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement no 50907-04-26 modifiant le plan d'urbanisme est explicitement consigné à la page 3."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement no 51007-04-26 modifiant le règlement de zonage est textuellement mentionné à la page 3."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'adoption du 1er projet de règlement numéro 509-07-04-26 modifiant le zonage est adoptée à la résolution 26-04-04 en page 3."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'adoption du 1er projet de règlement no 510-07-04-26 modifiant le plan d'urbanisme est adoptée à la résolution 26-04-05 en page 10."
+  }
+ ]
+}

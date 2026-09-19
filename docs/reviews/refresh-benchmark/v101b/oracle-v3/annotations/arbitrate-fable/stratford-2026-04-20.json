@@ -1,0 +1,282 @@
+{
+ "documentId": "stratford-2026-04-20",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b060a30ca906a62ca089de5bcbd2b50be6f30be819ba2a6c011fb5dbd200edc6",
+ "verificationSha256": "33b668984e3d86e5fcef51f5e1b3e2a99f4b78f3ccbafae3ab3e4163360cf878",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"La page 1 atteste « Consultation publique (Règlement 1257 et dérogations) », étape procédurale distincte de « Adoption du deuxième projet du Règlement no 1257 » (autre type d'étape, donc pas un doublon même type/même fait), inscrite comme point prévu d'un ordre du jour avec stage inconnu et procédure consultation_publique cohérents ; la citation, quoique coupée avant la parenthèse fermante, est recopiée mot pour mot du texte, ce qui écarte l'objection de A.\"},{\"item\":\"a02\",\"choice\":\"absent\",\"reason\":\"« Bail bureau de poste » (section Stratford 2030, entre contributions et ententes) est un contrat de louage sans lot ni adresse, donc pas un « objet réglementaire ou foncier explicite » ni un acte foncier au sens des inclusions (vente, achat, servitude) ; il relève des contrats administratifs exclus du rappel, et un fait complémentaire éventuel se signale séparément sans toucher le dénominateur, ce qui écarte la position de B.\"},{\"item\":\"a03\",\"choice\":\"v1\",\"reason\":\"Le point 4.2 « Achat d'un terrain sur la rue des Érables » marqué « Décision » en page 1 est un acte foncier explicite avec objet identifié, inclus par la règle « actes fonciers, même non résidentiels » ; le libellé « prévu » respecte le principe qu'un ordre du jour atteste un point prévu et non une décision acquise, et la mention « Décision » attestant une résolution d'adoption attendue, l'objection de B sur le stage ne justifie pas de supprimer l'unité.\"},{\"item\":\"a04\",\"choice\":\"v1\",\"reason\":\"Le point 4.3 « Vente d'une lisière de terrain sur le chemin des Hauts-Cantons » marqué « Décision » en page 1 est un acte foncier explicite (vente) avec objet identifié, unité prévue d'un ordre du jour conformément au libellé « prévue » ; la mention « Décision » atteste la résolution attendue, donc la position « absent » de B, fondée uniquement sur l'étiquette de stage, est écartée.\"},{\"item\":\"a05\",\"choice\":\"v1\",\"reason\":\"Le point 4.4 « Servitude d'écoulement des eaux au 467 rang Beau-Lac » marqué « Décision » en page 1 est un acte foncier explicite (servitude) avec adresse identifiée, point prévu et non décision acquise selon le libellé ; l'objection de B sur l'absence du mot « adoption » ne suffit pas à écarter une unité foncière explicite attestée par le texte.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Consultation publique prévue — Règlement 1257",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "1257",
+      "page": 1,
+      "citation": "Consultation publique (Règlement 1257 et dérogations",
+      "anchor": "Règlement 1257",
+      "spanStart": 70,
+      "spanEnd": 122
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 1 annonce une consultation publique sur le règlement 1257, ce qui atteste cette étape prévue, distincte du deuxième projet."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le texte atteste « Consultation publique (Règlement 1257 et dérogations) » en page 1 : étape procédurale distincte du deuxième projet (pas un doublon même type/même fait), point prévu d'un ordre du jour, étape inconnu avec procédure consultation_publique cohérente."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La citation est tronquée (parenthèse manquante) et la mention générale de consultation publique en tête de séance ne constitue pas une unité réglementaire distincte du second projet du règlement 1257."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u04",
+   "verificationItem": "i04",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Examen prévu du bail du bureau de poste",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Bail bureau de poste",
+      "page": 1,
+      "citation": "Bail bureau de poste",
+      "anchor": "Bail bureau de poste",
+      "spanStart": 1176,
+      "spanEnd": 1196
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point « Bail bureau de poste » figure pour décision à la page 1 et constitue un objet foncier prévu, même non résidentiel, sans étape plus précise attestée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "« Bail bureau de poste » n'est pas un objet réglementaire ou foncier explicite (aucun lot ni adresse, un bail est un contrat et non un acte foncier de type vente/achat/servitude), donc hors du périmètre du rappel ; fait complémentaire éventuel à signaler séparément."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Un bail pour un bureau de poste est un contrat de louage/services et non un acte foncier ou une unité d'urbanisme."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Achat prévu d’un terrain sur la rue des Érables",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "rue des Érables",
+      "page": 1,
+      "citation": "Achat d’un terrain sur la rue des Érables",
+      "anchor": "rue des Érables",
+      "spanStart": 1391,
+      "spanEnd": 1432
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "La page 1 inscrit l’achat du terrain pour décision, mais n’annonce pas explicitement une adoption, de sorte que l’étape « adoption » proposée n’est pas attestée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le point 4.2 « Achat d'un terrain sur la rue des Érables » est attesté page 1 comme point prévu (Décision) ; acte foncier explicite inclus par la règle « actes fonciers, même non résidentiels », label « prévu » conforme à un ordre du jour."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Le texte atteste en page 1 l'achat prévu d'un terrain sur la rue des Érables, acte foncier au stade d'adoption prévu."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a04",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Vente prévue d’une lisière de terrain sur le chemin des Hauts-Cantons",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "chemin des Hauts-Cantons",
+      "page": 1,
+      "citation": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons",
+      "anchor": "chemin des Hauts-Cantons",
+      "spanStart": 1433,
+      "spanEnd": 1495
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "La vente de la lisière de terrain est prévue pour décision à la page 1, mais le texte ne précise pas l’étape « adoption » attribuée à cette version."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le point 4.3 « Vente d'une lisière de terrain sur le chemin des Hauts-Cantons » est attesté page 1 ; acte foncier explicite, point prévu et non décision acquise, citation exacte."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Le texte atteste en page 1 la vente prévue d'une lisière de terrain sur le chemin des Hauts-Cantons, acte foncier au stade d'adoption prévu."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a05",
+   "kind": "split",
+   "unitId": "u07",
+   "verificationItem": "i07",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Décision prévue sur une servitude d’écoulement des eaux — 467 rang Beau-Lac",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "467 rang Beau-Lac",
+      "page": 1,
+      "citation": "Servitude d’écoulement des eaux au 467 rang Beau-Lac",
+      "anchor": "467 rang Beau-Lac",
+      "spanStart": 1496,
+      "spanEnd": 1548
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "La servitude au 467 rang Beau-Lac est inscrite pour décision à la page 1, sans mention d’une adoption permettant de confirmer l’étape proposée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le point 4.4 « Servitude d'écoulement des eaux au 467 rang Beau-Lac » est attesté page 1 ; servitude = acte foncier explicite avec adresse identifiée, point prévu, citation exacte."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Le texte atteste en page 1 l'octroi prévu d'une servitude d'écoulement des eaux au 467 rang Beau-Lac, acte foncier au stade d'adoption prévu."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "La page 1 atteste « Consultation publique (Règlement 1257 et dérogations) », étape procédurale distincte de « Adoption du deuxième projet du Règlement no 1257 » (autre type d'étape, donc pas un doublon même type/même fait), inscrite comme point prévu d'un ordre du jour avec stage inconnu et procédure consultation_publique cohérents ; la citation, quoique coupée avant la parenthèse fermante, est recopiée mot pour mot du texte, ce qui écarte l'objection de A."
+  },
+  {
+   "item": "a02",
+   "choice": "absent",
+   "reason": "« Bail bureau de poste » (section Stratford 2030, entre contributions et ententes) est un contrat de louage sans lot ni adresse, donc pas un « objet réglementaire ou foncier explicite » ni un acte foncier au sens des inclusions (vente, achat, servitude) ; il relève des contrats administratifs exclus du rappel, et un fait complémentaire éventuel se signale séparément sans toucher le dénominateur, ce qui écarte la position de B."
+  },
+  {
+   "item": "a03",
+   "choice": "v1",
+   "reason": "Le point 4.2 « Achat d'un terrain sur la rue des Érables » marqué « Décision » en page 1 est un acte foncier explicite avec objet identifié, inclus par la règle « actes fonciers, même non résidentiels » ; le libellé « prévu » respecte le principe qu'un ordre du jour atteste un point prévu et non une décision acquise, et la mention « Décision » attestant une résolution d'adoption attendue, l'objection de B sur le stage ne justifie pas de supprimer l'unité."
+  },
+  {
+   "item": "a04",
+   "choice": "v1",
+   "reason": "Le point 4.3 « Vente d'une lisière de terrain sur le chemin des Hauts-Cantons » marqué « Décision » en page 1 est un acte foncier explicite (vente) avec objet identifié, unité prévue d'un ordre du jour conformément au libellé « prévue » ; la mention « Décision » atteste la résolution attendue, donc la position « absent » de B, fondée uniquement sur l'étiquette de stage, est écartée."
+  },
+  {
+   "item": "a05",
+   "choice": "v1",
+   "reason": "Le point 4.4 « Servitude d'écoulement des eaux au 467 rang Beau-Lac » marqué « Décision » en page 1 est un acte foncier explicite (servitude) avec adresse identifiée, point prévu et non décision acquise selon le libellé ; l'objection de B sur l'absence du mot « adoption » ne suffit pas à écarter une unité foncière explicite attestée par le texte."
+  }
+ ]
+}

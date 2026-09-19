@@ -1,0 +1,19 @@
+{
+ "documentId": "lorraine-2026-01-13",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ef0331425b92a0039b4068244592edd94d52873d828fbc33e45411b8aab44774",
+ "verificationSha256": "2b9493db9a2bf2e9d6f9fd22dbf5053fcb749cee7b7bd818714f547324c764b0",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

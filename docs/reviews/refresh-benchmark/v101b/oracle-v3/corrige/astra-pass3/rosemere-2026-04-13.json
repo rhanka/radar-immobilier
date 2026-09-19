@@ -1,0 +1,424 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "nextId": 12,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée — 262, rue Westward, recul arrière du garage de 0,56 mètre",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "262, rue Westward",
+    "page": 2,
+    "citation": "D'ACCORDER la demande de dérogation mineure pour la propriété située au 262, rue Westward, afin de permettre une marge de recul arrière de 0,56 mètre pour le garage détaché actuellement présent",
+    "anchor": "262, rue Westward",
+    "spanStart": 510,
+    "spanEnd": 703
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée — 262, rue Westward, recul arrière du garage de 0,56 mètre",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "262, rue Westward",
+      "page": 2,
+      "citation": "D'ACCORDER la demande de dérogation mineure pour la propriété située au 262, rue Westward, afin de permettre une marge de recul arrière de 0,56 mètre pour le garage détaché actuellement présent",
+      "anchor": "262, rue Westward",
+      "spanStart": 510,
+      "spanEnd": 703
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-125 accorde explicitement cette dérogation mineure, qui constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — enseignes du Continental, 307, boulevard Labelle",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "307, boulevard Labelle",
+    "page": 2,
+    "citation": "D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et d'une enseigne sur pylône pour l'établissement Continental situé au 307, boulevard Labelle",
+    "anchor": "307, boulevard Labelle",
+    "spanStart": 1272,
+    "spanEnd": 1435
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — enseignes du Continental, 307, boulevard Labelle",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "307, boulevard Labelle",
+      "page": 2,
+      "citation": "D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et d'une enseigne sur pylône pour l'établissement Continental situé au 307, boulevard Labelle",
+      "anchor": "307, boulevard Labelle",
+      "spanStart": 1272,
+      "spanEnd": 1435
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-126 approuve une demande de PIIA pour les enseignes du Continental; les petits PIIA non résidentiels sont inclus."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — modification des enseignes, 400, chemin de la Grande-Côte",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "400, chemin de la Grande-Côte",
+    "page": 3,
+    "citation": "D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le pylône d'enseignes existant situé en cour avant au 400, chemin de la Grande-Côte",
+    "anchor": "400, chemin de la Grande-Côte",
+    "spanStart": 7,
+    "spanEnd": 158
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — modification des enseignes, 400, chemin de la Grande-Côte",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "400, chemin de la Grande-Côte",
+      "page": 3,
+      "citation": "D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le pylône d'enseignes existant situé en cour avant au 400, chemin de la Grande-Côte",
+      "anchor": "400, chemin de la Grande-Côte",
+      "spanStart": 7,
+      "spanEnd": 158
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-127 approuve explicitement cette demande de PIIA relative aux enseignes."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — agrandissement au 266, rue du Bocage",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "266, rue du Bocage",
+    "page": 3,
+    "citation": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du Bocage",
+    "anchor": "266, rue du Bocage",
+    "spanStart": 728,
+    "spanEnd": 810
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — agrandissement au 266, rue du Bocage",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "266, rue du Bocage",
+      "page": 3,
+      "citation": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du Bocage",
+      "anchor": "266, rue du Bocage",
+      "spanStart": 728,
+      "spanEnd": 810
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-128 approuve le projet d'agrandissement à titre de PIIA, ce qui constitue une unité d'urbanisme."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — agrandissement et garage annexé au 338, rue Montview",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "338, rue Montview",
+    "page": 3,
+    "citation": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de construction d'un garage annexé au 338, rue Montview",
+    "anchor": "338, rue Montview",
+    "spanStart": 1363,
+    "spanEnd": 1482
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — agrandissement et garage annexé au 338, rue Montview",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "338, rue Montview",
+      "page": 3,
+      "citation": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de construction d'un garage annexé au 338, rue Montview",
+      "anchor": "338, rue Montview",
+      "spanStart": 1363,
+      "spanEnd": 1482
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-129 approuve une demande de PIIA regroupant l'agrandissement et la construction du garage annexé."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — modification des ouvertures au 355, rue Montcalm",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "355, rue Montcalm",
+    "page": 4,
+    "citation": "D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures pour la propriété située au 355, rue Montcalm",
+    "anchor": "355, rue Montcalm",
+    "spanStart": 7,
+    "spanEnd": 127
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — modification des ouvertures au 355, rue Montcalm",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "355, rue Montcalm",
+      "page": 4,
+      "citation": "D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures pour la propriété située au 355, rue Montcalm",
+      "anchor": "355, rue Montcalm",
+      "spanStart": 7,
+      "spanEnd": 127
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-130 approuve explicitement ce projet de modification des ouvertures à titre de PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — revêtements et terrasse au toit, 5, chemin de la Grande-Côte",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "5, chemin de la Grande-Côte",
+    "page": 4,
+    "citation": "5.2.6. Revêtements et terrasse sur le toit - 5, chemin de la Grande-Côte 2026-04-131",
+    "anchor": "5, chemin de la Grande-Côte",
+    "spanStart": 322,
+    "spanEnd": 406
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — revêtements et terrasse au toit, 5, chemin de la Grande-Côte",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "5, chemin de la Grande-Côte",
+      "page": 4,
+      "citation": "5.2.6. Revêtements et terrasse sur le toit - 5, chemin de la Grande-Côte 2026-04-131",
+      "anchor": "5, chemin de la Grande-Côte",
+      "spanStart": 322,
+      "spanEnd": 406
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-131 approuve à titre de PIIA la substitution du revêtement des façades latérales et l'ajout d'une terrasse au toit pour cette propriété."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — règlement 1004-01 sur les contributions pour parcs, terrains de jeux et espaces naturels",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1004-01",
+    "page": 4,
+    "citation": "La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera adopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs",
+    "anchor": "Règlement 1004-01",
+    "spanStart": 1646,
+    "spanEnd": 1785
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — règlement 1004-01 sur les contributions pour parcs, terrains de jeux et espaces naturels",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "1004-01",
+      "page": 4,
+      "citation": "La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera adopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs",
+      "anchor": "Règlement 1004-01",
+      "spanStart": 1646,
+      "spanEnd": 1785
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 5.3.1 constate un avis de motion actuel pour le règlement 1004-01, à compter séparément de l'adoption du projet."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet de règlement 1004-01 — contributions pour parcs et consultation publique fixée",
+    "stage": "projet_reglement",
+    "procedure": "consultation_publique",
+    "objet": "1004-01",
+    "page": 5,
+    "citation": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions du Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux et d'espaces naturels",
+    "anchor": "Règlement 1004-01",
+    "spanStart": 138,
+    "spanEnd": 311
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet de règlement 1004-01 — contributions pour parcs et consultation publique fixée",
+      "stage": "projet_reglement",
+      "procedure": "consultation_publique",
+      "objet": "1004-01",
+      "page": 5,
+      "citation": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions du Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux et d'espaces naturels",
+      "anchor": "Règlement 1004-01",
+      "spanStart": 138,
+      "spanEnd": 311
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-133 adopte le projet et fixe sa consultation publique au 11 mai 2026; cette étape est distincte de l'avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — règlement 1015 sur la sensibilisation et l'accompagnement des propriétés vulnérables aux inondations pluviales",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1015",
+    "page": 6,
+    "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques - Avis de motion et dépôt",
+    "anchor": "1015 - Règlement",
+    "spanStart": 595,
+    "spanEnd": 788
+   },
+   "versions": [
+    {
+     "step": "astra-pass3",
+     "unit": {
+      "label": "Avis de motion — règlement 1015 sur la sensibilisation et l'accompagnement des propriétés vulnérables aux inondations pluviales",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "1015",
+      "page": 6,
+      "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques - Avis de motion et dépôt",
+      "anchor": "1015 - Règlement",
+      "spanStart": 595,
+      "spanEnd": 788
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass3",
+     "op": "add",
+     "reason": "La page 6 constate un avis de motion pour un objet réglementaire relatif à la réduction des risques d'inondation des propriétés, distinct du dépôt du projet."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement 1015 — sensibilisation et accompagnement des propriétés vulnérables aux inondations pluviales",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1015",
+    "page": 6,
+    "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques - Avis de motion et dépôt",
+    "anchor": "1015 - Règlement",
+    "spanStart": 595,
+    "spanEnd": 788
+   },
+   "versions": [
+    {
+     "step": "astra-pass3",
+     "unit": {
+      "label": "Dépôt du projet de règlement 1015 — sensibilisation et accompagnement des propriétés vulnérables aux inondations pluviales",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "1015",
+      "page": 6,
+      "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques - Avis de motion et dépôt",
+      "anchor": "1015 - Règlement",
+      "spanStart": 595,
+      "spanEnd": 788
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass3",
+     "op": "add",
+     "reason": "Le texte précise que la conseillère dépose le projet de règlement 1015, étape distincte de l'avis de motion selon la règle 2."
+    }
+   ]
+  }
+ ]
+}

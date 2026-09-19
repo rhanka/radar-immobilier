@@ -1,0 +1,36 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "4ed3478f674f30796abf8eaa9483b57afddcd46aeced0b635394e2896f556053",
+ "inputSha256": "53fe0a01c363ef0c8fc9bf3c353e81180b05490f15f10021b083e9ae24819d99",
+ "responseSha256": "e0003b9a4e528a7ef0e241997b997f205200ec509d577f5738ef2544ecfae1ba",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 24141,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 8475,
+  "outputTokens": 708,
+  "totalTokens": 9183
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 24139,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:19:14.201Z"
+}

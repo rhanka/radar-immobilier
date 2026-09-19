@@ -1,0 +1,52 @@
+{
+ "documentId": "roxton-2026-04-07",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "1c4598184adea3ab67d4703ab4ce04e2008c33194af15ce551ec2c1796256210",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 384-2026 modifiant les usages permis dans la zone 506\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"384-2026\",\n        \"page\": 4,\n        \"citation\": \"que le présent règlement soit adopté et qu'il soit\\nstatué et décrété par ce règlement ce qui suit:\\nArticle 1\\n\\nTitre du règlement\\n\\nLe présent règlement s'intitule « Règlement numéro 384-2026\",\n        \"anchor\": \"Règlement numéro 384-2026\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les sauts de ligne de la page 4 sont rétablis, sans changer l’unité d’adoption correctement identifiée.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption du règlement 384-2026 modifiant les usages permis dans la zone 506",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "384-2026",
+    "page": 4,
+    "citation": "que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:\nArticle 1\n\nTitre du règlement\n\nLe présent règlement s'intitule « Règlement numéro 384-2026",
+    "anchor": "Règlement numéro 384-2026"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les sauts de ligne de la page 4 sont rétablis, sans changer l’unité d’adoption correctement identifiée."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 4,
+   "citation": "que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:\nArticle 1\n\nTitre du règlement\n\nLe présent règlement s'intitule « Règlement numéro 384-2026"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 1
+}

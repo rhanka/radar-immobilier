@@ -1,0 +1,386 @@
+{
+ "documentId": "stratford-2026-04-20",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "76e401151fec9d83e5e228e004b7f06ac8f86d6902b312337c46366413c7e8bc",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-1256"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 1256 — démolition d’immeubles",
+     "stage": "projet",
+     "objet": "1256",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+      },
+      {
+       "page": 1,
+       "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-1212"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1212 relatif à la démolition d’immeubles",
+     "stage": null,
+     "objet": "1212",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+      },
+      {
+       "page": 1,
+       "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-1257"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Deuxième projet du règlement 1257 — création de RU-13",
+     "stage": "2e_projet",
+     "objet": "1257",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+      },
+      {
+       "page": 1,
+       "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-1035"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 1035",
+     "stage": null,
+     "objet": "1035",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+      },
+      {
+       "page": 1,
+       "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "consultation"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation publique prévue — règlement 1257 et dérogations",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Consultation publique (Règlement 1257 et dérogations)"
+      },
+      {
+       "page": 1,
+       "excerpt": "Consultation publique (Règlement 1257 et dérogations)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "derogation-thompson"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure — lot 6674217, chemin Thompson",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson"
+      },
+      {
+       "page": 2,
+       "excerpt": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "derogation-elgin"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure — 405 rang Elgin",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Demande de dérogation mineure – 405 rang Elgin"
+      },
+      {
+       "page": 2,
+       "excerpt": "Demande de dérogation mineure – 405 rang Elgin"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "achat-erables"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Achat prévu d’un terrain sur la rue des Érables",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Achat d’un terrain sur la rue des Érables"
+      },
+      {
+       "page": 1,
+       "excerpt": "Achat d’un terrain sur la rue des Érables"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "vente-hauts-cantons"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente prévue d’une lisière de terrain — chemin des Hauts-Cantons",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons"
+      },
+      {
+       "page": 1,
+       "excerpt": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "servitude-beau-lac"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Servitude d’écoulement des eaux — 467 rang Beau-Lac",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Servitude d’écoulement des eaux au 467 rang Beau-Lac"
+      },
+      {
+       "page": 1,
+       "excerpt": "Servitude d’écoulement des eaux au 467 rang Beau-Lac"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit l'adoption du projet de règlement no 1256 modifiant le règlement de démolition no 1212.\",\"excerpt\":\"Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\\nassujettis\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 1212 n'est que la mention de la norme modifiée, aucun acte juridique direct ne porte sur le règlement 1212 lui-même.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit l'adoption du deuxième projet du règlement no 1257.\",\"excerpt\":\"Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 1035 n'est cité que comme le règlement de zonage sous-jacent en cours de modification.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"La consultation publique relative au règlement 1257 et aux dérogations est explicitement annoncée en tête de séance.\",\"excerpt\":\"Consultation publique (Règlement 1257 et dérogations)\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit une décision sur la demande de dérogation mineure pour le lot 6 674 217 chemin Thompson.\",\"excerpt\":\"Demande de dérogation mineure – lot 6 674 217 chemin Thompson\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit une décision sur la demande de dérogation mineure au 405 rang Elgin.\",\"excerpt\":\"Demande de dérogation mineure – 405 rang Elgin\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit une décision d'achat d'un terrain sur la rue des Érables.\",\"excerpt\":\"Achat d’un terrain sur la rue des Érables\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit une décision de vente d'une lisière de terrain sur le chemin des Hauts-Cantons.\",\"excerpt\":\"Vente d’une lisière de terrain sur le chemin des Hauts-Cantons\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit une décision concernant une servitude d'écoulement des eaux au 467 rang Beau-Lac.\",\"excerpt\":\"Servitude d’écoulement des eaux au 467 rang Beau-Lac\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit l'adoption du projet de règlement no 1256 modifiant le règlement de démolition no 1212.",
+   "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1212 n'est que la mention de la norme modifiée, aucun acte juridique direct ne porte sur le règlement 1212 lui-même.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit l'adoption du deuxième projet du règlement no 1257.",
+   "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1035 n'est cité que comme le règlement de zonage sous-jacent en cours de modification.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "La consultation publique relative au règlement 1257 et aux dérogations est explicitement annoncée en tête de séance.",
+   "excerpt": "Consultation publique (Règlement 1257 et dérogations)"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit une décision sur la demande de dérogation mineure pour le lot 6 674 217 chemin Thompson.",
+   "excerpt": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit une décision sur la demande de dérogation mineure au 405 rang Elgin.",
+   "excerpt": "Demande de dérogation mineure – 405 rang Elgin"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit une décision d'achat d'un terrain sur la rue des Érables.",
+   "excerpt": "Achat d’un terrain sur la rue des Érables"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit une décision de vente d'une lisière de terrain sur le chemin des Hauts-Cantons.",
+   "excerpt": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit une décision concernant une servitude d'écoulement des eaux au 467 rang Beau-Lac.",
+   "excerpt": "Servitude d’écoulement des eaux au 467 rang Beau-Lac"
+  }
+ ],
+ "filter": {
+  "acts": 10,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 1212 n'est que la mention de la norme modifiée, aucun acte juridique direct ne porte sur le règlement 1212 lui-même."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 1035 n'est cité que comme le règlement de zonage sous-jacent en cours de modification."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "L'ordre du jour prévoit l'adoption du projet de règlement no 1256 modifiant le règlement de démolition no 1212."
+   },
+   {
+    "act": "A03",
+    "reason": "L'ordre du jour prévoit l'adoption du deuxième projet du règlement no 1257."
+   },
+   {
+    "act": "A05",
+    "reason": "La consultation publique relative au règlement 1257 et aux dérogations est explicitement annoncée en tête de séance."
+   },
+   {
+    "act": "A06",
+    "reason": "L'ordre du jour prévoit une décision sur la demande de dérogation mineure pour le lot 6 674 217 chemin Thompson."
+   },
+   {
+    "act": "A07",
+    "reason": "L'ordre du jour prévoit une décision sur la demande de dérogation mineure au 405 rang Elgin."
+   },
+   {
+    "act": "A08",
+    "reason": "L'ordre du jour prévoit une décision d'achat d'un terrain sur la rue des Érables."
+   },
+   {
+    "act": "A09",
+    "reason": "L'ordre du jour prévoit une décision de vente d'une lisière de terrain sur le chemin des Hauts-Cantons."
+   },
+   {
+    "act": "A10",
+    "reason": "L'ordre du jour prévoit une décision concernant une servitude d'écoulement des eaux au 467 rang Beau-Lac."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 6948,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3374,
+   "outputTokens": 630,
+   "totalTokens": 4004
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 6791
+  },
+  "inputSha256": "3bb0a5d191a127cefeef3ac77ea6feff651804be16ec50f12d092592a5d19891"
+ }
+}

@@ -1,0 +1,112 @@
+{
+ "documentId": "abercorn-2026-03-30",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "2dfcbb642f7b330da9ec8c22b8e3186a83da64a23ed481758c004e7e5878c090",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-rues-principales"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Adhésion au réseau Rues Principales",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D’adhérer au réseau Rues Principales au prix de 630 $ et d’autoriser"
+      },
+      {
+       "page": 3,
+       "excerpt": "D’adhérer au réseau Rues Principales au prix de 630 $ et d’autoriser\nmadame la conseillère Annik Alder à participer au colloque qui se tiendra à\nMontréal le 15 avril prochain et de rembourser les frais de participation à\ncette activité conformément à la réglementation."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-tecq"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Approbation de la programmation de travaux TECQ 2024-2028",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Que la Municipalité approuve le contenu et autorise l’envoi au ministère\ndes Aﬀaires municipales et de l’Habitation de la programmation de travaux"
+      },
+      {
+       "page": 3,
+       "excerpt": "Que la Municipalité approuve le contenu et autorise l’envoi au ministère\ndes Aﬀaires municipales et de l’Habitation de la programmation de travaux\nci-jointe et de tous les autres documents exigés par le Ministère en vue de"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une adhésion à un organisme et d'une autorisation de participation à un colloque, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement foncier/réglementaire.\",\"excerpt\":\"D’adhérer au réseau Rues Principales au prix de 630 $ et d’autoriser madame la conseillère Annik Alder à participer au colloque qui se tiendra à Montréal le 15 avril prochain\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"L'approbation d'une programmation de travaux dans le cadre d'un programme de subvention d'infrastructures d'eau (TECQ) relève de la voirie et des travaux publics sans volet de planification urbaine ou d'aménagement du territoire réglementé.\",\"excerpt\":\"Que la Municipalité approuve le contenu et autorise l’envoi au ministère des Aﬀaires municipales et de l’Habitation de la programmation de travaux\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une adhésion à un organisme et d'une autorisation de participation à un colloque, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement foncier/réglementaire.",
+   "excerpt": "D’adhérer au réseau Rues Principales au prix de 630 $ et d’autoriser madame la conseillère Annik Alder à participer au colloque qui se tiendra à Montréal le 15 avril prochain"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "L'approbation d'une programmation de travaux dans le cadre d'un programme de subvention d'infrastructures d'eau (TECQ) relève de la voirie et des travaux publics sans volet de planification urbaine ou d'aménagement du territoire réglementé.",
+   "excerpt": "Que la Municipalité approuve le contenu et autorise l’envoi au ministère des Aﬀaires municipales et de l’Habitation de la programmation de travaux"
+  }
+ ],
+ "filter": {
+  "acts": 2,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Il s'agit d'une adhésion à un organisme et d'une autorisation de participation à un colloque, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement foncier/réglementaire."
+   },
+   {
+    "act": "A02",
+    "reason": "L'approbation d'une programmation de travaux dans le cadre d'un programme de subvention d'infrastructures d'eau (TECQ) relève de la voirie et des travaux publics sans volet de planification urbaine ou d'aménagement du territoire réglementé."
+   }
+  ],
+  "kept": [],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1405,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3196,
+   "outputTokens": 181,
+   "totalTokens": 3377
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1239
+  },
+  "inputSha256": "e4e24e0e0e7a293559125de7b0425d14887594480d9068c4dc8a46f170d89594"
+ }
+}

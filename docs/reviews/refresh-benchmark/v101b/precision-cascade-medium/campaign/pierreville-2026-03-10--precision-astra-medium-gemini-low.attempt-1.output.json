@@ -1,0 +1,416 @@
+{
+ "nodes": [
+  {
+   "id": "source",
+   "label": "Procès-verbal de Pierreville du 10 mars 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "status": "candidate",
+   "municipality": "pierreville",
+   "date": "2026-03-10",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+   "url": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de Pierreville,\ntenue le mardi 10 mars 2026 à 19 h 00 à l’hôtel de ville",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-268",
+   "label": "Deuxième projet de règlement 268-2025",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "status": "candidate",
+   "numero": "268-2025",
+   "title": "Modification du règlement de zonage 160-2017 pour la construction d’un triplex sur la rue Georges",
+   "stage": "2e_projet",
+   "municipality": "pierreville",
+   "meetingDate": "2026-03-10",
+   "resolution": "2026-03-80",
+   "zone_cible": "H-06",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Adoption du deuxième (2ième) projet de règlement 268-2025 modifiant le\nrèglement de zonage 160-2017 pour la construction d’un triplex sur la rue\nGeorges ;",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 16,
+     "excerpt": "Modifier la grille des usages de la zone H-06 de l’annexe 3 du règlement\nde zonage 160-2017 afin de permettre :",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zonage"
+   ]
+  },
+  {
+   "id": "zone-h06",
+   "label": "Zone H-06",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "status": "candidate",
+   "code": "H-06",
+   "municipality": "pierreville",
+   "bylaw": "160-2017",
+   "description": "Zone dont la grille des usages fait l’objet du deuxième projet 268-2025 visant à permettre l’habitation trifamiliale isolée du groupe H2.",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Modifier la grille des usages de la zone H-06 de l’annexe 3 du règlement\nde zonage 160-2017 afin de permettre :",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zonage"
+   ]
+  },
+  {
+   "id": "event-268-second",
+   "label": "Adoption du deuxième projet 268-2025 — H-06",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "status": "candidate",
+   "municipality": "pierreville",
+   "date": "2026-03-10",
+   "meetingDate": "2026-03-10",
+   "decision": "approuvé",
+   "kind": "rezonage",
+   "etape": "second_projet",
+   "etape_date": "2026-03-10",
+   "resolution": "2026-03-80",
+   "reglement_number": "268-2025",
+   "zone_ref": "H-06",
+   "description": "Adoption du deuxième projet modifiant la grille de la zone H-06 pour permettre une habitation trifamiliale isolée, dans le cadre de la construction d’un triplex sur la rue Georges.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Adoption du deuxième (2ième) projet de règlement 268-2025 modifiant le\nrèglement de zonage 160-2017 pour la construction d’un triplex sur la rue\nGeorges ;",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 16,
+     "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zonage"
+   ]
+  },
+  {
+   "id": "signal-vente",
+   "label": "Mise en vente du terrain au 620, rang Haut de la Rivière",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "status": "candidate",
+   "municipality": "pierreville",
+   "date": "2026-03-10",
+   "category": "vente_terrain",
+   "scope": "local",
+   "resolution": "2026-03-81",
+   "description": "Autorisation de publier la vente du terrain municipal au 620, rang Haut de la Rivière dans Le Courrier Sud, pour environ 726,64 $ taxes incluses. La vente est conditionnelle à la construction d’une résidence dans les huit mois suivant la résolution; il ne s’agit pas d’une vente conclue.",
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la\nparution de l’annonce de la vente du terrain appartenant à la Municipalité,",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 17,
+     "excerpt": "QUE cette vente est conditionnelle à la construction d’une résidence dans\nles huit (8) mois suivant cette résolution.",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-vente"
+   ]
+  },
+  {
+   "id": "constraint-servitudes",
+   "label": "Servitudes exigées — rangs de l’Île et Haut de la Rivière",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "status": "candidate",
+   "municipality": "pierreville",
+   "constraintType": "autre",
+   "meetingDate": "2026-03-10",
+   "resolution": "2026-03-73",
+   "description": "Le gouvernement exige une servitude permanente et une servitude de travaux. Des descriptions techniques sont commandées pour les lots 5744155, 5744845, 5744152, 5744817, 5744154 et 5744816 au rang de l’Île, et 5744930 et 5744939 au rang Haut de la Rivière.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "CONSIDÉRANT QUE le gouvernement exige une servitude permanente\net une servitude de travaux pour les rangs de l’Île et Haut de la Rivière ;",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-servitudes"
+   ]
+  },
+  {
+   "id": "signal-acquisition",
+   "label": "Acquisition municipale après démolition — rang Haut de la Rivière",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "status": "candidate",
+   "municipality": "pierreville",
+   "date": "2026-03-10",
+   "category": "acquisition_terrain",
+   "scope": "local",
+   "resolution": "2026-03-70",
+   "description": "La municipalité prévoit acquérir le terrain portant le matricule 6100-38-1522 lorsque les bâtiments seront entièrement démolis, dans le contexte du risque de glissement de terrain du rang Haut de la Rivière.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain\nlorsque les bâtiments qui y sont érigés dessus seront entièrement démoli.",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-acquisition"
+   ]
+  },
+  {
+   "id": "signal-encheres",
+   "label": "Autorisation d’enchérir à la vente pour taxes du 16 juin 2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "status": "candidate",
+   "municipality": "pierreville",
+   "date": "2026-03-10",
+   "category": "vente_pour_taxes",
+   "scope": "local",
+   "resolution": "2026-03-71",
+   "description": "Autorisation à la direction générale ou, en son absence, au maire, d’enchérir pour la municipalité à la vente pour défaut de paiement des taxes du 16 juin 2026, dans la limite des taxes et créances prioritaires précisées.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, D’AUTORISER la\ndirectrice générale et greffière trésorière ou, en son absence, le maire,",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-encheres"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-268-second",
+   "target": "zone-h06",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Modifier la grille des usages de la zone H-06 de l’annexe 3 du règlement\nde zonage 160-2017 afin de permettre :",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "event-268-second",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "signal-vente",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "evidence_refs": [
+    "ev-vente"
+   ],
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la\nparution de l’annonce de la vente du terrain appartenant à la Municipalité,",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "constraint-servitudes",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "evidence_refs": [
+    "ev-servitudes"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "CONSIDÉRANT QUE le gouvernement exige une servitude permanente\net une servitude de travaux pour les rangs de l’Île et Haut de la Rivière ;",
+     "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+     "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+     "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-zonage",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+   "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+   "modality": "pdf",
+   "page": 16,
+   "excerpt": "Modifier la grille des usages de la zone H-06 de l’annexe 3 du règlement\nde zonage 160-2017 afin de permettre :\nGroupe habitation II (H2)\nc) Trifamiliale isolée : habitation ne comprenant que 3 logements,\ndégagée de toute autre habitation."
+  },
+  {
+   "id": "ev-motion",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+   "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+   "modality": "pdf",
+   "page": 16,
+   "excerpt": "CONSIDÉRANT QU’un avis de motion du présent projet de règlement\n268-2025 a été donné lors de la séance du conseil tenue le 9 décembre\n2025 ;"
+  },
+  {
+   "id": "ev-vente",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+   "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+   "modality": "pdf",
+   "page": 17,
+   "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la\nparution de l’annonce de la vente du terrain appartenant à la Municipalité,\nsoit celui du 620, rang Haut de la Rivière dans le journal Le Courrier Sud\nau coût de ± 726,64 $ taxes incluses.\nQUE cette vente est conditionnelle à la construction d’une résidence dans\nles huit (8) mois suivant cette résolution."
+  },
+  {
+   "id": "ev-servitudes",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+   "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "CONSIDÉRANT QUE le gouvernement exige une servitude permanente\net une servitude de travaux pour les rangs de l’Île et Haut de la Rivière ;"
+  },
+  {
+   "id": "ev-acquisition",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+   "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain\nlorsque les bâtiments qui y sont érigés dessus seront entièrement démoli."
+  },
+  {
+   "id": "ev-encheres",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+   "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, D’AUTORISER la\ndirectrice générale et greffière trésorière ou, en son absence, le maire,\nlors de la vente pour défaut de paiement de taxes du 16 juin 2026, à\nenchérir, pour et au nom de la Municipalité"
+  },
+  {
+   "id": "ev-taxation",
+   "source_file": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "rawRef": "raw/proces-verbaux-pierreville/cas/1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9.pdf",
+   "docSha": "1dc287ced8d062bf0cc9b7c5a96e76246f3a4baab92d6ce8bb904fc297b35bd9",
+   "sourceUrl": "https://pierreville.net/wp/wp-content/uploads/2026/04/PV2026-03-10.pdf",
+   "modality": "pdf",
+   "page": 15,
+   "excerpt": "Le présent règlement porte le titre de « Règlement no. 271-2026 relatifs\nà la taxation du cours d’eau Victor Jutras »"
+  }
+ ],
+ "input_tokens": 19300,
+ "output_tokens": 6300
+}

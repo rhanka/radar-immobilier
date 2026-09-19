@@ -1,0 +1,36 @@
+{
+ "documentId": "daveluyville-2026-05-04",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "cd3e765613ed5686e1943614eaff9183ce0781ee15f66fa20b9f366a641b0fb2",
+ "inputSha256": "69eb345777efcbcf9e700a3eef29e399e3b7fd608bc49bd83063283f893f4f89",
+ "responseSha256": "1af7d6d379e0b378414da6112d27f1e6517bd3c6a4779aace3fca38a6a6a0c80",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 85494,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 9803,
+  "outputTokens": 2786,
+  "totalTokens": 12589
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 85491,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:12:40.260Z"
+}

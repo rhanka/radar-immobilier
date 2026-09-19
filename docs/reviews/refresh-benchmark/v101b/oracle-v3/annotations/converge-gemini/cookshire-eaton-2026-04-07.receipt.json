@@ -1,0 +1,37 @@
+{
+ "documentId": "cookshire-eaton-2026-04-07",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dcef823e0abf9b897d88bdb82b1720374565a8af97cb1bd96327247ddafd2b5b",
+ "inputSha256": "831d90362da0163efb70c591632ef2458a99dab0631bc605e4de634fa8cf5b6f",
+ "responseSha256": "0110dc5c408b73e5792abe401507d0843097f0489d7366186f3ce9dd3f8d1894",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 8207,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 9235,
+  "outputTokens": 292,
+  "totalTokens": 12365,
+  "thoughtsTokenCount": 2838
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 8008,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:47:09.609Z"
+}

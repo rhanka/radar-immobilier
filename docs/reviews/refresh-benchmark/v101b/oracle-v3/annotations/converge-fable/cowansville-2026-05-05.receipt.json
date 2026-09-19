@@ -1,0 +1,77 @@
+{
+ "documentId": "cowansville-2026-05-05",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6b2f0f42478cda0df13e9a0ef53603935fecd69407b87058a8c18a85e4cf5120",
+ "inputSha256": "c8d4949bf13190534b6e32ac11da7dd66baa878357efd2e655fc6d6c121507ba",
+ "responseSha256": "5627d226ad6cd4bc57678d52790b0bd79ba809440d7f9b12a87b7e057897b9a6",
+ "rc": 0,
+ "latencyMs": 92222,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "d6098afa-d15d-4374-9225-8e1791366251",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 8603,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 57937,
+   "webSearchRequests": 0,
+   "costUSD": 1.58919475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 5762,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 57937,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 8603,
+  "output_tokens_details": {
+   "thinking_tokens": 5762
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 57937,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 8603,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 57937,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 57937
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 1.58919475,
+ "durationApiMs": 90271,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:34:36.511Z"
+}

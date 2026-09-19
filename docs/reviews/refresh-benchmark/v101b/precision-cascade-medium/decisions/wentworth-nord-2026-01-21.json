@@ -1,0 +1,354 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "49ecb9f65d5c60f55923c503dd3f26075c96cce7c8c8f3c1c6529748468b4ba3",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "dm-2025-0418"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2025-0418 — emprise du chemin de l’Adiante",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une"
+      },
+      {
+       "page": 9,
+       "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une\nemprise de rue constituée du lot projeté 6 704 332 (Wentworth-Nord) et du lot\n6 433 244 du cadastre du Québec (Harrington) qui aura une largeur de 11,50\nmètres dans sa section la plus étroite au lieu de posséder une largeur minimale\nde 12 mètres et ce, tel que prescrit au règlement pour toute voie locale\npossédant une pente transversale de moins de 10 %."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2017-497"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de lotissement 2017-497",
+     "stage": null,
+     "objet": "2017-497",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE le règlement de lotissement n°2017-497 prescrit que l’emprise\nd’une voie locale comprenant une pente transversale de moins de 10 % doit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-2025-9029"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Contribution pour parcs — lotissement 2025-9029",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit"
+      },
+      {
+       "page": 9,
+       "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit\nacquittée en argent pour un montant de 12 302.60 $."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2017-498"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 2017-498",
+     "stage": null,
+     "objet": "2017-498",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-2017-498-30"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2017-498-30 — hébergement touristique",
+     "stage": "projet",
+     "objet": "2017-498-30",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Dépôt des certificats attestant le résultat de la procédure\nd’enregistrement des personnes habiles à voter – Règlements distincts\nen lien avec le projet de règlement 2017-498-30 modifiant le"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-c09"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2017-498-30-C09",
+     "stage": null,
+     "objet": "2017-498-30-C09",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-cons08"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2017-498-30-CONS08",
+     "stage": null,
+     "objet": "2017-498-30-CONS08",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-i04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2017-498-30-I04",
+     "stage": null,
+     "objet": "2017-498-30-I04",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-certificats"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Dépôt des certificats d’enregistrement — hébergement touristique",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Conformément à l’article 557 de la Loi sur les élections et les référendums dans\nles municipalités, monsieur Ron Kelley, directeur général et greffier-trésorier,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "bylaw-2026-580"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-580 — taxes, compensations et tarifs",
+     "stage": "projet",
+     "objet": "2026-580",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Donne avis de motion qu’à une prochaine séance du Conseil municipal, le\nrèglement 2026-580 décrétant l’imposition de taxes, compensations et"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte la résolution acceptant la demande de dérogation mineure 2025-0418.\",\"excerpt\":\"ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de lotissement no 2017-497 n'est cité que comme rappel historique ou cadre normatif dans les attendus de la dérogation mineure.\",\"excerpt\":\"ATTENDU QUE le règlement de lotissement n°2017-497 prescrit que l’emprise\\nd’une voie locale comprenant une pente transversale de moins de 10 % doit\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal exige le paiement d'une contribution pour parcs en argent dans le cadre de la demande de lotissement.\",\"excerpt\":\"ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit\\nacquittée en argent pour un montant de 12 302.60 $.\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement no 2017-498 n'est mentionné que comme règlement de base modifié, aucun acte direct ne porte sur son adoption globale.\",\"excerpt\":\"modifiant le Règlement de zonage\\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le projet de règlement 2017-498-30 n'est mentionné qu'en référence historique lors du dépôt des certificats d'enregistrement.\",\"excerpt\":\"Dépôt des certificats attestant le résultat de la procédure\\nd’enregistrement des personnes habiles à voter – Règlements distincts\\nen lien avec le projet de règlement 2017-498-30\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement distinct 2017-498-30-C09 n'est l'objet d'aucune démarche procédurale adoptée dans la séance autre qu'un dépôt de certificat de consultation.\",\"excerpt\":\"Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement distinct 2017-498-30-CONS08 n'est l'objet d'aucune démarche procédurale adoptée dans la séance autre qu'un dépôt de certificat d'enregistrement.\",\"excerpt\":\"Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement distinct 2017-498-30-I04 n'est mentionné que dans le cadre du dépôt des certificats d'enregistrement, sans action réglementaire propre.\",\"excerpt\":\"Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le greffier-trésorier effectue formellement le dépôt des certificats d'enregistrement des personnes habiles à voter pour les règlements d'urbanisme.\",\"excerpt\":\"dépose les certificats attestant le résultat de la procédure d’enregistrement des\\npersonnes habiles à voter ayant le droit d’être inscrites sur la liste référendaire\"},{\"act\":\"A10\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de taxation 2026-580 relève des finances et de la fiscalité municipale, hors du champ de l'urbanisme et de l'aménagement du territoire.\",\"excerpt\":\"règlement 2026-580 décrétant l’imposition de taxes, compensations et\\ntarifs pour les services municipaux pour l’exercice financier 2026\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte la résolution acceptant la demande de dérogation mineure 2025-0418.",
+   "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de lotissement no 2017-497 n'est cité que comme rappel historique ou cadre normatif dans les attendus de la dérogation mineure.",
+   "excerpt": "ATTENDU QUE le règlement de lotissement n°2017-497 prescrit que l’emprise\nd’une voie locale comprenant une pente transversale de moins de 10 % doit"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal exige le paiement d'une contribution pour parcs en argent dans le cadre de la demande de lotissement.",
+   "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit\nacquittée en argent pour un montant de 12 302.60 $."
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement no 2017-498 n'est mentionné que comme règlement de base modifié, aucun acte direct ne porte sur son adoption globale.",
+   "excerpt": "modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le projet de règlement 2017-498-30 n'est mentionné qu'en référence historique lors du dépôt des certificats d'enregistrement.",
+   "excerpt": "Dépôt des certificats attestant le résultat de la procédure\nd’enregistrement des personnes habiles à voter – Règlements distincts\nen lien avec le projet de règlement 2017-498-30"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement distinct 2017-498-30-C09 n'est l'objet d'aucune démarche procédurale adoptée dans la séance autre qu'un dépôt de certificat de consultation.",
+   "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel"
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement distinct 2017-498-30-CONS08 n'est l'objet d'aucune démarche procédurale adoptée dans la séance autre qu'un dépôt de certificat d'enregistrement.",
+   "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement distinct 2017-498-30-I04 n'est mentionné que dans le cadre du dépôt des certificats d'enregistrement, sans action réglementaire propre.",
+   "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le greffier-trésorier effectue formellement le dépôt des certificats d'enregistrement des personnes habiles à voter pour les règlements d'urbanisme.",
+   "excerpt": "dépose les certificats attestant le résultat de la procédure d’enregistrement des\npersonnes habiles à voter ayant le droit d’être inscrites sur la liste référendaire"
+  },
+  {
+   "act": "A10",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de taxation 2026-580 relève des finances et de la fiscalité municipale, hors du champ de l'urbanisme et de l'aménagement du territoire.",
+   "excerpt": "règlement 2026-580 décrétant l’imposition de taxes, compensations et\ntarifs pour les services municipaux pour l’exercice financier 2026"
+  }
+ ],
+ "filter": {
+  "acts": 10,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement de lotissement no 2017-497 n'est cité que comme rappel historique ou cadre normatif dans les attendus de la dérogation mineure."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement no 2017-498 n'est mentionné que comme règlement de base modifié, aucun acte direct ne porte sur son adoption globale."
+   },
+   {
+    "act": "A05",
+    "reason": "Le projet de règlement 2017-498-30 n'est mentionné qu'en référence historique lors du dépôt des certificats d'enregistrement."
+   },
+   {
+    "act": "A06",
+    "reason": "Le règlement distinct 2017-498-30-C09 n'est l'objet d'aucune démarche procédurale adoptée dans la séance autre qu'un dépôt de certificat de consultation."
+   },
+   {
+    "act": "A07",
+    "reason": "Le règlement distinct 2017-498-30-CONS08 n'est l'objet d'aucune démarche procédurale adoptée dans la séance autre qu'un dépôt de certificat d'enregistrement."
+   },
+   {
+    "act": "A08",
+    "reason": "Le règlement distinct 2017-498-30-I04 n'est mentionné que dans le cadre du dépôt des certificats d'enregistrement, sans action réglementaire propre."
+   },
+   {
+    "act": "A10",
+    "reason": "Le règlement de taxation 2026-580 relève des finances et de la fiscalité municipale, hors du champ de l'urbanisme et de l'aménagement du territoire."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal adopte la résolution acceptant la demande de dérogation mineure 2025-0418."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil municipal exige le paiement d'une contribution pour parcs en argent dans le cadre de la demande de lotissement."
+   },
+   {
+    "act": "A09",
+    "reason": "Le greffier-trésorier effectue formellement le dépôt des certificats d'enregistrement des personnes habiles à voter pour les règlements d'urbanisme."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3604,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 11858,
+   "outputTokens": 1016,
+   "totalTokens": 12874
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3460
+  },
+  "inputSha256": "7f8a69f57c99f3a9150c0020cb798ce619438000166071c74dff16a32ed38be1"
+ }
+}

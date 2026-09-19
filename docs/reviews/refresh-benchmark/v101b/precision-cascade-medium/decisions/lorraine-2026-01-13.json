@@ -1,0 +1,216 @@
+{
+ "documentId": "lorraine-2026-01-13",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "314491655d6faa28d717b4340a7e810ae85b77a317769a939e710d9f2e58322d",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "derogation-souilly"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure approuvée — 4, rue de Souilly",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\nSouilly, lot 2 323 270, cadastre du Québec, circonscription foncière de Terrebonne,"
+      },
+      {
+       "page": 3,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\nSouilly, lot 2 323 270, cadastre du Québec, circonscription foncière de Terrebonne,\nayant pour effet de permettre que la marge de recul avant minimale soit autorisée à\n6,39 mètresau lieu des 7,6 mètresexigésàla grille des normes de zonage HU-124 du\nRèglementURB-03 de zonage en vigueur."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "derogation-liverdun"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure approuvée — 12, place de Liverdun",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\nde Liverdun, lot numéro 5 061 778, cadastre du Québec, circonscription foncière de"
+      },
+      {
+       "page": 3,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\nde Liverdun, lot numéro 5 061 778, cadastre du Québec, circonscription foncière de\nTerrebonne, ayant pour effet de permettre une largeur de stationnement de\n15,21 mètres, et ce, jusqu'à la limite de la propriétéavant, au lieu des 8,50 mètres\nprescrits par l'article 9.1.3.2.1 du Règlement URB-03 de zonage en vigueur."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "derogation-charmois"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure approuvée — 9, place de Charmois",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\nde Charmois, lot numéro 2 323 185, cadastre du Québec, circonscription foncière de"
+      },
+      {
+       "page": 4,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\nde Charmois, lot numéro 2 323 185, cadastre du Québec, circonscription foncière de\nTerrebonne, ayant pour effet de permettre que la marge de recul avant minimale soit\nautoriséeà6,72 mètres,au lieu des 7,6 mètresexigésàla grille des normes de zonage\nHU-120 du Règlement URB-03 de zonage en vigueur et que l'agrandissement du\ndeuxième étage au-dessus du garage soit autorisée à 7,33 mètres au lieu des\n7,6 mètresexigésàla grille des normes de zonage HU-120 du mêmerèglement."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "piia-charmois"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — agrandissement au 9, place de Charmois",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\n2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction"
+      },
+      {
+       "page": 5,
+       "excerpt": "D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\n2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction\nréalisépar Mélissa Picard Allard, technologue en architecture, et daté du 24 octobre\n\n2025."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-urb03"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement URB-03 de zonage",
+     "stage": null,
+     "objet": "URB-03",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\nSouilly, lot 2 323 270, cadastre du Québec, circonscription foncière de Terrebonne,"
+      },
+      {
+       "page": 3,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\nSouilly, lot 2 323 270, cadastre du Québec, circonscription foncière de Terrebonne,\nayant pour effet de permettre que la marge de recul avant minimale soit autorisée à\n6,39 mètresau lieu des 7,6 mètresexigésàla grille des normes de zonage HU-124 du\nRèglementURB-03 de zonage en vigueur."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La dérogation mineure pour le 4, rue de Souilly est accordée par la résolution 2026-01-4.\",\"excerpt\":\"D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\\nSouilly, lot 2 323 270, cadastre du Québec, circonscription foncière de Terrebonne,\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La dérogation mineure pour le 12, place de Liverdun est accordée par la résolution 2026-01-5.\",\"excerpt\":\"D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\\nde Liverdun, lot numéro 5 061 778, cadastre du Québec, circonscription foncière de\\nTerrebonne\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La dérogation mineure pour le 9, place de Charmois est accordée par la résolution 2026-01-6.\",\"excerpt\":\"D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\\nde Charmois, lot numéro 2 323 185, cadastre du Québec, circonscription foncière de\\nTerrebonne\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"La demande d'agrandissement (PIIA) pour le 9, place de Charmois est approuvée par la résolution 2026-01-7.\",\"excerpt\":\"D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\\n2025-0069 situé au 9, place de Charmois\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement URB-03 est seulement mentionné comme référence réglementaire en vigueur, aucun acte législatif ne le vise dans cette séance.\",\"excerpt\":\"RèglementURB-03 de zonage en vigueur.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La dérogation mineure pour le 4, rue de Souilly est accordée par la résolution 2026-01-4.",
+   "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\nSouilly, lot 2 323 270, cadastre du Québec, circonscription foncière de Terrebonne,"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La dérogation mineure pour le 12, place de Liverdun est accordée par la résolution 2026-01-5.",
+   "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\nde Liverdun, lot numéro 5 061 778, cadastre du Québec, circonscription foncière de\nTerrebonne"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La dérogation mineure pour le 9, place de Charmois est accordée par la résolution 2026-01-6.",
+   "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\nde Charmois, lot numéro 2 323 185, cadastre du Québec, circonscription foncière de\nTerrebonne"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "La demande d'agrandissement (PIIA) pour le 9, place de Charmois est approuvée par la résolution 2026-01-7.",
+   "excerpt": "D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\n2025-0069 situé au 9, place de Charmois"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement URB-03 est seulement mentionné comme référence réglementaire en vigueur, aucun acte législatif ne le vise dans cette séance.",
+   "excerpt": "RèglementURB-03 de zonage en vigueur."
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [
+   {
+    "act": "A05",
+    "reason": "Le règlement URB-03 est seulement mentionné comme référence réglementaire en vigueur, aucun acte législatif ne le vise dans cette séance."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La dérogation mineure pour le 4, rue de Souilly est accordée par la résolution 2026-01-4."
+   },
+   {
+    "act": "A02",
+    "reason": "La dérogation mineure pour le 12, place de Liverdun est accordée par la résolution 2026-01-5."
+   },
+   {
+    "act": "A03",
+    "reason": "La dérogation mineure pour le 9, place de Charmois est accordée par la résolution 2026-01-6."
+   },
+   {
+    "act": "A04",
+    "reason": "La demande d'agrandissement (PIIA) pour le 9, place de Charmois est approuvée par la résolution 2026-01-7."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1997,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 9166,
+   "outputTokens": 430,
+   "totalTokens": 9596
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1856
+  },
+  "inputSha256": "ce5cc22cd0c763c92eb1efbb3e036f3749dabaeab8833709f4dd69936fbbd12c"
+ }
+}

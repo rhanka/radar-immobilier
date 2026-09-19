@@ -1,0 +1,475 @@
+{
+ "documentId": "saint-barthelemy-2026-09-08",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "8942644f3bccd5757ec4286a05384d385cab43e5f710cac83f6a72b8a6fb882a",
+ "verificationSha256": "233dcd699ecfdc8cd508fec6d2d8efdb4a514ff86af530a1bacd2c0d77d2a8ca",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-09-203 en page 10 autorise le prolongement du réseau d'aqueduc pour desservir de nouvelles résidences, ce qui constitue un développement d'infrastructure explicite inclus par les règles.\"},{\"item\":\"a02\",\"choice\":\"absent\",\"reason\":\"Doublon de l'item a05 portant sur l'adoption du même règlement 738-26, avec un libellé d'objet mal découpé.\"},{\"item\":\"a03\",\"choice\":\"absent\",\"reason\":\"Doublon de l'item a06 portant sur le même premier projet de règlement 739-26, avec un objet mal formulé.\"},{\"item\":\"a04\",\"choice\":\"absent\",\"reason\":\"Doublon de l'item a08 pour l'acquisition de la Montée du Lac-Robert, avec un objet narratif plutôt que l'identifiant foncier.\"},{\"item\":\"a05\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-09-189 débutant à la page 3 adopte le règlement de zonage 738-26, avec un objet et une citation conformes et précis.\"},{\"item\":\"a06\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-09-191 à la page 4 adopte le premier projet de règlement de zonage 739-26, constituant une étape distincte valide.\"},{\"item\":\"a07\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-09-194 en page 6 autorise expressément la vente de l'immeuble désigné par le matricule 3220-73-6695, constituant un acte foncier explicite.\"},{\"item\":\"a08\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-09-195 en page 7 autorise l'acquisition de l'immeuble identifié par le matricule 2723-93-7328, acte foncier valide avec objet exact.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u09",
+   "verificationItem": "i09",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation du prolongement du réseau d’aqueduc sur le rang York à Saint-Cuthbert",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "réseau d'aqueduc",
+      "page": 10,
+      "citation": "la Municipalité de Saint-Barthélemy accepte la demande de Saint-Cuthbert pour prolonger le réseau d'aqueduc afin de desservir quelques résidences supplémentaires sur leur territoire",
+      "anchor": "prolonger le réseau d'aqueduc",
+      "spanStart": 2300,
+      "spanEnd": 2481
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-09-203, page 10, accepte le prolongement de l’aqueduc pour desservir des résidences supplémentaires, soit un développement explicite et non un simple entretien."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 10, résolution 2026-09-203 accepte le prolongement du réseau d'aqueduc pour desservir des résidences supplémentaires; développement explicite, donc hors de l'exclusion « entretiens de voirie sans développement explicite », citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le prolongement du réseau d'aqueduc n'est ni un objet réglementaire d'urbanisme ni un acte foncier selon les règles du corrigé."
+    }
+   ],
+   "human": {
+    "humanId": "S203",
+    "choice": "v1"
+   }
+  },
+  {
+   "item": "a02",
+   "kind": "human_only",
+   "unitId": null,
+   "humanId": "S738",
+   "verificationItem": null,
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption 738-26 : accessoires en cour avant au bord des lacs",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "QUE le règlement 738-26 ayant comme titre",
+      "page": 4,
+      "citation": "QUE le règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le règlement de zonage numéro 288-90 afin de permettre les constructions accessoires en cour avant pour les propriétés en b",
+      "anchor": "QUE le règlement 738-26 ayant comme titre",
+      "spanStart": 341,
+      "spanEnd": 542,
+      "humanId": "S738",
+      "grounded": true
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    }
+   ],
+   "human": {
+    "humanId": "S738",
+    "choice": "v1"
+   }
+  },
+  {
+   "item": "a03",
+   "kind": "human_only",
+   "unitId": null,
+   "humanId": "S739P",
+   "verificationItem": null,
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Premier projet 739-26 : densification R-7 et R-8",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "QUE le premier projet de règlement 739-26 ayant comme titre",
+      "page": 5,
+      "citation": "QUE le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26 amendant le règlement de zonage numéro 288-90 afin de permettre des immeubles à logements dans les zones R-7 et R",
+      "anchor": "QUE le premier projet de règlement 739-26 ayant comme titre",
+      "spanStart": 0,
+      "spanEnd": 200,
+      "humanId": "S739P",
+      "grounded": true
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    }
+   ],
+   "human": {
+    "humanId": "S739P",
+    "choice": "v1"
+   }
+  },
+  {
+   "item": "a04",
+   "kind": "human_only",
+   "unitId": null,
+   "humanId": "S195",
+   "verificationItem": null,
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acquisition Montée du Lac-Robert, développement de terrains",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "la récupération de ce matricule par la Municipalité facilitera le développement de certains terrains",
+      "page": 7,
+      "citation": "la récupération de ce matricule par la Municipalité facilitera le développement de certains terrains dans ce secteur; CONSIDÉRANT QUE le coût d'achat pour le matricule visé est la somme symbolique d'u",
+      "anchor": "la récupération de ce matricule par la Municipalité facilitera le développement de certains terrains",
+      "spanStart": 485,
+      "spanEnd": 687,
+      "humanId": "S195",
+      "grounded": true
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    }
+   ],
+   "human": {
+    "humanId": "S195",
+    "choice": "v1"
+   }
+  },
+  {
+   "item": "a05",
+   "kind": "v3_only",
+   "unitId": "u01",
+   "humanId": null,
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption du règlement 738-26 — constructions accessoires en cour avant des propriétés en bordure d’un lac",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "738-26",
+      "page": 3,
+      "citation": "4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS ACCESSOIRES EN COUR AVANT",
+      "anchor": "RÈGLEMENT NUMÉRO 738-26",
+      "spanStart": 1560,
+      "spanEnd": 1707
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 4.1 commence à la page 3 sous le titre cité, et la résolution 2026-09-189 adopte explicitement le règlement 738-26 dans son dispositif à la page 4."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "La résolution 2026-09-189 en page 3 adopte le règlement 738-26 (« soit et est adopté ») après avis de motion du 7 juillet et consultation; citation, étape adoption, objet 738-26 et page exacts."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "L'adoption du règlement de zonage 738-26 à la page 3 est un fait réglementaire attesté par le texte."
+    }
+   ],
+   "human": {
+    "humanId": null,
+    "choice": "absent"
+   }
+  },
+  {
+   "item": "a06",
+   "kind": "v3_only",
+   "unitId": "u03",
+   "humanId": null,
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 739-26 — immeubles à logements dans les zones R-7 et R-8",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "739-26",
+      "page": 4,
+      "citation": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8",
+      "anchor": "RÈGLEMENT NUMÉRO 739-26",
+      "spanStart": 2148,
+      "spanEnd": 2321
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le premier projet 739-26 est présenté sous le titre cité à la page 4 et adopté à la page 5, constituant une unité distincte de l’avis de motion."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 4-5, résolution 2026-09-191 : « le premier projet de règlement 739-26 ... soit et est adopté »; étape projet_reglement, objet 739-26 et citation du titre 4.3 exacts."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "L'adoption du premier projet de règlement 739-26 est attestée à la page 4 par la résolution 2026-09-191."
+    }
+   ],
+   "human": {
+    "humanId": null,
+    "choice": "absent"
+   }
+  },
+  {
+   "item": "a07",
+   "kind": "v3_only",
+   "unitId": "u05",
+   "humanId": null,
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Vente autorisée du matricule 3220-73-6695 près du Camping du Vieux Moulin — sans aménagement permanent",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "3220-73-6695",
+      "page": 6,
+      "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695",
+      "anchor": "3220-73-6695",
+      "spanStart": 1886,
+      "spanEnd": 2038
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 6 autorise explicitement la vente du second immeuble identifié par le matricule 3220-73-6695, également soumis à l’interdiction des aménagements permanents."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Même résolution 2026-09-194 page 6 pour le second matricule 3220-73-6695, unité distincte explicitement nommée; l'ancre v1 est le matricule lui-même, présent tel quel dans la citation."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "La vente du matricule 3220-73-6695 est un acte foncier distinct, et v1 utilise l'ancre exacte du matricule."
+    }
+   ],
+   "human": {
+    "humanId": null,
+    "choice": "absent"
+   }
+  },
+  {
+   "item": "a08",
+   "kind": "v3_only",
+   "unitId": "u06",
+   "humanId": null,
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acquisition autorisée d’une portion de la Montée du Lac-Robert — matricule 2723-93-7328",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2723-93-7328",
+      "page": 7,
+      "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à l'achat de l'immeuble identifié par le matricule 2723-93-7328",
+      "anchor": "matricule 2723-93-7328",
+      "spanStart": 897,
+      "spanEnd": 1029
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-09-195, page 7, autorise l’achat de la portion de la Montée du Lac-Robert identifiée par le matricule 2723-93-7328."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 7, résolution 2026-09-195 autorise « l'achat de l'immeuble identifié par le matricule 2723-93-7328 » (portion de la Montée du Lac-Robert) pour faciliter le développement du secteur; acte foncier explicite, citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "L'acquisition du matricule 2723-93-7328 à la page 7 est un acte foncier explicitement autorisé par le conseil."
+    }
+   ],
+   "human": {
+    "humanId": null,
+    "choice": "absent"
+   }
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "La résolution 2026-09-203 en page 10 autorise le prolongement du réseau d'aqueduc pour desservir de nouvelles résidences, ce qui constitue un développement d'infrastructure explicite inclus par les règles."
+  },
+  {
+   "item": "a02",
+   "choice": "absent",
+   "reason": "Doublon de l'item a05 portant sur l'adoption du même règlement 738-26, avec un libellé d'objet mal découpé."
+  },
+  {
+   "item": "a03",
+   "choice": "absent",
+   "reason": "Doublon de l'item a06 portant sur le même premier projet de règlement 739-26, avec un objet mal formulé."
+  },
+  {
+   "item": "a04",
+   "choice": "absent",
+   "reason": "Doublon de l'item a08 pour l'acquisition de la Montée du Lac-Robert, avec un objet narratif plutôt que l'identifiant foncier."
+  },
+  {
+   "item": "a05",
+   "choice": "v1",
+   "reason": "La résolution 2026-09-189 débutant à la page 3 adopte le règlement de zonage 738-26, avec un objet et une citation conformes et précis."
+  },
+  {
+   "item": "a06",
+   "choice": "v1",
+   "reason": "La résolution 2026-09-191 à la page 4 adopte le premier projet de règlement de zonage 739-26, constituant une étape distincte valide."
+  },
+  {
+   "item": "a07",
+   "choice": "v1",
+   "reason": "La résolution 2026-09-194 en page 6 autorise expressément la vente de l'immeuble désigné par le matricule 3220-73-6695, constituant un acte foncier explicite."
+  },
+  {
+   "item": "a08",
+   "choice": "v1",
+   "reason": "La résolution 2026-09-195 en page 7 autorise l'acquisition de l'immeuble identifié par le matricule 2723-93-7328, acte foncier valide avec objet exact."
+  }
+ ]
+}

@@ -1,0 +1,196 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "4d1e737f5b87940afc4fdaaca53ee2d9a01a0336db2efe620f0fe663b9779ab9",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Mise en délibéré annoncée de la dérogation mineure 2026-0059 — 813, 45e Avenue\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"813, 45e Avenue\",\n        \"page\": 3,\n        \"citation\": \"dérogation mineure 813, 45e Avenue – lotissement 2\\nterrains. Le maire explique que la demande sera prise en\\ndélibéré et revenir à un moment ultérieurement\",\n        \"anchor\": \"dérogation mineure 813, 45e Avenue\"\n      },\n      \"reason\": \"La règle exige une citation recopiée à l’identique : les sauts de ligne de la page 3 sont rétablis, sans modifier le fond de l’unité.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Fixation au 14 juin 2026 du scrutin référendaire — PPCMOI 2025-001, île Raymond\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"2025-001\",\n        \"page\": 14,\n        \"citation\": \"FIXATION DE LA DATE DU SCRUTIN RÉFÉRENDAIRE –\\nDEMANDE DE PPCMOI 2025-001 POUR LE PROJET DE\\nL’ÎLE RAYMOND\",\n        \"anchor\": \"DEMANDE DE PPCMOI 2025-001\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne du titre de la résolution à la page 14 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du second projet de règlement 2003-05-63 avec changement — modification du zonage\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"2003-05-63\",\n        \"page\": 15,\n        \"citation\": \"Il est proposé par : Denis Larocque. Qu’un second projet de\\nrèglement portant le numéro 2003-05-63 AVEC CHANGEMENT\\nsoit adopté\",\n        \"anchor\": \"règlement portant le numéro 2003-05-63\"\n      },\n      \"reason\": \"Les sauts de ligne de la résolution à la page 15 sont rétablis afin que la citation soit recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-0055 — garage incorporé au 31 Rue des Moissons\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-0055\",\n        \"page\": 18,\n        \"citation\": \"accepte la demande de PIIA 2026-0055 tel que\\nrecommandé par le Comité consultatif d’urbanisme\",\n        \"anchor\": \"demande de PIIA 2026-0055\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique le saut de ligne entre « tel que » et « recommandé » à la page 18.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-0056 — bâtiment commercial au 424 Chemin de l’Église\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-0056\",\n        \"page\": 19,\n        \"citation\": \"accepte la demande de PIIA 2026-0056 tel que\\nrecommandé par le Comité consultatif d’urbanisme\",\n        \"anchor\": \"demande de PIIA 2026-0056\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique le saut de ligne entre « tel que » et « recommandé » à la page 19.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Acceptation de la dérogation mineure 2026-0057 — allée d’accès au 424 Chemin de l’Église\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-0057\",\n        \"page\": 20,\n        \"citation\": \"accepte la demande de dérogation mineure 2026-0057\\ntel que recommandé par le Comité consultatif d’urbanisme\",\n        \"anchor\": \"demande de dérogation mineure 2026-0057\"\n      },\n      \"reason\": \"Le saut de ligne après « 2026-0057 » à la page 20 est rétabli pour respecter l’exigence de citation recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Autorisation de cession d’une servitude — 163 avenue des Cèdres, lots 5 988 194 et 6 520 252\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"163 avenue des Cèdres\",\n        \"page\": 20,\n        \"citation\": \"autorisés à signer les documents\\nnécessaires pour l’acte de cession de la servitude sur les lots\\n5 988 194 et 6 520 252 située au 163 avenue des Cèdres\",\n        \"anchor\": \"163 avenue des Cèdres\"\n      },\n      \"reason\": \"Les sauts de ligne de l’autorisation à la page 20 sont rétablis afin que la citation soit recopiée à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Mise en délibéré annoncée de la dérogation mineure 2026-0059 — 813, 45e Avenue",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "813, 45e Avenue",
+    "page": 3,
+    "citation": "dérogation mineure 813, 45e Avenue – lotissement 2\nterrains. Le maire explique que la demande sera prise en\ndélibéré et revenir à un moment ultérieurement",
+    "anchor": "dérogation mineure 813, 45e Avenue"
+   },
+   "reason": "La règle exige une citation recopiée à l’identique : les sauts de ligne de la page 3 sont rétablis, sans modifier le fond de l’unité."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Fixation au 14 juin 2026 du scrutin référendaire — PPCMOI 2025-001, île Raymond",
+    "stage": "inconnu",
+    "procedure": "ppcmoi",
+    "objet": "2025-001",
+    "page": 14,
+    "citation": "FIXATION DE LA DATE DU SCRUTIN RÉFÉRENDAIRE –\nDEMANDE DE PPCMOI 2025-001 POUR LE PROJET DE\nL’ÎLE RAYMOND",
+    "anchor": "DEMANDE DE PPCMOI 2025-001"
+   },
+   "reason": "La citation doit conserver les sauts de ligne du titre de la résolution à la page 14 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du second projet de règlement 2003-05-63 avec changement — modification du zonage",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "2003-05-63",
+    "page": 15,
+    "citation": "Il est proposé par : Denis Larocque. Qu’un second projet de\nrèglement portant le numéro 2003-05-63 AVEC CHANGEMENT\nsoit adopté",
+    "anchor": "règlement portant le numéro 2003-05-63"
+   },
+   "reason": "Les sauts de ligne de la résolution à la page 15 sont rétablis afin que la citation soit recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-0055 — garage incorporé au 31 Rue des Moissons",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-0055",
+    "page": 18,
+    "citation": "accepte la demande de PIIA 2026-0055 tel que\nrecommandé par le Comité consultatif d’urbanisme",
+    "anchor": "demande de PIIA 2026-0055"
+   },
+   "reason": "La citation doit reproduire à l’identique le saut de ligne entre « tel que » et « recommandé » à la page 18."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-0056 — bâtiment commercial au 424 Chemin de l’Église",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-0056",
+    "page": 19,
+    "citation": "accepte la demande de PIIA 2026-0056 tel que\nrecommandé par le Comité consultatif d’urbanisme",
+    "anchor": "demande de PIIA 2026-0056"
+   },
+   "reason": "La citation doit reproduire à l’identique le saut de ligne entre « tel que » et « recommandé » à la page 19."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Acceptation de la dérogation mineure 2026-0057 — allée d’accès au 424 Chemin de l’Église",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-0057",
+    "page": 20,
+    "citation": "accepte la demande de dérogation mineure 2026-0057\ntel que recommandé par le Comité consultatif d’urbanisme",
+    "anchor": "demande de dérogation mineure 2026-0057"
+   },
+   "reason": "Le saut de ligne après « 2026-0057 » à la page 20 est rétabli pour respecter l’exigence de citation recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Autorisation de cession d’une servitude — 163 avenue des Cèdres, lots 5 988 194 et 6 520 252",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "163 avenue des Cèdres",
+    "page": 20,
+    "citation": "autorisés à signer les documents\nnécessaires pour l’acte de cession de la servitude sur les lots\n5 988 194 et 6 520 252 située au 163 avenue des Cèdres",
+    "anchor": "163 avenue des Cèdres"
+   },
+   "reason": "Les sauts de ligne de l’autorisation à la page 20 sont rétablis afin que la citation soit recopiée à l’identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 3,
+   "citation": "dérogation mineure 813, 45e Avenue – lotissement 2\nterrains. Le maire explique que la demande sera prise en\ndélibéré et revenir à un moment ultérieurement"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 14,
+   "citation": "FIXATION DE LA DATE DU SCRUTIN RÉFÉRENDAIRE –\nDEMANDE DE PPCMOI 2025-001 POUR LE PROJET DE\nL’ÎLE RAYMOND"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "second_projet",
+   "page": 15,
+   "citation": "Il est proposé par : Denis Larocque. Qu’un second projet de\nrèglement portant le numéro 2003-05-63 AVEC CHANGEMENT\nsoit adopté"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "piia",
+   "page": 18,
+   "citation": "accepte la demande de PIIA 2026-0055 tel que\nrecommandé par le Comité consultatif d’urbanisme"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "piia",
+   "page": 19,
+   "citation": "accepte la demande de PIIA 2026-0056 tel que\nrecommandé par le Comité consultatif d’urbanisme"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "derogation_mineure",
+   "page": 20,
+   "citation": "accepte la demande de dérogation mineure 2026-0057\ntel que recommandé par le Comité consultatif d’urbanisme"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "adoption",
+   "page": 20,
+   "citation": "autorisés à signer les documents\nnécessaires pour l’acte de cession de la servitude sur les lots\n5 988 194 et 6 520 252 située au 163 avenue des Cèdres"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 7
+}

@@ -1,0 +1,91 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dde58b22ba15c59d0eb3228c87709123e0bb175a8e28a5158f89e617de9987e8",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 2 : « QUE la municipalité de Stanstead-Est appuie la demande déposée par Madame Mélanie Banville auprès de la CPTAQ concernant l'acquisition d'une superficie de 54 acres du lot 6 374 262 » — acte foncier explicite (lot cadastral), résolution 2026-04-03 adoptée, citation/page/objet exacts, étape inconnu adéquate pour un appui CPTAQ.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 2 : « QUE la municipalité de Stanstead-Est appuie la demande déposée à la CPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la construction d'une nouvelle résidence » — résolution 2026-04-04, objet foncier explicite, citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 10, point 8.1 « RÉSOLUTION AVIS D'ASSUJETTISSEMENT – LOT 5 416 383 » : le conseil autorise par résolution 2026-04-17 l'inscription d'un avis d'assujettissement de 10 ans au droit de préemption sur le lot 5 416 383 — acte foncier explicite, décision acquise, citation/page/objet exacts.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 10, point « 8.2 RÉSOLUTION AVIS D'ASSUJETTISSEMENT – LOT 5 416 384 » : résolution distincte autorisant un avis d'assujettissement de 10 ans sur le lot 5 416 384 — objet foncier distinct du lot 5 416 383, citation et page exactes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 13 : « l'utilisation, à des fins autres qu'agricoles, d'une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de Coaticook, soit pour l'agrandissement de son lieu d'enfouissement technique » — appui CPTAQ résolu sur un lot cadastral explicite, citation/page/objet exacts, étape inconnu adéquate.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"La location temporaire d'un garage privé par acceptation de la soumission des Entreprises Y. Fecteau (12 mois, 1 350 $/mois) est un marché de location/services et non un acte réglementaire ou foncier explicite ; les règles excluent les marchés de services du rappel, à signaler au plus comme fait complémentaire hors gold.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Page 18, résolution 2026-04-34 : « D'adopter le règlement portant le numéro 2026-04 modifiant 2016-10 sur la tarification des permis et certificats », règlement pris en vertu de l'article 124 LAU — étape adoption, objet 2026-04, citation et page exactes ; l'avis de motion du 2 mars 2026 n'est qu'un rappel historique.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 2 : « QUE la municipalité de Stanstead-Est appuie la demande déposée par Madame Mélanie Banville auprès de la CPTAQ concernant l'acquisition d'une superficie de 54 acres du lot 6 374 262 » — acte foncier explicite (lot cadastral), résolution 2026-04-03 adoptée, citation/page/objet exacts, étape inconnu adéquate pour un appui CPTAQ."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 2 : « QUE la municipalité de Stanstead-Est appuie la demande déposée à la CPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la construction d'une nouvelle résidence » — résolution 2026-04-04, objet foncier explicite, citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 10, point 8.1 « RÉSOLUTION AVIS D'ASSUJETTISSEMENT – LOT 5 416 383 » : le conseil autorise par résolution 2026-04-17 l'inscription d'un avis d'assujettissement de 10 ans au droit de préemption sur le lot 5 416 383 — acte foncier explicite, décision acquise, citation/page/objet exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 10, point « 8.2 RÉSOLUTION AVIS D'ASSUJETTISSEMENT – LOT 5 416 384 » : résolution distincte autorisant un avis d'assujettissement de 10 ans sur le lot 5 416 384 — objet foncier distinct du lot 5 416 383, citation et page exactes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 13 : « l'utilisation, à des fins autres qu'agricoles, d'une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de Coaticook, soit pour l'agrandissement de son lieu d'enfouissement technique » — appui CPTAQ résolu sur un lot cadastral explicite, citation/page/objet exacts, étape inconnu adéquate."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "La location temporaire d'un garage privé par acceptation de la soumission des Entreprises Y. Fecteau (12 mois, 1 350 $/mois) est un marché de location/services et non un acte réglementaire ou foncier explicite ; les règles excluent les marchés de services du rappel, à signaler au plus comme fait complémentaire hors gold."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Page 18, résolution 2026-04-34 : « D'adopter le règlement portant le numéro 2026-04 modifiant 2016-10 sur la tarification des permis et certificats », règlement pris en vertu de l'article 124 LAU — étape adoption, objet 2026-04, citation et page exactes ; l'avis de motion du 2 mars 2026 n'est qu'un rappel historique."
+  }
+ ]
+}

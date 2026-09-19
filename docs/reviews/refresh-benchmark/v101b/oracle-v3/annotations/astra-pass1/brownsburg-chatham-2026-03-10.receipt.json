@@ -1,0 +1,36 @@
+{
+ "documentId": "brownsburg-chatham-2026-03-10",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "cd698a3fe9ad12492b041746ffc90d954a09caf1ed45d54c350121caabd72430",
+ "inputSha256": "f1f4ef0f131b95462d2b4473e05edde96ed48e9c038bbc75db951305eef959e1",
+ "responseSha256": "154012297c2eba8995fd8907a1e82082876c16e2647e2a5834b624c965a509e5",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 394539,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 52127,
+  "outputTokens": 13018,
+  "totalTokens": 65145
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 394499,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:48:09.536Z"
+}

@@ -1,0 +1,101 @@
+{
+ "documentId": "saint-felix-de-kingsey-2026-04-07",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "3af0de69954f704c23483e712159a82d4849c7f5137fb1ff3937ee8794f66a3a",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 638 relatif à l’occupation et à l’entretien des bâtiments\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"638\",\n        \"page\": 8,\n        \"citation\": \"il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation\\net à l’entretien des bâtiments\",\n        \"anchor\": \"règlement 638\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : la page 8 comporte un saut de ligne après « l’occupation ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure acceptée — 1130 rue Provencher, lot 5 740 483\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"5 740 483\",\n        \"page\": 8,\n        \"citation\": \"dérogation mineure formulée concernant l'immeuble situé au numéro, 1130 rue\\nProvencher (lot 5 740 483 cadastre du Québec), et ayant pour objet\",\n        \"anchor\": \"lot 5 740 483\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : la page 8 comporte un saut de ligne entre « 1130 rue » et « Provencher ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Dépôt du premier projet de résolution PPCMOI — lot 5 739 222, route 255\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"5 739 222\",\n        \"page\": 8,\n        \"citation\": \"DÉPÔT DU PREMIER PROJET DE RÉSOLUTION RELATIF À UN\\nPROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU\\nD’OCCUPATION D’UN IMMEUBLE (PPCMOI) LOT 5 739 222\",\n        \"anchor\": \"LOT 5 739 222\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le titre de la page 8 comporte des sauts de ligne après « RELATIF À UN » et « DE MODIFICATION OU ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption du règlement 638 relatif à l’occupation et à l’entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "638",
+    "page": 8,
+    "citation": "il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation\net à l’entretien des bâtiments",
+    "anchor": "règlement 638"
+   },
+   "reason": "La citation doit être recopiée à l’identique : la page 8 comporte un saut de ligne après « l’occupation »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Dérogation mineure acceptée — 1130 rue Provencher, lot 5 740 483",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "5 740 483",
+    "page": 8,
+    "citation": "dérogation mineure formulée concernant l'immeuble situé au numéro, 1130 rue\nProvencher (lot 5 740 483 cadastre du Québec), et ayant pour objet",
+    "anchor": "lot 5 740 483"
+   },
+   "reason": "La citation doit être recopiée à l’identique : la page 8 comporte un saut de ligne entre « 1130 rue » et « Provencher »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Dépôt du premier projet de résolution PPCMOI — lot 5 739 222, route 255",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "5 739 222",
+    "page": 8,
+    "citation": "DÉPÔT DU PREMIER PROJET DE RÉSOLUTION RELATIF À UN\nPROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU\nD’OCCUPATION D’UN IMMEUBLE (PPCMOI) LOT 5 739 222",
+    "anchor": "LOT 5 739 222"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le titre de la page 8 comporte des sauts de ligne après « RELATIF À UN » et « DE MODIFICATION OU »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 8,
+   "citation": "il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation\net à l’entretien des bâtiments"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "derogation_mineure",
+   "page": 8,
+   "citation": "dérogation mineure formulée concernant l'immeuble situé au numéro, 1130 rue\nProvencher (lot 5 740 483 cadastre du Québec), et ayant pour objet"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "projet_reglement",
+   "page": 8,
+   "citation": "DÉPÔT DU PREMIER PROJET DE RÉSOLUTION RELATIF À UN\nPROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU\nD’OCCUPATION D’UN IMMEUBLE (PPCMOI) LOT 5 739 222"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3,
+ "relabeledFrom": "astra-pass2"
+}

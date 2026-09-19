@@ -1,0 +1,158 @@
+{
+ "documentId": "lorraine-2026-01-13",
+ "nextId": 5,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée — 4, rue de Souilly, lot 2 323 270",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2 323 270",
+    "page": 3,
+    "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de Souilly, lot 2 323 270, cadastre du Québec",
+    "anchor": "lot 2 323 270",
+    "spanStart": 1033,
+    "spanEnd": 1153
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée — 4, rue de Souilly, lot 2 323 270",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2 323 270",
+      "page": 3,
+      "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de Souilly, lot 2 323 270, cadastre du Québec",
+      "anchor": "lot 2 323 270",
+      "spanStart": 1033,
+      "spanEnd": 1153
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accorde explicitement cette demande de dérogation mineure pour autoriser une marge de recul avant de 6,39 mètres, ce qui constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée — 12, place de Liverdun, lot 5 061 778",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "5 061 778",
+    "page": 3,
+    "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place de Liverdun, lot numéro 5 061 778, cadastre du Québec",
+    "anchor": "lot numéro 5 061 778",
+    "spanStart": 4020,
+    "spanEnd": 4151
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée — 12, place de Liverdun, lot 5 061 778",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "5 061 778",
+      "page": 3,
+      "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place de Liverdun, lot numéro 5 061 778, cadastre du Québec",
+      "anchor": "lot numéro 5 061 778",
+      "spanStart": 4020,
+      "spanEnd": 4151
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accorde explicitement cette demande de dérogation mineure pour permettre une largeur de stationnement de 15,21 mètres, ce qui constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée — 9, place de Charmois, lot 2 323 185",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2 323 185",
+    "page": 4,
+    "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place de Charmois, lot numéro 2 323 185, cadastre du Québec",
+    "anchor": "lot numéro 2 323 185",
+    "spanStart": 2903,
+    "spanEnd": 3034
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée — 9, place de Charmois, lot 2 323 185",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2 323 185",
+      "page": 4,
+      "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place de Charmois, lot numéro 2 323 185, cadastre du Québec",
+      "anchor": "lot numéro 2 323 185",
+      "spanStart": 2903,
+      "spanEnd": 3034
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accorde une demande de dérogation mineure portant sur les marges avant du bâtiment et de son agrandissement, soit une seule unité pour cette demande."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "PIIA approuvé — agrandissement 2025-0069 au 9, place de Charmois",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-0069",
+    "page": 5,
+    "citation": "D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro 2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction",
+    "anchor": "2025-0069 situé au 9, place de Charmois",
+    "spanStart": 997,
+    "spanEnd": 1152
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA approuvé — agrandissement 2025-0069 au 9, place de Charmois",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2025-0069",
+      "page": 5,
+      "citation": "D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro 2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction",
+      "anchor": "2025-0069 situé au 9, place de Charmois",
+      "spanStart": 997,
+      "spanEnd": 1152
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil approuve la demande d'agrandissement 2025-0069 après examen des critères du règlement de PIIA URB-08, décision distincte de la dérogation mineure visant le même immeuble."
+    }
+   ]
+  }
+ ]
+}

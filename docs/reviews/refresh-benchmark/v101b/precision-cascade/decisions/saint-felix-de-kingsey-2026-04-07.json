@@ -1,0 +1,257 @@
+{
+ "documentId": "saint-felix-de-kingsey-2026-04-07",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "a6c913048661326856ff67a57d125b1051c3c3829ec19056b9bc892d9133c401",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-638"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 638 relatif à l’occupation et à l’entretien des bâtiments",
+     "stage": "adoption",
+     "objet": "638",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "EN CONSÉQUENCE, sur proposition de M. Jacob Morin, appuyée par M. Simon\nLauzière, il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation\net à l’entretien des bâtiments."
+      },
+      {
+       "page": 8,
+       "excerpt": "EN CONSÉQUENCE, sur proposition de M. Jacob Morin, appuyée par M. Simon\nLauzière, il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation\net à l’entretien des bâtiments."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-547"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 547",
+     "stage": null,
+     "objet": "547",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "le projet d’agrandissement, tel que soumis, ne respecte pas le Règlement de\nzonage 547, pour la zone I-1, dont la marge avant qui serait de 3 m malgré le"
+      },
+      {
+       "page": 9,
+       "excerpt": "le projet d’agrandissement, tel que soumis, ne respecte pas le Règlement de\nzonage 547, pour la zone I-1, dont la marge avant qui serait de 3 m malgré le\nrèglement de zonage numéro 547 qui mentionne que la marge avant doit être\nde 10m."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-631"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 631 sur les PPCMOI",
+     "stage": null,
+     "objet": "631",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "le Règlement no 631 sur les Projets particuliers de construction, de\nmodification ou d’occupation d’un immeuble (PPCMOI) de la Municipalité"
+      },
+      {
+       "page": 8,
+       "excerpt": "le Règlement no 631 sur les Projets particuliers de construction, de\nmodification ou d’occupation d’un immeuble (PPCMOI) de la Municipalité"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-71-04-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure acceptée — 1130 rue Provencher",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Il est résolu à l’unanimité des conseillers présents d’accepter la dérogation mineure\ntelle que demandée."
+      },
+      {
+       "page": 8,
+       "excerpt": "Il est résolu à l’unanimité des conseillers présents d’accepter la dérogation mineure\ntelle que demandée."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-72-04-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Premier projet de résolution PPCMOI — lot 5 739 222",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "il est proposé par monsieur Douglas Beard, appuyé par monsieur Jean-François De\nPlaen et résolu à l’unanimité que le CCU recommande d’accepter la demande de\nPPCMOI,"
+      },
+      {
+       "page": 10,
+       "excerpt": "2. Le projet de résolution est soumis à la consultation publique, conformément à la\nLoi sur l’aménagement et l’urbanisme (A-19.1);"
+      },
+      {
+       "page": 9,
+       "excerpt": "il est proposé par monsieur Douglas Beard, appuyé par monsieur Jean-François De\nPlaen et résolu à l’unanimité que le CCU recommande d’accepter la demande de\nPPCMOI, pour l’immeuble situé sur le lot 5 739 222 sur la route 255 pour autoriser\nl’agrandissement en cours avant avec une marge avant de 3 m malgré le règlement\nde zonage numéro 547 qui mentionne que la marge avant doit être de 10m."
+      },
+      {
+       "page": 10,
+       "excerpt": "2. Le projet de résolution est soumis à la consultation publique, conformément à la\nLoi sur l’aménagement et l’urbanisme (A-19.1);\n3. Le greffier est mandaté pour publier un avis public annonçant la tenue de cette\nconsultation et informer les citoyens de leurs droits quant à une éventuelle demande\nd’approbation référendaire.\nUne séance de consultation publique sera tenue le : 04 mai 2026 à 19h45."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-permis"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Rapport mensuel — 10 demandes de permis",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "10 demandes de permis (valeur approx. 865 300 $)"
+      },
+      {
+       "page": 7,
+       "excerpt": "10 demandes de permis (valeur approx. 865 300 $)"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement 638 relatif à l'occupation et à l'entretien des bâtiments sous la résolution 70-04-2026.\",\"excerpt\":\"il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation et à l’entretien des bâtiments.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage 547 est seulement cité comme norme d'urbanisme applicable sans faire l'objet d'un acte de procédure dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 631 sur les PPCMOI est simplement mentionné dans les considérants sans faire l'objet d'une démarche d'adoption ou de modification.\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution acceptant la demande de dérogation mineure pour le 1130 rue Provencher.\",\"excerpt\":\"Il est résolu à l’unanimité des conseillers présents d’accepter la dérogation mineure telle que demandée.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le premier projet de résolution PPCMOI pour le lot 5 739 222 et annonce la consultation publique.\",\"excerpt\":\"DÉPÔT DU PREMIER PROJET DE RÉSOLUTION RELATIF À UN PROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI) LOT 5 739 222.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt du rapport mensuel des activités de l'inspection en bâtiment (10 demandes de permis) est expressément attesté.\",\"excerpt\":\"9.1 RAPPORT MENSUEL DES ACTIVITÉS – INSPECTION EN BÂTIMENT\\n10 demandes de permis (valeur approx. 865 300 $)\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement 638 relatif à l'occupation et à l'entretien des bâtiments sous la résolution 70-04-2026.",
+   "excerpt": "il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation et à l’entretien des bâtiments."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage 547 est seulement cité comme norme d'urbanisme applicable sans faire l'objet d'un acte de procédure dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 631 sur les PPCMOI est simplement mentionné dans les considérants sans faire l'objet d'une démarche d'adoption ou de modification.",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution acceptant la demande de dérogation mineure pour le 1130 rue Provencher.",
+   "excerpt": "Il est résolu à l’unanimité des conseillers présents d’accepter la dérogation mineure telle que demandée."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le premier projet de résolution PPCMOI pour le lot 5 739 222 et annonce la consultation publique.",
+   "excerpt": "DÉPÔT DU PREMIER PROJET DE RÉSOLUTION RELATIF À UN PROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI) LOT 5 739 222."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le dépôt du rapport mensuel des activités de l'inspection en bâtiment (10 demandes de permis) est expressément attesté.",
+   "excerpt": "9.1 RAPPORT MENSUEL DES ACTIVITÉS – INSPECTION EN BÂTIMENT\n10 demandes de permis (valeur approx. 865 300 $)"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement de zonage 547 est seulement cité comme norme d'urbanisme applicable sans faire l'objet d'un acte de procédure dans cette séance."
+   },
+   {
+    "act": "A03",
+    "reason": "Le règlement 631 sur les PPCMOI est simplement mentionné dans les considérants sans faire l'objet d'une démarche d'adoption ou de modification."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le règlement 638 relatif à l'occupation et à l'entretien des bâtiments sous la résolution 70-04-2026."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte la résolution acceptant la demande de dérogation mineure pour le 1130 rue Provencher."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil adopte le premier projet de résolution PPCMOI pour le lot 5 739 222 et annonce la consultation publique."
+   },
+   {
+    "act": "A06",
+    "reason": "Le dépôt du rapport mensuel des activités de l'inspection en bâtiment (10 demandes de permis) est expressément attesté."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1852,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 8952,
+   "outputTokens": 444,
+   "totalTokens": 9396
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1708
+  },
+  "inputSha256": "fd34356c1596c645bd6ffe0728a8df2e6d5dc972c38843c135806924fd7d9060"
+ }
+}

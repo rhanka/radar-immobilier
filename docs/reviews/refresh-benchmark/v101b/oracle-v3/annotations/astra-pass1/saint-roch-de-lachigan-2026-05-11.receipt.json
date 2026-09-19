@@ -1,0 +1,36 @@
+{
+ "documentId": "saint-roch-de-lachigan-2026-05-11",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "75b96f76fef9964a0ee779a66dc88e9208063894623dec692645a623e0fa24e4",
+ "inputSha256": "5eb5cb943ad42de7e60cf40a67fffcd6948f51a8de5c287397a683f414933616",
+ "responseSha256": "040cca12ffadc4ad01aa9428bfcf9c9fb13b65886b7b20031fbdbe886af92045",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 71493,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2626,
+  "outputTokens": 2306,
+  "totalTokens": 4932
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 71487,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:04:27.431Z"
+}

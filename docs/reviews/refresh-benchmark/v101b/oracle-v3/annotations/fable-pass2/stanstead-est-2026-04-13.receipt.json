@@ -1,0 +1,75 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "dde58b22ba15c59d0eb3228c87709123e0bb175a8e28a5158f89e617de9987e8",
+ "inputSha256": "1ef23d96c0eb02fa9e3014db2d101025298e962c59cb4aa5f0140230f750526c",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "rc": 0,
+ "latencyMs": 52068,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "c73cff15-0abe-4f05-9b93-8594ffc266eb",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 4223,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 25430,
+   "webSearchRequests": 0,
+   "costUSD": 0.72044325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 4213,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 25430,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 4223,
+  "output_tokens_details": {
+   "thinking_tokens": 4213
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 25430,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 4223,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 25430,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 25430
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.72044325,
+ "durationApiMs": 50241,
+ "stderrTail": "",
+ "at": "2026-09-18T17:53:14.635Z"
+}

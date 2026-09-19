@@ -1,0 +1,272 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "nextId": 8,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Mise en délibéré annoncée de la dérogation mineure 2026-0059 — 813, 45e Avenue",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "813, 45e Avenue",
+    "page": 3,
+    "citation": "dérogation mineure 813, 45e Avenue – lotissement 2 terrains. Le maire explique que la demande sera prise en délibéré et revenir à un moment ultérieurement",
+    "anchor": "dérogation mineure 813, 45e Avenue",
+    "spanStart": 668,
+    "spanEnd": 822
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Mise en délibéré annoncée de la dérogation mineure 2026-0059 — 813, 45e Avenue",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "813, 45e Avenue",
+      "page": 3,
+      "citation": "dérogation mineure 813, 45e Avenue – lotissement 2 terrains. Le maire explique que la demande sera prise en délibéré et revenir à un moment ultérieurement",
+      "anchor": "dérogation mineure 813, 45e Avenue",
+      "spanStart": 668,
+      "spanEnd": 822
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le maire annonce une mise en délibéré et un retour ultérieur de cette demande explicite, étape à conserver sans la transformer en acceptation ou en refus."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Fixation au 14 juin 2026 du scrutin référendaire — PPCMOI 2025-001, île Raymond",
+    "stage": "inconnu",
+    "procedure": "ppcmoi",
+    "objet": "2025-001",
+    "page": 14,
+    "citation": "FIXATION DE LA DATE DU SCRUTIN RÉFÉRENDAIRE – DEMANDE DE PPCMOI 2025-001 POUR LE PROJET DE L’ÎLE RAYMOND",
+    "anchor": "DEMANDE DE PPCMOI 2025-001",
+    "spanStart": 124,
+    "spanEnd": 228
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Fixation au 14 juin 2026 du scrutin référendaire — PPCMOI 2025-001, île Raymond",
+      "stage": "inconnu",
+      "procedure": "ppcmoi",
+      "objet": "2025-001",
+      "page": 14,
+      "citation": "FIXATION DE LA DATE DU SCRUTIN RÉFÉRENDAIRE – DEMANDE DE PPCMOI 2025-001 POUR LE PROJET DE L’ÎLE RAYMOND",
+      "anchor": "DEMANDE DE PPCMOI 2025-001",
+      "spanStart": 124,
+      "spanEnd": 228
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise le scrutin référendaire et en fixe la date pour ce PPCMOI, tandis que l’adoption finale du 2 mars 2026 n’est qu’un rappel historique."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du second projet de règlement 2003-05-63 avec changement — modification du zonage",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "2003-05-63",
+    "page": 15,
+    "citation": "Il est proposé par : Denis Larocque. Qu’un second projet de règlement portant le numéro 2003-05-63 AVEC CHANGEMENT soit adopté",
+    "anchor": "règlement portant le numéro 2003-05-63",
+    "spanStart": 1180,
+    "spanEnd": 1306
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du second projet de règlement 2003-05-63 avec changement — modification du zonage",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "2003-05-63",
+      "page": 15,
+      "citation": "Il est proposé par : Denis Larocque. Qu’un second projet de règlement portant le numéro 2003-05-63 AVEC CHANGEMENT soit adopté",
+      "anchor": "règlement portant le numéro 2003-05-63",
+      "spanStart": 1180,
+      "spanEnd": 1306
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil adopte expressément le second projet avec changement; les étapes antérieures rappelées et l’adoption future indiquée au calendrier ne créent pas d’unités supplémentaires."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Acceptation du PIIA 2026-0055 — garage incorporé au 31 Rue des Moissons",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-0055",
+    "page": 18,
+    "citation": "Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d’urbanisme",
+    "anchor": "demande de PIIA 2026-0055",
+    "spanStart": 214,
+    "spanEnd": 375
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-0055 — garage incorporé au 31 Rue des Moissons",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-0055",
+      "page": 18,
+      "citation": "Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d’urbanisme",
+      "anchor": "demande de PIIA 2026-0055",
+      "spanStart": 214,
+      "spanEnd": 375
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution accepte explicitement cette demande de PIIA pour un garage incorporé, objet inclus même pour des travaux de petite envergure."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Acceptation du PIIA 2026-0056 — bâtiment commercial au 424 Chemin de l’Église",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-0056",
+    "page": 19,
+    "citation": "Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d’urbanisme",
+    "anchor": "demande de PIIA 2026-0056",
+    "spanStart": 519,
+    "spanEnd": 679
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-0056 — bâtiment commercial au 424 Chemin de l’Église",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-0056",
+      "page": 19,
+      "citation": "Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d’urbanisme",
+      "anchor": "demande de PIIA 2026-0056",
+      "spanStart": 519,
+      "spanEnd": 679
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution accepte cette demande de PIIA pour un bâtiment commercial, les objets d’urbanisme non résidentiels étant inclus."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Acceptation de la dérogation mineure 2026-0057 — allée d’accès au 424 Chemin de l’Église",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-0057",
+    "page": 20,
+    "citation": "Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d’urbanisme",
+    "anchor": "demande de dérogation mineure 2026-0057",
+    "spanStart": 214,
+    "spanEnd": 389
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation de la dérogation mineure 2026-0057 — allée d’accès au 424 Chemin de l’Église",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-0057",
+      "page": 20,
+      "citation": "Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d’urbanisme",
+      "anchor": "demande de dérogation mineure 2026-0057",
+      "spanStart": 214,
+      "spanEnd": 389
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte explicitement la dérogation relative à la largeur de l’allée d’accès, demande distincte du PIIA concernant la même adresse."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de cession d’une servitude — 163 avenue des Cèdres, lots 5 988 194 et 6 520 252",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "163 avenue des Cèdres",
+    "page": 20,
+    "citation": "autorisés à signer les documents nécessaires pour l’acte de cession de la servitude sur les lots 5 988 194 et 6 520 252 située au 163 avenue des Cèdres",
+    "anchor": "163 avenue des Cèdres",
+    "spanStart": 621,
+    "spanEnd": 772
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de cession d’une servitude — 163 avenue des Cèdres, lots 5 988 194 et 6 520 252",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "163 avenue des Cèdres",
+      "page": 20,
+      "citation": "autorisés à signer les documents nécessaires pour l’acte de cession de la servitude sur les lots 5 988 194 et 6 520 252 située au 163 avenue des Cèdres",
+      "anchor": "163 avenue des Cèdres",
+      "spanStart": 621,
+      "spanEnd": 772
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’autorisation de signer l’acte de cession de cette servitude constitue un acte foncier décidé portant sur les deux lots indiqués."
+    }
+   ]
+  }
+ ]
+}

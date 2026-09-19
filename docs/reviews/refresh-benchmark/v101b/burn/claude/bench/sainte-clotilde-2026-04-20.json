@@ -1,0 +1,13 @@
+{
+ "id": "sainte-clotilde-2026-04-20",
+ "rc": 0,
+ "latencyMs": 319347,
+ "inputTokens": 2,
+ "outputTokens": 35341,
+ "cacheRead": 0,
+ "cacheCreate": 19138,
+ "costUsd": 1.0880849999999997,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 65477
+}

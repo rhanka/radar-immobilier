@@ -1,0 +1,165 @@
+{
+ "documentId": "ayers-cliff-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ab13f81ec72e2b4d845b9aac3cd8be6a49eb841a261bc5a61fac13a7adb3fc25",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "ppcmoi-main-strathcona"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PPCMOI — 881-883 Main, 828 Strathcona",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828,\nStrathcona – Demande de PPCMOI"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "ppcmoi-tyler"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Projet PPCMOI — 329 rue Tyler",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "piia-ripple-cove"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Projet de plan global et agrandissements — Ripple Cove",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-amendements"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Amendements aux règlements d’urbanisme — point à l’ordre du jour",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Amendements aux règlements d’urbanisme"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 16.1.1 de l'ordre du jour concerne explicitement une demande de PPCMOI pour cette adresse.\",\"excerpt\":\"881-883 Main, 828,\\nStrathcona – Demande de PPCMOI\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 16.1.2 de l'ordre du jour porte sur un projet PPCMOI pour la construction d'un bâtiment au 329 rue Tyler.\",\"excerpt\":\"329 rue\\nTyler, Res-10 Projet PPCMOI construction 1\\nbâtiment 2 étages 4 logement au total\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 16.1.3 mentionne un projet de plan global, future construction et agrandissements relevant du PIIA-9.\",\"excerpt\":\"329\\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\\nglobale, future construction et Agrandissements\\n(PIIA-9)\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 16.2 inscrit à l'ordre du jour les amendements aux règlements d'urbanisme.\",\"excerpt\":\"16.2\\n\\nAmendements aux règlements d’urbanisme\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 16.1.1 de l'ordre du jour concerne explicitement une demande de PPCMOI pour cette adresse.",
+   "excerpt": "881-883 Main, 828,\nStrathcona – Demande de PPCMOI"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 16.1.2 de l'ordre du jour porte sur un projet PPCMOI pour la construction d'un bâtiment au 329 rue Tyler.",
+   "excerpt": "329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 16.1.3 mentionne un projet de plan global, future construction et agrandissements relevant du PIIA-9.",
+   "excerpt": "329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 16.2 inscrit à l'ordre du jour les amendements aux règlements d'urbanisme.",
+   "excerpt": "16.2\n\nAmendements aux règlements d’urbanisme"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 16.1.1 de l'ordre du jour concerne explicitement une demande de PPCMOI pour cette adresse."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 16.1.2 de l'ordre du jour porte sur un projet PPCMOI pour la construction d'un bâtiment au 329 rue Tyler."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 16.1.3 mentionne un projet de plan global, future construction et agrandissements relevant du PIIA-9."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 16.2 inscrit à l'ordre du jour les amendements aux règlements d'urbanisme."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2190,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3516,
+   "outputTokens": 276,
+   "totalTokens": 3792
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1713
+  },
+  "inputSha256": "24a3350d682068d66b480cf85167d8b4e2fd03601dfc389ad98f0d73d22cf8ec"
+ }
+}

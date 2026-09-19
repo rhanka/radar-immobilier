@@ -1,0 +1,74 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "284ee220fe486f61e7cd108aa9b318d40b04767e6fdc298ec8d61395c1ba5810",
+ "verificationSha256": "a0ae581513b3081f3f146efa86d33ea1ca76c6c1d8436405105e9e98db696d6c",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"L'entente de collaboration visant à « encadrer la mise à disposition d’un local municipal, l’octroi d’un prêt ainsi que l’émission de cautionnements » ne constitue pas un acte foncier ou un fait d'urbanisme portant sur un « objet réglementaire ou foncier explicite » au sens des règles, aucun immeuble ou lot n'étant d'ailleurs précisément désigné.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Conclusion autorisée de l’entente avec le CAD encadrant la mise à disposition d’un local municipal",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Entente de collaboration",
+      "page": 21,
+      "citation": "QUE le conseil municipal autorise la conclusion de l’Entente de collaboration entre la Municipalité de Notre-Dame-du-Rosaire et le Comité d’action et de développement (CAD), telle que présentée",
+      "anchor": "l’Entente de collaboration",
+      "spanStart": 1836,
+      "spanEnd": 2029
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 21 autorise la conclusion de l’entente encadrant explicitement la mise à disposition d’un local municipal, objet immobilier visé par l’inclusion des actes fonciers même non résidentiels."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "L'entente de collaboration avec le CAD (prêt, cautionnements, local non identifié) n'est pas un objet réglementaire ou foncier explicite au sens de la règle « Unité: objet réglementaire ou foncier explicite » ; relève des ententes de services exclues du rappel."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'entente de collaboration relative à la mise à disposition d'un local municipal, un prêt et un cautionnement ne constitue ni un acte foncier ni un fait d'urbanisme."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "L'entente de collaboration visant à « encadrer la mise à disposition d’un local municipal, l’octroi d’un prêt ainsi que l’émission de cautionnements » ne constitue pas un acte foncier ou un fait d'urbanisme portant sur un « objet réglementaire ou foncier explicite » au sens des règles, aucun immeuble ou lot n'étant d'ailleurs précisément désigné."
+  }
+ ]
+}

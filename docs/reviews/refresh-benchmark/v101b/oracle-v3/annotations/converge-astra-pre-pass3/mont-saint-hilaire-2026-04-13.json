@@ -1,0 +1,291 @@
+{
+ "documentId": "mont-saint-hilaire-2026-04-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "2dc49be12c6700e289e928622d9c1aed1d0f2ba7bbf5be3715bdd07b8c789da3",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-125, page 14, autorise la signature des actes de servitude d’aqueduc et d’égouts sur la rue Chénier, ce qui constitue un acte foncier explicitement inclus.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le CCU-26032403 est identifié page 15 pour la rénovation extérieure du 498-508, rue de l’Atlantique et figure parmi les PIIA approuvés conditionnellement par la résolution 2026-128.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le CCU-26032404 est identifié page 15 pour la rénovation extérieure du 455-465, cours de la Raffinerie et bénéficie de l’approbation conditionnelle de la résolution 2026-128.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le CCU-26032405 est identifié page 15 pour la rénovation extérieure du 485-495, cours de la Raffinerie et figure dans l’approbation conditionnelle de la résolution 2026-128.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 16 identifie le CCU-26032406 comme un projet d’affichage au 777, boulevard de la Gare, approuvé conditionnellement par la résolution 2026-128.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 16 identifie le CCU-26032407 comme un projet d’affichage au 847, chemin Benoît, inclus dans l’approbation conditionnelle des PIIA.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 16 identifie le CCU-26032408 comme un projet d’affichage au 849, chemin Benoît, approuvé conditionnellement par la résolution 2026-128.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-128, page 16, approuve conditionnellement le CCU-26032409 concernant la construction de deux bâtiments accessoires au 871, rue des Bernaches.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le CCU-26032410 vise les travaux de rénovation extérieure au 38, rue Saint-Charles et appartient aux PIIA approuvés conditionnellement page 16.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 16 atteste l’approbation conditionnelle du CCU-26032411 pour une habitation unifamiliale isolée au 734, rue Rembrandt, sur le lot 1 815 260.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 16 atteste l’approbation conditionnelle du CCU-26032412 pour une habitation unifamiliale isolée au 15, rue Campbell, sur le lot 3 956 018.\"\n    },\n    {\n      \"item\": \"i12\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le CCU-26032413 est explicitement approuvé conditionnellement page 16 pour les travaux d’agrandissement et de rénovation extérieure au 298, rue Fortier.\"\n    },\n    {\n      \"item\": \"i13\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 16 identifie et approuve conditionnellement le CCU-26032414 pour une habitation unifamiliale isolée au 675, rue Cardinal, sur le lot 1 816 633.\"\n    },\n    {\n      \"item\": \"i14\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-128 indique bien le 1436, chemin des Patriotes Nord, page 16, pour les travaux d’agrandissement du CCU-26032416 approuvés conditionnellement.\"\n    },\n    {\n      \"item\": \"i15\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le CCU-26032417 concerne les travaux d’agrandissement au 236, rue Desnoyers et figure dans l’approbation conditionnelle de la page 16.\"\n    },\n    {\n      \"item\": \"i16\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 16 atteste le projet d’affichage CCU-26032420 au 423, boulevard Sir-Wilfrid-Laurier et son approbation conditionnelle.\"\n    },\n    {\n      \"item\": \"i17\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 16 atteste l’approbation conditionnelle du CCU-26032421 pour les travaux de rénovation extérieure au 587, rue de l’Atlantique.\"\n    },\n    {\n      \"item\": \"i18\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le titre cité page 16 annonce le refus du CCU-26032415, confirmé page 17 pour l’agrandissement et la rénovation extérieure du 224, rue Villeneuve.\"\n    },\n    {\n      \"item\": \"i19\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le titre de la résolution 2026-129, page 16, annonce le refus du CCU-26032418, dont les travaux au 935, rue des Martinets sont précisés et refusés page 17.\"\n    },\n    {\n      \"item\": \"i20\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le refus du CCU-26032419 est annoncé dans le titre cité page 16 et confirmé page 17 pour l’agrandissement et la rénovation extérieure du 657, rue Doyle.\"\n    },\n    {\n      \"item\": \"i21\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 17 constate le dépôt actuel du certificat relatif au règlement 1371 abrogeant la réserve financière d’acquisition de lots aux fins de conservation, sans présenter ce dépôt comme une adoption.\"\n    },\n    {\n      \"item\": \"i22\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le dispositif de la résolution 2026-131, page 18, adopte expressément le règlement 1230-7 sur la concordance du plan d’urbanisme durable aux limites de certains îlots déstructurés.\"\n    },\n    {\n      \"item\": \"i23\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 18 constate l’avis de motion donné par Claude Rainville pour le règlement 1230-8, étape actuelle distincte de l’adoption du projet.\"\n    },\n    {\n      \"item\": \"i24\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-133, page 18, adopte explicitement le projet de règlement 1230-8, qui constitue une unité distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i25\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le titre cité page 18 annonce l’adoption du second projet de règlement 1235-34 concernant quatre zones du secteur de la rue des Vétérans, et le dispositif page 19 la confirme.\"\n    },\n    {\n      \"item\": \"i26\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-135, page 19, adopte expressément le règlement 1235-35 modifiant le zonage pour assurer sa concordance aux limites de certains îlots déstructurés.\"\n    },\n    {\n      \"item\": \"i27\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-124, page 13, étend actuellement le mandat de recours d’urbanisme concernant le 1580, rue Casavant aux propriétaires de la structure érigée sur cette propriété, plutôt que de simplement rappeler le mandat de 2024.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  },
+  {
+   "item": "i22",
+   "unitId": "u22",
+   "current": "v1"
+  },
+  {
+   "item": "i23",
+   "unitId": "u23",
+   "current": "v1"
+  },
+  {
+   "item": "i24",
+   "unitId": "u24",
+   "current": "v1"
+  },
+  {
+   "item": "i25",
+   "unitId": "u25",
+   "current": "v1"
+  },
+  {
+   "item": "i26",
+   "unitId": "u26",
+   "current": "v1"
+  },
+  {
+   "item": "i27",
+   "unitId": "u27",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-125, page 14, autorise la signature des actes de servitude d’aqueduc et d’égouts sur la rue Chénier, ce qui constitue un acte foncier explicitement inclus."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le CCU-26032403 est identifié page 15 pour la rénovation extérieure du 498-508, rue de l’Atlantique et figure parmi les PIIA approuvés conditionnellement par la résolution 2026-128."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le CCU-26032404 est identifié page 15 pour la rénovation extérieure du 455-465, cours de la Raffinerie et bénéficie de l’approbation conditionnelle de la résolution 2026-128."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le CCU-26032405 est identifié page 15 pour la rénovation extérieure du 485-495, cours de la Raffinerie et figure dans l’approbation conditionnelle de la résolution 2026-128."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 16 identifie le CCU-26032406 comme un projet d’affichage au 777, boulevard de la Gare, approuvé conditionnellement par la résolution 2026-128."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La page 16 identifie le CCU-26032407 comme un projet d’affichage au 847, chemin Benoît, inclus dans l’approbation conditionnelle des PIIA."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La page 16 identifie le CCU-26032408 comme un projet d’affichage au 849, chemin Benoît, approuvé conditionnellement par la résolution 2026-128."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La résolution 2026-128, page 16, approuve conditionnellement le CCU-26032409 concernant la construction de deux bâtiments accessoires au 871, rue des Bernaches."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Le CCU-26032410 vise les travaux de rénovation extérieure au 38, rue Saint-Charles et appartient aux PIIA approuvés conditionnellement page 16."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La page 16 atteste l’approbation conditionnelle du CCU-26032411 pour une habitation unifamiliale isolée au 734, rue Rembrandt, sur le lot 1 815 260."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "La page 16 atteste l’approbation conditionnelle du CCU-26032412 pour une habitation unifamiliale isolée au 15, rue Campbell, sur le lot 3 956 018."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Le CCU-26032413 est explicitement approuvé conditionnellement page 16 pour les travaux d’agrandissement et de rénovation extérieure au 298, rue Fortier."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "La page 16 identifie et approuve conditionnellement le CCU-26032414 pour une habitation unifamiliale isolée au 675, rue Cardinal, sur le lot 1 816 633."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "La résolution 2026-128 indique bien le 1436, chemin des Patriotes Nord, page 16, pour les travaux d’agrandissement du CCU-26032416 approuvés conditionnellement."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Le CCU-26032417 concerne les travaux d’agrandissement au 236, rue Desnoyers et figure dans l’approbation conditionnelle de la page 16."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "La page 16 atteste le projet d’affichage CCU-26032420 au 423, boulevard Sir-Wilfrid-Laurier et son approbation conditionnelle."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "La page 16 atteste l’approbation conditionnelle du CCU-26032421 pour les travaux de rénovation extérieure au 587, rue de l’Atlantique."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "Le titre cité page 16 annonce le refus du CCU-26032415, confirmé page 17 pour l’agrandissement et la rénovation extérieure du 224, rue Villeneuve."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "Le titre de la résolution 2026-129, page 16, annonce le refus du CCU-26032418, dont les travaux au 935, rue des Martinets sont précisés et refusés page 17."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "Le refus du CCU-26032419 est annoncé dans le titre cité page 16 et confirmé page 17 pour l’agrandissement et la rénovation extérieure du 657, rue Doyle."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "La page 17 constate le dépôt actuel du certificat relatif au règlement 1371 abrogeant la réserve financière d’acquisition de lots aux fins de conservation, sans présenter ce dépôt comme une adoption."
+  },
+  {
+   "item": "i22",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 2026-131, page 18, adopte expressément le règlement 1230-7 sur la concordance du plan d’urbanisme durable aux limites de certains îlots déstructurés."
+  },
+  {
+   "item": "i23",
+   "choice": "v1",
+   "reason": "La page 18 constate l’avis de motion donné par Claude Rainville pour le règlement 1230-8, étape actuelle distincte de l’adoption du projet."
+  },
+  {
+   "item": "i24",
+   "choice": "v1",
+   "reason": "La résolution 2026-133, page 18, adopte explicitement le projet de règlement 1230-8, qui constitue une unité distincte de l’avis de motion."
+  },
+  {
+   "item": "i25",
+   "choice": "v1",
+   "reason": "Le titre cité page 18 annonce l’adoption du second projet de règlement 1235-34 concernant quatre zones du secteur de la rue des Vétérans, et le dispositif page 19 la confirme."
+  },
+  {
+   "item": "i26",
+   "choice": "v1",
+   "reason": "La résolution 2026-135, page 19, adopte expressément le règlement 1235-35 modifiant le zonage pour assurer sa concordance aux limites de certains îlots déstructurés."
+  },
+  {
+   "item": "i27",
+   "choice": "v1",
+   "reason": "La résolution 2026-124, page 13, étend actuellement le mandat de recours d’urbanisme concernant le 1580, rue Casavant aux propriétaires de la structure érigée sur cette propriété, plutôt que de simplement rappeler le mandat de 2024."
+  }
+ ]
+}

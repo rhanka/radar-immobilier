@@ -1,0 +1,147 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "62a4f48678584809feddc98bc4e110b9c7156a2edb6b7670330ac8f863f95de5",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Mise en délibéré annoncée de la dérogation mineure 2026-0059 — 813, 45e Avenue\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"813, 45e Avenue\",\n        \"page\": 3,\n        \"citation\": \"dérogation mineure 813, 45e Avenue – lotissement 2\\nterrains. Le maire explique que la demande sera prise en\\ndélibéré et revenir à un moment ultérieurement.\",\n        \"anchor\": \"dérogation mineure 813, 45e Avenue\"\n      },\n      \"reason\": \"Le maire annonce une mise en délibéré et un retour ultérieur de cette demande explicite, étape à conserver sans la transformer en acceptation ou en refus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Fixation au 14 juin 2026 du scrutin référendaire — PPCMOI 2025-001, île Raymond\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"2025-001\",\n        \"page\": 14,\n        \"citation\": \"FIXATION DE LA DATE DU SCRUTIN RÉFÉRENDAIRE –\\nDEMANDE DE PPCMOI 2025-001 POUR LE PROJET DE\\nL’ÎLE RAYMOND\",\n        \"anchor\": \"DEMANDE DE PPCMOI 2025-001\"\n      },\n      \"reason\": \"La résolution autorise le scrutin référendaire et en fixe la date pour ce PPCMOI, tandis que l’adoption finale du 2 mars 2026 n’est qu’un rappel historique.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du second projet de règlement 2003-05-63 avec changement — modification du zonage\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"2003-05-63\",\n        \"page\": 15,\n        \"citation\": \"Il est proposé par : Denis Larocque. Qu’un second projet de\\nrèglement portant le numéro 2003-05-63 AVEC CHANGEMENT\\nsoit adopté\",\n        \"anchor\": \"règlement portant le numéro 2003-05-63\"\n      },\n      \"reason\": \"Le conseil adopte expressément le second projet avec changement; les étapes antérieures rappelées et l’adoption future indiquée au calendrier ne créent pas d’unités supplémentaires.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-0055 — garage incorporé au 31 Rue des Moissons\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-0055\",\n        \"page\": 18,\n        \"citation\": \"Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que\\nrecommandé par le Comité consultatif d’urbanisme.\",\n        \"anchor\": \"demande de PIIA 2026-0055\"\n      },\n      \"reason\": \"La résolution accepte explicitement cette demande de PIIA pour un garage incorporé, objet inclus même pour des travaux de petite envergure.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-0056 — bâtiment commercial au 424 Chemin de l’Église\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-0056\",\n        \"page\": 19,\n        \"citation\": \"Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que\\nrecommandé par le Comité consultatif d’urbanisme.\",\n        \"anchor\": \"demande de PIIA 2026-0056\"\n      },\n      \"reason\": \"La résolution accepte cette demande de PIIA pour un bâtiment commercial, les objets d’urbanisme non résidentiels étant inclus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Acceptation de la dérogation mineure 2026-0057 — allée d’accès au 424 Chemin de l’Église\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-0057\",\n        \"page\": 20,\n        \"citation\": \"Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057\\ntel que recommandé par le Comité consultatif d’urbanisme.\",\n        \"anchor\": \"demande de dérogation mineure 2026-0057\"\n      },\n      \"reason\": \"Le conseil accepte explicitement la dérogation relative à la largeur de l’allée d’accès, demande distincte du PIIA concernant la même adresse.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de cession d’une servitude — 163 avenue des Cèdres, lots 5 988 194 et 6 520 252\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"163 avenue des Cèdres\",\n        \"page\": 20,\n        \"citation\": \"autorisés à signer les documents\\nnécessaires pour l’acte de cession de la servitude sur les lots\\n5 988 194 et 6 520 252 située au 163 avenue des Cèdres.\",\n        \"anchor\": \"163 avenue des Cèdres\"\n      },\n      \"reason\": \"L’autorisation de signer l’acte de cession de cette servitude constitue un acte foncier décidé portant sur les deux lots indiqués.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Mise en délibéré annoncée de la dérogation mineure 2026-0059 — 813, 45e Avenue",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "813, 45e Avenue",
+    "page": 3,
+    "citation": "dérogation mineure 813, 45e Avenue – lotissement 2\nterrains. Le maire explique que la demande sera prise en\ndélibéré et revenir à un moment ultérieurement.",
+    "anchor": "dérogation mineure 813, 45e Avenue"
+   },
+   "reason": "Le maire annonce une mise en délibéré et un retour ultérieur de cette demande explicite, étape à conserver sans la transformer en acceptation ou en refus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Fixation au 14 juin 2026 du scrutin référendaire — PPCMOI 2025-001, île Raymond",
+    "stage": "inconnu",
+    "procedure": "ppcmoi",
+    "objet": "2025-001",
+    "page": 14,
+    "citation": "FIXATION DE LA DATE DU SCRUTIN RÉFÉRENDAIRE –\nDEMANDE DE PPCMOI 2025-001 POUR LE PROJET DE\nL’ÎLE RAYMOND",
+    "anchor": "DEMANDE DE PPCMOI 2025-001"
+   },
+   "reason": "La résolution autorise le scrutin référendaire et en fixe la date pour ce PPCMOI, tandis que l’adoption finale du 2 mars 2026 n’est qu’un rappel historique."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du second projet de règlement 2003-05-63 avec changement — modification du zonage",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "2003-05-63",
+    "page": 15,
+    "citation": "Il est proposé par : Denis Larocque. Qu’un second projet de\nrèglement portant le numéro 2003-05-63 AVEC CHANGEMENT\nsoit adopté",
+    "anchor": "règlement portant le numéro 2003-05-63"
+   },
+   "reason": "Le conseil adopte expressément le second projet avec changement; les étapes antérieures rappelées et l’adoption future indiquée au calendrier ne créent pas d’unités supplémentaires."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-0055 — garage incorporé au 31 Rue des Moissons",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-0055",
+    "page": 18,
+    "citation": "Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que\nrecommandé par le Comité consultatif d’urbanisme.",
+    "anchor": "demande de PIIA 2026-0055"
+   },
+   "reason": "La résolution accepte explicitement cette demande de PIIA pour un garage incorporé, objet inclus même pour des travaux de petite envergure."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-0056 — bâtiment commercial au 424 Chemin de l’Église",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-0056",
+    "page": 19,
+    "citation": "Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que\nrecommandé par le Comité consultatif d’urbanisme.",
+    "anchor": "demande de PIIA 2026-0056"
+   },
+   "reason": "La résolution accepte cette demande de PIIA pour un bâtiment commercial, les objets d’urbanisme non résidentiels étant inclus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Acceptation de la dérogation mineure 2026-0057 — allée d’accès au 424 Chemin de l’Église",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-0057",
+    "page": 20,
+    "citation": "Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057\ntel que recommandé par le Comité consultatif d’urbanisme.",
+    "anchor": "demande de dérogation mineure 2026-0057"
+   },
+   "reason": "Le conseil accepte explicitement la dérogation relative à la largeur de l’allée d’accès, demande distincte du PIIA concernant la même adresse."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de cession d’une servitude — 163 avenue des Cèdres, lots 5 988 194 et 6 520 252",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "163 avenue des Cèdres",
+    "page": 20,
+    "citation": "autorisés à signer les documents\nnécessaires pour l’acte de cession de la servitude sur les lots\n5 988 194 et 6 520 252 située au 163 avenue des Cèdres.",
+    "anchor": "163 avenue des Cèdres"
+   },
+   "reason": "L’autorisation de signer l’acte de cession de cette servitude constitue un acte foncier décidé portant sur les deux lots indiqués."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 7
+}

@@ -1,0 +1,148 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "dde58b22ba15c59d0eb3228c87709123e0bb175a8e28a5158f89e617de9987e8",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Appui à la demande CPTAQ d’acquisition de 54 acres du lot 6 374 262\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"6 374 262\",\n        \"page\": 2,\n        \"citation\": \"QUE la municipalité de Stanstead-Est appuie la demande déposée par\\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\\nd’une superficie de 54 acres du lot 6 374 262\",\n        \"anchor\": \"lot 6 374 262\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les sauts de ligne présents à la page 2 sont rétablis.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Appui CPTAQ — lot 5 417 438, nouvelle résidence sous condition de démolition et de remise en culture\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"5 417 438\",\n        \"page\": 2,\n        \"citation\": \"QUE la municipalité de Stanstead-Est appuie la demande déposée à la\\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\\nconstruction d’une nouvelle résidence\",\n        \"anchor\": \"lot 5 417 438\"\n      },\n      \"reason\": \"La citation courante remplace des sauts de ligne par des espaces, contrairement à l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Appui à la demande CPTAQ d’agrandissement du lieu d’enfouissement — lot 2 935 698\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2 935 698\",\n        \"page\": 13,\n        \"citation\": \"des fins autres qu’agricoles, d’une partie du lot 2 935 698 du\\ncadastre du Québec, circonscription foncière de Coaticook, soit\\npour l’agrandissement de son lieu d’enfouissement technique\",\n        \"anchor\": \"lot 2 935 698\"\n      },\n      \"reason\": \"Les sauts de ligne de l’extrait de la page 13 doivent être conservés pour respecter la règle de citation à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Location autorisée du garage au 1420 chemin Ball brook pour douze mois\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"1420 chemin Ball brook\",\n        \"page\": 13,\n        \"citation\": \"location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de\\n1 350\",\n        \"anchor\": \"1420 chemin Ball brook\"\n      },\n      \"reason\": \"Le texte comporte un saut de ligne avant « 1 350 », qui doit être rétabli dans la citation recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-04 modifiant la tarification des permis et certificats\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-04\",\n        \"page\": 18,\n        \"citation\": \"D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\\nsur la tarification des permis et certificats\",\n        \"anchor\": \"numéro 2026-04\"\n      },\n      \"reason\": \"Le saut de ligne après « 2016-10 » est rétabli afin que la citation soit identique au texte de la page 18.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Appui à la demande CPTAQ d’acquisition de 54 acres du lot 6 374 262",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "6 374 262",
+    "page": 2,
+    "citation": "QUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262",
+    "anchor": "lot 6 374 262"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les sauts de ligne présents à la page 2 sont rétablis."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Appui CPTAQ — lot 5 417 438, nouvelle résidence sous condition de démolition et de remise en culture",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5 417 438",
+    "page": 2,
+    "citation": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence",
+    "anchor": "lot 5 417 438"
+   },
+   "reason": "La citation courante remplace des sauts de ligne par des espaces, contrairement à l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Appui à la demande CPTAQ d’agrandissement du lieu d’enfouissement — lot 2 935 698",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2 935 698",
+    "page": 13,
+    "citation": "des fins autres qu’agricoles, d’une partie du lot 2 935 698 du\ncadastre du Québec, circonscription foncière de Coaticook, soit\npour l’agrandissement de son lieu d’enfouissement technique",
+    "anchor": "lot 2 935 698"
+   },
+   "reason": "Les sauts de ligne de l’extrait de la page 13 doivent être conservés pour respecter la règle de citation à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Location autorisée du garage au 1420 chemin Ball brook pour douze mois",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "1420 chemin Ball brook",
+    "page": 13,
+    "citation": "location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de\n1 350",
+    "anchor": "1420 chemin Ball brook"
+   },
+   "reason": "Le texte comporte un saut de ligne avant « 1 350 », qui doit être rétabli dans la citation recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Adoption du règlement 2026-04 modifiant la tarification des permis et certificats",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-04",
+    "page": 18,
+    "citation": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats",
+    "anchor": "numéro 2026-04"
+   },
+   "reason": "Le saut de ligne après « 2016-10 » est rétabli afin que la citation soit identique au texte de la page 18."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "QUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 13,
+   "citation": "des fins autres qu’agricoles, d’une partie du lot 2 935 698 du\ncadastre du Québec, circonscription foncière de Coaticook, soit\npour l’agrandissement de son lieu d’enfouissement technique"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "inconnu",
+   "page": 13,
+   "citation": "location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de\n1 350"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "adoption",
+   "page": 18,
+   "citation": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 7
+}

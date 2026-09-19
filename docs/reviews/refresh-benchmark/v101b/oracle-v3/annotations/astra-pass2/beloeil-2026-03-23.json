@@ -1,0 +1,508 @@
+{
+ "documentId": "beloeil-2026-03-23",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "c2d735769759743298d7dd16de8395a4b4fa202353daa334488a06b35c10463b",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Consultation publique tenue sur le règlement 1667-126-2026 — service de génie en zone I-906\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"1667-126-2026\",\n        \"page\": 2,\n        \"citation\": \"ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-126-2026 MODIFIANT LE\\nRÈGLEMENT DE ZONAGE 1667-00-2011\",\n        \"anchor\": \"RÈGLEMENT 1667-126-2026\"\n      },\n      \"reason\": \"L’exigence d’une citation recopiée à l’identique impose de conserver le saut de ligne après « MODIFIANT LE ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Consultation publique tenue sur le règlement 1667-127-2026 — dispositions environnementales\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"1667-127-2026\",\n        \"page\": 3,\n        \"citation\": \"ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-127-2026 MODIFIANT LE\\nRÈGLEMENT DE ZONAGE 1667-00-2011\",\n        \"anchor\": \"RÈGLEMENT 1667-127-2026\"\n      },\n      \"reason\": \"L’exigence d’une citation recopiée à l’identique impose de conserver le saut de ligne après « MODIFIANT LE ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Consultation publique tenue sur le règlement 1667-128-2026 — usages C-5 en zone C-523\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"1667-128-2026\",\n        \"page\": 4,\n        \"citation\": \"ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-128-2026 MODIFIANT LE\\nRÈGLEMENT DE ZONAGE 1667-00-2011\",\n        \"anchor\": \"RÈGLEMENT 1667-128-2026\"\n      },\n      \"reason\": \"L’exigence d’une citation recopiée à l’identique impose de conserver le saut de ligne après « MODIFIANT LE ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Autorisation de la dérogation mineure DM-2026-9017 — marges, 636, rue Salomon\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-9017\",\n        \"page\": 5,\n        \"citation\": \"D’autoriser la dérogation mineure numéro DM-2026-9017 telle que demandée pour le\\n636, rue Salomon\",\n        \"anchor\": \"dérogation mineure numéro DM-2026-9017\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne précédant « 636, rue Salomon » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Autorisation de la dérogation mineure DM-2026-9021 — enseigne, 1500, rue Louis-Marchand\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-9021\",\n        \"page\": 6,\n        \"citation\": \"D’autoriser la dérogation mineure numéro DM-2026-9021 telle que demandée pour le\\n1500, rue Louis-Marchand\",\n        \"anchor\": \"dérogation mineure numéro DM-2026-9021\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne précédant « 1500, rue Louis-Marchand » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Autorisation de la dérogation mineure DM-2026-9022 — marge et empiètements, 850, rue Laurier\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-9022\",\n        \"page\": 7,\n        \"citation\": \"D’autoriser la dérogation mineure numéro DM-2026-9022 telle que demandée pour le\\n850, rue Laurier\",\n        \"anchor\": \"dérogation mineure numéro DM-2026-9022\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne précédant « 850, rue Laurier » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Autorisation de l’usage conditionnel UC-2026-9008 — logement bigénérationnel, 209, rue Gagnon\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"usage_conditionnel\",\n        \"objet\": \"UC-2026-9008\",\n        \"page\": 7,\n        \"citation\": \"D’autoriser la demande d’usage conditionnel numéro UC-2026-9008 pour le 209, rue Gagnon, aux\\nconditions prévues à la recommandation 2026/02/40 du comité consultatif d'urbanisme\",\n        \"anchor\": \"usage conditionnel numéro UC-2026-9008\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « aux » et « conditions » pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u11\",\n      \"unit\": {\n        \"label\": \"Autorisation de l’usage conditionnel UC-2026-9020 — logement bigénérationnel, 850, rue Le Moyne\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"usage_conditionnel\",\n        \"objet\": \"UC-2026-9020\",\n        \"page\": 8,\n        \"citation\": \"D’autoriser la demande d’usage conditionnel numéro UC-2026-9020 pour le 850, rue Le Moyne,\\naux conditions prévues à la recommandation 2026/02/41 du comité consultatif d'urbanisme\",\n        \"anchor\": \"usage conditionnel numéro UC-2026-9020\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne après « 850, rue Le Moyne, » pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u12\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA-2026-9002 — modification du projet, 1005, rue Richelieu\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"PIIA-2026-9002\",\n        \"page\": 11,\n        \"citation\": \"D’approuver, aux conditions prévues à la recommandation 2026/02/30 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9002\",\n        \"anchor\": \"architecturale PIIA-2026-9002\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u13\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA-2026-9003 — enseignes, 201-217, rue Saint-Jean-Baptiste\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"PIIA-2026-9003\",\n        \"page\": 11,\n        \"citation\": \"D’approuver, aux conditions prévues à la recommandation 2026/02/31 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9003\",\n        \"anchor\": \"architecturale PIIA-2026-9003\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u14\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA-2026-9004 — enseignes, 229-245, rue Saint-Jean-Baptiste\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"PIIA-2026-9004\",\n        \"page\": 12,\n        \"citation\": \"D’approuver, aux conditions prévues à la recommandation 2026/02/32 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9004\",\n        \"anchor\": \"architecturale PIIA-2026-9004\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u15\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA-2026-9009 — enseignes Poulet Rouge, 481, rue de l’Industrie\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"PIIA-2026-9009\",\n        \"page\": 12,\n        \"citation\": \"D’approuver, aux conditions prévues à la recommandation 2026/02/33 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9009\",\n        \"anchor\": \"architecturale PIIA-2026-9009\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u16\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA-2026-9024 — lotissement du lot 6 580 334, rue Serge-Pepin\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"PIIA-2026-9024\",\n        \"page\": 13,\n        \"citation\": \"D’approuver, aux conditions prévues à la recommandation 2026/02/34 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9024\",\n        \"anchor\": \"architecturale PIIA-2026-9024\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u17\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA-2026-9025 — lotissement, 850 et 866, rue Laurier et 225, rue Hubert\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"PIIA-2026-9025\",\n        \"page\": 13,\n        \"citation\": \"D’approuver, aux conditions prévues à la recommandation 2026/02/35 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9025\",\n        \"anchor\": \"architecturale PIIA-2026-9025\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u18\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA-2026-9026 — agrandissement, 1182, rue Omer-Adam\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"PIIA-2026-9026\",\n        \"page\": 14,\n        \"citation\": \"D’approuver, aux conditions prévues à la recommandation 2026/02/36 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9026\",\n        \"anchor\": \"architecturale PIIA-2026-9026\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u19\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA-2026-9028 — projet intégré mixte de 218 logements, rue Serge-Pepin\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"PIIA-2026-9028\",\n        \"page\": 14,\n        \"citation\": \"D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028\",\n        \"anchor\": \"architecturale PIIA-2026-9028\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u20\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA-2026-9030 — enseignes, 888, boulevard Yvon-L’Heureux Nord\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"PIIA-2026-9030\",\n        \"page\": 15,\n        \"citation\": \"D’approuver, aux conditions prévues à la recommandation 2026/02/38 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9030\",\n        \"anchor\": \"architecturale PIIA-2026-9030\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u22\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 1667-129-2026 — dimensions minimales des terrains en zone C-733\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"1667-129-2026\",\n        \"page\": 16,\n        \"citation\": \"AVIS DE MOTION ET ADOPTION DU PROJET DE RÈGLEMENT 1667-129-2026 MODIFIANT LE\\nRÈGLEMENT DE ZONAGE 1667-00-2011\",\n        \"anchor\": \"RÈGLEMENT 1667-129-2026\"\n      },\n      \"reason\": \"L’exigence d’une citation recopiée à l’identique impose de conserver le saut de ligne après « MODIFIANT LE ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u24\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet PPCMOI-2026-9027 — projet intégré mixte, lot 4 553 167, rue Serge-Pepin\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2026-9027\",\n        \"page\": 16,\n        \"citation\": \"ADOPTION DU PREMIER PROJET DE RÉSOLUTION D’UN PROJET PARTICULIER DE CONSTRUCTION,\\nDE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI-2026-9027\",\n        \"anchor\": \"PPCMOI-2026-9027\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne après « CONSTRUCTION, » pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u25\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet PPCMOI 2025-9133 — stationnement, 409-415, boulevard Sir-Wilfrid-Laurier\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI 2025-9133\",\n        \"page\": 18,\n        \"citation\": \"ADOPTION DU PREMIER PROJET DE RÉSOLUTION D’UN PROJET PARTICULIER DE CONSTRUCTION,\\nDE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI 2025-9133\",\n        \"anchor\": \"PPCMOI 2025-9133\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne après « CONSTRUCTION, » pour respecter l’exigence de reproduction à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Consultation publique tenue sur le règlement 1667-126-2026 — service de génie en zone I-906",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "1667-126-2026",
+    "page": 2,
+    "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-126-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE 1667-00-2011",
+    "anchor": "RÈGLEMENT 1667-126-2026"
+   },
+   "reason": "L’exigence d’une citation recopiée à l’identique impose de conserver le saut de ligne après « MODIFIANT LE »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Consultation publique tenue sur le règlement 1667-127-2026 — dispositions environnementales",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "1667-127-2026",
+    "page": 3,
+    "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-127-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE 1667-00-2011",
+    "anchor": "RÈGLEMENT 1667-127-2026"
+   },
+   "reason": "L’exigence d’une citation recopiée à l’identique impose de conserver le saut de ligne après « MODIFIANT LE »."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Consultation publique tenue sur le règlement 1667-128-2026 — usages C-5 en zone C-523",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "1667-128-2026",
+    "page": 4,
+    "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-128-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE 1667-00-2011",
+    "anchor": "RÈGLEMENT 1667-128-2026"
+   },
+   "reason": "L’exigence d’une citation recopiée à l’identique impose de conserver le saut de ligne après « MODIFIANT LE »."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Autorisation de la dérogation mineure DM-2026-9017 — marges, 636, rue Salomon",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-9017",
+    "page": 5,
+    "citation": "D’autoriser la dérogation mineure numéro DM-2026-9017 telle que demandée pour le\n636, rue Salomon",
+    "anchor": "dérogation mineure numéro DM-2026-9017"
+   },
+   "reason": "La citation doit conserver le saut de ligne précédant « 636, rue Salomon » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Autorisation de la dérogation mineure DM-2026-9021 — enseigne, 1500, rue Louis-Marchand",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-9021",
+    "page": 6,
+    "citation": "D’autoriser la dérogation mineure numéro DM-2026-9021 telle que demandée pour le\n1500, rue Louis-Marchand",
+    "anchor": "dérogation mineure numéro DM-2026-9021"
+   },
+   "reason": "La citation doit conserver le saut de ligne précédant « 1500, rue Louis-Marchand » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Autorisation de la dérogation mineure DM-2026-9022 — marge et empiètements, 850, rue Laurier",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-9022",
+    "page": 7,
+    "citation": "D’autoriser la dérogation mineure numéro DM-2026-9022 telle que demandée pour le\n850, rue Laurier",
+    "anchor": "dérogation mineure numéro DM-2026-9022"
+   },
+   "reason": "La citation doit conserver le saut de ligne précédant « 850, rue Laurier » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Autorisation de l’usage conditionnel UC-2026-9008 — logement bigénérationnel, 209, rue Gagnon",
+    "stage": "adoption",
+    "procedure": "usage_conditionnel",
+    "objet": "UC-2026-9008",
+    "page": 7,
+    "citation": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9008 pour le 209, rue Gagnon, aux\nconditions prévues à la recommandation 2026/02/40 du comité consultatif d'urbanisme",
+    "anchor": "usage conditionnel numéro UC-2026-9008"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « aux » et « conditions » pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u11",
+   "unit": {
+    "label": "Autorisation de l’usage conditionnel UC-2026-9020 — logement bigénérationnel, 850, rue Le Moyne",
+    "stage": "adoption",
+    "procedure": "usage_conditionnel",
+    "objet": "UC-2026-9020",
+    "page": 8,
+    "citation": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9020 pour le 850, rue Le Moyne,\naux conditions prévues à la recommandation 2026/02/41 du comité consultatif d'urbanisme",
+    "anchor": "usage conditionnel numéro UC-2026-9020"
+   },
+   "reason": "La citation doit conserver le saut de ligne après « 850, rue Le Moyne, » pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u12",
+   "unit": {
+    "label": "Approbation du PIIA-2026-9002 — modification du projet, 1005, rue Richelieu",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9002",
+    "page": 11,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/30 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9002",
+    "anchor": "architecturale PIIA-2026-9002"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "Approbation du PIIA-2026-9003 — enseignes, 201-217, rue Saint-Jean-Baptiste",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9003",
+    "page": 11,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/31 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9003",
+    "anchor": "architecturale PIIA-2026-9003"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "Approbation du PIIA-2026-9004 — enseignes, 229-245, rue Saint-Jean-Baptiste",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9004",
+    "page": 12,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/32 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9004",
+    "anchor": "architecturale PIIA-2026-9004"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u15",
+   "unit": {
+    "label": "Approbation du PIIA-2026-9009 — enseignes Poulet Rouge, 481, rue de l’Industrie",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9009",
+    "page": 12,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/33 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9009",
+    "anchor": "architecturale PIIA-2026-9009"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u16",
+   "unit": {
+    "label": "Approbation du PIIA-2026-9024 — lotissement du lot 6 580 334, rue Serge-Pepin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9024",
+    "page": 13,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/34 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9024",
+    "anchor": "architecturale PIIA-2026-9024"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u17",
+   "unit": {
+    "label": "Approbation du PIIA-2026-9025 — lotissement, 850 et 866, rue Laurier et 225, rue Hubert",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9025",
+    "page": 13,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/35 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9025",
+    "anchor": "architecturale PIIA-2026-9025"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u18",
+   "unit": {
+    "label": "Approbation du PIIA-2026-9026 — agrandissement, 1182, rue Omer-Adam",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9026",
+    "page": 14,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/36 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9026",
+    "anchor": "architecturale PIIA-2026-9026"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u19",
+   "unit": {
+    "label": "Approbation du PIIA-2026-9028 — projet intégré mixte de 218 logements, rue Serge-Pepin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9028",
+    "page": 14,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028",
+    "anchor": "architecturale PIIA-2026-9028"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u20",
+   "unit": {
+    "label": "Approbation du PIIA-2026-9030 — enseignes, 888, boulevard Yvon-L’Heureux Nord",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9030",
+    "page": 15,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/38 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9030",
+    "anchor": "architecturale PIIA-2026-9030"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « consultatif » et « d’urbanisme » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u22",
+   "unit": {
+    "label": "Avis de motion du règlement 1667-129-2026 — dimensions minimales des terrains en zone C-733",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1667-129-2026",
+    "page": 16,
+    "citation": "AVIS DE MOTION ET ADOPTION DU PROJET DE RÈGLEMENT 1667-129-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE 1667-00-2011",
+    "anchor": "RÈGLEMENT 1667-129-2026"
+   },
+   "reason": "L’exigence d’une citation recopiée à l’identique impose de conserver le saut de ligne après « MODIFIANT LE »."
+  },
+  {
+   "op": "correct",
+   "id": "u24",
+   "unit": {
+    "label": "Adoption du premier projet PPCMOI-2026-9027 — projet intégré mixte, lot 4 553 167, rue Serge-Pepin",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2026-9027",
+    "page": 16,
+    "citation": "ADOPTION DU PREMIER PROJET DE RÉSOLUTION D’UN PROJET PARTICULIER DE CONSTRUCTION,\nDE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI-2026-9027",
+    "anchor": "PPCMOI-2026-9027"
+   },
+   "reason": "La citation doit conserver le saut de ligne après « CONSTRUCTION, » pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u25",
+   "unit": {
+    "label": "Adoption du premier projet PPCMOI 2025-9133 — stationnement, 409-415, boulevard Sir-Wilfrid-Laurier",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI 2025-9133",
+    "page": 18,
+    "citation": "ADOPTION DU PREMIER PROJET DE RÉSOLUTION D’UN PROJET PARTICULIER DE CONSTRUCTION,\nDE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI 2025-9133",
+    "anchor": "PPCMOI 2025-9133"
+   },
+   "reason": "La citation doit conserver le saut de ligne après « CONSTRUCTION, » pour respecter l’exigence de reproduction à l’identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-126-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE 1667-00-2011"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 3,
+   "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-127-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE 1667-00-2011"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 4,
+   "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-128-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE 1667-00-2011"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "derogation_mineure",
+   "page": 5,
+   "citation": "D’autoriser la dérogation mineure numéro DM-2026-9017 telle que demandée pour le\n636, rue Salomon"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "derogation_mineure",
+   "page": 6,
+   "citation": "D’autoriser la dérogation mineure numéro DM-2026-9021 telle que demandée pour le\n1500, rue Louis-Marchand"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "derogation_mineure",
+   "page": 7,
+   "citation": "D’autoriser la dérogation mineure numéro DM-2026-9022 telle que demandée pour le\n850, rue Laurier"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "adoption",
+   "page": 7,
+   "citation": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9008 pour le 209, rue Gagnon, aux\nconditions prévues à la recommandation 2026/02/40 du comité consultatif d'urbanisme"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u11",
+   "stage": "adoption",
+   "page": 8,
+   "citation": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9020 pour le 850, rue Le Moyne,\naux conditions prévues à la recommandation 2026/02/41 du comité consultatif d'urbanisme"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u12",
+   "stage": "piia",
+   "page": 11,
+   "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/30 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9002"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "piia",
+   "page": 11,
+   "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/31 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9003"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "piia",
+   "page": 12,
+   "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/32 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9004"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u15",
+   "stage": "piia",
+   "page": 12,
+   "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/33 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9009"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 12,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u16",
+   "stage": "piia",
+   "page": 13,
+   "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/34 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9024"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 13,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u17",
+   "stage": "piia",
+   "page": 13,
+   "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/35 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9025"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 14,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u18",
+   "stage": "piia",
+   "page": 14,
+   "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/36 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9026"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 15,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u19",
+   "stage": "piia",
+   "page": 14,
+   "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 16,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u20",
+   "stage": "piia",
+   "page": 15,
+   "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/38 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9030"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 17,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u22",
+   "stage": "avis_motion",
+   "page": 16,
+   "citation": "AVIS DE MOTION ET ADOPTION DU PROJET DE RÈGLEMENT 1667-129-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE 1667-00-2011"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 18,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u24",
+   "stage": "projet_reglement",
+   "page": 16,
+   "citation": "ADOPTION DU PREMIER PROJET DE RÉSOLUTION D’UN PROJET PARTICULIER DE CONSTRUCTION,\nDE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI-2026-9027"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 19,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u25",
+   "stage": "projet_reglement",
+   "page": 18,
+   "citation": "ADOPTION DU PREMIER PROJET DE RÉSOLUTION D’UN PROJET PARTICULIER DE CONSTRUCTION,\nDE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI 2025-9133"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 25
+}

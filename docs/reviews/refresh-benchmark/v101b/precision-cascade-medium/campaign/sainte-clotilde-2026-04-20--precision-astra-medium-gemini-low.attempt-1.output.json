@@ -1,0 +1,362 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-471-09",
+   "label": "Projet de règlement 471-09 relatif au zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "status": "candidate",
+   "numero": "471-09",
+   "municipality": "sainte-clotilde",
+   "meetingDate": "2026-04-20",
+   "stage": "projet",
+   "resolutionRef": "2026-04-192",
+   "objet": "Modifier le règlement de zonage 471 et assurer la concordance au schéma d’aménagement et de développement de la MRC des Jardins-de-Napierville (URB-205-21-2025 et URB-2025-17-2024-01).",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU\nZONAGE",
+     "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+     "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zonage"
+   ]
+  },
+  {
+   "id": "bylaw-470-04",
+   "label": "Projet de règlement 470-04 relatif au plan d’urbanisme",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "status": "candidate",
+   "numero": "470-04",
+   "municipality": "sainte-clotilde",
+   "meetingDate": "2026-04-20",
+   "stage": "projet",
+   "resolutionRef": "2026-04-193",
+   "objet": "Modifier le règlement du plan d’urbanisme 470 et assurer la concordance au schéma d’aménagement et de développement de la MRC des Jardins-de-Napierville (URB-205-21-2025).",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN\nD’URBANISME",
+     "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+     "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-plan"
+   ]
+  },
+  {
+   "id": "bylaw-472-04",
+   "label": "Projet de règlement 472-04 relatif au lotissement",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "status": "candidate",
+   "numero": "472-04",
+   "municipality": "sainte-clotilde",
+   "meetingDate": "2026-04-20",
+   "stage": "projet",
+   "resolutionRef": "2026-04-194",
+   "objet": "Modifier le règlement de lotissement 472 et assurer la concordance au schéma d’aménagement et de développement de la MRC des Jardins-de-Napierville (URB-205-21-2025).",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU\nLOTISSEMENT",
+     "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+     "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-lotissement"
+   ]
+  },
+  {
+   "id": "event-cptaq-correction",
+   "label": "Correction de l’appui au renouvellement de l’exploitation de la carrière de Construction DJL Inc.",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "status": "candidate",
+   "municipality": "sainte-clotilde",
+   "date": "2026-04-20",
+   "meetingDate": "2026-04-20",
+   "resolution": "2026-04-195",
+   "kind": "cptaq",
+   "etape": "inconnu",
+   "decision": "approuvé",
+   "demandeur_corporate": "Construction DJL Inc.",
+   "no_lot": "6471805",
+   "description": "Correction de la résolution 2025-12-286 pour ajouter une partie du lot 6 471 805 au lot 6 199 292 dans l’appui municipal à la demande de renouvellement auprès de la CPTAQ pour une carrière sur le rang 2. Les autres dispositions demeurent inchangées; il ne s’agit pas d’une autorisation de la CPTAQ.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;",
+     "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+     "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-cptaq"
+   ]
+  },
+  {
+   "id": "bylaw-534-2026",
+   "label": "Adoption du règlement d’emprunt parapluie 534-2026",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "status": "candidate",
+   "numero": "534-2026",
+   "title": "Règlement d’emprunt de type parapluie",
+   "municipality": "sainte-clotilde",
+   "date": "2026-04-20",
+   "meetingDate": "2026-04-20",
+   "stage": "adoption",
+   "resolution": "2026-04-179",
+   "objet": "Emprunt maximal de 8 452 778 $ sur un terme maximal de 40 ans pour la construction d’un CPE, la rénovation de l’hôtel de ville, la construction d’un garage municipal, la voirie et d’autres immobilisations municipales.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "QUE le conseil municipal adopte le Règlement numéro 534-2026 autorisant un emprunt pour\nles fins générales suivantes :",
+     "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+     "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-emprunt"
+   ]
+  },
+  {
+   "id": "signal-cpe",
+   "label": "Financement de la construction du CPE",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "status": "candidate",
+   "category": "infrastructure_municipale",
+   "municipality": "sainte-clotilde",
+   "date": "2026-04-20",
+   "resolution": "2026-04-180",
+   "reglement_number": "534-2026",
+   "amount_cad": 3200000,
+   "scope": "local",
+   "description": "Autorisation d’utiliser une partie de l’emprunt parapluie pour la construction du CPE, jusqu’à 3 200 000 $, remboursable sur 40 ans par taxation sur l’ensemble des immeubles imposables.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "QUE le conseil municipal autorise l’utilisation d’une partie du montant prévu au Règlement\nparapluie numéro 534-2026 pour financer le projet;",
+     "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+     "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-cpe"
+   ]
+  },
+  {
+   "id": "signal-acquisition",
+   "label": "Acquisition municipale des lots 6 592 592 et 6 199 726",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "status": "candidate",
+   "category": "acquisition_fonciere",
+   "municipality": "sainte-clotilde",
+   "date": "2026-04-20",
+   "resolution": "2026-04-182",
+   "amount_cad": 150000,
+   "scope": "local",
+   "description": "Achat des lots 6 592 592 et 6 199 726 de Gestions C. Clermont et Les Immeubles J.B. Clermont Inc., pour un prix total de 150 000 $ financé par le surplus non affecté. Le premier lot servira au stationnement et à un espace vert pour le futur CPE; le second sera annexé au terrain du garage municipal pour les besoins des travaux publics.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec;",
+     "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+     "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-acquisition"
+   ]
+  },
+  {
+   "id": "bylaw-533",
+   "label": "Adoption du règlement 533 sur les clapets anti-retour",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "status": "candidate",
+   "numero": "533",
+   "municipality": "sainte-clotilde",
+   "date": "2026-04-20",
+   "stage": "adoption",
+   "resolution": "2026-04-186",
+   "title": "Règlement relatif à l’installation des clapets anti-retour",
+   "objet": "Imposer des clapets anti-retour conformes au Code de construction du Québec dans certains bâtiments raccordés au réseau d’égout municipal, avec exigences techniques et dispositions sur l’entretien, l’inspection et les sanctions.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets\nanti-retour afin de prévenir les refoulements d’égout;",
+     "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+     "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-clapets"
+   ]
+  },
+  {
+   "id": "signal-loisirs",
+   "label": "Demande PAFIRSPA pour un chalet des loisirs et le Boisé des Pins",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "status": "candidate",
+   "category": "infrastructure_municipale",
+   "municipality": "sainte-clotilde",
+   "date": "2026-04-20",
+   "resolution": "2026-04-181",
+   "scope": "local",
+   "description": "Dépôt autorisé d’une demande d’aide PAFIRSPA 2026 pour construire un chalet des loisirs quatre saisons adjacent au centre communautaire et aménager un parcours extérieur intergénérationnel dans la zone de conservation du Boisé des Pins, avec notamment stationnement, accueil, équipements sportifs et circuit lumineux.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "QUE le conseil municipal autorise le dépôt d’une demande d’aide financière dans le cadre du\nprogramme PAFIRSPA 2026 pour la réalisation des projets décrits ci-dessus;",
+     "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+     "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+     "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-loisirs"
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-zonage",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+   "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "Ce règlement a pour objet de modifier le règlement de zonage numéro 471 et d’assurer la\nconcordance au schéma d’aménagement et de développement de la MRC des Jardins-deNapierville (URB-205-21-2025 et URB-2025-17-2024-01).\nUn projet de règlement est déposé séance tenante conformément aux dispositions du Code\nmunicipal du Québec."
+  },
+  {
+   "id": "ev-plan",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+   "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "Ce règlement a pour objet de modifier le règlement du plan d’urbanisme numéro 470 et\nd’assurer la concordance au schéma d’aménagement et de développement de la MRC des\nJardins-de-Napierville (URB-205-21-2025).\nUn projet de règlement est déposé séance tenante conformément aux dispositions du Code\nmunicipal du Québec."
+  },
+  {
+   "id": "ev-lotissement",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+   "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "Ce règlement a pour objet de modifier le règlement de lotissement numéro 472 et d’assurer la\nconcordance au schéma d’aménagement et de développement de la MRC des Jardins-deNapierville (URB-205-21-2025).\nUn projet de règlement est déposé séance tenante conformément aux dispositions du Code\nmunicipal du Québec."
+  },
+  {
+   "id": "ev-cptaq",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+   "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;\nQUE ladite résolution soit modifiée en conséquence afin de refléter l’ensemble des lots visés\npar la demande de renouvellement déposée auprès de la CPTAQ;\nQUE toutes les autres dispositions de la résolution 2025-12-286 demeurent inchangées."
+  },
+  {
+   "id": "ev-emprunt",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+   "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "QUE le conseil municipal adopte le Règlement numéro 534-2026 autorisant un emprunt pour\nles fins générales suivantes :"
+  },
+  {
+   "id": "ev-cpe",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+   "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "QUE le conseil municipal autorise l’utilisation d’une partie du montant prévu au Règlement\nparapluie numéro 534-2026 pour financer le projet;\nQUE le montant maximal alloué au CPE soit de 3 200 000 $;\nQUE le terme précis de remboursement soit 40 ans;\nQUE le remboursement soit effectué par taxation sur l’ensemble des immeubles imposables;"
+  },
+  {
+   "id": "ev-acquisition",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+   "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec;"
+  },
+  {
+   "id": "ev-clapets",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+   "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets\nanti-retour afin de prévenir les refoulements d’égout;"
+  },
+  {
+   "id": "ev-loisirs",
+   "source_file": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-clotilde/cas/2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d.pdf",
+   "docSha": "2dc4a9c9513dafb114b4efbbeca1c79174f519a5694ff7be0cc8799dadf5a76d",
+   "sourceUrl": "https://www.ste-clotilde.ca/fichiersUpload/fichiers/20260525072410-04-1-pv-avril.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "QUE le conseil municipal autorise le dépôt d’une demande d’aide financière dans le cadre du\nprogramme PAFIRSPA 2026 pour la réalisation des projets décrits ci-dessus;"
+  }
+ ],
+ "input_tokens": 15100,
+ "output_tokens": 6580
+}

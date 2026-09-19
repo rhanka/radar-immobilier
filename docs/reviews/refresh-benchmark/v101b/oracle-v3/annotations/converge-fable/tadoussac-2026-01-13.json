@@ -1,0 +1,131 @@
+{
+ "documentId": "tadoussac-2026-01-13",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b3bde7f596c8c6e4a35ab73e1e35c71c9c726cb4ce24eddec1ab817f612f27eb",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-01-06 page 5 atteste mot pour mot « QUE le Conseil autorise la vente du lot 4 342 594 du cadastre du Québec par une invitation à soumissionner » : acte foncier explicite adopté, inclus au corrigé.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 8 atteste l'avis de motion du règlement no 419 (« AVIS DE MOTION DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE ... ZONE 31C »), unité distincte du projet selon la règle « Avis de motion et projet actuels séparés ».\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-01-15 page 8 atteste « ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419 ... À L'INTÉRIEUR DE LA ZONAGE 31-C » : étape projet_reglement distincte de l'avis de motion.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-01-16 page 10 atteste « QUE le conseil refuse la demande d'amendement au zonage 253 aux fins de transiter le 247, rue des Forgerons dans la zone 21-CH » ; un refus reste une unité.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-01-17 page 10 titrée « PPCMOI - 176, RUE DU BORD-DE-L'EAU » conclut que le Conseil « refuse la demande du projet d'hébergement touristique et commercial » ; un refus reste une unité et la citation/page sont exactes.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-01-31 page 14 atteste la fermeture du chemin et la cession gratuite au MELCCFP des « lots 4 344 119 et 6 683 045 du cadastre du Québec » : acte foncier explicite sur le lot 4 344 119.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Même résolution page 14, lot 6 683 045 explicitement nommé et cédé ; « Un nœud groupé peut couvrir plusieurs unités explicitement nommées », chaque lot est une unité foncière distincte.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 14 atteste « QUE le réseau d'aqueduc situé sur les lots visés fera l'objet d'une servitude en faveur de la municipalité de Tadoussac » : acte foncier distinct de la cession (servitude), citation et page exactes.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Page 14 atteste « céder le barrage de la rivière du Moulin-à-Baude (immeubles se rapportant à l'acte no. 62 447 publié le 2 décembre 1968) à titre gratuit au MELCCFP » : cession immobilière explicite, objet et citation exacts.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-01-32, texte page 15 « D'adopter le règlement no 415 ayant pour objet la citation de la Maison du Tourisme située au 197, Rue des Pionniers, à titre d'immeubles patrimonial » : adoption d'un règlement explicite, page et citation exactes.\"},{\"item\":\"i11\",\"choice\":\"absent\",\"reason\":\"L'assemblée de consultation n'est qu'annoncée dans un ATTENDU du premier projet (« sera tenue le 28 janvier 2026 », avec un calendrier contradictoire au 27 janvier) : ce n'est pas une étape constatée dans ce document et elle ne multiplie pas le rappel du même dossier 419 déjà couvert par i02/i03.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 2026-01-06 page 5 atteste mot pour mot « QUE le Conseil autorise la vente du lot 4 342 594 du cadastre du Québec par une invitation à soumissionner » : acte foncier explicite adopté, inclus au corrigé."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 8 atteste l'avis de motion du règlement no 419 (« AVIS DE MOTION DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE ... ZONE 31C »), unité distincte du projet selon la règle « Avis de motion et projet actuels séparés »."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 2026-01-15 page 8 atteste « ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419 ... À L'INTÉRIEUR DE LA ZONAGE 31-C » : étape projet_reglement distincte de l'avis de motion."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Résolution 2026-01-16 page 10 atteste « QUE le conseil refuse la demande d'amendement au zonage 253 aux fins de transiter le 247, rue des Forgerons dans la zone 21-CH » ; un refus reste une unité."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution 2026-01-17 page 10 titrée « PPCMOI - 176, RUE DU BORD-DE-L'EAU » conclut que le Conseil « refuse la demande du projet d'hébergement touristique et commercial » ; un refus reste une unité et la citation/page sont exactes."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Résolution 2026-01-31 page 14 atteste la fermeture du chemin et la cession gratuite au MELCCFP des « lots 4 344 119 et 6 683 045 du cadastre du Québec » : acte foncier explicite sur le lot 4 344 119."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Même résolution page 14, lot 6 683 045 explicitement nommé et cédé ; « Un nœud groupé peut couvrir plusieurs unités explicitement nommées », chaque lot est une unité foncière distincte."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 14 atteste « QUE le réseau d'aqueduc situé sur les lots visés fera l'objet d'une servitude en faveur de la municipalité de Tadoussac » : acte foncier distinct de la cession (servitude), citation et page exactes."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Page 14 atteste « céder le barrage de la rivière du Moulin-à-Baude (immeubles se rapportant à l'acte no. 62 447 publié le 2 décembre 1968) à titre gratuit au MELCCFP » : cession immobilière explicite, objet et citation exacts."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Résolution 2026-01-32, texte page 15 « D'adopter le règlement no 415 ayant pour objet la citation de la Maison du Tourisme située au 197, Rue des Pionniers, à titre d'immeubles patrimonial » : adoption d'un règlement explicite, page et citation exactes."
+  },
+  {
+   "item": "i11",
+   "choice": "absent",
+   "reason": "L'assemblée de consultation n'est qu'annoncée dans un ATTENDU du premier projet (« sera tenue le 28 janvier 2026 », avec un calendrier contradictoire au 27 janvier) : ce n'est pas une étape constatée dans ce document et elle ne multiplie pas le rappel du même dossier 419 déjà couvert par i02/i03."
+  }
+ ]
+}

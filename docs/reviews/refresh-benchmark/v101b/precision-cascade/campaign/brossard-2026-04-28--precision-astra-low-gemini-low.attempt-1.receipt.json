@@ -1,0 +1,34 @@
+{
+ "documentId": "brossard-2026-04-28",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "a81fdeb604c94ce4472934afc5ebc4fc204c65f631965870ae6a787177a4eaf3",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-low output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3869,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 21423,
+   "outputTokens": 1046,
+   "totalTokens": 22469
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3423
+  },
+  "inputSha256": "7819b99739084fd62d5164ca34dfdc7a0e894a476c1de6ad63d42d4df79c5ab6"
+ },
+ "at": "2026-09-19T02:37:13.614Z"
+}

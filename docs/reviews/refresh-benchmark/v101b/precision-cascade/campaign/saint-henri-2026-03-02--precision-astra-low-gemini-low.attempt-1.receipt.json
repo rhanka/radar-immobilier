@@ -1,0 +1,34 @@
+{
+ "documentId": "saint-henri-2026-03-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "0f52a14caa68caa039aa6fa97f5490e5ff858f26ac359b0a74bdfbf9e5d9a98a",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-low output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1949,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 1940,
+   "outputTokens": 417,
+   "totalTokens": 2357
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1661
+  },
+  "inputSha256": "50ad8788743292f6312413eb79b0724a8414a52248efcaf01cf3537fa36561c8"
+ },
+ "at": "2026-09-19T02:36:35.749Z"
+}

@@ -1,0 +1,35 @@
+{
+ "documentId": "lac-du-cerf-2026-04-11",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "7f7b5ee188a883920b9637b9c9140f1e69f92a4827b5e90e863e6e7e975fb360",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1468,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 1950,
+   "outputTokens": 239,
+   "totalTokens": 2189
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1334
+  },
+  "inputSha256": "b77956c9b02f77ca532609aa4bf64756c6d965e968712c38262095b71af1af05"
+ },
+ "at": "2026-09-19T03:22:22.157Z"
+}

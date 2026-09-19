@@ -1,0 +1,526 @@
+{
+ "nodes": [
+  {
+   "id": "source-1",
+   "label": "Résumé de la séance du conseil du 14 avril 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "status": "candidate",
+   "properties": {
+    "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+    "date": "2026-04-14",
+    "municipality": "grenville-sur-la-rouge",
+    "url": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+    "sourceKind": "pv",
+    "format": "pdf",
+    "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Voici les principales résolutions adoptées par le conseil lors de cette séance.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-source"
+   ]
+  },
+  {
+   "id": "signal-don",
+   "label": "Acceptation du don du lot 6 209 933",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "transaction_fonciere",
+    "kind": "don",
+    "date": "2026-04-14",
+    "municipality": "grenville-sur-la-rouge",
+    "no_lot": "6209933",
+    "description": "Acceptation du don gratuit du lot 6 209 933 au bénéfice de la Municipalité.",
+    "outcome": "accepté"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-don"
+   ]
+  },
+  {
+   "id": "signal-vente",
+   "label": "Autorisation de vente du lot municipal 6 095 015",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "transaction_fonciere",
+    "kind": "vente",
+    "date": "2026-04-14",
+    "municipality": "grenville-sur-la-rouge",
+    "no_lot": "6095015",
+    "amount_cad": 13000,
+    "description": "Vente du lot municipal autorisée pour 13 000 $, correspondant à sa valeur marchande.",
+    "outcome": "autorisée"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$,\ncorrespondant à sa valeur marchande.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-vente"
+   ]
+  },
+  {
+   "id": "event-piia-refus",
+   "label": "PIIA refusé — 47, rue Donald Campbell",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "status": "candidate",
+   "properties": {
+    "date": "2026-04-14",
+    "meetingDate": "2026-04-14",
+    "municipality": "grenville-sur-la-rouge",
+    "kind": "piia",
+    "decision": "refusé",
+    "etape": "piia",
+    "etape_date": "2026-04-14",
+    "description": "Refus de la demande de PIIA au 47, rue Donald Campbell pour la construction d’un abri d’auto empiétant sur la marge latérale droite du terrain.",
+    "motif": "Refus d’accorder la demande de dérogation mineure concernant cet empiétement."
+   },
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-piia-refus"
+   ]
+  },
+  {
+   "id": "event-derogation-refus",
+   "label": "Dérogation mineure refusée — abri d’auto au 47, rue Donald Campbell",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "status": "candidate",
+   "properties": {
+    "meetingDate": "2026-04-14",
+    "municipality": "grenville-sur-la-rouge",
+    "kind": "derogation",
+    "decision": "refusé",
+    "etape": "derogation_mineure",
+    "description": "Le résumé mentionne le refus d’une dérogation mineure pour un abri d’auto empiétant sur la marge latérale droite du terrain au 47, rue Donald Campbell."
+   },
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-piia-refus"
+   ]
+  },
+  {
+   "id": "event-piia-accord",
+   "label": "PIIA accordé — résidence unifamiliale au 1417, route 148",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "status": "candidate",
+   "properties": {
+    "date": "2026-04-14",
+    "meetingDate": "2026-04-14",
+    "municipality": "grenville-sur-la-rouge",
+    "kind": "piia",
+    "decision": "approuvé",
+    "etape": "piia",
+    "etape_date": "2026-04-14",
+    "description": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417, route 148."
+   },
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417,\nroute 148.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-piia-accord"
+   ]
+  },
+  {
+   "id": "bylaw-renofacade",
+   "label": "Règlement de développement économique RénoFaçade",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "status": "candidate",
+   "properties": {
+    "title": "Règlement de développement économique RénoFaçade",
+    "date": "2026-04-14",
+    "meetingDate": "2026-04-14",
+    "municipality": "grenville-sur-la-rouge",
+    "stage": "adoption"
+   },
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Adoption du règlement de développement économique RénoFaçade.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-renofacade"
+   ]
+  },
+  {
+   "id": "bylaw-plan",
+   "label": "Projet de règlement relatif à des modifications au plan d’urbanisme",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "status": "candidate",
+   "properties": {
+    "objet": "Modifications au plan d’urbanisme",
+    "meetingDate": "2026-04-14",
+    "municipality": "grenville-sur-la-rouge",
+    "stage": "projet"
+   },
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-plan"
+   ]
+  },
+  {
+   "id": "signal-plan",
+   "label": "Avis de motion et adoption de projet — modifications au plan d’urbanisme",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "planification_urbanistique",
+    "date": "2026-04-14",
+    "meetingDate": "2026-04-14",
+    "municipality": "grenville-sur-la-rouge",
+    "etape": "projet_reglement",
+    "etape_date": "2026-04-14",
+    "description": "Avis de motion et adoption de projets de règlements comprenant des modifications au plan d’urbanisme; les modifications ne sont pas détaillées dans le résumé."
+   },
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-plan"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-1",
+   "target": "signal-don",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "evidence_refs": [
+    "ev-don"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "signal-vente",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "evidence_refs": [
+    "ev-vente"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$,\ncorrespondant à sa valeur marchande.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-piia-refus",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "evidence_refs": [
+    "ev-piia-refus"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-derogation-refus",
+   "relation": "references",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "evidence_refs": [
+    "ev-piia-refus"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-piia-accord",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "evidence_refs": [
+    "ev-piia-accord"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417,\nroute 148.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "bylaw-renofacade",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "evidence_refs": [
+    "ev-renofacade"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Adoption du règlement de développement économique RénoFaçade.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "bylaw-plan",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "evidence_refs": [
+    "ev-plan"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "signal-plan",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "evidence_refs": [
+    "ev-plan"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme.",
+     "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+     "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+     "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-source",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+   "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Voici les principales résolutions adoptées par le conseil lors de cette séance."
+  },
+  {
+   "id": "ev-don",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+   "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité."
+  },
+  {
+   "id": "ev-vente",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+   "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$,\ncorrespondant à sa valeur marchande."
+  },
+  {
+   "id": "ev-piia-refus",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+   "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto\nempiétant sur la marge latérale droite du terrain."
+  },
+  {
+   "id": "ev-piia-accord",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+   "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417,\nroute 148."
+  },
+  {
+   "id": "ev-renofacade",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+   "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "Adoption du règlement de développement économique RénoFaçade."
+  },
+  {
+   "id": "ev-plan",
+   "source_file": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "rawRef": "raw/proces-verbaux-grenville-sur-la-rouge/cas/0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72.pdf",
+   "docSha": "0de4c23f891bbb3c7b0ba4e6ef6862c4fe3e01b82b6f608be2f8b1714781dd72",
+   "sourceUrl": "https://www.gslr.ca/wp-content/uploads/2026/04/Resume-Seance-du-conseil-14-04-2026.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme."
+  }
+ ],
+ "input_tokens": 8210,
+ "output_tokens": 5890
+}

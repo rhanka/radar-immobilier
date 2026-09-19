@@ -1,0 +1,121 @@
+{
+ "documentId": "sainte-martine-2026-03-17",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ae0f045bd02b646fb63cf0b1fe203cda1fe541e8f3489f5a36c452e1d48bf09c",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-053, citée page 14 et adoptée page 15, autorise à enchérir et à acquérir lors de la vente pour taxes du 9 avril 2026, ce qui constitue un acte foncier inclus.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 17 atteste expressément l’adoption du règlement 2026-503 modifiant les conditions d’émission des permis et certificats concernant des immeubles en zone agricole.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"L’intitulé cité figure page 17 et la résolution se conclut page 18 par l’adoption du règlement 2026-501 ajoutant la recherche et le développement en agriculture aux usages commerciaux para-agricoles.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 19 autorise partiellement les modifications demandées au zonage 2019-342 et refuse expressément le passage à 24 logements ainsi que la modification de l’article 6.20, sans adopter de règlement modificatif.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le règlement 2019-341 est explicitement visé dans la citation page 18 et sa modification est autorisée au point 2 page 19, sans adoption d’un règlement modificatif.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La demande 2026-003 au 1394, boulevard Saint-Jean-Baptiste Ouest est citée page 19 et autorisée page 20 avec mandat de préparer la modification réglementaire, sans adoption du règlement.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La demande 2026-004 concernant les lots 6 060 923 et 6 060 924 figure page 20 et reçoit l’appui municipal page 21, sans que cet appui soit présenté comme une autorisation accordée par la CPTAQ.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 22 refuse explicitement le PIIA visant les panneaux solaires au 182, rue Saint-Joseph, conformément à la règle selon laquelle les refus doivent rester des refus.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-063 adoptée page 22 autorise expressément la démolition au 5, rue Phénix et le programme préliminaire de réutilisation du sol comprenant la reconstruction.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-064 adoptée page 23 exige une contribution monétaire de 7 625,90 $ pour le lot projeté 6 717 037 dans le cadre du lotissement au 330, rang Laberge.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-053, citée page 14 et adoptée page 15, autorise à enchérir et à acquérir lors de la vente pour taxes du 9 avril 2026, ce qui constitue un acte foncier inclus."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 17 atteste expressément l’adoption du règlement 2026-503 modifiant les conditions d’émission des permis et certificats concernant des immeubles en zone agricole."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L’intitulé cité figure page 17 et la résolution se conclut page 18 par l’adoption du règlement 2026-501 ajoutant la recherche et le développement en agriculture aux usages commerciaux para-agricoles."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 19 autorise partiellement les modifications demandées au zonage 2019-342 et refuse expressément le passage à 24 logements ainsi que la modification de l’article 6.20, sans adopter de règlement modificatif."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le règlement 2019-341 est explicitement visé dans la citation page 18 et sa modification est autorisée au point 2 page 19, sans adoption d’un règlement modificatif."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La demande 2026-003 au 1394, boulevard Saint-Jean-Baptiste Ouest est citée page 19 et autorisée page 20 avec mandat de préparer la modification réglementaire, sans adoption du règlement."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La demande 2026-004 concernant les lots 6 060 923 et 6 060 924 figure page 20 et reçoit l’appui municipal page 21, sans que cet appui soit présenté comme une autorisation accordée par la CPTAQ."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 22 refuse explicitement le PIIA visant les panneaux solaires au 182, rue Saint-Joseph, conformément à la règle selon laquelle les refus doivent rester des refus."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-063 adoptée page 22 autorise expressément la démolition au 5, rue Phénix et le programme préliminaire de réutilisation du sol comprenant la reconstruction."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-064 adoptée page 23 exige une contribution monétaire de 7 625,90 $ pour le lot projeté 6 717 037 dans le cadre du lotissement au 330, rang Laberge."
+  }
+ ]
+}

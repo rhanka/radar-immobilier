@@ -1,0 +1,225 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "72cd8aa070df9f6d149129f86aeda1508f88c60e70be3d8469e8e8ca19a2cc00",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-acquisition-6025922"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Modification prévue de l’autorisation d’achat d’une partie du lot 6 025 922",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat\nd’une partie du lot 6 025 922 (1 rue Dollard)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-terrain-juteau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Abrogation prévue du choix du proposant pour le terrain Juteau",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "b) Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2\n045 370 (Terrain Juteau)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-piia-3-principale"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA — 3, rue Principale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-piia-9-principale"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA — 9, rue Principale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "b) Pour le 9, rue Principale (modification enseigne sur poteau)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-ppcmoi-25-chutes-approbation"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbation prévue d’un PPCMOI — 25, rue des Chutes",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-ppcmoi-25-chutes-premier-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Premier projet de résolution prévu — PPCMOI du 25, rue des Chutes",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6 a) prévoit la modification de l'autorisation de signature d'un acte d'achat d'une partie du lot 6 025 922.\",\"excerpt\":\"Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat\\nd’une partie du lot 6 025 922 (1 rue Dollard)\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6 b) prévoit l'abrogation de la résolution concernant le choix du proposant pour le lot 2 045 370 (Terrain Juteau).\",\"excerpt\":\"Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2\\n045 370 (Terrain Juteau)\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.2 a) inscrit à l'ordre du jour une demande d'approbation de PIIA pour le 3, rue Principale.\",\"excerpt\":\"8.2. Demande d’approbation de PIIA seulement\\na) Pour le 3, rue Principale (enseigne sur vitrage)\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.2 b) prévoit l'approbation d'un PIIA pour le 9, rue Principale.\",\"excerpt\":\"b) Pour le 9, rue Principale (modification enseigne sur poteau)\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.3 a) prévoit l'approbation d'une demande de PPCMOI pour le 25, rue des Chutes.\",\"excerpt\":\"Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes\\n(agrandissement résidentiel)\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.3 b) prévoit l'adoption du premier projet de résolution pour un PPCMOI au 25, rue des Chutes.\",\"excerpt\":\"Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\\ndes Chutes (agrandissement résidentiel)\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 6 a) prévoit la modification de l'autorisation de signature d'un acte d'achat d'une partie du lot 6 025 922.",
+   "excerpt": "Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat\nd’une partie du lot 6 025 922 (1 rue Dollard)"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 6 b) prévoit l'abrogation de la résolution concernant le choix du proposant pour le lot 2 045 370 (Terrain Juteau).",
+   "excerpt": "Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2\n045 370 (Terrain Juteau)"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 8.2 a) inscrit à l'ordre du jour une demande d'approbation de PIIA pour le 3, rue Principale.",
+   "excerpt": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 8.2 b) prévoit l'approbation d'un PIIA pour le 9, rue Principale.",
+   "excerpt": "b) Pour le 9, rue Principale (modification enseigne sur poteau)"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le point 8.3 a) prévoit l'approbation d'une demande de PPCMOI pour le 25, rue des Chutes.",
+   "excerpt": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le point 8.3 b) prévoit l'adoption du premier projet de résolution pour un PPCMOI au 25, rue des Chutes.",
+   "excerpt": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 6 a) prévoit la modification de l'autorisation de signature d'un acte d'achat d'une partie du lot 6 025 922."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 6 b) prévoit l'abrogation de la résolution concernant le choix du proposant pour le lot 2 045 370 (Terrain Juteau)."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 8.2 a) inscrit à l'ordre du jour une demande d'approbation de PIIA pour le 3, rue Principale."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 8.2 b) prévoit l'approbation d'un PIIA pour le 9, rue Principale."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point 8.3 a) prévoit l'approbation d'une demande de PPCMOI pour le 25, rue des Chutes."
+   },
+   {
+    "act": "A06",
+    "reason": "Le point 8.3 b) prévoit l'adoption du premier projet de résolution pour un PPCMOI au 25, rue des Chutes."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2771,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2667,
+   "outputTokens": 504,
+   "totalTokens": 3171
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2599
+  },
+  "inputSha256": "d516e55e1776aab8f08c2e59c93ec70af1dab1dfdc7f25ec5aee79d06d77b0bc"
+ }
+}

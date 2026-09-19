@@ -1,0 +1,46 @@
+{
+ "documentId": "amherst-2026-06-08",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "3d3d029a18744837023f2e63cf7f34d2329149cb3de6d6e8d90c7f792049e61a",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u01\",\"unit\":{\"label\":\"Décision prévue sur la demande d’acquisition du lot 5 197 804 (route 323) – acte foncier\",\"stage\":\"adoption\",\"procedure\":null,\"objet\":\"5 197 804\",\"page\":1,\"citation\":\"Demande d’acquisition du lot 5 197 804 (route 323)\",\"anchor\":\"lot 5 197 804\"},\"reason\":\"Le point 6.4 est un acte foncier explicite (acquisition d'un lot cadastral) prévu à l'ordre du jour ; le vocabulaire d'étape range l'acte foncier décidé (vente, acquisition, cession) sous « adoption », non sous « inconnu », et le libellé doit dire « prévu » puisque le document n'est qu'un ordre du jour.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Décision prévue sur la demande d’acquisition du lot 5 197 804 (route 323) – acte foncier",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 197 804",
+    "page": 1,
+    "citation": "Demande d’acquisition du lot 5 197 804 (route 323)",
+    "anchor": "lot 5 197 804"
+   },
+   "reason": "Le point 6.4 est un acte foncier explicite (acquisition d'un lot cadastral) prévu à l'ordre du jour ; le vocabulaire d'étape range l'acte foncier décidé (vente, acquisition, cession) sous « adoption », non sous « inconnu », et le libellé doit dire « prévu » puisque le document n'est qu'un ordre du jour."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u01"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 1
+}

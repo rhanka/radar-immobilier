@@ -1,0 +1,77 @@
+{
+ "documentId": "la-peche-2026-06-01",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1bf30d4e86757ad7bd1cc2edc48b5f7efb22e8cdb823706f4efae97ba9488853",
+ "inputSha256": "e26832c351ae7a55fdbe9d64975d90c1a821ee600dbe70a6313bb5ece8c59fe5",
+ "responseSha256": "c4204c27d3ee67c263138cb726e116761ec7d3fe762bc0fb91362b28586a6108",
+ "rc": 0,
+ "latencyMs": 45844,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "0a7a7e56-6273-4a87-9663-3d5f1f357e72",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 3728,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 37305,
+   "webSearchRequests": 0,
+   "costUSD": 0.93280475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 2750,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 37305,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 3728,
+  "output_tokens_details": {
+   "thinking_tokens": 2750
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 37305,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 3728,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 37305,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 37305
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.93280475,
+ "durationApiMs": 43801,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:35:33.930Z"
+}

@@ -1,0 +1,35 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c26636ce20017b761172f86f87ca0022f5937c44d95cd362cf716e965d5cb66c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 8747,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 19643,
+   "outputTokens": 1393,
+   "totalTokens": 21036
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 8603
+  },
+  "inputSha256": "37ef524e6cbc123032db810a8a72661eb5da54d4c9443ebe54edcc9fdd447a7b"
+ },
+ "at": "2026-09-19T03:23:20.186Z"
+}

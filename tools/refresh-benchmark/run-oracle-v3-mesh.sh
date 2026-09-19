@@ -18,7 +18,7 @@ MESH_VERSION=0.19.3
 step="$1"; shift
 
 case "$step" in
-  astra-*|converge-astra|gemini-*|converge-gemini) ;;
+  astra-*|converge-astra|arbitrate-astra|gemini-*|converge-gemini|arbitrate-gemini) ;;
   *) echo "run-oracle-v3-mesh: $step is not an llm-mesh step" >&2; exit 2 ;;
 esac
 test "${ORACLE_V3_GO:-}" = 1 || { echo "ORACLE_V3_GO=1 required (GO i-cond)" >&2; exit 2; }

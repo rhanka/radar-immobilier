@@ -1,0 +1,13 @@
+{
+ "id": "pincourt-2026-01-20",
+ "rc": 0,
+ "latencyMs": 107214,
+ "inputTokens": 2,
+ "outputTokens": 12257,
+ "cacheRead": 0,
+ "cacheCreate": 5156,
+ "costUsd": 0.360695,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 23901
+}

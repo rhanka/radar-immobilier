@@ -1,0 +1,410 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "41df11f97ff5297535df34412d7e21d21ea7aedfb812c4082b09d4c071d804ac",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "dm-reported"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de la dérogation mineure au 3, rue Ernest-Piché",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Demande de dérogation mineure : 3, rue Ernest-Piché - REPORTÉ"
+      },
+      {
+       "page": 3,
+       "excerpt": "ET RÉSOLU d’adopter l’ordre du jour tel qu’il a été présenté en reportant toutefois le\npoint 5.1 à une séance ultérieure."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "dm-111"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 2, rue du Garbin",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri\nd’auto en garage privé attenant pour la propriété sise au 2, rue Garbin."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "dm-112"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — lot 6 621 589",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot\nd’angle 6 621 589 d’une largeur de 27,20 mètres."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "subdivision-113"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Subdivision au site patrimonial du manoir Juchereau-Duchesnay",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que\nprésenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi sur le site"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-castella"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Report des travaux de prolongement de l’avenue des Catherine",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "ET RÉSOLU d’amender l’article 6.7 de l’entente conclue avec Groupe Castella 2 inc.\nafin de repousser la date de fin des travaux au 31 octobre 2026."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "piia-116"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Le Ste-4 — garantie financière des phases 1A et 1B",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux\nderniers alinéas par les alinéas suivants :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-1259"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 1259-2014",
+     "stage": null,
+     "objet": "1259-2014",
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-apr423"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Premier projet APR-423-2026 — Boisé Natura",
+     "stage": "1er_projet",
+     "objet": "APR-423-2026",
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "motion-natura"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Boisé Natura — avis de motion de modification du zonage",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "Il est, par la présente, donné avis de motion, par monsieur David Milot, conseiller, qu’il\nsera adopté, à une séance ultérieure, un règlement modifiant le Règlement de zonage"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "projet-natura"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Boisé Natura — adoption du premier projet de zonage",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "signal-solaire"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Parc solaire Innergex — appui et modifications réglementaires à amorcer",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "IL EST ÉGALEMENT RÉSOLU que la Ville de Sainte-Catherine-de-laJacques-Cartier s’engage à amorcer, suivant la procédure prescrite par la Loi sur\nl’aménagement et l’urbanisme,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-servitude"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Servitude de passage et droit de premier refus — Sablière Martel",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et\npersonnelle de passage, droit de premier refus pour le lot 6 164 031."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a résolu d'adopter l'ordre du jour en reportant la dérogation mineure du point 5.1 à une séance ultérieure.\",\"excerpt\":\"ET RÉSOLU d’adopter l’ordre du jour tel qu’il a été présenté en reportant toutefois le\\npoint 5.1 à une séance ultérieure.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a accordé la dérogation mineure pour l'immeuble situé au 2, rue Garbin.\",\"excerpt\":\"ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri\\nd’auto en garage privé attenant pour la propriété sise au 2, rue Garbin.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal a formellement accordé la dérogation mineure pour le lot 6 621 589.\",\"excerpt\":\"ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot\\nd’angle 6 621 589 d’une largeur de 27,20 mètres.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a approuvé la subdivision de la parcelle dans le site patrimonial du manoir en vertu de son règlement patrimonial.\",\"excerpt\":\"ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que\\nprésenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi sur le site\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a adopté une résolution modifiant l'entente pour prolonger l'avenue des Catherine afin de repousser la date de fin des travaux.\",\"excerpt\":\"ET RÉSOLU d’amender l’article 6.7 de l’entente conclue avec Groupe Castella 2 inc.\\nafin de repousser la date de fin des travaux au 31 octobre 2026.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil amende les conditions d'exigence de la garantie financière liée à l'approbation PIIA du projet Le Ste-4.\",\"excerpt\":\"ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux\\nderniers alinéas par les alinéas suivants :\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 1259-2014 est le règlement de zonage d'origine qui est simplement mentionné comme objet de modification, non un acte adopté ici.\",\"excerpt\":\"\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le premier projet de règlement APR-423-2026 modifiant le zonage pour le projet Boisé Natura a été adopté par résolution.\",\"excerpt\":\"ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion a formellement été donné pour modifier le règlement de zonage.\",\"excerpt\":\"Il est, par la présente, donné avis de motion, par monsieur David Milot, conseiller, qu’il\\nsera adopté, à une séance ultérieure, un règlement modifiant le Règlement de zonage\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 117-2026 adopte le premier projet de règlement de zonage pour le secteur Boisé Natura.\",\"excerpt\":\"ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"La Ville résout d'appuyer le projet et de s'engager formellement à amorcer les modifications réglementaires d'urbanisme nécessaires.\",\"excerpt\":\"IL EST ÉGALEMENT RÉSOLU que la Ville de Sainte-Catherine-de-laJacques-Cartier s’engage à amorcer, suivant la procédure prescrite par la Loi sur\\nl’aménagement et l’urbanisme,\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"La résolution autorise la signature d'un acte de servitude exclusive de passage et de premier refus pour le lot 6 164 031.\",\"excerpt\":\"ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et\\npersonnelle de passage, droit de premier refus pour le lot 6 164 031.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil a résolu d'adopter l'ordre du jour en reportant la dérogation mineure du point 5.1 à une séance ultérieure.",
+   "excerpt": "ET RÉSOLU d’adopter l’ordre du jour tel qu’il a été présenté en reportant toutefois le\npoint 5.1 à une séance ultérieure."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil a accordé la dérogation mineure pour l'immeuble situé au 2, rue Garbin.",
+   "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri\nd’auto en garage privé attenant pour la propriété sise au 2, rue Garbin."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal a formellement accordé la dérogation mineure pour le lot 6 621 589.",
+   "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot\nd’angle 6 621 589 d’une largeur de 27,20 mètres."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil a approuvé la subdivision de la parcelle dans le site patrimonial du manoir en vertu de son règlement patrimonial.",
+   "excerpt": "ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que\nprésenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi sur le site"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil a adopté une résolution modifiant l'entente pour prolonger l'avenue des Catherine afin de repousser la date de fin des travaux.",
+   "excerpt": "ET RÉSOLU d’amender l’article 6.7 de l’entente conclue avec Groupe Castella 2 inc.\nafin de repousser la date de fin des travaux au 31 octobre 2026."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil amende les conditions d'exigence de la garantie financière liée à l'approbation PIIA du projet Le Ste-4.",
+   "excerpt": "ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux\nderniers alinéas par les alinéas suivants :"
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1259-2014 est le règlement de zonage d'origine qui est simplement mentionné comme objet de modification, non un acte adopté ici.",
+   "excerpt": ""
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le premier projet de règlement APR-423-2026 modifiant le zonage pour le projet Boisé Natura a été adopté par résolution.",
+   "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion a formellement été donné pour modifier le règlement de zonage.",
+   "excerpt": "Il est, par la présente, donné avis de motion, par monsieur David Milot, conseiller, qu’il\nsera adopté, à une séance ultérieure, un règlement modifiant le Règlement de zonage"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "La résolution 117-2026 adopte le premier projet de règlement de zonage pour le secteur Boisé Natura.",
+   "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "La Ville résout d'appuyer le projet et de s'engager formellement à amorcer les modifications réglementaires d'urbanisme nécessaires.",
+   "excerpt": "IL EST ÉGALEMENT RÉSOLU que la Ville de Sainte-Catherine-de-laJacques-Cartier s’engage à amorcer, suivant la procédure prescrite par la Loi sur\nl’aménagement et l’urbanisme,"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "La résolution autorise la signature d'un acte de servitude exclusive de passage et de premier refus pour le lot 6 164 031.",
+   "excerpt": "ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et\npersonnelle de passage, droit de premier refus pour le lot 6 164 031."
+  }
+ ],
+ "filter": {
+  "acts": 12,
+  "removed": [
+   {
+    "act": "A07",
+    "reason": "Le règlement 1259-2014 est le règlement de zonage d'origine qui est simplement mentionné comme objet de modification, non un acte adopté ici."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil a résolu d'adopter l'ordre du jour en reportant la dérogation mineure du point 5.1 à une séance ultérieure."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil a accordé la dérogation mineure pour l'immeuble situé au 2, rue Garbin."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil municipal a formellement accordé la dérogation mineure pour le lot 6 621 589."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil a approuvé la subdivision de la parcelle dans le site patrimonial du manoir en vertu de son règlement patrimonial."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil a adopté une résolution modifiant l'entente pour prolonger l'avenue des Catherine afin de repousser la date de fin des travaux."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil amende les conditions d'exigence de la garantie financière liée à l'approbation PIIA du projet Le Ste-4."
+   },
+   {
+    "act": "A08",
+    "reason": "Le premier projet de règlement APR-423-2026 modifiant le zonage pour le projet Boisé Natura a été adopté par résolution."
+   },
+   {
+    "act": "A09",
+    "reason": "Un avis de motion a formellement été donné pour modifier le règlement de zonage."
+   },
+   {
+    "act": "A10",
+    "reason": "La résolution 117-2026 adopte le premier projet de règlement de zonage pour le secteur Boisé Natura."
+   },
+   {
+    "act": "A11",
+    "reason": "La Ville résout d'appuyer le projet et de s'engager formellement à amorcer les modifications réglementaires d'urbanisme nécessaires."
+   },
+   {
+    "act": "A12",
+    "reason": "La résolution autorise la signature d'un acte de servitude exclusive de passage et de premier refus pour le lot 6 164 031."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3198,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 29787,
+   "outputTokens": 1070,
+   "totalTokens": 30857
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3037
+  },
+  "inputSha256": "7b67f250baf3d04c36a984100aab6784db02501e5fdc92def71ec491472f110a"
+ }
+}

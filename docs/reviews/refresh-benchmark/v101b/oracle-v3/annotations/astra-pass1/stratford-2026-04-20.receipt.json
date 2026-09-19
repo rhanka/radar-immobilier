@@ -1,0 +1,36 @@
+{
+ "documentId": "stratford-2026-04-20",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "4f62ba03ce24eaa83e94bc29d1ee39b19582407fa3031f7dab688e40bc4b7011",
+ "inputSha256": "8360b956bcdd24b9577978bff188bf085dd733d02d63418c65587008a1279dd4",
+ "responseSha256": "650b6153930df5867535db889cd15d2957969f810b33952d39d61e79533f14f0",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 87492,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2525,
+  "outputTokens": 2804,
+  "totalTokens": 5329
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 87483,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:05:35.437Z"
+}

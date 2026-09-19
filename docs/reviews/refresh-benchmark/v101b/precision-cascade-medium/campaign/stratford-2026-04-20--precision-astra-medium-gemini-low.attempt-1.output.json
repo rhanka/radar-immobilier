@@ -1,0 +1,505 @@
+{
+ "nodes": [
+  {
+   "id": "source",
+   "label": "Projet d’ordre du jour du 20 avril 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "status": "candidate",
+   "date": "2026-04-20",
+   "municipality": "stratford",
+   "format": "pdf",
+   "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+   "url": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "PROJET D’ORDRE DU JOUR",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1256",
+   "label": "Projet de règlement 1256 — démolition d’immeubles",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "status": "candidate",
+   "numero": "1256",
+   "municipality": "stratford",
+   "meetingDate": "2026-04-20",
+   "objet": "Modification de certaines dispositions relatives aux bâtiments assujettis au règlement relatif à la démolition d’immeubles no 1212; adoption du projet inscrite à l’ordre du jour.",
+   "stage": "projet",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-1256"
+   ]
+  },
+  {
+   "id": "bylaw-1257",
+   "label": "Deuxième projet du règlement 1257 — création de RU-13",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "status": "candidate",
+   "numero": "1257",
+   "municipality": "stratford",
+   "meetingDate": "2026-04-20",
+   "stage": "2e_projet",
+   "zone_cible": "RU-13",
+   "objet": "Modification du règlement de zonage no 1035 afin de créer la zone RU-13 et déterminer les usages autorisés; adoption du deuxième projet inscrite à l’ordre du jour.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-1257"
+   ]
+  },
+  {
+   "id": "zone-ru13",
+   "label": "RU-13 — zone projetée",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "status": "candidate",
+   "code": "RU-13",
+   "municipality": "stratford",
+   "description": "Zone dont la création est prévue par le deuxième projet du règlement 1257 inscrit à l’ordre du jour.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-1257"
+   ]
+  },
+  {
+   "id": "consultation",
+   "label": "Consultation publique prévue — règlement 1257 et dérogations",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "status": "candidate",
+   "municipality": "stratford",
+   "meetingDate": "2026-04-20",
+   "etape": "consultation_publique",
+   "reglement_number": "1257",
+   "description": "Consultation publique inscrite au projet d’ordre du jour; tenue et résultat non établis par ce document.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Consultation publique (Règlement 1257 et dérogations)",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-consultation"
+   ]
+  },
+  {
+   "id": "derogation-thompson",
+   "label": "Demande de dérogation mineure — lot 6674217, chemin Thompson",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "status": "candidate",
+   "municipality": "stratford",
+   "meetingDate": "2026-04-20",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "no_lot": "6674217",
+   "description": "Demande inscrite à l’ordre du jour; aucune décision rapportée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-thompson"
+   ]
+  },
+  {
+   "id": "derogation-elgin",
+   "label": "Demande de dérogation mineure — 405 rang Elgin",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "status": "candidate",
+   "municipality": "stratford",
+   "meetingDate": "2026-04-20",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "description": "Demande concernant le 405 rang Elgin inscrite à l’ordre du jour; aucune décision rapportée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de dérogation mineure – 405 rang Elgin",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-elgin"
+   ]
+  },
+  {
+   "id": "achat-erables",
+   "label": "Achat prévu d’un terrain sur la rue des Érables",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "status": "candidate",
+   "municipality": "stratford",
+   "meetingDate": "2026-04-20",
+   "category": "transaction_fonciere",
+   "kind": "achat_terrain",
+   "description": "Achat d’un terrain sur la rue des Érables inscrit à l’ordre du jour; réalisation non établie.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Achat d’un terrain sur la rue des Érables",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-achat"
+   ]
+  },
+  {
+   "id": "vente-hauts-cantons",
+   "label": "Vente prévue d’une lisière de terrain — chemin des Hauts-Cantons",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "status": "candidate",
+   "municipality": "stratford",
+   "meetingDate": "2026-04-20",
+   "category": "transaction_fonciere",
+   "kind": "vente_terrain",
+   "description": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons inscrite à l’ordre du jour; réalisation non établie.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-vente"
+   ]
+  },
+  {
+   "id": "servitude-beau-lac",
+   "label": "Servitude d’écoulement des eaux — 467 rang Beau-Lac",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "status": "candidate",
+   "municipality": "stratford",
+   "meetingDate": "2026-04-20",
+   "category": "servitude",
+   "description": "Servitude d’écoulement des eaux au 467 rang Beau-Lac inscrite à l’ordre du jour; constitution non établie.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Servitude d’écoulement des eaux au 467 rang Beau-Lac",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-servitude"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "bylaw-1257",
+   "target": "zone-ru13",
+   "relation": "defines",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "assertion_basis": "Création projetée, sans entrée en vigueur attestée.",
+   "evidence_refs": [
+    "ev-1257"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "consultation",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "evidence_refs": [
+    "ev-consultation"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Consultation publique (Règlement 1257 et dérogations)",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "derogation-thompson",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "evidence_refs": [
+    "ev-thompson"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "derogation-elgin",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "evidence_refs": [
+    "ev-elgin"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de dérogation mineure – 405 rang Elgin",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "achat-erables",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "evidence_refs": [
+    "ev-achat"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Achat d’un terrain sur la rue des Érables",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "vente-hauts-cantons",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "evidence_refs": [
+    "ev-vente"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "servitude-beau-lac",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "evidence_refs": [
+    "ev-servitude"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Servitude d’écoulement des eaux au 467 rang Beau-Lac",
+     "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+     "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+     "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-1256",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+   "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis"
+  },
+  {
+   "id": "ev-1257",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+   "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés"
+  },
+  {
+   "id": "ev-consultation",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+   "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Consultation publique (Règlement 1257 et dérogations)"
+  },
+  {
+   "id": "ev-thompson",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+   "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson"
+  },
+  {
+   "id": "ev-elgin",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+   "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Demande de dérogation mineure – 405 rang Elgin"
+  },
+  {
+   "id": "ev-achat",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+   "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Achat d’un terrain sur la rue des Érables"
+  },
+  {
+   "id": "ev-vente",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+   "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons"
+  },
+  {
+   "id": "ev-servitude",
+   "source_file": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "rawRef": "raw/proces-verbaux-stratford/cas/08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5.pdf",
+   "docSha": "08d229880b0aee8976f3e50f4a8f6f49df27600e29d58d34002a8c869fa2abf5",
+   "sourceUrl": "https://stratford.quebec/wp-content/uploads/2026/04/PV-2026-04-20.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Servitude d’écoulement des eaux au 467 rang Beau-Lac"
+  }
+ ],
+ "input_tokens": 6900,
+ "output_tokens": 6500
+}

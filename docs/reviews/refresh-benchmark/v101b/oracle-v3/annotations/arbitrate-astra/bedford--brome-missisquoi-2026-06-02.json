@@ -1,0 +1,19 @@
+{
+ "documentId": "bedford--brome-missisquoi-2026-06-02",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c5de592a09dbe44822aeba1edf7c9686111f53eb53c102fec513198bc10e74d6",
+ "verificationSha256": "f2eff2ba5638ba4229e1b6aec9022e823a2b6aa03192a094648fa733c45d1940",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

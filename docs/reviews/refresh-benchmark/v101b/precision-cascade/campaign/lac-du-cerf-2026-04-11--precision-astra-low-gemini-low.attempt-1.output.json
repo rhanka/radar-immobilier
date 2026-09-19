@@ -1,0 +1,54 @@
+{
+ "nodes": [
+  {
+   "id": "source-1",
+   "label": "Projet d’ordre du jour — Lac-du-Cerf — 11 avril 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-du-cerf/cas/2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef.pdf",
+   "status": "needs_review",
+   "date": "2026-04-11",
+   "municipality": "lac-du-cerf",
+   "format": "pdf",
+   "docSha": "2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef",
+   "url": "https://www.lacducerf.ca/wp-content/uploads/ODJ_conseil_ordinaire_11-05-2026.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "PROJET - ORDRE DU JOUR –11 AVRIL 2026 – 19 h",
+     "source_file": "raw/proces-verbaux-lac-du-cerf/cas/2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef.pdf",
+     "rawRef": "raw/proces-verbaux-lac-du-cerf/cas/2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef.pdf",
+     "docSha": "2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef",
+     "sourceUrl": "https://www.lacducerf.ca/wp-content/uploads/ODJ_conseil_ordinaire_11-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-1",
+   "source_file": "raw/proces-verbaux-lac-du-cerf/cas/2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef.pdf",
+   "rawRef": "raw/proces-verbaux-lac-du-cerf/cas/2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef.pdf",
+   "docSha": "2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef",
+   "sourceUrl": "https://www.lacducerf.ca/wp-content/uploads/ODJ_conseil_ordinaire_11-05-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis"
+  },
+  {
+   "id": "ev-2",
+   "source_file": "raw/proces-verbaux-lac-du-cerf/cas/2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef.pdf",
+   "rawRef": "raw/proces-verbaux-lac-du-cerf/cas/2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef.pdf",
+   "docSha": "2a0c655ebbfb829edf78b4ed48d73789d2d769a3aa7213b554c764f7c78630ef",
+   "sourceUrl": "https://www.lacducerf.ca/wp-content/uploads/ODJ_conseil_ordinaire_11-05-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "8.2 Renforcement de l’application du règlement sur les nuisances pour la saison estivale"
+  }
+ ],
+ "input_tokens": 6850,
+ "output_tokens": 1930
+}

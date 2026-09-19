@@ -1,0 +1,515 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "18ae517b66650946a1409d1d3d70176f156e38982c2e319252d95dfc332c068c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-645"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 645 — Entretien et occupation des bâtiments",
+     "stage": "adoption",
+     "objet": "645",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-626"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 626 — Promenade sur la rue Principale Nord",
+     "stage": null,
+     "objet": "626",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présent d’autoriser la modification de\nl’article 6"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-646"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 646 — Délégation de pouvoir",
+     "stage": "projet",
+     "objet": "646",
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "Un projet de règlement intitulé « Règlement numéro 646 intitulé délégation\nde pouvoir » est déposé séance tenante."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-186"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI 2026-009 — Usage bifamilial isolé",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présents, d’autoriser par projet de\nrésolution la demande numéro 2026-009"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-187"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-010 — Reconstruction au 318, chemin de L’Anse-de-Roche",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010"
+      },
+      {
+       "page": 20,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\nzone 40-REC."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-188"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-008 — Maison au 99, chemin du Fjord",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-008"
+      },
+      {
+       "page": 20,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-189"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-007 — Verrière trois saisons",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Paul J. Choquette et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-007"
+      },
+      {
+       "page": 21,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Paul J. Choquette et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche\ndans la zone 40-REC pour en faire une verrière trois saisons."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-190"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-006 — Agrandissement de patio",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-006"
+      },
+      {
+       "page": 21,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\ndu patio à la place de la terrasse actuelle au 295 chemin de\nL’Anse de Roche dans la zone 40-REC."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-191"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — Société des frais funéraires de Sacré-Cœur",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Guy Brisson et résolu, à\nl’unanimité des conseillers présents, d’autoriser la demande de dérogation\nmineure numéro 20226-009"
+      },
+      {
+       "page": 21,
+       "excerpt": "Demande de dérogation mineure de la Société des frais funéraires de\nSacré-Cœur sur le lot 4 700 841 du cadastre du Québec"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-192"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-011 — Marge arrière de garage",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu, à l’unanimité des conseillers présents, d’autoriser la demande de\ndérogation mineure numéro 2026-011"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "signal-180"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Développement du secteur de la rue Dufour — Estimation d’ingénierie",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des conseillers présents, d’accepter l’offre de service de\nStantec au montant de 977,29 $"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-175"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de révision du projet de règlement sur les pratiques agroenvironnementales",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les\nChangements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de\nsuspendre le processus d’adoption"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-185"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Halte routière — Modification de convention pour agrandissement",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "PAR CES MOTIFS, IL EST PROPOSE par M. Paul J. Choquette et\nrésolu à l’unanimité des conseillers présents, d’autoriser Mme Lise"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "signal-permis-avril"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Permis d’avril 2026 — Valeur des travaux",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "Au mois d’avril 2026, 10 permis ont été émis pour un total annuel de 28\npermis."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "signal-204"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Terrain de baseball — Demande de financement pour réfection",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 28,
+       "excerpt": "QUE la Municipalité de Sacré-Cœur dépose une demande d’aide financière\nau Fonds régions et ruralité – Volet 2 pour le projet intitulé « Réfection et mise"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement numéro 645 sur l'entretien et l'occupation des bâtiments est formellement adopté par la résolution 2026-05-167.\",\"excerpt\":\"PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\\nunanimement que le règlement portant le numéro 645 suivant soit\\nadopté :\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-171 autorise la modification de l'article 6 du règlement d'emprunt numéro 626.\",\"excerpt\":\"PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\\net résolu à l’unanimité des conseillers présent d’autoriser la modification de\\nl’article 6\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt du projet de règlement numéro 646 portant sur la délégation de pouvoir est consigné à la résolution 2026-05-174.\",\"excerpt\":\"Un projet de règlement intitulé « Règlement numéro 646 intitulé délégation\\nde pouvoir » est déposé séance tenante.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-186 autorise par projet de résolution la demande de PPCMOI numéro 2026-009 pour un usage bifamilial isolé.\",\"excerpt\":\"PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\\net résolu à l’unanimité des conseillers présents, d’autoriser par projet de\\nrésolution la demande numéro 2026-009\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-187 autorise la demande de PIIA numéro 2026-010 pour la reconstruction d'une maison au 318, chemin de L'Anse-de-Roche.\",\"excerpt\":\"d’autoriser la demande de PIIA numéro\\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\\nzone 40-REC.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-188 autorise la demande de PIIA numéro 2026-008 pour la maison située au 99, chemin du Fjord.\",\"excerpt\":\"d’autoriser la demande de PIIA\\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-189 autorise la demande de PIIA numéro 2026-007 pour une verrière trois saisons au 322, chemin de L'Anse-de-Roche.\",\"excerpt\":\"d’autoriser la demande de PIIA\\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-190 autorise la demande de PIIA numéro 2026-006 pour l'agrandissement d'un patio au 295, chemin de L'Anse-de-Roche.\",\"excerpt\":\"d’autoriser la demande de PIIA numéro\\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\\ndu patio à la place de la terrasse actuelle au 295 chemin de\\nL’Anse de Roche\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-191 accorde la demande de dérogation mineure numéro 20226-009 pour la Société des frais funéraires de Sacré-Cœur.\",\"excerpt\":\"PAR CES MOTIFS, IL EST PROPOSÉ par M. Guy Brisson et résolu, à\\nl’unanimité des conseillers présents, d’autoriser la demande de dérogation\\nmineure numéro 20226-009\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-192 accorde la demande de dérogation mineure numéro 2026-011 concernant la marge arrière.\",\"excerpt\":\"PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\\nrésolu, à l’unanimité des conseillers présents, d’autoriser la demande de\\ndérogation mineure numéro 2026-011\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-180 autorise l'octroi d'un mandat de services professionnels en ingénierie à Stantec en vue du développement du secteur de la rue Dufour.\",\"excerpt\":\"CONSIDÉRANT QUE la municipalité\\ndésire\\nprocéder\\nau\\ndéveloppement du secteur de la rue Dufour;\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-175 demande formellement à la ministre de suspendre le processus d'adoption du projet de règlement provincial sur les pratiques agroenvironnementales.\",\"excerpt\":\"DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les\\nChangements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de\\nsuspendre le processus d’adoption\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-185 autorise la signature d'une modification à la convention d'exploitation de la halte routière pour permettre un agrandissement du bâtiment.\",\"excerpt\":\"une\\nmodification à la convention de la concession de la halte routière en\\najoutant une clause pour l’agrandissement du bâtiment.\"},{\"act\":\"A14\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt du rapport mensuel des permis émis en avril 2026 est expressément consigné dans le procès-verbal.\",\"excerpt\":\"Au mois d’avril 2026, 10 permis ont été émis pour un total annuel de 28\\npermis.\\nLa valeur des travaux pour le mois s’élève à 59 000 $ et le montant des\\npermis s’élève à 120 $.\"},{\"act\":\"A15\",\"verdict\":\"non_soutenu\",\"reason\":\"Cette décision concerne une demande de subvention pour la réfection d'un terrain de baseball municipal, ce qui relève du domaine des loisirs/équipements sportifs exclu du champ d'urbanisme.\",\"excerpt\":\"QUE la Municipalité de Sacré-Cœur dépose une demande d’aide financière\\nau Fonds régions et ruralité – Volet 2 pour le projet intitulé « Réfection et mise\\naux normes du terrain de baseball municipal » ;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le règlement numéro 645 sur l'entretien et l'occupation des bâtiments est formellement adopté par la résolution 2026-05-167.",
+   "excerpt": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté :"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-171 autorise la modification de l'article 6 du règlement d'emprunt numéro 626.",
+   "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présent d’autoriser la modification de\nl’article 6"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le dépôt du projet de règlement numéro 646 portant sur la délégation de pouvoir est consigné à la résolution 2026-05-174.",
+   "excerpt": "Un projet de règlement intitulé « Règlement numéro 646 intitulé délégation\nde pouvoir » est déposé séance tenante."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-186 autorise par projet de résolution la demande de PPCMOI numéro 2026-009 pour un usage bifamilial isolé.",
+   "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présents, d’autoriser par projet de\nrésolution la demande numéro 2026-009"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-187 autorise la demande de PIIA numéro 2026-010 pour la reconstruction d'une maison au 318, chemin de L'Anse-de-Roche.",
+   "excerpt": "d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\nzone 40-REC."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-188 autorise la demande de PIIA numéro 2026-008 pour la maison située au 99, chemin du Fjord.",
+   "excerpt": "d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-189 autorise la demande de PIIA numéro 2026-007 pour une verrière trois saisons au 322, chemin de L'Anse-de-Roche.",
+   "excerpt": "d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-190 autorise la demande de PIIA numéro 2026-006 pour l'agrandissement d'un patio au 295, chemin de L'Anse-de-Roche.",
+   "excerpt": "d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\ndu patio à la place de la terrasse actuelle au 295 chemin de\nL’Anse de Roche"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-191 accorde la demande de dérogation mineure numéro 20226-009 pour la Société des frais funéraires de Sacré-Cœur.",
+   "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Guy Brisson et résolu, à\nl’unanimité des conseillers présents, d’autoriser la demande de dérogation\nmineure numéro 20226-009"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-192 accorde la demande de dérogation mineure numéro 2026-011 concernant la marge arrière.",
+   "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu, à l’unanimité des conseillers présents, d’autoriser la demande de\ndérogation mineure numéro 2026-011"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-180 autorise l'octroi d'un mandat de services professionnels en ingénierie à Stantec en vue du développement du secteur de la rue Dufour.",
+   "excerpt": "CONSIDÉRANT QUE la municipalité\ndésire\nprocéder\nau\ndéveloppement du secteur de la rue Dufour;"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-175 demande formellement à la ministre de suspendre le processus d'adoption du projet de règlement provincial sur les pratiques agroenvironnementales.",
+   "excerpt": "DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les\nChangements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de\nsuspendre le processus d’adoption"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-185 autorise la signature d'une modification à la convention d'exploitation de la halte routière pour permettre un agrandissement du bâtiment.",
+   "excerpt": "une\nmodification à la convention de la concession de la halte routière en\najoutant une clause pour l’agrandissement du bâtiment."
+  },
+  {
+   "act": "A14",
+   "verdict": "soutenu",
+   "reason": "Le dépôt du rapport mensuel des permis émis en avril 2026 est expressément consigné dans le procès-verbal.",
+   "excerpt": "Au mois d’avril 2026, 10 permis ont été émis pour un total annuel de 28\npermis.\nLa valeur des travaux pour le mois s’élève à 59 000 $ et le montant des\npermis s’élève à 120 $."
+  },
+  {
+   "act": "A15",
+   "verdict": "non_soutenu",
+   "reason": "Cette décision concerne une demande de subvention pour la réfection d'un terrain de baseball municipal, ce qui relève du domaine des loisirs/équipements sportifs exclu du champ d'urbanisme.",
+   "excerpt": "QUE la Municipalité de Sacré-Cœur dépose une demande d’aide financière\nau Fonds régions et ruralité – Volet 2 pour le projet intitulé « Réfection et mise\naux normes du terrain de baseball municipal » ;"
+  }
+ ],
+ "filter": {
+  "acts": 15,
+  "removed": [
+   {
+    "act": "A15",
+    "reason": "Cette décision concerne une demande de subvention pour la réfection d'un terrain de baseball municipal, ce qui relève du domaine des loisirs/équipements sportifs exclu du champ d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le règlement numéro 645 sur l'entretien et l'occupation des bâtiments est formellement adopté par la résolution 2026-05-167."
+   },
+   {
+    "act": "A02",
+    "reason": "La résolution 2026-05-171 autorise la modification de l'article 6 du règlement d'emprunt numéro 626."
+   },
+   {
+    "act": "A03",
+    "reason": "Le dépôt du projet de règlement numéro 646 portant sur la délégation de pouvoir est consigné à la résolution 2026-05-174."
+   },
+   {
+    "act": "A04",
+    "reason": "La résolution 2026-05-186 autorise par projet de résolution la demande de PPCMOI numéro 2026-009 pour un usage bifamilial isolé."
+   },
+   {
+    "act": "A05",
+    "reason": "La résolution 2026-05-187 autorise la demande de PIIA numéro 2026-010 pour la reconstruction d'une maison au 318, chemin de L'Anse-de-Roche."
+   },
+   {
+    "act": "A06",
+    "reason": "La résolution 2026-05-188 autorise la demande de PIIA numéro 2026-008 pour la maison située au 99, chemin du Fjord."
+   },
+   {
+    "act": "A07",
+    "reason": "La résolution 2026-05-189 autorise la demande de PIIA numéro 2026-007 pour une verrière trois saisons au 322, chemin de L'Anse-de-Roche."
+   },
+   {
+    "act": "A08",
+    "reason": "La résolution 2026-05-190 autorise la demande de PIIA numéro 2026-006 pour l'agrandissement d'un patio au 295, chemin de L'Anse-de-Roche."
+   },
+   {
+    "act": "A09",
+    "reason": "La résolution 2026-05-191 accorde la demande de dérogation mineure numéro 20226-009 pour la Société des frais funéraires de Sacré-Cœur."
+   },
+   {
+    "act": "A10",
+    "reason": "La résolution 2026-05-192 accorde la demande de dérogation mineure numéro 2026-011 concernant la marge arrière."
+   },
+   {
+    "act": "A11",
+    "reason": "La résolution 2026-05-180 autorise l'octroi d'un mandat de services professionnels en ingénierie à Stantec en vue du développement du secteur de la rue Dufour."
+   },
+   {
+    "act": "A12",
+    "reason": "La résolution 2026-05-175 demande formellement à la ministre de suspendre le processus d'adoption du projet de règlement provincial sur les pratiques agroenvironnementales."
+   },
+   {
+    "act": "A13",
+    "reason": "La résolution 2026-05-185 autorise la signature d'une modification à la convention d'exploitation de la halte routière pour permettre un agrandissement du bâtiment."
+   },
+   {
+    "act": "A14",
+    "reason": "Le dépôt du rapport mensuel des permis émis en avril 2026 est expressément consigné dans le procès-verbal."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 1,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4646,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 22256,
+   "outputTokens": 1676,
+   "totalTokens": 23932
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4501
+  },
+  "inputSha256": "57b0534d305caebc8779b4f0b69361555bc837239b4ce999b3c831ad0a0136a8"
+ }
+}

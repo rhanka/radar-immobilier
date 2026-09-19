@@ -1,0 +1,38 @@
+{
+ "documentId": "grenville-sur-la-rouge-2026-04-14",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "196330a7c7fa54a291562c8f0834a06cd57a06f85ca3936dca9441b7e2699550",
+ "verificationSha256": "258c8c90f8c5bd2c0eb09041b7f30f7573be546eb1870430f122727e26383545",
+ "inputSha256": "a7af8e7003b5807466f51dd75826167463482314d8b06f240a4bf0032615089c",
+ "responseSha256": "899933840b6534494857f1800e3140e106ddb54493eba5eb438fd17231c63ac0",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 9702,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2971,
+  "outputTokens": 110,
+  "totalTokens": 6258,
+  "thoughtsTokenCount": 3177
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 9542,
+  "requestId": null
+ },
+ "at": "2026-09-18T22:46:46.972Z"
+}

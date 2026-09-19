@@ -1,0 +1,509 @@
+{
+ "documentId": "stoneham-et-tewkesbury-2026-06-08",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "9d7cf4556650fdb175828864283edf92c910cea7541165003ede809b8fd75c54",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-09-591"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage numéro 09-591",
+     "stage": null,
+     "objet": "09-591",
+     "citations": [
+      {
+       "page": 52,
+       "excerpt": "Adoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-09-603"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement relatif aux plans d’implantation et d’intégration architecturale numéro 09-603",
+     "stage": null,
+     "objet": "09-603",
+     "citations": [
+      {
+       "page": 54,
+       "excerpt": "Adoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-26-1105"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement 26-1105 — modification du zonage",
+     "stage": "adoption",
+     "objet": "26-1105",
+     "citations": [
+      {
+       "page": 52,
+       "excerpt": "Adoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-26-1106"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement 26-1106 — PIIA de la zone RT-503",
+     "stage": "adoption",
+     "objet": "26-1106",
+     "citations": [
+      {
+       "page": 54,
+       "excerpt": "Adoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-15-1-1"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — piscine au 2135, route de Tewkesbury",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 38,
+       "excerpt": "Construction d’une piscine en cour avant au 2135, route de Tewkesbury"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-15-1-2"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — habitation au 53, chemin Plamondon",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 40,
+       "excerpt": "Régularisation d’une habitation unifamiliale avec une marge latérale de 2,55 m au 53,\nchemin Plamondon"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-15-2-1"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — entreposage commercial au 2757, boulevard Talbot",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 42,
+       "excerpt": "Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une\naire de stationnement de plus de 150 m2 au 2757, boulevard Talbot"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-15-2-2"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — accès et stationnement au 98, 1re Avenue",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 44,
+       "excerpt": "Agrandissement de l’allée d’accès et de l’aire de stationnement portant la superficie à plus de\n150 m² au 98, 1re Avenue"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-15-2-3"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — piscine au 105, chemin de la Tourterelle",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 46,
+       "excerpt": "Implantation d’une piscine à l’intérieur des bandes de protection d’un secteur de forte pente\nau 105, chemin de la Tourterelle"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-15-2-4"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — stationnement au 144, chemin du Sommet",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 48,
+       "excerpt": "Aménagement d’une aire de stationnement de plus de 150 m2 au 144, chemin du Sommet"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-15-2-5"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — enseigne Excavation JDS au 2523, boulevard Talbot",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 50,
+       "excerpt": "Modification d’une enseigne pour l’entreprise Excavation JDS au 2523, boulevard Talbot"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "event-16-3",
+    "signal-18-logements"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Refus du PPCMOI — 102, 1re Avenue",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 56,
+       "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser"
+      }
+     ]
+    },
+    {
+     "type": "Signal",
+     "label": "Projet de 18 logements locatifs refusé",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 56,
+       "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-acquisition"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acquisition gratuite et stationnement partagé avec la Résidence",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "d’autoriser l’acquisition à titre\ngratuit, par la Municipalité, d’une\npartie du lot actuel numéro 6 564\n346 du cadastre du Québec;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "bylaw-septique-projet"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement — vidange des fosses septiques et de rétention",
+     "stage": "projet",
+     "objet": "Avis de motion et dépôt d’un projet remplaçant entièrement le règlement 08-573, modernisant la terminologie, les responsabilités, les fréquences de vidange et les processus.",
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "Avis de motion et dépôt d’un projet de règlement\nVidange des fosses septiques et des fosses de rétention"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "bylaw-26-1125"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 26-1125 — traitement du manganèse au puits de la Montagne",
+     "stage": "adoption",
+     "objet": "26-1125",
+     "citations": [
+      {
+       "page": 35,
+       "excerpt": "Adoption du Règlement numéro 26-1125\n\nEmprunt pour le traitement du manganèse au puits de la Montagne"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 09-591 n'est que le règlement d'origine cité comme référence modifiée par le règlement 26-1105 sans étape propre dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 09-603 est seulement le règlement d'origine cité comme objet de la modification par le règlement 26-1106.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 26-1105 modifiant le zonage est traitée au point 16.1.\",\"excerpt\":\"Adoption du Règlement numéro 26-1105\\nmodifiant le Règlement de zonage numéro 09-591\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 26-1106 modifiant le PIIA figure au point 16.2.\",\"excerpt\":\"Adoption du Règlement numéro 26-1106\\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\\narchitecturale numéro 09-603\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"La demande de dérogation mineure pour une piscine au 2135, route de Tewkesbury est présentée au point 15.1.1.\",\"excerpt\":\"Construction d’une piscine en cour avant au 2135, route de Tewkesbury\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"La dérogation mineure pour l'habitation au 53, chemin Plamondon est présentée au point 15.1.2.\",\"excerpt\":\"Régularisation d’une habitation unifamiliale avec une marge latérale de 2,55 m au 53,\\nchemin Plamondon\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA au 2757, boulevard Talbot est soumise au conseil au point 15.2.1.\",\"excerpt\":\"Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une\\naire de stationnement de plus de 150 m2 au 2757, boulevard Talbot\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA pour le stationnement au 98, 1re Avenue est examinée au point 15.2.2.\",\"excerpt\":\"Agrandissement de l’allée d’accès et de l’aire de stationnement portant la superficie à plus de\\n150 m² au 98, 1re Avenue\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA pour une piscine au 105, chemin de la Tourterelle est examinée au point 15.2.3.\",\"excerpt\":\"Implantation d’une piscine à l’intérieur des bandes de protection d’un secteur de forte pente\\nau 105, chemin de la Tourterelle\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA au 144, chemin du Sommet est examinée au point 15.2.4.\",\"excerpt\":\"Aménagement d’une aire de stationnement de plus de 150 m2 au 144, chemin du Sommet\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA pour l'enseigne au 2523, boulevard Talbot est examinée au point 15.2.5.\",\"excerpt\":\"Modification d’une enseigne pour l’entreprise Excavation JDS au 2523, boulevard Talbot\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil résout expressément de refuser la demande de PPCMOI de 18 logements au 102, 1re Avenue.\",\"excerpt\":\"Il est résolu\\nde refuser la demande de projet\\nparticulier de construction, de\\nmodification ou d’occupation d’un\\nimmeuble (PPCMOI) visant à autoriser\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise l'acquisition à titre gratuit d'une partie de lot cadastral et une entente de stationnement au point 9.4.\",\"excerpt\":\"d’autoriser l’acquisition à titre\\ngratuit, par la Municipalité, d’une\\npartie du lot actuel numéro 6 564\\n346 du cadastre du Québec;\"},{\"act\":\"A14\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt de projet de règlement sur la vidange des fosses figurent au point 9.1.\",\"excerpt\":\"Avis de motion et dépôt d’un projet de règlement\\nVidange des fosses septiques et des fosses de rétention\"},{\"act\":\"A15\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement d'emprunt 26-1125 est inscrite au point 14.5.\",\"excerpt\":\"Adoption du Règlement numéro 26-1125\\n\\nEmprunt pour le traitement du manganèse au puits de la Montagne\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 09-591 n'est que le règlement d'origine cité comme référence modifiée par le règlement 26-1105 sans étape propre dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 09-603 est seulement le règlement d'origine cité comme objet de la modification par le règlement 26-1106.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 26-1105 modifiant le zonage est traitée au point 16.1.",
+   "excerpt": "Adoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 26-1106 modifiant le PIIA figure au point 16.2.",
+   "excerpt": "Adoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "La demande de dérogation mineure pour une piscine au 2135, route de Tewkesbury est présentée au point 15.1.1.",
+   "excerpt": "Construction d’une piscine en cour avant au 2135, route de Tewkesbury"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "La dérogation mineure pour l'habitation au 53, chemin Plamondon est présentée au point 15.1.2.",
+   "excerpt": "Régularisation d’une habitation unifamiliale avec une marge latérale de 2,55 m au 53,\nchemin Plamondon"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA au 2757, boulevard Talbot est soumise au conseil au point 15.2.1.",
+   "excerpt": "Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une\naire de stationnement de plus de 150 m2 au 2757, boulevard Talbot"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA pour le stationnement au 98, 1re Avenue est examinée au point 15.2.2.",
+   "excerpt": "Agrandissement de l’allée d’accès et de l’aire de stationnement portant la superficie à plus de\n150 m² au 98, 1re Avenue"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA pour une piscine au 105, chemin de la Tourterelle est examinée au point 15.2.3.",
+   "excerpt": "Implantation d’une piscine à l’intérieur des bandes de protection d’un secteur de forte pente\nau 105, chemin de la Tourterelle"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA au 144, chemin du Sommet est examinée au point 15.2.4.",
+   "excerpt": "Aménagement d’une aire de stationnement de plus de 150 m2 au 144, chemin du Sommet"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA pour l'enseigne au 2523, boulevard Talbot est examinée au point 15.2.5.",
+   "excerpt": "Modification d’une enseigne pour l’entreprise Excavation JDS au 2523, boulevard Talbot"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Le conseil résout expressément de refuser la demande de PPCMOI de 18 logements au 102, 1re Avenue.",
+   "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise l'acquisition à titre gratuit d'une partie de lot cadastral et une entente de stationnement au point 9.4.",
+   "excerpt": "d’autoriser l’acquisition à titre\ngratuit, par la Municipalité, d’une\npartie du lot actuel numéro 6 564\n346 du cadastre du Québec;"
+  },
+  {
+   "act": "A14",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt de projet de règlement sur la vidange des fosses figurent au point 9.1.",
+   "excerpt": "Avis de motion et dépôt d’un projet de règlement\nVidange des fosses septiques et des fosses de rétention"
+  },
+  {
+   "act": "A15",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement d'emprunt 26-1125 est inscrite au point 14.5.",
+   "excerpt": "Adoption du Règlement numéro 26-1125\n\nEmprunt pour le traitement du manganèse au puits de la Montagne"
+  }
+ ],
+ "filter": {
+  "acts": 15,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le règlement 09-591 n'est que le règlement d'origine cité comme référence modifiée par le règlement 26-1105 sans étape propre dans cette séance."
+   },
+   {
+    "act": "A02",
+    "reason": "Le règlement 09-603 est seulement le règlement d'origine cité comme objet de la modification par le règlement 26-1106."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A03",
+    "reason": "L'adoption du règlement 26-1105 modifiant le zonage est traitée au point 16.1."
+   },
+   {
+    "act": "A04",
+    "reason": "L'adoption du règlement 26-1106 modifiant le PIIA figure au point 16.2."
+   },
+   {
+    "act": "A05",
+    "reason": "La demande de dérogation mineure pour une piscine au 2135, route de Tewkesbury est présentée au point 15.1.1."
+   },
+   {
+    "act": "A06",
+    "reason": "La dérogation mineure pour l'habitation au 53, chemin Plamondon est présentée au point 15.1.2."
+   },
+   {
+    "act": "A07",
+    "reason": "La demande de PIIA au 2757, boulevard Talbot est soumise au conseil au point 15.2.1."
+   },
+   {
+    "act": "A08",
+    "reason": "La demande de PIIA pour le stationnement au 98, 1re Avenue est examinée au point 15.2.2."
+   },
+   {
+    "act": "A09",
+    "reason": "La demande de PIIA pour une piscine au 105, chemin de la Tourterelle est examinée au point 15.2.3."
+   },
+   {
+    "act": "A10",
+    "reason": "La demande de PIIA au 144, chemin du Sommet est examinée au point 15.2.4."
+   },
+   {
+    "act": "A11",
+    "reason": "La demande de PIIA pour l'enseigne au 2523, boulevard Talbot est examinée au point 15.2.5."
+   },
+   {
+    "act": "A12",
+    "reason": "Le conseil résout expressément de refuser la demande de PPCMOI de 18 logements au 102, 1re Avenue."
+   },
+   {
+    "act": "A13",
+    "reason": "Le conseil autorise l'acquisition à titre gratuit d'une partie de lot cadastral et une entente de stationnement au point 9.4."
+   },
+   {
+    "act": "A14",
+    "reason": "L'avis de motion et le dépôt de projet de règlement sur la vidange des fosses figurent au point 9.1."
+   },
+   {
+    "act": "A15",
+    "reason": "L'adoption du règlement d'emprunt 26-1125 est inscrite au point 14.5."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3268,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 11288,
+   "outputTokens": 1161,
+   "totalTokens": 12449
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3113
+  },
+  "inputSha256": "091dc4e6d7f389504d75a91ab560d69735962af612eda96c57b79fe94ca92532"
+ }
+}

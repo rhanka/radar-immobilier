@@ -1,0 +1,341 @@
+{
+ "documentId": "eastman-2026-06-01",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "65ca8c959bf51328fde992b510adb0393e6326eb4b3a7f259dd1c024c34c0ede",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 4 atteste l’avis de motion donné par Serge Meunier pour le règlement 2026-07 relatif au stationnement et à la gestion des voies publiques.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 4 atteste la présentation du projet 2026-07 et sa remise aux membres du conseil, étape actuelle distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-06-122, page 4, renouvelle le bail du 1er juillet 2026 au 30 juin 2027, un acte foncier inclus même non résidentiel.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-06-125, page 5, adopte explicitement le règlement 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-06-127, page 7, autorise la modification de l’acte de vente 19 377 959 lors de la vente des lots 4 380 408 et 4 380 601, sous cinq conditions.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La troisième condition adoptée page 7 prévoit une servitude publique et perpétuelle de passage piétonnier de trois mètres grevant le lot 4 380 408.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La quatrième condition adoptée page 7 prévoit le don des lots 5 235 794 et 4 380 417 à la Municipalité, libres de biens meubles et de contamination environnementale.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution adoptée page 7 prévoit de consentir une servitude de circulation et de stationnement en faveur du lot dominant 4 380 420 sur les futurs lots municipaux.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-06-140, page 12, refuse explicitement la réduction de la marge latérale droite demandée pour le lot 4 380 003 au 70 chemin de la Traverse.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-06-141, page 12, refuse la coupe d’arbres demandée au 152 chemin Bellevue, où le déboisement dépasse déjà le maximum prescrit.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-06-142 accepte, page 13, la dérogation permettant un bâtiment accessoire en cour avant sur le lot 2 235 834 au 6 chemin de la Mésange.\"\n    },\n    {\n      \"item\": \"i12\",\n      \"choice\": \"v1\",\n      \"reason\": \"La construction d’un bâtiment principal sur le lot 6 627 628, chemin Gilbert, figure parmi les demandes de PIIA acceptées page 13.\"\n    },\n    {\n      \"item\": \"i13\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le changement de couleur du revêtement extérieur du bâtiment principal au 42 chemin de Petite-Rivière, lot 2 239 886, est explicitement accepté au titre du PIIA page 13.\"\n    },\n    {\n      \"item\": \"i14\",\n      \"choice\": \"v1\",\n      \"reason\": \"La construction d’un bâtiment accessoire au 42 chemin de Petite-Rivière, lot 2 239 886, constitue une demande de PIIA explicitement nommée et acceptée page 13.\"\n    },\n    {\n      \"item\": \"i15\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 13 accepte au titre du PIIA la construction d’un bâtiment principal sur le lot 2 236 143 au 88 chemin de l’Escalade.\"\n    },\n    {\n      \"item\": \"i16\",\n      \"choice\": \"v1\",\n      \"reason\": \"La rénovation du bâtiment principal au 50 chemin de la Feuillade, lot 2 240 000, figure dans la liste des PIIA acceptés page 13.\"\n    },\n    {\n      \"item\": \"i17\",\n      \"choice\": \"v1\",\n      \"reason\": \"La rénovation du bâtiment accessoire au 50 chemin de la Feuillade, lot 2 240 000, est explicitement acceptée page 13 et distincte de celle du bâtiment principal.\"\n    },\n    {\n      \"item\": \"i18\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 13 accepte au titre du PIIA la rénovation du bâtiment principal sur le lot 2 239 703 au 103 chemin du Lac-d’Argent.\"\n    },\n    {\n      \"item\": \"i19\",\n      \"choice\": \"v1\",\n      \"reason\": \"L’agrandissement du bâtiment principal sur le lot 2 239 988 au 9 rue des Jacinthes est explicitement accepté au titre du PIIA page 13.\"\n    },\n    {\n      \"item\": \"i20\",\n      \"choice\": \"v1\",\n      \"reason\": \"La construction d’un bâtiment principal sur le lot 6 597 767, rue de la Butte, figure parmi les demandes de PIIA acceptées page 13.\"\n    },\n    {\n      \"item\": \"i21\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 13 accepte au titre du PIIA la construction d’un bâtiment principal sur le lot 6 720 154, chemin des Étangs.\"\n    },\n    {\n      \"item\": \"i22\",\n      \"choice\": \"v1\",\n      \"reason\": \"L’agrandissement du bâtiment principal sur le lot 4 380 205 au 21 rue Lapointe est explicitement accepté au titre du PIIA page 13.\"\n    },\n    {\n      \"item\": \"i23\",\n      \"choice\": \"v1\",\n      \"reason\": \"L’installation d’une enseigne sur le lot 2 235 611 au 1167 chemin des Diligences est acceptée page 13 et relève des petits PIIA inclus.\"\n    },\n    {\n      \"item\": \"i24\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 13 accepte au titre du PIIA la rénovation du bâtiment principal sur le lot 2 237 223 au 151 rue Martin.\"\n    },\n    {\n      \"item\": \"i25\",\n      \"choice\": \"v1\",\n      \"reason\": \"La construction d’un bâtiment principal sur le lot 6 291 859, chemin des Diligences, est explicitement inscrite parmi les PIIA acceptés page 13.\"\n    },\n    {\n      \"item\": \"i26\",\n      \"choice\": \"v1\",\n      \"reason\": \"La liste des PIIA acceptés se poursuit page 14 avec la rénovation du bâtiment principal sur le lot 4 380 241 au 14 rue Martin.\"\n    },\n    {\n      \"item\": \"i27\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 14 refuse le PIIA du bâtiment principal sur le lot 6 627 707, chemin de la Corniche, en raison de sa visibilité partielle possible depuis certains points stratégiques.\"\n    },\n    {\n      \"item\": \"i28\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 14 refuse le PIIA du bâtiment accessoire sur le lot 2 238 228 au 93 chemin du Cèdre, faute de démonstration claire de l’emplacement et de l’orientation.\"\n    },\n    {\n      \"item\": \"i29\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 14 refuse explicitement le PIIA de la murale au 412 rue Principale, lot 4 380 220, la Municipalité souhaitant encadrer l’art urbain par une politique.\"\n    },\n    {\n      \"item\": \"i30\",\n      \"choice\": \"absent\",\n      \"reason\": \"La consultation est rappelée dans les attendus de la résolution d’adoption du règlement 2026-03, page 14, et ce rappel procédural ne crée pas d’unité supplémentaire.\"\n    },\n    {\n      \"item\": \"i31\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-06-144, page 14, adopte explicitement le règlement 2026-03 sur l’occupation et l’entretien des bâtiments.\"\n    },\n    {\n      \"item\": \"i32\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition répète i30 et vise le même rappel de consultation dans les attendus de l’adoption, sans unité distincte à ajouter.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  },
+  {
+   "item": "i22",
+   "unitId": "u22",
+   "current": "v1"
+  },
+  {
+   "item": "i23",
+   "unitId": "u23",
+   "current": "v1"
+  },
+  {
+   "item": "i24",
+   "unitId": "u24",
+   "current": "v1"
+  },
+  {
+   "item": "i25",
+   "unitId": "u25",
+   "current": "v1"
+  },
+  {
+   "item": "i26",
+   "unitId": "u26",
+   "current": "v1"
+  },
+  {
+   "item": "i27",
+   "unitId": "u27",
+   "current": "v1"
+  },
+  {
+   "item": "i28",
+   "unitId": "u28",
+   "current": "v1"
+  },
+  {
+   "item": "i29",
+   "unitId": "u29",
+   "current": "v1"
+  },
+  {
+   "item": "i30",
+   "unitId": "u30",
+   "current": "absent"
+  },
+  {
+   "item": "i31",
+   "unitId": "u31",
+   "current": "v1"
+  },
+  {
+   "item": "i32",
+   "unitId": "u32",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 4 atteste l’avis de motion donné par Serge Meunier pour le règlement 2026-07 relatif au stationnement et à la gestion des voies publiques."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 4 atteste la présentation du projet 2026-07 et sa remise aux membres du conseil, étape actuelle distincte de l’avis de motion."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-06-122, page 4, renouvelle le bail du 1er juillet 2026 au 30 juin 2027, un acte foncier inclus même non résidentiel."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-06-125, page 5, adopte explicitement le règlement 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-06-127, page 7, autorise la modification de l’acte de vente 19 377 959 lors de la vente des lots 4 380 408 et 4 380 601, sous cinq conditions."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La troisième condition adoptée page 7 prévoit une servitude publique et perpétuelle de passage piétonnier de trois mètres grevant le lot 4 380 408."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La quatrième condition adoptée page 7 prévoit le don des lots 5 235 794 et 4 380 417 à la Municipalité, libres de biens meubles et de contamination environnementale."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La résolution adoptée page 7 prévoit de consentir une servitude de circulation et de stationnement en faveur du lot dominant 4 380 420 sur les futurs lots municipaux."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 2026-06-140, page 12, refuse explicitement la réduction de la marge latérale droite demandée pour le lot 4 380 003 au 70 chemin de la Traverse."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La résolution 2026-06-141, page 12, refuse la coupe d’arbres demandée au 152 chemin Bellevue, où le déboisement dépasse déjà le maximum prescrit."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "La résolution 2026-06-142 accepte, page 13, la dérogation permettant un bâtiment accessoire en cour avant sur le lot 2 235 834 au 6 chemin de la Mésange."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "La construction d’un bâtiment principal sur le lot 6 627 628, chemin Gilbert, figure parmi les demandes de PIIA acceptées page 13."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "Le changement de couleur du revêtement extérieur du bâtiment principal au 42 chemin de Petite-Rivière, lot 2 239 886, est explicitement accepté au titre du PIIA page 13."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "La construction d’un bâtiment accessoire au 42 chemin de Petite-Rivière, lot 2 239 886, constitue une demande de PIIA explicitement nommée et acceptée page 13."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "La page 13 accepte au titre du PIIA la construction d’un bâtiment principal sur le lot 2 236 143 au 88 chemin de l’Escalade."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "La rénovation du bâtiment principal au 50 chemin de la Feuillade, lot 2 240 000, figure dans la liste des PIIA acceptés page 13."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "La rénovation du bâtiment accessoire au 50 chemin de la Feuillade, lot 2 240 000, est explicitement acceptée page 13 et distincte de celle du bâtiment principal."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "La page 13 accepte au titre du PIIA la rénovation du bâtiment principal sur le lot 2 239 703 au 103 chemin du Lac-d’Argent."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "L’agrandissement du bâtiment principal sur le lot 2 239 988 au 9 rue des Jacinthes est explicitement accepté au titre du PIIA page 13."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "La construction d’un bâtiment principal sur le lot 6 597 767, rue de la Butte, figure parmi les demandes de PIIA acceptées page 13."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "La page 13 accepte au titre du PIIA la construction d’un bâtiment principal sur le lot 6 720 154, chemin des Étangs."
+  },
+  {
+   "item": "i22",
+   "choice": "v1",
+   "reason": "L’agrandissement du bâtiment principal sur le lot 4 380 205 au 21 rue Lapointe est explicitement accepté au titre du PIIA page 13."
+  },
+  {
+   "item": "i23",
+   "choice": "v1",
+   "reason": "L’installation d’une enseigne sur le lot 2 235 611 au 1167 chemin des Diligences est acceptée page 13 et relève des petits PIIA inclus."
+  },
+  {
+   "item": "i24",
+   "choice": "v1",
+   "reason": "La page 13 accepte au titre du PIIA la rénovation du bâtiment principal sur le lot 2 237 223 au 151 rue Martin."
+  },
+  {
+   "item": "i25",
+   "choice": "v1",
+   "reason": "La construction d’un bâtiment principal sur le lot 6 291 859, chemin des Diligences, est explicitement inscrite parmi les PIIA acceptés page 13."
+  },
+  {
+   "item": "i26",
+   "choice": "v1",
+   "reason": "La liste des PIIA acceptés se poursuit page 14 avec la rénovation du bâtiment principal sur le lot 4 380 241 au 14 rue Martin."
+  },
+  {
+   "item": "i27",
+   "choice": "v1",
+   "reason": "La page 14 refuse le PIIA du bâtiment principal sur le lot 6 627 707, chemin de la Corniche, en raison de sa visibilité partielle possible depuis certains points stratégiques."
+  },
+  {
+   "item": "i28",
+   "choice": "v1",
+   "reason": "La page 14 refuse le PIIA du bâtiment accessoire sur le lot 2 238 228 au 93 chemin du Cèdre, faute de démonstration claire de l’emplacement et de l’orientation."
+  },
+  {
+   "item": "i29",
+   "choice": "v1",
+   "reason": "La page 14 refuse explicitement le PIIA de la murale au 412 rue Principale, lot 4 380 220, la Municipalité souhaitant encadrer l’art urbain par une politique."
+  },
+  {
+   "item": "i30",
+   "choice": "absent",
+   "reason": "La consultation est rappelée dans les attendus de la résolution d’adoption du règlement 2026-03, page 14, et ce rappel procédural ne crée pas d’unité supplémentaire."
+  },
+  {
+   "item": "i31",
+   "choice": "v1",
+   "reason": "La résolution 2026-06-144, page 14, adopte explicitement le règlement 2026-03 sur l’occupation et l’entretien des bâtiments."
+  },
+  {
+   "item": "i32",
+   "choice": "absent",
+   "reason": "Cette proposition répète i30 et vise le même rappel de consultation dans les attendus de l’adoption, sans unité distincte à ajouter."
+  }
+ ]
+}

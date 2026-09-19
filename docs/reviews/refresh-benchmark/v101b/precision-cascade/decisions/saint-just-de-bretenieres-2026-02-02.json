@@ -1,0 +1,150 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "65cf98d9e1bc7430ef5136717afb12eaa60b520fd6cd91717dd450f337186d42",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-vente-terrain"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente de terrain au rang St-Isidore — informations demandées",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Les élus demandent plus d’information, dont la valeur du terrain."
+      },
+      {
+       "page": 2,
+       "excerpt": "AFFAIRES DÉCOULANT DU PROCÈS-VERBAL – VENTE DE\nTERRAIN – RANG ST-ISIDORE\nLes élus demandent plus d’information, dont la valeur du terrain."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-competence-hydrique"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acceptation de la compétence de la MRC en matière de milieux hydriques",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte"
+      },
+      {
+       "page": 8,
+       "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration\nde compétence de la MRC de Montmagny concernant la délivrance de\ncertaines autorisations en vertu du Règlement sur l’encadrement\nd’activités sous la responsabilité des municipalités réalisées dans des\nmilieux hydriques et sur des ouvrages de protection contre les\ninondations, selon les modalités et conditions prévues à la résolution\nadoptée par la MRC le 20 janvier 2026;"
+      },
+      {
+       "page": 7,
+       "excerpt": "CONSIDÉRANT que la déclaration de compétence vise à confier à la\nMRC la gestion, la délivrance et le suivi de certaines autorisations\nrelatives aux activités réalisées dans les milieux hydriques, à l’exclusion\ndes activités liées aux bâtiments, lesquelles demeurent sous la\nresponsabilité des municipalités locales;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-marche-jr"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Appui au réaménagement des équipements du Marché JR",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET résolu à l’unanimité\ndes conseillers présents QUE la Municipalité de St-Just-de-Bretenières"
+      },
+      {
+       "page": 8,
+       "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET résolu à l’unanimité\ndes conseillers présents QUE la Municipalité de St-Just-de-Bretenières\nappui le projet de réaménagement des équipements du Marché JR pour"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le document rapporte explicitement une demande d'informations des élus concernant la vente d'un terrain au rang St-Isidore.\",\"excerpt\":\"AFFAIRES DÉCOULANT DU PROCÈS-VERBAL – VENTE DE\\nTERRAIN – RANG ST-ISIDORE\\nLes élus demandent plus d’information, dont la valeur du terrain.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 41-02-2026 confirme que la municipalité accepte l'intention de déclaration de compétence de la MRC concernant la délivrance d'autorisations en milieux hydriques.\",\"excerpt\":\"QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration\\nde compétence de la MRC de Montmagny concernant la délivrance de\\ncertaines autorisations\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 43-02-2026 adopte formellement l'appui au projet de réaménagement des équipements du Marché JR.\",\"excerpt\":\"QUE la Municipalité de St-Just-de-Bretenières\\nappui le projet de réaménagement des équipements du Marché JR pour\\nle maintien des services\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le document rapporte explicitement une demande d'informations des élus concernant la vente d'un terrain au rang St-Isidore.",
+   "excerpt": "AFFAIRES DÉCOULANT DU PROCÈS-VERBAL – VENTE DE\nTERRAIN – RANG ST-ISIDORE\nLes élus demandent plus d’information, dont la valeur du terrain."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La résolution 41-02-2026 confirme que la municipalité accepte l'intention de déclaration de compétence de la MRC concernant la délivrance d'autorisations en milieux hydriques.",
+   "excerpt": "QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration\nde compétence de la MRC de Montmagny concernant la délivrance de\ncertaines autorisations"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La résolution 43-02-2026 adopte formellement l'appui au projet de réaménagement des équipements du Marché JR.",
+   "excerpt": "QUE la Municipalité de St-Just-de-Bretenières\nappui le projet de réaménagement des équipements du Marché JR pour\nle maintien des services"
+  }
+ ],
+ "filter": {
+  "acts": 3,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le document rapporte explicitement une demande d'informations des élus concernant la vente d'un terrain au rang St-Isidore."
+   },
+   {
+    "act": "A02",
+    "reason": "La résolution 41-02-2026 confirme que la municipalité accepte l'intention de déclaration de compétence de la MRC concernant la délivrance d'autorisations en milieux hydriques."
+   },
+   {
+    "act": "A03",
+    "reason": "La résolution 43-02-2026 adopte formellement l'appui au projet de réaménagement des équipements du Marché JR."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 1,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1700,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 9058,
+   "outputTokens": 269,
+   "totalTokens": 9327
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1555
+  },
+  "inputSha256": "a2e7176cc7b37d96e35223080cb70aa385052dd7cad72001a36a7dfecb3a4512"
+ }
+}

@@ -1,0 +1,36 @@
+{
+ "documentId": "sainte-angele-de-monnoir-2026-01-13",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "2473739f61dfb2cf1219db08c2c029010efcd457778dfe401744f8a30c8c14cc",
+ "inputSha256": "3ee31e6a2560c0a5d368271fbbfcd2190cf114da74c039742c964d4fb2fb349e",
+ "responseSha256": "5f263cb55e1a0ff436e6c59e91fe34f7dd53de03b75cec0a170a28fe13db04d4",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 52319,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 9358,
+  "outputTokens": 1518,
+  "totalTokens": 10876
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 52316,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:24:01.687Z"
+}

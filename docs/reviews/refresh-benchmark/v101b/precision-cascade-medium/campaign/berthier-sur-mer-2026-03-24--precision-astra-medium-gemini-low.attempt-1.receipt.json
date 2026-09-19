@@ -1,0 +1,35 @@
+{
+ "documentId": "berthier-sur-mer-2026-03-24",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "a5a798c61648f0506fe0e9c7aff76e943b88566116195e5b7479d29f0d981607",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2465,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 25895,
+   "outputTokens": 712,
+   "totalTokens": 26607
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2314
+  },
+  "inputSha256": "e2dd6d1bfced93b85650e5e4ecc8af75bf9ba70722e62e8ed18f82c5d0f08565"
+ },
+ "at": "2026-09-19T03:23:00.618Z"
+}

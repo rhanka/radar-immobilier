@@ -1,0 +1,386 @@
+{
+ "documentId": "sainte-martine-2026-03-17",
+ "nextId": 11,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation d’enchérir et d’acquérir à la vente d’immeubles pour taxes du 9 avril 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Vente d’immeubles",
+    "page": 14,
+    "citation": "2026-03-053 : Autorisation d’enchérir – Vente d’immeubles pour défaut de paiement des taxes municipales",
+    "anchor": "Vente d’immeubles pour défaut",
+    "spanStart": 1655,
+    "spanEnd": 1758
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir à la vente d’immeubles pour taxes du 9 avril 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Vente d’immeubles",
+      "page": 14,
+      "citation": "2026-03-053 : Autorisation d’enchérir – Vente d’immeubles pour défaut de paiement des taxes municipales",
+      "anchor": "Vente d’immeubles pour défaut",
+      "spanStart": 1655,
+      "spanEnd": 1758
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise expressément l’enchère et l’acquisition d’immeubles au nom de la Municipalité, ce qui constitue une autorisation foncière et non une simple nomination."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 2026-503 — permis et certificats concernant les immeubles en zone agricole",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-503",
+    "page": 17,
+    "citation": "2026-03-057 : Adoption du Règlement numéro 2026-503 modifiant le Règlement sur les permis et certificats numéro 2019-345",
+    "anchor": "Règlement numéro 2026-503",
+    "spanStart": 265,
+    "spanEnd": 385
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 2026-503 — permis et certificats concernant les immeubles en zone agricole",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-503",
+      "page": 17,
+      "citation": "2026-03-057 : Adoption du Règlement numéro 2026-503 modifiant le Règlement sur les permis et certificats numéro 2019-345",
+      "anchor": "Règlement numéro 2026-503",
+      "spanStart": 265,
+      "spanEnd": 385
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil adopte ce règlement d’urbanisme; l’avis de motion et le dépôt du projet du 10 février ne sont que des rappels historiques."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 2026-501 — ajout de la recherche et du développement en agriculture aux usages commerciaux para-agricoles",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-501",
+    "page": 17,
+    "citation": "2026-03-058 : Adoption du Règlement numéro 2026-501 modifiant le Règlement de zonage numéro 2019-342",
+    "anchor": "Règlement numéro 2026-501",
+    "spanStart": 1747,
+    "spanEnd": 1847
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 2026-501 — ajout de la recherche et du développement en agriculture aux usages commerciaux para-agricoles",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-501",
+      "page": 17,
+      "citation": "2026-03-058 : Adoption du Règlement numéro 2026-501 modifiant le Règlement de zonage numéro 2019-342",
+      "anchor": "Règlement numéro 2026-501",
+      "spanStart": 1747,
+      "spanEnd": 1847
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’adoption du règlement de modification du zonage est constatée dans cette séance, tandis que les étapes antérieures rappelées à la page 18 ne créent pas d’autres unités."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Autorisation partielle et refus de modifications du zonage 2019-342 — demande 2025-016, 122, rue Saint-Joseph",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2019-342",
+    "page": 19,
+    "citation": "D’autoriser partiellement les demandes de modifications réglementaires comme suit : 1. Que soit modifié le Règlement de zonage numéro 2019-342 afin",
+    "anchor": "Règlement de zonage numéro 2019-342",
+    "spanStart": 685,
+    "spanEnd": 832
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation partielle et refus de modifications du zonage 2019-342 — demande 2025-016, 122, rue Saint-Joseph",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2019-342",
+      "page": 19,
+      "citation": "D’autoriser partiellement les demandes de modifications réglementaires comme suit : 1. Que soit modifié le Règlement de zonage numéro 2019-342 afin",
+      "anchor": "Règlement de zonage numéro 2019-342",
+      "spanStart": 685,
+      "spanEnd": 832
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil autorise la préparation de certaines modifications, mais refuse le passage à 24 logements et la modification de l’article 6.20, sans adopter un règlement modificatif à cette étape."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de modification du plan d’urbanisme 2019-341 — demande 2025-016, 122, rue Saint-Joseph",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2019-341",
+    "page": 18,
+    "citation": "Attendu la demande de modification du Règlement adoptant le plan d’urbanisme numéro 2019-341 et du Règlement de zonage numéro 2019-342 déposée par monsieur Louis-David Demers",
+    "anchor": "numéro 2019-341",
+    "spanStart": 1683,
+    "spanEnd": 1857
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de modification du plan d’urbanisme 2019-341 — demande 2025-016, 122, rue Saint-Joseph",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2019-341",
+      "page": 18,
+      "citation": "Attendu la demande de modification du Règlement adoptant le plan d’urbanisme numéro 2019-341 et du Règlement de zonage numéro 2019-342 déposée par monsieur Louis-David Demers",
+      "anchor": "numéro 2019-341",
+      "spanStart": 1683,
+      "spanEnd": 1857
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dispositif de la page 19 autorise également la préparation d’une modification du plan d’urbanisme, objet réglementaire distinct du zonage qui doit avoir sa propre unité."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de modification réglementaire — demande 2026-003, 1394, boulevard Saint-Jean-Baptiste Ouest",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2026-003",
+    "page": 19,
+    "citation": "2026-03-060 : Demande 2026-003 – Modification réglementaire – 1394, boulevard Saint-Jean-Baptiste Ouest",
+    "anchor": "Demande 2026-003",
+    "spanStart": 1613,
+    "spanEnd": 1716
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de modification réglementaire — demande 2026-003, 1394, boulevard Saint-Jean-Baptiste Ouest",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2026-003",
+      "page": 19,
+      "citation": "2026-03-060 : Demande 2026-003 – Modification réglementaire – 1394, boulevard Saint-Jean-Baptiste Ouest",
+      "anchor": "Demande 2026-003",
+      "spanStart": 1613,
+      "spanEnd": 1716
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil autorise la demande visant certaines activités artisanales à domicile et mandate la préparation des documents réglementaires, sans encore adopter de règlement modificatif."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Appui à la demande CPTAQ 2026-004 — lots 6 060 923 et 6 060 924, rang Touchette",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2026-004",
+    "page": 20,
+    "citation": "2026-03-061 : Demande 2026-004 – Autorisation à la CPTAQ – Lots numéro 6 060 923 et 6 060 924 (rang Touchette",
+    "anchor": "Demande 2026-004",
+    "spanStart": 1948,
+    "spanEnd": 2057
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui à la demande CPTAQ 2026-004 — lots 6 060 923 et 6 060 924, rang Touchette",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2026-004",
+      "page": 20,
+      "citation": "2026-03-061 : Demande 2026-004 – Autorisation à la CPTAQ – Lots numéro 6 060 923 et 6 060 924 (rang Touchette",
+      "anchor": "Demande 2026-004",
+      "spanStart": 1948,
+      "spanEnd": 2057
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution appuie une demande foncière explicite d’aliénation et d’utilisation résidentielle des deux lots, sans constater une autorisation accordée par la CPTAQ."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Refus du PIIA 2026-005 — panneaux solaires au 182, rue Saint-Joseph",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "182, rue Saint-Joseph",
+    "page": 22,
+    "citation": "De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux solaires sur le toit de la résidence située au 182, rue Saint-Joseph",
+    "anchor": "182, rue Saint-Joseph",
+    "spanStart": 659,
+    "spanEnd": 807
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus du PIIA 2026-005 — panneaux solaires au 182, rue Saint-Joseph",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "182, rue Saint-Joseph",
+      "page": 22,
+      "citation": "De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux solaires sur le toit de la résidence située au 182, rue Saint-Joseph",
+      "anchor": "182, rue Saint-Joseph",
+      "spanStart": 659,
+      "spanEnd": 807
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La décision refuse explicitement le PIIA pour les panneaux solaires; ce refus demeure une unité malgré la recommandation favorable du service d’urbanisme."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de démolition et du programme de réutilisation du sol — demande 2026-007, 5, rue Phénix",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5, rue Phénix",
+    "page": 22,
+    "citation": "D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le programme préliminaire de réutilisation du sol dégagé, à savoir le projet de reconstruction de l’immeuble, tel que présenté",
+    "anchor": "5, rue Phénix",
+    "spanStart": 1658,
+    "spanEnd": 1856
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de démolition et du programme de réutilisation du sol — demande 2026-007, 5, rue Phénix",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5, rue Phénix",
+      "page": 22,
+      "citation": "D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le programme préliminaire de réutilisation du sol dégagé, à savoir le projet de reconstruction de l’immeuble, tel que présenté",
+      "anchor": "5, rue Phénix",
+      "spanStart": 1658,
+      "spanEnd": 1856
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil adopte une décision finale autorisant la démolition et le programme préliminaire de réutilisation du sol pour cet immeuble."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Contribution pour fins de parcs adoptée — lot 6 717 037, 330, rang Laberge, 7 625,90 $",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 717 037",
+    "page": 23,
+    "citation": "Attendu que le conseil opte pour une compensation monétaire de 10 % de la valeur inscrite au rôle d’évaluation pour le lot projeté numéro 6 717 037, soit une somme de 7 625,90",
+    "anchor": "lot projeté numéro 6 717 037",
+    "spanStart": 1756,
+    "spanEnd": 1931
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Contribution pour fins de parcs adoptée — lot 6 717 037, 330, rang Laberge, 7 625,90 $",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 717 037",
+      "page": 23,
+      "citation": "Attendu que le conseil opte pour une compensation monétaire de 10 % de la valeur inscrite au rôle d’évaluation pour le lot projeté numéro 6 717 037, soit une somme de 7 625,90",
+      "anchor": "lot projeté numéro 6 717 037",
+      "spanStart": 1756,
+      "spanEnd": 1931
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution exige une contribution monétaire pour fins de parcs liée au lotissement résidentiel, objet expressément inclus dans le corrigé."
+    }
+   ]
+  }
+ ]
+}

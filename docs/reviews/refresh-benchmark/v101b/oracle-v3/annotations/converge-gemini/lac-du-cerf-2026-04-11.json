@@ -1,0 +1,41 @@
+{
+ "documentId": "lac-du-cerf-2026-04-11",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c9c511e751188af60815f0564299776b5cd821cae8d27ff23b4a952704f10066",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"L'octroi de contrat pour l'évaluation de terrains est un marché de services, expressément exclu du rappel selon les règles.\"},{\"item\":\"i02\",\"choice\":\"absent\",\"reason\":\"L'octroi de contrat pour l'évaluation de terrains est un marché de services, expressément exclu du rappel selon les règles.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "L'octroi de contrat pour l'évaluation de terrains est un marché de services, expressément exclu du rappel selon les règles."
+  },
+  {
+   "item": "i02",
+   "choice": "absent",
+   "reason": "L'octroi de contrat pour l'évaluation de terrains est un marché de services, expressément exclu du rappel selon les règles."
+  }
+ ]
+}

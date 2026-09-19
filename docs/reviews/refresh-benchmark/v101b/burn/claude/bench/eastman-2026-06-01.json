@@ -1,0 +1,13 @@
+{
+ "id": "eastman-2026-06-01",
+ "rc": 0,
+ "latencyMs": 18766,
+ "inputTokens": 2,
+ "outputTokens": 1235,
+ "cacheRead": 0,
+ "cacheCreate": 18831,
+ "costUsd": 0.233155,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 313
+}

@@ -1,0 +1,13 @@
+{
+ "id": "stoneham-et-tewkesbury-2026-06-08",
+ "rc": 0,
+ "latencyMs": 342475,
+ "inputTokens": 2,
+ "outputTokens": 35270,
+ "cacheRead": 0,
+ "cacheCreate": 13885,
+ "costUsd": 1.030925,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 56270
+}

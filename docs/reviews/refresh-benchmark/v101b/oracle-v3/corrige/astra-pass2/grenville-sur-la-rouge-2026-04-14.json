@@ -1,0 +1,310 @@
+{
+ "documentId": "grenville-sur-la-rouge-2026-04-14",
+ "nextId": 9,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Acceptation du don du lot 6 209 933 à la Municipalité",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 209 933",
+    "page": 1,
+    "citation": "Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité",
+    "anchor": "lot 6 209 933",
+    "spanStart": 555,
+    "spanEnd": 628
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation du don du lot 6 209 933 à la Municipalité",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 209 933",
+      "page": 1,
+      "citation": "Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité",
+      "anchor": "lot 6 209 933",
+      "spanStart": 555,
+      "spanEnd": 628
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’acceptation du don constitue une acquisition foncière décidée, incluse parmi les actes fonciers."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de vente du lot municipal 6 095 015",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 095 015",
+    "page": 1,
+    "citation": "Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$, correspondant à sa valeur marchande",
+    "anchor": "lot municipal 6 095 015",
+    "spanStart": 630,
+    "spanEnd": 744
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de vente du lot municipal 6 095 015",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 095 015",
+      "page": 1,
+      "citation": "Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$, correspondant à sa valeur marchande",
+      "anchor": "lot municipal 6 095 015",
+      "spanStart": 630,
+      "spanEnd": 744
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La vente de ce lot municipal est explicitement autorisée et constitue un acte foncier décidé."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Refus de PIIA — 47, rue Donald Campbell",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "47, rue Donald Campbell",
+    "page": 2,
+    "citation": "Refus de la demande de PIIA du 47, rue Donald Campbell",
+    "anchor": "47, rue Donald Campbell",
+    "spanStart": 1206,
+    "spanEnd": 1260
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de PIIA — 47, rue Donald Campbell",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "47, rue Donald Campbell",
+      "page": 2,
+      "citation": "Refus de la demande de PIIA du 47, rue Donald Campbell",
+      "anchor": "47, rue Donald Campbell",
+      "spanStart": 1206,
+      "spanEnd": 1260
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le document constate une décision sur une demande de PIIA, dont le refus doit être conservé dans le libellé."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Refus de dérogation mineure — 47, rue Donald Campbell — abri d’auto",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "47, rue Donald Campbell",
+    "page": 2,
+    "citation": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus d’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto",
+    "anchor": "47, rue Donald Campbell",
+    "spanStart": 1206,
+    "spanEnd": 1370
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de dérogation mineure — 47, rue Donald Campbell — abri d’auto",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "47, rue Donald Campbell",
+      "page": 2,
+      "citation": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus d’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto",
+      "anchor": "47, rue Donald Campbell",
+      "spanStart": 1206,
+      "spanEnd": 1370
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le texte constate également le refus d’une demande de dérogation mineure, objet distinct de la demande de PIIA à la même adresse."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "PIIA accordé — résidence unifamiliale au 1417, route 148",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "1417, route 148",
+    "page": 2,
+    "citation": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417, route 148",
+    "anchor": "1417, route 148",
+    "spanStart": 1422,
+    "spanEnd": 1515
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accordé — résidence unifamiliale au 1417, route 148",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "1417, route 148",
+      "page": 2,
+      "citation": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417, route 148",
+      "anchor": "1417, route 148",
+      "spanStart": 1422,
+      "spanEnd": 1515
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’accord de cette demande de PIIA pour une résidence unifamiliale est explicitement constaté."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement de développement économique RénoFaçade",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "développement économique RénoFaçade",
+    "page": 3,
+    "citation": "Adoption du règlement de développement économique RénoFaçade",
+    "anchor": "développement économique RénoFaçade",
+    "spanStart": 470,
+    "spanEnd": 530
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement de développement économique RénoFaçade",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "développement économique RénoFaçade",
+      "page": 3,
+      "citation": "Adoption du règlement de développement économique RénoFaçade",
+      "anchor": "développement économique RénoFaçade",
+      "spanStart": 470,
+      "spanEnd": 530
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement RénoFaçade constitue un objet réglementaire relatif au cadre bâti dont l’adoption est explicitement constatée."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — modifications au plan d’urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "modiﬁcations au plan d’urbanisme",
+    "page": 3,
+    "citation": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la publication des avis publics et à des modiﬁcations au plan d’urbanisme",
+    "anchor": "modiﬁcations au plan d’urbanisme",
+    "spanStart": 678,
+    "spanEnd": 834
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — modifications au plan d’urbanisme",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "modiﬁcations au plan d’urbanisme",
+      "page": 3,
+      "citation": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la publication des avis publics et à des modiﬁcations au plan d’urbanisme",
+      "anchor": "modiﬁcations au plan d’urbanisme",
+      "spanStart": 678,
+      "spanEnd": 834
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion relatif aux modifications du plan d’urbanisme est constaté et forme une unité distincte du projet de règlement."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet de règlement — modifications au plan d’urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "modiﬁcations au plan d’urbanisme",
+    "page": 3,
+    "citation": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la publication des avis publics et à des modiﬁcations au plan d’urbanisme",
+    "anchor": "modiﬁcations au plan d’urbanisme",
+    "spanStart": 678,
+    "spanEnd": 834
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet de règlement — modifications au plan d’urbanisme",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "modiﬁcations au plan d’urbanisme",
+      "page": 3,
+      "citation": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la publication des avis publics et à des modiﬁcations au plan d’urbanisme",
+      "anchor": "modiﬁcations au plan d’urbanisme",
+      "spanStart": 678,
+      "spanEnd": 834
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’adoption du projet concernant le plan d’urbanisme est constatée séparément de l’avis de motion et relève de l’étape projet_reglement."
+    }
+   ]
+  }
+ ]
+}

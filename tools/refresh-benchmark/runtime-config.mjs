@@ -4,6 +4,7 @@ export const variants = Object.freeze({
   "luna-low": { provider: "openai", transport: "codex", model: "gpt-5.6-luna", effort: "low" },
   // Wire ID announced by fetchAvailableModels; replace with llm-mesh 0.19.2 mapping.
   "gemini-low": { provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash-tiered", effort: "low" },
+  "gemini-medium": { provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash-tiered", effort: "medium" },
   "gemini-high": { provider: "gemini", transport: "cloud-code", model: "gemini-3.8-flash-tiered", effort: "high" },
   "sonnet-direct": { provider: "anthropic", transport: "anthropic-direct",
     model: "claude-sonnet-4-6", effort: null },

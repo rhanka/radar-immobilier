@@ -1,0 +1,77 @@
+{
+ "documentId": "daveluyville-2026-05-04",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "06afa8b814e0d9623dfd8f1e5c5588565305993d4ac6e7a338776e5ffb4bff9f",
+ "inputSha256": "17722f37f946ccfc1f58f0b4455a66b85e8233562f4dfd8ffdfcf42d2640708b",
+ "responseSha256": "dd4a6622a3dd89c760b0a2929936fe4b74ebdbf9bec083199e607c4e266c65e5",
+ "rc": 0,
+ "latencyMs": 26205,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "0adfadf4-d829-4211-9b1f-30d5c584ae08",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 1944,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 16233,
+   "webSearchRequests": 0,
+   "costUSD": 0.42216475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 1464,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 16233,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 1944,
+  "output_tokens_details": {
+   "thinking_tokens": 1464
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 16233,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1944,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 16233,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 16233
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.42216475,
+ "durationApiMs": 24265,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:28:38.916Z"
+}

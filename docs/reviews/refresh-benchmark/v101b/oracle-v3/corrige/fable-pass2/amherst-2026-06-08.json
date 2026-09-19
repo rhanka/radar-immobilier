@@ -1,0 +1,63 @@
+{
+ "documentId": "amherst-2026-06-08",
+ "nextId": 2,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Décision prévue sur la demande d’acquisition du lot 5 197 804 (route 323) – acte foncier",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 197 804",
+    "page": 1,
+    "citation": "Demande d’acquisition du lot 5 197 804 (route 323",
+    "anchor": "lot 5 197 804",
+    "spanStart": 986,
+    "spanEnd": 1035
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu de la demande d’acquisition du lot 5 197 804 (route 323)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "5 197 804",
+      "page": 1,
+      "citation": "Demande d’acquisition du lot 5 197 804 (route 323",
+      "anchor": "lot 5 197 804",
+      "spanStart": 986,
+      "spanEnd": 1035
+     }
+    },
+    {
+     "step": "fable-pass2",
+     "unit": {
+      "label": "Décision prévue sur la demande d’acquisition du lot 5 197 804 (route 323) – acte foncier",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 197 804",
+      "page": 1,
+      "citation": "Demande d’acquisition du lot 5 197 804 (route 323",
+      "anchor": "lot 5 197 804",
+      "spanStart": 986,
+      "spanEnd": 1035
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 6.4 porte sur un objet foncier explicite à inclure comme point prévu de l’ordre du jour, sans présenter la demande d’acquisition comme une acquisition autorisée."
+    },
+    {
+     "step": "fable-pass2",
+     "op": "correct",
+     "reason": "Le point 6.4 est un acte foncier explicite (acquisition d'un lot cadastral) prévu à l'ordre du jour ; le vocabulaire d'étape range l'acte foncier décidé (vente, acquisition, cession) sous « adoption », non sous « inconnu », et le libellé doit dire « prévu » puisque le document n'est qu'un ordre du jour."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "documentId": "sainte-brigide-diberville-2026-06-01",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "4486f5b04fcf60b042415abf7110cc6e348f2631cb807943cf087451d61cf4c4",
+ "inputSha256": "85ff963164bf5604a9a7e55a8c814f53d1b9a2938d0abdc971fd640b955a5495",
+ "responseSha256": "bee62dc177b12b32ccc04245c91af6cd99d14f1db4d140217e4558c2e31c432e",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 66960,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2356,
+  "outputTokens": 2171,
+  "totalTokens": 4527
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 66956,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:10:45.809Z"
+}

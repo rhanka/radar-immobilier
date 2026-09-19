@@ -1,0 +1,421 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-760-2026",
+   "label": "760-2026 — Modification du plan d'urbanisme : grandes affectations",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "status": "candidate",
+   "numero": "760-2026",
+   "title": "Règlement modifiant le plan d'urbanisme #387-2007 - Grandes affectations",
+   "municipality": "sainte-croix",
+   "date": "2026-05-05",
+   "stage": "adoption",
+   "resolution": "118-2026",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le règlement #760-2026 intitulé « Règlement modifiant le plan d'urbanisme\n#387-2007 - Grandes affectations », soit adopté",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-761-2026",
+   "label": "761-2026 — Usages de la zone 14-I et création de la zone 21-H",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "status": "candidate",
+   "numero": "761-2026",
+   "title": "Règlement modifiant le règlement #389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de la zone 21-H",
+   "municipality": "sainte-croix",
+   "date": "2026-05-05",
+   "stage": "adoption",
+   "resolution": "119-2026",
+   "zones_ciblees": [
+    "14-I",
+    "21-H"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-14-I",
+   "label": "Zone 14-I",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "status": "candidate",
+   "code": "14-I",
+   "municipality": "sainte-croix",
+   "description": "Zone dont les usages permis sont modifiés par le règlement 761-2026.",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-21-H",
+   "label": "Zone 21-H",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "status": "candidate",
+   "code": "21-H",
+   "municipality": "sainte-croix",
+   "description": "Zone dont la création est prévue par le règlement 761-2026 adopté le 5 mai 2026.",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-119-2026",
+   "label": "Adoption du changement de zonage 761-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "status": "candidate",
+   "date": "2026-05-05",
+   "municipality": "sainte-croix",
+   "kind": "rezonage",
+   "decision": "approuvé",
+   "etape": "adoption",
+   "etape_date": "2026-05-05",
+   "reglement_number": "761-2026",
+   "resolution": "119-2026",
+   "description": "Adoption unanime du règlement modifiant les usages permis dans la zone 14-I et créant la zone 21-H. L'entrée en vigueur n'est pas constatée par cette décision.",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-120-2026",
+   "label": "Approbation du plan de lotissement — Rue Thibodeau",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "status": "candidate",
+   "date": "2026-05-05",
+   "municipality": "sainte-croix",
+   "kind": "subdivision",
+   "decision": "approuvé",
+   "etape": "inconnu",
+   "resolution": "120-2026",
+   "no_lot": "3592103",
+   "reglement_number": "718-2024",
+   "description": "Approbation du plan d'aménagement de Giroux Arpentage pour le développement du lot 3 592 103, prévoyant le prolongement de la rue Thibodeau et des habitations unifamiliales.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "D'APPROUVER le plan d'aménagement produit par la firme « Giroux Arpentage »,\nconcernant le développement du lot 3 592 103 ;",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-126-2026",
+   "label": "Approbation des plans et devis préliminaires — Rue Thibodeau",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "status": "candidate",
+   "date": "2026-05-05",
+   "municipality": "sainte-croix",
+   "decision": "approuvé",
+   "etape": "inconnu",
+   "resolution": "126-2026",
+   "no_lot": "3592103",
+   "reglement_number": "718-2024",
+   "description": "Approbation des plans et devis préliminaires d'Apex Expert Conseil inc. pour le développement du lot 3 592 103. Cette acceptation ne certifie pas la conformité du projet aux exigences municipales.",
+   "conditions": [
+    "Une seconde analyse par le Service des travaux publics est prévue après le dépôt des plans et devis finaux pour ouverture de rue.",
+    "Les exigences municipales seront précisées à la signature de l'entente."
+   ],
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "D'APPROUVER au promoteur les plans et devis préliminaires de l'entreprise\n« Apex Expert Conseil inc. », concernant le développement du lot 3 592 103 ;",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 17,
+     "excerpt": "QUE la présente acceptation ne certifie en aucun cas la conformité du projet pas la\nconformité du projet aux exigences municipales qui seront précisés à la signature\nde l'entente",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-121-2026",
+   "label": "Recommandation municipale à la CPTAQ — Projet éolien Lotbinière Ndakina",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "status": "candidate",
+   "date": "2026-05-05",
+   "municipality": "sainte-croix",
+   "kind": "cptaq",
+   "etape": "inconnu",
+   "resolution": "121-2026",
+   "demandeur_corporate": "Parc éolien Lotbinière Ndakina S.E.C.",
+   "description": "Recommandation favorable de la Municipalité à la CPTAQ pour le projet éolien Lotbinière Ndakina et engagement à octroyer les droits fonciers municipaux requis. Il ne s'agit pas d'une autorisation de la CPTAQ.",
+   "motif": "Analyse des critères de l'article 62 de la LPTAA, absence d'espaces appropriés hors zone agricole et conformité déclarée à la réglementation d'urbanisme.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "QUE la Municipalité de Sainte-Croix recommande à la Commission d’approuver la\nDemande étant donné que, selon l’appréciation de la Municipalité, cette dernière",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 11,
+     "excerpt": "ATTENDU QUE Parc éolien Lotbinière Ndakina S.E.C. (Demanderesse) vise\nl’implantation d’un parc éolien d’une puissance de 100 MW",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-cptaq-eolien",
+   "label": "Projet éolien en zone agricole protégée — Autorisation CPTAQ requise",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "status": "candidate",
+   "constraintType": "cptaq",
+   "municipality": "sainte-croix",
+   "meetingDate": "2026-05-05",
+   "resolution": "121-2026",
+   "loi": "Loi sur la protection du territoire et des activités agricoles (LPTAA)",
+   "organisme": "Commission de la protection du territoire agricole du Québec",
+   "description": "Le projet éolien Lotbinière Ndakina est entièrement situé en zone agricole protégée et nécessite une ou plusieurs demandes d'autorisation à la CPTAQ. Les autorisations sollicitées couvrent environ 35 ans, construction, exploitation et démantèlement compris.",
+   "evidence_refs": [
+    "ev-cptaq"
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "ATTENDU QUE le Projet est situé en totalité en zone agricole protégée par la Loi\nsur la protection du territoire et des activités agricoles (LPTAA,) et que la",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-vente-bateau",
+   "label": "Vente potentielle d'une partie du lot 6 191 770",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "status": "candidate",
+   "category": "transaction_fonciere",
+   "kind": "lettre_intention",
+   "date": "2026-05-05",
+   "municipality": "sainte-croix",
+   "scope": "local",
+   "resolution": "117-2026",
+   "no_lot": "6191770",
+   "amount_cad": 500000,
+   "description": "Autorisation de transmettre une lettre d'intention pour une promesse éventuelle de vente et d'achat d'une partie du lot 6 191 770, rue du Bateau. La Municipalité a retenu un projet et envisage la vente du lot à créer au prix de 500 000 $. La vente n'est pas constatée comme conclue.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "DE TRANSMETTRE une lettre d'intention pour la signature éventuelle d'une\npromesse de vente et d'achat pour une partie du lot 6 191 770 à l'entreprise ;",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE la Municipalité a retenu un projet et désire confirmer son intention\nde vendre, au prix de 500 000 $, le lot à être créé au promoteur",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "bylaw-761-2026",
+   "target": "zone-21-H",
+   "relation": "defines",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "evidence_refs": [
+    "ev-761"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "bylaw-761-2026",
+   "target": "zone-14-I",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "evidence_refs": [
+    "ev-761"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-119-2026",
+   "target": "zone-14-I",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "evidence_refs": [
+    "ev-761"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-119-2026",
+   "target": "zone-21-H",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "evidence_refs": [
+    "ev-761"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté",
+     "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+     "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+     "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-760",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+   "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "QUE le règlement #760-2026 intitulé « Règlement modifiant le plan d'urbanisme\n#387-2007 - Grandes affectations », soit adopté et que ce conseil ordonne et statue\nce qu’il suit :"
+  },
+  {
+   "id": "ev-761",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+   "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "QUE le règlement #761-2026 intitulé « Règlement modifiant le règlement\n#389-2007 afin d'y modifier les usages permis dans la zone 14-I et la création de\nla zone 21-H », soit adopté et que ce conseil ordonne et statue ce qu’il suit :"
+  },
+  {
+   "id": "ev-cptaq",
+   "source_file": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-croix/cas/1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f.pdf",
+   "docSha": "1ef8f33be89498c97306f408f22c707e4cefc3c2f26dfb02352959044458565f",
+   "sourceUrl": "https://saintecroix.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/20260505-Seance-ordinaire.pdf",
+   "modality": "pdf",
+   "page": 11,
+   "excerpt": "ATTENDU QUE le Projet est situé en totalité en zone agricole protégée par la Loi\nsur la protection du territoire et des activités agricoles (LPTAA,) et que la\nDemanderesse doit ainsi déposer une ou plusieurs demandes d’autorisations\n(Demande) auprès de la Commission de la protection du territoire agricole du Québec\n(Commission) ;"
+  }
+ ],
+ "input_tokens": 19300,
+ "output_tokens": 6400
+}

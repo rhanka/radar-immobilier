@@ -1,0 +1,100 @@
+{
+ "documentId": "ayers-cliff-2026-03-02",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "e43e04d14aef91ebfa21d77900784f41178e841a79d4d579077be5e017cb1d1b",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Examen prévu de la demande de PPCMOI — 881-883 Main et 828, Strathcona\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"1904-14-2760\",\n        \"page\": 2,\n        \"citation\": \"Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828,\\nStrathcona – Demande de PPCMOI\",\n        \"anchor\": \"Matricule 1904-14-2760\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le saut de ligne avant « Strathcona » est rétabli.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Examen prévu du PPCMOI — 329 rue Tyler, bâtiment de deux étages et quatre logements\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"4 665 202\",\n        \"page\": 2,\n        \"citation\": \"Matricule 1904-97-9556 lot 4 665 202, 329 rue\\nTyler, Res-10 Projet PPCMOI construction 1\\nbâtiment 2 étages 4 logement au total\",\n        \"anchor\": \"lot 4 665 202\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les sauts de ligne avant « Tyler » et « bâtiment » sont rétablis.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Examen prévu du PIIA-9 — lot 6 108 937, Ripple Cove\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 108 937\",\n        \"page\": 2,\n        \"citation\": \"Matricule 1805-72-3947 lot 6 108 937, 329\\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\\nglobale, future construction et Agrandissements\\n(PIIA-9)\",\n        \"anchor\": \"lot 6 108 937\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les sauts de ligne du point 16.1.3 sont rétablis.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Examen prévu de la demande de PPCMOI — 881-883 Main et 828, Strathcona",
+    "stage": "inconnu",
+    "procedure": "ppcmoi",
+    "objet": "1904-14-2760",
+    "page": 2,
+    "citation": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828,\nStrathcona – Demande de PPCMOI",
+    "anchor": "Matricule 1904-14-2760"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le saut de ligne avant « Strathcona » est rétabli."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Examen prévu du PPCMOI — 329 rue Tyler, bâtiment de deux étages et quatre logements",
+    "stage": "inconnu",
+    "procedure": "ppcmoi",
+    "objet": "4 665 202",
+    "page": 2,
+    "citation": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total",
+    "anchor": "lot 4 665 202"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les sauts de ligne avant « Tyler » et « bâtiment » sont rétablis."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Examen prévu du PIIA-9 — lot 6 108 937, Ripple Cove",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 108 937",
+    "page": 2,
+    "citation": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)",
+    "anchor": "lot 6 108 937"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les sauts de ligne du point 16.1.3 sont rétablis."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828,\nStrathcona – Demande de PPCMOI"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "piia",
+   "page": 2,
+   "citation": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

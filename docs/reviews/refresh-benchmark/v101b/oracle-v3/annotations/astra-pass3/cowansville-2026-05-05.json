@@ -1,0 +1,796 @@
+{
+ "documentId": "cowansville-2026-05-05",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "6b2f0f42478cda0df13e9a0ef53603935fecd69407b87058a8c18a85e4cf5120",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Autorisation de mainlevée et de renonciation au droit de préemption — acte 28 261 535\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"28 261 535\",\n        \"page\": 8,\n        \"citation\": \"une mainlevée totale de l'hypothèque et afin\\nde renoncer au droit de préemption prévus à l’acte de vente publié au registre\\nfoncier sous le numéro 28 261 535\",\n        \"anchor\": \"numéro 28 261 535\"\n      },\n      \"reason\": \"La citation courante supprime des retours à la ligne ; leur restitution respecte l’exigence de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 1571-08-2026 — modification du règlement sur les PIIA\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"1571-08-2026\",\n        \"page\": 10,\n        \"citation\": \"Monsieur le conseiller Alain Daigle, donne avis de motion qu’à une prochaine\\nséance de ce conseil, il sera adopté le Règlement numéro 1571-08-2026\",\n        \"anchor\": \"Règlement numéro 1571-08-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « prochaine » pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du projet de règlement 1571-08-2026 — modification du règlement sur les PIIA\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"1571-08-2026\",\n        \"page\": 11,\n        \"citation\": \"D’adopter le projet de règlement numéro 1571-08-2026 modifiant le règlement\\nnuméro 1571 relatif aux plans d’implantation et d’intégration architecturale\",\n        \"anchor\": \"règlement numéro 1571-08-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « numéro 1571 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement de zonage 1841-53-2026 — zones Rc-23, Cbb-1 et Ib-1\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"1841-53-2026\",\n        \"page\": 11,\n        \"citation\": \"Avis de motion – Règlement numéro 1841-53-2026 modifiant le règlement\\nde zonage numéro 1841 afin de permettre les habitations de 26\",\n        \"anchor\": \"Règlement numéro 1841-53-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « de zonage » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement de zonage 1841-53-2026\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"1841-53-2026\",\n        \"page\": 12,\n        \"citation\": \"D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26\",\n        \"anchor\": \"règlement numéro 1841-53-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « règlement de zonage » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement de lotissement 1842-06-2026 — contributions pour parcs et projets intégrés\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"1842-06-2026\",\n        \"page\": 12,\n        \"citation\": \"Avis de motion – Règlement numéro 1842-06-2026 modifiant le règlement\\nde lotissement numéro 1842 afin de préciser les dispositions relatives\",\n        \"anchor\": \"Règlement numéro 1842-06-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « de lotissement » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Adoption du projet de règlement de lotissement 1842-06-2026\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"1842-06-2026\",\n        \"page\": 13,\n        \"citation\": \"D’adopter le projet de règlement numéro 1842-06-2026 modifiant le règlement\\nde lotissement numéro 1842 afin de préciser les dispositions relatives aux\",\n        \"anchor\": \"règlement numéro 1842-06-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « de lotissement » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions de la dérogation mineure 2026-006 — 518 rue Principale\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-006\",\n        \"page\": 14,\n        \"citation\": \"D'approuver la demande de dérogation mineure 2026-006 relative à la\\npropriété sise au 518 rue Principale, lot 3 355 762 du cadastre du Québec, afin\\nde permettre\",\n        \"anchor\": \"dérogation mineure 2026-006\"\n      },\n      \"reason\": \"La citation courante supprime deux retours à la ligne de la résolution ; leur restitution respecte la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Approbation de la dérogation mineure 2026-034 — 111 rue du Muscadet\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-034\",\n        \"page\": 15,\n        \"citation\": \"D'approuver la demande de dérogation mineure 2026-034 relative à la\\npropriété sise au 111 rue du Muscadet, lot 4 445 225 du cadastre du Québec\",\n        \"anchor\": \"dérogation mineure 2026-034\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « propriété » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions du PIIA 2026-003 — 518 rue Principale\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-003\",\n        \"page\": 16,\n        \"citation\": \"D’approuver la demande de PIIA 2026-003 relative à la propriété sise au 518\\nrue Principale, lot 3 355 762 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2026-003\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « 518 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u11\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2025-087 — 1529 rue du Sud\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-087\",\n        \"page\": 16,\n        \"citation\": \"D’approuver la demande de PIIA 2025-087 relative à la propriété sise au 1529\\nrue du Sud, lot 3 798 733 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2025-087\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « 1529 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u12\",\n      \"unit\": {\n        \"label\": \"Refus du PIIA 2026-029 — garage au 295 rue d’Ontario\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-029\",\n        \"page\": 17,\n        \"citation\": \"De refuser la demande de PIIA 2026-029 relative à la propriété sise au 295 rue\\nd’Ontario, lots 6 407 699 et 6 407 703 du cadastre du Québec\",\n        \"anchor\": \"PIIA 2026-029\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « d’Ontario » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u13\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-043 — 1600 rue du Sud\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-043\",\n        \"page\": 17,\n        \"citation\": \"D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec\",\n        \"anchor\": \"PIIA 2026-043\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « propriété » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u14\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-047 — 1600 rue du Sud\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-047\",\n        \"page\": 17,\n        \"citation\": \"D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec\",\n        \"anchor\": \"PIIA 2026-043 et 2026-047\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « propriété » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u15\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions du PIIA 2026-040 — 101 rue Albert, local 1002\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-040\",\n        \"page\": 18,\n        \"citation\": \"D’approuver la demande de PIIA 2026-040 relative à la propriété sise au 101\\nrue Albert, lot 3 357 701 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2026-040\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « 101 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u16\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-013 — réfection et agrandissement au 454 rue Principale\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-013\",\n        \"page\": 18,\n        \"citation\": \"D’approuver la demande de PIIA 2026-013 relative à la propriété sise au 454\\nrue Principale, lot 3 356 478 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2026-013\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « 454 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u17\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-042 — retrait d’une marquise au 419 rue de la Rivière\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-042\",\n        \"page\": 18,\n        \"citation\": \"D’approuver la demande de PIIA 2026-042 relative à la propriété sise au 419\\nrue de la Rivière, lots 3 799 479 et 5 759 231 du cadastre du Québec\",\n        \"anchor\": \"PIIA 2026-042\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « 419 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u18\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-039 — projet Le Nordik, 141 à 153 rue du Nord\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-039\",\n        \"page\": 19,\n        \"citation\": \"D’approuver la demande de PIIA 2026-039 relative aux propriétés sises aux\\n141 à 153 rue du Nord, lots 6 677 103 à 6 677 110, 6 692 067 et 6 388 104 du\\ncadastre du Québec\",\n        \"anchor\": \"PIIA 2026-039\"\n      },\n      \"reason\": \"La citation courante supprime deux retours à la ligne de la résolution ; leur restitution respecte la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u19\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-041 — enseigne au 111 rue William\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-041\",\n        \"page\": 19,\n        \"citation\": \"D’approuver la demande de PIIA 2026-041 relative à la propriété sise au 111\\nrue William, lot 3 356 907 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2026-041\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « 111 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u20\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions du PIIA 2026-044 — bâtiment accessoire au 191 rue Pauline-Julien\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-044\",\n        \"page\": 20,\n        \"citation\": \"D’approuver la demande de PIIA 2026-044 relative à la propriété sise au 191\\nrue Pauline-Julien, lot 6 592 066 du cadastre du Québec\",\n        \"anchor\": \"PIIA 2026-044\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « 191 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u21\",\n      \"unit\": {\n        \"label\": \"Approbation conditionnelle du PIIA 2026-045 — bâtiment accessoire sans appentis au 192 rue Albert-Millaire\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-045\",\n        \"page\": 20,\n        \"citation\": \"D’approuver la demande de PIIA 2026-045 relative à la propriété sise au 192\\nrue Albert-Millaire, lot 6 592 073 du cadastre du Québec\",\n        \"anchor\": \"PIIA 2026-045\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « 192 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u22\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions du PIIA 2026-046 — véranda au 82 rue Pine\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-046\",\n        \"page\": 21,\n        \"citation\": \"D’approuver la demande de PIIA 2026-046 relative à la propriété sise au 82\\nrue Pine, lot 5 236 370 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2026-046\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « 82 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u23\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions du PIIA 2026-051 — enclos à bacs du Quartier des Comédiens\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-051\",\n        \"page\": 21,\n        \"citation\": \"D’approuver la demande de PIIA 2026-051 relative aux propriétés situées sur\\nles rues Pauline-Julien et Albert-Millaire, afin de permettre l’installation\",\n        \"anchor\": \"PIIA 2026-051\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « les rues » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u24\",\n      \"unit\": {\n        \"label\": \"Refus du PIIA 2026-035 — immeuble de 9 logements, rue Bernard, lot 3 356 557\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-035\",\n        \"page\": 22,\n        \"citation\": \"De refuser la demande de PIIA 2026-035 relative à la future propriété sise à\\nl’angle des rues Bernard et du Nord, lot 3 356 557 du cadastre du Québec\",\n        \"anchor\": \"PIIA 2026-035\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « l’angle » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u25\",\n      \"unit\": {\n        \"label\": \"Refus de la modification du PIIA 2025-120 — 403 et 407 rue Paul-Hébert\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-120\",\n        \"page\": 22,\n        \"citation\": \"De refuser la demande de PIIA 2025-120 relative aux futures propriétés sises\\nsur la rue Paul-Hébert, lots 6 691 576 et 6 691 577 du cadastre du Québec\",\n        \"anchor\": \"PIIA 2025-120\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « sur la rue » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u26\",\n      \"unit\": {\n        \"label\": \"Approbation de la modification du PIIA 2025-117 — 1447 rue du Sud\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-117\",\n        \"page\": 23,\n        \"citation\": \"D’approuver la demande de PIIA 2025-117 relative à la future propriété sise\\nau 1447 rue du Sud, lot 3 798 608 du cadastre du Québec\",\n        \"anchor\": \"PIIA 2025-117\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « au 1447 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u27\",\n      \"unit\": {\n        \"label\": \"Approbation du rendu architectural CDEMO 2025-116 — 1037-1041 rue Principale\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"CDEMO 2025-116\",\n        \"page\": 23,\n        \"citation\": \"Demande d’approbation du rendu architectural – CDEMO 2025-116 –\\nGestion Lussard Inc. – 1037-1041 rue Principale\",\n        \"anchor\": \"CDEMO 2025-116\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « Gestion Lussard Inc. » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u28\",\n      \"unit\": {\n        \"label\": \"Contribution pour parcs de 14 500 $ exigée — lot projeté 6 725 842, boulevard Pierre-Laporte\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 725 842\",\n        \"page\": 25,\n        \"citation\": \"contribution pour fins de parcs, terrains de jeux et espaces\\nnaturels de 14 500 $ en argent, préalablement à l'autorisation de délivrance du\\npermis de lotissement sur le lot projeté numéro 6 725 842\",\n        \"anchor\": \"lot projeté numéro 6 725 842\"\n      },\n      \"reason\": \"La citation courante supprime deux retours à la ligne de la résolution ; leur restitution respecte la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u29\",\n      \"unit\": {\n        \"label\": \"Autorisation de rétrocession à la Ville — lot 4 621 525, rue des Pivoines\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"4 621 525\",\n        \"page\": 25,\n        \"citation\": \"signer, pour et au nom de la Ville, l’acte\\nde rétrocession (acte de vente) à intervenir entre les propriétaires du lot\\nnuméro 4 621 525 du cadastre du Québec et la Ville\",\n        \"anchor\": \"numéro 4 621 525\"\n      },\n      \"reason\": \"La citation courante supprime deux retours à la ligne de la résolution ; leur restitution respecte la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u30\",\n      \"unit\": {\n        \"label\": \"Autorisation de l’avenant 1 au protocole d’infrastructures — Village Scolaire inc., rue du Nord\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"avenant 1\",\n        \"page\": 27,\n        \"citation\": \"D’autoriser la mairesse et la greffière à signer, pour et au nom de la Ville,\\nl’avenant 1 du protocole d’entente à être entériné avec Village Scolaire inc\",\n        \"anchor\": \"l’avenant 1 du protocole d’entente\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « l’avenant 1 » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u31\",\n      \"unit\": {\n        \"label\": \"Autorisation d’acquisition de servitudes de passage — arrière-lots de la rue Jules-Monast\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"rue Jules-Monast\",\n        \"page\": 31,\n        \"citation\": \"L’acquisition de servitudes de passage (en arrière-lot de propriétés\\nsituées sur la rue Jules-Monast\",\n        \"anchor\": \"rue Jules-Monast\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « situées » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u34\",\n      \"unit\": {\n        \"label\": \"Adoption du second projet de PPCMOI 2026-032 — quatre logements touristiques et stationnement au 245, rue Principale\",\n        \"stage\": \"second_projet\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"2026-032\",\n        \"page\": 42,\n        \"citation\": \"D’adopter le second projet de PPCMOI numéro 2026-032, afin d’autoriser, sur\\nl’immeuble situé au 245, rue Principale (lot 3 357 427 du cadastre du Québec\",\n        \"anchor\": \"PPCMOI numéro 2026-032\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « l’immeuble » pour respecter la copie à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Autorisation de mainlevée et de renonciation au droit de préemption — acte 28 261 535",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "28 261 535",
+    "page": 8,
+    "citation": "une mainlevée totale de l'hypothèque et afin\nde renoncer au droit de préemption prévus à l’acte de vente publié au registre\nfoncier sous le numéro 28 261 535",
+    "anchor": "numéro 28 261 535"
+   },
+   "reason": "La citation courante supprime des retours à la ligne ; leur restitution respecte l’exigence de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Avis de motion du règlement 1571-08-2026 — modification du règlement sur les PIIA",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1571-08-2026",
+    "page": 10,
+    "citation": "Monsieur le conseiller Alain Daigle, donne avis de motion qu’à une prochaine\nséance de ce conseil, il sera adopté le Règlement numéro 1571-08-2026",
+    "anchor": "Règlement numéro 1571-08-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « prochaine » pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du projet de règlement 1571-08-2026 — modification du règlement sur les PIIA",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1571-08-2026",
+    "page": 11,
+    "citation": "D’adopter le projet de règlement numéro 1571-08-2026 modifiant le règlement\nnuméro 1571 relatif aux plans d’implantation et d’intégration architecturale",
+    "anchor": "règlement numéro 1571-08-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « numéro 1571 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Avis de motion du règlement de zonage 1841-53-2026 — zones Rc-23, Cbb-1 et Ib-1",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1841-53-2026",
+    "page": 11,
+    "citation": "Avis de motion – Règlement numéro 1841-53-2026 modifiant le règlement\nde zonage numéro 1841 afin de permettre les habitations de 26",
+    "anchor": "Règlement numéro 1841-53-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « de zonage » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Adoption du premier projet de règlement de zonage 1841-53-2026",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1841-53-2026",
+    "page": 12,
+    "citation": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+    "anchor": "règlement numéro 1841-53-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « règlement de zonage » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Avis de motion du règlement de lotissement 1842-06-2026 — contributions pour parcs et projets intégrés",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1842-06-2026",
+    "page": 12,
+    "citation": "Avis de motion – Règlement numéro 1842-06-2026 modifiant le règlement\nde lotissement numéro 1842 afin de préciser les dispositions relatives",
+    "anchor": "Règlement numéro 1842-06-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « de lotissement » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Adoption du projet de règlement de lotissement 1842-06-2026",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1842-06-2026",
+    "page": 13,
+    "citation": "D’adopter le projet de règlement numéro 1842-06-2026 modifiant le règlement\nde lotissement numéro 1842 afin de préciser les dispositions relatives aux",
+    "anchor": "règlement numéro 1842-06-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « de lotissement » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Approbation sous conditions de la dérogation mineure 2026-006 — 518 rue Principale",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-006",
+    "page": 14,
+    "citation": "D'approuver la demande de dérogation mineure 2026-006 relative à la\npropriété sise au 518 rue Principale, lot 3 355 762 du cadastre du Québec, afin\nde permettre",
+    "anchor": "dérogation mineure 2026-006"
+   },
+   "reason": "La citation courante supprime deux retours à la ligne de la résolution ; leur restitution respecte la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Approbation de la dérogation mineure 2026-034 — 111 rue du Muscadet",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-034",
+    "page": 15,
+    "citation": "D'approuver la demande de dérogation mineure 2026-034 relative à la\npropriété sise au 111 rue du Muscadet, lot 4 445 225 du cadastre du Québec",
+    "anchor": "dérogation mineure 2026-034"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « propriété » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Approbation sous conditions du PIIA 2026-003 — 518 rue Principale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-003",
+    "page": 16,
+    "citation": "D’approuver la demande de PIIA 2026-003 relative à la propriété sise au 518\nrue Principale, lot 3 355 762 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2026-003"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « 518 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u11",
+   "unit": {
+    "label": "Approbation du PIIA 2025-087 — 1529 rue du Sud",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-087",
+    "page": 16,
+    "citation": "D’approuver la demande de PIIA 2025-087 relative à la propriété sise au 1529\nrue du Sud, lot 3 798 733 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2025-087"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « 1529 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u12",
+   "unit": {
+    "label": "Refus du PIIA 2026-029 — garage au 295 rue d’Ontario",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-029",
+    "page": 17,
+    "citation": "De refuser la demande de PIIA 2026-029 relative à la propriété sise au 295 rue\nd’Ontario, lots 6 407 699 et 6 407 703 du cadastre du Québec",
+    "anchor": "PIIA 2026-029"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « d’Ontario » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "Approbation du PIIA 2026-043 — 1600 rue du Sud",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-043",
+    "page": 17,
+    "citation": "D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec",
+    "anchor": "PIIA 2026-043"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « propriété » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "Approbation du PIIA 2026-047 — 1600 rue du Sud",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-047",
+    "page": 17,
+    "citation": "D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec",
+    "anchor": "PIIA 2026-043 et 2026-047"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « propriété » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u15",
+   "unit": {
+    "label": "Approbation sous conditions du PIIA 2026-040 — 101 rue Albert, local 1002",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-040",
+    "page": 18,
+    "citation": "D’approuver la demande de PIIA 2026-040 relative à la propriété sise au 101\nrue Albert, lot 3 357 701 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2026-040"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « 101 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u16",
+   "unit": {
+    "label": "Approbation du PIIA 2026-013 — réfection et agrandissement au 454 rue Principale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-013",
+    "page": 18,
+    "citation": "D’approuver la demande de PIIA 2026-013 relative à la propriété sise au 454\nrue Principale, lot 3 356 478 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2026-013"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « 454 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u17",
+   "unit": {
+    "label": "Approbation du PIIA 2026-042 — retrait d’une marquise au 419 rue de la Rivière",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-042",
+    "page": 18,
+    "citation": "D’approuver la demande de PIIA 2026-042 relative à la propriété sise au 419\nrue de la Rivière, lots 3 799 479 et 5 759 231 du cadastre du Québec",
+    "anchor": "PIIA 2026-042"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « 419 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u18",
+   "unit": {
+    "label": "Approbation du PIIA 2026-039 — projet Le Nordik, 141 à 153 rue du Nord",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-039",
+    "page": 19,
+    "citation": "D’approuver la demande de PIIA 2026-039 relative aux propriétés sises aux\n141 à 153 rue du Nord, lots 6 677 103 à 6 677 110, 6 692 067 et 6 388 104 du\ncadastre du Québec",
+    "anchor": "PIIA 2026-039"
+   },
+   "reason": "La citation courante supprime deux retours à la ligne de la résolution ; leur restitution respecte la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u19",
+   "unit": {
+    "label": "Approbation du PIIA 2026-041 — enseigne au 111 rue William",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-041",
+    "page": 19,
+    "citation": "D’approuver la demande de PIIA 2026-041 relative à la propriété sise au 111\nrue William, lot 3 356 907 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2026-041"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « 111 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u20",
+   "unit": {
+    "label": "Approbation sous conditions du PIIA 2026-044 — bâtiment accessoire au 191 rue Pauline-Julien",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-044",
+    "page": 20,
+    "citation": "D’approuver la demande de PIIA 2026-044 relative à la propriété sise au 191\nrue Pauline-Julien, lot 6 592 066 du cadastre du Québec",
+    "anchor": "PIIA 2026-044"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « 191 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u21",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA 2026-045 — bâtiment accessoire sans appentis au 192 rue Albert-Millaire",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-045",
+    "page": 20,
+    "citation": "D’approuver la demande de PIIA 2026-045 relative à la propriété sise au 192\nrue Albert-Millaire, lot 6 592 073 du cadastre du Québec",
+    "anchor": "PIIA 2026-045"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « 192 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u22",
+   "unit": {
+    "label": "Approbation sous conditions du PIIA 2026-046 — véranda au 82 rue Pine",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-046",
+    "page": 21,
+    "citation": "D’approuver la demande de PIIA 2026-046 relative à la propriété sise au 82\nrue Pine, lot 5 236 370 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2026-046"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « 82 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u23",
+   "unit": {
+    "label": "Approbation sous conditions du PIIA 2026-051 — enclos à bacs du Quartier des Comédiens",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-051",
+    "page": 21,
+    "citation": "D’approuver la demande de PIIA 2026-051 relative aux propriétés situées sur\nles rues Pauline-Julien et Albert-Millaire, afin de permettre l’installation",
+    "anchor": "PIIA 2026-051"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « les rues » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u24",
+   "unit": {
+    "label": "Refus du PIIA 2026-035 — immeuble de 9 logements, rue Bernard, lot 3 356 557",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-035",
+    "page": 22,
+    "citation": "De refuser la demande de PIIA 2026-035 relative à la future propriété sise à\nl’angle des rues Bernard et du Nord, lot 3 356 557 du cadastre du Québec",
+    "anchor": "PIIA 2026-035"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « l’angle » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u25",
+   "unit": {
+    "label": "Refus de la modification du PIIA 2025-120 — 403 et 407 rue Paul-Hébert",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-120",
+    "page": 22,
+    "citation": "De refuser la demande de PIIA 2025-120 relative aux futures propriétés sises\nsur la rue Paul-Hébert, lots 6 691 576 et 6 691 577 du cadastre du Québec",
+    "anchor": "PIIA 2025-120"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « sur la rue » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u26",
+   "unit": {
+    "label": "Approbation de la modification du PIIA 2025-117 — 1447 rue du Sud",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-117",
+    "page": 23,
+    "citation": "D’approuver la demande de PIIA 2025-117 relative à la future propriété sise\nau 1447 rue du Sud, lot 3 798 608 du cadastre du Québec",
+    "anchor": "PIIA 2025-117"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « au 1447 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u27",
+   "unit": {
+    "label": "Approbation du rendu architectural CDEMO 2025-116 — 1037-1041 rue Principale",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "CDEMO 2025-116",
+    "page": 23,
+    "citation": "Demande d’approbation du rendu architectural – CDEMO 2025-116 –\nGestion Lussard Inc. – 1037-1041 rue Principale",
+    "anchor": "CDEMO 2025-116"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « Gestion Lussard Inc. » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u28",
+   "unit": {
+    "label": "Contribution pour parcs de 14 500 $ exigée — lot projeté 6 725 842, boulevard Pierre-Laporte",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 725 842",
+    "page": 25,
+    "citation": "contribution pour fins de parcs, terrains de jeux et espaces\nnaturels de 14 500 $ en argent, préalablement à l'autorisation de délivrance du\npermis de lotissement sur le lot projeté numéro 6 725 842",
+    "anchor": "lot projeté numéro 6 725 842"
+   },
+   "reason": "La citation courante supprime deux retours à la ligne de la résolution ; leur restitution respecte la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u29",
+   "unit": {
+    "label": "Autorisation de rétrocession à la Ville — lot 4 621 525, rue des Pivoines",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 621 525",
+    "page": 25,
+    "citation": "signer, pour et au nom de la Ville, l’acte\nde rétrocession (acte de vente) à intervenir entre les propriétaires du lot\nnuméro 4 621 525 du cadastre du Québec et la Ville",
+    "anchor": "numéro 4 621 525"
+   },
+   "reason": "La citation courante supprime deux retours à la ligne de la résolution ; leur restitution respecte la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u30",
+   "unit": {
+    "label": "Autorisation de l’avenant 1 au protocole d’infrastructures — Village Scolaire inc., rue du Nord",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "avenant 1",
+    "page": 27,
+    "citation": "D’autoriser la mairesse et la greffière à signer, pour et au nom de la Ville,\nl’avenant 1 du protocole d’entente à être entériné avec Village Scolaire inc",
+    "anchor": "l’avenant 1 du protocole d’entente"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « l’avenant 1 » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u31",
+   "unit": {
+    "label": "Autorisation d’acquisition de servitudes de passage — arrière-lots de la rue Jules-Monast",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "rue Jules-Monast",
+    "page": 31,
+    "citation": "L’acquisition de servitudes de passage (en arrière-lot de propriétés\nsituées sur la rue Jules-Monast",
+    "anchor": "rue Jules-Monast"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « situées » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u34",
+   "unit": {
+    "label": "Adoption du second projet de PPCMOI 2026-032 — quatre logements touristiques et stationnement au 245, rue Principale",
+    "stage": "second_projet",
+    "procedure": "ppcmoi",
+    "objet": "2026-032",
+    "page": 42,
+    "citation": "D’adopter le second projet de PPCMOI numéro 2026-032, afin d’autoriser, sur\nl’immeuble situé au 245, rue Principale (lot 3 357 427 du cadastre du Québec",
+    "anchor": "PPCMOI numéro 2026-032"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « l’immeuble » pour respecter la copie à l’identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 8,
+   "citation": "une mainlevée totale de l'hypothèque et afin\nde renoncer au droit de préemption prévus à l’acte de vente publié au registre\nfoncier sous le numéro 28 261 535"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "avis_motion",
+   "page": 10,
+   "citation": "Monsieur le conseiller Alain Daigle, donne avis de motion qu’à une prochaine\nséance de ce conseil, il sera adopté le Règlement numéro 1571-08-2026"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "projet_reglement",
+   "page": 11,
+   "citation": "D’adopter le projet de règlement numéro 1571-08-2026 modifiant le règlement\nnuméro 1571 relatif aux plans d’implantation et d’intégration architecturale"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "avis_motion",
+   "page": 11,
+   "citation": "Avis de motion – Règlement numéro 1841-53-2026 modifiant le règlement\nde zonage numéro 1841 afin de permettre les habitations de 26"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "projet_reglement",
+   "page": 12,
+   "citation": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "avis_motion",
+   "page": 12,
+   "citation": "Avis de motion – Règlement numéro 1842-06-2026 modifiant le règlement\nde lotissement numéro 1842 afin de préciser les dispositions relatives"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "projet_reglement",
+   "page": 13,
+   "citation": "D’adopter le projet de règlement numéro 1842-06-2026 modifiant le règlement\nde lotissement numéro 1842 afin de préciser les dispositions relatives aux"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "derogation_mineure",
+   "page": 14,
+   "citation": "D'approuver la demande de dérogation mineure 2026-006 relative à la\npropriété sise au 518 rue Principale, lot 3 355 762 du cadastre du Québec, afin\nde permettre"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "derogation_mineure",
+   "page": 15,
+   "citation": "D'approuver la demande de dérogation mineure 2026-034 relative à la\npropriété sise au 111 rue du Muscadet, lot 4 445 225 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "piia",
+   "page": 16,
+   "citation": "D’approuver la demande de PIIA 2026-003 relative à la propriété sise au 518\nrue Principale, lot 3 355 762 du cadastre du Québec, de manière à permettre"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u11",
+   "stage": "piia",
+   "page": 16,
+   "citation": "D’approuver la demande de PIIA 2025-087 relative à la propriété sise au 1529\nrue du Sud, lot 3 798 733 du cadastre du Québec, de manière à permettre"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u12",
+   "stage": "piia",
+   "page": 17,
+   "citation": "De refuser la demande de PIIA 2026-029 relative à la propriété sise au 295 rue\nd’Ontario, lots 6 407 699 et 6 407 703 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 12,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "piia",
+   "page": 17,
+   "citation": "D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 13,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "piia",
+   "page": 17,
+   "citation": "D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 14,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u15",
+   "stage": "piia",
+   "page": 18,
+   "citation": "D’approuver la demande de PIIA 2026-040 relative à la propriété sise au 101\nrue Albert, lot 3 357 701 du cadastre du Québec, de manière à permettre"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 15,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u16",
+   "stage": "piia",
+   "page": 18,
+   "citation": "D’approuver la demande de PIIA 2026-013 relative à la propriété sise au 454\nrue Principale, lot 3 356 478 du cadastre du Québec, de manière à permettre"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 16,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u17",
+   "stage": "piia",
+   "page": 18,
+   "citation": "D’approuver la demande de PIIA 2026-042 relative à la propriété sise au 419\nrue de la Rivière, lots 3 799 479 et 5 759 231 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 17,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u18",
+   "stage": "piia",
+   "page": 19,
+   "citation": "D’approuver la demande de PIIA 2026-039 relative aux propriétés sises aux\n141 à 153 rue du Nord, lots 6 677 103 à 6 677 110, 6 692 067 et 6 388 104 du\ncadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 18,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u19",
+   "stage": "piia",
+   "page": 19,
+   "citation": "D’approuver la demande de PIIA 2026-041 relative à la propriété sise au 111\nrue William, lot 3 356 907 du cadastre du Québec, de manière à permettre"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 19,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u20",
+   "stage": "piia",
+   "page": 20,
+   "citation": "D’approuver la demande de PIIA 2026-044 relative à la propriété sise au 191\nrue Pauline-Julien, lot 6 592 066 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 20,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u21",
+   "stage": "piia",
+   "page": 20,
+   "citation": "D’approuver la demande de PIIA 2026-045 relative à la propriété sise au 192\nrue Albert-Millaire, lot 6 592 073 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 21,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u22",
+   "stage": "piia",
+   "page": 21,
+   "citation": "D’approuver la demande de PIIA 2026-046 relative à la propriété sise au 82\nrue Pine, lot 5 236 370 du cadastre du Québec, de manière à permettre"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 22,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u23",
+   "stage": "piia",
+   "page": 21,
+   "citation": "D’approuver la demande de PIIA 2026-051 relative aux propriétés situées sur\nles rues Pauline-Julien et Albert-Millaire, afin de permettre l’installation"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 23,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u24",
+   "stage": "piia",
+   "page": 22,
+   "citation": "De refuser la demande de PIIA 2026-035 relative à la future propriété sise à\nl’angle des rues Bernard et du Nord, lot 3 356 557 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 24,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u25",
+   "stage": "piia",
+   "page": 22,
+   "citation": "De refuser la demande de PIIA 2025-120 relative aux futures propriétés sises\nsur la rue Paul-Hébert, lots 6 691 576 et 6 691 577 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 25,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u26",
+   "stage": "piia",
+   "page": 23,
+   "citation": "D’approuver la demande de PIIA 2025-117 relative à la future propriété sise\nau 1447 rue du Sud, lot 3 798 608 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 26,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u27",
+   "stage": "adoption",
+   "page": 23,
+   "citation": "Demande d’approbation du rendu architectural – CDEMO 2025-116 –\nGestion Lussard Inc. – 1037-1041 rue Principale"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 27,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u28",
+   "stage": "adoption",
+   "page": 25,
+   "citation": "contribution pour fins de parcs, terrains de jeux et espaces\nnaturels de 14 500 $ en argent, préalablement à l'autorisation de délivrance du\npermis de lotissement sur le lot projeté numéro 6 725 842"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 28,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u29",
+   "stage": "adoption",
+   "page": 25,
+   "citation": "signer, pour et au nom de la Ville, l’acte\nde rétrocession (acte de vente) à intervenir entre les propriétaires du lot\nnuméro 4 621 525 du cadastre du Québec et la Ville"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 29,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u30",
+   "stage": "adoption",
+   "page": 27,
+   "citation": "D’autoriser la mairesse et la greffière à signer, pour et au nom de la Ville,\nl’avenant 1 du protocole d’entente à être entériné avec Village Scolaire inc"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 30,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u31",
+   "stage": "adoption",
+   "page": 31,
+   "citation": "L’acquisition de servitudes de passage (en arrière-lot de propriétés\nsituées sur la rue Jules-Monast"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 31,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u34",
+   "stage": "second_projet",
+   "page": 42,
+   "citation": "D’adopter le second projet de PPCMOI numéro 2026-032, afin d’autoriser, sur\nl’immeuble situé au 245, rue Principale (lot 3 357 427 du cadastre du Québec"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 34
+}

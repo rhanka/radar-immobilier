@@ -1,0 +1,171 @@
+{
+ "documentId": "stoneham-et-tewkesbury-2026-06-08",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fb01cb7d80ff17759f3653fc7e8c1f3a5ef0c6b1da2235b2a3180d8ffe5873d5",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 20 annonce explicitement l’avis de motion concernant la vidange des fosses septiques et des fosses de rétention, unité distincte du dépôt du projet.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 20 atteste le dépôt du projet de règlement sur la vidange des fosses septiques et des fosses de rétention, distinct de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution de la page 23 autorise la signature d’une entente avec la Résidence des Cantons-Unis concernant le stationnement commun, objet foncier explicitement décrit.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution de la page 23 autorise expressément l’acquisition gratuite d’une partie du lot cadastral 6 564 346, ce qui constitue un acte foncier inclus.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution de la page 23 autorise l’établissement d’ententes, de conventions d’occupation et de servitudes d’utilité publique sur les lots concernés par l’entente.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 38 recommande l’approbation de la dérogation pour la piscine en cour avant au 2135, route de Tewkesbury, sous condition d’un écran opaque d’au moins quatre pieds.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 40 recommande l’approbation de la dérogation régularisant la marge latérale de 2,55 m de l’habitation au 53, chemin Plamondon.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 42 recommande l’approbation du PIIA pour les bâtiments d’entreposage et le stationnement au 2757, boulevard Talbot, avec des exigences paysagères et d’implantation.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 44 recommande explicitement le refus du PIIA d’agrandissement de l’accès et du stationnement au 98, 1re Avenue, conformément au statut conservé par cette version.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 46 recommande l’approbation du PIIA pour la piscine dans les bandes de protection au 105, chemin de la Tourterelle, sans empiètement en zone de forte pente.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 48 recommande l’approbation du PIIA pour l’aménagement d’un stationnement de plus de 150 m2 au 144, chemin du Sommet.\"\n    },\n    {\n      \"item\": \"i12\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 50 recommande l’approbation du PIIA pour la modification de l’enseigne d’Excavation JDS au 2523, boulevard Talbot, les petits PIIA non résidentiels étant inclus.\"\n    },\n    {\n      \"item\": \"i13\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 16.1, page 52, porte explicitement sur l’adoption du Règlement 26-1105 modifiant le Règlement de zonage 09-591.\"\n    },\n    {\n      \"item\": \"i14\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 16.2, page 54, porte explicitement sur l’adoption du Règlement 26-1106 modifiant le règlement relatif aux PIIA 09-603.\"\n    },\n    {\n      \"item\": \"i15\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point du premier projet de résolution PPCMOI, page 56, le conseil refuse expressément le projet de 18 logements au 102, 1re Avenue, refus correctement conservé dans cette version.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 20 annonce explicitement l’avis de motion concernant la vidange des fosses septiques et des fosses de rétention, unité distincte du dépôt du projet."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 20 atteste le dépôt du projet de règlement sur la vidange des fosses septiques et des fosses de rétention, distinct de l’avis de motion."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution de la page 23 autorise la signature d’une entente avec la Résidence des Cantons-Unis concernant le stationnement commun, objet foncier explicitement décrit."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution de la page 23 autorise expressément l’acquisition gratuite d’une partie du lot cadastral 6 564 346, ce qui constitue un acte foncier inclus."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution de la page 23 autorise l’établissement d’ententes, de conventions d’occupation et de servitudes d’utilité publique sur les lots concernés par l’entente."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La page 38 recommande l’approbation de la dérogation pour la piscine en cour avant au 2135, route de Tewkesbury, sous condition d’un écran opaque d’au moins quatre pieds."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La page 40 recommande l’approbation de la dérogation régularisant la marge latérale de 2,55 m de l’habitation au 53, chemin Plamondon."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 42 recommande l’approbation du PIIA pour les bâtiments d’entreposage et le stationnement au 2757, boulevard Talbot, avec des exigences paysagères et d’implantation."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La page 44 recommande explicitement le refus du PIIA d’agrandissement de l’accès et du stationnement au 98, 1re Avenue, conformément au statut conservé par cette version."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La page 46 recommande l’approbation du PIIA pour la piscine dans les bandes de protection au 105, chemin de la Tourterelle, sans empiètement en zone de forte pente."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "La page 48 recommande l’approbation du PIIA pour l’aménagement d’un stationnement de plus de 150 m2 au 144, chemin du Sommet."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "La page 50 recommande l’approbation du PIIA pour la modification de l’enseigne d’Excavation JDS au 2523, boulevard Talbot, les petits PIIA non résidentiels étant inclus."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "Le point 16.1, page 52, porte explicitement sur l’adoption du Règlement 26-1105 modifiant le Règlement de zonage 09-591."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Le point 16.2, page 54, porte explicitement sur l’adoption du Règlement 26-1106 modifiant le règlement relatif aux PIIA 09-603."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Au point du premier projet de résolution PPCMOI, page 56, le conseil refuse expressément le projet de 18 logements au 102, 1re Avenue, refus correctement conservé dans cette version."
+  }
+ ]
+}

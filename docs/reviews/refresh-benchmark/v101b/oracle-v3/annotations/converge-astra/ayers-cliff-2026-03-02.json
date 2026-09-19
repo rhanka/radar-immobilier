@@ -1,0 +1,51 @@
+{
+ "documentId": "ayers-cliff-2026-03-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "e43e04d14aef91ebfa21d77900784f41178e841a79d4d579077be5e017cb1d1b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 16.1.1, page 2, inscrit la demande de PPCMOI pour les 881-883 Main et 828, Strathcona, incluant le matricule 1904-14-2760, comme examen prévu et non comme décision acquise.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 16.1.2, page 2, prévoit l’examen du PPCMOI visant un bâtiment de deux étages et quatre logements au 329 rue Tyler, sur le lot 4 665 202, sans attester une adoption.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 16.1.3, page 2, inscrit le projet de plan global, de construction future et d’agrandissements du lot 6 108 937 à Ripple Cove sous la mention PIIA-9, ce qui atteste un examen prévu de PIIA.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 16.1.1, page 2, inscrit la demande de PPCMOI pour les 881-883 Main et 828, Strathcona, incluant le matricule 1904-14-2760, comme examen prévu et non comme décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 16.1.2, page 2, prévoit l’examen du PPCMOI visant un bâtiment de deux étages et quatre logements au 329 rue Tyler, sur le lot 4 665 202, sans attester une adoption."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 16.1.3, page 2, inscrit le projet de plan global, de construction future et d’agrandissements du lot 6 108 937 à Ripple Cove sous la mention PIIA-9, ce qui atteste un examen prévu de PIIA."
+  }
+ ]
+}

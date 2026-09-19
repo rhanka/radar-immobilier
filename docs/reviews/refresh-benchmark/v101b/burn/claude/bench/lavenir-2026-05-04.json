@@ -1,0 +1,13 @@
+{
+ "id": "lavenir-2026-05-04",
+ "rc": 0,
+ "latencyMs": 294652,
+ "inputTokens": 2,
+ "outputTokens": 31430,
+ "cacheRead": 0,
+ "cacheCreate": 15223,
+ "costUsd": 0.9488879999999998,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 55216
+}

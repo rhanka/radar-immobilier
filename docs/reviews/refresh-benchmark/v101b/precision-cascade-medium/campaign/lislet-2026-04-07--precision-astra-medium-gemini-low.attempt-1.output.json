@@ -1,0 +1,465 @@
+{
+ "nodes": [
+  {
+   "id": "source-1",
+   "label": "Ordre du jour de la séance ordinaire du 7 avril 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "status": "candidate",
+   "date": "2026-04-07",
+   "municipality": "lislet",
+   "format": "pdf",
+   "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+   "url": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "ORDRE DU JOUR – SÉANCE ORDINAIRE DU 7 AVRIL 2026",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-342",
+   "label": "Projet de règlement 342-2026 relatif aux droits de mutations immobilières",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "status": "candidate",
+   "numero": "342-2026",
+   "title": "Règlement relatif aux droits de mutations immobilières",
+   "stage": "projet",
+   "meetingDate": "2026-04-07",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "25. Dépôt du projet de règlement 342-2026 relatif aux droits de mutations immobilières",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-30",
+   "label": "Demande de dérogation mineure — 418, chemin des Pionniers Est",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "meetingDate": "2026-04-07",
+   "etape": "derogation_mineure",
+   "description": "Demande inscrite à l’ordre du jour; aucune décision rapportée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-31",
+   "label": "Demande de PIIA — 81, chemin des Pionniers Est",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "meetingDate": "2026-04-07",
+   "etape": "piia",
+   "description": "Demande inscrite à l’ordre du jour; aucune décision rapportée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "31. Demande de PIIA pour le 81, chemin des Pionniers Est",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-32",
+   "label": "Demande de PIIA — 272, chemin des Pionniers Est",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "meetingDate": "2026-04-07",
+   "etape": "piia",
+   "description": "Demande inscrite à l’ordre du jour; aucune décision rapportée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "32. Demande de PIIA pour le 272, chemin des Pionniers Est",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-33",
+   "label": "Entreposage temporaire d’un conteneur — 2, rue Chanoine-Martel",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "status": "candidate",
+   "meetingDate": "2026-04-07",
+   "etape": "inconnu",
+   "description": "Entérinement d’une décision inscrit à l’ordre du jour concernant une demande d’entreposage temporaire d’un conteneur; sens de la décision non précisé.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "33. Entérinement de la décision concernant la demande d’entreposage temporaire d’un conteneur au\n2, rue Chanoine-Martel",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-34",
+   "label": "Demande à la CPTAQ — renouvellement de permis d’exploitation d’une sablière",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "status": "candidate",
+   "kind": "cptaq",
+   "meetingDate": "2026-04-07",
+   "etape": "inconnu",
+   "demandeur_corporate": "Michel Gamache & Frères",
+   "description": "Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une sablière inscrite à l’ordre du jour; aucune autorisation rapportée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-35",
+   "label": "Délégation de pouvoir pour l’application du RMUN",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "status": "candidate",
+   "category": "milieux_hydriques",
+   "meetingDate": "2026-04-07",
+   "description": "Délégation de pouvoir inscrite à l’ordre du jour pour l’application du règlement sur les activités municipales réalisées dans les milieux hydriques et sur les ouvrages de protection contre les inondations (RMUN).",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "35. Délégation de pouvoir pour l’application du règlement sur l’encadrement d’activités sous la\nresponsabilité des municipalités réalisées dans les milieux hydriques e",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-36",
+   "label": "Inventaire du patrimoine bâti partiel de L’Islet",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "status": "candidate",
+   "category": "patrimoine_bati",
+   "meetingDate": "2026-04-07",
+   "description": "Adoption de l’inventaire du patrimoine bâti partiel inscrite à l’ordre du jour, sans confirmation d’adoption.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "36. Adoption de l’inventaire du patrimoine bâti partiel – Municipalité de L’Islet",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-1",
+   "target": "bylaw-342",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "evidence_refs": [
+    "ev-25"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "25. Dépôt du projet de règlement 342-2026 relatif aux droits de mutations immobilières",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-30",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "evidence_refs": [
+    "ev-30"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-31",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "evidence_refs": [
+    "ev-31"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "31. Demande de PIIA pour le 81, chemin des Pionniers Est",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-32",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "evidence_refs": [
+    "ev-32"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "32. Demande de PIIA pour le 272, chemin des Pionniers Est",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-33",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "evidence_refs": [
+    "ev-33"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "33. Entérinement de la décision concernant la demande d’entreposage temporaire d’un conteneur au\n2, rue Chanoine-Martel",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-34",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "evidence_refs": [
+    "ev-34"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "signal-35",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "evidence_refs": [
+    "ev-35"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "35. Délégation de pouvoir pour l’application du règlement sur l’encadrement d’activités sous la\nresponsabilité des municipalités réalisées dans les milieux hydriques e",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "signal-36",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "evidence_refs": [
+    "ev-36"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "36. Adoption de l’inventaire du patrimoine bâti partiel – Municipalité de L’Islet",
+     "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+     "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+     "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-25",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+   "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "25. Dépôt du projet de règlement 342-2026 relatif aux droits de mutations immobilières"
+  },
+  {
+   "id": "ev-30",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+   "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est"
+  },
+  {
+   "id": "ev-31",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+   "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "31. Demande de PIIA pour le 81, chemin des Pionniers Est"
+  },
+  {
+   "id": "ev-32",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+   "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "32. Demande de PIIA pour le 272, chemin des Pionniers Est"
+  },
+  {
+   "id": "ev-33",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+   "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "33. Entérinement de la décision concernant la demande d’entreposage temporaire d’un conteneur au\n2, rue Chanoine-Martel"
+  },
+  {
+   "id": "ev-34",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+   "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+  },
+  {
+   "id": "ev-35",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+   "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "35. Délégation de pouvoir pour l’application du règlement sur l’encadrement d’activités sous la\nresponsabilité des municipalités réalisées dans les milieux hydriques e sur les ouvrages de\nprotection contre les inondations (RMUN)"
+  },
+  {
+   "id": "ev-36",
+   "source_file": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "rawRef": "raw/proces-verbaux-lislet/cas/177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525.pdf",
+   "docSha": "177ea7729a02b2fc59cf7ec64ece9f8bcce507a6e770f7499530d27ea66ff525",
+   "sourceUrl": "https://www.lislet.com/storage/app/media/evenements/seances-conseil/2026_conseil/4-avril/2026-04-07-Projet-ODJ.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "36. Adoption de l’inventaire du patrimoine bâti partiel – Municipalité de L’Islet"
+  }
+ ],
+ "input_tokens": 7350,
+ "output_tokens": 5420
+}

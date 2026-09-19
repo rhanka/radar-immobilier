@@ -1,0 +1,37 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dbb8601a27768bf3efa9e573dfd219a14a6d99a501dc980f410fefeaa4b1a383",
+ "verificationSha256": "5e708e46ea67d6a9931720f28f4a0e62934a74ec6a3180564d89060e888c2b9d",
+ "inputSha256": "9bb0d440f24b31edaed4fdbac4d2444f3a2bd28d23ba8e21aa10ebf73b7fb639",
+ "responseSha256": "3d914f25c1a7dfef9997b2766a643d0ff504d2a2e36c18c3e253ae81844eda4f",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 24453,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 13513,
+  "outputTokens": 716,
+  "totalTokens": 14229
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 24450,
+  "requestId": null
+ },
+ "at": "2026-09-18T21:07:38.883Z"
+}

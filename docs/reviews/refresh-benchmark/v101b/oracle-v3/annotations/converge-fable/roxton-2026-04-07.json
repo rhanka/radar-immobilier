@@ -1,0 +1,31 @@
+{
+ "documentId": "roxton-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1c4598184adea3ab67d4703ab4ce04e2008c33194af15ce551ec2c1796256210",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 4, résolution 74-04-2026 : « résolu unanimement que le présent règlement soit adopté ... Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le règlement de zonage numéro 181-2003 ... modifiant les usages permis dans la zone 506 » » — objet réglementaire explicite, étape adoption constatée, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 4, résolution 74-04-2026 : « résolu unanimement que le présent règlement soit adopté ... Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le règlement de zonage numéro 181-2003 ... modifiant les usages permis dans la zone 506 » » — objet réglementaire explicite, étape adoption constatée, citation et page exactes."
+  }
+ ]
+}

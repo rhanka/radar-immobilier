@@ -1,0 +1,13 @@
+{
+ "id": "mcmasterville-2026-02-02",
+ "rc": 0,
+ "latencyMs": 147725,
+ "inputTokens": 2,
+ "outputTokens": 16168,
+ "cacheRead": 0,
+ "cacheCreate": 4423,
+ "costUsd": 0.45110199999999995,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 29914
+}

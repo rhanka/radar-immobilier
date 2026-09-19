@@ -1,0 +1,13 @@
+{
+ "id": "bolton-est-2026-01-12",
+ "rc": 0,
+ "latencyMs": 13019,
+ "inputTokens": 2,
+ "outputTokens": 829,
+ "cacheRead": 0,
+ "cacheCreate": 3361,
+ "costUsd": 0.056195,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 858
+}

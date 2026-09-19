@@ -1,0 +1,284 @@
+{
+ "documentId": "dosquet-2026-01-13",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "eebb801636f94e22a2a8da919fe607662d67b1317618d857624be81976702883",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-cptaq-26-01-08"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui municipal à une demande à la CPTAQ",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Que la municipalité est favorable et recommande la demande."
+      },
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit\nrésidentiel à la partie du lot située en zone agricole;"
+      },
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit\nrésidentiel à la partie du lot située en zone agricole;\nATTENDU QUE l’étendue du droit résidentiel n’aura pas d’impact sur la zone\nagricole actuelle, considérant l’usage actuel de celle-ci;\nATTENDU QUE le propriétaire souhaite également aliéner les lots 5 376 188 et\n4 819 191, d’une superficie totale de 107,9684 hectares;\nATTENDU QUE l’usage agricole des lots 5 376 188 et 4 819 191 sera préservé.\nPOUR CES MOTIFS : IL EST PROPOSÉ par madame Mélanie St-Jean ET\nRÉSOLU À L’UNANIMITÉ des membres présents :\nQue la municipalité est favorable et recommande la demande."
+      },
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est\nautorisé dans ces deux zones, conformément à la réglementation d’urbanisme\nmunicipale;"
+      },
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE le lot 6 274 449 est situé en partie dans le périmètre urbain et en\npartie dans la zone agricole, et qu’il possède une superficie totale de 7 200 m²;\nATTENDU QUE la superficie visée par la demande correspond à la portion située\ndans la zone agricole, laquelle a une superficie de 4 631,6 m²;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2025-499"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2025-499 — Taxes et compensations 2026",
+     "stage": "projet",
+     "objet": "2025-499",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À\nL’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que\nsuit;"
+      },
+      {
+       "page": 4,
+       "excerpt": "SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À\nL’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que\nsuit;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2022-459"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement d’emprunt 2022-459",
+     "stage": null,
+     "objet": "2022-459",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "8. Emprunt de 85 000$ de gré à gré auprès de Desjardins pour le règlement\nd’emprunt 2022-459 (programme de réhabilitation de l’environnement :\nfosses septiques)."
+      },
+      {
+       "page": 7,
+       "excerpt": "QU’UN emprunt par billet au montant de 85 000 $ prévu au règlement d’emprunt\nnuméro 2022-459 soit réalisé au taux annuel de 5,01%.\nQUE le billet soit émis et daté du 20 janvier 2026."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-emprunt"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Financement de 85 000 $ pour les fosses septiques",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "QU’UN emprunt par billet au montant de 85 000 $ prévu au règlement d’emprunt\nnuméro 2022-459 soit réalisé au taux annuel de 5,01%."
+      },
+      {
+       "page": 7,
+       "excerpt": "QU’UN emprunt par billet au montant de 85 000 $ prévu au règlement d’emprunt\nnuméro 2022-459 soit réalisé au taux annuel de 5,01%.\nQUE le billet soit émis et daté du 20 janvier 2026."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-eoliennes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Projet potentiel d’éoliennes à l’ordre du jour",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5. Projet potentiel d’éoliennes."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-garde"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Bail pour un service de garde communautaire au 368 route 116",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "IL EST PROPOSÉ par madame Mélanie St-Jean, ET RÉSOLU À\nL’UNANIMITÉ QUE le conseil de la municipalité de Dosquet autorise madame\nJolyane Houle, directrice générale à signer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-eco360"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Intérêt pour la rénovation énergétique des actifs municipaux",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "QUE la Municipalité de Dosquet déclare son intérêt au programme Éco\nÉnergie 360 ;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 26-01-08 appuie et recommande formellement la demande adressée à la CPTAQ pour le lot 6 274 449.\",\"excerpt\":\"Que la municipalité est favorable et recommande la demande.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 26-01-06 décrète le dépôt du projet de règlement 2025-499 concernant les taxes et compensations.\",\"excerpt\":\"SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À L’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que suit;\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2022-459 est un règlement d'emprunt antérieur cité comme base juridique pour une résolution de concordance d'emprunt par billet, et non un acte réglementaire adopté à cette séance.\",\"excerpt\":\"RÉSOLUTION DE CONCORDANCE RELATIVEMENT À UN EMPRUNT PAR BILLETS AU MONTANT DE 85 000 $ QUI DOIT ÊTRE RÉALISÉ LE 20 JANVIER 2026. RÈGLEMENT D’EMPRUNT #2022-459\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Cet emprunt par billet auprès d'une institution financière relève de la simple gestion financière et de trésorerie exclue du champ de l'urbanisme et de l'aménagement.\",\"excerpt\":\"QU’UN emprunt par billet au montant de 85 000 $ prévu au règlement d’emprunt numéro 2022-459 soit réalisé au taux annuel de 5,01%.\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le point apparaît à l'ordre du jour mais ne fait l'objet d'aucune délibération, décision ou résolution dans le procès-verbal.\",\"excerpt\":\"5. Projet potentiel d’éoliennes.\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"L'autorisation de bail pour un service de garde éducatif en milieu communautaire relève de la gestion de baux municipaux/services sociaux, exclue de la planification urbaine.\",\"excerpt\":\"bail liant la municipalité et les responsables de garde qui utiliseront les locaux dédiés à ce service au 368 route 116.\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"L'avis d'intérêt à un programme d'efficacité énergétique des bâtiments municipaux (Éco Énergie 360) relève de la gestion des actifs internes sans impact direct sur l'aménagement du territoire.\",\"excerpt\":\"QUE la Municipalité de Dosquet déclare son intérêt au programme Éco Énergie 360 ;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La résolution 26-01-08 appuie et recommande formellement la demande adressée à la CPTAQ pour le lot 6 274 449.",
+   "excerpt": "Que la municipalité est favorable et recommande la demande."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La résolution 26-01-06 décrète le dépôt du projet de règlement 2025-499 concernant les taxes et compensations.",
+   "excerpt": "SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À L’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que suit;"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2022-459 est un règlement d'emprunt antérieur cité comme base juridique pour une résolution de concordance d'emprunt par billet, et non un acte réglementaire adopté à cette séance.",
+   "excerpt": "RÉSOLUTION DE CONCORDANCE RELATIVEMENT À UN EMPRUNT PAR BILLETS AU MONTANT DE 85 000 $ QUI DOIT ÊTRE RÉALISÉ LE 20 JANVIER 2026. RÈGLEMENT D’EMPRUNT #2022-459"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Cet emprunt par billet auprès d'une institution financière relève de la simple gestion financière et de trésorerie exclue du champ de l'urbanisme et de l'aménagement.",
+   "excerpt": "QU’UN emprunt par billet au montant de 85 000 $ prévu au règlement d’emprunt numéro 2022-459 soit réalisé au taux annuel de 5,01%."
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le point apparaît à l'ordre du jour mais ne fait l'objet d'aucune délibération, décision ou résolution dans le procès-verbal.",
+   "excerpt": "5. Projet potentiel d’éoliennes."
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "L'autorisation de bail pour un service de garde éducatif en milieu communautaire relève de la gestion de baux municipaux/services sociaux, exclue de la planification urbaine.",
+   "excerpt": "bail liant la municipalité et les responsables de garde qui utiliseront les locaux dédiés à ce service au 368 route 116."
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "L'avis d'intérêt à un programme d'efficacité énergétique des bâtiments municipaux (Éco Énergie 360) relève de la gestion des actifs internes sans impact direct sur l'aménagement du territoire.",
+   "excerpt": "QUE la Municipalité de Dosquet déclare son intérêt au programme Éco Énergie 360 ;"
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 2022-459 est un règlement d'emprunt antérieur cité comme base juridique pour une résolution de concordance d'emprunt par billet, et non un acte réglementaire adopté à cette séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Cet emprunt par billet auprès d'une institution financière relève de la simple gestion financière et de trésorerie exclue du champ de l'urbanisme et de l'aménagement."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point apparaît à l'ordre du jour mais ne fait l'objet d'aucune délibération, décision ou résolution dans le procès-verbal."
+   },
+   {
+    "act": "A06",
+    "reason": "L'autorisation de bail pour un service de garde éducatif en milieu communautaire relève de la gestion de baux municipaux/services sociaux, exclue de la planification urbaine."
+   },
+   {
+    "act": "A07",
+    "reason": "L'avis d'intérêt à un programme d'efficacité énergétique des bâtiments municipaux (Éco Énergie 360) relève de la gestion des actifs internes sans impact direct sur l'aménagement du territoire."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La résolution 26-01-08 appuie et recommande formellement la demande adressée à la CPTAQ pour le lot 6 274 449."
+   },
+   {
+    "act": "A02",
+    "reason": "La résolution 26-01-06 décrète le dépôt du projet de règlement 2025-499 concernant les taxes et compensations."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2551,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 9577,
+   "outputTokens": 612,
+   "totalTokens": 10189
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2403
+  },
+  "inputSha256": "652a335bc7e7021eb54e01a198479bfe8b88b394d086afe3292281831962900e"
+ }
+}

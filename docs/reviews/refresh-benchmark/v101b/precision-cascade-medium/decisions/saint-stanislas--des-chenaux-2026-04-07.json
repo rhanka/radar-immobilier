@@ -1,0 +1,652 @@
+{
+ "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c5bd6c3691bded48bc52c4d09099be3d12ef9154b14042d27db2935aa5088121",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2009-474-06"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet 2009-474-06 — Modification du plan d’urbanisme",
+     "stage": "projet",
+     "objet": "2009-474-06",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "Projet de règlement numéro 2009-474-06 modifiant le règlement\n2009-474 sur le plan d’urbanisme – Adoption"
+      },
+      {
+       "page": 5,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-474-06 modifiant le"
+      },
+      {
+       "page": 5,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-474-06 modifiant le\nrèglement de zonage 2009-474.\nLedit projet de règlement 2009-476-14 est mis à la disposition des\ncitoyens."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2009-474"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2009-474 — Plan d’urbanisme",
+     "stage": null,
+     "objet": "2009-474",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas ait adopté, le\n04 mai 2009, le Règlement sur le plan d’urbanisme numéro 2009-474 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2009-475-04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet 2009-475-04 — Permis et certificats",
+     "stage": "projet",
+     "objet": "2009-475-04",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-475-04 modifiant le"
+      },
+      {
+       "page": 6,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-475-04 modifiant le\nrèglement sur les permis et certificats 2009-475."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2009-475"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2009-475 — Permis et certificats",
+     "stage": null,
+     "objet": "2009-475",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas a adopté, le 04\nmai 2009, le Règlement sur les permis et certificats numéro 2009-475 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-2009-476-14"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet 2009-476-14 — Zonage, captage et éoliennes",
+     "stage": "projet",
+     "objet": "2009-476-14",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le"
+      },
+      {
+       "page": 7,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le\nrèglement de zonage 2009-476."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-2009-476"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2009-476 — Zonage",
+     "stage": null,
+     "objet": "2009-476",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas a adopté, le 04\nmai 2009, le Règlement de zonage numéro 2009-476 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-plan-motion"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — 2009-474-06",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "AVIS DE MOTION est par les présentes donné par Michel Sanscartier\nà l’effet qu’il présentera, à une séance ultérieure de ce conseil, le"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-plan-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du projet 2009-474-06",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-474-06 modifiant le"
+      },
+      {
+       "page": 5,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-474-06 modifiant le\nrèglement de zonage 2009-474.\nLedit projet de règlement 2009-476-14 est mis à la disposition des\ncitoyens."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-permis-motion"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — 2009-475-04",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "AVIS DE MOTION est par les présentes donné par Michel Sanscartier\nà l’effet qu’il présentera, à une séance ultérieure de ce conseil, le"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-permis-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du projet 2009-475-04",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-475-04 modifiant le"
+      },
+      {
+       "page": 6,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-475-04 modifiant le\nrèglement sur les permis et certificats 2009-475."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-zonage-motion"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — 2009-476-14",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "Avis de motion est par les présentes donné par Michel Sanscartier à\nl’effet qu’il présentera, à une séance ultérieure de ce conseil, le"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "event-zonage-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du projet 2009-476-14",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le"
+      },
+      {
+       "page": 7,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le\nrèglement de zonage 2009-476."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-consultation-zonage"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Consultation publique annoncée pour le 26 mai 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "CONSIDÉRANT que le conseil municipal tiendra, conformément aux\nexigences de la Loi, une assemblée publique de consultation le 26 mai\n2026 à 18h30"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "signal-opposition-eoliennes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Opposition aux éoliennes et appui à la résiliation de l’entente TES Mauricie H2",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "CONSIDÉRANT la volonté clairement exprimée par la Municipalité\nde Saint-Stanislas de s’opposer au projet d’implantation d’éoliennes sur\nson territoire ;"
+      },
+      {
+       "page": 11,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas appuie la résolution 2026-03-32"
+      },
+      {
+       "page": 11,
+       "excerpt": "CONSIDÉRANT la volonté clairement exprimée par la Municipalité\nde Saint-Stanislas de s’opposer au projet d’implantation d’éoliennes sur\nson territoire ;\nEN CONSÉQUENCE, il est proposé par Michel Sanscartier et résolu\nà l’unanimité des conseillers présents que la Municipalité de SaintStanislas appuie la résolution 2026-03-32 de la Municipalité de SaintSéverin-de-Proulxville."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "signal-vente-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Autorisation d’enchérir à la vente pour taxes du 11 juin 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Dominique Cossette et\nrésolu à l’unanimité des conseillers présents que la Municipalité de\nSaint-Stanislas autorise:"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A16",
+   "nodeIds": [
+    "bylaw-2026-02"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-02 — Occupation et entretien des bâtiments",
+     "stage": null,
+     "objet": "2026-02",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas ait adopté le\nrèglement numéro 2026-02 relatif à l’occupation et l’entretien des\nbâtiments ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A17",
+   "nodeIds": [
+    "signal-application-urbanisme"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Élargissement de l’autorité d’application des règlements d’urbanisme",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Lorraine Boisvert et résolu à\nl’unanimité des conseillers présents que la Municipalité de SaintStanislas autorise, en plus de l’inspecteur en bâtiment, le coordonnat"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A18",
+   "nodeIds": [
+    "signal-plan-intervention"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Adoption du plan d’intervention pour les infrastructures",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Lise Déry et résolu à\nl’unanimité des conseillers présents que la Municipalité de SaintStanislas :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A19",
+   "nodeIds": [
+    "signal-preau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Projet de préau au-dessus de la patinoire — Demande de financement",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Dominique Cossette et\nrésolu à l’unanimité des conseillers présents que la Municipalité de\nSaint-Stanislas :"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement 2009-474-06 modifiant le plan d'urbanisme est formellement adopté par la résolution 2026-04-51.\",\"excerpt\":\"que la Municipalité de SaintStanislas adopte le projet de règlement 2009-474-06 modifiant le\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple rappel historique de l'adoption en 2009 du plan d'urbanisme numéro 2009-474, sans décision prise dans ce document.\",\"excerpt\":\"CONSIDÉRANT que la Municipalité de Saint-Stanislas ait adopté, le\\n04 mai 2009, le Règlement sur le plan d’urbanisme numéro 2009-474 ;\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement 2009-475-04 modifiant le règlement sur les permis et certificats est adopté par résolution 2026-04-52.\",\"excerpt\":\"que la Municipalité de SaintStanislas adopte le projet de règlement 2009-475-04 modifiant le\\nrèglement sur les permis et certificats 2009-475.\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un rappel historique concernant un règlement adopté le 4 mai 2009.\",\"excerpt\":\"CONSIDÉRANT que la Municipalité de Saint-Stanislas a adopté, le 04\\nmai 2009, le Règlement sur les permis et certificats numéro 2009-475 ;\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement 2009-476-14 modifiant le règlement de zonage est adopté par résolution 2026-04-53.\",\"excerpt\":\"que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le\\nrèglement de zonage 2009-476.\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un rappel historique d'un règlement adopté en mai 2009.\",\"excerpt\":\"CONSIDÉRANT que la Municipalité de Saint-Stanislas a adopté, le 04\\nmai 2009, le Règlement de zonage numéro 2009-476 ;\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion pour le règlement 2009-474-06 est donné lors de la séance.\",\"excerpt\":\"AVIS DE MOTION est par les présentes donné par Michel Sanscartier\\nà l’effet qu’il présentera, à une séance ultérieure de ce conseil, le\\nrèglement 2009-474-06\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du projet de règlement 2009-474-06 est actée par la résolution 2026-04-51.\",\"excerpt\":\"que la Municipalité de SaintStanislas adopte le projet de règlement 2009-474-06 modifiant le\\nrèglement de zonage 2009-474.\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion pour le règlement 2009-475-04 est formellement donné lors de la séance.\",\"excerpt\":\"AVIS DE MOTION est par les présentes donné par Michel Sanscartier\\nà l’effet qu’il présentera, à une séance ultérieure de ce conseil, le\\nrèglement 2009-475-04\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du projet de règlement 2009-475-04 est constatée par la résolution 2026-04-52.\",\"excerpt\":\"que la Municipalité de SaintStanislas adopte le projet de règlement 2009-475-04 modifiant le\\nrèglement sur les permis et certificats 2009-475.\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion pour le règlement 2009-476-14 est expressément donné à la séance.\",\"excerpt\":\"Avis de motion est par les présentes donné par Michel Sanscartier à\\nl’effet qu’il présentera, à une séance ultérieure de ce conseil, le\\nrèglement 2009-476-14\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du projet de règlement 2009-476-14 est actée par la résolution 2026-04-53.\",\"excerpt\":\"que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le\\nrèglement de zonage 2009-476.\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"La tenue d'une assemblée publique de consultation fixée au 26 mai 2026 est mentionnée aux considérants d'urbanisme.\",\"excerpt\":\"le conseil municipal tiendra, conformément aux\\nexigences de la Loi, une assemblée publique de consultation le 26 mai\\n2026 à 18h30\"},{\"act\":\"A14\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une résolution politique d'appui à une autre municipalité et non d'un acte réglementaire d'urbanisme ou foncier direct.\",\"excerpt\":\"\"},{\"act\":\"A15\",\"verdict\":\"non_soutenu\",\"reason\":\"Une autorisation d'enchérir à une vente pour non-paiement de taxes est un acte d'administration fiscale et générale exclu du champ de l'urbanisme.\",\"excerpt\":\"\"},{\"act\":\"A16\",\"verdict\":\"non_soutenu\",\"reason\":\"Le texte fait uniquement référence à l'adoption passée du règlement 2026-02 pour justifier la nomination d'officiers d'application.\",\"excerpt\":\"CONSIDÉRANT que la Municipalité de Saint-Stanislas ait adopté le\\nrèglement numéro 2026-02 relatif à l’occupation et l’entretien des\\nbâtiments ;\"},{\"act\":\"A17\",\"verdict\":\"non_soutenu\",\"reason\":\"La désignation d'un fonctionnaire pour l'application des règlements est une nomination/gestion administrative interne exclue.\",\"excerpt\":\"autorise, en plus de l’inspecteur en bâtiment, le coordonnateur\\ndu service des travaux publics pour appliquer les règlements\\nd’urbanisme\"},{\"act\":\"A18\",\"verdict\":\"non_soutenu\",\"reason\":\"L'adoption d'un plan d'intervention pour le renouvellement de conduites d'aqueduc et d'égouts relève de la voirie/infrastructure technique d'hygiène du milieu sans développement foncier/urbanistique explicite.\",\"excerpt\":\"\"},{\"act\":\"A19\",\"verdict\":\"non_soutenu\",\"reason\":\"Une demande de subvention pour des infrastructures récréatives et sportives (loisirs) relève des exclusions.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement 2009-474-06 modifiant le plan d'urbanisme est formellement adopté par la résolution 2026-04-51.",
+   "excerpt": "que la Municipalité de SaintStanislas adopte le projet de règlement 2009-474-06 modifiant le"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple rappel historique de l'adoption en 2009 du plan d'urbanisme numéro 2009-474, sans décision prise dans ce document.",
+   "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas ait adopté, le\n04 mai 2009, le Règlement sur le plan d’urbanisme numéro 2009-474 ;"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement 2009-475-04 modifiant le règlement sur les permis et certificats est adopté par résolution 2026-04-52.",
+   "excerpt": "que la Municipalité de SaintStanislas adopte le projet de règlement 2009-475-04 modifiant le\nrèglement sur les permis et certificats 2009-475."
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un rappel historique concernant un règlement adopté le 4 mai 2009.",
+   "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas a adopté, le 04\nmai 2009, le Règlement sur les permis et certificats numéro 2009-475 ;"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement 2009-476-14 modifiant le règlement de zonage est adopté par résolution 2026-04-53.",
+   "excerpt": "que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le\nrèglement de zonage 2009-476."
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un rappel historique d'un règlement adopté en mai 2009.",
+   "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas a adopté, le 04\nmai 2009, le Règlement de zonage numéro 2009-476 ;"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion pour le règlement 2009-474-06 est donné lors de la séance.",
+   "excerpt": "AVIS DE MOTION est par les présentes donné par Michel Sanscartier\nà l’effet qu’il présentera, à une séance ultérieure de ce conseil, le\nrèglement 2009-474-06"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "L'adoption du projet de règlement 2009-474-06 est actée par la résolution 2026-04-51.",
+   "excerpt": "que la Municipalité de SaintStanislas adopte le projet de règlement 2009-474-06 modifiant le\nrèglement de zonage 2009-474."
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion pour le règlement 2009-475-04 est formellement donné lors de la séance.",
+   "excerpt": "AVIS DE MOTION est par les présentes donné par Michel Sanscartier\nà l’effet qu’il présentera, à une séance ultérieure de ce conseil, le\nrèglement 2009-475-04"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "L'adoption du projet de règlement 2009-475-04 est constatée par la résolution 2026-04-52.",
+   "excerpt": "que la Municipalité de SaintStanislas adopte le projet de règlement 2009-475-04 modifiant le\nrèglement sur les permis et certificats 2009-475."
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion pour le règlement 2009-476-14 est expressément donné à la séance.",
+   "excerpt": "Avis de motion est par les présentes donné par Michel Sanscartier à\nl’effet qu’il présentera, à une séance ultérieure de ce conseil, le\nrèglement 2009-476-14"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "L'adoption du projet de règlement 2009-476-14 est actée par la résolution 2026-04-53.",
+   "excerpt": "que la Municipalité de SaintStanislas adopte le projet de règlement 2009-476-14 modifiant le\nrèglement de zonage 2009-476."
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "La tenue d'une assemblée publique de consultation fixée au 26 mai 2026 est mentionnée aux considérants d'urbanisme.",
+   "excerpt": "le conseil municipal tiendra, conformément aux\nexigences de la Loi, une assemblée publique de consultation le 26 mai\n2026 à 18h30"
+  },
+  {
+   "act": "A14",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une résolution politique d'appui à une autre municipalité et non d'un acte réglementaire d'urbanisme ou foncier direct.",
+   "excerpt": ""
+  },
+  {
+   "act": "A15",
+   "verdict": "non_soutenu",
+   "reason": "Une autorisation d'enchérir à une vente pour non-paiement de taxes est un acte d'administration fiscale et générale exclu du champ de l'urbanisme.",
+   "excerpt": ""
+  },
+  {
+   "act": "A16",
+   "verdict": "non_soutenu",
+   "reason": "Le texte fait uniquement référence à l'adoption passée du règlement 2026-02 pour justifier la nomination d'officiers d'application.",
+   "excerpt": "CONSIDÉRANT que la Municipalité de Saint-Stanislas ait adopté le\nrèglement numéro 2026-02 relatif à l’occupation et l’entretien des\nbâtiments ;"
+  },
+  {
+   "act": "A17",
+   "verdict": "non_soutenu",
+   "reason": "La désignation d'un fonctionnaire pour l'application des règlements est une nomination/gestion administrative interne exclue.",
+   "excerpt": "autorise, en plus de l’inspecteur en bâtiment, le coordonnateur\ndu service des travaux publics pour appliquer les règlements\nd’urbanisme"
+  },
+  {
+   "act": "A18",
+   "verdict": "non_soutenu",
+   "reason": "L'adoption d'un plan d'intervention pour le renouvellement de conduites d'aqueduc et d'égouts relève de la voirie/infrastructure technique d'hygiène du milieu sans développement foncier/urbanistique explicite.",
+   "excerpt": ""
+  },
+  {
+   "act": "A19",
+   "verdict": "non_soutenu",
+   "reason": "Une demande de subvention pour des infrastructures récréatives et sportives (loisirs) relève des exclusions.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 19,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Il s'agit d'un simple rappel historique de l'adoption en 2009 du plan d'urbanisme numéro 2009-474, sans décision prise dans ce document."
+   },
+   {
+    "act": "A04",
+    "reason": "Il s'agit d'un rappel historique concernant un règlement adopté le 4 mai 2009."
+   },
+   {
+    "act": "A06",
+    "reason": "Il s'agit d'un rappel historique d'un règlement adopté en mai 2009."
+   },
+   {
+    "act": "A14",
+    "reason": "Il s'agit d'une résolution politique d'appui à une autre municipalité et non d'un acte réglementaire d'urbanisme ou foncier direct."
+   },
+   {
+    "act": "A15",
+    "reason": "Une autorisation d'enchérir à une vente pour non-paiement de taxes est un acte d'administration fiscale et générale exclu du champ de l'urbanisme."
+   },
+   {
+    "act": "A16",
+    "reason": "Le texte fait uniquement référence à l'adoption passée du règlement 2026-02 pour justifier la nomination d'officiers d'application."
+   },
+   {
+    "act": "A17",
+    "reason": "La désignation d'un fonctionnaire pour l'application des règlements est une nomination/gestion administrative interne exclue."
+   },
+   {
+    "act": "A18",
+    "reason": "L'adoption d'un plan d'intervention pour le renouvellement de conduites d'aqueduc et d'égouts relève de la voirie/infrastructure technique d'hygiène du milieu sans développement foncier/urbanistique explicite."
+   },
+   {
+    "act": "A19",
+    "reason": "Une demande de subvention pour des infrastructures récréatives et sportives (loisirs) relève des exclusions."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le projet de règlement 2009-474-06 modifiant le plan d'urbanisme est formellement adopté par la résolution 2026-04-51."
+   },
+   {
+    "act": "A03",
+    "reason": "Le projet de règlement 2009-475-04 modifiant le règlement sur les permis et certificats est adopté par résolution 2026-04-52."
+   },
+   {
+    "act": "A05",
+    "reason": "Le projet de règlement 2009-476-14 modifiant le règlement de zonage est adopté par résolution 2026-04-53."
+   },
+   {
+    "act": "A07",
+    "reason": "L'avis de motion pour le règlement 2009-474-06 est donné lors de la séance."
+   },
+   {
+    "act": "A08",
+    "reason": "L'adoption du projet de règlement 2009-474-06 est actée par la résolution 2026-04-51."
+   },
+   {
+    "act": "A09",
+    "reason": "L'avis de motion pour le règlement 2009-475-04 est formellement donné lors de la séance."
+   },
+   {
+    "act": "A10",
+    "reason": "L'adoption du projet de règlement 2009-475-04 est constatée par la résolution 2026-04-52."
+   },
+   {
+    "act": "A11",
+    "reason": "L'avis de motion pour le règlement 2009-476-14 est expressément donné à la séance."
+   },
+   {
+    "act": "A12",
+    "reason": "L'adoption du projet de règlement 2009-476-14 est actée par la résolution 2026-04-53."
+   },
+   {
+    "act": "A13",
+    "reason": "La tenue d'une assemblée publique de consultation fixée au 26 mai 2026 est mentionnée aux considérants d'urbanisme."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 5095,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 13169,
+   "outputTokens": 1694,
+   "totalTokens": 14863
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4931
+  },
+  "inputSha256": "470fc3c0a5ea7955f7a99735b9a7b6d97d19c52b7b9a6c25f2315d907eccee8d"
+ }
+}

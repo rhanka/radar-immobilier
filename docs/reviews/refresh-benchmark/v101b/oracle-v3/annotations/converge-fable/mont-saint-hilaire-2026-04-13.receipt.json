@@ -1,0 +1,77 @@
+{
+ "documentId": "mont-saint-hilaire-2026-04-13",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2dc49be12c6700e289e928622d9c1aed1d0f2ba7bbf5be3715bdd07b8c789da3",
+ "inputSha256": "8d7868d118e201dc235aa3728ef9bf7d449815328e20e8de7b1971ccead00d2a",
+ "responseSha256": "b87ba899b34bfb8dd5f919a79abafbe8ea0338b7262cc8d755a7b887c28984ef",
+ "rc": 0,
+ "latencyMs": 79799,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "33a2af4f-6e5f-4b97-a0b4-731c06d447e9",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 6613,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 36493,
+   "webSearchRequests": 0,
+   "costUSD": 1.06081475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 4276,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 36493,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 6613,
+  "output_tokens_details": {
+   "thinking_tokens": 4276
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 36493,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 6613,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 36493,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 36493
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 1.06081475,
+ "durationApiMs": 77933,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:34:22.408Z"
+}

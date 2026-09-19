@@ -1,0 +1,111 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c71cd359cd133021bc4dac4793b39d1015e23185e50f317a26f81884bf00faa1",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement résiduel de zonage 596-20 est formellement attestée à la page 20 par la résolution 2026-04-098.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement distinct 596-21 est formellement attestée à la page 21 par la résolution 2026-04-099.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement distinct 596-22 est formellement attestée à la page 23 par la résolution 2026-04-100.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement distinct 596-23 est formellement attestée à la page 24 par la résolution 2026-04-101.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'octroi du PIIA au 9, chemin Frank-Santerre est attesté à la page 25 par la résolution 2026-04-102.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'octroi du PIIA révisé au 753, chemin Lakeside (lot 6 643 103) est attesté à la page 26 par la résolution 2026-04-103.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-099 et ne constitue pas une unité d'urbanisme distincte.\"},{\"item\":\"i08\",\"choice\":\"absent\",\"reason\":\"L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-100 et ne constitue pas une unité d'urbanisme distincte.\"},{\"item\":\"i09\",\"choice\":\"absent\",\"reason\":\"L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-101 et ne constitue pas une unité d'urbanisme distincte.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'adoption du règlement résiduel de zonage 596-20 est formellement attestée à la page 20 par la résolution 2026-04-098."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'adoption du règlement distinct 596-21 est formellement attestée à la page 21 par la résolution 2026-04-099."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'adoption du règlement distinct 596-22 est formellement attestée à la page 23 par la résolution 2026-04-100."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'adoption du règlement distinct 596-23 est formellement attestée à la page 24 par la résolution 2026-04-101."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'octroi du PIIA au 9, chemin Frank-Santerre est attesté à la page 25 par la résolution 2026-04-102."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'octroi du PIIA révisé au 753, chemin Lakeside (lot 6 643 103) est attesté à la page 26 par la résolution 2026-04-103."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-099 et ne constitue pas une unité d'urbanisme distincte."
+  },
+  {
+   "item": "i08",
+   "choice": "absent",
+   "reason": "L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-100 et ne constitue pas une unité d'urbanisme distincte."
+  },
+  {
+   "item": "i09",
+   "choice": "absent",
+   "reason": "L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-101 et ne constitue pas une unité d'urbanisme distincte."
+  }
+ ]
+}

@@ -1,0 +1,74 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "3a6ae6809f0da4a89c45b1e2bc32faf27033a275dbb2da9d785a50ccdb404e82",
+ "verificationSha256": "09c4b6c0b8c7804e10dbf25b708d391a75540cd3636e479bc2f65ed87e410f16",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"L'objet réglementaire est explicite et l'étape est constatée dans ce document par l'ordre du jour adopté (« 9.2 Adoption du 2e projet – Règlement #55-2026 modifiant le règlement de zonage #2010-03 ») et par le titre du point 9.2 (« ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03 »), cohérents avec la séquence attestée (avis de motion le 13 avril 2026, consultation publique du 27 avril 2026) ; la mention « premier projet » dans la résolution 61-05-2026 est un report du libellé d'avril (le considérant dit encore que le premier projet « sera présenté » à la consultation du 27 avril, déjà passée) et ne suffit pas à effacer l'unité. La position « absent » de A est écartée car elle supprimerait un fait d'urbanisme explicitement traité, alors que la règle d'inclusion vise l'urbanisme et que le document n'offre aucune autre étape crédible pour ce règlement à cette séance.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption du second projet du règlement #55-2026 modifiant le zonage",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "55-2026",
+      "page": 7,
+      "citation": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03",
+      "anchor": "RÈGLEMENT #55-2026",
+      "spanStart": 501,
+      "spanEnd": 590
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Malgré le titre annonçant un second projet à la page 7, la résolution 61-05-2026 dispose que le conseil « dépose et adopte le premier projet de règlement #55-2026 », ce qui ne confirme pas l’étape second_projet proposée."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le titre du point 9.2 (page 7) et l'ordre du jour attestent « ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03 » ; objet réglementaire d'urbanisme explicite, étape second_projet conforme à la séquence (avis de motion 13 avril, consultation 27 avril), citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "La résolution 61-05-2026 et le titre 9.2 à la page 7 attestent l'adoption du second projet de règlement #55-2026 modifiant le zonage."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "L'objet réglementaire est explicite et l'étape est constatée dans ce document par l'ordre du jour adopté (« 9.2 Adoption du 2e projet – Règlement #55-2026 modifiant le règlement de zonage #2010-03 ») et par le titre du point 9.2 (« ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03 »), cohérents avec la séquence attestée (avis de motion le 13 avril 2026, consultation publique du 27 avril 2026) ; la mention « premier projet » dans la résolution 61-05-2026 est un report du libellé d'avril (le considérant dit encore que le premier projet « sera présenté » à la consultation du 27 avril, déjà passée) et ne suffit pas à effacer l'unité. La position « absent » de A est écartée car elle supprimerait un fait d'urbanisme explicitement traité, alors que la règle d'inclusion vise l'urbanisme et que le document n'offre aucune autre étape crédible pour ce règlement à cette séance."
+  }
+ ]
+}

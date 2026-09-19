@@ -1,0 +1,765 @@
+{
+ "archivedAt": "2026-09-18T18:30:53.354Z",
+ "step": "converge-astra",
+ "archivedAs": "converge-astra-pre-pass3",
+ "reason": "owner 2026-09-18: astra-pass3 inserted after gemini-pass2; these verification votes were cast on the gold before astra-pass3 and must not be reused",
+ "documents": 97,
+ "files": [
+  {
+   "path": "annotations/converge-astra-pre-pass3/abercorn-2026-03-30.json",
+   "sha256": "cd59781a506264512a446bcb6605adb22fdb851fda3d78197ca31ac8979e3856"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/acton-vale-2026-03-16.json",
+   "sha256": "760dddbbe0585b270930adec651187dc67755a1792af70eac850e51d979cdb95"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/acton-vale-2026-03-16.receipt.json",
+   "sha256": "361b307fc747dace8a77a5e508a2b07cc2875ca602c0eac18f0b5232503dcc03"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/amherst-2026-06-08.json",
+   "sha256": "3632ac57137abacbe6bac8e41d07193eb204334f166d3d2fa812619b44a81a6c"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/amherst-2026-06-08.receipt.json",
+   "sha256": "647fe97e0de0a3f961966cc8dd09c05f23b92ff02f281437dca1ff7138660ef8"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/arundel-2026-07-31.json",
+   "sha256": "c6458743c0a2760d701e967d4de46c688fa14cd39a60f6ba3a082dfdbaee278c"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/arundel-2026-07-31.receipt.json",
+   "sha256": "7aebb79890ac8c1e6c6a81c00425c3db72248efed0880470ba6265de85e5f9e1"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/aumond-2026-01-14.json",
+   "sha256": "3c121400be037a1dcead701d3dbc7d3aa57d2afd9ea341d6f3eeb12feb14717b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/ayers-cliff-2026-03-02.json",
+   "sha256": "918b67595af5dbc3e0c50d1e23b926c153c10be89c3181457244b813cf67e167"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/ayers-cliff-2026-03-02.receipt.json",
+   "sha256": "3477bada5ad8ccdf965169a082df43ce83116f34651909acaa76d4eaf806bfb1"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/barnston-ouest-2026-05-04.json",
+   "sha256": "59b40a5b5ed1ba4b337d7491007d910913a35ea860cbf4a43181a144daef2814"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/barnston-ouest-2026-05-04.receipt.json",
+   "sha256": "cedab6a2491211ed88b89655b6c9f9adba3b3526c24ba0aab4a34f1d57b1d35f"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/beaupre-2026-03-02.json",
+   "sha256": "299cac26e014d7d9d1b91f4617f6442615a4a07aa89579eee894de20bd1b3fc4"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/beaupre-2026-03-02.receipt.json",
+   "sha256": "bd2c2b9407117ccbcc18389c506269970b12b8e61d0455299e3c727d07628727"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/bedford--brome-missisquoi-2026-06-02.json",
+   "sha256": "e503960f189225635f2603dbf5216969b147bc8811b42e18fe6c9e77a29607df"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/bedford--brome-missisquoi-2026-06-02.receipt.json",
+   "sha256": "ad2ea9ca5d4747cc12eec22c50db2f14f92b3aa2cf33bb58af0cba5e79834b19"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/beloeil-2026-03-23.json",
+   "sha256": "3de511ace8c6982cc3e1edfd57c83882014ac8dfbeba7f1bdfc17d320adff0f1"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/beloeil-2026-03-23.receipt.json",
+   "sha256": "21d8976208ab104cb8cf203059e2c4cce32e9671103b2084e9d4e2f15e0156b2"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/berthier-sur-mer-2026-03-24.json",
+   "sha256": "d7f170e27aaa89524ef19fd747fe21779a677bd4d4adbddebc8c6e25dd3390b1"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/berthier-sur-mer-2026-03-24.receipt.json",
+   "sha256": "88af4b79e8c2770ff5e4bd469e71877b471f2a9d2b1ec0dda17b357f0e6bcfab"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/blue-sea-2026-02-03.json",
+   "sha256": "d5a4f55361eb247425c9bf16bb66a971a87bffe68d8b7de9e7a98c962fc025a7"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/boisbriand-2026-05-05.json",
+   "sha256": "c244f57a166efe1070eb90672435174a381d2422d955e55472dc3b560dd00509"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/boisbriand-2026-05-05.receipt.json",
+   "sha256": "8e5fe5e54ee0e9e445eba95dc2a4fc521f13509053cb67d1ad99c51d4dded880"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/bolton-est-2026-01-12.json",
+   "sha256": "a2a033e5bc556dc1e7804ec5b8050eea76b29ec34ff65a55b126297ba7911a5f"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/bolton-est-2026-01-12.receipt.json",
+   "sha256": "6c1d3045cd1bb769a9117eaf60a01002b85ea893158ea1ded679191cb799d430"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/bowman-2026-05-12.json",
+   "sha256": "e711bdeb2d7482c8905f0422b60d4dcf2eaccc6634bd59e2f6e47a4a2ac44aa9"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/bowman-2026-05-12.receipt.json",
+   "sha256": "41b1a2dca6ab8c571235677cb75df9048e771fb2562afe078aa5745f5169a355"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/brossard-2026-04-28.json",
+   "sha256": "57f6da6c10e5b9873ad43d30f1c39de7b4940f0db1c7bbcaa0d2d01002d22730"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/brossard-2026-04-28.receipt.json",
+   "sha256": "121ff7bca197f70a0a78b28704a85f419776607b7411c4b673baf7caaa8898f2"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/brownsburg-chatham-2026-03-10.json",
+   "sha256": "4eed4d593ed4941fedcb418af64afcd7bcd083d2ff10502f5a8102933d77e71b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/brownsburg-chatham-2026-03-10.receipt.json",
+   "sha256": "394905531986005fc8fdf67ffcaad2d9ee539bae24d91307e6e6a37cd266a754"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/candiac-2026-06-15.json",
+   "sha256": "1dd94d05ace1a98bc0aea1fca35bc2fc90d3e5ce85ea8773da040908f1531031"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/candiac-2026-06-15.receipt.json",
+   "sha256": "692d5fde87bbf0da3748b8997d2934d0857aea9915e883a8406cbde094a5c48f"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/carignan-2026-03-04.json",
+   "sha256": "06e82fa81d3e47f513701c615deab2aa938d73fc6220d08462e8a7bddf0fd7cd"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/carignan-2026-03-04.receipt.json",
+   "sha256": "cb03b4cd461d7f2f7e79eca24793c1155a96aec73ae7d5d4a96b79a9ef69851b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/chesterville-2026-03-02.json",
+   "sha256": "8d8e7d04210c380a8225c9da2a234f55eaebf5361ba4c0e5f82bab42e8369ea9"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/chesterville-2026-03-02.receipt.json",
+   "sha256": "28d6c6dd7acd34d976d08d9d351aaff9b536e60fb9b7a99adc7c22cf0d5a0ed2"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/chibougamau-2026-05-16.json",
+   "sha256": "ae702beb70a52feb36a1c7c3738302d2fa1eb1a899766794430d5485cf5f8126"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/chibougamau-2026-05-16.receipt.json",
+   "sha256": "f611c4a517851fe6d8fb93d7c829348fcc1343c2af6263187995a43ad61b4484"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/contrecoeur-2026-04-14.json",
+   "sha256": "fb18173f037c3bea0b425bc7de5bc87d20e959dd71d682bcff7c8e1604920406"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/contrecoeur-2026-04-14.receipt.json",
+   "sha256": "c07ec7c67334925dc3d4e47b77dec936f05b22c2a64889e397f7e7713cfabd81"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/cookshire-eaton-2026-04-07.json",
+   "sha256": "8b3f13897cc4d359c5d8e219cece3680c9620164f05504bf757c815d4865ba67"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/cookshire-eaton-2026-04-07.receipt.json",
+   "sha256": "2984459d1e1fbcc71c3483ac413dec437c8acfe7c52049682e07d992b6c05850"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/coteau-du-lac-2026-02-10.json",
+   "sha256": "f4946c82b2bef98a2e1062df9fbdcc772f38853191a9a9ca0426dd94f56cdccf"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/coteau-du-lac-2026-02-10.receipt.json",
+   "sha256": "38104430ca9460c145fce96b8a8bcedeeae4043c057d20f94f79e8bb94d2db7f"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/cowansville-2026-05-05.json",
+   "sha256": "5b23bad5b788da766a4fa098a245b875380d85de1a07c15c808b6c5471c1fc4d"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/cowansville-2026-05-05.receipt.json",
+   "sha256": "911408185804e4c3eb5131c52782297fc13608d72fe1ba69054047d6ac357740"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/danville-2026-01-15.json",
+   "sha256": "243f612eefcf2b6d9ebebb32a626e7803570fae28312a5d70f4f308e61de4422"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/daveluyville-2026-05-04.json",
+   "sha256": "02542c483651c3ab4f9fc23ce69f7b00b65af0cc672fcea99f19dd64b7ccd00c"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/daveluyville-2026-05-04.receipt.json",
+   "sha256": "998fc5411bf8ce8df0a96d90adf04a98b9c23e7cb2853394e1a10fdf461067d1"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/dollard-des-ormeaux-2026-02-10.json",
+   "sha256": "458e75616a0eff4f4e213384ea10fbdd3c99732f2c69fb71696389f48c18174a"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/dollard-des-ormeaux-2026-02-10.receipt.json",
+   "sha256": "dfbc9104709c43ad56d740305d6dc5ee3c600fa9949427a06f2424413a57a0fb"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/dosquet-2026-01-13.json",
+   "sha256": "608deac59c3ebe7cc3a5028e5cf1f1b2c8d340a0791ed3313448facc55bafe14"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/dosquet-2026-01-13.receipt.json",
+   "sha256": "cb9c586d7ea0ce9cc1909f62512f59c19469ca89d5aae31410999d022f265998"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/eastman-2026-06-01.json",
+   "sha256": "b7ecae68763ade8d0d7b96b630eea439002cfab8e3f778ffd13bbb162ebf9653"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/eastman-2026-06-01.receipt.json",
+   "sha256": "cce849e67cf6bfc639502086cd6cfd8073d5b69e55b32fa0e7e44090b2b0be9c"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/frontenac-2026-03-10.json",
+   "sha256": "5afbbab2738d2bf4b90ebca77db822d8954ef212ea0fe61ea52512c81c20f060"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/frontenac-2026-03-10.receipt.json",
+   "sha256": "337120e905f49ab8582e8670d8297f38b9fe9d3b611b4f20b60f27376f426f5b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/gracefield-2026-04-14.json",
+   "sha256": "70b258c9042f09940c681e0d6d4a45c0e7993582ae99b5f6f2048eb27ab20a77"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/gracefield-2026-04-14.receipt.json",
+   "sha256": "1d3634997247324f112b1dbe24d0ee69b8daaeaa347aa8db337e6a973b97d555"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/grenville-sur-la-rouge-2026-04-14.json",
+   "sha256": "59eac92c167481e57372ad0ee1aa7d5688eba9d4ed89d19bd3c0264680c7c86e"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/grenville-sur-la-rouge-2026-04-14.receipt.json",
+   "sha256": "cf600bfa47f6759791db78b23fe294bb17db984fd9abd0641b1b0e233e39d5dd"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/hatley-2026-04-07.json",
+   "sha256": "3ea453e5fc37fb1cd90f05923490a89306590aa02e9b5a54d19cba04c344ddd4"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/hatley-2026-04-07.receipt.json",
+   "sha256": "3fe6c5eed0dbbc29bd3670dbcf69e80b1864808af88eeceb41638d31ebd5815f"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/la-peche-2026-06-01.json",
+   "sha256": "3cebf5aa8461993b169d4a6d7a06344f5933329e5757b2e2e9052ad7e81f5fef"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/la-peche-2026-06-01.receipt.json",
+   "sha256": "ce90555c589a1075ce603449da6789dff000d921bd60157eb04a8021b79a0706"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-brome-2026-04-07.json",
+   "sha256": "c505773c5dc3146a169e8d257f4f1d37880e4aca0f03c684f4c0ba45a9149678"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-brome-2026-04-07.receipt.json",
+   "sha256": "8d212834a5590833516e682d1abfa6ce9118698096b7cfdb0abf585c0fc8e197"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-des-seize-iles-2026-09-agenda.json",
+   "sha256": "03209e6c01cd53efcef80873194864ed0d1c9fb975e7a627f91abcdd5eb8d5f6"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-des-seize-iles-2026-09-agenda.receipt.json",
+   "sha256": "692fa3054f3923772764604ed4106435a688e1486bbbe342694e1d68420435d0"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-du-cerf-2026-04-11.json",
+   "sha256": "c1695ed7321c563b6b94f7b71fbe5af0dd0d34022de6b31790ca71cf988f6992"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-du-cerf-2026-04-11.receipt.json",
+   "sha256": "a4d016b34e570eb1c44abccccc5f2b82dfa005c6ca0dbe469a7e8e3660f90ca6"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-etchemin-2026-02-03.json",
+   "sha256": "9d9a7d4b0e6de288c4f5488290e828de63ac45cc5f5161bda97131147c92dda8"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-etchemin-2026-02-03.receipt.json",
+   "sha256": "d8907589c119af8831849d5579460d31258ed5848ba52b5d4aa540263c7c2a74"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-saint-paul-2026-05-11.json",
+   "sha256": "3c61bf0e5db949c254642a435fdb24ae593a20339e2de8332cb9fcb7a234a8dd"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-saint-paul-2026-05-11.receipt.json",
+   "sha256": "e1bf9bed997f74a185bc5ae500ff66ecbea7669948ce250c62ca3db8e3312825"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-tremblant-nord-2026-05-09.json",
+   "sha256": "3609bf98ee39677716aa40b0d90d985d7cf36d0ec61c7137e30283f5be8f0633"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lac-tremblant-nord-2026-05-09.receipt.json",
+   "sha256": "51b62f9443cdc758152cd6cbacc79e0dd6d13bcfc155d714c0e81d0b3416dbc4"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lavenir-2026-05-04.json",
+   "sha256": "24010d024e99f530597d4567b76fee1a07aae2b12dc990bb0d1362fdcb6e8c0d"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lavenir-2026-05-04.receipt.json",
+   "sha256": "1f03bf45329f25c26cc67fd5bb7d60667b26b9c18a41c597d506d37ee1ba1e71"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/les-coteaux-2026-03-16.json",
+   "sha256": "ad91ad07ee324f29ff095c7c443e034f0211904a005c3e9d9f210d230250838a"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/les-coteaux-2026-03-16.receipt.json",
+   "sha256": "ad2b3df8038d769f39eef42296e5c42ac240284076b4ed15bfc6e3a4c99e2262"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lislet-2026-04-07.json",
+   "sha256": "5a5be4e7aa4019e7f1203f0d3f75fc5bcca93d7896c0f47bf31fe8b48a9947f6"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lislet-2026-04-07.receipt.json",
+   "sha256": "90f525d17ec0da33bdc18dbd8f54a639e21da863d6dd73fc3da8e93e32f11a66"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lorraine-2026-01-13.json",
+   "sha256": "20b05026706dc963663e627ee0008ad2b5345d990d5e10b8af5e9978e56c1714"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lorraine-2026-01-13.receipt.json",
+   "sha256": "ac57fbf943e1131eeab13d3b116f440c5fcacecc2e65ff1833d51434a07933bb"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lyster-2026-02-02.json",
+   "sha256": "2c4e9787e51fdb5373cc3fffc43b177e5170db2d7e8ea1433d4bd451216cf679"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/lyster-2026-02-02.receipt.json",
+   "sha256": "c8e82696d6551bc975d228f0d3c1addc9eff868246bc7e99c3eb5f13b7de0404"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/mcmasterville-2026-02-02.json",
+   "sha256": "bcea29e9a442a88ee963a6ee0164508a887f1452c79ef9c7020910f06124b6a6"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/mcmasterville-2026-02-02.receipt.json",
+   "sha256": "258fea47228403390003158ceee337218bf514130502b623b66dd31cbec554fd"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/mont-saint-hilaire-2026-04-13.json",
+   "sha256": "0debfa58d3e20c74620e407a24248a3ecc735aedffe1903c872de74a968dc291"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/mont-saint-hilaire-2026-04-13.receipt.json",
+   "sha256": "fcc0a43bccb0147eeac4d188fda42fe04d7f31d0634d7b962512fe0033605c0b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/notre-dame-de-lourdes--joliette-2026-04-13.json",
+   "sha256": "2cd38cbc851cbe161891133398401917d325745fa0d43b6ac4bd9eec1bcdfb38"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/notre-dame-de-lourdes--joliette-2026-04-13.receipt.json",
+   "sha256": "e095a9dd8c96111322611b914f4e19c43bd313ece9b1c5b5899a2486caad4141"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/notre-dame-du-rosaire-2026-03-02.json",
+   "sha256": "c5e75bf7d64749f4ea742db45a41719f3b432e7c6e7b9468641aa4e6d87d8f51"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/notre-dame-du-rosaire-2026-03-02.receipt.json",
+   "sha256": "9c2f14b0d62a250a0811a65049b01e371824e1851d856a34441c39bda965f17e"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/ogden-2026-03-09.json",
+   "sha256": "e000b0e61b7e25c9a4b929c27c73960c09d2e03ffe764bddbf7b7362371b1653"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/ogden-2026-03-09.receipt.json",
+   "sha256": "70c16e07241171c4c335503810017d6e44c411203eb668ab9f959da1dddbf9c2"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/orford-2026-03-02.json",
+   "sha256": "bbf5c34e8e1e4e5c072ef3fc749a236722d481e8725d60b814325571827826b0"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/orford-2026-03-02.receipt.json",
+   "sha256": "c88eb6737564462016d12a8c3ad3d3d1f81b04b3e6e3ae9e4550b6099a654eb7"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/parisville-2026-05-05.json",
+   "sha256": "1399c2610b46d223b6d98cc39a10f115f841dc0026d384831474e9a0fc8ad9d8"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/parisville-2026-05-05.receipt.json",
+   "sha256": "b32f0e1f486a7e6fec402405c1a9fb9cb0f9402e8bf17620453c50209b0b9334"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/pierreville-2026-03-10.json",
+   "sha256": "e03b1a66c791cf37560269efd989be91f85bca59793bdfbdc68adf1521937912"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/pierreville-2026-03-10.receipt.json",
+   "sha256": "36e42495df31a34cac0230016c652957bc319d6fe3dd97e1845a822c9d777857"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/pincourt-2026-01-20.json",
+   "sha256": "3010c41dc7f8c58dd8cf9ffc518f629895a2a5ae2f84ddb1c938fd3fe8aa445c"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/pincourt-2026-01-20.receipt.json",
+   "sha256": "fa288f67c412730161bf62aec42f52d5636cd2497495a5575563c78fcea250ed"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/potton-2026-01-05.json",
+   "sha256": "9738db08ff0d98806c8f11b38ca6538f73b7abc025a282142ad981c83b3dddf3"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/potton-2026-01-05.receipt.json",
+   "sha256": "6aeb92d384da3a487c9b19b3fafca96f2be406259cd16c02006ddc9e96455126"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/richelieu-2026-02-03.json",
+   "sha256": "a61702c4c8b94570ffe9ff9b5c08aed2c9649e57ba2959706e67bf4dfd5fd322"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/richelieu-2026-02-03.receipt.json",
+   "sha256": "097ba9e1752f24708f553b3ef93d8673e87d5d77fb7914be7d2ea862364b6389"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/rosemere-2026-04-13.json",
+   "sha256": "b473507bf33514bf530c8786a6aeb01af093497da0328301541b97af1304ba28"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/rosemere-2026-04-13.receipt.json",
+   "sha256": "08aca90bf6ecb327fb40f9ebcea87ca038ac44ba251251f17bdb07dd02a1e816"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/roxton-2026-04-07.json",
+   "sha256": "f3b32ce613b6d9364b4a60768b51bde7b271f9ee76b060dfc936747d23dc1290"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/roxton-2026-04-07.receipt.json",
+   "sha256": "aafbcd4a2360c7ee8df95d5619dfd8faa643fcd168fe505b5b282958a746b007"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sacre-coeur-2026-05-11.json",
+   "sha256": "d7ec30ddc7438f93091d6a4388ec3656b2c6625640adf6885a8e14019beb6481"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sacre-coeur-2026-05-11.receipt.json",
+   "sha256": "445aede5b1619f6b1afb2fb23db1b22b87126353470aeeec5551f3723094c078"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-bernard-de-michaudville-2026-04-01.json",
+   "sha256": "e69898f980b670cb64c47285e0337c78ca355a6e0bf2d9d9b6c88a903b5ce329"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-charles-de-bourget-2026-05-04.json",
+   "sha256": "2340323d8a8af9f8ee49a458ae497c8357bb9d00dc75d79a71b92dcb6d513b9c"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-charles-de-bourget-2026-05-04.receipt.json",
+   "sha256": "40fa876752c78c228795f24f1356672d5973ea160f7d0949f7ecd6cb5ee55c6a"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-constant-2026-01-20.json",
+   "sha256": "378cb0f47e9b85e0fd22b85ffc68acf3bcee1541719e2d712410a3dc39d852b7"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-constant-2026-01-20.receipt.json",
+   "sha256": "370e7e18700d4274d95e6bb0ba1743fb30f1e585e4ccf949dea647511553309d"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-damien-2026-06-16.json",
+   "sha256": "519cfad5e645e0343dc0145ca48f9b84b66b93d5d7062c7a4e930fe3b8c22afd"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-damien-2026-06-16.receipt.json",
+   "sha256": "13caa60b03f6405fb482fdd2ee46c416a74b8961aeb72accbacf01a6cab727b3"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-felix-de-kingsey-2026-04-07.json",
+   "sha256": "dce8097e617c19612c0b6109cebeaf60691eed304ef3d02418740aec9828bfca"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-felix-de-kingsey-2026-04-07.receipt.json",
+   "sha256": "6356bd7137bb5a5a24bbe633af8532b23d1435e71efc860d61a1a9f45a0f586a"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-henri-2026-03-02.json",
+   "sha256": "bc82d53e2b5ddc96a20789c7aa9e545b00b948f2a379e45e6160cdf57553030f"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-henri-2026-03-02.receipt.json",
+   "sha256": "27c343311d4f610daf85c604ca2bc13d2085ed77f2565c8352943c708cf115a9"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-just-de-bretenieres-2026-02-02.json",
+   "sha256": "ead77458160b8c529d6fbe4e245fe73a6f7001ac79937e7f29e5e592a349e491"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-just-de-bretenieres-2026-02-02.receipt.json",
+   "sha256": "75dac28db2fc933fb162149d2fc2b8a34348d9f3138495c390fb5859ceebac9b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-lin-laurentides-2026-06-09.json",
+   "sha256": "46d044c5882408d5512c95c1877a1f56a6474f9e9d947876ed8300bf92982953"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-lin-laurentides-2026-06-09.receipt.json",
+   "sha256": "5cff4b8c021b01bc818a144eda6c5564d95f1f98740d698bf34de6e9fa32bb10"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-odilon-de-cranbourne-2026-01-12.json",
+   "sha256": "aaac000458613ab65bb5ef5bd61ce43ae7f8e6ba2cdd8fbb8ce3cff317f8dcc0"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-odilon-de-cranbourne-2026-01-12.receipt.json",
+   "sha256": "f970116fe1295c746142f38244e5295b75516f64caf7ea869ba645eac97d60c5"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-polycarpe-2026-01-19.json",
+   "sha256": "2509e4c666062886b76dc9efdd0070559c75fa0d2b113ea5d39d3c37d645b0c3"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-polycarpe-2026-01-19.receipt.json",
+   "sha256": "921abd991fa9c1df549f7a6160f1ac1037a61bc9fa5479efcc796b178e8457fc"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-roch-de-lachigan-2026-05-11.json",
+   "sha256": "b8ae921c88e9a9fd0c61f922355d9905dc6c5eb7f54c93ef0b5bee7de7a9176a"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-roch-de-lachigan-2026-05-11.receipt.json",
+   "sha256": "915639ac3037bbc8e69b1adba3715785edb642e46b285dbebe0b6ee19abe1160"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-stanislas--des-chenaux-2026-04-07.json",
+   "sha256": "d8e8b5a46c01215da90cdf3cc1bb780eb24fc7dc3de20ad03b01d5c7ac75a221"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-stanislas--des-chenaux-2026-04-07.receipt.json",
+   "sha256": "84dd2ad6b8cd528c06e2e562cc470c5c5be917dc6823a24fe8e5af8dcc51e338"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-sylvere-2026-04-07.json",
+   "sha256": "14fcc5f709870df51d20b81079290abac21ffd268825c21db42a9076fa7970e5"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-sylvere-2026-04-07.receipt.json",
+   "sha256": "65cab063e55ee9838a9befa028ab10467ec1554c999fa2f000e5819e57c14dd4"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-tite-des-caps-2026-02-02.json",
+   "sha256": "ed9e087a35ab091deba2139caf93e03d981a659388d1baceb815c8ea4614763e"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-tite-des-caps-2026-02-02.receipt.json",
+   "sha256": "072c6765d71fd1a2dc9413b7896dc27b6224e693db0703b6cf1d5a04a04dd5ce"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-zephirin-de-courval-2026-03-02.json",
+   "sha256": "0459ce5a46bd345c75475b206ecea3c73834e1ec468d5b1fe392f4caf5e0091a"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/saint-zephirin-de-courval-2026-03-02.receipt.json",
+   "sha256": "2b37d3bbc630f9290fbba9e28d50cc8a08738e88a3a1fdcbc339936c2b29c898"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-angele-de-monnoir-2026-01-13.json",
+   "sha256": "02360d39e7e2e731a8ce710e2bcfc1e598c38ef6e36c2624848d2911f8339027"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-angele-de-monnoir-2026-01-13.receipt.json",
+   "sha256": "7f7568fc2227e1fd97931108949994f22fdbf5f6ecfdfe664ed3428ab1d36756"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-barbe-2026-05-05.json",
+   "sha256": "c51f04a58452aca8701baacfb39f11d9cb82086b000f853a7bf5be39ee88f993"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-barbe-2026-05-05.receipt.json",
+   "sha256": "289d8893432121412fa6b3b3e767cb882462c7ebe7cc6cec5245d1b98571d07c"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-brigide-diberville-2026-06-01.json",
+   "sha256": "2df03058eab1941194855d71edfcc3e24af96ede94b002701cccadf620790ec5"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-brigide-diberville-2026-06-01.receipt.json",
+   "sha256": "25820c9714af0d3ec9faa88adb7aa418c08a8c306781c76861f330eead4cdef0"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-catherine-de-la-jacques-cartier-2026-03-02.json",
+   "sha256": "c2918ca5f6c931480f5b4d2ca542b27d9f5a14b50208aae8547706ae29483f80"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-catherine-de-la-jacques-cartier-2026-03-02.receipt.json",
+   "sha256": "2f6c742067fd545d868ab1e99dfe84c166fd5482d54413dee1f4f8929a700d9c"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-christine-2026-04-07.json",
+   "sha256": "1854642559302ed37ec99752dafaa3884c278be3ef687c1fbed122f611c3476b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-christine-2026-04-07.receipt.json",
+   "sha256": "185e0ac2107442ade2b895a4553d6b59e874e875c454ea8e6d0397e19ad88738"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-clotilde-2026-04-20.json",
+   "sha256": "855ff2ebcb8f8d1402c44fab7c9e81b3301444e318b97644e32b30ef686a340b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-clotilde-2026-04-20.receipt.json",
+   "sha256": "1d4e228084c02529030c65aef067fe84155984c660c56f2aed1e029f52b03d3b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-croix-2026-05-05.json",
+   "sha256": "4096d330bd39eb31945cc06ddeba0cd8c4f51157f9465c4b608939f5bd854f2b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-croix-2026-05-05.receipt.json",
+   "sha256": "1e355f39ec900c910dd5832cf0a3d3d6d43ae12506791718e8e08eb49d2d3d17"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-francoise--becancour-2026-05-04.json",
+   "sha256": "1bd8d4607a29ef4865d504957a3e3f1392ec4e18339c3f38f8b91c8471cddb5e"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-francoise--becancour-2026-05-04.receipt.json",
+   "sha256": "b45c89b6ca87067db532ea3e84b5826c8908eb70c6f552baad30f20c6312c280"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-genevieve-de-batiscan-2026-04-07.json",
+   "sha256": "2e41f832af6c1440817a45d2577b9ce7893426373b2d57059aa7bf547b31a883"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-genevieve-de-batiscan-2026-04-07.receipt.json",
+   "sha256": "766790997ed3c8ff76b58bc2d5b5743d5061bb858669494cdec660f926fefefb"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-martine-2026-03-17.json",
+   "sha256": "0e850243ccc835844018222d08a1d4c04d1ee58c755f62f901ac09b14edbf33d"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-martine-2026-03-17.receipt.json",
+   "sha256": "ddb41bdf9c42d6007f74aa31cb92a77373dad091b2f31f4d03731a7c023010c6"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-sophie-2026-06-02.json",
+   "sha256": "ecbe9a758606ce7e4a3833c4dc7a01ee14dd909f2ef988372791705a48e29cb6"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-sophie-2026-06-02.receipt.json",
+   "sha256": "d34efe942be84df47584b6d0d8cf69829e72b72511d8652d4e3491e8f4b37bb5"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-thecle-2026-03-09.json",
+   "sha256": "0b85f7bb0389ccc7512bff85eebdfeecb5d4fbe5326e08d30efe67ba1d9b12ef"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/sainte-thecle-2026-03-09.receipt.json",
+   "sha256": "44f2e0380b8b5a85c68eba827c391073af42e13f151f6b6a91f98666934d3907"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/stanstead-est-2026-04-13.json",
+   "sha256": "f0d90bb1dface2d217ea220cf9bd701755246008e735935cf3411ac88422f49e"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/stanstead-est-2026-04-13.receipt.json",
+   "sha256": "9f706ab3e0c6d2b7ec96956f59df80c5c8b3a123c7723e2c78ddfed496da9e92"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/stoneham-et-tewkesbury-2026-06-08.json",
+   "sha256": "745759331d7bd81a2e1a1daaee762d32df894115454a0b71f3636c7a8d45e96c"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/stoneham-et-tewkesbury-2026-06-08.receipt.json",
+   "sha256": "a231fc7c0053245d84c3ebfb0b02905ed36df679e31ee2be13cdbb540d035bd6"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/stratford-2026-04-20.json",
+   "sha256": "77bd58c3b275ed290a823b05efe1a6f87878e30a43072aa2a4c0e7a2fc0c96d8"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/stratford-2026-04-20.receipt.json",
+   "sha256": "c0284b92f79a9610eeedd810c331fde6fc4e670833430b6b26292e0147a03937"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/tadoussac-2026-01-13.json",
+   "sha256": "86a6ba3b1a6167f44f9112a0f9a5b109d9ca44b41910154e648f6c9f4fc04c14"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/tadoussac-2026-01-13.receipt.json",
+   "sha256": "c4b14814db02da77cb035559c20ffa3425cd082e26b979e16316f1214b79cdc1"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/val-dor-2026-06-01.json",
+   "sha256": "241af76d55bfa25b7a5406067741aac3c17e6dc9e8ff7ed0dd8446c8b65d1f9c"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/val-dor-2026-06-01.receipt.json",
+   "sha256": "67f5880731088014086aa817644651bb26e4aa859634b5861dfd3c2757a6da9b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/val-racine-2026-06-09.json",
+   "sha256": "440c9c4990c8eb410cb83de5270fd9ba12892bcacb08b93eedfe4c1355b0b4eb"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/val-racine-2026-06-09.receipt.json",
+   "sha256": "d2ede872fdbdd4b5f215a48709b7b71b8556d3d78b3d55c28576367fcd1e1014"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/valcourt-2026-06-01-agenda.json",
+   "sha256": "2bb1f496e5e970e47a0d66e29214da6b94eb4784b509016fee7bd98ed553726b"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/valcourt-2026-06-01-agenda.receipt.json",
+   "sha256": "8740378e9eab37208fd8dee7e6c175e287bbdea0191413db7374d9caca0fa7a2"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/warden-2026-04-08.json",
+   "sha256": "325f98babcf11e03bd0562aea121f506097ec65edddb06d92e9b428ed59fa74e"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/warden-2026-04-08.receipt.json",
+   "sha256": "b9f13cd84ecfb141f32c0322abba7b155424025bb58c35d436f3de0dbd7de82a"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/waterville-2026-04-07.json",
+   "sha256": "4b2ce609da65fb8a47712340ac32af2ce42c88cae549e91f26fd73244f3c2ec0"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/waterville-2026-04-07.receipt.json",
+   "sha256": "6ebc2ed49625b9d68a9102b4f24b25b4d7139025e3aac3112621290fa1220f90"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/wentworth-nord-2026-01-21.json",
+   "sha256": "f3e23b258913e7525df4bc293ce7bda9504c3aad2c67fefa79e9e44307009dde"
+  },
+  {
+   "path": "annotations/converge-astra-pre-pass3/wentworth-nord-2026-01-21.receipt.json",
+   "sha256": "3df5a0e59b2ba7c471cf471c17eec33040897291496f282e7051e3f1d48fd065"
+  }
+ ]
+}

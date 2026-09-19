@@ -1,0 +1,51 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "638f58c73d3253faa109d65d15cdb3049a3d7c044a5978af7e7b940173cebbd3",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-062, page 14, accepte le prêt d’un local au 30, rue Principale et autorise la Direction à signer les documents afférents, attestant ainsi un acte foncier non résidentiel inclus dans le périmètre.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-063, page 15, porte exactement le titre cité et dispose explicitement que le règlement 263-2026 soit adopté.\"},{\"item\":\"i03\",\"choice\":\"v2\",\"reason\":\"La citation de v2 reproduit exactement le passage de la page 22 nommant les quatre lots, et la résolution poursuivie à la page 23 confirme l’appui municipal à la demande sans constituer une autorisation de la CPTAQ.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-062, page 14, accepte le prêt d’un local au 30, rue Principale et autorise la Direction à signer les documents afférents, attestant ainsi un acte foncier non résidentiel inclus dans le périmètre."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-063, page 15, porte exactement le titre cité et dispose explicitement que le règlement 263-2026 soit adopté."
+  },
+  {
+   "item": "i03",
+   "choice": "v2",
+   "reason": "La citation de v2 reproduit exactement le passage de la page 22 nommant les quatre lots, et la résolution poursuivie à la page 23 confirme l’appui municipal à la demande sans constituer une autorisation de la CPTAQ."
+  }
+ ]
+}

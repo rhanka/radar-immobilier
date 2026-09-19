@@ -1,0 +1,317 @@
+{
+ "documentId": "saint-damien-2026-06-16",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "409248f0459a014a5170eebda93914ad22050c0e108508eba0cb94720fe5e905",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-2026-122"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure 2026-122 — 73, rue Messier",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+      },
+      {
+       "page": 1,
+       "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-2026-133"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure 2026-133 — 3173, chemin du Ruisseau",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+      },
+      {
+       "page": 1,
+       "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-2026-135"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande d’approbation au PIIA 2026-135 — 6710, rue Principale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+      },
+      {
+       "page": 1,
+       "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-834"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 834 — gestion contractuelle",
+     "stage": "Adoption finale inscrite au projet d’ordre du jour",
+     "objet": "834",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "14.1 Adoption finale – règlement 834 portant sur la gestion contractuelle"
+      },
+      {
+       "page": 2,
+       "excerpt": "14.1 Adoption finale – règlement 834 portant sur la gestion contractuelle"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-804-1"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 804-1 — modification du règlement 804",
+     "stage": "Avis de motion et présentation inscrits au projet d’ordre du jour",
+     "objet": "804-1",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+      },
+      {
+       "page": 2,
+       "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-804"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 804 — camions de cuisine cantines temporaires",
+     "stage": null,
+     "objet": "804",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+      },
+      {
+       "page": 2,
+       "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-830-2"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 830-2 — modification du règlement 830",
+     "stage": "Avis de motion et présentation inscrits au projet d’ordre du jour",
+     "objet": "830-2",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "14.3 Avis de motion et présentation – projet de règlement 830-2 – modification du\nrèglement 830 décrétant la tarification d’activités, biens ou services municipaux"
+      },
+      {
+       "page": 2,
+       "excerpt": "14.3 Avis de motion et présentation – projet de règlement 830-2 – modification du\nrèglement 830 décrétant la tarification d’activités, biens ou services municipaux"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-830"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 830 — tarification d’activités, biens ou services municipaux",
+     "stage": null,
+     "objet": "830",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "14.3 Avis de motion et présentation – projet de règlement 830-2 – modification du\nrèglement 830 décrétant la tarification d’activités, biens ou services municipaux"
+      },
+      {
+       "page": 2,
+       "excerpt": "14.3 Avis de motion et présentation – projet de règlement 830-2 – modification du\nrèglement 830 décrétant la tarification d’activités, biens ou services municipaux"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\n \"decisions\": [\n  {\n   \"act\": \"A01\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le point 12.2 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure.\",\n   \"excerpt\": \"12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier\"\n  },\n  {\n   \"act\": \"A02\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le point 12.3 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure.\",\n   \"excerpt\": \"12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau\"\n  },\n  {\n   \"act\": \"A03\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le point 12.4 de l'ordre du jour prévoit le traitement d'une demande d'approbation au PIIA.\",\n   \"excerpt\": \"12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale\"\n  },\n  {\n   \"act\": \"A04\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"Un règlement portant sur la gestion contractuelle relève de l'administration et des contrats municipaux et est exclu du champ de l'urbanisme et du foncier.\",\n   \"excerpt\": \"14.1 Adoption finale – règlement 834 portant sur la gestion contractuelle\"\n  },\n  {\n   \"act\": \"A05\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"La réglementation des camions de cuisine/cantines temporaires relève du commerce/activités mobiles et ne constitue pas un acte d'urbanisme ou d'aménagement foncier soutenu.\",\n   \"excerpt\": \"14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\\nrèglement 804 portant sur les camions de cuisine cantines temporaires\"\n  },\n  {\n   \"act\": \"A06\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"Le règlement antérieur 804 n'est mentionné que comme objet de modification pour les cantines temporaires (hors urbanisme/foncier) et ne fait l'objet d'aucune étape propre.\",\n   \"excerpt\": \"règlement 804 portant sur les camions de cuisine cantines temporaires\"\n  },\n  {\n   \"act\": \"A07\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"Un règlement décrétant la tarification d’activités, biens ou services municipaux relève de la fiscalité/administration et est exclu des compétences d'urbanisme et foncier.\",\n   \"excerpt\": \"14.3 Avis de motion et présentation – projet de règlement 830-2 – modification du\\nrèglement 830 décrétant la tarification d’activités, biens ou services municipaux\"\n  },\n  {\n   \"act\": \"A08\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"Le règlement de tarification 830 n'est cité qu'en référence et relève de la gestion tarifaire générale, exclue de l'urbanisme.\",\n   \"excerpt\": \"règlement 830 décrétant la tarification d’activités, biens ou services municipaux\"\n  }\n ]\n}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 12.2 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure.",
+   "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 12.3 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure.",
+   "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 12.4 de l'ordre du jour prévoit le traitement d'une demande d'approbation au PIIA.",
+   "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Un règlement portant sur la gestion contractuelle relève de l'administration et des contrats municipaux et est exclu du champ de l'urbanisme et du foncier.",
+   "excerpt": "14.1 Adoption finale – règlement 834 portant sur la gestion contractuelle"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "La réglementation des camions de cuisine/cantines temporaires relève du commerce/activités mobiles et ne constitue pas un acte d'urbanisme ou d'aménagement foncier soutenu.",
+   "excerpt": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement antérieur 804 n'est mentionné que comme objet de modification pour les cantines temporaires (hors urbanisme/foncier) et ne fait l'objet d'aucune étape propre.",
+   "excerpt": "règlement 804 portant sur les camions de cuisine cantines temporaires"
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Un règlement décrétant la tarification d’activités, biens ou services municipaux relève de la fiscalité/administration et est exclu des compétences d'urbanisme et foncier.",
+   "excerpt": "14.3 Avis de motion et présentation – projet de règlement 830-2 – modification du\nrèglement 830 décrétant la tarification d’activités, biens ou services municipaux"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de tarification 830 n'est cité qu'en référence et relève de la gestion tarifaire générale, exclue de l'urbanisme.",
+   "excerpt": "règlement 830 décrétant la tarification d’activités, biens ou services municipaux"
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A04",
+    "reason": "Un règlement portant sur la gestion contractuelle relève de l'administration et des contrats municipaux et est exclu du champ de l'urbanisme et du foncier."
+   },
+   {
+    "act": "A05",
+    "reason": "La réglementation des camions de cuisine/cantines temporaires relève du commerce/activités mobiles et ne constitue pas un acte d'urbanisme ou d'aménagement foncier soutenu."
+   },
+   {
+    "act": "A06",
+    "reason": "Le règlement antérieur 804 n'est mentionné que comme objet de modification pour les cantines temporaires (hors urbanisme/foncier) et ne fait l'objet d'aucune étape propre."
+   },
+   {
+    "act": "A07",
+    "reason": "Un règlement décrétant la tarification d’activités, biens ou services municipaux relève de la fiscalité/administration et est exclu des compétences d'urbanisme et foncier."
+   },
+   {
+    "act": "A08",
+    "reason": "Le règlement de tarification 830 n'est cité qu'en référence et relève de la gestion tarifaire générale, exclue de l'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 12.2 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 12.3 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 12.4 de l'ordre du jour prévoit le traitement d'une demande d'approbation au PIIA."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2524,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3122,
+   "outputTokens": 795,
+   "totalTokens": 3917
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2383
+  },
+  "inputSha256": "8689a0be5e824c6efa64bfb9e8e5caa1fea883f5235be205e51e3178e9d632bf"
+ }
+}

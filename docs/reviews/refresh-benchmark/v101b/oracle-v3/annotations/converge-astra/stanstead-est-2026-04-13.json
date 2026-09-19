@@ -1,0 +1,91 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dde58b22ba15c59d0eb3228c87709123e0bb175a8e28a5158f89e617de9987e8",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La page 2 atteste explicitement l’appui municipal à la demande CPTAQ de Mélanie Banville pour l’acquisition de 54 acres du lot 6 374 262.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-04, page 2, appuie la nouvelle résidence sur le lot 5 417 438 conditionnellement à la démolition de la résidence actuelle et à la remise en culture de son emplacement.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution adoptée page 10 autorise l’inscription d’un avis d’assujettissement au droit de préemption pour dix ans sur le lot 5 416 383, ce qui constitue un acte foncier explicite.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La rubrique 8.2 citée figure bien page 10 et sa résolution, poursuivie page 11, autorise l’inscription d’un avis d’assujettissement pour dix ans sur le lot 5 416 384.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La page 13 atteste l’appui municipal à la demande CPTAQ d’agrandissement du lieu d’enfouissement sur une partie du lot 2 935 698, sans présenter cet appui comme une autorisation de la CPTAQ.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-22, page 13, accepte la location du garage au 1420 chemin Ball brook pour douze mois à 1 350 $ par mois, acte foncier non résidentiel inclus par les règles.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-34 adopte explicitement, page 18, le règlement 2026-04 modifiant le règlement 2016-10 sur la tarification des permis et certificats.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 2 atteste explicitement l’appui municipal à la demande CPTAQ de Mélanie Banville pour l’acquisition de 54 acres du lot 6 374 262."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-04, page 2, appuie la nouvelle résidence sur le lot 5 417 438 conditionnellement à la démolition de la résidence actuelle et à la remise en culture de son emplacement."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution adoptée page 10 autorise l’inscription d’un avis d’assujettissement au droit de préemption pour dix ans sur le lot 5 416 383, ce qui constitue un acte foncier explicite."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La rubrique 8.2 citée figure bien page 10 et sa résolution, poursuivie page 11, autorise l’inscription d’un avis d’assujettissement pour dix ans sur le lot 5 416 384."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 13 atteste l’appui municipal à la demande CPTAQ d’agrandissement du lieu d’enfouissement sur une partie du lot 2 935 698, sans présenter cet appui comme une autorisation de la CPTAQ."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-22, page 13, accepte la location du garage au 1420 chemin Ball brook pour douze mois à 1 350 $ par mois, acte foncier non résidentiel inclus par les règles."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-34 adopte explicitement, page 18, le règlement 2026-04 modifiant le règlement 2016-10 sur la tarification des permis et certificats."
+  }
+ ]
+}

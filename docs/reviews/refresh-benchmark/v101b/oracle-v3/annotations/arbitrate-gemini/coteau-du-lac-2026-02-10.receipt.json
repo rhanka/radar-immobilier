@@ -1,0 +1,38 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "157c64fb15e859bcb2fca8cebab1e81f23e96302883248d5c021b7c8c5853839",
+ "verificationSha256": "81f9998909bf84455d2847e1d932fc6692771f25484be55c57a24902b3a62f43",
+ "inputSha256": "9418cd78a344a13d63849bcf33cfdf9bead61e5db6e91a237dbfb96703e83864",
+ "responseSha256": "3ef8abb8a304afeb312bf0248324a49c7613be52e98b9f5c9c2909c1d35ca3cf",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 5066,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2488,
+  "outputTokens": 78,
+  "totalTokens": 3989,
+  "thoughtsTokenCount": 1423
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 4555,
+  "requestId": null
+ },
+ "at": "2026-09-18T22:46:37.267Z"
+}

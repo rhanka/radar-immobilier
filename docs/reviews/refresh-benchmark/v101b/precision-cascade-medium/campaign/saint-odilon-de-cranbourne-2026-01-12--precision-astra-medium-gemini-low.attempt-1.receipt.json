@@ -1,0 +1,35 @@
+{
+ "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "7312adec7c54a253e8d9d985d7e54e1fdf7e2b158fdbb9fb4817ab9f4f30bb3b",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3940,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 16676,
+   "outputTokens": 778,
+   "totalTokens": 17454
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3795
+  },
+  "inputSha256": "c2b11643859333c6444284b36e673ac7ab32837744b2856946694a29f1736e58"
+ },
+ "at": "2026-09-19T03:23:13.691Z"
+}

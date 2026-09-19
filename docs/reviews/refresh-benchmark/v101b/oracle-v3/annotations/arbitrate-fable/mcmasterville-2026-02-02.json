@@ -1,0 +1,19 @@
+{
+ "documentId": "mcmasterville-2026-02-02",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fa603cdfd978c31a80b2c3bb4b0c3925751028f33858efaef911b1fcdb175ffc",
+ "verificationSha256": "027035a932010591b8a0a6c7f32d80fc49d0b183176ee1859806a0230339a368",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

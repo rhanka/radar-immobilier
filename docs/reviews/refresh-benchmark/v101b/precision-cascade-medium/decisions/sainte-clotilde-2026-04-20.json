@@ -1,0 +1,454 @@
+{
+ "documentId": "sainte-clotilde-2026-04-20",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "f22055ca0fd62ad6af3c37f0b9b9e609d7a3bbab4a9b4c745e084555a47c21c7",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-471-09"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 471-09 relatif au zonage",
+     "stage": "projet",
+     "objet": "471-09",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU\nZONAGE"
+      },
+      {
+       "page": 9,
+       "excerpt": "Ce règlement a pour objet de modifier le règlement de zonage numéro 471 et d’assurer la\nconcordance au schéma d’aménagement et de développement de la MRC des Jardins-deNapierville (URB-205-21-2025 et URB-2025-17-2024-01).\nUn projet de règlement est déposé séance tenante conformément aux dispositions du Code\nmunicipal du Québec."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-471"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 471",
+     "stage": null,
+     "objet": "471",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "Ce règlement a pour objet de modifier le règlement de zonage numéro 471 et d’assurer la"
+      },
+      {
+       "page": 9,
+       "excerpt": "Ce règlement a pour objet de modifier le règlement de zonage numéro 471 et d’assurer la\nconcordance au schéma d’aménagement et de développement de la MRC des Jardins-deNapierville (URB-205-21-2025 et URB-2025-17-2024-01).\nUn projet de règlement est déposé séance tenante conformément aux dispositions du Code\nmunicipal du Québec."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-470-04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 470-04 relatif au plan d’urbanisme",
+     "stage": "projet",
+     "objet": "470-04",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN\nD’URBANISME"
+      },
+      {
+       "page": 9,
+       "excerpt": "Ce règlement a pour objet de modifier le règlement du plan d’urbanisme numéro 470 et\nd’assurer la concordance au schéma d’aménagement et de développement de la MRC des\nJardins-de-Napierville (URB-205-21-2025).\nUn projet de règlement est déposé séance tenante conformément aux dispositions du Code\nmunicipal du Québec."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-470"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement du plan d’urbanisme 470",
+     "stage": null,
+     "objet": "470",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "Ce règlement a pour objet de modifier le règlement du plan d’urbanisme numéro 470 et"
+      },
+      {
+       "page": 9,
+       "excerpt": "Ce règlement a pour objet de modifier le règlement du plan d’urbanisme numéro 470 et\nd’assurer la concordance au schéma d’aménagement et de développement de la MRC des\nJardins-de-Napierville (URB-205-21-2025).\nUn projet de règlement est déposé séance tenante conformément aux dispositions du Code\nmunicipal du Québec."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-472-04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 472-04 relatif au lotissement",
+     "stage": "projet",
+     "objet": "472-04",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU\nLOTISSEMENT"
+      },
+      {
+       "page": 9,
+       "excerpt": "Ce règlement a pour objet de modifier le règlement de lotissement numéro 472 et d’assurer la\nconcordance au schéma d’aménagement et de développement de la MRC des Jardins-deNapierville (URB-205-21-2025).\nUn projet de règlement est déposé séance tenante conformément aux dispositions du Code\nmunicipal du Québec."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-472"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de lotissement 472",
+     "stage": null,
+     "objet": "472",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "Ce règlement a pour objet de modifier le règlement de lotissement numéro 472 et d’assurer la"
+      },
+      {
+       "page": 9,
+       "excerpt": "Ce règlement a pour objet de modifier le règlement de lotissement numéro 472 et d’assurer la\nconcordance au schéma d’aménagement et de développement de la MRC des Jardins-deNapierville (URB-205-21-2025).\nUn projet de règlement est déposé séance tenante conformément aux dispositions du Code\nmunicipal du Québec."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-cptaq-correction"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Correction de l’appui au renouvellement de l’exploitation de la carrière de Construction DJL Inc.",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;"
+      },
+      {
+       "page": 10,
+       "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;\nQUE ladite résolution soit modifiée en conséquence afin de refléter l’ensemble des lots visés\npar la demande de renouvellement déposée auprès de la CPTAQ;\nQUE toutes les autres dispositions de la résolution 2025-12-286 demeurent inchangées."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-534-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement d’emprunt parapluie 534-2026",
+     "stage": "adoption",
+     "objet": "534-2026",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "QUE le conseil municipal adopte le Règlement numéro 534-2026 autorisant un emprunt pour\nles fins générales suivantes :"
+      },
+      {
+       "page": 2,
+       "excerpt": "QUE le conseil municipal adopte le Règlement numéro 534-2026 autorisant un emprunt pour\nles fins générales suivantes :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-cpe"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Financement de la construction du CPE",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "QUE le conseil municipal autorise l’utilisation d’une partie du montant prévu au Règlement\nparapluie numéro 534-2026 pour financer le projet;"
+      },
+      {
+       "page": 3,
+       "excerpt": "QUE le conseil municipal autorise l’utilisation d’une partie du montant prévu au Règlement\nparapluie numéro 534-2026 pour financer le projet;\nQUE le montant maximal alloué au CPE soit de 3 200 000 $;\nQUE le terme précis de remboursement soit 40 ans;\nQUE le remboursement soit effectué par taxation sur l’ensemble des immeubles imposables;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "signal-acquisition"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acquisition municipale des lots 6 592 592 et 6 199 726",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec;"
+      },
+      {
+       "page": 4,
+       "excerpt": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "bylaw-533"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement 533 sur les clapets anti-retour",
+     "stage": "adoption",
+     "objet": "533",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets\nanti-retour afin de prévenir les refoulements d’égout;"
+      },
+      {
+       "page": 6,
+       "excerpt": "QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets\nanti-retour afin de prévenir les refoulements d’égout;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-loisirs"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande PAFIRSPA pour un chalet des loisirs et le Boisé des Pins",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "QUE le conseil municipal autorise le dépôt d’une demande d’aide financière dans le cadre du\nprogramme PAFIRSPA 2026 pour la réalisation des projets décrits ci-dessus;"
+      },
+      {
+       "page": 3,
+       "excerpt": "QUE le conseil municipal autorise le dépôt d’une demande d’aide financière dans le cadre du\nprogramme PAFIRSPA 2026 pour la réalisation des projets décrits ci-dessus;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Avis de motion donné et projet de règlement numéro 471-09 déposé en séance à l'article 10.2.\",\"excerpt\":\"10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU\\nZONAGE\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 471 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, il ne fait l'objet d'aucun acte autonome dans la séance.\",\"excerpt\":\"Ce règlement a pour objet de modifier le règlement de zonage numéro 471 et d’assurer la\\nconcordance au schéma d’aménagement\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Avis de motion et dépôt du projet de règlement 470-04 à l'article 10.3.\",\"excerpt\":\"10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN\\nD’URBANISME\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 470 est uniquement le règlement antérieur modifié, sans étape de procédure propre lors de cette séance.\",\"excerpt\":\"Ce règlement a pour objet de modifier le règlement du plan d’urbanisme numéro 470\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Avis de motion donné et dépôt du projet de règlement 472-04 attesté à l'article 10.4.\",\"excerpt\":\"10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU\\nLOTISSEMENT\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 472 est simplement mentionné comme le règlement d'origine visé par une modification.\",\"excerpt\":\"Ce règlement a pour objet de modifier le règlement de lotissement numéro 472\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Résolution 2026-04-195 adoptée pour corriger la résolution d'appui à la demande CPTAQ concernant l'exploitation d'une carrière.\",\"excerpt\":\"DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\\ndu cadastre du Québec, en plus du lot 6 199 292;\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement d'emprunt parapluie numéro 534-2026 à la résolution 2026-04-179.\",\"excerpt\":\"QUE le conseil municipal adopte le Règlement numéro 534-2026 autorisant un emprunt pour\\nles fins générales suivantes :\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Résolution 2026-04-180 autorisant l'utilisation du règlement d'emprunt parapluie pour la construction d'un CPE.\",\"excerpt\":\"QUE le conseil municipal autorise l’utilisation d’une partie du montant prévu au Règlement\\nparapluie numéro 534-2026 pour financer le projet;\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Résolution 2026-04-182 approuvant l'acquisition des lots 6 592 592 et 6 199 726.\",\"excerpt\":\"QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec;\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement numéro 533 relatif aux clapets anti-retour à la résolution 2026-04-186.\",\"excerpt\":\"QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets\\nanti-retour afin de prévenir les refoulements d’égout;\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Résolution 2026-04-181 autorisant le dépôt d'une demande de subvention PAFIRSPA pour des infrastructures récréatives.\",\"excerpt\":\"QUE le conseil municipal autorise le dépôt d’une demande d’aide financière dans le cadre du\\nprogramme PAFIRSPA 2026 pour la réalisation des projets décrits ci-dessus;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Avis de motion donné et projet de règlement numéro 471-09 déposé en séance à l'article 10.2.",
+   "excerpt": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU\nZONAGE"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 471 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, il ne fait l'objet d'aucun acte autonome dans la séance.",
+   "excerpt": "Ce règlement a pour objet de modifier le règlement de zonage numéro 471 et d’assurer la\nconcordance au schéma d’aménagement"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Avis de motion et dépôt du projet de règlement 470-04 à l'article 10.3.",
+   "excerpt": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN\nD’URBANISME"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 470 est uniquement le règlement antérieur modifié, sans étape de procédure propre lors de cette séance.",
+   "excerpt": "Ce règlement a pour objet de modifier le règlement du plan d’urbanisme numéro 470"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Avis de motion donné et dépôt du projet de règlement 472-04 attesté à l'article 10.4.",
+   "excerpt": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU\nLOTISSEMENT"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 472 est simplement mentionné comme le règlement d'origine visé par une modification.",
+   "excerpt": "Ce règlement a pour objet de modifier le règlement de lotissement numéro 472"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Résolution 2026-04-195 adoptée pour corriger la résolution d'appui à la demande CPTAQ concernant l'exploitation d'une carrière.",
+   "excerpt": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292;"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement d'emprunt parapluie numéro 534-2026 à la résolution 2026-04-179.",
+   "excerpt": "QUE le conseil municipal adopte le Règlement numéro 534-2026 autorisant un emprunt pour\nles fins générales suivantes :"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Résolution 2026-04-180 autorisant l'utilisation du règlement d'emprunt parapluie pour la construction d'un CPE.",
+   "excerpt": "QUE le conseil municipal autorise l’utilisation d’une partie du montant prévu au Règlement\nparapluie numéro 534-2026 pour financer le projet;"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Résolution 2026-04-182 approuvant l'acquisition des lots 6 592 592 et 6 199 726.",
+   "excerpt": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec;"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement numéro 533 relatif aux clapets anti-retour à la résolution 2026-04-186.",
+   "excerpt": "QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets\nanti-retour afin de prévenir les refoulements d’égout;"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Résolution 2026-04-181 autorisant le dépôt d'une demande de subvention PAFIRSPA pour des infrastructures récréatives.",
+   "excerpt": "QUE le conseil municipal autorise le dépôt d’une demande d’aide financière dans le cadre du\nprogramme PAFIRSPA 2026 pour la réalisation des projets décrits ci-dessus;"
+  }
+ ],
+ "filter": {
+  "acts": 12,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 471 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, il ne fait l'objet d'aucun acte autonome dans la séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 470 est uniquement le règlement antérieur modifié, sans étape de procédure propre lors de cette séance."
+   },
+   {
+    "act": "A06",
+    "reason": "Le règlement 472 est simplement mentionné comme le règlement d'origine visé par une modification."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Avis de motion donné et projet de règlement numéro 471-09 déposé en séance à l'article 10.2."
+   },
+   {
+    "act": "A03",
+    "reason": "Avis de motion et dépôt du projet de règlement 470-04 à l'article 10.3."
+   },
+   {
+    "act": "A05",
+    "reason": "Avis de motion donné et dépôt du projet de règlement 472-04 attesté à l'article 10.4."
+   },
+   {
+    "act": "A07",
+    "reason": "Résolution 2026-04-195 adoptée pour corriger la résolution d'appui à la demande CPTAQ concernant l'exploitation d'une carrière."
+   },
+   {
+    "act": "A08",
+    "reason": "Adoption du règlement d'emprunt parapluie numéro 534-2026 à la résolution 2026-04-179."
+   },
+   {
+    "act": "A09",
+    "reason": "Résolution 2026-04-180 autorisant l'utilisation du règlement d'emprunt parapluie pour la construction d'un CPE."
+   },
+   {
+    "act": "A10",
+    "reason": "Résolution 2026-04-182 approuvant l'acquisition des lots 6 592 592 et 6 199 726."
+   },
+   {
+    "act": "A11",
+    "reason": "Adoption du règlement numéro 533 relatif aux clapets anti-retour à la résolution 2026-04-186."
+   },
+   {
+    "act": "A12",
+    "reason": "Résolution 2026-04-181 autorisant le dépôt d'une demande de subvention PAFIRSPA pour des infrastructures récréatives."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3334,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 13903,
+   "outputTokens": 1027,
+   "totalTokens": 14930
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3164
+  },
+  "inputSha256": "c4567ad50d5b1f767a7e9b8fbecc27ff21279e42048df5193396261aa798ebf8"
+ }
+}

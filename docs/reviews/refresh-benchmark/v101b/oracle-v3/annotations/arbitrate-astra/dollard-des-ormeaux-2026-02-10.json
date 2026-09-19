@@ -1,0 +1,74 @@
+{
+ "documentId": "dollard-des-ormeaux-2026-02-10",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "a540ae0b36d5e6c693b7d081407ad9e627ac4ddd5c46213d2007c0a860d91c87",
+ "verificationSha256": "bd8936e0ba1b2c9f163d79bce96e2b261be40e4ee318da150c5cd2c9adf0d377",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"Le point 20.2 prévoit une « Autorisation de signature d’un bail avec Timex Reality Corp. pour la location d'entrepôt (2025-004 GG) » : il s’agit d’une autorisation prévue à l’ordre du jour, non d’une décision acquise. Ce bail a un objet immobilier explicite et relève des « actes fonciers, même non résidentiels » ; aucune règle n’exige un lot ou une adresse, et leur absence ne justifie pas son classement parmi les marchés de services exclus.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation prévue de signature du bail de location d’entrepôt avec Timex Reality Corp. (2025-004 GG)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2025-004 GG",
+      "page": 1,
+      "citation": "Autorisation de signature d’un bail avec Timex Reality Corp. pour la location d'entrepôt (2025-004 GG) (SD2026-500-2811",
+      "anchor": "d'entrepôt (2025-004 GG",
+      "spanStart": 602,
+      "spanEnd": 721
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 1 prévoit l’autorisation de signature du bail d’entrepôt avec Timex Reality Corp. (2025-004 GG), acte foncier inclus même non résidentiel."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "Le bail de location d'entrepôt (2025-004 GG) est un contrat de location identifié par un numéro de contrat, sans objet réglementaire ni objet foncier explicite (aucun lot ni adresse) ; il relève des marchés exclus du rappel et reste au mieux un fait complémentaire hors gold."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Le point 20.2 concerne un acte foncier non résidentiel (bail d'entrepôt) attesté en page 1."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "Le point 20.2 prévoit une « Autorisation de signature d’un bail avec Timex Reality Corp. pour la location d'entrepôt (2025-004 GG) » : il s’agit d’une autorisation prévue à l’ordre du jour, non d’une décision acquise. Ce bail a un objet immobilier explicite et relève des « actes fonciers, même non résidentiels » ; aucune règle n’exige un lot ou une adresse, et leur absence ne justifie pas son classement parmi les marchés de services exclus."
+  }
+ ]
+}

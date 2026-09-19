@@ -1,0 +1,44 @@
+{
+ "documentId": "lac-du-cerf-2026-04-11",
+ "nextId": 2,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Point prévu – octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St-Louis",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "lotissement chemin Dicaire / St- Louis",
+    "page": 1,
+    "citation": "Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+    "anchor": "lotissement chemin Dicaire / St- Louis",
+    "spanStart": 1382,
+    "spanEnd": 1482
+   },
+   "versions": [
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Point prévu – octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St-Louis",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "lotissement chemin Dicaire / St- Louis",
+      "page": 1,
+      "citation": "Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+      "anchor": "lotissement chemin Dicaire / St- Louis",
+      "spanStart": 1382,
+      "spanEnd": 1482
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "fable-pass1",
+     "op": "add",
+     "reason": "Point 8.1 de l’ordre du jour (rubrique Urbanisme) portant sur un objet foncier explicite, le projet de lotissement chemin Dicaire / St-Louis (inclusion « actes fonciers, même non résidentiels ») ; l’étape (évaluation des terrains en vue du lotissement) n’entre dans aucune valeur du vocabulaire, d’où « inconnu », et le document n’étant qu’un ordre du jour le libellé dit « prévu »."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,74 @@
+{
+ "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1e90d3d566980812a2f7b3bc5a30ff52d2c50694c4b8a0a1df6b085c1082b0f7",
+ "verificationSha256": "d3ab3e4c291d964e1d8a6ab921e2dcbdb7cc546e9d21b6845bbe6de5540ccdaf",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"Le refus concerne les obligations de construction du contrat de vente d’un terrain destiné à un « immeuble multi-logement » (p. 15), et la résolution décide « DE REFUSER la demande de remboursement des pénalités » et de confirmer leur application « conformément aux termes du contrat de vente » (p. 16). Cette décision actuelle sur les conditions d’un dossier foncier relève de l’inclusion des actes fonciers, avec refus conservé et étape « inconnu » : sa portée financière ne la réduit pas à une simple opération de comptes à exclure.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Refus de remboursement des pénalités de construction — terrain de Jean-Pierre Labbé",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Terrain de Jean-Pierre Labbé",
+      "page": 16,
+      "citation": "DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé; DE CONFIRMER que les pénalités ont été appliquées conformément aux termes du contrat de vente",
+      "anchor": "M. Jean-Pierre Labbé",
+      "spanStart": 111,
+      "spanEnd": 292
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 12-01-2026 refuse explicitement à la page 16 le remboursement des pénalités liées au contrat de vente du terrain destiné à un immeuble multilogement, ce qui constitue une décision foncière dont le refus est correctement conservé."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Acte foncier explicite (contrat de vente d'un terrain avec obligation de construction et pénalités) et page 16 atteste « DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé » ; les refus restent des refus, étape inconnu appropriée."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le refus de rembourser des pénalités contractuelles de construction est une décision financière et non un acte foncier ou un objet d'urbanisme correspondant au profil."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "Le refus concerne les obligations de construction du contrat de vente d’un terrain destiné à un « immeuble multi-logement » (p. 15), et la résolution décide « DE REFUSER la demande de remboursement des pénalités » et de confirmer leur application « conformément aux termes du contrat de vente » (p. 16). Cette décision actuelle sur les conditions d’un dossier foncier relève de l’inclusion des actes fonciers, avec refus conservé et étape « inconnu » : sa portée financière ne la réduit pas à une simple opération de comptes à exclure."
+  }
+ ]
+}

@@ -1,0 +1,81 @@
+{
+ "documentId": "dollard-des-ormeaux-2026-02-10",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "a540ae0b36d5e6c693b7d081407ad9e627ac4ddd5c46213d2007c0a860d91c87",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 1 prévoit l’autorisation de signature du bail d’entrepôt avec Timex Reality Corp. (2025-004 GG), acte foncier inclus même non résidentiel.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 50.1, page 2, prévoit l’avis de motion du Règlement R-2026-199-1 modifiant le zonage, étape distincte du projet de règlement.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 50.2, page 2, prévoit l’adoption du premier projet du Règlement R-2026-199-1, ce qui correspond à l’étape projet_reglement et non à l’adoption définitive.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 50.3, page 2, prévoit l’avis de motion du Règlement R-2026-084-1 sur l’utilisation des égouts et la rétention des eaux de ruissellement.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 50.3, page 2, prévoit également le dépôt du projet de Règlement R-2026-084-1, unité distincte de l’avis de motion selon les règles.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 50.4, page 2, prévoit l’adoption du règlement R-2026-216 sur les ententes pour travaux municipaux, sans attester une décision déjà acquise.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 1 prévoit l’autorisation de signature du bail d’entrepôt avec Timex Reality Corp. (2025-004 GG), acte foncier inclus même non résidentiel."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 50.1, page 2, prévoit l’avis de motion du Règlement R-2026-199-1 modifiant le zonage, étape distincte du projet de règlement."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 50.2, page 2, prévoit l’adoption du premier projet du Règlement R-2026-199-1, ce qui correspond à l’étape projet_reglement et non à l’adoption définitive."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 50.3, page 2, prévoit l’avis de motion du Règlement R-2026-084-1 sur l’utilisation des égouts et la rétention des eaux de ruissellement."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 50.3, page 2, prévoit également le dépôt du projet de Règlement R-2026-084-1, unité distincte de l’avis de motion selon les règles."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 50.4, page 2, prévoit l’adoption du règlement R-2026-216 sur les ententes pour travaux municipaux, sans attester une décision déjà acquise."
+  }
+ ]
+}

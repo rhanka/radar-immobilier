@@ -1,0 +1,19 @@
+{
+ "documentId": "chibougamau-2026-05-16",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "d5bbc9d8affb236747fc5a0ca9e54e5d3b2a830aa9d3167e8fc5684f508255e2",
+ "verificationSha256": "14ed42d830636018175bede6abaf131722519f0fe609c80488127017b7b68b97",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

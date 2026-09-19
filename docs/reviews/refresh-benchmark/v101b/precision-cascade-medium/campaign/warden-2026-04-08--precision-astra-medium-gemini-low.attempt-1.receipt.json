@@ -1,0 +1,35 @@
+{
+ "documentId": "warden-2026-04-08",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "59b45e1c1890b48a95a8fcd66338f71974a4eb3552ed48a425e9e563221c14c4",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2501,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10908,
+   "outputTokens": 716,
+   "totalTokens": 11624
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2283
+  },
+  "inputSha256": "8d2bed3d6b22bbd3eec938f78bd82418203228006f0374facf6b9f811d62967a"
+ },
+ "at": "2026-09-19T03:22:41.022Z"
+}

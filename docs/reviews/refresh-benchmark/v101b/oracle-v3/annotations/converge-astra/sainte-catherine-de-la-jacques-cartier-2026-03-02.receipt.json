@@ -1,0 +1,36 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "da997eb99eac78ef15f719aee853f9267939862b5438972042c00fcc82790f1b",
+ "inputSha256": "5087f1c5bf55f375f9cf2511382f611c95a33c15b6dad12a4a328b0639175273",
+ "responseSha256": "4a7aba6818a9cc6ed1afbfc4e5d236f71aa00c3e9a1c102d8de37487ccf385db",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 85327,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 27921,
+  "outputTokens": 2742,
+  "totalTokens": 30663
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 85322,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:19:45.141Z"
+}

@@ -1,0 +1,536 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-738-26",
+   "label": "738-26 — Constructions accessoires en cour avant en bordure d’un lac",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "numero": "738-26",
+    "municipality": "saint-barthelemy",
+    "date": "2026-09-08",
+    "stage": "adoption",
+    "resolution": "2026-09-189",
+    "objet": "Permettre les constructions et aménagements accessoires en cour avant pour les propriétés en bordure d’un lac."
+   },
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "QUE\n\nle règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le\nrèglement de zonage numéro 288-90",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-739-26",
+   "label": "739-26 — Premier projet de densification des zones R-7 et R-8",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "numero": "739-26",
+    "municipality": "saint-barthelemy",
+    "stage": "1er_projet",
+    "meetingDate": "2026-09-08",
+    "resolution": "2026-09-191",
+    "zones_ciblees": [
+     "R-7",
+     "R-8"
+    ],
+    "objet": "Permettre des immeubles à logements et la densification des zones R-7 et R-8."
+   },
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "QUE\n\nle premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-r7",
+   "label": "Zone R-7",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "code": "R-7",
+    "municipality": "saint-barthelemy",
+    "description": "Zone visée par le premier projet de règlement 739-26 permettant la densification."
+   },
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "Le but du présent règlement est de permettre la densification des zones R-7 et R-8",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-r8",
+   "label": "Zone R-8",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "code": "R-8",
+    "municipality": "saint-barthelemy",
+    "description": "Zone visée par le premier projet de règlement 739-26 permettant la densification."
+   },
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "Le but du présent règlement est de permettre la densification des zones R-7 et R-8",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-motion",
+   "label": "Avis de motion — Immeubles à logements dans R-7 et R-8",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "municipality": "saint-barthelemy",
+    "date": "2026-09-08",
+    "etape": "avis_motion",
+    "etape_date": "2026-09-08",
+    "kind": "rezonage",
+    "resolution": "2026-09-190",
+    "reglement_number": "288-90",
+    "description": "Avis de motion pour permettre des immeubles à logements dans les zones R-7 et R-8."
+   },
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Un avis de motion est donné par Monsieur le conseiller François Bertrand à l'effet qu'un\nmembre du conseil pourra déposer et présenter, séance tenante ou ultérieure, un premier",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-project",
+   "label": "Adoption du premier projet 739-26",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "municipality": "saint-barthelemy",
+    "date": "2026-09-08",
+    "etape": "projet_reglement",
+    "etape_date": "2026-09-08",
+    "kind": "rezonage",
+    "decision": "approuvé",
+    "resolution": "2026-09-191",
+    "reglement_number": "739-26",
+    "description": "Adoption unanime du premier projet ajoutant les usages Habitation II et III dans les zones R-7 et R-8 et proposant un nouvel article 9.7.",
+    "conditions": [
+     "Le projet prévoit que les usages H-II, H-III et H-IV sont uniquement possibles lorsqu’il y a l’égout et l’aqueduc au chemin.",
+     "Le projet prévoit au plus un étage de différence entre les propriétés voisines immédiates au terrain et une nouvelle construction."
+    ]
+   },
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "QUE\n\nle premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-project",
+   "label": "Conditions projetées de desserte et de hauteur — R-7 et R-8",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "constraintType": "autre",
+    "municipality": "saint-barthelemy",
+    "loi": "Premier projet de règlement 739-26, article 4, ajout de l’article 9.7",
+    "meetingDate": "2026-09-08",
+    "description": "Conditions proposées, sans entrée en vigueur établie : égout et aqueduc au chemin pour les usages H-II, H-III et H-IV; au plus un étage de différence avec les propriétés voisines immédiates."
+   },
+   "evidence_refs": [
+    "ev-conditions"
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "Les usages H-II, H-III et H-IV sont uniquement possibles lorsqu’il y a l’égout\net l’aqueduc au chemin.",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-camping",
+   "label": "Vente des terrains adjacents au Camping du Vieux Moulin",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "transaction_immobiliere",
+    "municipality": "saint-barthelemy",
+    "date": "2026-09-08",
+    "resolution": "2026-09-194",
+    "amount_cad": 1,
+    "description": "Vente autorisée des immeubles de matricules 3220-74-4030 et 3220-73-6695, adjacents au Camping du Vieux Moulin. Frais de clôture à la charge de l’acheteur.",
+    "outcome": "vente autorisée"
+   },
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE\n\nle conseil autorise le directeur général, monsieur Thomas Gravel, à signer pour et au\nnom de la Municipalité les documents nécessaires à la vente des immeubles identifiés",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-camping",
+   "label": "Interdiction d’aménagements permanents — Terrains du Camping du Vieux Moulin",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "constraintType": "autre",
+    "municipality": "saint-barthelemy",
+    "resolution": "2026-09-194",
+    "description": "Terrains vacants de matricules 3220-74-4030 et 3220-73-6695 affectés par la tempête Debby; implantation d’aménagements permanents désormais interdite."
+   },
+   "evidence_refs": [
+    "ev-camping"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "CONSIDÉRANT QUE\n\nces terrains, maintenant vacants, ont été affectés par la tempête\nDebby et qu'il est dorénavant interdit d'y implanter des\naménagements permanents;",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-lac",
+   "label": "Acquisition municipale — Montée du Lac-Robert",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "transaction_immobiliere",
+    "municipality": "saint-barthelemy",
+    "date": "2026-09-08",
+    "resolution": "2026-09-195",
+    "amount_cad": 1,
+    "description": "Achat autorisé de la portion de la Montée du Lac-Robert identifiée par le matricule 2723-93-7328. L’acquisition facilitera le développement de certains terrains du secteur; frais de clôture assumés par la Municipalité.",
+    "outcome": "achat autorisé"
+   },
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "QUE\n\nle conseil autorise le directeur général, monsieur Thomas Gravel, à signer pour et au\nnom de la Municipalité les documents nécessaires à l'achat de l'immeuble identifié",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-york",
+   "label": "Vente municipale — Terrain du 180, rang York",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "transaction_immobiliere",
+    "municipality": "saint-barthelemy",
+    "date": "2026-09-08",
+    "resolution": "2026-09-196",
+    "amount_cad": 1,
+    "description": "Vente autorisée de l’immeuble identifié par le matricule 3418-41-5276. Le texte indique un prix symbolique de 1 $, payable par le vendeur à la Municipalité, et des frais de clôture à la charge de l’acheteur.",
+    "outcome": "vente autorisée"
+   },
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "QUE\n\nle conseil autorise le directeur général, monsieur Thomas Gravel, à signer pour et au\nnom de la Municipalité les documents nécessaires à la vente de l'immeuble identifié",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-york",
+   "label": "Correction préalable de pente — Terrain du 180, rang York",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "constraintType": "autre",
+    "municipality": "saint-barthelemy",
+    "resolution": "2026-09-196",
+    "description": "Terrain vacant affecté par la tempête Debby : aménagements permanents interdits à moins de réaliser préalablement des travaux majeurs de correction de la pente."
+   },
+   "evidence_refs": [
+    "ev-york"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "CONSIDÉRANT QUE\n\nce terrain, maintenant vacant, a été affecté par la tempête Debby et\nqu'il est interdit d'y implanter des aménagements permanents à",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-transfer",
+   "label": "Transfert autorisé de Chéné Immobilier Inc. à Hulix S.E.N.C.",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "transaction_immobiliere",
+    "municipality": "saint-barthelemy",
+    "date": "2026-09-08",
+    "resolution": "2026-09-197",
+    "no_lot": "6621027",
+    "description": "Vente de Chéné Immobilier Inc. à Hulix S.E.N.C. autorisée à condition de transférer au nouveau propriétaire les responsabilités et les clauses de préemption prévues au contrat original.",
+    "outcome": "vente autorisée sous condition"
+   },
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "QUE\n\nle conseil municipal autorise la vente de l'immeuble 6 621 027 de Chéné Immobilier\nInc. à Hulix S.E.N.C., à condition que le transfert des responsabilités ainsi que les",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-transfer",
+   "label": "Clause résolutoire et droit de préemption — Immeuble 6 621 027",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "constraintType": "autre",
+    "municipality": "saint-barthelemy",
+    "resolution": "2026-09-197",
+    "description": "L’immeuble 6 621 027 est grevé d’une clause résolutoire en faveur de la Municipalité et fait l’objet d’un droit de préemption."
+   },
+   "evidence_refs": [
+    "ev-transfer"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "CONSIDÉRANT QUE\n\nl'immeuble 6 621 027 est grevé d'une clause résolutoire en faveur\nde la Municipalité;",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-water",
+   "label": "Prolongement d’aqueduc accepté — Rang York, Saint-Cuthbert",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "infrastructure",
+    "kind": "prolongement_aqueduc",
+    "municipality": "saint-barthelemy",
+    "date": "2026-09-08",
+    "resolution": "2026-09-203",
+    "scope": "regional",
+    "description": "Acceptation de la demande de Saint-Cuthbert de prolonger le réseau d’aqueduc sur le rang York pour desservir des résidences supplémentaires. La disponibilité en eau est jugée suffisante pour les résidences raccordées et projetées.",
+    "outcome": "demande acceptée"
+   },
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE\n\nla Municipalité de Saint-Barthélemy accepte la demande de Saint-Cuthbert pour\nprolonger le réseau d'aqueduc afin de desservir quelques résidences\nsupplémentaires sur leur territoire.",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-project",
+   "target": "zone-r7",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "evidence_refs": [
+    "ev-project"
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "Le but du présent règlement est de permettre la densification des zones R-7 et R-8",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-project",
+   "target": "zone-r8",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "evidence_refs": [
+    "ev-project"
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "Le but du présent règlement est de permettre la densification des zones R-7 et R-8",
+     "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+     "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+     "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-738",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+   "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "QUE\n\nle règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le\nrèglement de zonage numéro 288-90 afin de permettre les constructions accessoires\nen cour avant pour les propriétés en bordure d’un lac » soit et est adopté et qu’il soit\nstatué et décrété comme suit :"
+  },
+  {
+   "id": "ev-project",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+   "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "QUE\n\nle premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26\namendant le règlement de zonage numéro 288-90 afin de permettre des immeubles\nà logements dans les zones R-7 et R-8 » soit et est adopté et qu’il soit statué et\ndécrété comme suit :"
+  },
+  {
+   "id": "ev-conditions",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+   "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "Les usages H-II, H-III et H-IV sont uniquement possibles lorsqu’il y a l’égout\net l’aqueduc au chemin.\nIl ne peut pas y avoir plus d’un étage de différence entre les propriétés\nvoisines immédiates au terrain et une nouvelle construction."
+  },
+  {
+   "id": "ev-camping",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+   "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "CONSIDÉRANT QUE\n\nces terrains, maintenant vacants, ont été affectés par la tempête\nDebby et qu'il est dorénavant interdit d'y implanter des\naménagements permanents;"
+  },
+  {
+   "id": "ev-york",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+   "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "CONSIDÉRANT QUE\n\nce terrain, maintenant vacant, a été affecté par la tempête Debby et\nqu'il est interdit d'y implanter des aménagements permanents à\nmoins que des travaux de correction majeurs de la pente du terrain\nsoient réalisés préalablement à la construction;"
+  },
+  {
+   "id": "ev-transfer",
+   "source_file": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "rawRef": "raw/proces-verbaux-saint-barthelemy/cas/ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845.pdf",
+   "docSha": "ac5306d7efd793dc3b456afaf203b1d1a8e495456099ac560457f56591953845",
+   "sourceUrl": "https://www.saint-barthelemy.ca/storage/app/media/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux/Proc%C3%A8s-verbaux/2026/Proc%C3%A8s-verbal%20-%20S%C3%A9ance%20ordinaire%20-%208%20septembre%202026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "CONSIDÉRANT QUE\n\nl'immeuble 6 621 027 est grevé d'une clause résolutoire en faveur\nde la Municipalité;\n\nCONSIDÉRANT QUE\n\nce même immeuble fait l'objet d'un droit de préemption;"
+  }
+ ],
+ "input_tokens": 11850,
+ "output_tokens": 6880
+}

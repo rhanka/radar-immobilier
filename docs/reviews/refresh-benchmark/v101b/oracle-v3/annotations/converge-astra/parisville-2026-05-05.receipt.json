@@ -1,0 +1,36 @@
+{
+ "documentId": "parisville-2026-05-05",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2aa5234b8f9ef2dd8ca8992165af580158825b1851a5554d291351cb6b12579a",
+ "inputSha256": "b8ba759f7686bf731b43705013e47b2b89554ecf0bb90daf9b6cbf87df63d82a",
+ "responseSha256": "ab707ab4002c7cb5aaa3b9ca13a7ebc50a7b80eb957cc35f50ef02859386c941",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 10121,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 6149,
+  "outputTokens": 214,
+  "totalTokens": 6363
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 10119,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:11:51.906Z"
+}

@@ -1,0 +1,18 @@
+{
+ "documentId": "saint-bernard-de-michaudville-2026-04-01",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "9a3c8090c94dd30d437fde15205f3848efdde8df7fdc136768e77e37e7304bf6",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

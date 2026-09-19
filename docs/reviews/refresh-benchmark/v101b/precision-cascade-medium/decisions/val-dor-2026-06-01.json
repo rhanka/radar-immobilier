@@ -1,0 +1,215 @@
+{
+ "documentId": "val-dor-2026-06-01",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "b4722fe3a2e3c1db46637c288ddf69fa7f5c65677ac97055cb3661d4050c8948",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-12"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-12 — Partie centrale du Domaine des Deux Lacs",
+     "stage": "1er_projet",
+     "objet": "2026-12",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+      },
+      {
+       "page": 1,
+       "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2026-14"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-14 — Zonage — Règlement Omnibus",
+     "stage": "projet",
+     "objet": "2026-14",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+      },
+      {
+       "page": 1,
+       "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-credit-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Entente de crédit de taxes avec Accès Patrimmo",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "6 Autorisation de signature d'une entente de crédit de taxes avec Accès Patrimmo concernant les immeubles situés aux\n670-690 rue Giguère."
+      },
+      {
+       "page": 1,
+       "excerpt": "6 Autorisation de signature d'une entente de crédit de taxes avec Accès Patrimmo concernant les immeubles situés aux\n670-690 rue Giguère."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-operation-cadastrale"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Plan-projet d'opération cadastrale — Domaine des Deux Lacs",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\nDeux Lacs."
+      },
+      {
+       "page": 1,
+       "excerpt": "14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\nDeux Lacs."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-cptaq"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande d'appui auprès de la CPTAQ — lot 4 721 047",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+      },
+      {
+       "page": 1,
+       "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit l'adoption du premier projet de règlement 2026-12 concernant la partie centrale du Domaine des Deux Lacs.\",\"excerpt\":\"3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit des explications et la consultation publique sur le projet de règlement 2026-14.\",\"excerpt\":\"4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit l'autorisation de signature d'une entente de crédit de taxes foncières pour des immeubles spécifiques.\",\"excerpt\":\"6 Autorisation de signature d'une entente de crédit de taxes avec Accès Patrimmo concernant les immeubles situés aux\\n670-690 rue Giguère.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le document mentionne explicitement l'approbation d'un plan-projet d'opération cadastrale pour le Domaine des Deux Lacs.\",\"excerpt\":\"14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\\nDeux Lacs.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le document atteste une demande d'appui à la CPTAQ pour une utilisation à une fin autre qu'agricole sur le lot 4 721 047.\",\"excerpt\":\"15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit l'adoption du premier projet de règlement 2026-12 concernant la partie centrale du Domaine des Deux Lacs.",
+   "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit des explications et la consultation publique sur le projet de règlement 2026-14.",
+   "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit l'autorisation de signature d'une entente de crédit de taxes foncières pour des immeubles spécifiques.",
+   "excerpt": "6 Autorisation de signature d'une entente de crédit de taxes avec Accès Patrimmo concernant les immeubles situés aux\n670-690 rue Giguère."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le document mentionne explicitement l'approbation d'un plan-projet d'opération cadastrale pour le Domaine des Deux Lacs.",
+   "excerpt": "14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\nDeux Lacs."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le document atteste une demande d'appui à la CPTAQ pour une utilisation à une fin autre qu'agricole sur le lot 4 721 047.",
+   "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "L'ordre du jour prévoit l'adoption du premier projet de règlement 2026-12 concernant la partie centrale du Domaine des Deux Lacs."
+   },
+   {
+    "act": "A02",
+    "reason": "L'ordre du jour prévoit des explications et la consultation publique sur le projet de règlement 2026-14."
+   },
+   {
+    "act": "A03",
+    "reason": "L'ordre du jour prévoit l'autorisation de signature d'une entente de crédit de taxes foncières pour des immeubles spécifiques."
+   },
+   {
+    "act": "A04",
+    "reason": "Le document mentionne explicitement l'approbation d'un plan-projet d'opération cadastrale pour le Domaine des Deux Lacs."
+   },
+   {
+    "act": "A05",
+    "reason": "Le document atteste une demande d'appui à la CPTAQ pour une utilisation à une fin autre qu'agricole sur le lot 4 721 047."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1987,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2388,
+   "outputTokens": 405,
+   "totalTokens": 2793
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1814
+  },
+  "inputSha256": "268d0efa326287a55a41c9e189cec9660a1eeb851853c3c2de3594ca3ca6fdaa"
+ }
+}

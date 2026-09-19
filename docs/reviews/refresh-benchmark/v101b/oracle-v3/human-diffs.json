@@ -1,0 +1,307 @@
+{
+ "interim": false,
+ "count": 10,
+ "byKindAndVerdict": {
+  "human_only:human_right": 1,
+  "v3_only:unresolved": 3,
+  "split:unresolved": 1,
+  "human_only:unresolved": 2,
+  "human_only:v3_right": 1,
+  "v3_only:v3_right": 2
+ },
+ "unexplained": 0,
+ "entries": [
+  {
+   "documentId": "saint-etienne-de-bolton-2026-08-04",
+   "item": "a02",
+   "kind": "human_only",
+   "humanId": "B156",
+   "unitId": null,
+   "humanChoice": "v1",
+   "resolution": {
+    "outcome": "resolved",
+    "choice": "v1",
+    "tally": {
+     "v1": 3
+    }
+   },
+   "verdict": "human_right",
+   "reasons": {
+    "astra": "La résolution 2026-08-156 (p. 13) dispose : « QUE le conseil municipal refuse, sur recommandation du CCU, la demande de dérogation mineure visant à réduire à 2,4 mètres la marge latérale de 3 mètres », pour la piscine au 135, rue de la Serpentine, lot 6 380 011. L’absence de proposition par les annotateurs automatiques n’est pas un motif d’exclusion : cette décision est explicitement constatée dans le document et « Les refus doivent rester des refus ».",
+    "fable": "L'unité repose sur l'étape constatée dans ce document : « QUE le conseil municipal refuse, sur recommandation du CCU, la demande de dérogation mineure visant à réduire à 2,4 mètres la marge latérale … au 135, rue de la Serpentine, lot 6 380 011 » (résolution 2026-08-156, page 13, ADOPTÉE) ; c'est un objet foncier explicite et un refus qui « reste un refus », donc unité de rappel derogation_mineure — les votes « absent » ne sont motivés que par l'absence de proposition automatique et non par le texte.",
+    "gemini": "La résolution 2026-08-156 adoptée à la page 13 consigne le refus formel de la dérogation mineure au 135, rue de la Serpentine, ce qui constitue une unité d'urbanisme valide car « un refus reste une unité »."
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 13,
+     "citation": "QUE le conseil municipal refuse, sur recommandation du CCU, la demande de dérogation mineure visant à réduire à 2,4 mètres la marge latérale de 3 mètres prescrite au tableau 1 « Bâtiment, construction"
+    }
+   ]
+  },
+  {
+   "documentId": "valcourt-2026-06-01-agenda",
+   "item": "a01",
+   "kind": "v3_only",
+   "humanId": null,
+   "unitId": "u06",
+   "humanChoice": "absent",
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "verdict": "unresolved",
+   "reasons": {
+    "astra": "Le point 11.1, page 2, prévoit la « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES » : il s’agit d’un objet réglementaire explicite, et non d’un simple rappel historique. L’option « absent » est donc écartée : conformément à la règle sur les ordres du jour, cette révision constitue une unité prévue, à l’étape « inconnu », sans attester une adoption ni le dépôt d’un nouveau projet.",
+    "fable": "Le point 11.1 « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES » est classé par le document lui-même sous « 11. TRAVAUX PUBLICS, ENVIRONNEMENT ET GESTION DES EAUX » et non sous « 7. URBANISME » : c'est un règlement environnemental sur des pratiques agricoles, sans objet d'urbanisme, de PIIA ni d'acte foncier, donc hors des inclusions du corrigé (« urbanisme, petits PIIA et actes fonciers ») et sans étape procédurale constatée (ni avis de motion, ni projet, ni adoption, seulement une « révision nécessaire »). Les annotateurs A, B et C sont écartés car ils assimilent tout « projet de règlement » à un objet du profil ; conformément à la règle « Un fait complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur », ce point est un signal complémentaire et non une unité gold.",
+    "gemini": "Le point 11.1 en page 2 (« RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES ») mentionne explicitement un objet réglementaire prévu à l'ordre du jour ; l'étape « inconnu » est conforme aux règles régissant les points prévus non formellement qualifiés en avis de motion ou adoption, ce qui écarte « absent »."
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 2,
+     "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a01",
+   "kind": "split",
+   "humanId": "S203",
+   "unitId": "u09",
+   "humanChoice": "v1",
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "verdict": "unresolved",
+   "reasons": {
+    "astra": "La résolution 2026-09-203 accepte de « prolonger le réseau d'aqueduc afin de desservir quelques résidences supplémentaires », mais ne constate aucun objet réglementaire ni acte foncier explicite. Le développement invoqué par A et B ne suffit pas à satisfaire cette condition : le prolongement constitue un fait complémentaire d'infrastructure à signaler hors gold.",
+    "fable": "Page 10, résolution 2026-09-203 : la Municipalité « accepte la demande de Saint-Cuthbert pour prolonger le réseau d'aqueduc afin de desservir quelques résidences supplémentaires », avec mention des « résidences projetées dans les zones de développement possibles » ; il s'agit d'un développement explicite, donc hors de l'exclusion « entretiens de voirie sans développement explicite ». La position C (absent) est écartée car la règle n'exclut que les travaux sans développement explicite.",
+    "gemini": "La résolution 2026-09-203 en page 10 autorise le prolongement du réseau d'aqueduc pour desservir de nouvelles résidences, ce qui constitue un développement d'infrastructure explicite inclus par les règles."
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 10,
+     "citation": "la Municipalité de Saint-Barthélemy accepte la demande de Saint-Cuthbert pour prolonger le réseau d'aqueduc afin de desservir quelques résidences supplémentaires sur leur territoire"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a02",
+   "kind": "human_only",
+   "humanId": "S738",
+   "unitId": null,
+   "humanChoice": "v1",
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "verdict": "unresolved",
+   "reasons": {
+    "astra": "À la page 4, le dispositif de la résolution 2026-09-189 indique que le règlement 738-26 permettant les constructions accessoires en cour avant des propriétés riveraines « soit et est adopté ». L'absence de proposition automatique n'est pas un motif d'exclusion; cette adoption est retenue une seule fois, le point a05 reprenant le même acte.",
+    "fable": "L'adoption du règlement 738-26 (« soit et est adopté », page 4) est un fait réel, mais il est déjà crédité par l'unité a05 (même type adoption, même règlement 738-26) : « Doublon même type/même fait non crédité ». De plus l'objet proposé (« QUE le règlement 738-26 ayant comme titre ») n'est pas un objet réglementaire explicite ; la référence humaine est écartée pour éviter le doublon.",
+    "gemini": "Doublon de l'item a05 portant sur l'adoption du même règlement 738-26, avec un libellé d'objet mal découpé."
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 4,
+     "citation": "QUE le règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le règlement de zonage numéro 288-90 afin de permettre les constructions accessoires en cour avant pour les propriétés en b"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a03",
+   "kind": "human_only",
+   "humanId": "S739P",
+   "unitId": null,
+   "humanChoice": "v1",
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "verdict": "unresolved",
+   "reasons": {
+    "astra": "À la page 5, la résolution 2026-09-191 dispose que « le premier projet de règlement 739-26 » relatif aux immeubles à logements dans les zones R-7 et R-8 « soit et est adopté ». Cette étape actuelle est distincte de l'avis de motion, indépendamment de son absence parmi les propositions automatiques, mais ne doit pas être recomptée sous a06.",
+    "fable": "L'adoption du premier projet 739-26 (page 5, « soit et est adopté ») est déjà créditée par l'unité a06 avec l'objet propre « 739-26 » et l'étape projet_reglement ; garder a03 créerait un doublon même type/même fait, et son objet (« QUE le premier projet de règlement 739-26 ayant comme titre ») n'est pas un objet réglementaire explicite.",
+    "gemini": "Doublon de l'item a06 portant sur le même premier projet de règlement 739-26, avec un objet mal formulé."
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 5,
+     "citation": "QUE le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26 amendant le règlement de zonage numéro 288-90 afin de permettre des immeubles à logements dans les zones R-7 et R"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a04",
+   "kind": "human_only",
+   "humanId": "S195",
+   "unitId": null,
+   "humanChoice": "v1",
+   "resolution": {
+    "outcome": "resolved",
+    "choice": "absent",
+    "tally": {
+     "absent": 3
+    }
+   },
+   "verdict": "v3_right",
+   "reasons": {
+    "astra": "Le considérant selon lequel la récupération du matricule « facilitera le développement de certains terrains dans ce secteur » motive l'achat du matricule 2723-93-7328 autorisé par la résolution 2026-09-195. Il ne constitue pas une opération supplémentaire : l'unique acquisition est retenue sous a08, dont la citation identifie directement le dispositif et l'immeuble.",
+    "fable": "L'achat de la portion de la Montée du Lac-Robert (page 7, résolution 2026-09-195) est le même acte foncier que l'unité a08, identifié par le « matricule 2723-93-7328 » ; l'objet proposé ici est un considérant (« la récupération de ce matricule... facilitera le développement ») et non l'objet foncier explicite, donc doublon non crédité au profit de a08.",
+    "gemini": "Doublon de l'item a08 pour l'acquisition de la Montée du Lac-Robert, avec un objet narratif plutôt que l'identifiant foncier."
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 7,
+     "citation": "la récupération de ce matricule par la Municipalité facilitera le développement de certains terrains dans ce secteur; CONSIDÉRANT QUE le coût d'achat pour le matricule visé est la somme symbolique d'u"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a05",
+   "kind": "v3_only",
+   "humanId": null,
+   "unitId": "u01",
+   "humanChoice": "absent",
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "verdict": "unresolved",
+   "reasons": {
+    "astra": "Le titre « ADOPTION DU RÈGLEMENT NUMÉRO 738-26 » de la page 3 et le dispositif « soit et est adopté » de la page 4 appartiennent à la même résolution 2026-09-189, déjà retenue sous a02. Le fait relevé par les annotateurs est exact, mais absent comme unité supplémentaire selon la règle du rappel par unité gold distincte.",
+    "fable": "Page 3, résolution 2026-09-189 sous le titre « 4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26... », dispositif page 4 : « le règlement 738-26 ... soit et est adopté » après avis de motion du 7 juillet 2026 et consultation du 22 juillet ; étape adoption, objet 738-26 et citation exacts. La référence humaine (absent) est écartée car elle ne conservait que la variante a02, dont l'objet est malformé ; une seule unité d'adoption 738-26 est due et c'est celle-ci.",
+    "gemini": "La résolution 2026-09-189 débutant à la page 3 adopte le règlement de zonage 738-26, avec un objet et une citation conformes et précis."
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 3,
+     "citation": "4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS ACCESSOIRES EN COUR AVANT"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a06",
+   "kind": "v3_only",
+   "humanId": null,
+   "unitId": "u03",
+   "humanChoice": "absent",
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "verdict": "unresolved",
+   "reasons": {
+    "astra": "Le titre « ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 » à la page 4 introduit la résolution 2026-09-191 dont le dispositif figure à la page 5, retenu sous a03. Il ne s'agit ni d'un autre projet ni d'une autre étape : ajouter cette unité compterait deux fois le même fait.",
+    "fable": "Page 4, résolution 2026-09-191 « 4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 », dispositif page 5 : « le premier projet de règlement 739-26 ... soit et est adopté » ; unité projet_reglement distincte de l'avis de motion 4.2 (« Avis de motion et projet actuels séparés »). La référence humaine (absent) est écartée puisque le fait doit être crédité une fois et cette version porte l'objet réglementaire explicite « 739-26 ».",
+    "gemini": "La résolution 2026-09-191 à la page 4 adopte le premier projet de règlement de zonage 739-26, constituant une étape distincte valide."
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 4,
+     "citation": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a07",
+   "kind": "v3_only",
+   "humanId": null,
+   "unitId": "u05",
+   "humanChoice": "absent",
+   "resolution": {
+    "outcome": "resolved",
+    "choice": "v1",
+    "tally": {
+     "v1": 3
+    }
+   },
+   "verdict": "v3_right",
+   "reasons": {
+    "astra": "La résolution 2026-09-194 autorise expressément la signature des documents nécessaires à « la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695 » : le second immeuble est donc une unité foncière explicitement nommée, même dans une décision groupée. L'option respecte également l'interdiction « d'y implanter des aménagements permanents » et ne transforme pas le matricule en lot cadastral.",
+    "fable": "Page 6, résolution 2026-09-194 : le conseil autorise « la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695 », terrains où « il est dorénavant interdit d'y implanter des aménagements permanents » ; le second matricule est un objet foncier explicitement nommé et « un nœud groupé peut couvrir plusieurs unités explicitement nommées », donc unité distincte, identifiée comme matricule et non comme lot, sans contredire la contrainte permanente. La référence humaine (absent) est écartée.",
+    "gemini": "La résolution 2026-09-194 en page 6 autorise expressément la vente de l'immeuble désigné par le matricule 3220-73-6695, constituant un acte foncier explicite."
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 6,
+     "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a08",
+   "kind": "v3_only",
+   "humanId": null,
+   "unitId": "u06",
+   "humanChoice": "absent",
+   "resolution": {
+    "outcome": "resolved",
+    "choice": "v1",
+    "tally": {
+     "v1": 3
+    }
+   },
+   "verdict": "v3_right",
+   "reasons": {
+    "astra": "À la page 7, la résolution 2026-09-195 autorise la signature des documents nécessaires à « l'achat de l'immeuble identifié par le matricule 2723-93-7328 », correspondant à une portion de la Montée du Lac-Robert. L'autorisation d'acquisition est donc explicitement attestée, contrairement à l'absence proposée par la référence humaine, et constitue l'unique unité couvrant aussi la mention présentée sous a04.",
+    "fable": "Page 7, résolution 2026-09-195 : le conseil autorise « l'achat de l'immeuble identifié par le matricule 2723-93-7328 » (portion de la Montée du Lac-Robert) pour 1,00 $, acte foncier explicite désigné comme matricule et non comme lot cadastral, conforme à la règle ; la référence humaine (absent) est écartée car elle ne créditait que la variante a04 dont l'objet est un considérant, et le fait doit être crédité une seule fois, ici.",
+    "gemini": "La résolution 2026-09-195 en page 7 autorise l'acquisition de l'immeuble identifié par le matricule 2723-93-7328, acte foncier valide avec objet exact."
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 7,
+     "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à l'achat de l'immeuble identifié par le matricule 2723-93-7328"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,35 @@
+{
+ "documentId": "pincourt-2026-01-20",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "64a2299d750598db64fe5852a12ce75fe4706df2ea40469993fbe8a4906181d0",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2775,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4416,
+   "outputTokens": 839,
+   "totalTokens": 5255
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2609
+  },
+  "inputSha256": "ce4f54a5b1214fc9937102c1b3515e19be9c49aaa5d68baf1c89440df8b444df"
+ },
+ "at": "2026-09-19T03:22:19.577Z"
+}

@@ -1,0 +1,37 @@
+{
+ "documentId": "saint-zephirin-de-courval-2026-03-02",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "97f7e0b7e51578bbfebf6ce80068634ffb184b229280037be9abe204a107acd4",
+ "inputSha256": "46abb20275b9ec617ba26a1ac590a8fc968e19a7d80fe3ef62d5a49d56bd586e",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 7905,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 9991,
+  "outputTokens": 4,
+  "totalTokens": 12613,
+  "thoughtsTokenCount": 2618
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 32768,
+  "httpStatus": 200,
+  "durationMs": 7727,
+  "requestId": null
+ },
+ "at": "2026-09-18T13:50:52.899Z"
+}

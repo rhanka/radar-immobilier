@@ -1,0 +1,124 @@
+{
+ "documentId": "berthier-sur-mer-2026-03-24",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "c45f9d1b48e4e12cc888b85c591319f6edbda635bff8a8a1342f47fc48ea7f1b",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Autorisation du bail de location du terrain municipal de La Marée Gourmande pour cinq ans (maintien de l'usage de crémerie)\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"La Marée Gourmande\",\n        \"page\": 4,\n        \"citation\": \"QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\\nGourmande, pour une durée de cinq (5) ans\",\n        \"anchor\": \"La Marée\\nGourmande\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique avec les sauts de ligne de la page 4, et l'ancre doit en être une sous-chaîne exacte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Adoption du deuxième projet de règlement 369 modifiant la grille des usages du règlement de zonage 265\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"369\",\n        \"page\": 6,\n        \"citation\": \"QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\\n\\ndu règlement de zonage numéro 265 soit adopté\",\n        \"anchor\": \"règlement numéro 369\"\n      },\n      \"reason\": \"La citation actuelle supprime les sauts de ligne après « usages », alors que la règle exige un extrait recopié à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 372 modifiant le règlement 360 relatif à la démolition d'immeubles\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"372\",\n        \"page\": 7,\n        \"citation\": \"QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\\n\\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté\",\n        \"anchor\": \"règlement numéro 372\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne entre « modifier le » et « règlement numéro 360 » pour respecter l'exigence de copie à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"373\",\n        \"page\": 7,\n        \"citation\": \"QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté\",\n        \"anchor\": \"Règlement numéro373\"\n      },\n      \"reason\": \"La citation actuelle remplace le saut de ligne après « relatif à » par une espace, contrairement à l'exigence de copie à l'identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Autorisation du bail de location du terrain municipal de La Marée Gourmande pour cinq ans (maintien de l'usage de crémerie)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "La Marée Gourmande",
+    "page": 4,
+    "citation": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\nGourmande, pour une durée de cinq (5) ans",
+    "anchor": "La Marée\nGourmande"
+   },
+   "reason": "La citation doit être recopiée à l'identique avec les sauts de ligne de la page 4, et l'ancre doit en être une sous-chaîne exacte."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Adoption du deuxième projet de règlement 369 modifiant la grille des usages du règlement de zonage 265",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "369",
+    "page": 6,
+    "citation": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté",
+    "anchor": "règlement numéro 369"
+   },
+   "reason": "La citation actuelle supprime les sauts de ligne après « usages », alors que la règle exige un extrait recopié à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 372 modifiant le règlement 360 relatif à la démolition d'immeubles",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "372",
+    "page": 7,
+    "citation": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté",
+    "anchor": "règlement numéro 372"
+   },
+   "reason": "La citation doit conserver les sauts de ligne entre « modifier le » et « règlement numéro 360 » pour respecter l'exigence de copie à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "373",
+    "page": 7,
+    "citation": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté",
+    "anchor": "Règlement numéro373"
+   },
+   "reason": "La citation actuelle remplace le saut de ligne après « relatif à » par une espace, contrairement à l'exigence de copie à l'identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 4,
+   "citation": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\nGourmande, pour une durée de cinq (5) ans"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "second_projet",
+   "page": 6,
+   "citation": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "projet_reglement",
+   "page": 7,
+   "citation": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "projet_reglement",
+   "page": 7,
+   "citation": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

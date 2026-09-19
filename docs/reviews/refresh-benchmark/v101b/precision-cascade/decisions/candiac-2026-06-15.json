@@ -1,0 +1,113 @@
+{
+ "documentId": "candiac-2026-06-15",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "b177cc03892069bd1dcb0d48041dba0ee0690cded0c43db0e9fb66c0c2adb2a1",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-5005-024"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 5005-024 — exigences d’études et de mitigation",
+     "stage": null,
+     "objet": "5005-024",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+      },
+      {
+       "page": 1,
+       "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-5005"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 5005 relatif aux permis et certificats",
+     "stage": null,
+     "objet": "5005",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+      },
+      {
+       "page": 1,
+       "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le document est le texte d'adoption du règlement 5005-024 décrété par le conseil municipal de la Ville de Candiac le 15 juin 2026.\",\"excerpt\":\"À LA SÉANCE DU 15 JUIN 2026 LE CONSEIL MUNICIPAL DE LA\\nVILLE DE CANDIAC DÉCRÈTE :\\n\\nARTICLE 1.\\nLe présent règlement modifie le Règlement 5005\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 5005 n'est mentionné que comme le règlement d'origine modifié par le présent règlement (simple référence / antécédent).\",\"excerpt\":\"Le présent règlement modifie le Règlement 5005 relatif aux permis et\\ncertificats.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le document est le texte d'adoption du règlement 5005-024 décrété par le conseil municipal de la Ville de Candiac le 15 juin 2026.",
+   "excerpt": "À LA SÉANCE DU 15 JUIN 2026 LE CONSEIL MUNICIPAL DE LA\nVILLE DE CANDIAC DÉCRÈTE :\n\nARTICLE 1.\nLe présent règlement modifie le Règlement 5005"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 5005 n'est mentionné que comme le règlement d'origine modifié par le présent règlement (simple référence / antécédent).",
+   "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+  }
+ ],
+ "filter": {
+  "acts": 2,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 5005 n'est mentionné que comme le règlement d'origine modifié par le présent règlement (simple référence / antécédent)."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le document est le texte d'adoption du règlement 5005-024 décrété par le conseil municipal de la Ville de Candiac le 15 juin 2026."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1840,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2757,
+   "outputTokens": 175,
+   "totalTokens": 2932
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1694
+  },
+  "inputSha256": "fe2f3521b0e78c49a611fca21acf0cda8ea8ef110d2f89869c0acc831d5e779a"
+ }
+}

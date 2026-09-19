@@ -1,0 +1,207 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "2ed2cbc9ec8a62d796c4aa47a0717ed2893667f1c48da2191af9299612015d1a",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Approbation conditionnelle du PIIA — aire de stationnement en pente, lot 6 474 528\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 474 528\",\n        \"page\": 43,\n        \"citation\": \"Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38.\\nDe FAIRE parvenir la présente résolution à Mme Genevieve Lacroix.\\nADOPTÉE À L'UNANIMITÉ\",\n        \"anchor\": \"lot numéro 6 474 528\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique, en conservant les sauts de ligne présents à la page 43.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Approbation conditionnelle du PIIA — rénovation au 2197-2199, chemin du Parc\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2197-2199, chemin du Parc\",\n        \"page\": 45,\n        \"citation\": \"Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 –\\nZone C3.\\nDe FAIRE parvenir la présente résolution à M. Eric Graveson.\\nADOPTÉE À L'UNANIMITÉ\",\n        \"anchor\": \"2197-2199, chemin du Parc\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne du texte de la page 45 pour constituer un extrait recopié à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Contribution pour parcs exigée en argent — lot 6 521 680\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 521 680\",\n        \"page\": 46,\n        \"citation\": \"6 521 680\\n\\n0 m2\\n\\nChemin des\\nNénuphars\\n6 449 130\\n\\nMontant à\\npayer au fonds\\nde parcs, de\\nterrains de\\njeux et\\nd'espaces\\nnaturels (10 %)\\nContribution\\nexigée en argent.\",\n        \"anchor\": \"6 521 680\\n\\n0 m2\"\n      },\n      \"reason\": \"La citation et son ancre doivent reproduire exactement le tableau de la page 46, sans remplacer ses sauts de ligne par des espaces.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Contribution pour parcs exigée en argent — lot 6 449 130\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 449 130\",\n        \"page\": 46,\n        \"citation\": \"Chemin des\\nNénuphars\\n6 449 130\\n\\nMontant à\\npayer au fonds\\nde parcs, de\\nterrains de\\njeux et\\nd'espaces\\nnaturels (10 %)\\nContribution\\nexigée en argent.\",\n        \"anchor\": \"Nénuphars\\n6 449 130\"\n      },\n      \"reason\": \"La citation et son ancre doivent conserver la disposition textuelle exacte du tableau de la page 46.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Demande de modification du RCI 16-21 — intégration du lot 3 787 898 au secteur de consolidation\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"16-21\",\n        \"page\": 47,\n        \"citation\": \"De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle\\nintérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur\",\n        \"anchor\": \"intérimaire numéro 16-21\"\n      },\n      \"reason\": \"La citation doit restituer le saut de ligne entre « contrôle » et « intérimaire » pour être identique au texte de la page 47.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Demande de modification du schéma d'aménagement 16-23 — intégration du lot 3 787 898\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"16-23\",\n        \"page\": 46,\n        \"citation\": \"schéma d'aménagement de la MRC de Memphrémagog\\n(Règlement numéro 16-23\",\n        \"anchor\": \"Règlement numéro 16-23\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne précédant la parenthèse à la page 46, conformément à l'exigence de reproduction à l'identique.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de transmission à la MRC des immeubles à vendre pour taxes impayées\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"immeubles pour taxes impayées\",\n        \"page\": 5,\n        \"citation\": \"D’AUTORISER la greffière ou le directeur général à transmettre à la MRC de\\nMemphrémagog la liste des immeubles dont les taxes n’auront pas été payées avant\\nle 19 mars 2026\",\n        \"anchor\": \"la liste des immeubles\"\n      },\n      \"reason\": \"La résolution 2026-03-46 constate une étape foncière actuelle de transmission des immeubles aux fins de vente pour taxes, sans constater une vente déjà réalisée.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation d'enchérir et d'acquérir des immeubles à la vente pour taxes du 11 juin 2026\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"immeubles vendus pour taxes\",\n        \"page\": 5,\n        \"citation\": \"D’AUTORISER la greffière ou le directeur général à enchérir et à acquérir des\\nimmeubles vendus sur le territoire de la Municipalité du Canton d’Orford par la MRC\",\n        \"anchor\": \"immeubles vendus\"\n      },\n      \"reason\": \"La résolution 2026-03-47 autorise expressément à enchérir et à acquérir des immeubles, ce qui dépasse une simple nomination et constitue une autorisation foncière distincte.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA — aire de stationnement en pente, lot 6 474 528",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 474 528",
+    "page": 43,
+    "citation": "Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38.\nDe FAIRE parvenir la présente résolution à Mme Genevieve Lacroix.\nADOPTÉE À L'UNANIMITÉ",
+    "anchor": "lot numéro 6 474 528"
+   },
+   "reason": "La citation doit être recopiée à l'identique, en conservant les sauts de ligne présents à la page 43."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA — rénovation au 2197-2199, chemin du Parc",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2197-2199, chemin du Parc",
+    "page": 45,
+    "citation": "Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 –\nZone C3.\nDe FAIRE parvenir la présente résolution à M. Eric Graveson.\nADOPTÉE À L'UNANIMITÉ",
+    "anchor": "2197-2199, chemin du Parc"
+   },
+   "reason": "La citation doit conserver les sauts de ligne du texte de la page 45 pour constituer un extrait recopié à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Contribution pour parcs exigée en argent — lot 6 521 680",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 521 680",
+    "page": 46,
+    "citation": "6 521 680\n\n0 m2\n\nChemin des\nNénuphars\n6 449 130\n\nMontant à\npayer au fonds\nde parcs, de\nterrains de\njeux et\nd'espaces\nnaturels (10 %)\nContribution\nexigée en argent.",
+    "anchor": "6 521 680\n\n0 m2"
+   },
+   "reason": "La citation et son ancre doivent reproduire exactement le tableau de la page 46, sans remplacer ses sauts de ligne par des espaces."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Contribution pour parcs exigée en argent — lot 6 449 130",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 449 130",
+    "page": 46,
+    "citation": "Chemin des\nNénuphars\n6 449 130\n\nMontant à\npayer au fonds\nde parcs, de\nterrains de\njeux et\nd'espaces\nnaturels (10 %)\nContribution\nexigée en argent.",
+    "anchor": "Nénuphars\n6 449 130"
+   },
+   "reason": "La citation et son ancre doivent conserver la disposition textuelle exacte du tableau de la page 46."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Demande de modification du RCI 16-21 — intégration du lot 3 787 898 au secteur de consolidation",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "16-21",
+    "page": 47,
+    "citation": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle\nintérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur",
+    "anchor": "intérimaire numéro 16-21"
+   },
+   "reason": "La citation doit restituer le saut de ligne entre « contrôle » et « intérimaire » pour être identique au texte de la page 47."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Demande de modification du schéma d'aménagement 16-23 — intégration du lot 3 787 898",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "16-23",
+    "page": 46,
+    "citation": "schéma d'aménagement de la MRC de Memphrémagog\n(Règlement numéro 16-23",
+    "anchor": "Règlement numéro 16-23"
+   },
+   "reason": "La citation doit conserver le saut de ligne précédant la parenthèse à la page 46, conformément à l'exigence de reproduction à l'identique."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de transmission à la MRC des immeubles à vendre pour taxes impayées",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "immeubles pour taxes impayées",
+    "page": 5,
+    "citation": "D’AUTORISER la greffière ou le directeur général à transmettre à la MRC de\nMemphrémagog la liste des immeubles dont les taxes n’auront pas été payées avant\nle 19 mars 2026",
+    "anchor": "la liste des immeubles"
+   },
+   "reason": "La résolution 2026-03-46 constate une étape foncière actuelle de transmission des immeubles aux fins de vente pour taxes, sans constater une vente déjà réalisée."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation d'enchérir et d'acquérir des immeubles à la vente pour taxes du 11 juin 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "immeubles vendus pour taxes",
+    "page": 5,
+    "citation": "D’AUTORISER la greffière ou le directeur général à enchérir et à acquérir des\nimmeubles vendus sur le territoire de la Municipalité du Canton d’Orford par la MRC",
+    "anchor": "immeubles vendus"
+   },
+   "reason": "La résolution 2026-03-47 autorise expressément à enchérir et à acquérir des immeubles, ce qui dépasse une simple nomination et constitue une autorisation foncière distincte."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "piia",
+   "page": 43,
+   "citation": "Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38.\nDe FAIRE parvenir la présente résolution à Mme Genevieve Lacroix.\nADOPTÉE À L'UNANIMITÉ"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "piia",
+   "page": 45,
+   "citation": "Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 –\nZone C3.\nDe FAIRE parvenir la présente résolution à M. Eric Graveson.\nADOPTÉE À L'UNANIMITÉ"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 46,
+   "citation": "6 521 680\n\n0 m2\n\nChemin des\nNénuphars\n6 449 130\n\nMontant à\npayer au fonds\nde parcs, de\nterrains de\njeux et\nd'espaces\nnaturels (10 %)\nContribution\nexigée en argent."
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 46,
+   "citation": "Chemin des\nNénuphars\n6 449 130\n\nMontant à\npayer au fonds\nde parcs, de\nterrains de\njeux et\nd'espaces\nnaturels (10 %)\nContribution\nexigée en argent."
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 47,
+   "citation": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle\nintérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "inconnu",
+   "page": 46,
+   "citation": "schéma d'aménagement de la MRC de Memphrémagog\n(Règlement numéro 16-23"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 8
+}

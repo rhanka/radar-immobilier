@@ -1,0 +1,268 @@
+{
+ "documentId": "sainte-martine-2026-03-17",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "ae0f045bd02b646fb63cf0b1fe203cda1fe541e8f3489f5a36c452e1d48bf09c",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Autorisation d’enchérir et d’acquérir à la vente d’immeubles pour taxes du 9 avril 2026\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"Vente d’immeubles\",\n        \"page\": 14,\n        \"citation\": \"2026-03-053 : Autorisation d’enchérir – Vente d’immeubles pour défaut de\\npaiement des taxes municipales\",\n        \"anchor\": \"Vente d’immeubles pour défaut\"\n      },\n      \"reason\": \"La citation courante remplace un saut de ligne par une espace, alors que l’extrait doit être recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-503 — permis et certificats concernant les immeubles en zone agricole\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-503\",\n        \"page\": 17,\n        \"citation\": \"2026-03-057 : Adoption du Règlement numéro 2026-503 modifiant le Règlement\\nsur les permis et certificats numéro 2019-345\",\n        \"anchor\": \"Règlement numéro 2026-503\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « Règlement » et « sur les permis » pour reproduire exactement le texte de la page 17.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-501 — ajout de la recherche et du développement en agriculture aux usages commerciaux para-agricoles\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-501\",\n        \"page\": 17,\n        \"citation\": \"2026-03-058 : Adoption du Règlement numéro 2026-501 modifiant le Règlement\\nde zonage numéro 2019-342\",\n        \"anchor\": \"Règlement numéro 2026-501\"\n      },\n      \"reason\": \"L’exigence d’une citation identique au document impose de rétablir le saut de ligne avant « de zonage ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Autorisation partielle et refus de modifications du zonage 2019-342 — demande 2025-016, 122, rue Saint-Joseph\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2019-342\",\n        \"page\": 19,\n        \"citation\": \"D’autoriser partiellement les demandes de modifications réglementaires comme\\nsuit :\\n1. Que soit modifié le Règlement de zonage numéro 2019-342 afin :\",\n        \"anchor\": \"Règlement de zonage numéro 2019-342\"\n      },\n      \"reason\": \"La citation courante fusionne les lignes du dispositif, qui doivent être conservées pour fournir un extrait exact et continu.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Autorisation de modification du plan d’urbanisme 2019-341 — demande 2025-016, 122, rue Saint-Joseph\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2019-341\",\n        \"page\": 18,\n        \"citation\": \"Attendu la demande de modification du Règlement adoptant le plan d’urbanisme\\nnuméro 2019-341 et du Règlement de zonage numéro 2019-342 déposée par\\nmonsieur Louis-David Demers\",\n        \"anchor\": \"numéro 2019-341\"\n      },\n      \"reason\": \"La modification du plan est autorisée à la page 19, mais la citation choisie à la page 18 doit conserver ses deux sauts de ligne pour être exacte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Autorisation de modification réglementaire — demande 2026-003, 1394, boulevard Saint-Jean-Baptiste Ouest\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2026-003\",\n        \"page\": 19,\n        \"citation\": \"2026-03-060 : Demande 2026-003 – Modification réglementaire – 1394,\\nboulevard Saint-Jean-Baptiste Ouest\",\n        \"anchor\": \"Demande 2026-003\"\n      },\n      \"reason\": \"La citation doit reproduire le saut de ligne après « 1394, » présent dans le titre de la résolution.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Appui à la demande CPTAQ 2026-004 — lots 6 060 923 et 6 060 924, rang Touchette\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2026-004\",\n        \"page\": 20,\n        \"citation\": \"2026-03-061 : Demande 2026-004 – Autorisation à la CPTAQ – Lots\\nnuméro 6 060 923 et 6 060 924 (rang Touchette)\",\n        \"anchor\": \"Demande 2026-004\"\n      },\n      \"reason\": \"Le titre cité comporte un saut de ligne après « Lots », qu’il faut conserver conformément à la règle de transcription à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Refus du PIIA 2026-005 — panneaux solaires au 182, rue Saint-Joseph\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"182, rue Saint-Joseph\",\n        \"page\": 22,\n        \"citation\": \"De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph.\",\n        \"anchor\": \"182, rue Saint-Joseph\"\n      },\n      \"reason\": \"Le refus est correctement représenté, mais sa citation doit conserver le saut de ligne après « panneaux » pour être identique au document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Autorisation de démolition et du programme de réutilisation du sol — demande 2026-007, 5, rue Phénix\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5, rue Phénix\",\n        \"page\": 22,\n        \"citation\": \"D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de\\nreconstruction de l’immeuble, tel que présenté.\",\n        \"anchor\": \"5, rue Phénix\"\n      },\n      \"reason\": \"La citation courante supprime les sauts de ligne du dispositif autorisant la démolition et la reconstruction, contrairement à l’exigence d’un extrait exact.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Contribution pour fins de parcs adoptée — lot 6 717 037, 330, rang Laberge, 7 625,90 $\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 717 037\",\n        \"page\": 23,\n        \"citation\": \"Attendu que le conseil opte pour une compensation monétaire de 10 % de la\\nvaleur inscrite au rôle d’évaluation pour le lot projeté numéro 6 717 037, soit une\\nsomme de 7 625,90 $ ;\",\n        \"anchor\": \"lot projeté numéro 6 717 037\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne du considérant établissant la compensation monétaire pour respecter la transcription à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Autorisation d’enchérir et d’acquérir à la vente d’immeubles pour taxes du 9 avril 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Vente d’immeubles",
+    "page": 14,
+    "citation": "2026-03-053 : Autorisation d’enchérir – Vente d’immeubles pour défaut de\npaiement des taxes municipales",
+    "anchor": "Vente d’immeubles pour défaut"
+   },
+   "reason": "La citation courante remplace un saut de ligne par une espace, alors que l’extrait doit être recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Adoption du règlement 2026-503 — permis et certificats concernant les immeubles en zone agricole",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-503",
+    "page": 17,
+    "citation": "2026-03-057 : Adoption du Règlement numéro 2026-503 modifiant le Règlement\nsur les permis et certificats numéro 2019-345",
+    "anchor": "Règlement numéro 2026-503"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « Règlement » et « sur les permis » pour reproduire exactement le texte de la page 17."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du règlement 2026-501 — ajout de la recherche et du développement en agriculture aux usages commerciaux para-agricoles",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-501",
+    "page": 17,
+    "citation": "2026-03-058 : Adoption du Règlement numéro 2026-501 modifiant le Règlement\nde zonage numéro 2019-342",
+    "anchor": "Règlement numéro 2026-501"
+   },
+   "reason": "L’exigence d’une citation identique au document impose de rétablir le saut de ligne avant « de zonage »."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Autorisation partielle et refus de modifications du zonage 2019-342 — demande 2025-016, 122, rue Saint-Joseph",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2019-342",
+    "page": 19,
+    "citation": "D’autoriser partiellement les demandes de modifications réglementaires comme\nsuit :\n1. Que soit modifié le Règlement de zonage numéro 2019-342 afin :",
+    "anchor": "Règlement de zonage numéro 2019-342"
+   },
+   "reason": "La citation courante fusionne les lignes du dispositif, qui doivent être conservées pour fournir un extrait exact et continu."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Autorisation de modification du plan d’urbanisme 2019-341 — demande 2025-016, 122, rue Saint-Joseph",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2019-341",
+    "page": 18,
+    "citation": "Attendu la demande de modification du Règlement adoptant le plan d’urbanisme\nnuméro 2019-341 et du Règlement de zonage numéro 2019-342 déposée par\nmonsieur Louis-David Demers",
+    "anchor": "numéro 2019-341"
+   },
+   "reason": "La modification du plan est autorisée à la page 19, mais la citation choisie à la page 18 doit conserver ses deux sauts de ligne pour être exacte."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Autorisation de modification réglementaire — demande 2026-003, 1394, boulevard Saint-Jean-Baptiste Ouest",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2026-003",
+    "page": 19,
+    "citation": "2026-03-060 : Demande 2026-003 – Modification réglementaire – 1394,\nboulevard Saint-Jean-Baptiste Ouest",
+    "anchor": "Demande 2026-003"
+   },
+   "reason": "La citation doit reproduire le saut de ligne après « 1394, » présent dans le titre de la résolution."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Appui à la demande CPTAQ 2026-004 — lots 6 060 923 et 6 060 924, rang Touchette",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2026-004",
+    "page": 20,
+    "citation": "2026-03-061 : Demande 2026-004 – Autorisation à la CPTAQ – Lots\nnuméro 6 060 923 et 6 060 924 (rang Touchette)",
+    "anchor": "Demande 2026-004"
+   },
+   "reason": "Le titre cité comporte un saut de ligne après « Lots », qu’il faut conserver conformément à la règle de transcription à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Refus du PIIA 2026-005 — panneaux solaires au 182, rue Saint-Joseph",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "182, rue Saint-Joseph",
+    "page": 22,
+    "citation": "De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph.",
+    "anchor": "182, rue Saint-Joseph"
+   },
+   "reason": "Le refus est correctement représenté, mais sa citation doit conserver le saut de ligne après « panneaux » pour être identique au document."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Autorisation de démolition et du programme de réutilisation du sol — demande 2026-007, 5, rue Phénix",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5, rue Phénix",
+    "page": 22,
+    "citation": "D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de\nreconstruction de l’immeuble, tel que présenté.",
+    "anchor": "5, rue Phénix"
+   },
+   "reason": "La citation courante supprime les sauts de ligne du dispositif autorisant la démolition et la reconstruction, contrairement à l’exigence d’un extrait exact."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Contribution pour fins de parcs adoptée — lot 6 717 037, 330, rang Laberge, 7 625,90 $",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 717 037",
+    "page": 23,
+    "citation": "Attendu que le conseil opte pour une compensation monétaire de 10 % de la\nvaleur inscrite au rôle d’évaluation pour le lot projeté numéro 6 717 037, soit une\nsomme de 7 625,90 $ ;",
+    "anchor": "lot projeté numéro 6 717 037"
+   },
+   "reason": "La citation doit conserver les sauts de ligne du considérant établissant la compensation monétaire pour respecter la transcription à l’identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 14,
+   "citation": "2026-03-053 : Autorisation d’enchérir – Vente d’immeubles pour défaut de\npaiement des taxes municipales"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 17,
+   "citation": "2026-03-057 : Adoption du Règlement numéro 2026-503 modifiant le Règlement\nsur les permis et certificats numéro 2019-345"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 17,
+   "citation": "2026-03-058 : Adoption du Règlement numéro 2026-501 modifiant le Règlement\nde zonage numéro 2019-342"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "inconnu",
+   "page": 19,
+   "citation": "D’autoriser partiellement les demandes de modifications réglementaires comme\nsuit :\n1. Que soit modifié le Règlement de zonage numéro 2019-342 afin :"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 18,
+   "citation": "Attendu la demande de modification du Règlement adoptant le plan d’urbanisme\nnuméro 2019-341 et du Règlement de zonage numéro 2019-342 déposée par\nmonsieur Louis-David Demers"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "inconnu",
+   "page": 19,
+   "citation": "2026-03-060 : Demande 2026-003 – Modification réglementaire – 1394,\nboulevard Saint-Jean-Baptiste Ouest"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "inconnu",
+   "page": 20,
+   "citation": "2026-03-061 : Demande 2026-004 – Autorisation à la CPTAQ – Lots\nnuméro 6 060 923 et 6 060 924 (rang Touchette)"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "piia",
+   "page": 22,
+   "citation": "De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph."
+  },
+  {
+   "step": "astra-pass2",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "adoption",
+   "page": 22,
+   "citation": "D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de\nreconstruction de l’immeuble, tel que présenté."
+  },
+  {
+   "step": "astra-pass2",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "adoption",
+   "page": 23,
+   "citation": "Attendu que le conseil opte pour une compensation monétaire de 10 % de la\nvaleur inscrite au rôle d’évaluation pour le lot projeté numéro 6 717 037, soit une\nsomme de 7 625,90 $ ;"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 10
+}

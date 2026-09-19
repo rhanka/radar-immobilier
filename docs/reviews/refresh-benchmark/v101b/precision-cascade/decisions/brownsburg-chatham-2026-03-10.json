@@ -1,0 +1,1089 @@
+{
+ "documentId": "brownsburg-chatham-2026-03-10",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "f77bec70e7645627c4ad6576db85b4209a5fc6eb91a2773f2f8b3e932cbb87dd",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "piia-2026-006"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-006 — Développement résidentiel, rue Lacasse",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 42,
+       "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle projet de développement d’envergure projeté sur le lot"
+      },
+      {
+       "page": 43,
+       "excerpt": "QUE l’acceptation du projet est assortie des conditions suivantes:"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "dm-2026-00030"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00030 — Emprise de rue de 13 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 44,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00030, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "dm-2026-00031"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00031 — Emprise de rue de 13 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 45,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00031, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "dm-2026-00032"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00032 — Profondeur moyenne de 27,46 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 46,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00032, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "dm-2026-00033"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00033 — Profondeur moyenne de 26,70 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 48,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00033, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "dm-2026-00034"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00034 — Profondeur moyenne de 26,59 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 49,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00034, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "dm-2026-00035"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00035 — Profondeur moyenne de 27,76 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 50,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00035, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "dm-2026-00036"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00036 — Profondeur moyenne de 27,41 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 52,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00036, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "dm-2026-00037"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00037 — Profondeur moyenne de 26,78 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 53,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00037, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "dm-2026-00038"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00038 — Profondeur moyenne de 27,31 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 54,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00038, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "dm-2026-00039"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00039 — Profondeur moyenne de 27,70 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 55,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00039, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "dm-2026-00040"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-00040 — Profondeur moyenne de 27,50 mètres",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 57,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00040, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "dm-2025-00725"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2025-00725 — Enseigne sur la route du Canton",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 58,
+       "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2025-00725, visant des dispositions du\nRèglement de zonage numéro 197-2013 pour le lot projeté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "piia-2026-007"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-007 — Construction d’un établissement de restauration",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 59,
+       "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle Service du développement et de l’aménagement du territoire à"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "piia-2026-008"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-008 — Remise et abri à bois, 815 route des Outaouais",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 60,
+       "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle Service du développement et de l’aménagement du territoire à"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A16",
+   "nodeIds": [
+    "piia-2026-009"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-009 — Habitation bifamiliale, rue de l’Église",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 62,
+       "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle Service du développement et de l’aménagement du territoire à"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A17",
+   "nodeIds": [
+    "piia-2026-010"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-010 — Rénovation, 332-332A rue Saint-Joseph",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 63,
+       "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle Service du développement et de l’aménagement du territoire à"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A18",
+   "nodeIds": [
+    "piia-2026-011"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-011 — Bâtiment agricole, 309 route du Canton",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 64,
+       "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle Service du développement et de l’aménagement du territoire à"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A19",
+   "nodeIds": [
+    "bylaw-361-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 361-2026 — Occupation et entretien des bâtiments",
+     "stage": "projet",
+     "objet": "361-2026",
+     "citations": [
+      {
+       "page": 65,
+       "excerpt": "CONSIDÉRANT QUE le projet de règlement a été adopté par le\nconseil municipal à la séance ordinaire du 10 mars 2026;"
+      },
+      {
+       "page": 66,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par madame la conseillère\nMartine Renaud et résolu que soit adopté le Règlement numéro\n361-2026 intitulé « Règlement numéro 361-2026 concernant"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A20",
+   "nodeIds": [
+    "motion-361-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion et dépôt du règlement 361-2026",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 64,
+       "excerpt": "Madame la conseillère Martine Renaud donne avis de motion qu’à\nune séance subséquente, il sera proposé pour adoption le\nRèglement numéro 361-2026 concernant l’occupation et l’entretien"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A21",
+   "nodeIds": [
+    "consultation-361-2026"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Consultation publique annoncée — Règlement 361-2026",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 65,
+       "excerpt": "CONSIDÉRANT QU’une consultation publique se tiendra le\n7 avril 2026 à 18 h 30, à la salle du centre communautaire LouisRenaud située au 270, route du Canton, Brownsburg-Chatham,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A22",
+   "nodeIds": [
+    "cession-2025-00021"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Lotissement 2025-00021 — Contribution pour fins de parcs",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 67,
+       "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\naccepte la contrepartie en argent pour cette cession. Sur la base de\nla valeur établie par l’évaluateur agréé, la contribution de 10 % en"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A23",
+   "nodeIds": [
+    "cession-2026-00001"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Lotissement 2026-00001 — Contribution pour fins de parcs",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 69,
+       "excerpt": "QUE le conseil municipal accepte la contrepartie en argent pour\ncette cession. Sur la base de l’évaluation foncière, la contribution\nde 10 % en argent représente un montant de 16 950 $."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A24",
+   "nodeIds": [
+    "cession-2026-00002"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Lotissement 2026-00002 — Trois lots, rue Principale",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 70,
+       "excerpt": "QUE le conseil municipal accepte la contrepartie en argent pour\ncette cession. Sur la base de l’évaluation foncière, la contribution\nde 10 % en argent représente un montant de 21 150 $."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A25",
+   "nodeIds": [
+    "cession-2026-00005"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Lotissement 2026-00005 — Lots commerciaux ou industriels",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 71,
+       "excerpt": "QUE le conseil municipal accepte la contrepartie en argent pour\ncette cession. Sur la base de l’évaluation foncière, la contribution\nde 10 % en argent représente un montant de 123 000 $."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A26",
+   "nodeIds": [
+    "signal-hlm"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Accueil potentiel de logements sociaux et cession de terrain",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\nconfirme sa volonté d’accueillir des unités d’Habitation à loyer\nmodique (HLM) sur son territoire, s’engage à céder une partie des"
+      },
+      {
+       "page": 18,
+       "excerpt": "CONSIDÉRANT QUE l’aire de construction possible sur le lot à\ncréer est d’environ 8 563 mètres carrés et qu’en fonction de cette\nsuperficie, la Ville pourrait accueillir jusqu’à un maximum de"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A27",
+   "nodeIds": [
+    "signal-fiscalite"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Intention de taxation par sous-catégories d’immeubles et secteurs",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\nexprime son intention d'établir, conformément aux dispositions des\narticles 244.64.1 et suivantes, 244.64.8.1 et suivantes et 244.64.10"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A28",
+   "nodeIds": [
+    "signal-septaco"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acceptation provisoire du prolongement de la rue de la Septaco",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 73,
+       "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\nautorise l’acceptation provisoire selon le protocole d’entente de la\nrésolution numéro 25-05-162"
+      },
+      {
+       "page": 74,
+       "excerpt": "QUE tel que prévu à l’article 9.1 du protocole d’entente, la Ville\ns’engage à reprendre la rue de la Septaco suite à l’acceptation finale."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A29",
+   "nodeIds": [
+    "signal-oria-entente"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Domaine Oria — Signature de l’entente promoteur",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 74,
+       "excerpt": "CONSIDÉRANT QUE le projet de développement vise à encadrer\nla construction d’une nouvelle rue publique, soit le prolongement\ndes rues Lacasse et Saint-Denis et verra à accueillir de nouveaux"
+      },
+      {
+       "page": 75,
+       "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\nautorise, monsieur Kévin Maurice, maire, ainsi que\nMe Pierre-Alain Bouchard, greffier et directeur du Service"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A30",
+   "nodeIds": [
+    "signal-oria-environnement"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Domaine Oria — Dépôt d’une demande au MELCCFP",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 76,
+       "excerpt": "D’AUTORISER le dépôt d’une demande de certificat\nd’autorisation au ministère de l’Environnement, de la Lutte contre\nles changements climatiques, de la Faune et des Parcs"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A31",
+   "nodeIds": [
+    "signal-ecole"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Planification scolaire — Engagement conditionnel de cession d’un terrain",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 77,
+       "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\ns’engage à céder, si le besoin se présente, un terrain à titre gratuit\npour l’établissement d’une école secondaire sur son territoire."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A32",
+   "nodeIds": [
+    "bylaw-197-2013"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 197-2013",
+     "stage": null,
+     "objet": "197-2013",
+     "citations": [
+      {
+       "page": 41,
+       "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-615 selon le plan de zonage en vigueur\n(Règlement de zonage numéro 197-2013);"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A33",
+   "nodeIds": [
+    "bylaw-320-01-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 320-01-2026 — Modernisation du parc Roland-Cadieux",
+     "stage": "adoption",
+     "objet": "320-01-2026",
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "Le titre du règlement numéro 320-2023 est remplacé par le suivant :"
+      },
+      {
+       "page": 20,
+       "excerpt": "QUE les travaux soient décrétés conformément à la Loi sur les\ntravaux municipaux (RLRQ, c. T-14)."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A34",
+   "nodeIds": [
+    "bylaw-320-2023"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement d’emprunt 320-2023 — Parc Roland-Cadieux",
+     "stage": null,
+     "objet": "320-2023",
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "ATTENDU QUE, le 2 mai 2023, le conseil a adopté le règlement\nd’emprunt numéro 320-2023 concernant la modernisation du parc\nRoland-Cadieux et décrétant un emprunt et une dépense de"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la demande de PIIA 2026-006 avec conditions pour le lot 4 234 857 sur le prolongement de la rue Lacasse.\",\"excerpt\":\"le conseil municipal accepte la demande et en conséquence, autorise le projet de développement d’envergure projeté sur le lot 4 234 857 du cadastre du Québec, situé sur le prolongement de la rue Lacasse\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accepte la demande de dérogation mineure DM-2026-00030 relative à l'emprise de rue.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00030, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 120\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accepte la demande de dérogation mineure DM-2026-00031.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00031, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 733\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la dérogation mineure DM-2026-00032.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00032, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 108\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la dérogation mineure DM-2026-00033.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00033, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 109\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la dérogation mineure DM-2026-00034.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00034, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 110\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la dérogation mineure DM-2026-00035.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00035, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 111\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la dérogation mineure DM-2026-00036.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00036, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 339\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la dérogation mineure DM-2026-00037.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00037, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 340\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la dérogation mineure DM-2026-00038.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00038, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 341\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la dérogation mineure DM-2026-00039.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00039, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 343\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la dérogation mineure DM-2026-00040.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00040, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 344\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la dérogation mineure DM-2025-00725 pour l'enseigne.\",\"excerpt\":\"QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2025-00725, visant des dispositions du Règlement de zonage numéro 197-2013 pour le lot projeté 6 703 926\"},{\"act\":\"A14\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve la demande de PIIA 2026-007.\",\"excerpt\":\"le conseil municipal accepte la demande et en conséquence, autorise le Service du développement et de l’aménagement du territoire à délivrer le permis de construction visant la construction d’un établissement de restauration\"},{\"act\":\"A15\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve la demande de PIIA 2026-008.\",\"excerpt\":\"le conseil municipal accepte la demande et en conséquence, autorise le Service du développement et de l’aménagement du territoire à délivrer un certificat d’autorisation visant la construction d’une remise\"},{\"act\":\"A16\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve la demande de PIIA 2026-009.\",\"excerpt\":\"le conseil municipal accepte la demande et en conséquence, autorise le Service du développement et de l’aménagement du territoire à délivrer le permis de construction visant la construction d’une habitation bifamiliale\"},{\"act\":\"A17\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve la demande de PIIA 2026-010.\",\"excerpt\":\"le conseil municipal accepte la demande et en conséquence, autorise le Service du développement et de l’aménagement du territoire à délivrer le certificat d’autorisation visant la rénovation de la résidence\"},{\"act\":\"A18\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve la demande de PIIA 2026-011.\",\"excerpt\":\"le conseil municipal accepte la demande et en conséquence, autorise le Service du développement et de l’aménagement du territoire à délivrer le certificat d’autorisation visant la construction d’un bâtiment agricole\"},{\"act\":\"A19\",\"verdict\":\"soutenu\",\"reason\":\"Le point 14.20 adopte le projet de règlement numéro 361-2026.\",\"excerpt\":\"ADOPTION DU PROJET DE RÈGLEMENT NUMÉRO 361-2026 CONCERNANT L’OCCUPATION ET L’ENTRETIEN DES BÂTIMENTS\"},{\"act\":\"A20\",\"verdict\":\"soutenu\",\"reason\":\"Avis de motion et dépôt du projet de règlement 361-2026 au point 14.19.\",\"excerpt\":\"Madame la conseillère Martine Renaud donne avis de motion qu’à une séance subséquente, il sera proposé pour adoption le Règlement numéro 361-2026 concernant l’occupation et l’entretien des bâtiments\"},{\"act\":\"A21\",\"verdict\":\"soutenu\",\"reason\":\"Une consultation publique est formellement annoncée dans le texte pour le 7 avril 2026.\",\"excerpt\":\"CONSIDÉRANT QU’une consultation publique se tiendra le 7 avril 2026 à 18 h 30, à la salle du centre communautaire LouisRenaud située au 270, route du Canton, Brownsburg-Chatham\"},{\"act\":\"A22\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la contribution pour fins de parcs sous forme de contrepartie en argent pour le lotissement 2025-00021.\",\"excerpt\":\"QUE le conseil municipal de la Ville de Brownsburg-Chatham accepte la contrepartie en argent pour cette cession. Sur la base de la valeur établie par l’évaluateur agréé, la contribution de 10 % en argent représente un montant de 810 $.\"},{\"act\":\"A23\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la contribution pour fins de parcs en argent pour le lotissement 2026-00001.\",\"excerpt\":\"QUE le conseil municipal accepte la contrepartie en argent pour cette cession. Sur la base de l’évaluation foncière, la contribution de 10 % en argent représente un montant de 16 950 $.\"},{\"act\":\"A24\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la contribution pour fins de parcs en argent pour le lotissement 2026-00002.\",\"excerpt\":\"QUE le conseil municipal accepte la contrepartie en argent pour cette cession. Sur la base de l’évaluation foncière, la contribution de 10 % en argent représente un montant de 21 150 $.\"},{\"act\":\"A25\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la contribution pour fins de parcs en argent pour le lotissement 2026-00005.\",\"excerpt\":\"QUE le conseil municipal accepte la contrepartie en argent pour cette cession. Sur la base de l’évaluation foncière, la contribution de 10 % en argent représente un montant de 123 000 $.\"},{\"act\":\"A26\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 26-03-066 engage la ville à céder une partie de terrain pour accueillir des logements sociaux.\",\"excerpt\":\"confirme sa volonté d’accueillir des unités d’Habitation à loyer modique (HLM) sur son territoire, s’engage à céder une partie des lots 4 235 205 et 5 641 417 du cadastre du Québec\"},{\"act\":\"A27\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une simple intention de taxation fiscale municipale, ce qui relève de la fiscalité et des finances locales, hors actes d'urbanisme ou d'aménagement.\",\"excerpt\":\"\"},{\"act\":\"A28\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 26-03-110 autorise l'acceptation provisoire des travaux de voirie du prolongement de la rue de la Septaco et prévoit sa rétrocession future.\",\"excerpt\":\"QUE le conseil municipal de la Ville de Brownsburg-Chatham autorise l’acceptation provisoire selon le protocole d’entente de la résolution numéro 25-05-162\"},{\"act\":\"A29\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la signature d'une entente promoteur relative au développement du Domaine Oria.\",\"excerpt\":\"AUTORISER LA SIGNATURE DE L’ENTENTE PROMOTEUR ENTRE LA VILLE DE BROWNSBURGCHATHAM ET LA COMPAGNIE GESTION OR CONCEPT INC CONCERNANT LE DÉVELOPPEMENT DU DOMAINE ORIA\"},{\"act\":\"A30\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise le dépôt d'une demande auprès du MELCCFP pour les infrastructures du projet Oria.\",\"excerpt\":\"D’AUTORISER le dépôt d’une demande de certificat d’autorisation au ministère de l’Environnement, de la Lutte contre les changements climatiques, de la Faune et des Parcs (MELCCFP)\"},{\"act\":\"A31\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil s'engage par résolution à céder gratuitement un terrain pour une école secondaire dans le cadre de la planification des besoins scolaires.\",\"excerpt\":\"QUE le conseil municipal de la Ville de Brownsburg-Chatham s’engage à céder, si le besoin se présente, un terrain à titre gratuit pour l’établissement d’une école secondaire sur son territoire.\"},{\"act\":\"A32\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 197-2013 est simplement mentionné en tant que réglementation en vigueur dans les considérants, aucun acte n'est posé à son sujet lors de cette séance.\",\"excerpt\":\"CONSIDÉRANT QUE l’immeuble visé par la demande est situé dans la zone résidentielle R-615 selon le plan de zonage en vigueur (Règlement de zonage numéro 197-2013);\"},{\"act\":\"A33\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un règlement d'emprunt financier pour travaux de parc/école, relevant des travaux publics/finances et non d'un acte réglementaire d'urbanisme.\",\"excerpt\":\"ADOPTION DU RÈGLEMENT D’EMPRUNT NUMÉRO 320-01-2026 MODIFIANT LE RÈGLEMENT D’EMPRUNT NUMÉRO 320-2023 CONCERNANT LA MODERNISATION DU PARC ROLAND-CADIEUX\"},{\"act\":\"A34\",\"verdict\":\"non_soutenu\",\"reason\":\"Simple rappel historique d'un règlement d'emprunt adopté en mai 2023, aucun acte n'est adopté pour celui-ci.\",\"excerpt\":\"ATTENDU QUE, le 2 mai 2023, le conseil a adopté le règlement d’emprunt numéro 320-2023 concernant la modernisation du parc Roland-Cadieux\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la demande de PIIA 2026-006 avec conditions pour le lot 4 234 857 sur le prolongement de la rue Lacasse.",
+   "excerpt": "le conseil municipal accepte la demande et en conséquence, autorise le projet de développement d’envergure projeté sur le lot 4 234 857 du cadastre du Québec, situé sur le prolongement de la rue Lacasse"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil accepte la demande de dérogation mineure DM-2026-00030 relative à l'emprise de rue.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00030, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 120"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil accepte la demande de dérogation mineure DM-2026-00031.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00031, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 733"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00032.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00032, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 108"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00033.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00033, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 109"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00034.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00034, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 110"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00035.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00035, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 111"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00036.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00036, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 339"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00037.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00037, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 340"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00038.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00038, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 341"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00039.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00039, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 343"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00040.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00040, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 344"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la dérogation mineure DM-2025-00725 pour l'enseigne.",
+   "excerpt": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2025-00725, visant des dispositions du Règlement de zonage numéro 197-2013 pour le lot projeté 6 703 926"
+  },
+  {
+   "act": "A14",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve la demande de PIIA 2026-007.",
+   "excerpt": "le conseil municipal accepte la demande et en conséquence, autorise le Service du développement et de l’aménagement du territoire à délivrer le permis de construction visant la construction d’un établissement de restauration"
+  },
+  {
+   "act": "A15",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve la demande de PIIA 2026-008.",
+   "excerpt": "le conseil municipal accepte la demande et en conséquence, autorise le Service du développement et de l’aménagement du territoire à délivrer un certificat d’autorisation visant la construction d’une remise"
+  },
+  {
+   "act": "A16",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve la demande de PIIA 2026-009.",
+   "excerpt": "le conseil municipal accepte la demande et en conséquence, autorise le Service du développement et de l’aménagement du territoire à délivrer le permis de construction visant la construction d’une habitation bifamiliale"
+  },
+  {
+   "act": "A17",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve la demande de PIIA 2026-010.",
+   "excerpt": "le conseil municipal accepte la demande et en conséquence, autorise le Service du développement et de l’aménagement du territoire à délivrer le certificat d’autorisation visant la rénovation de la résidence"
+  },
+  {
+   "act": "A18",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve la demande de PIIA 2026-011.",
+   "excerpt": "le conseil municipal accepte la demande et en conséquence, autorise le Service du développement et de l’aménagement du territoire à délivrer le certificat d’autorisation visant la construction d’un bâtiment agricole"
+  },
+  {
+   "act": "A19",
+   "verdict": "soutenu",
+   "reason": "Le point 14.20 adopte le projet de règlement numéro 361-2026.",
+   "excerpt": "ADOPTION DU PROJET DE RÈGLEMENT NUMÉRO 361-2026 CONCERNANT L’OCCUPATION ET L’ENTRETIEN DES BÂTIMENTS"
+  },
+  {
+   "act": "A20",
+   "verdict": "soutenu",
+   "reason": "Avis de motion et dépôt du projet de règlement 361-2026 au point 14.19.",
+   "excerpt": "Madame la conseillère Martine Renaud donne avis de motion qu’à une séance subséquente, il sera proposé pour adoption le Règlement numéro 361-2026 concernant l’occupation et l’entretien des bâtiments"
+  },
+  {
+   "act": "A21",
+   "verdict": "soutenu",
+   "reason": "Une consultation publique est formellement annoncée dans le texte pour le 7 avril 2026.",
+   "excerpt": "CONSIDÉRANT QU’une consultation publique se tiendra le 7 avril 2026 à 18 h 30, à la salle du centre communautaire LouisRenaud située au 270, route du Canton, Brownsburg-Chatham"
+  },
+  {
+   "act": "A22",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la contribution pour fins de parcs sous forme de contrepartie en argent pour le lotissement 2025-00021.",
+   "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham accepte la contrepartie en argent pour cette cession. Sur la base de la valeur établie par l’évaluateur agréé, la contribution de 10 % en argent représente un montant de 810 $."
+  },
+  {
+   "act": "A23",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la contribution pour fins de parcs en argent pour le lotissement 2026-00001.",
+   "excerpt": "QUE le conseil municipal accepte la contrepartie en argent pour cette cession. Sur la base de l’évaluation foncière, la contribution de 10 % en argent représente un montant de 16 950 $."
+  },
+  {
+   "act": "A24",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la contribution pour fins de parcs en argent pour le lotissement 2026-00002.",
+   "excerpt": "QUE le conseil municipal accepte la contrepartie en argent pour cette cession. Sur la base de l’évaluation foncière, la contribution de 10 % en argent représente un montant de 21 150 $."
+  },
+  {
+   "act": "A25",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la contribution pour fins de parcs en argent pour le lotissement 2026-00005.",
+   "excerpt": "QUE le conseil municipal accepte la contrepartie en argent pour cette cession. Sur la base de l’évaluation foncière, la contribution de 10 % en argent représente un montant de 123 000 $."
+  },
+  {
+   "act": "A26",
+   "verdict": "soutenu",
+   "reason": "La résolution 26-03-066 engage la ville à céder une partie de terrain pour accueillir des logements sociaux.",
+   "excerpt": "confirme sa volonté d’accueillir des unités d’Habitation à loyer modique (HLM) sur son territoire, s’engage à céder une partie des lots 4 235 205 et 5 641 417 du cadastre du Québec"
+  },
+  {
+   "act": "A27",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple intention de taxation fiscale municipale, ce qui relève de la fiscalité et des finances locales, hors actes d'urbanisme ou d'aménagement.",
+   "excerpt": ""
+  },
+  {
+   "act": "A28",
+   "verdict": "soutenu",
+   "reason": "La résolution 26-03-110 autorise l'acceptation provisoire des travaux de voirie du prolongement de la rue de la Septaco et prévoit sa rétrocession future.",
+   "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham autorise l’acceptation provisoire selon le protocole d’entente de la résolution numéro 25-05-162"
+  },
+  {
+   "act": "A29",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la signature d'une entente promoteur relative au développement du Domaine Oria.",
+   "excerpt": "AUTORISER LA SIGNATURE DE L’ENTENTE PROMOTEUR ENTRE LA VILLE DE BROWNSBURGCHATHAM ET LA COMPAGNIE GESTION OR CONCEPT INC CONCERNANT LE DÉVELOPPEMENT DU DOMAINE ORIA"
+  },
+  {
+   "act": "A30",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise le dépôt d'une demande auprès du MELCCFP pour les infrastructures du projet Oria.",
+   "excerpt": "D’AUTORISER le dépôt d’une demande de certificat d’autorisation au ministère de l’Environnement, de la Lutte contre les changements climatiques, de la Faune et des Parcs (MELCCFP)"
+  },
+  {
+   "act": "A31",
+   "verdict": "soutenu",
+   "reason": "Le conseil s'engage par résolution à céder gratuitement un terrain pour une école secondaire dans le cadre de la planification des besoins scolaires.",
+   "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham s’engage à céder, si le besoin se présente, un terrain à titre gratuit pour l’établissement d’une école secondaire sur son territoire."
+  },
+  {
+   "act": "A32",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 197-2013 est simplement mentionné en tant que réglementation en vigueur dans les considérants, aucun acte n'est posé à son sujet lors de cette séance.",
+   "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé dans la zone résidentielle R-615 selon le plan de zonage en vigueur (Règlement de zonage numéro 197-2013);"
+  },
+  {
+   "act": "A33",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un règlement d'emprunt financier pour travaux de parc/école, relevant des travaux publics/finances et non d'un acte réglementaire d'urbanisme.",
+   "excerpt": "ADOPTION DU RÈGLEMENT D’EMPRUNT NUMÉRO 320-01-2026 MODIFIANT LE RÈGLEMENT D’EMPRUNT NUMÉRO 320-2023 CONCERNANT LA MODERNISATION DU PARC ROLAND-CADIEUX"
+  },
+  {
+   "act": "A34",
+   "verdict": "non_soutenu",
+   "reason": "Simple rappel historique d'un règlement d'emprunt adopté en mai 2023, aucun acte n'est adopté pour celui-ci.",
+   "excerpt": "ATTENDU QUE, le 2 mai 2023, le conseil a adopté le règlement d’emprunt numéro 320-2023 concernant la modernisation du parc Roland-Cadieux"
+  }
+ ],
+ "filter": {
+  "acts": 34,
+  "removed": [
+   {
+    "act": "A27",
+    "reason": "Il s'agit d'une simple intention de taxation fiscale municipale, ce qui relève de la fiscalité et des finances locales, hors actes d'urbanisme ou d'aménagement."
+   },
+   {
+    "act": "A32",
+    "reason": "Le règlement 197-2013 est simplement mentionné en tant que réglementation en vigueur dans les considérants, aucun acte n'est posé à son sujet lors de cette séance."
+   },
+   {
+    "act": "A33",
+    "reason": "Il s'agit d'un règlement d'emprunt financier pour travaux de parc/école, relevant des travaux publics/finances et non d'un acte réglementaire d'urbanisme."
+   },
+   {
+    "act": "A34",
+    "reason": "Simple rappel historique d'un règlement d'emprunt adopté en mai 2023, aucun acte n'est adopté pour celui-ci."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal accepte la demande de PIIA 2026-006 avec conditions pour le lot 4 234 857 sur le prolongement de la rue Lacasse."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil accepte la demande de dérogation mineure DM-2026-00030 relative à l'emprise de rue."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil accepte la demande de dérogation mineure DM-2026-00031."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00032."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00033."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00034."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00035."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00036."
+   },
+   {
+    "act": "A09",
+    "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00037."
+   },
+   {
+    "act": "A10",
+    "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00038."
+   },
+   {
+    "act": "A11",
+    "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00039."
+   },
+   {
+    "act": "A12",
+    "reason": "Le conseil municipal accepte la dérogation mineure DM-2026-00040."
+   },
+   {
+    "act": "A13",
+    "reason": "Le conseil municipal accepte la dérogation mineure DM-2025-00725 pour l'enseigne."
+   },
+   {
+    "act": "A14",
+    "reason": "Le conseil municipal approuve la demande de PIIA 2026-007."
+   },
+   {
+    "act": "A15",
+    "reason": "Le conseil municipal approuve la demande de PIIA 2026-008."
+   },
+   {
+    "act": "A16",
+    "reason": "Le conseil municipal approuve la demande de PIIA 2026-009."
+   },
+   {
+    "act": "A17",
+    "reason": "Le conseil municipal approuve la demande de PIIA 2026-010."
+   },
+   {
+    "act": "A18",
+    "reason": "Le conseil municipal approuve la demande de PIIA 2026-011."
+   },
+   {
+    "act": "A19",
+    "reason": "Le point 14.20 adopte le projet de règlement numéro 361-2026."
+   },
+   {
+    "act": "A20",
+    "reason": "Avis de motion et dépôt du projet de règlement 361-2026 au point 14.19."
+   },
+   {
+    "act": "A21",
+    "reason": "Une consultation publique est formellement annoncée dans le texte pour le 7 avril 2026."
+   },
+   {
+    "act": "A22",
+    "reason": "Le conseil approuve la contribution pour fins de parcs sous forme de contrepartie en argent pour le lotissement 2025-00021."
+   },
+   {
+    "act": "A23",
+    "reason": "Le conseil approuve la contribution pour fins de parcs en argent pour le lotissement 2026-00001."
+   },
+   {
+    "act": "A24",
+    "reason": "Le conseil approuve la contribution pour fins de parcs en argent pour le lotissement 2026-00002."
+   },
+   {
+    "act": "A25",
+    "reason": "Le conseil approuve la contribution pour fins de parcs en argent pour le lotissement 2026-00005."
+   },
+   {
+    "act": "A26",
+    "reason": "La résolution 26-03-066 engage la ville à céder une partie de terrain pour accueillir des logements sociaux."
+   },
+   {
+    "act": "A28",
+    "reason": "La résolution 26-03-110 autorise l'acceptation provisoire des travaux de voirie du prolongement de la rue de la Septaco et prévoit sa rétrocession future."
+   },
+   {
+    "act": "A29",
+    "reason": "Le conseil autorise la signature d'une entente promoteur relative au développement du Domaine Oria."
+   },
+   {
+    "act": "A30",
+    "reason": "Le conseil autorise le dépôt d'une demande auprès du MELCCFP pour les infrastructures du projet Oria."
+   },
+   {
+    "act": "A31",
+    "reason": "Le conseil s'engage par résolution à céder gratuitement un terrain pour une école secondaire dans le cadre de la planification des besoins scolaires."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 7964,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 61067,
+   "outputTokens": 3289,
+   "totalTokens": 64356
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 7783
+  },
+  "inputSha256": "0f8872a47a208eb90bdefe700e119c3820bcd1dd526ee5a6ab282ae173505003"
+ }
+}

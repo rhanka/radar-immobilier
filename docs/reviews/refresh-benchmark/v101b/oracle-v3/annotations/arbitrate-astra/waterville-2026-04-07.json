@@ -1,0 +1,19 @@
+{
+ "documentId": "waterville-2026-04-07",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b137b8bce7cb9f8629faf0c9f8f7c3c2ba81b57ed8ef781488c2329ec6de5a92",
+ "verificationSha256": "285f7e9612f6aa82f3dc11e8de561a5f6ce09e4a5ce80577d367c3ade7d075a2",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

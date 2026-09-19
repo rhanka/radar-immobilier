@@ -1,0 +1,142 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "b5e36b8255342179d05e430ddadd0cd954799d82ef1a0c671356667e582e30a7",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Acquisition conditionnelle du terrain au matricule 6100-38-1522 après démolition complète\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6100-38-1522\",\n        \"page\": 7,\n        \"citation\": \"à procéder à l’acquisition du lot qui porte le matricule\\n6100-38-1522 appartenant à monsieur William Pilon et madame Mahélie\\nCampagna\",\n        \"anchor\": \"matricule\\n6100-38-1522\"\n      },\n      \"reason\": \"La citation identifiant le terrain doit respecter les sauts de ligne de la page 7 ; l’acquisition conditionnelle est confirmée dans le dispositif de la résolution à la page 8.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation d’enchérir et d’acquérir des immeubles à la vente pour taxes du 16 juin 2026\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"Immeubles vendus pour taxes\",\n        \"page\": 8,\n        \"citation\": \"et à acquérir, au nom de la Municipalité, tout immeuble de son territoire\\nmis en vente.\",\n        \"anchor\": \"tout immeuble de son territoire\"\n      },\n      \"reason\": \"La résolution 2026-03-71 autorise expressément les enchères et l’acquisition d’immeubles lors de la vente pour taxes du 16 juin 2026, ce qui constitue une autorisation foncière distincte à inclure.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Modification du signataire de l’acquisition de terrains du rang Haut de la Rivière — résolution 2025-08-304\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2025-08-304\",\n        \"page\": 12,\n        \"citation\": \"ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la\\nmodification du changement de nom du maire, par monsieur Michel\\nDeraspe dans la résolution 2025-08-304\",\n        \"anchor\": \"résolution 2025-08-304\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique de la page 12, sans remplacer ses sauts de ligne par des espaces.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Second projet du règlement 268-2025 — triplex rue Georges, zone H-06\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"268-2025\",\n        \"page\": 15,\n        \"citation\": \"19. ADOPTION DU DEUXIÈME (2IÈME) PROJET DE\\nRÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE\\nZONAGE 160-2017 POUR LA CONSTRUCTION D’UN\\nTRIPLEX SUR LA RUE GEORGES\",\n        \"anchor\": \"RÈGLEMENT 268-2025\"\n      },\n      \"reason\": \"Le titre cité atteste bien le second projet, mais ses sauts de ligne doivent être conservés pour respecter l’exigence de citation identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Appel d’offres autorisé pour la vente du 620, rang Haut de la Rivière — résidence sous huit mois\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"620, rang Haut de la Rivière\",\n        \"page\": 17,\n        \"citation\": \"d’autoriser la\\nparution de l’annonce de la vente du terrain appartenant à la Municipalité,\\nsoit celui du 620, rang Haut de la Rivière dans le journal Le Courrier Sud\",\n        \"anchor\": \"620, rang Haut de la Rivière\"\n      },\n      \"reason\": \"La citation courante omet la virgule après « Municipalité » et remplace les sauts de ligne ; elle doit reproduire exactement le texte de la page 17.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Acquisition conditionnelle du terrain au matricule 6100-38-1522 après démolition complète",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6100-38-1522",
+    "page": 7,
+    "citation": "à procéder à l’acquisition du lot qui porte le matricule\n6100-38-1522 appartenant à monsieur William Pilon et madame Mahélie\nCampagna",
+    "anchor": "matricule\n6100-38-1522"
+   },
+   "reason": "La citation identifiant le terrain doit respecter les sauts de ligne de la page 7 ; l’acquisition conditionnelle est confirmée dans le dispositif de la résolution à la page 8."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation d’enchérir et d’acquérir des immeubles à la vente pour taxes du 16 juin 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Immeubles vendus pour taxes",
+    "page": 8,
+    "citation": "et à acquérir, au nom de la Municipalité, tout immeuble de son territoire\nmis en vente.",
+    "anchor": "tout immeuble de son territoire"
+   },
+   "reason": "La résolution 2026-03-71 autorise expressément les enchères et l’acquisition d’immeubles lors de la vente pour taxes du 16 juin 2026, ce qui constitue une autorisation foncière distincte à inclure."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Modification du signataire de l’acquisition de terrains du rang Haut de la Rivière — résolution 2025-08-304",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2025-08-304",
+    "page": 12,
+    "citation": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la\nmodification du changement de nom du maire, par monsieur Michel\nDeraspe dans la résolution 2025-08-304",
+    "anchor": "résolution 2025-08-304"
+   },
+   "reason": "La citation doit être recopiée à l’identique de la page 12, sans remplacer ses sauts de ligne par des espaces."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Second projet du règlement 268-2025 — triplex rue Georges, zone H-06",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "268-2025",
+    "page": 15,
+    "citation": "19. ADOPTION DU DEUXIÈME (2IÈME) PROJET DE\nRÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE\nZONAGE 160-2017 POUR LA CONSTRUCTION D’UN\nTRIPLEX SUR LA RUE GEORGES",
+    "anchor": "RÈGLEMENT 268-2025"
+   },
+   "reason": "Le titre cité atteste bien le second projet, mais ses sauts de ligne doivent être conservés pour respecter l’exigence de citation identique."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Appel d’offres autorisé pour la vente du 620, rang Haut de la Rivière — résidence sous huit mois",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "620, rang Haut de la Rivière",
+    "page": 17,
+    "citation": "d’autoriser la\nparution de l’annonce de la vente du terrain appartenant à la Municipalité,\nsoit celui du 620, rang Haut de la Rivière dans le journal Le Courrier Sud",
+    "anchor": "620, rang Haut de la Rivière"
+   },
+   "reason": "La citation courante omet la virgule après « Municipalité » et remplace les sauts de ligne ; elle doit reproduire exactement le texte de la page 17."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u06"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 7,
+   "citation": "à procéder à l’acquisition du lot qui porte le matricule\n6100-38-1522 appartenant à monsieur William Pilon et madame Mahélie\nCampagna"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 12,
+   "citation": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la\nmodification du changement de nom du maire, par monsieur Michel\nDeraspe dans la résolution 2025-08-304"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "second_projet",
+   "page": 15,
+   "citation": "19. ADOPTION DU DEUXIÈME (2IÈME) PROJET DE\nRÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE\nZONAGE 160-2017 POUR LA CONSTRUCTION D’UN\nTRIPLEX SUR LA RUE GEORGES"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 17,
+   "citation": "d’autoriser la\nparution de l’annonce de la vente du terrain appartenant à la Municipalité,\nsoit celui du 620, rang Haut de la Rivière dans le journal Le Courrier Sud"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 5
+}

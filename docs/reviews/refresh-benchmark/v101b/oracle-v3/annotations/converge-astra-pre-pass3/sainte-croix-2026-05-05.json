@@ -1,0 +1,91 @@
+{
+ "documentId": "sainte-croix-2026-05-05",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "99b86b2c262f1b2a6ed341d6b6085222101383467151687495d2b29b3300191c",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 117-2026, page 8, autorise la transmission d’une lettre d’intention concernant une partie du lot 6 191 770, sans constater une vente conclue.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 118-2026 prononce expressément, page 9, l’adoption du règlement 760-2026 modifiant les grandes affectations du plan d’urbanisme.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 119-2026 adopte expressément, page 9, le règlement 761-2026 concernant les usages permis dans la zone 14-I et la création de la zone 21-H.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 120-2026 approuve expressément, page 10, le plan d’aménagement de Giroux Arpentage pour le développement du lot 3 592 103 et le prolongement de la rue Thibodeau.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La page 14 atteste une recommandation municipale favorable à la demande du projet éolien Lotbinière Ndakina, et non une autorisation déjà accordée par la CPTAQ.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La page 14 confirme explicitement l’engagement municipal à octroyer les droits fonciers nécessaires au projet, acte foncier distinct de la recommandation à la CPTAQ.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La résolution 126-2026 approuve expressément, page 17, les plans et devis préliminaires d’Apex pour le lot 3 592 103, sans certifier la conformité du projet et distinctement de l’approbation du plan d’aménagement.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 117-2026, page 8, autorise la transmission d’une lettre d’intention concernant une partie du lot 6 191 770, sans constater une vente conclue."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 118-2026 prononce expressément, page 9, l’adoption du règlement 760-2026 modifiant les grandes affectations du plan d’urbanisme."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 119-2026 adopte expressément, page 9, le règlement 761-2026 concernant les usages permis dans la zone 14-I et la création de la zone 21-H."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 120-2026 approuve expressément, page 10, le plan d’aménagement de Giroux Arpentage pour le développement du lot 3 592 103 et le prolongement de la rue Thibodeau."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 14 atteste une recommandation municipale favorable à la demande du projet éolien Lotbinière Ndakina, et non une autorisation déjà accordée par la CPTAQ."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La page 14 confirme explicitement l’engagement municipal à octroyer les droits fonciers nécessaires au projet, acte foncier distinct de la recommandation à la CPTAQ."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 126-2026 approuve expressément, page 17, les plans et devis préliminaires d’Apex pour le lot 3 592 103, sans certifier la conformité du projet et distinctement de l’approbation du plan d’aménagement."
+  }
+ ]
+}

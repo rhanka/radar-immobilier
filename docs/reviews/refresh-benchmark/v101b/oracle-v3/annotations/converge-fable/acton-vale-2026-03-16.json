@@ -1,0 +1,51 @@
+{
+ "documentId": "acton-vale-2026-03-16",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "651db8ff1fc50b87182675ec2f9ff7652f82181a774981355061c593e80a89d8",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 18.1 page 2 prévoit explicitement l'« Adoption de la résolution finale » du PPCMOI-001-2026 au 1050, rue Dubois ; c'est un objet réglementaire explicite, étape adoption, marquée « prévue » conformément à la règle sur les ordres du jour qui attestent des points prévus et non des décisions acquises.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 18.2 page 2 prévoit une « Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Ferme Guilmette Inc.) » ; acte foncier explicite en urbanisme, étape inconnue, point prévu d'ordre du jour, citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 18.3 page 2 prévoit une « Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Daniel Laroche) » ; objet foncier distinct du 18.2, étape inconnue, point prévu d'ordre du jour, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 18.1 page 2 prévoit explicitement l'« Adoption de la résolution finale » du PPCMOI-001-2026 au 1050, rue Dubois ; c'est un objet réglementaire explicite, étape adoption, marquée « prévue » conformément à la règle sur les ordres du jour qui attestent des points prévus et non des décisions acquises."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 18.2 page 2 prévoit une « Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Ferme Guilmette Inc.) » ; acte foncier explicite en urbanisme, étape inconnue, point prévu d'ordre du jour, citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 18.3 page 2 prévoit une « Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Daniel Laroche) » ; objet foncier distinct du 18.2, étape inconnue, point prévu d'ordre du jour, citation et page exactes."
+  }
+ ]
+}

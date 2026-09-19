@@ -1,0 +1,111 @@
+{
+ "documentId": "ogden-2026-03-09",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1164b01f7be18a11e9d25f30bcc979b5c5a89e7cd2c523722c986f7ea1695d48",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Demande de deux dérogations mineures au 905 Descente 2 prévue au point 6.3, attestée en page 1.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington prévue au point 6.4, attestée en page 1.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead prévue au point 6.5, attestée en page 1.\"},{\"item\":\"i04\",\"choice\":\"absent\",\"reason\":\"Simple dépôt de certificats de conformité de la MRC sans objet réglementaire explicite, non admissible comme DesignationEvent.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"Simple dépôt administratif d'un certificat d'enregistrement sur un règlement antérieur de 2025, ne constituant pas une étape réglementaire active au sens du profil.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Point de finances relatif à la vente pour non-paiement de taxes sans objet foncier explicite, exclu du rappel.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Adoption prévue du règlement no 2026.03 modifiant le règlement du CCU au point 13.1, attestée en page 1.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Avis de motion prévu du règlement no 2026.05 sur l'occupation et l'entretien des bâtiments au point 13.3, attesté en page 1.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Adoption prévue du projet de règlement no 2026.05 au point 13.4, distincte de l'avis de motion et attestée en page 2.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Demande de deux dérogations mineures au 905 Descente 2 prévue au point 6.3, attestée en page 1."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington prévue au point 6.4, attestée en page 1."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead prévue au point 6.5, attestée en page 1."
+  },
+  {
+   "item": "i04",
+   "choice": "absent",
+   "reason": "Simple dépôt de certificats de conformité de la MRC sans objet réglementaire explicite, non admissible comme DesignationEvent."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "Simple dépôt administratif d'un certificat d'enregistrement sur un règlement antérieur de 2025, ne constituant pas une étape réglementaire active au sens du profil."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Point de finances relatif à la vente pour non-paiement de taxes sans objet foncier explicite, exclu du rappel."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Adoption prévue du règlement no 2026.03 modifiant le règlement du CCU au point 13.1, attestée en page 1."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Avis de motion prévu du règlement no 2026.05 sur l'occupation et l'entretien des bâtiments au point 13.3, attesté en page 1."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Adoption prévue du projet de règlement no 2026.05 au point 13.4, distincte de l'avis de motion et attestée en page 2."
+  }
+ ]
+}

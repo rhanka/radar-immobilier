@@ -1,0 +1,37 @@
+{
+ "documentId": "carignan-2026-03-04",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "14b3b9ab727802809e2c4ff1a97fcd2b4c64012d05ad0b23bb36f5a1a2550684",
+ "rawText": "{\"operations\":[{\"op\":\"remove\",\"id\":\"u01\",\"reason\":\"La résolution 5.3 constitue une prise de position politique demandant au gouvernement du Québec de retirer un projet de règlement provincial ; elle ne constitue pas un objet réglementaire ou foncier municipal ni une étape de procédure d'urbanisme de la Ville (fait hors gold devant être exclu du dénominateur).\"}]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u01",
+   "reason": "La résolution 5.3 constitue une prise de position politique demandant au gouvernement du Québec de retirer un projet de règlement provincial ; elle ne constitue pas un objet réglementaire ou foncier municipal ni une étape de procédure d'urbanisme de la Ville (fait hors gold devant être exclu du dénominateur)."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u01"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 18
+}

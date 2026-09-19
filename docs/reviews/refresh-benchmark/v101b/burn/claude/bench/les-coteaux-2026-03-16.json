@@ -1,0 +1,13 @@
+{
+ "id": "les-coteaux-2026-03-16",
+ "rc": 0,
+ "latencyMs": 285653,
+ "inputTokens": 2,
+ "outputTokens": 30745,
+ "cacheRead": 0,
+ "cacheCreate": 18529,
+ "costUsd": 0.966698,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 53761
+}

@@ -1,0 +1,318 @@
+{
+ "documentId": "pincourt-2026-01-20",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "64a2299d750598db64fe5852a12ce75fe4706df2ea40469993fbe8a4906181d0",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-931-04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 931-04 (RMH 450) — nuisances",
+     "stage": null,
+     "objet": "931-04",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+      },
+      {
+       "page": 2,
+       "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-931"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 931 — nuisances",
+     "stage": null,
+     "objet": "931",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+      },
+      {
+       "page": 2,
+       "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-778-03"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 778-03 — concordance au schéma révisé",
+     "stage": null,
+     "objet": "778-03",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+      },
+      {
+       "page": 2,
+       "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-779-03"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 779-03 — concordance au schéma révisé",
+     "stage": null,
+     "objet": "779-03",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+      },
+      {
+       "page": 2,
+       "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-780-28"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 780-28 — concordance au schéma révisé",
+     "stage": null,
+     "objet": "780-28",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+      },
+      {
+       "page": 2,
+       "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-784-09"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 784-09 — concordance au schéma révisé",
+     "stage": null,
+     "objet": "784-09",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+      },
+      {
+       "page": 2,
+       "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION DE LA MRC DE\nVAUDREUIL-SOULANGES"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-780-32"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 780-32 — modification du règlement 780",
+     "stage": null,
+     "objet": "780-32",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+      },
+      {
+       "page": 2,
+       "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-780"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 780 — zonage et PIIA",
+     "stage": null,
+     "objet": "780",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+      },
+      {
+       "page": 2,
+       "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du projet de règlement 931-04 modifiant le règlement sur les nuisances sont inscrits à l'ordre du jour au point 8.1.\",\"excerpt\":\"8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 931 n'est que le règlement d'origine faisant l'objet de la modification, il ne fait pas l'objet d'un acte propre dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 778-03 relatif à la concordance au schéma d'aménagement est prévue au point 8.2.\",\"excerpt\":\"8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 779-03 relatif à la concordance au schéma d'aménagement est prévue au point 8.2.\",\"excerpt\":\"8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 780-28 relatif à la concordance au schéma d'aménagement est prévue au point 8.2.\",\"excerpt\":\"8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 784-09 relatif à la concordance au schéma d'aménagement est prévue au point 8.2.\",\"excerpt\":\"8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 780-32 modifiant le règlement de zonage et de PIIA est inscrite au point 8.3.\",\"excerpt\":\"8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 780 est le règlement de base modifié, non un règlement adopté ou initié de façon distincte lors de cette séance.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du projet de règlement 931-04 modifiant le règlement sur les nuisances sont inscrits à l'ordre du jour au point 8.1.",
+   "excerpt": "8.1 AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT NO 931-04 (RMH 450) MODIFIANT LE\nRÈGLEMENT NO 931 RELATIF AUX NUISANCES"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 931 n'est que le règlement d'origine faisant l'objet de la modification, il ne fait pas l'objet d'un acte propre dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 778-03 relatif à la concordance au schéma d'aménagement est prévue au point 8.2.",
+   "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 779-03 relatif à la concordance au schéma d'aménagement est prévue au point 8.2.",
+   "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 780-28 relatif à la concordance au schéma d'aménagement est prévue au point 8.2.",
+   "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 784-09 relatif à la concordance au schéma d'aménagement est prévue au point 8.2.",
+   "excerpt": "8.2 ADOPTION DES RÈGLEMENTS NOS 778-03, 779-03, 780-28 ET 784-09 RELATIFS À LA CONCORDANCE\nAU SCHÉMA D'AMÉNAGEMENT ET DE DÉVELOPPEMENT RÉVISÉ 3E GÉNÉRATION"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 780-32 modifiant le règlement de zonage et de PIIA est inscrite au point 8.3.",
+   "excerpt": "8.3 ADOPTION DU RÈGLEMENT NO 780-32 MODIFIANT LE RÈGLEMENT DE ZONAGE ET DE PLANS\nD'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NO 780, TEL QU'AMENDÉ"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 780 est le règlement de base modifié, non un règlement adopté ou initié de façon distincte lors de cette séance.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 931 n'est que le règlement d'origine faisant l'objet de la modification, il ne fait pas l'objet d'un acte propre dans cette séance."
+   },
+   {
+    "act": "A08",
+    "reason": "Le règlement 780 est le règlement de base modifié, non un règlement adopté ou initié de façon distincte lors de cette séance."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "L'avis de motion et le dépôt du projet de règlement 931-04 modifiant le règlement sur les nuisances sont inscrits à l'ordre du jour au point 8.1."
+   },
+   {
+    "act": "A03",
+    "reason": "L'adoption du règlement 778-03 relatif à la concordance au schéma d'aménagement est prévue au point 8.2."
+   },
+   {
+    "act": "A04",
+    "reason": "L'adoption du règlement 779-03 relatif à la concordance au schéma d'aménagement est prévue au point 8.2."
+   },
+   {
+    "act": "A05",
+    "reason": "L'adoption du règlement 780-28 relatif à la concordance au schéma d'aménagement est prévue au point 8.2."
+   },
+   {
+    "act": "A06",
+    "reason": "L'adoption du règlement 784-09 relatif à la concordance au schéma d'aménagement est prévue au point 8.2."
+   },
+   {
+    "act": "A07",
+    "reason": "L'adoption du règlement 780-32 modifiant le règlement de zonage et de PIIA est inscrite au point 8.3."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2775,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4416,
+   "outputTokens": 839,
+   "totalTokens": 5255
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2609
+  },
+  "inputSha256": "ce4f54a5b1214fc9937102c1b3515e19be9c49aaa5d68baf1c89440df8b444df"
+ }
+}

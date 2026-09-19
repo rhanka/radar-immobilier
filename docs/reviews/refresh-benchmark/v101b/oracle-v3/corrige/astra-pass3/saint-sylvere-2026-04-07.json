@@ -1,0 +1,196 @@
+{
+ "documentId": "saint-sylvere-2026-04-07",
+ "nextId": 6,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — règlement 383 modifiant le zonage 247",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "383",
+    "page": 6,
+    "citation": "Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un séance ultérieure du conseil municipal le règlement suivant: - Règlement # 383 modifiant le règlement de zonage # 247",
+    "anchor": "Règlement # 383",
+    "spanStart": 2062,
+    "spanEnd": 2259
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — règlement 383 modifiant le zonage 247",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "383",
+      "page": 6,
+      "citation": "Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un séance ultérieure du conseil municipal le règlement suivant: - Règlement # 383 modifiant le règlement de zonage # 247",
+      "anchor": "Règlement # 383",
+      "spanStart": 2062,
+      "spanEnd": 2259
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion du règlement 383 est donné dans cette séance et constitue une unité distincte du premier projet."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dépôt et adoption du premier projet — règlement 383 modifiant le zonage 247",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "383",
+    "page": 7,
+    "citation": "de la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 383 n odifiant le règlement de zonage # 247",
+    "anchor": "règlement # 383",
+    "spanStart": 1599,
+    "spanEnd": 1729
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt et adoption du premier projet — règlement 383 modifiant le zonage 247",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "383",
+      "page": 7,
+      "citation": "de la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 383 n odifiant le règlement de zonage # 247",
+      "anchor": "règlement # 383",
+      "spanStart": 1599,
+      "spanEnd": 1729
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil dépose et adopte le premier projet du règlement 383, étape distincte de l’avis de motion et non adoption définitive du règlement."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — règlement 384 sur les PPCMOI",
+    "stage": "avis_motion",
+    "procedure": "ppcmoi",
+    "objet": "384",
+    "page": 7,
+    "citation": "Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance ultérieur du conseil municipal le règlement suivant: RèglLment 4*384",
+    "anchor": "RèglLment 4*384",
+    "spanStart": 1874,
+    "spanEnd": 2018
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — règlement 384 sur les PPCMOI",
+      "stage": "avis_motion",
+      "procedure": "ppcmoi",
+      "objet": "384",
+      "page": 7,
+      "citation": "Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance ultérieur du conseil municipal le règlement suivant: RèglLment 4*384",
+      "anchor": "RèglLment 4*384",
+      "spanStart": 1874,
+      "spanEnd": 2018
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le document constate un avis de motion pour le règlement 384 concernant les PPCMOI, à compter séparément de son premier projet."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Dépôt et adoption du premier projet — règlement 384 sur les PPCMOI",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "384",
+    "page": 8,
+    "citation": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384",
+    "anchor": "règlement # 384",
+    "spanStart": 805,
+    "spanEnd": 961
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt et adoption du premier projet — règlement 384 sur les PPCMOI",
+      "stage": "projet_reglement",
+      "procedure": "ppcmoi",
+      "objet": "384",
+      "page": 8,
+      "citation": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384",
+      "anchor": "règlement # 384",
+      "spanStart": 805,
+      "spanEnd": 961
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-119 dépose et adopte le premier projet du règlement 384, ce qui constitue une étape réglementaire actuelle distincte."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Appui municipal à la demande CPTAQ — lotissement 453952 et échange de parcelles",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "453952",
+    "page": 8,
+    "citation": "demande de lotissement 453952 du cadastre du Québec de la circonscription foncière d( Nicolet qui est conforme à la réglementation d’urbanisme. Adoptée à l’unanimité des conseillers présents",
+    "anchor": "demande de lotissement 453952",
+    "spanStart": 2991,
+    "spanEnd": 3181
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui municipal à la demande CPTAQ — lotissement 453952 et échange de parcelles",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "453952",
+      "page": 8,
+      "citation": "demande de lotissement 453952 du cadastre du Québec de la circonscription foncière d( Nicolet qui est conforme à la réglementation d’urbanisme. Adoptée à l’unanimité des conseillers présents",
+      "anchor": "demande de lotissement 453952",
+      "spanStart": 2991,
+      "spanEnd": 3181
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-120 adopte l’appui municipal à une demande foncière conjointe visant l’échange de parcelles entre les lots 5 652 594 et 5 889 436, sans constituer une autorisation acquise de la CPTAQ."
+    }
+   ]
+  }
+ ]
+}

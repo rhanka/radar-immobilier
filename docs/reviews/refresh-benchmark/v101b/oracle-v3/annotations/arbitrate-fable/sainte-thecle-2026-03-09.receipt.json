@@ -1,0 +1,78 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01e174afa3871e892056b2ac16eff8c2088afe711ebcf965b22813672952c4c2",
+ "verificationSha256": "45a7ee7790ab17671049346278842ffbb0bef385bce236e320e0061864d2696e",
+ "inputSha256": "681ba27270f469a87c6e9b97581a171c806155f6a21abd6f1140c77e5d386396",
+ "responseSha256": "549ac13d8b139961fd40cd27aa95cce9117a666f51c1abc119df470071ecd2b6",
+ "rc": 0,
+ "latencyMs": 23205,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "b6a51017-0dad-41b2-9202-7a76abbf7c94",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 1284,
+   "cacheReadInputTokens": 1193,
+   "cacheCreationInputTokens": 32234,
+   "webSearchRequests": 0,
+   "costUSD": 0.7091982499999999,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 1034,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 32234,
+  "cache_read_input_tokens": 1193,
+  "output_tokens": 1284,
+  "output_tokens_details": {
+   "thinking_tokens": 1034
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 32234,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1284,
+    "cache_read_input_tokens": 1193,
+    "cache_creation_input_tokens": 32234,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 32234
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.7091982499999999,
+ "durationApiMs": 21222,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T22:44:54.915Z"
+}

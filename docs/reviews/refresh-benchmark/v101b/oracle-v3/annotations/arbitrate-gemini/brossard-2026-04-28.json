@@ -1,0 +1,400 @@
+{
+ "documentId": "brossard-2026-04-28",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "a85426bcda9b72baf3b722b2d01b90372a8acc1f7eadcb04d3da2245506931e6",
+ "verificationSha256": "7a4ee46f7e2e1b2f453c8d6d389f28dddb84d5debc10665a7e3be026172eaa7c",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"La résolution 260428-102 (p. 7-8) approuve l'entente MUP-B prévoyant expressément l'établissement d'une propriété superficiaire et une renonciation à l'accession sur le lot 4 533 221, ce qui constitue un acte foncier explicite visé par les inclusions (« urbanisme, petits PIIA et actes fonciers, même non résidentiels »).\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"La résolution 260428-103 (p. 8) approuve l'entente MUP-6 qui régularise l'occupation et les droits sur des lots municipaux identifiés (lots 4 537 690 et 5 701 948), constituant un acte foncier explicite inclus dans le périmètre du gold.\"},{\"item\":\"a03\",\"choice\":\"v1\",\"reason\":\"La résolution 260428-104 (p. 8-9) autorise formellement la signature d'une entente relative aux travaux municipaux liée au projet de développement « Pandora Matte Self-Storage », instrument contractuel d'urbanisme et de développement expressément inclus.\"},{\"item\":\"a04\",\"choice\":\"v1\",\"reason\":\"La résolution 260428-105 (p. 9) approuve un « Accord de développement du projet Plan A - Site chemin des Prairies » avec un promoteur immobilier, acte contractuel direct de mise en œuvre d'un développement urbain inclus au gold.\"},{\"item\":\"a05\",\"choice\":\"absent\",\"reason\":\"L'autorisation de présenter une demande ministérielle en vertu de l'article 22 de la LQE (p. 15, résolution 260428-122) relève de formalités administratives et environnementales d'infrastructures, sans objet réglementaire ou foncier explicite d'urbanisme.\"},{\"item\":\"a06\",\"choice\":\"absent\",\"reason\":\"Le dépôt d'une déclaration de conformité au MELCCFP pour le prolongement de l'aqueduc est une procédure environnementale d'infrastructure sans objet réglementaire ou foncier d'urbanisme, constituant un fait complémentaire hors gold.\"},{\"item\":\"a07\",\"choice\":\"absent\",\"reason\":\"La résolution 260428-124 (p. 15) modifie la date d'une vente aux enchères pour défaut de taxes sans désigner d'immeuble spécifique ; cette procédure de recouvrement fiscal relève de l'administration et des comptes, exclus du rappel.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u26",
+   "verificationItem": "i26",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Approbation conditionnelle de l'entente MUP-B — propriété superficiaire au profit de LICC",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "MUP-B",
+      "page": 7,
+      "citation": "ENTENTE RELATIVE À LA PISTE MULTIFONCTIONNELLE MUP-B – DEMANDE DE DÉCRET (M-30) ET AUTORISATION DE SIGNATURE",
+      "anchor": "MULTIFONCTIONNELLE MUP-B",
+      "spanStart": 246,
+      "spanEnd": 354
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 7 approuve le projet d'entente MUP-B prévoyant une propriété superficiaire au profit de LICC, avec signature conditionnelle au décret précisée page 8."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 260428-102 p. 7 approuve l'entente MUP-B impliquant renonciation au bénéfice d'accession et propriété superficiaire sur le lot 4 533 221 : acte foncier explicite inclus, citation du titre exacte p. 7."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'entente d'entretien et d'exploitation d'une piste multifonctionnelle relève de la voirie/loisirs et ne constitue pas un acte réglementaire ou foncier d'urbanisme."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u27",
+   "verificationItem": "i27",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Approbation conditionnelle de l'entente MUP-6 — régularisation de l'occupation des terrains municipaux",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "MUP-6",
+      "page": 8,
+      "citation": "ENTENTE RELATIVE À LA PISTE MULTIFONCTIONNELLE MUP-6 – DEMANDE DE DÉCRET (M-30) ET AUTORISATION DE SIGNATURE",
+      "anchor": "MULTIFONCTIONNELLE MUP-6",
+      "spanStart": 320,
+      "spanEnd": 428
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 8 approuve le projet d'entente MUP-6 régularisant sa présence sur les lots municipaux 4 537 690 et 5 701 948, sous réserve du décret requis pour la signature."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 260428-103 p. 8 approuve l'entente MUP-6 régularisant l'occupation des lots municipaux 4 537 690 et 5 701 948 par LICC : acte foncier explicite, citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'entente relative à l'exploitation et l'entretien de la piste MUP-6 est exclue du périmètre (voirie/loisirs sans acte foncier ou réglementaire d'urbanisme)."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u28",
+   "verificationItem": "i28",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de l'entente de travaux municipaux — Pandora Matte Self-Storage, 3505, boulevard Matte",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Pandora Matte Self-Storage",
+      "page": 9,
+      "citation": "D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage",
+      "anchor": "projet Pandora Matte Self-Storage",
+      "spanStart": 10,
+      "spanEnd": 180
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 260428-104 autorise expressément, page 9, la signature de l'entente de travaux municipaux liée au projet Pandora Matte Self-Storage."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 260428-104 (texte résolutif p. 9) autorise la signature de « l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage » : entente de développement d'urbanisme, citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'autorisation de signer une entente relative aux travaux municipaux n'est pas une adoption réglementaire et constitue un fait contractuel hors gold."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a04",
+   "kind": "split",
+   "unitId": "u29",
+   "verificationItem": "i29",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Approbation de l'accord de développement — Plan A, site chemin des Prairies",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Plan A - Site chemin des Prairies",
+      "page": 9,
+      "citation": "D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à intervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec inc",
+      "anchor": "Plan A - Site chemin des Prairies",
+      "spanStart": 497,
+      "spanEnd": 675
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 9 approuve l'accord de développement du projet Plan A – Site chemin des Prairies avec la société 9520-8732 Québec inc. et en autorise la signature."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 260428-105 p. 9 : « D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies ... société 9520-8732 Québec inc » ; acte de développement explicite, citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'approbation d'un accord de développement avec un promoteur n'est pas une adoption réglementaire d'urbanisme et reste hors gold."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a05",
+   "kind": "split",
+   "unitId": "u30",
+   "verificationItem": "i30",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de demander l'autorisation ministérielle — prolongement de l'égout pluvial du projet Plan A",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "réseau d’égout pluvial",
+      "page": 15,
+      "citation": "une demande d’autorisation ministérielle pour le prolongement du réseau d’égout pluvial",
+      "anchor": "réseau d’égout pluvial",
+      "spanStart": 181,
+      "spanEnd": 268
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 15 autorise la présentation d'une demande d'autorisation ministérielle pour le prolongement de l'égout pluvial du projet Plan A, sans constater la délivrance de cette autorisation."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La demande d'autorisation ministérielle (art. 22 LQE) pour l'égout pluvial est une démarche environnementale d'infrastructure sans « objet réglementaire ou foncier explicite » ; fait complémentaire à signaler hors gold, non une unité."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Une autorisation administrative de demande de certificat ministériel environnemental (MELCCFP) est hors du périmètre d'urbanisme du gold."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a06",
+   "kind": "split",
+   "unitId": "u31",
+   "verificationItem": "i31",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de déposer la déclaration de conformité — prolongement de l'aqueduc du projet Plan A",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "réseau d’aqueduc",
+      "page": 15,
+      "citation": "une déclaration de conformité pour le prolongement du réseau d’aqueduc auprès du ministère de",
+      "anchor": "réseau d’aqueduc",
+      "spanStart": 278,
+      "spanEnd": 371
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Autorisation de déposer la déclaration de conformité — prolongement de l'aqueduc du projet Plan A",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "réseau d’aqueduc",
+      "page": 15,
+      "citation": "ainsi qu'une déclaration de conformité pour le prolongement du réseau d’aqueduc auprès du ministère de",
+      "anchor": "réseau d’aqueduc",
+      "spanStart": 269,
+      "spanEnd": 371
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v2",
+     "reason": "La citation de v2 reprend exactement la coordination « ainsi qu'une déclaration de conformité » de la page 15, qui autorise son dépôt pour le prolongement de l'aqueduc du projet Plan A."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La déclaration de conformité pour le réseau d'aqueduc est une démarche d'infrastructure sans objet réglementaire ou foncier explicite ; de plus elle scinde la même résolution 260428-122 en deux unités, fait complémentaire hors gold."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le dépôt d'une déclaration de conformité au MELCCFP pour l'aqueduc est une démarche administrative environnementale hors gold."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a07",
+   "kind": "split",
+   "unitId": "u32",
+   "verificationItem": "i32",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Modification de la date de l'ordonnance de vente d'immeubles pour défaut de taxes",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "vente aux enchères",
+      "page": 15,
+      "citation": "de procéder à la vente aux enchères des immeubles pour défaut de paiement de taxes le jeudi 11 juin 2026, à 10 h, par celle du 28 avril 2026",
+      "anchor": "vente aux enchères des immeubles",
+      "spanStart": 2884,
+      "spanEnd": 3024
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 260428-124, page 15, modifie la date de l'ordonnance de vente d'immeubles pour défaut de taxes, ce qui constitue une étape foncière explicite sans attester une vente réalisée."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La modification de date de l'ordonnance de vente pour défaut de taxes (section Administration et finances) est un acte fiscal sans objet foncier explicite (aucun immeuble identifié) ; exclusion « comptes », et doublon des items i33/i34."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La modification de la date d'une vente aux enchères pour défaut de taxes est une mesure administrative et fiscale, non un acte foncier ou d'urbanisme."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "La résolution 260428-102 (p. 7-8) approuve l'entente MUP-B prévoyant expressément l'établissement d'une propriété superficiaire et une renonciation à l'accession sur le lot 4 533 221, ce qui constitue un acte foncier explicite visé par les inclusions (« urbanisme, petits PIIA et actes fonciers, même non résidentiels »)."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "La résolution 260428-103 (p. 8) approuve l'entente MUP-6 qui régularise l'occupation et les droits sur des lots municipaux identifiés (lots 4 537 690 et 5 701 948), constituant un acte foncier explicite inclus dans le périmètre du gold."
+  },
+  {
+   "item": "a03",
+   "choice": "v1",
+   "reason": "La résolution 260428-104 (p. 8-9) autorise formellement la signature d'une entente relative aux travaux municipaux liée au projet de développement « Pandora Matte Self-Storage », instrument contractuel d'urbanisme et de développement expressément inclus."
+  },
+  {
+   "item": "a04",
+   "choice": "v1",
+   "reason": "La résolution 260428-105 (p. 9) approuve un « Accord de développement du projet Plan A - Site chemin des Prairies » avec un promoteur immobilier, acte contractuel direct de mise en œuvre d'un développement urbain inclus au gold."
+  },
+  {
+   "item": "a05",
+   "choice": "absent",
+   "reason": "L'autorisation de présenter une demande ministérielle en vertu de l'article 22 de la LQE (p. 15, résolution 260428-122) relève de formalités administratives et environnementales d'infrastructures, sans objet réglementaire ou foncier explicite d'urbanisme."
+  },
+  {
+   "item": "a06",
+   "choice": "absent",
+   "reason": "Le dépôt d'une déclaration de conformité au MELCCFP pour le prolongement de l'aqueduc est une procédure environnementale d'infrastructure sans objet réglementaire ou foncier d'urbanisme, constituant un fait complémentaire hors gold."
+  },
+  {
+   "item": "a07",
+   "choice": "absent",
+   "reason": "La résolution 260428-124 (p. 15) modifie la date d'une vente aux enchères pour défaut de taxes sans désigner d'immeuble spécifique ; cette procédure de recouvrement fiscal relève de l'administration et des comptes, exclus du rappel."
+  }
+ ]
+}

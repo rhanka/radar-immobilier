@@ -1,0 +1,268 @@
+{
+ "documentId": "frontenac-2026-03-10",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "4123b4b6aa6edb3493ae47527db68392cd5733de0363aa4ec717521c25f429d1",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Vente pour défaut de paiement des taxes demandée — lot 4 972 283\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"4 972 283\",\n        \"page\": 19,\n        \"citation\": \"de vendre\\npour défaut de paiement des taxes, les immeubles suivants :\\nNuméro de matricule : 7445-62-1565\\nPropriétaire : Janine Carrier Racine\\nNuméro de cadastre : 4 972 283\",\n        \"anchor\": \"Numéro de cadastre : 4 972 283\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les retours à la ligne de la page 19 doivent être conservés.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Attestation de conformité municipale — demande CPTAQ 453132, Groupe Exca inc.\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"453132\",\n        \"page\": 23,\n        \"citation\": \"Que le conseil municipal de la Municipalité de Frontenac atteste que la\\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\\nest conforme à la réglementation municipale applicable\",\n        \"anchor\": \"CPTAQ au dossier 453132\"\n      },\n      \"reason\": \"La citation courante remplace les retours à la ligne par des espaces, contrairement à l’exigence de recopier à l’identique l’extrait de la page 23.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Approbation de l’entente de conservation des milieux humides — lac Aux Araignées, durée de 25 ans\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"lac Aux Araignées\",\n        \"page\": 27,\n        \"citation\": \"Que la Municipalité de Frontenac accepte les termes de l’entente relative à la protection et à la conservation des milieux humides riverains du\\nlac Aux Araignées, telle que déposée\",\n        \"anchor\": \"lac Aux Araignées\"\n      },\n      \"reason\": \"La règle de citation à l’identique impose de conserver le retour à la ligne précédant « lac Aux Araignées » sur la page 27.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Report de l’adoption du premier projet — règlement 503-2026 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"503-2026\",\n        \"page\": 37,\n        \"citation\": \"Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\\nl’occupation et à l’entretien des bâtiments\",\n        \"anchor\": \"règlement no. 503-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « relatif à » pour reproduire à l’identique le texte de la page 37.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Report de l’adoption — règlement 504-2026 modifiant les dispositions sur la démolition d’immeubles\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"504-2026\",\n        \"page\": 37,\n        \"citation\": \"Adoption reportée du règlement no 504-2026 modifiant le règlement\\nrelatif à la démolition d’immeubles no 469-2023\",\n        \"anchor\": \"règlement no 504-2026\"\n      },\n      \"reason\": \"La citation courante fusionne deux lignes ; l’extrait doit être recopié à l’identique de la page 37.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Report de l’avis de motion et de la présentation — règlement 506-2026, concordance du règlement de construction\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"506-2026\",\n        \"page\": 37,\n        \"citation\": \"Avis de motion et présentation reportée du règlement no. 506-2026\\nafin de faire la concordance du règlement de construction no 287-96\\nenvers le schéma d’aménagement de la MRC du Granit\",\n        \"anchor\": \"règlement no. 506-2026\"\n      },\n      \"reason\": \"Les retours à la ligne de la page 37 doivent être rétablis pour respecter l’exigence d’une citation recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Report de l’avis de motion et de la présentation — règlement 507-2026, concordance du règlement de lotissement\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"507-2026\",\n        \"page\": 37,\n        \"citation\": \"Avis de motion et présentation reportée du règlement no 507-2026\\nafin de faire la concordance du règlement de lotissement no 244-90\\nenvers le schéma d’aménagement de la MRC du Granit\",\n        \"anchor\": \"règlement no 507-2026\"\n      },\n      \"reason\": \"La citation courante remplace les retours à la ligne par des espaces, alors que l’extrait doit reproduire à l’identique le texte de la page 37.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Report de l’avis de motion et de la présentation — règlement 508-2026, concordance des permis et certificats\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"508-2026\",\n        \"page\": 37,\n        \"citation\": \"Avis de motion et présentation reportée du règlement no 508-2026\\nafin de faire la concordance du règlement sur les permis et certificats\\nno 242-90 envers le schéma d’aménagement de la MRC du Granit\",\n        \"anchor\": \"règlement no 508-2026\"\n      },\n      \"reason\": \"La règle de citation à l’identique exige de conserver les retours à la ligne présents sur la page 37.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Report de l’avis de motion et de la présentation — règlement 5092026 remplaçant le plan d’urbanisme\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"5092026\",\n        \"page\": 37,\n        \"citation\": \"Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\\n241-90\",\n        \"anchor\": \"règlement numéro 5092026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne avant « 241-90 » ; le numéro « 5092026 » reste reproduit tel qu’écrit dans le document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Report de l’avis de motion et de la présentation — règlement 510-2026, concordance du règlement de zonage\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"510-2026\",\n        \"page\": 37,\n        \"citation\": \"Avis de motion et présentation reportée du règlement no 510-2026\\nafin de faire la concordance du règlement de zonage no 243-90\",\n        \"anchor\": \"règlement no 510-2026\"\n      },\n      \"reason\": \"La citation courante fusionne deux lignes ; le retour à la ligne après « 510-2026 » doit être conservé conformément à la règle de copie à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Vente pour défaut de paiement des taxes demandée — lot 4 972 283",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 972 283",
+    "page": 19,
+    "citation": "de vendre\npour défaut de paiement des taxes, les immeubles suivants :\nNuméro de matricule : 7445-62-1565\nPropriétaire : Janine Carrier Racine\nNuméro de cadastre : 4 972 283",
+    "anchor": "Numéro de cadastre : 4 972 283"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les retours à la ligne de la page 19 doivent être conservés."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Attestation de conformité municipale — demande CPTAQ 453132, Groupe Exca inc.",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "453132",
+    "page": 23,
+    "citation": "Que le conseil municipal de la Municipalité de Frontenac atteste que la\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\nest conforme à la réglementation municipale applicable",
+    "anchor": "CPTAQ au dossier 453132"
+   },
+   "reason": "La citation courante remplace les retours à la ligne par des espaces, contrairement à l’exigence de recopier à l’identique l’extrait de la page 23."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Approbation de l’entente de conservation des milieux humides — lac Aux Araignées, durée de 25 ans",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "lac Aux Araignées",
+    "page": 27,
+    "citation": "Que la Municipalité de Frontenac accepte les termes de l’entente relative à la protection et à la conservation des milieux humides riverains du\nlac Aux Araignées, telle que déposée",
+    "anchor": "lac Aux Araignées"
+   },
+   "reason": "La règle de citation à l’identique impose de conserver le retour à la ligne précédant « lac Aux Araignées » sur la page 27."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Report de l’adoption du premier projet — règlement 503-2026 sur l’occupation et l’entretien des bâtiments",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "503-2026",
+    "page": 37,
+    "citation": "Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\nl’occupation et à l’entretien des bâtiments",
+    "anchor": "règlement no. 503-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « relatif à » pour reproduire à l’identique le texte de la page 37."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Report de l’adoption — règlement 504-2026 modifiant les dispositions sur la démolition d’immeubles",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "504-2026",
+    "page": 37,
+    "citation": "Adoption reportée du règlement no 504-2026 modifiant le règlement\nrelatif à la démolition d’immeubles no 469-2023",
+    "anchor": "règlement no 504-2026"
+   },
+   "reason": "La citation courante fusionne deux lignes ; l’extrait doit être recopié à l’identique de la page 37."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 506-2026, concordance du règlement de construction",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "506-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no. 506-2026\nafin de faire la concordance du règlement de construction no 287-96\nenvers le schéma d’aménagement de la MRC du Granit",
+    "anchor": "règlement no. 506-2026"
+   },
+   "reason": "Les retours à la ligne de la page 37 doivent être rétablis pour respecter l’exigence d’une citation recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 507-2026, concordance du règlement de lotissement",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "507-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no 507-2026\nafin de faire la concordance du règlement de lotissement no 244-90\nenvers le schéma d’aménagement de la MRC du Granit",
+    "anchor": "règlement no 507-2026"
+   },
+   "reason": "La citation courante remplace les retours à la ligne par des espaces, alors que l’extrait doit reproduire à l’identique le texte de la page 37."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 508-2026, concordance des permis et certificats",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "508-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no 508-2026\nafin de faire la concordance du règlement sur les permis et certificats\nno 242-90 envers le schéma d’aménagement de la MRC du Granit",
+    "anchor": "règlement no 508-2026"
+   },
+   "reason": "La règle de citation à l’identique exige de conserver les retours à la ligne présents sur la page 37."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 5092026 remplaçant le plan d’urbanisme",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5092026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\n241-90",
+    "anchor": "règlement numéro 5092026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne avant « 241-90 » ; le numéro « 5092026 » reste reproduit tel qu’écrit dans le document."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 510-2026, concordance du règlement de zonage",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "510-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no 510-2026\nafin de faire la concordance du règlement de zonage no 243-90",
+    "anchor": "règlement no 510-2026"
+   },
+   "reason": "La citation courante fusionne deux lignes ; le retour à la ligne après « 510-2026 » doit être conservé conformément à la règle de copie à l’identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 19,
+   "citation": "de vendre\npour défaut de paiement des taxes, les immeubles suivants :\nNuméro de matricule : 7445-62-1565\nPropriétaire : Janine Carrier Racine\nNuméro de cadastre : 4 972 283"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 23,
+   "citation": "Que le conseil municipal de la Municipalité de Frontenac atteste que la\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\nest conforme à la réglementation municipale applicable"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 27,
+   "citation": "Que la Municipalité de Frontenac accepte les termes de l’entente relative à la protection et à la conservation des milieux humides riverains du\nlac Aux Araignées, telle que déposée"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "inconnu",
+   "page": 37,
+   "citation": "Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\nl’occupation et à l’entretien des bâtiments"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 37,
+   "citation": "Adoption reportée du règlement no 504-2026 modifiant le règlement\nrelatif à la démolition d’immeubles no 469-2023"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "inconnu",
+   "page": 37,
+   "citation": "Avis de motion et présentation reportée du règlement no. 506-2026\nafin de faire la concordance du règlement de construction no 287-96\nenvers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "inconnu",
+   "page": 37,
+   "citation": "Avis de motion et présentation reportée du règlement no 507-2026\nafin de faire la concordance du règlement de lotissement no 244-90\nenvers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "inconnu",
+   "page": 37,
+   "citation": "Avis de motion et présentation reportée du règlement no 508-2026\nafin de faire la concordance du règlement sur les permis et certificats\nno 242-90 envers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "inconnu",
+   "page": 37,
+   "citation": "Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\n241-90"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "inconnu",
+   "page": 37,
+   "citation": "Avis de motion et présentation reportée du règlement no 510-2026\nafin de faire la concordance du règlement de zonage no 243-90"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 10
+}

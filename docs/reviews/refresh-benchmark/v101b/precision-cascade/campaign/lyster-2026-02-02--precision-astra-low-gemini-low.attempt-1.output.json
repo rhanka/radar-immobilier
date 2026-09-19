@@ -1,0 +1,274 @@
+{
+ "nodes": [
+  {
+   "id": "source-lyster-2026-02-02",
+   "label": "Procès-verbal de Lyster du 2 février 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "status": "candidate",
+   "date": "2026-02-02",
+   "municipality": "lyster",
+   "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+   "url": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire du conseil de la Municipalité de Lyster tenue au\nComplexe Anastasia, 114 rue Isabelle, Lyster, le 2 février 2026 à 20 h.",
+     "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-372-5",
+   "label": "Règlement 372.5 — Taxes 2026",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "status": "candidate",
+   "numero": "372.5",
+   "title": "Fixer les taux de taxes pour l'exercice financier 2026 et les conditions de perception",
+   "date": "2026-02-02",
+   "stage": "adoption",
+   "municipality": "lyster",
+   "resolution": "2026-02-23",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "QUE le conseil municipal adopte le Règlement numéro 372.5 pour fixer les taux de\ntaxes pour l'exercice financier 2026 et les conditions de perception.",
+     "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-396",
+   "label": "Règlement 396 — Voirie du rang 8 ouest et emprunt",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "status": "candidate",
+   "numero": "396",
+   "title": "Exécution de travaux de voirie sur une partie du rang 8 ouest, ainsi qu'un emprunt pour en acquitter les coûts",
+   "date": "2026-02-02",
+   "stage": "adoption",
+   "municipality": "lyster",
+   "resolution": "2026-02-24",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "QUE le conseil municipal adopte le Règlement numéro 396 décrétant l'exécution de\ntravaux de voirie sur une partie du rang 8 ouest, ainsi qu'un emprunt pour en\nacquitter les coûts.",
+     "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-vente-taxes",
+   "label": "Autorisation de transmission des immeubles pour vente pour taxes",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "status": "candidate",
+   "category": "vente_pour_taxes",
+   "date": "2026-02-02",
+   "municipality": "lyster",
+   "resolution": "2026-02-28",
+   "scope": "local",
+   "description": "Transmission à la MRC de L’Érable avant le 13 mars 2026 de la liste des immeubles pour vente à l’enchère publique le 3 juin 2026, sauf paiement intégral avant la vente. Les lots indiqués sont 5835056, 5834167 et 5834895. La résolution ne constate pas une vente réalisée.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "D’AUTORISER la directrice générale et greffière-trésorière à transmettre, avant le\n13 mars 2026, au bureau de la MRC de L’Érable, la liste des immeubles ci-dessous",
+     "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-vente",
+    "ev-lots"
+   ]
+  },
+  {
+   "id": "signal-tecq",
+   "label": "Approbation de la programmation TECQ 2024-2028 version 2",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "status": "candidate",
+   "category": "infrastructures",
+   "date": "2026-02-02",
+   "municipality": "lyster",
+   "resolution": "2026-02-31",
+   "description": "Approbation et autorisation d’envoi de la programmation de travaux TECQ 2024-2028 version no 2 au ministère des Affaires municipales et de l’Habitation.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE la Municipalité approuve le contenu et autorise l’envoi au ministère des Affaires\nmunicipales et de l’Habitation de la programmation de travaux version no 2 ci-jointe",
+     "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-lyster-2026-02-02",
+   "target": "bylaw-372-5",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "evidence_refs": [
+    "ev-taxes"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "QUE le conseil municipal adopte le Règlement numéro 372.5 pour fixer les taux de\ntaxes pour l'exercice financier 2026 et les conditions de perception.",
+     "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-lyster-2026-02-02",
+   "target": "bylaw-396",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "evidence_refs": [
+    "ev-voirie"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "QUE le conseil municipal adopte le Règlement numéro 396 décrétant l'exécution de\ntravaux de voirie sur une partie du rang 8 ouest, ainsi qu'un emprunt pour en\nacquitter les coûts.",
+     "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-lyster-2026-02-02",
+   "target": "signal-vente-taxes",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "evidence_refs": [
+    "ev-vente",
+    "ev-lots"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "D’AUTORISER la directrice générale et greffière-trésorière à transmettre, avant le\n13 mars 2026, au bureau de la MRC de L’Érable, la liste des immeubles ci-dessous",
+     "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-lyster-2026-02-02",
+   "target": "signal-tecq",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "evidence_refs": [
+    "ev-tecq"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE la Municipalité approuve le contenu et autorise l’envoi au ministère des Affaires\nmunicipales et de l’Habitation de la programmation de travaux version no 2 ci-jointe",
+     "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+     "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-taxes",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "QUE le conseil municipal adopte le Règlement numéro 372.5 pour fixer les taux de\ntaxes pour l'exercice financier 2026 et les conditions de perception."
+  },
+  {
+   "id": "ev-voirie",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "QUE le conseil municipal adopte le Règlement numéro 396 décrétant l'exécution de\ntravaux de voirie sur une partie du rang 8 ouest, ainsi qu'un emprunt pour en\nacquitter les coûts."
+  },
+  {
+   "id": "ev-vente",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "D’AUTORISER la directrice générale et greffière-trésorière à transmettre, avant le\n13 mars 2026, au bureau de la MRC de L’Érable, la liste des immeubles ci-dessous\npour qu’ils soient procédés à la vente à l’enchère publique, conformément aux\narticles 1022 et suivants du Code municipal du Québec, pour satisfaire aux taxes\nmunicipales impayées, avec intérêts, pénalité et frais encourus, à moins que ces\ntaxes, intérêts et frais ne soient entièrement payés avant la vente;"
+  },
+  {
+   "id": "ev-lots",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "Jean-François\n1837-35-8331 5 835 056\nLagacé\nAnthony Lalonde2437-98-1768 5 834 167\nLacaille\nCarl Roy, Édith\nFrancoeur, Réal 1636-52-7076 5 834 895\nRoy"
+  },
+  {
+   "id": "ev-tecq",
+   "source_file": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "rawRef": "raw/proces-verbaux-lyster/cas/01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7.pdf",
+   "docSha": "01283ad4ca3d529fe8576c7da425f8a08aa2141978efa1257d7d7478070170d7",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/lyster/_publication/fichiers/PV_Fvrier_2026.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "QUE la Municipalité approuve le contenu et autorise l’envoi au ministère des Affaires\nmunicipales et de l’Habitation de la programmation de travaux version no 2 ci-jointe"
+  }
+ ],
+ "input_tokens": 12100,
+ "output_tokens": 4100
+}

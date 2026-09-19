@@ -1,0 +1,13 @@
+{
+ "id": "bowman-2026-05-12",
+ "rc": 0,
+ "latencyMs": 10702,
+ "inputTokens": 2,
+ "outputTokens": 604,
+ "cacheRead": 0,
+ "cacheCreate": 11056,
+ "costUsd": 0.13312200000000002,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 163
+}

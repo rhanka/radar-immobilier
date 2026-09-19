@@ -1,0 +1,36 @@
+{
+ "documentId": "bedford--brome-missisquoi-2026-06-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c5de592a09dbe44822aeba1edf7c9686111f53eb53c102fec513198bc10e74d6",
+ "inputSha256": "bbb6544ff5c81acec965bee45957270a3e2f327cbaeb407b64e178a166af47d5",
+ "responseSha256": "47ef39679a4db6bdccd6e9eefc122c08ed94ebecfdddccb5cf18e2c1b2cf6866",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 54633,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 11703,
+  "outputTokens": 1665,
+  "totalTokens": 13368
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 54629,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:13:01.592Z"
+}

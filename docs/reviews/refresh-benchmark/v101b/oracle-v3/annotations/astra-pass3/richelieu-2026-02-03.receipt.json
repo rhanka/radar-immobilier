@@ -1,0 +1,36 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "ebd732269f54a2374886a8f50998368d7ebd795fc371fc083f3141955dbffda9",
+ "inputSha256": "f908839fa42201844924007c0fd1a631f811a235f8a6d7b31400c1ad4e3ba396",
+ "responseSha256": "053737e64754a8ffda877ca3e0967b8a6cff45476b2493f56bfc9c5c6822111d",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 125680,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 11856,
+  "outputTokens": 4116,
+  "totalTokens": 15972
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 125675,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:45:59.314Z"
+}

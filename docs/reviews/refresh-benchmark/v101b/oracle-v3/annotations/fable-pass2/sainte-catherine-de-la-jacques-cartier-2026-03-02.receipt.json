@@ -1,0 +1,75 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "989616eafaf923bd0e695e7ec7d6c8d7b007f17bb14b464a269d45c7fe15b9b5",
+ "inputSha256": "862dd461a32dd09ca9aadfa4f63565c39da0168268fb929b3b1da59d00927326",
+ "responseSha256": "3e1f29b7ff2d696e31f949d0865c9c439d5a3a3e5e7e560939a4bd822b1fbafb",
+ "rc": 0,
+ "latencyMs": 354941,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "9f6ee215-6de2-402a-a2c7-eff63445f176",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 29445,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 46981,
+   "webSearchRequests": 0,
+   "costUSD": 2.41256325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 28726,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 46981,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 29445,
+  "output_tokens_details": {
+   "thinking_tokens": 28726
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 46981,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 29445,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 46981,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 46981
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 2.41256325,
+ "durationApiMs": 352677,
+ "stderrTail": "",
+ "at": "2026-09-18T17:55:42.280Z"
+}

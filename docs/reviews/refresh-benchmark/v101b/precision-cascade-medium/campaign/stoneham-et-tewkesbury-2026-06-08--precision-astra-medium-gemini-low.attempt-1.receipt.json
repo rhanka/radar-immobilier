@@ -1,0 +1,35 @@
+{
+ "documentId": "stoneham-et-tewkesbury-2026-06-08",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "9d7cf4556650fdb175828864283edf92c910cea7541165003ede809b8fd75c54",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3268,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 11288,
+   "outputTokens": 1161,
+   "totalTokens": 12449
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3113
+  },
+  "inputSha256": "091dc4e6d7f389504d75a91ab560d69735962af612eda96c57b79fe94ca92532"
+ },
+ "at": "2026-09-19T03:22:44.322Z"
+}

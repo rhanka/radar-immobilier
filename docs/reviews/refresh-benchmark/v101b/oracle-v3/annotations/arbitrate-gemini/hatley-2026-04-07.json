@@ -1,0 +1,19 @@
+{
+ "documentId": "hatley-2026-04-07",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "7698c4adcecc5ce44ef0cfa7e380f71b90c092e21d3515c64adfddca992c1a16",
+ "verificationSha256": "6278ee94cbeb5ed3a71fd75dff1326331de173b11be49ed595a66718048b69c0",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

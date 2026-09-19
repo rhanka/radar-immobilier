@@ -1,0 +1,146 @@
+{
+ "documentId": "danville-2026-01-15",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "4e9c6fbe3508cb69d84ff2957ce253ee396b221ef2229acaa8c83b493e0474b1",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-01 — Taux de taxes et compensations pour 2026",
+     "stage": "projet",
+     "objet": "2026-01",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Avis de motion est donné par le conseiller Richard Lefebvre à l’effet qu’il adoptera\nou fera adopter, lors d’une séance ultérieure de ce conseil, le règlement 2026-01"
+      },
+      {
+       "page": 3,
+       "excerpt": "Avis de motion est donné par le conseiller Richard Lefebvre à l’effet qu’il adoptera\nou fera adopter, lors d’une séance ultérieure de ce conseil, le règlement 2026-01\nrelatif à l'imposition des taux de taxes et des compensations pour l'exercice\nfinancier 2026.\nCe projet de règlement établit les taux de taxes, de compensations et autres\ntarifs et redevances pour l’année 2026.\nLe projet de règlement est également déposé."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2026-02"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-02 — Tarification des biens, services et activités pour 2026",
+     "stage": "projet",
+     "objet": "2026-02",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Avis de motion est donné par le conseiller Émile Lachance à l’effet qu’il adoptera\nou fera adopter, lors d’une séance ultérieure de ce conseil, le règlement 2026-02"
+      },
+      {
+       "page": 4,
+       "excerpt": "Avis de motion est donné par le conseiller Émile Lachance à l’effet qu’il adoptera\nou fera adopter, lors d’une séance ultérieure de ce conseil, le règlement 2026-02\nétablissant la tarification pour l’utilisation des biens, des services et des activités\nde la Ville de Danville pour l’année 2026.\nCe projet de règlement établit la tarification pour le financement et l’utilisation de\ncertains biens, services et pour le bénéfice retiré de certaines activités de la Ville\nde Danville, et ce, du 1er janvier au 31 décembre 2026.\nLe projet de règlement est également déposé."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-pti-2026-2028"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Adoption du plan triennal des immobilisations 2026-2027-2028",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "QUE le plan triennal des immobilisations pour 2026-2027-2028 soit adopté tel que\ndéposé;"
+      },
+      {
+       "page": 3,
+       "excerpt": "QUE le plan triennal des immobilisations pour 2026-2027-2028 soit adopté tel que\ndéposé;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du projet de règlement 2026-01 sont expressément consignés.\",\"excerpt\":\"Ce projet de règlement établit les taux de taxes, de compensations et autres\\ntarifs et redevances pour l’année 2026.\\nLe projet de règlement est également déposé.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du projet de règlement 2026-02 sont consignés dans le procès-verbal.\",\"excerpt\":\"Ce projet de règlement établit la tarification pour le financement et l’utilisation de\\ncertains biens, services et pour le bénéfice retiré de certaines activités de la Ville\\nde Danville\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte expressément le plan triennal des immobilisations 2026-2027-2028.\",\"excerpt\":\"QUE le plan triennal des immobilisations pour 2026-2027-2028 soit adopté tel que\\ndéposé;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du projet de règlement 2026-01 sont expressément consignés.",
+   "excerpt": "Ce projet de règlement établit les taux de taxes, de compensations et autres\ntarifs et redevances pour l’année 2026.\nLe projet de règlement est également déposé."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du projet de règlement 2026-02 sont consignés dans le procès-verbal.",
+   "excerpt": "Ce projet de règlement établit la tarification pour le financement et l’utilisation de\ncertains biens, services et pour le bénéfice retiré de certaines activités de la Ville\nde Danville"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte expressément le plan triennal des immobilisations 2026-2027-2028.",
+   "excerpt": "QUE le plan triennal des immobilisations pour 2026-2027-2028 soit adopté tel que\ndéposé;"
+  }
+ ],
+ "filter": {
+  "acts": 3,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "L'avis de motion et le dépôt du projet de règlement 2026-01 sont expressément consignés."
+   },
+   {
+    "act": "A02",
+    "reason": "L'avis de motion et le dépôt du projet de règlement 2026-02 sont consignés dans le procès-verbal."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte expressément le plan triennal des immobilisations 2026-2027-2028."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1453,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3944,
+   "outputTokens": 241,
+   "totalTokens": 4185
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1294
+  },
+  "inputSha256": "7dcbab36545fdd5220f05e7aab971ef0208ca4a3ee07d847d434e98d1b53deee"
+ }
+}

@@ -1,0 +1,41 @@
+{
+ "documentId": "lac-etchemin-2026-02-03",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "d35ebfd9a268081ce8cb8d54fd89837c3d38338f1e6f32a84ad088f635486153",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure 2026-175 est bien adoptée par la résolution 045-02-2026 à la page 10.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le projet de résolution PPCMOI 2026-157 est bien adopté par la résolution 046-02-2026 à la page 10.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La dérogation mineure 2026-175 est bien adoptée par la résolution 045-02-2026 à la page 10."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le projet de résolution PPCMOI 2026-157 est bien adopté par la résolution 046-02-2026 à la page 10."
+  }
+ ]
+}

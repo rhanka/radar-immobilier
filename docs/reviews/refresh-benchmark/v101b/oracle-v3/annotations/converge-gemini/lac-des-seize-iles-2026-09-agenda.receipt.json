@@ -1,0 +1,37 @@
+{
+ "documentId": "lac-des-seize-iles-2026-09-agenda",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "0ded76906f0c25cb52cdce093c80a979c7821bdb5745041887419e5b2c5b5c6e",
+ "inputSha256": "f5b31fe5e7b8193e99702a134e0378765e33b43eb6c2639ea19c6f5d77dd7c90",
+ "responseSha256": "fb61a110b97b64592e532becd0ea0a8ec7b40bcceb5fd1070dc9cd38f953c11e",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 11538,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2363,
+  "outputTokens": 185,
+  "totalTokens": 6569,
+  "thoughtsTokenCount": 4021
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 11380,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:52:18.340Z"
+}

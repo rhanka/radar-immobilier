@@ -1,0 +1,316 @@
+{
+ "documentId": "warden-2026-04-08",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "59b45e1c1890b48a95a8fcd66338f71974a4eb3552ed48a425e9e563221c14c4",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-184"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-184 — TIAM",
+     "stage": "projet",
+     "objet": "2026-184",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2017-127"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 2017-127",
+     "stage": null,
+     "objet": "2017-127",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "6.3. Avis de motion et dépôt du projet de règlement numéro 2026-184 modifiant le\nrèglement de zonage numéro 2017-127 et le règlement administratif 2017-131 afin"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2017-131"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement administratif 2017-131",
+     "stage": null,
+     "objet": "2017-131",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "6.3. Avis de motion et dépôt du projet de règlement numéro 2026-184 modifiant le\nrèglement de zonage numéro 2017-127 et le règlement administratif 2017-131 afin"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2026-180"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-180 — Immeubles patrimoniaux",
+     "stage": "adoption",
+     "objet": "2026-180",
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-2026-181"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-181 — Démolition d'immeubles",
+     "stage": "adoption",
+     "objet": "2026-181",
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026181 intitulé « Règlement relatif à la démolition d'immeubles »;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-2026-182"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-182 — Occupation et entretien des bâtiments",
+     "stage": "adoption",
+     "objet": "2026-182",
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments »;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-2026-183"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-183 — Construction d'un hôtel de ville - centre communautaire",
+     "stage": "adoption",
+     "objet": "2026-183",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026183 intitulé « Règlement décrétant une dépense de 2 511 000.00 $ et un emprunt"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-infrastructures"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mise à jour du plan d'intervention des infrastructures municipales",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "QUE la Municipalité de Warden accepte l'offre de services professionnels de la\nfirme EXP, datée du 9 mars 2026, relativement à la mise à jour du plan"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-relocalisation"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Bail commercial pour la relocalisation temporaire des bureaux municipaux",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE la Municipalité de Warden accepte le bail commercial à intervenir entre\nGroupe RSE inc. et la Municipalité de Warden pour la location d'un espace de"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement 2026-184 est adopté lors de la séance.\",\"excerpt\":\"il est résolu à l'unanimité des membres présents d'adopter le projet de règlement numéro 2026-184, tel que déposé\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2017-127 n'est que la cible modifiée par le règlement 2026-184 et ne subit pas d'étape de procédure autonome dans ce document.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2017-131 n'est que la cible modifiée mentionnée dans le titre et ne subit pas d'étape de procédure autonome dans ce document.\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement 2026-180.\",\"excerpt\":\"QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la délégation de certains mandats au comité consultatif d'urbanisme »;\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement 2026-181.\",\"excerpt\":\"QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026181 intitulé « Règlement relatif à la démolition d'immeubles »;\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement 2026-182.\",\"excerpt\":\"QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments »;\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement d'emprunt 2026-183.\",\"excerpt\":\"QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026183 intitulé « Règlement décrétant une dépense de 2 511 000.00 $ et un emprunt de 427 000.00 $ pour la construction d'un nouvel hôtel de ville - centre communautaire »;\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un contrat de services professionnels d'ingénierie, relevant des exclusions.\",\"excerpt\":\"QUE la Municipalité de Warden accepte l'offre de services professionnels de la firme EXP, datée du 9 mars 2026, relativement à la mise à jour du plan d'intervention des infrastructures municipales\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"La municipalité conclut un bail commercial pour la relocalisation de ses bureaux, ce qui constitue une transaction immobilière/foncière.\",\"excerpt\":\"QUE la Municipalité de Warden accepte le bail commercial à intervenir entre Groupe RSE inc. et la Municipalité de Warden pour la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement 2026-184 est adopté lors de la séance.",
+   "excerpt": "il est résolu à l'unanimité des membres présents d'adopter le projet de règlement numéro 2026-184, tel que déposé"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2017-127 n'est que la cible modifiée par le règlement 2026-184 et ne subit pas d'étape de procédure autonome dans ce document.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2017-131 n'est que la cible modifiée mentionnée dans le titre et ne subit pas d'étape de procédure autonome dans ce document.",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement 2026-180.",
+   "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la délégation de certains mandats au comité consultatif d'urbanisme »;"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement 2026-181.",
+   "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026181 intitulé « Règlement relatif à la démolition d'immeubles »;"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement 2026-182.",
+   "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments »;"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement d'emprunt 2026-183.",
+   "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026183 intitulé « Règlement décrétant une dépense de 2 511 000.00 $ et un emprunt de 427 000.00 $ pour la construction d'un nouvel hôtel de ville - centre communautaire »;"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un contrat de services professionnels d'ingénierie, relevant des exclusions.",
+   "excerpt": "QUE la Municipalité de Warden accepte l'offre de services professionnels de la firme EXP, datée du 9 mars 2026, relativement à la mise à jour du plan d'intervention des infrastructures municipales"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "La municipalité conclut un bail commercial pour la relocalisation de ses bureaux, ce qui constitue une transaction immobilière/foncière.",
+   "excerpt": "QUE la Municipalité de Warden accepte le bail commercial à intervenir entre Groupe RSE inc. et la Municipalité de Warden pour la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo"
+  }
+ ],
+ "filter": {
+  "acts": 9,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 2017-127 n'est que la cible modifiée par le règlement 2026-184 et ne subit pas d'étape de procédure autonome dans ce document."
+   },
+   {
+    "act": "A03",
+    "reason": "Le règlement 2017-131 n'est que la cible modifiée mentionnée dans le titre et ne subit pas d'étape de procédure autonome dans ce document."
+   },
+   {
+    "act": "A08",
+    "reason": "Il s'agit d'un contrat de services professionnels d'ingénierie, relevant des exclusions."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le projet de règlement 2026-184 est adopté lors de la séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte le règlement 2026-180."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil adopte le règlement 2026-181."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil adopte le règlement 2026-182."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil adopte le règlement d'emprunt 2026-183."
+   },
+   {
+    "act": "A09",
+    "reason": "La municipalité conclut un bail commercial pour la relocalisation de ses bureaux, ce qui constitue une transaction immobilière/foncière."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2501,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10908,
+   "outputTokens": 716,
+   "totalTokens": 11624
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2283
+  },
+  "inputSha256": "8d2bed3d6b22bbd3eec938f78bd82418203228006f0374facf6b9f811d62967a"
+ }
+}

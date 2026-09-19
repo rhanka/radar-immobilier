@@ -1,0 +1,315 @@
+{
+ "documentId": "tadoussac-2026-01-13",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "5348fa2e6110b33da6b7d7fa213971c3acf1df198ac9fe27188697efb574b6f5",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-419"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 419 — premier projet, agriculture sans élevage",
+     "stage": "1er_projet",
+     "objet": "419",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419\nMODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE\nL’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE\n31-C"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-253"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 253",
+     "stage": null,
+     "objet": "253",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE la Municipalité de Tadoussac a adopté le règlement de\nzonage numéro 253 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-motion-419"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion du règlement 419",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Conformément à l’article 445 du Code municipal, je, soussigné, Bruno\nForest, conseiller, de la Municipalité du Village de Tadoussac, donne avis"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-project-419"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du premier projet du règlement 419",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419\nMODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE\nL’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE\n31-C"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-forgerons"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Refus du changement de zonage — 247, rue des Forgerons",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil refuse la demande d’amendement au zonage 253 aux\nfins de transiter le 247, rue des Forgerons dans la zone 21­CH afin de\nleur permettre d’opérer une boutique souvenir."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-ppcmoi"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Refus du PPCMOI — 176, rue du Bord-de-l’Eau",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le Conseil approuve la décision du Comité consultatif d’urbanisme\net refuse la demande du projet d’hébergement touristique et commercial"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-sale"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente municipale par invitation — lot 4 342 594",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "QUE le Conseil autorise la vente du lot 4 342 594 du cadastre du Québec\npar une invitation à soumissionner."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-park"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Cessions pour le projet de parc national des Dunes-de-Tadoussac",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "QUE le Conseil municipal consente à fermer et abolir comme chemin\nmunicipal la portion du chemin du Moulin­à­Baude"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "bylaw-415"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 415 — citation patrimoniale de la Maison du Tourisme",
+     "stage": "adoption",
+     "objet": "415",
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D’adopter le règlement no 415 ayant pour objet la citation de la Maison\ndu Tourisme située au 197, Rue des Pionniers, à titre d’immeubles\npatrimonial."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le premier projet du règlement no 419 est expressément adopté par la résolution 2026-01-15.\",\"excerpt\":\"ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE L’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE 31-C\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 253 n'est qu'un rappel historique dans les attendus et ne fait l'objet d'aucune démarche procédurale propre dans cette séance.\",\"excerpt\":\"ATTENDU QUE la Municipalité de Tadoussac a adopté le règlement de zonage numéro 253 ;\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion pour le règlement no 419 est formellement donné lors de la séance.\",\"excerpt\":\"AVIS DE MOTION DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE L’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DES BÂTIMENTS DE LA ZONE 31C\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-01-15 procède à l'adoption du premier projet du règlement no 419.\",\"excerpt\":\"ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE L’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE 31-C\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-01-16 statue expressément sur le refus de la demande d'amendement de zonage pour le 247, rue des Forgerons.\",\"excerpt\":\"QUE le conseil refuse la demande d’amendement au zonage 253 aux fins de transiter le 247, rue des Forgerons dans la zone 21­CH afin de leur permettre d’opérer une boutique souvenir.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-01-17 entérine le refus de la demande de PPCMOI pour le 176, rue du Bord-de-l'Eau.\",\"excerpt\":\"QUE le Conseil approuve la décision du Comité consultatif d’urbanisme et refuse la demande du projet d’hébergement touristique et commercial situé dans la zone 12­P qui ne permet pas ces usages.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-01-06 autorise expressément la vente foncière du lot 4 342 594 par invitation à soumissionner.\",\"excerpt\":\"QUE le Conseil autorise la vente du lot 4 342 594 du cadastre du Québec par une invitation à soumissionner.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-01-31 autorise la fermeture et la cession foncière de portions de chemin et infrastructures pour le parc national.\",\"excerpt\":\"QUE le Conseil municipal consente à fermer et abolir comme chemin municipal la portion du chemin du Moulin­à­Baude qui est compris dans le territoire visé par le projet de parc national\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-01-32 adopte le règlement no 415 pour la citation patrimoniale de l'immeuble.\",\"excerpt\":\"D’adopter le règlement no 415 ayant pour objet la citation de la Maison du Tourisme située au 197, Rue des Pionniers, à titre d’immeubles patrimonial.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le premier projet du règlement no 419 est expressément adopté par la résolution 2026-01-15.",
+   "excerpt": "ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE L’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE 31-C"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 253 n'est qu'un rappel historique dans les attendus et ne fait l'objet d'aucune démarche procédurale propre dans cette séance.",
+   "excerpt": "ATTENDU QUE la Municipalité de Tadoussac a adopté le règlement de zonage numéro 253 ;"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion pour le règlement no 419 est formellement donné lors de la séance.",
+   "excerpt": "AVIS DE MOTION DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE L’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DES BÂTIMENTS DE LA ZONE 31C"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-01-15 procède à l'adoption du premier projet du règlement no 419.",
+   "excerpt": "ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419 MODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE L’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE 31-C"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-01-16 statue expressément sur le refus de la demande d'amendement de zonage pour le 247, rue des Forgerons.",
+   "excerpt": "QUE le conseil refuse la demande d’amendement au zonage 253 aux fins de transiter le 247, rue des Forgerons dans la zone 21­CH afin de leur permettre d’opérer une boutique souvenir."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-01-17 entérine le refus de la demande de PPCMOI pour le 176, rue du Bord-de-l'Eau.",
+   "excerpt": "QUE le Conseil approuve la décision du Comité consultatif d’urbanisme et refuse la demande du projet d’hébergement touristique et commercial situé dans la zone 12­P qui ne permet pas ces usages."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-01-06 autorise expressément la vente foncière du lot 4 342 594 par invitation à soumissionner.",
+   "excerpt": "QUE le Conseil autorise la vente du lot 4 342 594 du cadastre du Québec par une invitation à soumissionner."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-01-31 autorise la fermeture et la cession foncière de portions de chemin et infrastructures pour le parc national.",
+   "excerpt": "QUE le Conseil municipal consente à fermer et abolir comme chemin municipal la portion du chemin du Moulin­à­Baude qui est compris dans le territoire visé par le projet de parc national"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-01-32 adopte le règlement no 415 pour la citation patrimoniale de l'immeuble.",
+   "excerpt": "D’adopter le règlement no 415 ayant pour objet la citation de la Maison du Tourisme située au 197, Rue des Pionniers, à titre d’immeubles patrimonial."
+  }
+ ],
+ "filter": {
+  "acts": 9,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 253 n'est qu'un rappel historique dans les attendus et ne fait l'objet d'aucune démarche procédurale propre dans cette séance."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le premier projet du règlement no 419 est expressément adopté par la résolution 2026-01-15."
+   },
+   {
+    "act": "A03",
+    "reason": "Un avis de motion pour le règlement no 419 est formellement donné lors de la séance."
+   },
+   {
+    "act": "A04",
+    "reason": "La résolution 2026-01-15 procède à l'adoption du premier projet du règlement no 419."
+   },
+   {
+    "act": "A05",
+    "reason": "La résolution 2026-01-16 statue expressément sur le refus de la demande d'amendement de zonage pour le 247, rue des Forgerons."
+   },
+   {
+    "act": "A06",
+    "reason": "La résolution 2026-01-17 entérine le refus de la demande de PPCMOI pour le 176, rue du Bord-de-l'Eau."
+   },
+   {
+    "act": "A07",
+    "reason": "La résolution 2026-01-06 autorise expressément la vente foncière du lot 4 342 594 par invitation à soumissionner."
+   },
+   {
+    "act": "A08",
+    "reason": "La résolution 2026-01-31 autorise la fermeture et la cession foncière de portions de chemin et infrastructures pour le parc national."
+   },
+   {
+    "act": "A09",
+    "reason": "La résolution 2026-01-32 adopte le règlement no 415 pour la citation patrimoniale de l'immeuble."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2688,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 12952,
+   "outputTokens": 877,
+   "totalTokens": 13829
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2512
+  },
+  "inputSha256": "a7fdcd5975b2f0e6e355da981a93ad32252fc51bc266632715187636817f64a5"
+ }
+}

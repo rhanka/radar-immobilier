@@ -1,0 +1,92 @@
+{
+ "documentId": "lac-du-cerf-2026-04-11",
+ "nextId": 3,
+ "units": [
+  {
+   "id": "u01",
+   "status": "removed",
+   "current": {
+    "label": "Point prévu – octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St-Louis",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "lotissement chemin Dicaire / St- Louis",
+    "page": 1,
+    "citation": "Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+    "anchor": "lotissement chemin Dicaire / St- Louis",
+    "spanStart": 1382,
+    "spanEnd": 1482
+   },
+   "versions": [
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Point prévu – octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St-Louis",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "lotissement chemin Dicaire / St- Louis",
+      "page": 1,
+      "citation": "Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+      "anchor": "lotissement chemin Dicaire / St- Louis",
+      "spanStart": 1382,
+      "spanEnd": 1482
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "fable-pass1",
+     "op": "add",
+     "reason": "Point 8.1 de l’ordre du jour (rubrique Urbanisme) portant sur un objet foncier explicite, le projet de lotissement chemin Dicaire / St-Louis (inclusion « actes fonciers, même non résidentiels ») ; l’étape (évaluation des terrains en vue du lotissement) n’entre dans aucune valeur du vocabulaire, d’où « inconnu », et le document n’étant qu’un ordre du jour le libellé dit « prévu »."
+    },
+    {
+     "step": "gemini-pass1",
+     "op": "remove",
+     "reason": "Ce point concerne l'octroi d'un contrat pour l'évaluation de terrains (marché de services professionnels), ce qui est expressément exclu du corrigé par les règles (exclusions du rappel : contrats et marchés de services) et ne constitue ni un acte réglementaire d'urbanisme ni un acte foncier."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "removed",
+   "current": {
+    "label": "Contrat d'évaluation des terrains du projet de lotissement chemin Dicaire / St-Louis (prévu, ordre du jour)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "projet de lotissement chemin Dicaire / St-Louis",
+    "page": 1,
+    "citation": "8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+    "anchor": "projet de lotissement chemin Dicaire / St- Louis",
+    "spanStart": 1378,
+    "spanEnd": 1482
+   },
+   "versions": [
+    {
+     "step": "fable-pass2",
+     "unit": {
+      "label": "Contrat d'évaluation des terrains du projet de lotissement chemin Dicaire / St-Louis (prévu, ordre du jour)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "projet de lotissement chemin Dicaire / St-Louis",
+      "page": 1,
+      "citation": "8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+      "anchor": "projet de lotissement chemin Dicaire / St- Louis",
+      "spanStart": 1378,
+      "spanEnd": 1482
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "fable-pass2",
+     "op": "add",
+     "reason": "Point 8.1 sous la rubrique Urbanisme porte sur un objet foncier explicite (projet de lotissement chemin Dicaire / St-Louis) dont l'étape (évaluation des terrains préalable au lotissement) n'entre dans aucune valeur d'étape définie, d'où « inconnu » ; le document n'étant qu'un ordre du jour, l'unité atteste un point prévu et non une décision acquise (règle 5)."
+    },
+    {
+     "step": "gemini-pass2",
+     "op": "remove",
+     "reason": "L'octroi d'un contrat d'évaluation de terrains est un marché de services professionnels, expressément exclu du rappel selon la règle sur les contrats et marchés de services."
+    }
+   ]
+  }
+ ]
+}

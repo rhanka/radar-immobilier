@@ -1,0 +1,385 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-2003-05-63",
+   "label": "Second projet de règlement 2003-05-63",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "numero": "2003-05-63",
+   "municipality": "sainte-barbe",
+   "stage": "2e_projet",
+   "meetingDate": "2026-05-05",
+   "resolution": "2026-05-16",
+   "title": "Modification de diverses dispositions du règlement de zonage 2003-05",
+   "zones_ciblees": [
+    "CB-2",
+    "MX-3"
+   ],
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "Il est proposé par : Denis Larocque. Qu’un second projet de\nrèglement portant le numéro 2003-05-63 AVEC CHANGEMENT\nsoit adopté",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-cb-2",
+   "label": "CB-2",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "code": "CB-2",
+   "municipality": "sainte-barbe",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 4.9.2.12\n(CB-2), par l’augmentation du nombre maximum de logement à\n12.",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-mx-3",
+   "label": "MX-3",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "code": "MX-3",
+   "municipality": "sainte-barbe",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 4.9.2.24.2\n(MX-3), par l’augmentation du nombre maximum de logement à\n12.",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-ppcmoi-2025-001",
+   "label": "Scrutin référendaire — PPCMOI 2025-001, Île Raymond",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "date": "2026-05-05",
+   "municipality": "sainte-barbe",
+   "dossier": "2025-001",
+   "resolution": "2026-05-13",
+   "etape": "ppcmoi",
+   "etape_date": "2026-05-05",
+   "demandeur_corporate": "Location Francs-Tireurs Inc.",
+   "description": "Autorisation d'un scrutin référendaire le 14 juin 2026, de 10 h à 20 h, concernant le PPCMOI de marina à quais multiples sur les lots 3 075 411 et 2 845 094 de l’Île Raymond. La résolution finale 2026-03-15 a été adoptée le 2 mars 2026; le registre du 30 mars 2026 a recueilli le nombre de demandes nécessaire pour exiger le scrutin.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "QUE le conseil municipal autorise la tenue d'un scrutin\nréférendaire conformément à la Loi sur les élections et les\nréférendums dans les municipalités ;",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    },
+    {
+     "page": 14,
+     "excerpt": "QUE la date du scrutin référendaire est fixée au dimanche 14\njuin 2026, de 10 h 00 à 20 h 00 ;",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-2026-0055",
+   "label": "PIIA 2026-0055 — 31 Rue des Moissons",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "dossier": "2026-0055",
+   "date": "2026-05-05",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "municipality": "sainte-barbe",
+   "resolution": "2026-05-18",
+   "decision": "approuvé",
+   "description": "Garage incorporé au 31 Rue des Moissons, de même esthétique et couleurs que la maison existante, avec brique en façade similaire.",
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que\nrecommandé par le Comité consultatif d’urbanisme.",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-2026-0056",
+   "label": "PIIA 2026-0056 — 424 Chemin de l’Église",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "dossier": "2026-0056",
+   "date": "2026-05-05",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "municipality": "sainte-barbe",
+   "resolution": "2026-05-19",
+   "decision": "approuvé",
+   "description": "PIIA pour un bâtiment commercial au 424 Chemin de l’Église.",
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que\nrecommandé par le Comité consultatif d’urbanisme.",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-derogation-2026-0057",
+   "label": "Dérogation mineure 2026-0057 — allée d’accès",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "dossier": "2026-0057",
+   "date": "2026-05-05",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-05-05",
+   "municipality": "sainte-barbe",
+   "resolution": "2026-05-20",
+   "reglement_number": "2003-05",
+   "decision": "approuvé",
+   "description": "Allée d’accès existante de 3,9 m au 424 Chemin de l’Église, au lieu du minimum réglementaire de 6,1 m.",
+   "motif": "Allée existante, faible flux commercial de véhicules prévu et appui signé des voisins concernés.",
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057\ntel que recommandé par le Comité consultatif d’urbanisme.",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-derogation-2026-0059",
+   "label": "Dérogation mineure 2026-0059 — 813, 45e avenue",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "dossier": "2026-0059",
+   "date": "2026-05-05",
+   "etape": "derogation_mineure",
+   "municipality": "sainte-barbe",
+   "decision": "reporté",
+   "description": "Demande inscrite à l’ordre du jour; le maire indique que la demande relative au lotissement de deux terrains sera prise en délibéré et reprise ultérieurement.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "6.8 Demande de dérogation mineure #2026-0059 – 813, 45e avenue ®",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    },
+    {
+     "page": 3,
+     "excerpt": "Le maire explique que la demande sera prise en\ndélibéré et revenir à un moment ultérieurement.",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-servitude",
+   "label": "Cession de servitude — 163 avenue des Cèdres",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "category": "servitude",
+   "date": "2026-05-05",
+   "municipality": "sainte-barbe",
+   "resolution": "2026-05-21",
+   "description": "Autorisation au maire et à la directrice générale de signer l’acte de cession de servitude sur les lots 5 988 194 et 6 520 252 au 163 avenue des Cèdres.",
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "Il est proposé par : Johanne Béliveau. Que le maire et la\ndirectrice générale soient autorisés à signer les documents\nnécessaires pour l’acte de cession de la servitude",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2023-10-01",
+   "label": "Règlement 2023-10-01 — abrogation de l’emprunt du Centre Barberivain",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "numero": "2023-10-01",
+   "municipality": "sainte-barbe",
+   "date": "2026-05-05",
+   "stage": "adoption",
+   "resolution": "2026-05-09",
+   "objet": "Abrogation du règlement d’emprunt 2023-10 relatif à l’agrandissement et à la rénovation du Centre Barberivain, l’emprunt de 1 749 000 $ n’étant plus requis.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Il est proposé par : François Gagnon. Que le règlement 202310-01 soit adopté et de décrèter ce qui suit :",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-05",
+   "label": "Règlement d’emprunt 2026-05 — réfection routière",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "status": "candidate",
+   "numero": "2026-05",
+   "municipality": "sainte-barbe",
+   "date": "2026-05-05",
+   "stage": "adoption",
+   "resolution": "2026-05-10",
+   "objet": "Dépense de 3 774 141 $ et emprunt de 2 223 087 $ sur 20 ans pour la réfection des chemins, pavage, trottoirs et stationnement de l’hôtel de ville. Approbation MAMH requise.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "Il est proposé par : Élodie Tricoire. Que le conseil décrète ce\nqui suit :",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "bylaw-2003-05-63",
+   "target": "zone-cb-2",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "evidence_refs": [
+    "ev-cb"
+   ],
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 4.9.2.12\n(CB-2), par l’augmentation du nombre maximum de logement à\n12.",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "bylaw-2003-05-63",
+   "target": "zone-mx-3",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "evidence_refs": [
+    "ev-mx"
+   ],
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 4.9.2.24.2\n(MX-3), par l’augmentation du nombre maximum de logement à\n12.",
+     "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+     "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+     "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "evidence": [
+  {
+   "id": "ev-zoning",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+   "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+   "modality": "pdf",
+   "page": 15,
+   "excerpt": "SECOND PROJET DE RÈGLEMENT 2003-05-63 MODIFIANT\nLE RÈGLEMENT DE ZONAGE 2003-05 AFIN DE MODIFIER\nDIVERSES DISPOSITIONS RÈGLEMENTAIRES"
+  },
+  {
+   "id": "ev-cb",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+   "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+   "modality": "pdf",
+   "page": 16,
+   "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 4.9.2.12\n(CB-2), par l’augmentation du nombre maximum de logement à\n12. La grille est présentée à l’Annexe 1."
+  },
+  {
+   "id": "ev-mx",
+   "source_file": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-barbe/cas/0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347.pdf",
+   "docSha": "0b9af96217c8e6603693f2ee39797a0f10b767d2613928dfc51d0fe1b8261347",
+   "sourceUrl": "https://www.ste-barbe.com/pv-2026-05-05/",
+   "modality": "pdf",
+   "page": 16,
+   "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 4.9.2.24.2\n(MX-3), par l’augmentation du nombre maximum de logement à\n12. La grille est présentée à l’Annexe 2."
+  }
+ ],
+ "hyperedges": [],
+ "input_tokens": 15100,
+ "output_tokens": 5400
+}

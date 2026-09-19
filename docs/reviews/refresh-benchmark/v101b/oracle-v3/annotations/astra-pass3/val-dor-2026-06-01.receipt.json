@@ -1,0 +1,36 @@
+{
+ "documentId": "val-dor-2026-06-01",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "35fd5eb75f529c39565ab7bbd7eb6f6a6e1ad33545e6d828d78448e105e36685",
+ "inputSha256": "8760c94754949a814886d7c53d922588567e94376f95248711fbb928a72f7496",
+ "responseSha256": "a336587d30d10b565f9462a3057b16f588564fd5701645c10f3ffa03a2d09d8c",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 33823,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2871,
+  "outputTokens": 1072,
+  "totalTokens": 3943
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 33820,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:34:23.206Z"
+}

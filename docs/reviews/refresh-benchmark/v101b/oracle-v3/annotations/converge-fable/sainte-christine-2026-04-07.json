@@ -1,0 +1,31 @@
+{
+ "documentId": "sainte-christine-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "aac78225da743b4b7179a06fb7b6d045a339440590cd288b10c510afccb50879",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 071-04-2026 (page 9) est un acte foncier explicite — signature des documents cadastraux pour la modification du cadastre de l'emprise de la route 116 au pont de la rivière Le Renne — « Adoptée à l'unanimité », ce qui correspond à l'inclusion « actes fonciers, même non résidentiels » avec citation, page, objet et étape exacts.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 071-04-2026 (page 9) est un acte foncier explicite — signature des documents cadastraux pour la modification du cadastre de l'emprise de la route 116 au pont de la rivière Le Renne — « Adoptée à l'unanimité », ce qui correspond à l'inclusion « actes fonciers, même non résidentiels » avec citation, page, objet et étape exacts."
+  }
+ ]
+}

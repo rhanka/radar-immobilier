@@ -1,0 +1,62 @@
+{
+ "documentId": "sainte-brigide-diberville-2026-06-01",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "5787941e9a318a12a4bf31b2f318845b6cc6190164b44d4b5af55ebc30047f46",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u04\",\"reason\":\"La vente d’immeubles pour défaut de paiement des taxes est une procédure fiscale de recouvrement de la MRC qui ne constitue ni un acte foncier municipal ni un objet foncier explicite d'aménagement.\"},\n {\"op\":\"correct\",\"id\":\"u02\",\"unit\":{\"label\":\"Demande de prolongation prévue à la CPTAQ pour le projet éolien\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"projet éolien\",\"page\":1,\"citation\":\"6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet\\néolien : demande de prolongation à la CPTAQ\",\"anchor\":\"projet\\néolien\"},\"reason\":\"Correction de la citation et de l'ancre pour reproduire fidèlement le saut de ligne du texte source.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u04",
+   "reason": "La vente d’immeubles pour défaut de paiement des taxes est une procédure fiscale de recouvrement de la MRC qui ne constitue ni un acte foncier municipal ni un objet foncier explicite d'aménagement."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Demande de prolongation prévue à la CPTAQ pour le projet éolien",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "projet éolien",
+    "page": 1,
+    "citation": "6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet\néolien : demande de prolongation à la CPTAQ",
+    "anchor": "projet\néolien"
+   },
+   "reason": "Correction de la citation et de l'ancre pour reproduire fidèlement le saut de ligne du texte source."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u04"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "gemini-pass1",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 1,
+   "citation": "6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet\néolien : demande de prolongation à la CPTAQ"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

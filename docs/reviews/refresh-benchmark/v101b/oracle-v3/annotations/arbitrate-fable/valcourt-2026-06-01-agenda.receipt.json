@@ -1,0 +1,78 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "160b21de89153b366ad378f120d15d0ad2c2b085c05343a3c47205fcb0259737",
+ "verificationSha256": "4918d6c9bc5934800e44cb3511907389e70fb54c7e823b973fa12fafd444735f",
+ "inputSha256": "8daac7140e405a4f244dd8bcf83497bf060ea87404be3d7795b4fee3484871ef",
+ "responseSha256": "048dfc9dc47a00ecb02d271134be85946c4d26e69a6a678d3189907471c212d2",
+ "rc": 0,
+ "latencyMs": 29865,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "22ec6365-71c4-4366-b4d9-c1ad585d2dfc",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 2239,
+   "cacheReadInputTokens": 1193,
+   "cacheCreationInputTokens": 4875,
+   "webSearchRequests": 0,
+   "costUSD": 0.20976825000000002,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 1828,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 4875,
+  "cache_read_input_tokens": 1193,
+  "output_tokens": 2239,
+  "output_tokens_details": {
+   "thinking_tokens": 1828
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 4875,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 2239,
+    "cache_read_input_tokens": 1193,
+    "cache_creation_input_tokens": 4875,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 4875
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.20976825000000002,
+ "durationApiMs": 28063,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T22:45:24.783Z"
+}

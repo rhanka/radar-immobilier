@@ -1,0 +1,35 @@
+{
+ "documentId": "saint-bernard-de-michaudville-2026-04-01",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "dae603ddad22cd4cd248bf691cc6d46e9340d8f02db9196f7afac36833552035",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2085,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10206,
+   "outputTokens": 507,
+   "totalTokens": 10713
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1923
+  },
+  "inputSha256": "ebc89c99506a1a0a0c1754db62cbe3fe1644b4b08d2b21663350ee8519926b74"
+ },
+ "at": "2026-09-19T03:22:29.083Z"
+}

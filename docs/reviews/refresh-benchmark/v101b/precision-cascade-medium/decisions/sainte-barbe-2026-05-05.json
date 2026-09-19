@@ -1,0 +1,392 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c6f840b62592a8d94dcd4c385e168e94534254e01c95b933b2fc0d6b3e0f4224",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2003-05-63"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Second projet de règlement 2003-05-63",
+     "stage": "2e_projet",
+     "objet": "2003-05-63",
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "Il est proposé par : Denis Larocque. Qu’un second projet de\nrèglement portant le numéro 2003-05-63 AVEC CHANGEMENT\nsoit adopté"
+      },
+      {
+       "page": 16,
+       "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 4.9.2.12\n(CB-2), par l’augmentation du nombre maximum de logement à\n12."
+      },
+      {
+       "page": 16,
+       "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 4.9.2.24.2\n(MX-3), par l’augmentation du nombre maximum de logement à\n12."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2003-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 2003-05",
+     "stage": null,
+     "objet": "2003-05",
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 6.2, dans la\nrangé #20 (garage détaché), dans la colonne « cour avant »,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-ppcmoi-referendum"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI 2025-001 — scrutin référendaire de l’Île Raymond",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "QUE le conseil municipal autorise la tenue d'un scrutin\nréférendaire conformément à la Loi sur les élections et les\nréférendums dans les municipalités ;"
+      },
+      {
+       "page": 14,
+       "excerpt": "QUE la date du scrutin référendaire est fixée au dimanche 14\njuin 2026, de 10 h 00 à 20 h 00 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-piia-2026-0055"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-0055 — 31, rue des Moissons",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que\nrecommandé par le Comité consultatif d’urbanisme."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-piia-2026-0056"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-0056 — 424, chemin de l’Église",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que\nrecommandé par le Comité consultatif d’urbanisme."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-derogation-2026-0057"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-0057 — allée d’accès au 424, chemin de l’Église",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057\ntel que recommandé par le Comité consultatif d’urbanisme."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-derogation-2026-0059"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-0059 — 813, 45e avenue",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "6.8 Demande de dérogation mineure #2026-0059 – 813, 45e avenue ®"
+      },
+      {
+       "page": 3,
+       "excerpt": "Le maire explique que la demande sera prise en\ndélibéré et revenir à un moment ultérieurement."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-branchement-2844573"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Branchement aqueduc et égout — lot 2844573",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "Il est proposé par :\nFrançois Gagnon. QUE le conseil octroi\nle contrat à l'entreprise F. Duval Excavation, plus bas\nsoumissionnaire jugé conforme,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-servitude-cedres"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Cession d’une servitude — 163, avenue des Cèdres",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "Il est proposé par : Johanne Béliveau. Que le maire et la\ndirectrice générale soient autorisés à signer les documents\nnécessaires pour l’acte de cession de la servitude"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "bylaw-2023-10-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2023-10-01 — abrogation de l’emprunt du Centre Barberivain",
+     "stage": "adoption",
+     "objet": "2023-10-01",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Il est proposé par : François Gagnon. Que le règlement 202310-01 soit adopté et de décrèter ce qui suit :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "bylaw-2026-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement d’emprunt 2026-05 — réfection des chemins",
+     "stage": "adoption",
+     "objet": "2026-05",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Il est proposé par : Élodie Tricoire. Que le conseil décrète ce\nqui suit :"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le second projet de règlement 2003-05-63 modifiant le règlement de zonage.\",\"excerpt\":\"Qu’un second projet de\\nrèglement portant le numéro 2003-05-63 AVEC CHANGEMENT\\nsoit adopté\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2003-05 n'est que le règlement d'origine modifié par le second projet de règlement 2003-05-63, il ne constitue pas un acte distinct adopté ici.\",\"excerpt\":\"Le règlement numéro 2003-05 est modifié à l’article 6.2\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-05-13 fixe la date du scrutin référendaire pour la demande de PPCMOI 2025-001.\",\"excerpt\":\"QUE le conseil municipal autorise la tenue d'un scrutin\\nréférendaire conformément à la Loi sur les élections et les\\nréférendums dans les municipalités ;\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la demande de PIIA 2026-0055 au 31 rue des Moissons.\",\"excerpt\":\"Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que\\nrecommandé par le Comité consultatif d’urbanisme.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la demande de PIIA 2026-0056 au 424 chemin de l'Église.\",\"excerpt\":\"Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que\\nrecommandé par le Comité consultatif d’urbanisme.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accorde la dérogation mineure 2026-0057.\",\"excerpt\":\"Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057\\ntel que recommandé par le Comité consultatif d’urbanisme.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"La demande de dérogation mineure inscrite à l'ordre du jour a été prise en délibéré par le conseil.\",\"excerpt\":\"dérogation mineure 813, 45e Avenue – lotissement 2\\nterrains. Le maire explique que la demande sera prise en\\ndélibéré et revenir à un moment ultérieurement.\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple octroi de contrat de travaux publics / voirie, ce qui relève des exclusions.\",\"excerpt\":\"QUE le conseil octroi\\nle contrat à l'entreprise F. Duval Excavation, plus bas\\nsoumissionnaire jugé conforme, pour les travaux de\\nbranchement au réseau d’aqueduc et d’égout\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la signature d'un acte de cession d'une servitude foncière.\",\"excerpt\":\"Que le maire et la\\ndirectrice générale soient autorisés à signer les documents\\nnécessaires pour l’acte de cession de la servitude sur les lots\\n5 988 194 et 6 520 252\"},{\"act\":\"A10\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit de l'abrogation d'un règlement d'emprunt financier sans composante d'urbanisme ou d'aménagement du territoire.\",\"excerpt\":\"Règlement d’emprunt 2023-10 décrétant une\\ndépense et un emprunt de 1 749 000 $ pour l’agrandissement\\net la rénovation du Centre Barberivain est abrogé\"},{\"act\":\"A11\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un règlement d'emprunt financier pour travaux de voirie et pavage sans développement urbain explicite, relevant des exclusions.\",\"excerpt\":\"RÈGLEMENT D’EMPRUNT À L’ENSEMBLE RELATIF À DES\\nTRAVAUX DE RÉFECTION DES CHEMINS INCLUANT LE\\nPAVAGE, LES TROTTOIRS ET LE STATIONNEMENT DE\\nL’HÔTEL DE VILLE\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le second projet de règlement 2003-05-63 modifiant le règlement de zonage.",
+   "excerpt": "Qu’un second projet de\nrèglement portant le numéro 2003-05-63 AVEC CHANGEMENT\nsoit adopté"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2003-05 n'est que le règlement d'origine modifié par le second projet de règlement 2003-05-63, il ne constitue pas un acte distinct adopté ici.",
+   "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 6.2"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-05-13 fixe la date du scrutin référendaire pour la demande de PPCMOI 2025-001.",
+   "excerpt": "QUE le conseil municipal autorise la tenue d'un scrutin\nréférendaire conformément à la Loi sur les élections et les\nréférendums dans les municipalités ;"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la demande de PIIA 2026-0055 au 31 rue des Moissons.",
+   "excerpt": "Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que\nrecommandé par le Comité consultatif d’urbanisme."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la demande de PIIA 2026-0056 au 424 chemin de l'Église.",
+   "excerpt": "Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que\nrecommandé par le Comité consultatif d’urbanisme."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accorde la dérogation mineure 2026-0057.",
+   "excerpt": "Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057\ntel que recommandé par le Comité consultatif d’urbanisme."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "La demande de dérogation mineure inscrite à l'ordre du jour a été prise en délibéré par le conseil.",
+   "excerpt": "dérogation mineure 813, 45e Avenue – lotissement 2\nterrains. Le maire explique que la demande sera prise en\ndélibéré et revenir à un moment ultérieurement."
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple octroi de contrat de travaux publics / voirie, ce qui relève des exclusions.",
+   "excerpt": "QUE le conseil octroi\nle contrat à l'entreprise F. Duval Excavation, plus bas\nsoumissionnaire jugé conforme, pour les travaux de\nbranchement au réseau d’aqueduc et d’égout"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la signature d'un acte de cession d'une servitude foncière.",
+   "excerpt": "Que le maire et la\ndirectrice générale soient autorisés à signer les documents\nnécessaires pour l’acte de cession de la servitude sur les lots\n5 988 194 et 6 520 252"
+  },
+  {
+   "act": "A10",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit de l'abrogation d'un règlement d'emprunt financier sans composante d'urbanisme ou d'aménagement du territoire.",
+   "excerpt": "Règlement d’emprunt 2023-10 décrétant une\ndépense et un emprunt de 1 749 000 $ pour l’agrandissement\net la rénovation du Centre Barberivain est abrogé"
+  },
+  {
+   "act": "A11",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un règlement d'emprunt financier pour travaux de voirie et pavage sans développement urbain explicite, relevant des exclusions.",
+   "excerpt": "RÈGLEMENT D’EMPRUNT À L’ENSEMBLE RELATIF À DES\nTRAVAUX DE RÉFECTION DES CHEMINS INCLUANT LE\nPAVAGE, LES TROTTOIRS ET LE STATIONNEMENT DE\nL’HÔTEL DE VILLE"
+  }
+ ],
+ "filter": {
+  "acts": 11,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 2003-05 n'est que le règlement d'origine modifié par le second projet de règlement 2003-05-63, il ne constitue pas un acte distinct adopté ici."
+   },
+   {
+    "act": "A08",
+    "reason": "Il s'agit d'un simple octroi de contrat de travaux publics / voirie, ce qui relève des exclusions."
+   },
+   {
+    "act": "A10",
+    "reason": "Il s'agit de l'abrogation d'un règlement d'emprunt financier sans composante d'urbanisme ou d'aménagement du territoire."
+   },
+   {
+    "act": "A11",
+    "reason": "Il s'agit d'un règlement d'emprunt financier pour travaux de voirie et pavage sans développement urbain explicite, relevant des exclusions."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le second projet de règlement 2003-05-63 modifiant le règlement de zonage."
+   },
+   {
+    "act": "A03",
+    "reason": "La résolution 2026-05-13 fixe la date du scrutin référendaire pour la demande de PPCMOI 2025-001."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil municipal accepte la demande de PIIA 2026-0055 au 31 rue des Moissons."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil municipal accepte la demande de PIIA 2026-0056 au 424 chemin de l'Église."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil municipal accorde la dérogation mineure 2026-0057."
+   },
+   {
+    "act": "A07",
+    "reason": "La demande de dérogation mineure inscrite à l'ordre du jour a été prise en délibéré par le conseil."
+   },
+   {
+    "act": "A09",
+    "reason": "Le conseil autorise la signature d'un acte de cession d'une servitude foncière."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3440,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 16083,
+   "outputTokens": 1026,
+   "totalTokens": 17109
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3301
+  },
+  "inputSha256": "e4b2aac31990fb453daa8ab7a46fe4012614514d2107950c6658fda9b4cbabf6"
+ }
+}

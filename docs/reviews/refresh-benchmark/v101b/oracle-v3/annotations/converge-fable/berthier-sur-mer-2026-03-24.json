@@ -1,0 +1,61 @@
+{
+ "documentId": "berthier-sur-mer-2026-03-24",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c45f9d1b48e4e12cc888b85c591319f6edbda635bff8a8a1342f47fc48ea7f1b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v2\",\"reason\":\"La résolution 2026-063 (page 4) autorise un bail de location du terrain municipal, acte foncier inclus au corrigé, mais ce n'est pas l'adoption d'un règlement : l'étape « inconnu » est la seule conforme, et le maintien de l'usage de crémerie est attesté par « QUE l'usage de crémerie soit maintenu ».\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 6, résolution 2026-067 : « QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages du règlement de zonage numéro 265 soit adopté » atteste l'étape second_projet pour l'objet 369.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 7, résolution 2026-068 : « QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le règlement numéro 360 relatif à la démolition d'immeubles soit adopté » atteste l'étape projet_reglement pour l'objet 372.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 7, résolution 2026-069 : « QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements » atteste l'étape projet_reglement pour l'objet 373 ; l'avis de motion du 9 mars 2026 n'est qu'un rappel historique.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v2"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v2",
+   "reason": "La résolution 2026-063 (page 4) autorise un bail de location du terrain municipal, acte foncier inclus au corrigé, mais ce n'est pas l'adoption d'un règlement : l'étape « inconnu » est la seule conforme, et le maintien de l'usage de crémerie est attesté par « QUE l'usage de crémerie soit maintenu »."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 6, résolution 2026-067 : « QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages du règlement de zonage numéro 265 soit adopté » atteste l'étape second_projet pour l'objet 369."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 7, résolution 2026-068 : « QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le règlement numéro 360 relatif à la démolition d'immeubles soit adopté » atteste l'étape projet_reglement pour l'objet 372."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 7, résolution 2026-069 : « QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements » atteste l'étape projet_reglement pour l'objet 373 ; l'avis de motion du 9 mars 2026 n'est qu'un rappel historique."
+  }
+ ]
+}

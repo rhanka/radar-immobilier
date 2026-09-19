@@ -1,0 +1,13 @@
+{
+ "id": "cowansville-2026-05-05",
+ "rc": 0,
+ "latencyMs": 754185,
+ "inputTokens": 6,
+ "outputTokens": 112195,
+ "cacheRead": 50112,
+ "cacheCreate": 114175,
+ "costUsd": 4.011259000000001,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 105534
+}

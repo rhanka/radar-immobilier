@@ -1,0 +1,333 @@
+{
+ "documentId": "berthier-sur-mer-2026-03-24",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c3222a9874a7b47e9eab3044ca067ab9b01df16e3ec665f3cefd4f88776a8d23",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-369"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 369 — deuxième projet modifiant la grille des usages",
+     "stage": "2e_projet",
+     "objet": "369",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+      },
+      {
+       "page": 6,
+       "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+      },
+      {
+       "page": 11,
+       "excerpt": "grille des usages permis, à laquelle réfère l'articl\nnuméro 265, est modifiée afin d'individ\nstinctes les grilles Rb.23, Rb.24 et Rb.25,"
+      },
+      {
+       "page": 9,
+       "excerpt": "la zone Rb 23, ainsi que la création d'une nouvelle zone\nRd.5, sont situées à l'intérieur du'périmètre d'urbanisation de\nla Municipalité"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-265"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 265",
+     "stage": null,
+     "objet": "265",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+      },
+      {
+       "page": 6,
+       "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-369-second-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du deuxième projet de règlement 369",
+     "stage": "second_projet",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+      },
+      {
+       "page": 6,
+       "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+      },
+      {
+       "page": 11,
+       "excerpt": "grille des usages permis, à laquelle réfère l'articl\nnuméro 265, est modifiée afin d'individ\nstinctes les grilles Rb.23, Rb.24 et Rb.25,"
+      },
+      {
+       "page": 9,
+       "excerpt": "la zone Rb 23, ainsi que la création d'une nouvelle zone\nRd.5, sont situées à l'intérieur du'périmètre d'urbanisation de\nla Municipalité"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-372"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 372 — premier projet relatif à la démolition",
+     "stage": "1er_projet",
+     "objet": "372",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté."
+      },
+      {
+       "page": 7,
+       "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-360"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 360 — modification du règlement de démolition",
+     "stage": null,
+     "objet": "360",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "ATTENDU que la municipalité de Berthier-sur-Mer a adopté en date du 2\ndécembre 2024|e règlement numéro 360 mpdifiant le règlement numéro 354\nrelatif à la démolition d'immeubles;"
+      },
+      {
+       "page": 6,
+       "excerpt": "ATTENDU que la municipalité de Berthier-sur-Mer a adopté en date du 2\ndécembre 2024|e règlement numéro 360 mpdifiant le règlement numéro 354\nrelatif à la démolition d'immeubles;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-354"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 354 — démolition d'immeubles",
+     "stage": null,
+     "objet": "354",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "ATTENDU que la municipalité de Berthier-sur-Mer a adopté en date du 2\ndécembre 2024|e règlement numéro 360 mpdifiant le règlement numéro 354\nrelatif à la démolition d'immeubles;"
+      },
+      {
+       "page": 6,
+       "excerpt": "ATTENDU que la municipalité de Berthier-sur-Mer a adopté en date du 2\ndécembre 2024|e règlement numéro 360 mpdifiant le règlement numéro 354\nrelatif à la démolition d'immeubles;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-373"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 373 — premier projet sur la salubrité et l'entretien",
+     "stage": "1er_projet",
+     "objet": "373",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté."
+      },
+      {
+       "page": 7,
+       "excerpt": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-bail-maree-gourmande"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Bail municipal de cinq ans — La Marée Gourmande",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\nGourmande,"
+      },
+      {
+       "page": 4,
+       "excerpt": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\nGourmande, pour une durée de cinq (5) ans au montant de 3 200,00 $ par\nannée, incluant un ajustement annuel bdsé sur l'indice des prix à la\nconsommation (lPC);\n\nQUE l'usage de crémerie soit maintenu conformément aux conditions\nconvenues ;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le deuxième projet de règlement numéro 369 modifiant la grille des usages du règlement de zonage 265.\",\"excerpt\":\"QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\\n\\ndu règlement de zonage numéro 265 soit adopté.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 265 n'est mentionné qu'en tant que règlement modifié par le projet de règlement 369, sans faire l'objet d'un acte procédural autonome.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-067 formalise l'adoption du deuxième projet de règlement 369.\",\"excerpt\":\"QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\\n\\ndu règlement de zonage numéro 265 soit adopté.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le premier projet de règlement numéro 372 modifiant le règlement de démolition 360.\",\"excerpt\":\"QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\\n\\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté.\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 360 n'est cité qu'au titre des antécédents historiques et comme objet de modification par le projet 372.\",\"excerpt\":\"ATTENDU que la municipalité de Berthier-sur-Mer a adopté en date du 2\\ndécembre 2024|e règlement numéro 360 mpdifiant le règlement numéro 354\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 354 n'apparaît que dans un rappel historique dans le préambule.\",\"excerpt\":\"ATTENDU que la municipalité de Berthier-sur-Mer a adopté en date du 2\\ndécembre 2024|e règlement numéro 360 mpdifiant le règlement numéro 354\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le premier projet de règlement numéro 373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements.\",\"excerpt\":\"QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal autorise la conclusion d'un bail de location de terrain d'une durée de 5 ans pour La Marée Gourmande.\",\"excerpt\":\"QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\\nGourmande, pour une durée de cinq (5) ans\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le deuxième projet de règlement numéro 369 modifiant la grille des usages du règlement de zonage 265.",
+   "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 265 n'est mentionné qu'en tant que règlement modifié par le projet de règlement 369, sans faire l'objet d'un acte procédural autonome.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-067 formalise l'adoption du deuxième projet de règlement 369.",
+   "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le premier projet de règlement numéro 372 modifiant le règlement de démolition 360.",
+   "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté."
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 360 n'est cité qu'au titre des antécédents historiques et comme objet de modification par le projet 372.",
+   "excerpt": "ATTENDU que la municipalité de Berthier-sur-Mer a adopté en date du 2\ndécembre 2024|e règlement numéro 360 mpdifiant le règlement numéro 354"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 354 n'apparaît que dans un rappel historique dans le préambule.",
+   "excerpt": "ATTENDU que la municipalité de Berthier-sur-Mer a adopté en date du 2\ndécembre 2024|e règlement numéro 360 mpdifiant le règlement numéro 354"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le premier projet de règlement numéro 373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements.",
+   "excerpt": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal autorise la conclusion d'un bail de location de terrain d'une durée de 5 ans pour La Marée Gourmande.",
+   "excerpt": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\nGourmande, pour une durée de cinq (5) ans"
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 265 n'est mentionné qu'en tant que règlement modifié par le projet de règlement 369, sans faire l'objet d'un acte procédural autonome."
+   },
+   {
+    "act": "A05",
+    "reason": "Le règlement 360 n'est cité qu'au titre des antécédents historiques et comme objet de modification par le projet 372."
+   },
+   {
+    "act": "A06",
+    "reason": "Le règlement 354 n'apparaît que dans un rappel historique dans le préambule."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le deuxième projet de règlement numéro 369 modifiant la grille des usages du règlement de zonage 265."
+   },
+   {
+    "act": "A03",
+    "reason": "La résolution 2026-067 formalise l'adoption du deuxième projet de règlement 369."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte le premier projet de règlement numéro 372 modifiant le règlement de démolition 360."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil adopte le premier projet de règlement numéro 373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil municipal autorise la conclusion d'un bail de location de terrain d'une durée de 5 ans pour La Marée Gourmande."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2769,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 26071,
+   "outputTokens": 656,
+   "totalTokens": 26727
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2590
+  },
+  "inputSha256": "b19b1a1317b7984495bd58c4dbb356498d0b7fb07ede42bf71292aa0c4d7c4ea"
+ }
+}

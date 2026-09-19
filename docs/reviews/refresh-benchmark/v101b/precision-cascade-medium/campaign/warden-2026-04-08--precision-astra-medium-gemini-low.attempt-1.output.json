@@ -1,0 +1,395 @@
+{
+ "nodes": [
+  {
+   "id": "source",
+   "label": "Procès-verbal du conseil de Warden du 8 avril 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "status": "candidate",
+   "date": "2026-04-08",
+   "municipality": "warden",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+   "url": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire du Conseil de la Municipalité de Warden tenue le\nmercredi 8 avril 2026, à 19h45",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-184",
+   "label": "Projet de règlement 2026-184 — TIAM",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "status": "candidate",
+   "numero": "2026-184",
+   "title": "Projet de règlement modifiant le règlement de zonage et le règlement administratif afin d'intégrer les dispositions relatives aux territoires incompatibles à l'activité minière (TIAM)",
+   "stage": "projet",
+   "meetingDate": "2026-04-08",
+   "municipality": "warden",
+   "resolution": "2026-04-047",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-180",
+   "label": "Règlement 2026-180 — Immeubles patrimoniaux",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "status": "candidate",
+   "numero": "2026-180",
+   "title": "Règlement relatif à la gestion des immeubles patrimoniaux et à la délégation de certains mandats au comité consultatif d'urbanisme",
+   "stage": "adoption",
+   "date": "2026-04-08",
+   "meetingDate": "2026-04-08",
+   "municipality": "warden",
+   "resolution": "2026-04-062",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-181",
+   "label": "Règlement 2026-181 — Démolition d'immeubles",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "status": "candidate",
+   "numero": "2026-181",
+   "title": "Règlement relatif à la démolition d'immeubles",
+   "stage": "adoption",
+   "date": "2026-04-08",
+   "meetingDate": "2026-04-08",
+   "municipality": "warden",
+   "resolution": "2026-04-063",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026181 intitulé « Règlement relatif à la démolition d'immeubles »;",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-182",
+   "label": "Règlement 2026-182 — Occupation et entretien des bâtiments",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "status": "candidate",
+   "numero": "2026-182",
+   "title": "Règlement relatif à l'occupation et à l'entretien des bâtiments",
+   "stage": "adoption",
+   "date": "2026-04-08",
+   "meetingDate": "2026-04-08",
+   "municipality": "warden",
+   "resolution": "2026-04-064",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments »;",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-183",
+   "label": "Règlement 2026-183 — Construction d'un hôtel de ville - centre communautaire",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "status": "candidate",
+   "numero": "2026-183",
+   "title": "Règlement décrétant une dépense de 2 511 000.00 $ et un emprunt de 427 000.00 $ pour la construction d'un nouvel hôtel de ville - centre communautaire",
+   "stage": "adoption",
+   "date": "2026-04-08",
+   "meetingDate": "2026-04-08",
+   "municipality": "warden",
+   "resolution": "2026-04-057",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026183 intitulé « Règlement décrétant une dépense de 2 511 000.00 $ et un emprunt",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-relocalisation",
+   "label": "Bail commercial pour la relocalisation temporaire des bureaux municipaux",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "status": "candidate",
+   "category": "immobilier_municipal",
+   "date": "2026-04-08",
+   "municipality": "warden",
+   "resolution": "2026-04-051",
+   "description": "Acceptation d'un bail avec Groupe RSE inc. au 1-5383, rue Foster, à Waterloo, pendant la démolition et la reconstruction de l'hôtel de ville. Bail du 1er mai au 30 novembre 2026, loyer mensuel de 1 300 $ plus taxes.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE la Municipalité de Warden accepte le bail commercial à intervenir entre\nGroupe RSE inc. et la Municipalité de Warden pour la location d'un espace de",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source",
+   "target": "bylaw-2026-184",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "evidence_refs": [
+    "ev-projet"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "bylaw-2026-180",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "evidence_refs": [
+    "ev-180"
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "bylaw-2026-181",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "evidence_refs": [
+    "ev-181"
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026181 intitulé « Règlement relatif à la démolition d'immeubles »;",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "bylaw-2026-182",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "evidence_refs": [
+    "ev-182"
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments »;",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "bylaw-2026-183",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "evidence_refs": [
+    "ev-183"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026183 intitulé « Règlement décrétant une dépense de 2 511 000.00 $ et un emprunt",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "signal-relocalisation",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "evidence_refs": [
+    "ev-bail"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE la Municipalité de Warden accepte le bail commercial à intervenir entre\nGroupe RSE inc. et la Municipalité de Warden pour la location d'un espace de",
+     "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+     "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+     "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-projet",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+   "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Sur une proposition de monsieur Martin Labrecque appuyée par monsieur Serge\nBlanchard, il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+  },
+  {
+   "id": "ev-tiam",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+   "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "6.3. Avis de motion et dépôt du projet de règlement numéro 2026-184 modifiant le\nrèglement de zonage numéro 2017-127 et le règlement administratif 2017-131 afin\nd'intégrer les dispositions relatives aux TIAM"
+  },
+  {
+   "id": "ev-180",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+   "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+   "modality": "pdf",
+   "page": 12,
+   "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la\ndélégation de certains mandats au comité consultatif d'urbanisme »;"
+  },
+  {
+   "id": "ev-181",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+   "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+   "modality": "pdf",
+   "page": 13,
+   "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026181 intitulé « Règlement relatif à la démolition d'immeubles »;"
+  },
+  {
+   "id": "ev-182",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+   "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+   "modality": "pdf",
+   "page": 13,
+   "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments »;"
+  },
+  {
+   "id": "ev-183",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+   "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "QUE le conseil de la Municipalité de Warden adopte le règlement numéro 2026183 intitulé « Règlement décrétant une dépense de 2 511 000.00 $ et un emprunt\nde 427 000.00 $ pour la construction d'un nouvel hôtel de ville - centre\ncommunautaire »;"
+  },
+  {
+   "id": "ev-exp",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+   "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "QUE la Municipalité de Warden accepte l'offre de services professionnels de la\nfirme EXP, datée du 9 mars 2026, relativement à la mise à jour du plan\nd'intervention des infrastructures municipales, pour un montant budgétaire\nmaximal de 25 000.00 $ avant taxes;"
+  },
+  {
+   "id": "ev-bail",
+   "source_file": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "rawRef": "raw/proces-verbaux-warden/cas/34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab.pdf",
+   "docSha": "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab",
+   "sourceUrl": "https://municipalites-du-quebec.com/warden/docs/pv/2026/2026-04-08%20Proc%C3%A8s-Verbal.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "QUE la Municipalité de Warden accepte le bail commercial à intervenir entre\nGroupe RSE inc. et la Municipalité de Warden pour la location d'un espace de\nbureau situé au 1-5383, rue Foster, à Waterloo, afin d'y relocaliser\ntemporairement les bureaux municipaux pendant la durée des travaux de\ndémolition et de reconstruction de l'hôtel de ville;"
+  }
+ ],
+ "input_tokens": 12500,
+ "output_tokens": 6100
+}

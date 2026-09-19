@@ -1,0 +1,178 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4379fc60f9b0423ee4f1fcbe4e45632ff075e83f84ece97381a698efdc225824",
+ "verificationSha256": "7164aa8baea9c7115d02be3454a81de94b10c8b4aab46fe0c70478931b1d17e6",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"L'acte foncier n'est pas seulement historique : la résolution 2026-03-70 (p. 8) résout « QUE la municipalité de Pierreville procèdera à l'acquisition dudit terrain lorsque les bâtiments qui y sont érigés dessus seront entièrement démoli », étape constatée dans ce document, et la citation p. 7 identifie l'objet foncier explicite (« le lot qui porte le matricule 6100-38-1522 »). A et B écartés : le considérant n'est que le rappel du dossier, mais la décision conditionnelle est bien prise ici.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-71 (p. 8) autorise à « enchérir, pour et au nom de la Municipalité » et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » à la vente pour taxes du 16 juin 2026 : acte foncier explicite (acquisition d'immeubles) inclus par la règle, non une simple nomination ni un compte. La position A est écartée car l'objet est la vente pour taxes du 16 juin 2026 et l'acquisition d'immeubles, pas une désignation administrative.\"},{\"item\":\"a03\",\"choice\":\"absent\",\"reason\":\"Le texte résolu (2026-03-75, p. 12) se limite à « autoriser la modification du changement de nom du maire, par monsieur Michel Deraspe dans la résolution 2025-08-304 » : simple désignation de signataire, exclue du rappel, et l'acquisition elle-même relève du dossier historique 2025-08-304 (même dossier que le matricule 6100-38-1522 crédité en a01), or « mentions historiques du même dossier ne multiplient pas le rappel » ; l'objet proposé (« 2025-08-304 ») n'est pas un objet foncier explicite. B est écarté pour ces motifs.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acquisition conditionnelle du terrain au matricule 6100-38-1522 après démolition complète",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6100-38-1522",
+      "page": 7,
+      "citation": "à procéder à l’acquisition du lot qui porte le matricule 6100-38-1522 appartenant à monsieur William Pilon et madame Mahélie Campagna",
+      "anchor": "matricule 6100-38-1522",
+      "spanStart": 1689,
+      "spanEnd": 1822
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "La citation de la page 7 rappelle l’intérêt exprimé dans la résolution historique 2025-08-304, tandis que la décision actuelle d’acquisition après démolition figure à la page 8 dans la résolution 2026-03-70."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Acte foncier explicite attesté p. 7-8 : la résolution 2026-03-70 résout « QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain lorsque les bâtiments ... seront entièrement démoli », citation exacte p. 7 sur le matricule 6100-38-1522."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La citation provient d'un considérant historique rappelant une résolution de 2025 dans une résolution de crédit de taxes, ce qui enfreint la règle interdisant les mentions historiques."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir à la vente pour taxes du 16 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "vente pour taxes municipales",
+      "page": 8,
+      "citation": "lors de la vente pour défaut de paiement de taxes du 16 juin 2026, à enchérir, pour et au nom de la Municipalité, jusqu’à un montant maximal",
+      "anchor": "vente pour défaut de paiement de taxes",
+      "spanStart": 1714,
+      "spanEnd": 1854
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-71, page 8, autorise les enchères et l’acquisition d’immeubles à la vente pour taxes du 16 juin 2026, constituant un acte foncier explicite."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-03-71 p. 8 autorisant à enchérir et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » le 16 juin 2026 : acte foncier inclus par la règle, citation et page exactes."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'autorisation générale d'enchérir pour défaut de paiement de taxes ne comporte aucun objet foncier explicite et relève des exclusions administratives."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Modification du signataire de l’acquisition de terrains du rang Haut de la Rivière — résolution 2025-08-304",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2025-08-304",
+      "page": 12,
+      "citation": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la modification du changement de nom du maire, par monsieur Michel Deraspe dans la résolution 2025-08-304",
+      "anchor": "résolution 2025-08-304",
+      "spanStart": 122,
+      "spanEnd": 289
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-75, page 12, remplace le nom du maire par Michel Deraspe dans la résolution 2025-08-304 afin de permettre la signature des documents d’acquisition des terrains."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La résolution 2026-03-75 ne fait que changer le nom du maire signataire dans la résolution historique 2025-08-304 : simple nomination exclue du rappel et mention historique du même dossier qui ne multiplie pas le rappel, sans objet foncier explicite (l’objet est un numéro de résolution)."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La modification du nom du signataire pour une résolution antérieure est une simple désignation administrative exclue du rappel."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "L'acte foncier n'est pas seulement historique : la résolution 2026-03-70 (p. 8) résout « QUE la municipalité de Pierreville procèdera à l'acquisition dudit terrain lorsque les bâtiments qui y sont érigés dessus seront entièrement démoli », étape constatée dans ce document, et la citation p. 7 identifie l'objet foncier explicite (« le lot qui porte le matricule 6100-38-1522 »). A et B écartés : le considérant n'est que le rappel du dossier, mais la décision conditionnelle est bien prise ici."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-71 (p. 8) autorise à « enchérir, pour et au nom de la Municipalité » et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » à la vente pour taxes du 16 juin 2026 : acte foncier explicite (acquisition d'immeubles) inclus par la règle, non une simple nomination ni un compte. La position A est écartée car l'objet est la vente pour taxes du 16 juin 2026 et l'acquisition d'immeubles, pas une désignation administrative."
+  },
+  {
+   "item": "a03",
+   "choice": "absent",
+   "reason": "Le texte résolu (2026-03-75, p. 12) se limite à « autoriser la modification du changement de nom du maire, par monsieur Michel Deraspe dans la résolution 2025-08-304 » : simple désignation de signataire, exclue du rappel, et l'acquisition elle-même relève du dossier historique 2025-08-304 (même dossier que le matricule 6100-38-1522 crédité en a01), or « mentions historiques du même dossier ne multiplient pas le rappel » ; l'objet proposé (« 2025-08-304 ») n'est pas un objet foncier explicite. B est écarté pour ces motifs."
+  }
+ ]
+}

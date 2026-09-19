@@ -1,0 +1,36 @@
+{
+ "documentId": "val-racine-2026-06-09",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "50e56aff06352f620eb1a39a30002f5964b770ef1ed9f94a95fbadc3097dd853",
+ "inputSha256": "c9ccd826b7914714244f940b1b024828b368445b3738541c20d9eaa5c957e561",
+ "responseSha256": "75d9d03cac73ffd0b6546e51deaf103a2b9412cae6da56b061f98a261082de48",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 76614,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2356,
+  "outputTokens": 2483,
+  "totalTokens": 4839
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 76609,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:07:34.584Z"
+}

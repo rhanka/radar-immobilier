@@ -1,0 +1,74 @@
+{
+ "documentId": "mont-saint-hilaire-2026-04-13",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2dc49be12c6700e289e928622d9c1aed1d0f2ba7bbf5be3715bdd07b8c789da3",
+ "verificationSha256": "d133720d3810cbe29b207a1613e5659c144cc495971cfc4d4a149c5bdebeac26",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-124 ne constitue ni un objet réglementaire ni un acte foncier du profil, mais une simple modification d'un mandat judiciaire confié à une firme d'avocats (« mandatait la firme Bélanger Sauvé, avocats »), ce qui relève des mandats et marchés de services expressément exclus du rappel.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u27",
+   "verificationItem": "i27",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Modification du mandat de recours en vertu de l'article 227 LAU — 1580, rue Casavant (lots 1 818 249 et 1 818 255), travaux sans permis",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1580, rue Casavant",
+      "page": 13,
+      "citation": "MODIFICATION À LA RÉSOLUTION 2024-159 - MANDAT - RECOURS EN VERTU DE L'ARTICLE 227 DE LA LOI SUR L'AMÉNAGEMENT ET L'URBANISME OU TOUT RECOURS APPROPRIÉ - 1580, RUE CASAVANT",
+      "anchor": "1580, RUE CASAVANT",
+      "spanStart": 1333,
+      "spanEnd": 1505
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-124, page 13, étend actuellement le mandat de recours urbanistique aux propriétaires de la structure du 1580, rue Casavant, sans constituer un simple rappel historique."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "2026-124 (p. 13) modifie le mandat de recours en vertu de l'art. 227 LAU visant le 1580, rue Casavant (lots 1 818 249 et 1 818 255) pour travaux sans permis : fait d'urbanisme à objet foncier explicite, étape « inconnu », citation exacte."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La modification d'un mandat judiciaire confié à des avocats relève des marchés de services exclus du rappel et ne constitue pas un objet réglementaire ou foncier du profil."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La résolution 2026-124 ne constitue ni un objet réglementaire ni un acte foncier du profil, mais une simple modification d'un mandat judiciaire confié à une firme d'avocats (« mandatait la firme Bélanger Sauvé, avocats »), ce qui relève des mandats et marchés de services expressément exclus du rappel."
+  }
+ ]
+}

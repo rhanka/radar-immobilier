@@ -1,0 +1,62 @@
+{
+ "documentId": "parisville-2026-05-05",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "1ac41620976404c0dd310f13f5c463f12cfe5108d3fc969b601c99004051a442",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 432-2026 modifiant le règlement de zonage 308-2011\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"432-2026\",\n        \"page\": 3,\n        \"citation\": \"6.1. AVIS D'ADOPTION_RÈGLEMENT 432-2026 MODIFIANT LE RÈGLEMENT DE\\nZONAGE # 308-2011\",\n        \"anchor\": \"RÈGLEMENT 432-2026\"\n      },\n      \"reason\": \"La résolution 73-05-26 adopte ce règlement de zonage; les avis de motion, projets et consultation antérieurs sont des rappels historiques qui ne créent pas d’unités supplémentaires.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 433-2026 modifiant le règlement de lotissement 311-2011\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"433-2026\",\n        \"page\": 4,\n        \"citation\": \"6.2. AVIS D'ADOPTION_RÈGLEMENT 433-2026 MODIFIANT LE RÈGLEMENT DE\\nLOTISSEMENT # 311-2011\",\n        \"anchor\": \"RÈGLEMENT 433-2026\"\n      },\n      \"reason\": \"La résolution 74-05-26 adopte ce règlement de lotissement permettant le remembrement d’un terrain; les étapes antérieures mentionnées dans les considérants ne constituent pas de nouvelles unités.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 432-2026 modifiant le règlement de zonage 308-2011",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "432-2026",
+    "page": 3,
+    "citation": "6.1. AVIS D'ADOPTION_RÈGLEMENT 432-2026 MODIFIANT LE RÈGLEMENT DE\nZONAGE # 308-2011",
+    "anchor": "RÈGLEMENT 432-2026"
+   },
+   "reason": "La résolution 73-05-26 adopte ce règlement de zonage; les avis de motion, projets et consultation antérieurs sont des rappels historiques qui ne créent pas d’unités supplémentaires."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 433-2026 modifiant le règlement de lotissement 311-2011",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "433-2026",
+    "page": 4,
+    "citation": "6.2. AVIS D'ADOPTION_RÈGLEMENT 433-2026 MODIFIANT LE RÈGLEMENT DE\nLOTISSEMENT # 311-2011",
+    "anchor": "RÈGLEMENT 433-2026"
+   },
+   "reason": "La résolution 74-05-26 adopte ce règlement de lotissement permettant le remembrement d’un terrain; les étapes antérieures mentionnées dans les considérants ne constituent pas de nouvelles unités."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 2
+}

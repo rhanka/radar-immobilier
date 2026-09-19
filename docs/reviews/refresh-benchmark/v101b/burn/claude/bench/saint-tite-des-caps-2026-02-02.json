@@ -1,0 +1,13 @@
+{
+ "id": "saint-tite-des-caps-2026-02-02",
+ "rc": 0,
+ "latencyMs": 252033,
+ "inputTokens": 2,
+ "outputTokens": 38991,
+ "cacheRead": 0,
+ "cacheCreate": 12376,
+ "costUsd": 1.107468,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 67855
+}

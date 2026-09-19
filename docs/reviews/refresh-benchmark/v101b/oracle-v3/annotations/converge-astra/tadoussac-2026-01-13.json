@@ -1,0 +1,131 @@
+{
+ "documentId": "tadoussac-2026-01-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b3bde7f596c8c6e4a35ab73e1e35c71c9c726cb4ce24eddec1ab817f612f27eb",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-06, page 5, autorise expressément la vente du lot 4 342 594 par invitation à soumissionner, un acte foncier inclus au corrigé.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 8 atteste l’avis de motion donné le 13 janvier 2026 pour le règlement 419 permettant l’agriculture sans élevage à l’intérieur des bâtiments de la zone 31-C.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-15 commence page 8 sous l’intitulé cité et adopte le premier projet du règlement 419, étape distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-16, page 10, refuse explicitement l’amendement au zonage demandé pour le 247, rue des Forgerons, conformément à la règle voulant qu’un refus reste un refus.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-17, page 10, porte l’intitulé cité du PPCMOI au 176, rue du Bord-de-l’Eau et refuse explicitement le projet d’hébergement touristique et commercial.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-31, page 14, inclut expressément le lot 4 344 119 dans la fermeture du chemin municipal et la cession gratuite au MELCCFP.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-31, page 14, inclut expressément le lot 6 683 045 dans la fermeture et la cession gratuite, ce lot constituant un objet foncier distinct explicitement nommé.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-31, page 14, prévoit expressément une servitude en faveur de Tadoussac pour le réseau d’aqueduc situé sur les lots visés.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-31, page 14, accepte la cession gratuite au MELCCFP du barrage et identifie les immeubles par l’acte no 62 447.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le dispositif de la résolution 2026-01-32, page 15, adopte expressément le règlement 415 citant la Maison du Tourisme au 197, rue des Pionniers comme immeuble patrimonial.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"absent\",\n      \"reason\": \"La page 9 annonce une consultation future dans les attendus du premier projet 419, fait complémentaire qui ne constitue pas une étape distincte constatée dans cette séance.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-06, page 5, autorise expressément la vente du lot 4 342 594 par invitation à soumissionner, un acte foncier inclus au corrigé."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 8 atteste l’avis de motion donné le 13 janvier 2026 pour le règlement 419 permettant l’agriculture sans élevage à l’intérieur des bâtiments de la zone 31-C."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-15 commence page 8 sous l’intitulé cité et adopte le premier projet du règlement 419, étape distincte de l’avis de motion."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-16, page 10, refuse explicitement l’amendement au zonage demandé pour le 247, rue des Forgerons, conformément à la règle voulant qu’un refus reste un refus."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-17, page 10, porte l’intitulé cité du PPCMOI au 176, rue du Bord-de-l’Eau et refuse explicitement le projet d’hébergement touristique et commercial."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-31, page 14, inclut expressément le lot 4 344 119 dans la fermeture du chemin municipal et la cession gratuite au MELCCFP."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-31, page 14, inclut expressément le lot 6 683 045 dans la fermeture et la cession gratuite, ce lot constituant un objet foncier distinct explicitement nommé."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-31, page 14, prévoit expressément une servitude en faveur de Tadoussac pour le réseau d’aqueduc situé sur les lots visés."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-31, page 14, accepte la cession gratuite au MELCCFP du barrage et identifie les immeubles par l’acte no 62 447."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 2026-01-32, page 15, adopte expressément le règlement 415 citant la Maison du Tourisme au 197, rue des Pionniers comme immeuble patrimonial."
+  },
+  {
+   "item": "i11",
+   "choice": "absent",
+   "reason": "La page 9 annonce une consultation future dans les attendus du premier projet 419, fait complémentaire qui ne constitue pas une étape distincte constatée dans cette séance."
+  }
+ ]
+}

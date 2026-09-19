@@ -1,0 +1,71 @@
+{
+ "documentId": "saint-damien-2026-06-16",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "7cd332a5b358a642a48227ccfa91165d29c84bf486ec3871f5284bae68093fcd",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 12.2, page 1, inscrit la demande de dérogation mineure 2026-122 au 73, rue Messier à l’ordre du jour, sans attester une décision acquise.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 12.3, page 1, inscrit la demande de dérogation mineure 2026-133 au 3173, chemin du Ruisseau à l’ordre du jour, comme étape prévue.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 12.4, page 1, prévoit l’examen de la demande d’approbation au PIIA 2026-135 pour le 6710, rue Principale, sans établir que l’approbation est acquise.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 14.2, page 2, prévoit explicitement un avis de motion pour le règlement 804-1 modifiant le règlement 804 portant sur les camions de cuisine cantines temporaires.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 14.2, page 2, prévoit aussi la présentation du projet de règlement 804-1, qui constitue une unité distincte de l’avis de motion selon les règles.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v2"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 12.2, page 1, inscrit la demande de dérogation mineure 2026-122 au 73, rue Messier à l’ordre du jour, sans attester une décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 12.3, page 1, inscrit la demande de dérogation mineure 2026-133 au 3173, chemin du Ruisseau à l’ordre du jour, comme étape prévue."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 12.4, page 1, prévoit l’examen de la demande d’approbation au PIIA 2026-135 pour le 6710, rue Principale, sans établir que l’approbation est acquise."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 14.2, page 2, prévoit explicitement un avis de motion pour le règlement 804-1 modifiant le règlement 804 portant sur les camions de cuisine cantines temporaires."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 14.2, page 2, prévoit aussi la présentation du projet de règlement 804-1, qui constitue une unité distincte de l’avis de motion selon les règles."
+  }
+ ]
+}

@@ -1,0 +1,613 @@
+{
+ "nodes": [
+  {
+   "id": "source-pv-2026-04-13",
+   "label": "Procès-verbal du conseil municipal de Stanstead-Est du 13 avril 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "status": "candidate",
+   "date": "2026-04-13",
+   "municipality": "stanstead-est",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "url": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Lors d’une séance régulière du conseil municipal du 13 avril 2026 à 19h30,",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "appui-cptaq-6374262",
+   "label": "Appui municipal à l’acquisition agricole de 54 acres du lot 6 374 262",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "status": "candidate",
+   "municipality": "stanstead-est",
+   "date": "2026-04-13",
+   "kind": "cptaq",
+   "decision": "approuvé",
+   "etape": "inconnu",
+   "no_lot": "6374262",
+   "resolution": "2026-04-03",
+   "description": "Appui municipal à une demande auprès de la CPTAQ pour acquérir environ 54 acres à des fins d’acériculture, de myciculture et de verger diversifié. Cet appui ne constitue pas une autorisation de la CPTAQ.",
+   "conditions": [
+    "Un plan d’arpenteur doit être présenté pour toute demande de permis de lotissement."
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262.",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-agricole"
+   ]
+  },
+  {
+   "id": "appui-cptaq-5417438",
+   "label": "Appui conditionnel au déplacement d’une résidence sur le lot 5 417 438",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "status": "candidate",
+   "municipality": "stanstead-est",
+   "date": "2026-04-13",
+   "kind": "cptaq",
+   "decision": "approuvé",
+   "etape": "inconnu",
+   "no_lot": "5417438",
+   "resolution": "2026-04-04",
+   "description": "Appui municipal à la demande de construction d’une nouvelle résidence dans la portion nord-ouest du lot au 2710 Route 141. Le lot projeté pour la résidence aura une superficie d’au plus 4 000 m2. Aucune autorisation finale de la CPTAQ n’est rapportée.",
+   "conditions": [
+    "Démolition de la résidence actuelle.",
+    "Remise en culture de la portion occupée par la résidence actuelle."
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-residence"
+   ]
+  },
+  {
+   "id": "signal-civique-5416138",
+   "label": "Attribution du numéro civique 1770 Chemin Boynton",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "status": "candidate",
+   "municipality": "stanstead-est",
+   "date": "2026-04-13",
+   "category": "activite_agricole",
+   "kind": "attribution_numero_civique",
+   "no_lot": "5416138",
+   "reglement_number": "2021-08",
+   "resolution": "2026-04-35",
+   "description": "Attribution du numéro civique 1770 Chemin Boynton pour une activité agricole projetée de culture de l’ail et de cabane à sucre ainsi que pour le bâtiment existant. Le numéro de résolution est reproduit tel qu’inscrit au point 4.1.3.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "QUE la Municipalité de Stanstead-Est attribue le numéro civique 1770\nChemin Boynton, au lot 5 416 138 pour l’activité agricole projetée",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-civique"
+   ]
+  },
+  {
+   "id": "signal-abrogation-245-1",
+   "label": "Demande d’abrogation de l’article 245.1 de la LAU",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "status": "candidate",
+   "municipality": "stanstead-est",
+   "date": "2026-04-13",
+   "category": "protection_milieux_humides",
+   "kind": "demande_modification_legislative",
+   "resolution": "2026-04-09",
+   "description": "Demande d’un amendement au projet de loi no 22 pour abroger l’article 245.1 de la LAU concernant les avis aux propriétaires touchés par la protection des milieux humides et hydriques. Il ne s’agit pas d’une abrogation réalisée par le conseil.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE la municipalité de Stanstead-Est demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi no 22",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-lau"
+   ]
+  },
+  {
+   "id": "preemption-5416383",
+   "label": "Autorisation d’inscrire un avis de préemption sur le lot 5 416 383",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "status": "candidate",
+   "municipality": "stanstead-est",
+   "date": "2026-04-13",
+   "kind": "preemption",
+   "decision": "approuvé",
+   "etape": "inconnu",
+   "no_lot": "5416383",
+   "reglement_number": "2026-02",
+   "resolution": "2026-04-17",
+   "description": "Autorisation d’inscription au registre foncier d’un avis d’assujettissement d’une durée de 10 ans, aux fins d’infrastructures publiques, de service d’utilité publique, de culture, de loisirs, d’activités communautaires et de réserve foncière. L’inscription effective n’est pas attestée.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-preemption-383"
+   ]
+  },
+  {
+   "id": "preemption-5416384",
+   "label": "Autorisation d’inscrire un avis de préemption sur le lot 5 416 384",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "status": "candidate",
+   "municipality": "stanstead-est",
+   "date": "2026-04-13",
+   "kind": "preemption",
+   "decision": "approuvé",
+   "etape": "inconnu",
+   "no_lot": "5416384",
+   "reglement_number": "2026-02",
+   "resolution": "2026-04-17",
+   "description": "Autorisation d’inscription d’un avis d’assujettissement de 10 ans aux fins d’infrastructures publiques, de service d’utilité publique, de culture, de loisirs, d’activités communautaires et de réserve foncière. Le PV répète le numéro 2026-04-17 au point 8.2. L’inscription effective n’est pas attestée.",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-preemption-384"
+   ]
+  },
+  {
+   "id": "appui-let-2935698",
+   "label": "Appui à l’agrandissement du lieu d’enfouissement sur le lot 2 935 698",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "status": "candidate",
+   "municipality": "stanstead-est",
+   "date": "2026-04-13",
+   "kind": "cptaq",
+   "decision": "approuvé",
+   "etape": "inconnu",
+   "no_lot": "2935698",
+   "dossier": "45064",
+   "demandeur_corporate": "Régie intermunicipale de gestion des déchets solides de la région de Coaticook",
+   "resolution": "2026-03-21",
+   "superficie_m2": 255000,
+   "description": "Appui municipal à l’utilisation non agricole d’environ 25,5 hectares pour agrandir le LET. La CPTAQ a émis une orientation préliminaire défavorable le 2 décembre 2025; une rencontre est prévue le 15 avril 2026. Aucun refus final ni autorisation finale n’est rapporté. Le numéro de résolution 2026-03-21 est reproduit tel qu’inscrit.",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande de la\nRégie intermunicipale de gestion des déchets solides de la région\nde Coaticook à la Commission de protection du territoire agricole",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-let-contexte",
+    "ev-let-appui"
+   ]
+  },
+  {
+   "id": "constraint-let-cptaq",
+   "label": "Zone agricole permanente et orientation CPTAQ défavorable au projet de LET",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "status": "candidate",
+   "constraintType": "cptaq",
+   "organisme": "Commission de protection du territoire agricole du Québec",
+   "dossier": "45064",
+   "meetingDate": "2026-04-13",
+   "superficie_concernee_m2": 255000,
+   "description": "Le lot 2 935 698 se trouve dans la zone agricole permanente. La demande d’agrandissement d’environ 25,5 hectares fait l’objet d’une orientation préliminaire de la CPTAQ du 2 décembre 2025 indiquant qu’elle doit essentiellement être refusée; cette orientation n’est pas une décision finale.",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "ATTENDU que l’Orientation préliminaire indique que la CPTAQ\nconsidère essentiellement que la Demande doit être refusée;",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-let-contexte"
+   ]
+  },
+  {
+   "id": "bylaw-2026-04",
+   "label": "Règlement 2026-04 modifiant la tarification des permis et certificats",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "status": "candidate",
+   "municipality": "stanstead-est",
+   "numero": "2026-04",
+   "title": "Règlement modifiant 2016-10 sur la tarification des permis et certificats",
+   "date": "2026-04-13",
+   "stage": "adoption",
+   "resolution": "2026-04-34",
+   "objet": "Ajuster la tarification des permis et certificats pour rattraper l’indexation des dernières années.",
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-tarification"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-pv-2026-04-13",
+   "target": "appui-cptaq-6374262",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "evidence_refs": [
+    "ev-agricole"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262.",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-13",
+   "target": "appui-cptaq-5417438",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "evidence_refs": [
+    "ev-residence"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-13",
+   "target": "signal-civique-5416138",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "evidence_refs": [
+    "ev-civique"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "QUE la Municipalité de Stanstead-Est attribue le numéro civique 1770\nChemin Boynton, au lot 5 416 138 pour l’activité agricole projetée",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-13",
+   "target": "signal-abrogation-245-1",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "evidence_refs": [
+    "ev-lau"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE la municipalité de Stanstead-Est demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi no 22",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-13",
+   "target": "preemption-5416383",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "evidence_refs": [
+    "ev-preemption-383"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-13",
+   "target": "preemption-5416384",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "evidence_refs": [
+    "ev-preemption-384"
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-13",
+   "target": "appui-let-2935698",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "evidence_refs": [
+    "ev-let-appui"
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande de la\nRégie intermunicipale de gestion des déchets solides de la région\nde Coaticook à la Commission de protection du territoire agricole",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-13",
+   "target": "constraint-let-cptaq",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "evidence_refs": [
+    "ev-let-contexte"
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "ATTENDU que l’Orientation préliminaire indique que la CPTAQ\nconsidère essentiellement que la Demande doit être refusée;",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-13",
+   "target": "bylaw-2026-04",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "evidence_refs": [
+    "ev-tarification"
+   ],
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;",
+     "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+     "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+     "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-agricole",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "QUE la municipalité de Stanstead-Est :\n1. Reconnaît positivement le projet agricole visant la production\nacéricole, la myciculture et la mise en place d’un verger diversifié ;\n2. Confirme que la Municipalité ne voit pas d’inconvénient à cette\nopération cadastrale, ni à l’usage agricole projeté ;\n3. Reconnaît l’obligation qu’un plan d’arpenteur soit présenté pour toute\ndemande de permis de lotissement ;\nQUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262."
+  },
+  {
+   "id": "ev-residence",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence dans la portion nord-ouest du\nterrain, conditionnellement à la démolition de la résidence actuelle et à\nla remise en culture de cette dernière portion ;"
+  },
+  {
+   "id": "ev-civique",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "QUE la Municipalité de Stanstead-Est attribue le numéro civique 1770\nChemin Boynton, au lot 5 416 138 pour l’activité agricole projetée\n(culture de l’ail et cabane à sucre) ainsi que pour le bâtiment existant,\nconformément au règlement numéro 2021-08 relatif à la prévention\ncontre les incendies."
+  },
+  {
+   "id": "ev-lau",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "QUE la municipalité de Stanstead-Est demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi no 22\nabrogeant l’article 245.1 de la Loi sur l’aménagement et l’urbanisme afin\nde respecter le consensus établi entre le ministère et ses partenaires\nmunicipaux;"
+  },
+  {
+   "id": "ev-bylaw-preemption",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "ATTENDU que le conseil municipal a adopté le Règlement 2026-02 sur\nle droit de préemption visant à identifier le territoire assujetti et les fins\nmunicipales pour lesquelles des immeubles peuvent être acquis ;"
+  },
+  {
+   "id": "ev-preemption-383",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard\nde l’immeuble connu et désigné sous le numéro de lot CINQ MILLIONS\nQUATRE CENT SEIZE MILLE TROIS CENT QUATRE VINGT TROIS\n(5 416 383) du cadastre du Québec, circonscription foncière de\nStanstead, et ce, aux fins d'infrastructures publiques et service d’utilité\npublique, culture, loisirs et activités communautaires ainsi que de\nréserve foncière:"
+  },
+  {
+   "id": "ev-preemption-384",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 11,
+   "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard\nde l’immeuble connu et désigné sous le numéro de lot CINQ MILLIONS\nQUATRE CENT SEIZE MILLE TROIS CENT QUATRE VINGT QUATRE\n(5 416 384) du cadastre du Québec, circonscription foncière de\nStanstead, et ce, aux fins d'infrastructures publiques et service d’utilité\npublique, culture, loisirs et activités communautaires ainsi que de\nréserve foncière:"
+  },
+  {
+   "id": "ev-let-contexte",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 12,
+   "excerpt": "ATTENDU que la Régie est déjà propriétaire du Lot 698;\nATTENDU qu’une partie du Lot 698 d’une superficie\napproximative de 23 hectares est déjà utilisée par la Régie pour\nl’exploitation de son LET, et ce, conformément à la décision de la\nCPTAQ rendue le 5 mars 1982 au dossier numéro 046178;\nATTENDU que la Régie dessert 22 municipalités, dont la\nMunicipalité de Stanstead-Est;\nATTENDU que le LET atteindra sa capacité maximale d’ici l’année\n2028 s’il ne fait pas l’objet d’un agrandissement;\nATTENDU que la Régie a présenté à la Commission de protection\ndu territoire agricole du Québec (la «CPTAQ») une demande\nd’autorisation visant l’agrandissement LET d’une superficie\nd’environ 25,5 hectares (dossier numéro 45064) (la «Demande»);\nATTENDU que le Compte-rendu de la demande et orientation\npréliminaire (l’«Orientation préliminaire») rendu par la CPTAQ\ndans le dossier numéro 45064 en date du 2 décembre 2025;\nATTENDU que l’Orientation préliminaire indique que la CPTAQ\nconsidère essentiellement que la Demande doit être refusée;\nATTENDU qu’une rencontre avec la CPTAQ a été demandée par\nla Régie et que cette rencontre est prévue le 15 avril prochain;"
+  },
+  {
+   "id": "ev-let-appui",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 13,
+   "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande de la\nRégie intermunicipale de gestion des déchets solides de la région\nde Coaticook à la Commission de protection du territoire agricole\ndu Québec visant l’obtention d’une autorisation pour l’utilisation, à\ndes fins autres qu’agricoles, d’une partie du lot 2 935 698 du\ncadastre du Québec, circonscription foncière de Coaticook, soit\npour l’agrandissement de son lieu d’enfouissement technique."
+  },
+  {
+   "id": "ev-tarification",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 18,
+   "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;"
+  },
+  {
+   "id": "ev-ethique",
+   "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+   "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+   "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+   "modality": "pdf",
+   "page": 18,
+   "excerpt": "D’adopter le règlement portant le numéro 2026-03- Code d’éthique et de\ndéontologie des élus municipaux ;"
+  }
+ ],
+ "input_tokens": 16000,
+ "output_tokens": 9200
+}

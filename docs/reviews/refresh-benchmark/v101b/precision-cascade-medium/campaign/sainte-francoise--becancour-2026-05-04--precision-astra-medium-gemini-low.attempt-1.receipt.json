@@ -1,0 +1,35 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "4af969e8c64e2289e0537b2c451b2f38d5c8c54aa3c7f39b4f2eafd81169e21f",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2359,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10728,
+   "outputTokens": 706,
+   "totalTokens": 11434
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2197
+  },
+  "inputSha256": "d102ded6a68972f97b3aedcb7f17e57c687aec7952a36a3eaf37f31f997e2ec3"
+ },
+ "at": "2026-09-19T03:22:29.522Z"
+}

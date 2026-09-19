@@ -1,0 +1,75 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "cc33975cf6846d1cd404c522fbe8f4f0779dbcee3a8593a4791a901060b55ce5",
+ "inputSha256": "73cb781edb353b976bb4dc1efc5a49ff051d8db8556b885f2d422be33ae08953",
+ "responseSha256": "0da271991c6bb4a0042e32f117748975e7dd382ef304e64db686dc2d9f1dbf2e",
+ "rc": 0,
+ "latencyMs": 101032,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "77dd98fc-aac6-419a-b0dd-ecc2cc26a1be",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 7811,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 33845,
+   "webSearchRequests": 0,
+   "costUSD": 1.06814325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 7624,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 33845,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 7811,
+  "output_tokens_details": {
+   "thinking_tokens": 7624
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 33845,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 7811,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 33845,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 33845
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 1.06814325,
+ "durationApiMs": 99084,
+ "stderrTail": "",
+ "at": "2026-09-18T17:52:16.276Z"
+}

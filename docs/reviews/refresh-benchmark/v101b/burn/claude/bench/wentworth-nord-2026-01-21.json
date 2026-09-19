@@ -1,0 +1,13 @@
+{
+ "id": "wentworth-nord-2026-01-21",
+ "rc": 0,
+ "latencyMs": 285318,
+ "inputTokens": 2,
+ "outputTokens": 30510,
+ "cacheRead": 0,
+ "cacheCreate": 16923,
+ "costUsd": 0.9434089999999998,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 51863
+}

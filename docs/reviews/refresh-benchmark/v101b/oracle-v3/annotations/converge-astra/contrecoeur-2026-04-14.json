@@ -1,0 +1,111 @@
+{
+ "documentId": "contrecoeur-2026-04-14",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "f0baf2f9afc3a69c641ca6cc86c1cff2346c391e6151dc571335006642175964",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v2\",\n      \"reason\": \"La page 4 constate l’avis de motion donné par Manon Handfield et identifie dans le corps du texte le Règlement U-102 constituant le comité consultatif en urbanisme et abrogeant le Règlement 147-82.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v2\",\n      \"reason\": \"La page 4 précise que le membre du conseil présente et dépose le projet de règlement U-102, étape distincte de l’avis de motion selon les règles du corrigé.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-057, à la page 5, adopte explicitement le second projet de Règlement U-100-1 modifiant le zonage, tandis que les étapes de mars sont uniquement des rappels historiques.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-058, à la page 5, adopte expressément le Règlement U-101 sur le contrôle intérimaire relatif au secteur industriel.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 13 approuve le PIIA 2026-009 pour les enseignes au 4270, rue des Patriotes, suite 101, conformément à la citation proposée et à l’inclusion des petits PIIA non résidentiels.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La décision figurant à la page 14 approuve le PIIA 2026-012 pour la construction d’un bâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-073, à la page 14, approuve la dérogation mineure 2026-011 pour les deux immeubles de la rue Papin et les lots 4 813 320 et 4 813 323 explicitement nommés.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 15 contient l’approbation explicite de la dérogation mineure 2026-020 pour le 275, rue de l’Église, lot 6 607 642 au cadastre du Québec.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-075, adoptée à la page 16, autorise la signature du protocole avec Picard Construction pour une nouvelle halte routière et ses infrastructures, soit un développement explicite plutôt qu’un simple entretien de voirie.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v2"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v2"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v2",
+   "reason": "La page 4 constate l’avis de motion donné par Manon Handfield et identifie dans le corps du texte le Règlement U-102 constituant le comité consultatif en urbanisme et abrogeant le Règlement 147-82."
+  },
+  {
+   "item": "i02",
+   "choice": "v2",
+   "reason": "La page 4 précise que le membre du conseil présente et dépose le projet de règlement U-102, étape distincte de l’avis de motion selon les règles du corrigé."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-057, à la page 5, adopte explicitement le second projet de Règlement U-100-1 modifiant le zonage, tandis que les étapes de mars sont uniquement des rappels historiques."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-058, à la page 5, adopte expressément le Règlement U-101 sur le contrôle intérimaire relatif au secteur industriel."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 13 approuve le PIIA 2026-009 pour les enseignes au 4270, rue des Patriotes, suite 101, conformément à la citation proposée et à l’inclusion des petits PIIA non résidentiels."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La décision figurant à la page 14 approuve le PIIA 2026-012 pour la construction d’un bâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-073, à la page 14, approuve la dérogation mineure 2026-011 pour les deux immeubles de la rue Papin et les lots 4 813 320 et 4 813 323 explicitement nommés."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 15 contient l’approbation explicite de la dérogation mineure 2026-020 pour le 275, rue de l’Église, lot 6 607 642 au cadastre du Québec."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-075, adoptée à la page 16, autorise la signature du protocole avec Picard Construction pour une nouvelle halte routière et ses infrastructures, soit un développement explicite plutôt qu’un simple entretien de voirie."
+  }
+ ]
+}

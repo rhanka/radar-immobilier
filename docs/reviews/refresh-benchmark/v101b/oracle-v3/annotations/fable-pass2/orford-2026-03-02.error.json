@@ -1,0 +1,50 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "14c620b4e7114d1d6fcd72972e12c02e700ca2055c7cc38525f97408ad0c145f",
+ "error": "CLAUDE_CLI_FAILED rc=1",
+ "receipt": {
+  "transport": "claude-cli",
+  "rc": 1,
+  "latencyMs": 2156,
+  "isError": true,
+  "numTurns": 1,
+  "sessionId": "5a96cb86-0523-47cc-8d6d-58a80f6e1715",
+  "modelUsage": {},
+  "usage": {
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "input_tokens": 0,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "output_tokens": 0,
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "",
+   "iterations": [],
+   "speed": "standard"
+  },
+  "totalCostUsd": 0,
+  "durationApiMs": 0,
+  "stderrTail": ""
+ },
+ "at": "2026-09-18T14:54:00.246Z"
+}

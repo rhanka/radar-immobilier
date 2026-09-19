@@ -1,0 +1,434 @@
+{
+ "nodes": [
+  {
+   "id": "source",
+   "label": "Procès-verbal du 21 janvier 2026 — Wentworth-Nord",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "date": "2026-01-21",
+   "municipality": "wentworth-nord",
+   "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+   "url": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire tenue par le Conseil municipal le\n21 janvier 2026 à 19 h au Centre communautaire de Laurel situé au 3470, route",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2025-0418",
+   "label": "Dérogation mineure 2025-0418 — emprise du chemin de l’Adiante",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "date": "2026-01-21",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-01-21",
+   "decision": "approuvé",
+   "dossier": "2025-0418",
+   "resolution": "2026-01-3809",
+   "no_lot": "6704332",
+   "reglement_number": "2017-497",
+   "description": "Acceptation d’une emprise de rue constituée du lot projeté 6 704 332 à Wentworth-Nord et du lot 6 433 244 à Harrington, d’une largeur minimale de 11,50 mètres au lieu de 12 mètres. L’opération doit permettre d’agrandir les lots 5 940 268 et 5 949 269 vers l’ouest et de leur donner front sur le chemin de la Médéole pour les rendre constructibles. Le numéro du lot dans le titre diffère entre l’ordre du jour (5 938 135) et le point détaillé (5 938 138).",
+   "conditions": [
+    "Transmission à la MRC des Pays-d’en-Haut afin qu’elle statue également sur la demande.",
+    "La résolution est nulle et caduque si le plan de l’opération cadastrale n’est pas enregistré dans les six mois suivant la délivrance du permis de lotissement."
+   ],
+   "evidence_refs": [
+    "ev-dm"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-adiante",
+   "label": "Contraintes environnementales — emprise du chemin de l’Adiante",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "constraintType": "riveraine",
+   "dossier": "2025-0418",
+   "meetingDate": "2026-01-21",
+   "description": "L’emprise de rue est située dans la rive d’un cours d’eau et de milieux humides. La MRC des Pays-d’en-Haut doit également statuer sur la dérogation mineure.",
+   "evidence_refs": [
+    "ev-rive"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE la MRC des Pays-d’en-Haut devra également statuer sur la\nprésente demande de dérogation mineure puisque cette emprise de rue sera",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-2025-9029",
+   "label": "Contribution pour parcs — lotissement 2025-9029",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "date": "2026-01-21",
+   "kind": "subdivision",
+   "etape": "inconnu",
+   "dossier": "2025-9029",
+   "resolution": "2026-01-3810",
+   "no_lot": "6717658",
+   "description": "Le Conseil demande le paiement en argent de la contribution pour fins de parcs de 12 302,60 $, plutôt qu’une cession de terrain de 866,01 m². La demande de lotissement vise à créer le lot 6 717 658 à partir des lots 5 940 257, 5 940 255 et 5 940 256; la résolution porte sur la contribution, non sur l’approbation du permis.",
+   "evidence_refs": [
+    "ev-parcs"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-orphelins",
+   "label": "Servitude de conservation — terres des sentiers des Orphelins",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "constraintType": "autre",
+   "organisme": "Éco-corridors laurentiens",
+   "resolution": "2026-01-3807",
+   "meetingDate": "2026-01-21",
+   "description": "Approbation de l’engagement municipal et autorisation de signer une entente de suivi de la conservation des terres des sentiers des Orphelins. Le projet de servitude réelle et perpétuelle précédemment approuvé vise les lots 5 589 168, 6 312 664, 6 312 665, 6 579 582, 6 669 890 et 6 671 588.",
+   "evidence_refs": [
+    "ev-conservation"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’approuver\nl’engagement de la Municipalité de Wentworth-Nord et d’autoriser monsieur Ron",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-c09",
+   "label": "Zone commerciale C-09",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "code": "C-09",
+   "designation": "commerciale",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-cons08",
+   "label": "Zone conservation CONS-08",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "code": "CONS-08",
+   "designation": "conservation",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-i04",
+   "label": "Zone industrielle I-04",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "code": "I-04",
+   "designation": "industrielle",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-certificats",
+   "label": "Dépôt des certificats d’enregistrement — hébergement touristique",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "date": "2026-01-21",
+   "category": "procedure_referendaire",
+   "etape": "inconnu",
+   "reglement_number": "2017-498-30",
+   "description": "Dépôt des certificats attestant le résultat de la procédure d’enregistrement des personnes habiles à voter pour les règlements distincts 2017-498-30-C09, 2017-498-30-CONS08 et 2017-498-30-I04. Aucun résultat chiffré ni entrée en vigueur n’est indiqué.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "Conformément à l’article 557 de la Loi sur les élections et les référendums dans\nles municipalités, monsieur Ron Kelley, directeur général et greffier-trésorier,",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source",
+   "target": "dm-2025-0418",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "evidence_refs": [
+    "ev-dm"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "event-2025-9029",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "evidence_refs": [
+    "ev-parcs"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "constraint-adiante",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "evidence_refs": [
+    "ev-rive"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE la MRC des Pays-d’en-Haut devra également statuer sur la\nprésente demande de dérogation mineure puisque cette emprise de rue sera",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "constraint-orphelins",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "evidence_refs": [
+    "ev-conservation"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’approuver\nl’engagement de la Municipalité de Wentworth-Nord et d’autoriser monsieur Ron",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "signal-certificats",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "evidence_refs": [
+    "ev-certificats"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "Conformément à l’article 557 de la Loi sur les élections et les référendums dans\nles municipalités, monsieur Ron Kelley, directeur général et greffier-trésorier,",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-dm",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+   "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une\nemprise de rue constituée du lot projeté 6 704 332 (Wentworth-Nord) et du lot\n6 433 244 du cadastre du Québec (Harrington) qui aura une largeur de 11,50\nmètres dans sa section la plus étroite au lieu de posséder une largeur minimale\nde 12 mètres et ce, tel que prescrit au règlement pour toute voie locale\npossédant une pente transversale de moins de 10 %."
+  },
+  {
+   "id": "ev-rive",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+   "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "particulières pour des raisons de protection de l’environnement (dans la rive d’un\ncours d’eau et de milieux humides) ;"
+  },
+  {
+   "id": "ev-parcs",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+   "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit\nacquittée en argent pour un montant de 12 302.60 $."
+  },
+  {
+   "id": "ev-conservation",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+   "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’approuver\nl’engagement de la Municipalité de Wentworth-Nord et d’autoriser monsieur Ron\nKelley, directeur général et greffier-trésorier, à signer l’entente avec Éco-corridors\nlaurentiens visant à assurer le suivi de la conservation des terres comprenant le\nréseau de sentiers des Orphelins."
+  },
+  {
+   "id": "ev-c09",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+   "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+   "modality": "pdf",
+   "page": 11,
+   "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction\ndans la zone commerciale C-09 ;"
+  },
+  {
+   "id": "ev-cons08",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+   "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+   "modality": "pdf",
+   "page": 11,
+   "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nconservation CONS-08 ;"
+  },
+  {
+   "id": "ev-i04",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+   "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+   "modality": "pdf",
+   "page": 11,
+   "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » dans la zone\nindustrielle I-04."
+  },
+  {
+   "id": "ev-certificats",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+   "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "Conformément à l’article 557 de la Loi sur les élections et les référendums dans\nles municipalités, monsieur Ron Kelley, directeur général et greffier-trésorier,\ndépose les certificats attestant le résultat de la procédure d’enregistrement des\npersonnes habiles à voter ayant le droit d’être inscrites sur la liste référendaire\nquant aux règlements distincts énumérés ci-dessous, en lien avec le projet de\nrèglement 2017-498-30 modifiant le Règlement de zonage 2017-498 afin"
+  }
+ ],
+ "input_tokens": 12500,
+ "output_tokens": 7800
+}

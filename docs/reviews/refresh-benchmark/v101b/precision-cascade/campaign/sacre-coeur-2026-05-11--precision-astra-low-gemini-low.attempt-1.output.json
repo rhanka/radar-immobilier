@@ -1,0 +1,564 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-645",
+   "label": "Règlement 645 — Entretien et occupation des bâtiments",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "numero": "645",
+   "title": "Règlement sur l’entretien et l’occupation des bâtiments",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "stage": "adoption",
+   "resolution": "2026-05-167",
+   "objet": "Encadrement de l’occupation et de l’entretien de tout bâtiment du territoire municipal, avec normes particulières pour les logements, les bâtiments patrimoniaux et les bâtiments vacants.",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté :",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-626",
+   "label": "Règlement 626 — Promenade sur la rue Principale Nord",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "numero": "626",
+   "municipality": "sacre-coeur",
+   "meetingDate": "2026-05-11",
+   "resolution": "2026-05-171",
+   "objet": "Aménagement d’une promenade sur la rue Principale Nord, dépense et emprunt. Modification autorisée de l’article 6 pour ramener le terme de l’emprunt de vingt à dix ans.",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présent d’autoriser la modification de\nl’article 6",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-646",
+   "label": "Projet de règlement 646 — Délégation de pouvoir",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "numero": "646",
+   "title": "Règlement numéro 646 intitulé délégation de pouvoir",
+   "municipality": "sacre-coeur",
+   "meetingDate": "2026-05-11",
+   "stage": "projet",
+   "resolution": "2026-05-174",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "Un projet de règlement intitulé « Règlement numéro 646 intitulé délégation\nde pouvoir » est déposé séance tenante.",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-186",
+   "label": "PPCMOI 2026-009 — Usage bifamilial isolé",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "decision": "approuvé",
+   "kind": "ppcmoi",
+   "etape": "ppcmoi",
+   "etape_date": "2026-05-11",
+   "dossier": "2026-009",
+   "resolution": "2026-05-186",
+   "no_lot": "4700425",
+   "description": "Autorisation par projet de résolution d’intégrer l’usage (Hc) bifamilial isolé sur le lot 4 700 425. Le texte indique qu’une consultation et un processus d’approbation ont suivi le projet de résolution 2026-03-93 et qu’aucune personne ne s’est manifestée.",
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Pierre-Marc Boulianne\net résolu à l’unanimité des conseillers présents, d’autoriser par projet de\nrésolution la demande numéro 2026-009",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-40-rec",
+   "label": "Zone 40-REC",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "code": "40-REC",
+   "municipality": "sacre-coeur",
+   "meetingDate": "2026-05-11",
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-187",
+   "label": "PIIA 2026-010 — Reconstruction au 318, chemin de L’Anse-de-Roche",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-11",
+   "dossier": "2026-010",
+   "resolution": "2026-05-187",
+   "zone_ref": "40-REC",
+   "description": "Autorisation de reconstruire la maison au 318, chemin de L’Anse-de-Roche.",
+   "motif": "Recommandation du CCU 2026-012; respect de l’article 14.3.1 du règlement de zonage; maintien des panoramas sur le Saguenay, intégration paysagère et absence d’impact sur les voisins.",
+   "evidence_refs": [
+    "ev-187"
+   ],
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-188",
+   "label": "PIIA 2026-008 — Maison au 99, chemin du Fjord",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-11",
+   "dossier": "2026-008",
+   "resolution": "2026-05-188",
+   "zone_ref": "40-REC",
+   "description": "Autorisation de construire la maison au 99, chemin du Fjord; la demande est décrite comme une reconstruction dans les considérants.",
+   "motif": "Recommandation du CCU 2026-013; maintien des panoramas sur le Saguenay, intégration paysagère et absence d’impact sur les voisins.",
+   "evidence_refs": [
+    "ev-188"
+   ],
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-008",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-189",
+   "label": "PIIA 2026-007 — Verrière trois saisons",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-11",
+   "dossier": "2026-007",
+   "resolution": "2026-05-189",
+   "zone_ref": "40-REC",
+   "description": "Autorisation d’ajouter des panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche pour en faire une verrière trois saisons.",
+   "motif": "Recommandation du CCU 2026-014; maintien des panoramas sur le Saguenay, intégration paysagère et absence d’impact sur les voisins.",
+   "evidence_refs": [
+    "ev-189"
+   ],
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Paul J. Choquette et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-007",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-190",
+   "label": "PIIA 2026-006 — Agrandissement de patio",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-11",
+   "dossier": "2026-006",
+   "resolution": "2026-05-190",
+   "zone_ref": "40-REC",
+   "description": "Autorisation d’agrandir le patio à la place de la terrasse actuelle au 295 chemin de L’Anse de Roche.",
+   "motif": "Recommandation du CCU 2026-015; maintien des panoramas sur le Saguenay, intégration paysagère et absence d’impact sur les voisins.",
+   "evidence_refs": [
+    "ev-190"
+   ],
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-006",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-191",
+   "label": "Dérogation mineure — Société des frais funéraires de Sacré-Cœur",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "decision": "approuvé",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-05-11",
+   "dossier": "20226-009",
+   "resolution": "2026-05-191",
+   "no_lot": "4700841",
+   "demandeur_corporate": "Société des frais funéraires de Sacré-Cœur inc.",
+   "description": "Réduction de la marge de recul arrière de huit à deux mètres pour construire un garage attenant au bâtiment. Le numéro de dossier est reproduit tel qu’écrit dans la décision.",
+   "motif": "Absence de préjudice sérieux au voisin; préjudice important au requérant en cas de refus.",
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Guy Brisson et résolu, à\nl’unanimité des conseillers présents, d’autoriser la demande de dérogation\nmineure numéro 20226-009",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 21,
+     "excerpt": "Demande de dérogation mineure de la Société des frais funéraires de\nSacré-Cœur sur le lot 4 700 841 du cadastre du Québec",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-192",
+   "label": "Dérogation mineure 2026-011 — Marge arrière de garage",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "decision": "approuvé",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-05-11",
+   "dossier": "2026-011",
+   "resolution": "2026-05-192",
+   "no_lot": "4701026",
+   "description": "Régularisation de la marge de recul arrière derrière le garage attenant : réduction de huit mètres à 6,25 mètres.",
+   "motif": "Absence de préjudice sérieux au voisin; préjudice important au requérant en cas de refus.",
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu, à l’unanimité des conseillers présents, d’autoriser la demande de\ndérogation mineure numéro 2026-011",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-180",
+   "label": "Développement du secteur de la rue Dufour — Estimation d’ingénierie",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "category": "developpement_infrastructures",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "resolution": "2026-05-180",
+   "scope": "local",
+   "amount_cad": 977.29,
+   "description": "Mandat à Stantec pour estimer les coûts de préparation des plans et devis du réseau routier et de l’extension des réseaux d’aqueduc et d’égout sanitaire et pluvial, en vue d’une demande de financement du développement du secteur de la rue Dufour. Montant taxes incluses.",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des conseillers présents, d’accepter l’offre de service de\nStantec au montant de 977,29 $",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-175",
+   "label": "Demande de révision du projet de règlement sur les pratiques agroenvironnementales",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "category": "reglementation_amenagement",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "resolution": "2026-05-175",
+   "scope": "regional",
+   "description": "Demande de suspendre l’adoption du projet provincial sur les pratiques agroenvironnementales et de le réviser avec le milieu municipal : abandon de la préséance sur les protections environnementales municipales et rattachement de l’augmentation des superficies cultivées aux planifications territoriales.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les\nChangements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de\nsuspendre le processus d’adoption",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-185",
+   "label": "Halte routière — Modification de convention pour agrandissement",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "category": "agrandissement_batiment",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "resolution": "2026-05-185",
+   "scope": "local",
+   "description": "Autorisation de signer une modification à la convention de concession de la halte routière sur la route 172 Nord pour ajouter une clause d’agrandissement du bâtiment des gestionnaires, demandé sous une forme déplaçable.",
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSE par M. Paul J. Choquette et\nrésolu à l’unanimité des conseillers présents, d’autoriser Mme Lise",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-permis-avril",
+   "label": "Permis d’avril 2026 — Valeur des travaux",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "status": "candidate",
+   "category": "activite_permis",
+   "municipality": "sacre-coeur",
+   "date": "2026-05-11",
+   "scope": "local",
+   "amount_cad": 59000,
+   "description": "Dépôt du rapport d’avril 2026 : 10 permis émis, total annuel de 28 permis, travaux de 59 000 $ et droits de permis de 120 $.",
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "Au mois d’avril 2026, 10 permis ont été émis pour un total annuel de 28\npermis.",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-187",
+   "target": "zone-40-rec",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "evidence_refs": [
+    "ev-187"
+   ],
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-188",
+   "target": "zone-40-rec",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "evidence_refs": [
+    "ev-188"
+   ],
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-008",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-189",
+   "target": "zone-40-rec",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "evidence_refs": [
+    "ev-189"
+   ],
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Paul J. Choquette et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-007",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-190",
+   "target": "zone-40-rec",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "evidence_refs": [
+    "ev-190"
+   ],
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-006",
+     "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+     "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+     "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-187",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+   "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+   "modality": "pdf",
+   "page": 20,
+   "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\nzone 40-REC."
+  },
+  {
+   "id": "ev-188",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+   "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+   "modality": "pdf",
+   "page": 20,
+   "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par Mme Valérie Dufour et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC."
+  },
+  {
+   "id": "ev-189",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+   "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+   "modality": "pdf",
+   "page": 21,
+   "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Paul J. Choquette et\nrésolu à l’unanimité des membres présents, d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche\ndans la zone 40-REC pour en faire une verrière trois saisons."
+  },
+  {
+   "id": "ev-190",
+   "source_file": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "rawRef": "raw/proces-verbaux-sacre-coeur/cas/1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911.pdf",
+   "docSha": "1418677f2bb54069a1050c7a9156dd2ef9bf7cb268d51c3debbe57eb92d6c911",
+   "sourceUrl": "https://www.sacre-coeur.ca/fichiersUpload/fichiers/20260609115751-proces-verbal-seance-ordinaire-du-conseil-du-11-mai-2026.pdf",
+   "modality": "pdf",
+   "page": 21,
+   "excerpt": "PAR CES MOTIFS, IL EST PROPOSÉ par M. Philippe Roy et résolu à\nl’unanimité des membres présents, d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\ndu patio à la place de la terrasse actuelle au 295 chemin de\nL’Anse de Roche dans la zone 40-REC."
+  }
+ ],
+ "input_tokens": 19400,
+ "output_tokens": 6500
+}

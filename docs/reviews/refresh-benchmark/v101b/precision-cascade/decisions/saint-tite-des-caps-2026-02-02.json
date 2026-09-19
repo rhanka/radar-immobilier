@@ -1,0 +1,287 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "1afb4c315dd08d1376ac85495374b969aa287869bd298b4a6256a0763a0a2d97",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-12945"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — agrandissement, lot 6213140",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\nPIIA faite par la propriétaire du lot 6 213 140."
+      },
+      {
+       "page": 5,
+       "excerpt": "Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\nPIIA faite par la propriétaire du lot 6 213 140."
+      },
+      {
+       "page": 4,
+       "excerpt": "Considérant que la construction projetée sera située en zone V-17, dans un secteur\nde villégiature ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-12946"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — construction, lot 6212400",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 212 400."
+      },
+      {
+       "page": 5,
+       "excerpt": "Considérant que la demande de permis vise une modification du cadastre, la\ndémolition d’une résidence principale et la construction d’une résidence\nunifamiliale sur le lot 6 212 400 ;"
+      },
+      {
+       "page": 6,
+       "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 212 400."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-12947"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — construction, lot 6213540",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 213 540."
+      },
+      {
+       "page": 6,
+       "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 213 540."
+      },
+      {
+       "page": 6,
+       "excerpt": "Considérant que la construction projetée sera située en zone Va-47, dans un secteur\nde villégiature à consolider ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-12948"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — construction, lot 6425190",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 425 190."
+      },
+      {
+       "page": 7,
+       "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 425 190."
+      },
+      {
+       "page": 6,
+       "excerpt": "Considérant que la construction projetée sera située en zone Va-88, dans un secteur\nde villégiature à consolider ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-500-2017"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 500-2017 — PIIA",
+     "stage": null,
+     "objet": "500-2017",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Considérant que l’agrandissement d’un bâtiment principal, sur tout terrain en zone\nde villégiature est assujetti au règlement # 500-2017, via l’article 8.2-6 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-591-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 591-2026 — Épandage en 2026",
+     "stage": "projet",
+     "objet": "591-2026",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains\njours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-tax-sale"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Dernier avis avant processus de vente pour taxes",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Le Conseil municipal demande qu’un dernier avis écrit soit transmis à tous les\ncontribuables visés par le processus de vente d’immeubles pour défaut de paiement\nde taxes."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve la demande de permis d'agrandissement en zone PIIA pour le lot 6 213 140 à la résolution # 12945.\",\"excerpt\":\"Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\\nPIIA faite par la propriétaire du lot 6 213 140.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la demande de permis de construction en zone PIIA pour le lot 6 212 400 à la résolution # 12946.\",\"excerpt\":\"Que le Conseil municipal accepte la demande de permis de construction en zone\\nPIIA faite par le propriétaire du lot 6 212 400.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la demande de permis de construction en zone PIIA pour le lot 6 213 540 à la résolution # 12947.\",\"excerpt\":\"Que le Conseil municipal accepte la demande de permis de construction en zone\\nPIIA faite par le propriétaire du lot 6 213 540.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accepte la demande de permis de construction en zone PIIA pour le lot 6 425 190 à la résolution # 12948.\",\"excerpt\":\"Que le Conseil municipal accepte la demande de permis de construction en zone\\nPIIA faite par le propriétaire du lot 6 425 190.\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 500-2017 n'est cité que comme référence réglementaire existante dans les considérants, il ne fait l'objet d'aucune étape de procédure dans cette séance.\",\"excerpt\":\"Considérant que l’agrandissement d’un bâtiment principal, sur tout terrain en zone\\nde villégiature est assujetti au règlement # 500-2017, via l’article 8.2-6 ;\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement # 591-2026 concernant l'épandage est adopté à la résolution # 12940.\",\"excerpt\":\"Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains\\njours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté.\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"La gestion des arrérages de taxes et l'envoi d'avis avant vente pour défaut de paiement relèvent de la perception fiscale et des finances/exclusions, non d'un acte réglementaire d'urbanisme.\",\"excerpt\":\"Le Conseil municipal demande qu’un dernier avis écrit soit transmis à tous les\\ncontribuables visés par le processus de vente d’immeubles pour défaut de paiement\\nde taxes.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve la demande de permis d'agrandissement en zone PIIA pour le lot 6 213 140 à la résolution # 12945.",
+   "excerpt": "Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\nPIIA faite par la propriétaire du lot 6 213 140."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la demande de permis de construction en zone PIIA pour le lot 6 212 400 à la résolution # 12946.",
+   "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 212 400."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la demande de permis de construction en zone PIIA pour le lot 6 213 540 à la résolution # 12947.",
+   "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 213 540."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accepte la demande de permis de construction en zone PIIA pour le lot 6 425 190 à la résolution # 12948.",
+   "excerpt": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 425 190."
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 500-2017 n'est cité que comme référence réglementaire existante dans les considérants, il ne fait l'objet d'aucune étape de procédure dans cette séance.",
+   "excerpt": "Considérant que l’agrandissement d’un bâtiment principal, sur tout terrain en zone\nde villégiature est assujetti au règlement # 500-2017, via l’article 8.2-6 ;"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement # 591-2026 concernant l'épandage est adopté à la résolution # 12940.",
+   "excerpt": "Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains\njours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté."
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "La gestion des arrérages de taxes et l'envoi d'avis avant vente pour défaut de paiement relèvent de la perception fiscale et des finances/exclusions, non d'un acte réglementaire d'urbanisme.",
+   "excerpt": "Le Conseil municipal demande qu’un dernier avis écrit soit transmis à tous les\ncontribuables visés par le processus de vente d’immeubles pour défaut de paiement\nde taxes."
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [
+   {
+    "act": "A05",
+    "reason": "Le règlement 500-2017 n'est cité que comme référence réglementaire existante dans les considérants, il ne fait l'objet d'aucune étape de procédure dans cette séance."
+   },
+   {
+    "act": "A07",
+    "reason": "La gestion des arrérages de taxes et l'envoi d'avis avant vente pour défaut de paiement relèvent de la perception fiscale et des finances/exclusions, non d'un acte réglementaire d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal approuve la demande de permis d'agrandissement en zone PIIA pour le lot 6 213 140 à la résolution # 12945."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil municipal accepte la demande de permis de construction en zone PIIA pour le lot 6 212 400 à la résolution # 12946."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil municipal accepte la demande de permis de construction en zone PIIA pour le lot 6 213 540 à la résolution # 12947."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil municipal accepte la demande de permis de construction en zone PIIA pour le lot 6 425 190 à la résolution # 12948."
+   },
+   {
+    "act": "A06",
+    "reason": "Le projet de règlement # 591-2026 concernant l'épandage est adopté à la résolution # 12940."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2909,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 8863,
+   "outputTokens": 689,
+   "totalTokens": 9552
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2772
+  },
+  "inputSha256": "24fac5a139b39591e2e722d04926df1823a16449ba8c993a211e3841ecbc72c1"
+ }
+}

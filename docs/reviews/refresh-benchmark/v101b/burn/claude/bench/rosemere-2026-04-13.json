@@ -1,0 +1,13 @@
+{
+ "id": "rosemere-2026-04-13",
+ "rc": 0,
+ "latencyMs": 276530,
+ "inputTokens": 2,
+ "outputTokens": 41595,
+ "cacheRead": 0,
+ "cacheCreate": 22569,
+ "costUsd": 1.2817420000000002,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 66565
+}

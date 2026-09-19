@@ -1,0 +1,249 @@
+{
+ "documentId": "orford-2026-03-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "195d75ab894108539f3daefce88da4f024ce625b12ee398548d9f4dce68eca5d",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "piia-2026-03-59"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé sous condition — lot 6474528, rue de la Bourrasque",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 43,
+       "excerpt": "D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à\nun endroit où la pente du terrain est d'au plus 18,7 %."
+      },
+      {
+       "page": 43,
+       "excerpt": "D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à\nun endroit où la pente du terrain est d'au plus 18,7 %.\nLe tout conditionnellement à l'intégration au projet d'un aménagement de gestion\ndes eaux pluviales de part et d'autre de l'allée de stationnement, de manière à ce\nque les eaux soient captées et dirigées adéquatement en direction du fossé de la\nrue.\nPour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "piia-2026-03-60"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé sous condition — 2197-2199, chemin du Parc",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 45,
+       "excerpt": "D’APPROUVER le présent projet de PIIA concernant les travaux de rénovation."
+      },
+      {
+       "page": 45,
+       "excerpt": "D’APPROUVER le présent projet de PIIA concernant les travaux de rénovation.\nLe tout conditionnellement au dépôt d’un plan d’aménagement paysager à la\nMunicipalité avant la délivrance du permis ou du certificat d'autorisation relatif aux\ntravaux visés par la présente résolution. Le plan devra démontrer les aménagements\nprévus dans la cour avant à l'emplacement des travaux portant sur le retrait de la\nterrasse existante.\nPour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 –\nZone C3."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-955"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 955 sur les plans d’implantation et d’intégration architecturale",
+     "stage": null,
+     "objet": "955",
+     "citations": [
+      {
+       "page": 42,
+       "excerpt": "Cette partie du projet est donc assujettie au Règlement\nnuméro 955 sur les plans d’implantation et d’intégration\narchitecturale (PIIA des pentes de terrain de 15 % à 30 %);"
+      },
+      {
+       "page": 42,
+       "excerpt": "Cette partie du projet est donc assujettie au Règlement\nnuméro 955 sur les plans d’implantation et d’intégration\narchitecturale (PIIA des pentes de terrain de 15 % à 30 %);"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-parcs-2026-03-61"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Contribution au fonds de parcs — chemins des Quenouilles et des Nénuphars",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 46,
+       "excerpt": "D’EXIGER pour les projets de lotissement et de construction suivants, des\ncontributions pour fins de parcs, de terrains de jeux, d’espaces naturels et d'espaces\nverts comme suit,"
+      },
+      {
+       "page": 46,
+       "excerpt": "D’EXIGER pour les projets de lotissement et de construction suivants, des\ncontributions pour fins de parcs, de terrains de jeux, d’espaces naturels et d'espaces\nverts comme suit, le tout comme prévu par le Règlement numéro 951 de zonage et\nlotissement et ses amendements :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-951"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 951 de zonage et de lotissement",
+     "stage": null,
+     "objet": "951",
+     "citations": [
+      {
+       "page": 46,
+       "excerpt": "D’EXIGER pour les projets de lotissement et de construction suivants, des\ncontributions pour fins de parcs, de terrains de jeux, d’espaces naturels et d'espaces\nverts comme suit,"
+      },
+      {
+       "page": 46,
+       "excerpt": "D’EXIGER pour les projets de lotissement et de construction suivants, des\ncontributions pour fins de parcs, de terrains de jeux, d’espaces naturels et d'espaces\nverts comme suit, le tout comme prévu par le Règlement numéro 951 de zonage et\nlotissement et ses amendements :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "consolidation-2026-03-62"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande d’agrandissement du secteur de consolidation — lot 3787898",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 47,
+       "excerpt": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle\nintérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur\nde consolidation,"
+      },
+      {
+       "page": 47,
+       "excerpt": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle\nintérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur\nde consolidation, le tout de manière à y intégrer le lot numéro 3 787 898.\nADOPTÉE À L'UNANIMITÉ"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve sous condition le projet de PIIA pour le lot 6 474 528 à la rue de la Bourrasque.\",\"excerpt\":\"D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à un endroit où la pente du terrain est d'au plus 18,7 %.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve sous condition le projet de PIIA au 2197-2199, chemin du Parc.\",\"excerpt\":\"D’APPROUVER le présent projet de PIIA concernant les travaux de rénovation. Le tout conditionnellement au dépôt d’un plan d’aménagement paysager à la Municipalité avant la délivrance du permis\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 955 n'est mentionné que comme texte de référence applicable, sans acte de procédure réglementaire posé à son sujet.\",\"excerpt\":\"Cette partie du projet est donc assujettie au Règlement numéro 955 sur les plans d’implantation et d’intégration architecturale\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil exige une contribution pour fins de parcs en argent pour les projets sur les chemins des Quenouilles et des Nénuphars.\",\"excerpt\":\"D’EXIGER pour les projets de lotissement et de construction suivants, des contributions pour fins de parcs, de terrains de jeux, d’espaces naturels et d'espaces verts comme suit\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement numéro 951 est seulement invoqué comme fondement juridique dans la résolution, sans adoption ni modification.\",\"excerpt\":\"le tout comme prévu par le Règlement numéro 951 de zonage et lotissement et ses amendements :\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution demandant à la MRC de modifier le RCI et le schéma pour agrandir le secteur de consolidation afin d'y inclure le lot 3 787 898.\",\"excerpt\":\"De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle intérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur de consolidation, le tout de manière à y intégrer le lot numéro 3 787 898.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve sous condition le projet de PIIA pour le lot 6 474 528 à la rue de la Bourrasque.",
+   "excerpt": "D'APPROUVER le présent projet de PIIA relatif à l'aire de stationnement prévue à un endroit où la pente du terrain est d'au plus 18,7 %."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve sous condition le projet de PIIA au 2197-2199, chemin du Parc.",
+   "excerpt": "D’APPROUVER le présent projet de PIIA concernant les travaux de rénovation. Le tout conditionnellement au dépôt d’un plan d’aménagement paysager à la Municipalité avant la délivrance du permis"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 955 n'est mentionné que comme texte de référence applicable, sans acte de procédure réglementaire posé à son sujet.",
+   "excerpt": "Cette partie du projet est donc assujettie au Règlement numéro 955 sur les plans d’implantation et d’intégration architecturale"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil exige une contribution pour fins de parcs en argent pour les projets sur les chemins des Quenouilles et des Nénuphars.",
+   "excerpt": "D’EXIGER pour les projets de lotissement et de construction suivants, des contributions pour fins de parcs, de terrains de jeux, d’espaces naturels et d'espaces verts comme suit"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement numéro 951 est seulement invoqué comme fondement juridique dans la résolution, sans adoption ni modification.",
+   "excerpt": "le tout comme prévu par le Règlement numéro 951 de zonage et lotissement et ses amendements :"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution demandant à la MRC de modifier le RCI et le schéma pour agrandir le secteur de consolidation afin d'y inclure le lot 3 787 898.",
+   "excerpt": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle intérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur de consolidation, le tout de manière à y intégrer le lot numéro 3 787 898."
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 955 n'est mentionné que comme texte de référence applicable, sans acte de procédure réglementaire posé à son sujet."
+   },
+   {
+    "act": "A05",
+    "reason": "Le règlement numéro 951 est seulement invoqué comme fondement juridique dans la résolution, sans adoption ni modification."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal approuve sous condition le projet de PIIA pour le lot 6 474 528 à la rue de la Bourrasque."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil municipal approuve sous condition le projet de PIIA au 2197-2199, chemin du Parc."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil exige une contribution pour fins de parcs en argent pour les projets sur les chemins des Quenouilles et des Nénuphars."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil adopte une résolution demandant à la MRC de modifier le RCI et le schéma pour agrandir le secteur de consolidation afin d'y inclure le lot 3 787 898."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2418,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 32355,
+   "outputTokens": 533,
+   "totalTokens": 32888
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2279
+  },
+  "inputSha256": "bb934d9d64965754c6eed0af5cadb0c8ef1e88bf07ced6a7df245b8e05a24fc4"
+ }
+}

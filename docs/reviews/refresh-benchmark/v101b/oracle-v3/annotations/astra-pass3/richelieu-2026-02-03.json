@@ -1,0 +1,159 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "ebd732269f54a2374886a8f50998368d7ebd795fc371fc083f3141955dbffda9",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du Règlement 26-R-285 — interdiction d'épandage de déjections animales ou de boues à certaines dates en 2026\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"26-R-285\",\n        \"page\": 3,\n        \"citation\": \"résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé :\\n« Règlement interdisant l'épandage de déjections animales ou de boues à des dates\",\n        \"anchor\": \"règlement numéro 26-R-285\"\n      },\n      \"reason\": \"Le point 6.1 constate l'adoption du règlement 26-R-285 encadrant l'épandage; l'avis de motion et le projet du 20 janvier 2026 sont seulement des rappels historiques.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Vente à l'enchère autorisée des immeubles pour défaut de paiement de taxes — 15 avril 2026\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"immeubles à être vendus\",\n        \"page\": 6,\n        \"citation\": \"de vendre à l'enchère\\npublique, dans la salle du conseil de l'hôtel de ville située au 200, boulevard Richelieu,\\nle 15 avril 2026 à 10h00, les immeubles apparaissant au rapport de la trésorière\",\n        \"anchor\": \"les immeubles apparaissant au rapport\"\n      },\n      \"reason\": \"La résolution 26-02-037 ordonne la vente à l'enchère des immeubles figurant au rapport de la trésorière, ce qui constitue un acte foncier décidé et non un simple dépôt financier.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Adoption finale du PPCMOI-2025-07 — fusion des lots 6 465 474 et 6 465 475\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2025-07\",\n        \"page\": 10,\n        \"citation\": \"Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\\nl'aspect suivant\",\n        \"anchor\": \"demande numéro PPCMOI-2025-07\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : les sauts de ligne après « pourra » et « sur » doivent être conservés.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption finale du PPCMOI-2025-08 — fusion des lots 6 465 476 et 6 465 477\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2025-08\",\n        \"page\": 11,\n        \"citation\": \"Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\\nl'aspect suivant\",\n        \"anchor\": \"demande numéro PPCMOI-2025-08\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : les sauts de ligne après « pourra » et « sur » doivent être conservés.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Adoption finale du PPCMOI-2025-09 — fusion des lots 6 465 470, 6 465 471 et 6 460 234\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2025-09\",\n        \"page\": 12,\n        \"citation\": \"Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\\nl'aspect suivant\",\n        \"anchor\": \"demande numéro PPCMOI-2025-09\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : les sauts de ligne après « pourra » et « sur » doivent être conservés.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Appui à la demande à la CPTAQ — habitation unifamiliale au 2860, chemin des Patriotes\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2860, chemin des Patriotes\",\n        \"page\": 13,\n        \"citation\": \"appuie la présente demande auprès de la CPTAQ pour\\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\\nnuméro 5 891 123 du cadastre du Québec\",\n        \"anchor\": \"2860, chemin des Patriotes\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : les sauts de ligne après « pour » et « lot » doivent être conservés.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du Règlement 26-R-285 — interdiction d'épandage de déjections animales ou de boues à certaines dates en 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-R-285",
+    "page": 3,
+    "citation": "résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé :\n« Règlement interdisant l'épandage de déjections animales ou de boues à des dates",
+    "anchor": "règlement numéro 26-R-285"
+   },
+   "reason": "Le point 6.1 constate l'adoption du règlement 26-R-285 encadrant l'épandage; l'avis de motion et le projet du 20 janvier 2026 sont seulement des rappels historiques."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Vente à l'enchère autorisée des immeubles pour défaut de paiement de taxes — 15 avril 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "immeubles à être vendus",
+    "page": 6,
+    "citation": "de vendre à l'enchère\npublique, dans la salle du conseil de l'hôtel de ville située au 200, boulevard Richelieu,\nle 15 avril 2026 à 10h00, les immeubles apparaissant au rapport de la trésorière",
+    "anchor": "les immeubles apparaissant au rapport"
+   },
+   "reason": "La résolution 26-02-037 ordonne la vente à l'enchère des immeubles figurant au rapport de la trésorière, ce qui constitue un acte foncier décidé et non un simple dépôt financier."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Adoption finale du PPCMOI-2025-07 — fusion des lots 6 465 474 et 6 465 475",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2025-07",
+    "page": 10,
+    "citation": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant",
+    "anchor": "demande numéro PPCMOI-2025-07"
+   },
+   "reason": "La citation doit être recopiée à l'identique : les sauts de ligne après « pourra » et « sur » doivent être conservés."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption finale du PPCMOI-2025-08 — fusion des lots 6 465 476 et 6 465 477",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2025-08",
+    "page": 11,
+    "citation": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant",
+    "anchor": "demande numéro PPCMOI-2025-08"
+   },
+   "reason": "La citation doit être recopiée à l'identique : les sauts de ligne après « pourra » et « sur » doivent être conservés."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Adoption finale du PPCMOI-2025-09 — fusion des lots 6 465 470, 6 465 471 et 6 460 234",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2025-09",
+    "page": 12,
+    "citation": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant",
+    "anchor": "demande numéro PPCMOI-2025-09"
+   },
+   "reason": "La citation doit être recopiée à l'identique : les sauts de ligne après « pourra » et « sur » doivent être conservés."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Appui à la demande à la CPTAQ — habitation unifamiliale au 2860, chemin des Patriotes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2860, chemin des Patriotes",
+    "page": 13,
+    "citation": "appuie la présente demande auprès de la CPTAQ pour\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\nnuméro 5 891 123 du cadastre du Québec",
+    "anchor": "2860, chemin des Patriotes"
+   },
+   "reason": "La citation doit être recopiée à l'identique : les sauts de ligne après « pour » et « lot » doivent être conservés."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 10,
+   "citation": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 11,
+   "citation": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 12,
+   "citation": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 13,
+   "citation": "appuie la présente demande auprès de la CPTAQ pour\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\nnuméro 5 891 123 du cadastre du Québec"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

@@ -1,0 +1,189 @@
+{
+ "documentId": "lavenir-2026-05-04",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "fc774eb8dfa1c3b9dd0c019a646a1c49242e84d4b793ffd8e0ce97dfe3eb33bb",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-797-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 797-26 — Habitation multifamiliale en zone C3",
+     "stage": "adoption",
+     "objet": "797-26",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26,"
+      },
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12 et\nqu'il soit statué et décrété ce qui suit:"
+      },
+      {
+       "page": 3,
+       "excerpt": "a) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation. Le tout, comme il est montré dans la\ngrille jointe en annexe I du présent règlement pour en faire partie\nintégrante;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-654-12"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 654-12",
+     "stage": null,
+     "objet": "654-12",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26,"
+      },
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12 et\nqu'il soit statué et décrété ce qui suit:"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-adoption-797-26"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption de l’amendement de zonage 797-26",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26,"
+      },
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12 et\nqu'il soit statué et décrété ce qui suit:"
+      },
+      {
+       "page": 3,
+       "excerpt": "a) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation. Le tout, comme il est montré dans la\ngrille jointe en annexe I du présent règlement pour en faire partie\nintégrante;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-bandes-riveraines"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Caractérisation des bandes riveraines sur les terrains privés",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Que le conseil de la municipalité de L’Avenir désigne deux employés d’Exp\ncomme inspecteur adjoints, l’autorisant ainsi à circuler sur les terrains\nprivés de la municipalité"
+      },
+      {
+       "page": 8,
+       "excerpt": "Que le conseil de la municipalité de L’Avenir désigne deux employés d’Exp\ncomme inspecteur adjoints, l’autorisant ainsi à circuler sur les terrains\nprivés de la municipalité afin de réaliser des travaux de caractérisation des\nbandes riveraines."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement d'amendement 797-26 modifiant le zonage pour permettre l'habitation multifamiliale en zone C3.\",\"excerpt\":\"résolu d'adopter le règlement d'amendement no. 797-26, modifiant le règlement de zonage no. 654-12\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 654-12 est seulement le règlement antérieur faisant l'objet d'une modification, aucune étape procédurale propre ne le concerne.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une duplication sous un type d'événement de l'adoption du règlement 797-26 déjà validée en A01, sans qualification d'acte distinct d'urbanisme.\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"La résolution concerne une nomination d'employés comme inspecteurs adjoints pour circuler sur des terrains, ce qui relève des exclusions (nominations/opérations administratives).\",\"excerpt\":\"Que le conseil de la municipalité de L’Avenir désigne deux employés d’Exp comme inspecteur adjoints\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement d'amendement 797-26 modifiant le zonage pour permettre l'habitation multifamiliale en zone C3.",
+   "excerpt": "résolu d'adopter le règlement d'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 654-12 est seulement le règlement antérieur faisant l'objet d'une modification, aucune étape procédurale propre ne le concerne.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une duplication sous un type d'événement de l'adoption du règlement 797-26 déjà validée en A01, sans qualification d'acte distinct d'urbanisme.",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "La résolution concerne une nomination d'employés comme inspecteurs adjoints pour circuler sur des terrains, ce qui relève des exclusions (nominations/opérations administratives).",
+   "excerpt": "Que le conseil de la municipalité de L’Avenir désigne deux employés d’Exp comme inspecteur adjoints"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 654-12 est seulement le règlement antérieur faisant l'objet d'une modification, aucune étape procédurale propre ne le concerne."
+   },
+   {
+    "act": "A03",
+    "reason": "Il s'agit d'une duplication sous un type d'événement de l'adoption du règlement 797-26 déjà validée en A01, sans qualification d'acte distinct d'urbanisme."
+   },
+   {
+    "act": "A04",
+    "reason": "La résolution concerne une nomination d'employés comme inspecteurs adjoints pour circuler sur des terrains, ce qui relève des exclusions (nominations/opérations administratives)."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le règlement d'amendement 797-26 modifiant le zonage pour permettre l'habitation multifamiliale en zone C3."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1963,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10432,
+   "outputTokens": 252,
+   "totalTokens": 10684
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1820
+  },
+  "inputSha256": "dae630c9bb32c205d308034970dea66d1dd257503d9a84728876566c5dfd1e1f"
+ }
+}

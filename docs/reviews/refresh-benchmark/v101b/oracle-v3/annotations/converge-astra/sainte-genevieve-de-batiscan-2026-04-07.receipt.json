@@ -1,0 +1,36 @@
+{
+ "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "9d523d36752582a0448cd5695ff41c885691c4b98d0a03b9df489ebd43629e93",
+ "inputSha256": "66a285f6d9873dc6f14f20110d05ac566fc837b94bf98d858eef5d6f8de0f094",
+ "responseSha256": "16cc4f58c3c6e7c064a6351373db4a74fb83e81f95cf9ff01aed078ba21eb867",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 19969,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 16911,
+  "outputTokens": 594,
+  "totalTokens": 17505
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 19966,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:20:19.597Z"
+}

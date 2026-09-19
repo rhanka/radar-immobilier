@@ -1,0 +1,36 @@
+{
+ "documentId": "cowansville-2026-05-05",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "d90ddb2c09a65aba234d596f233f6a8ebb68fdf245213bb02933cf5ebb30667d",
+ "inputSha256": "1844a12412e5dd0736e8cb69096533212172593d9c88e0983b9a7e6a2e27c666",
+ "responseSha256": "b08db46a09a955819cdc1475966107e3d3c9d49477035d9b3a034bf755dfedac",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 323128,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 32163,
+  "outputTokens": 10688,
+  "totalTokens": 42851
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 323110,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:28:54.528Z"
+}

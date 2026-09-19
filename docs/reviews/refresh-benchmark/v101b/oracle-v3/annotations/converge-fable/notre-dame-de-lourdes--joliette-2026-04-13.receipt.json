@@ -1,0 +1,77 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01d555b9144977e58926b82bb8440d1531b599d66161fc3fb838739681afff4f",
+ "inputSha256": "ef83a5e9b1616d0a105e17fd863a310e82075440012370b7fd275e346d7e48f8",
+ "responseSha256": "0d5893a68cf832e19ca74fd2f03272bfd1dbc36c7ddd7b150d63224f630526bc",
+ "rc": 0,
+ "latencyMs": 45063,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "deafac70-2bd8-405b-bce2-e4a8423c183b",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 3617,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 17763,
+   "webSearchRequests": 0,
+   "costUSD": 0.53641475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 2810,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 17763,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 3617,
+  "output_tokens_details": {
+   "thinking_tokens": 2810
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 17763,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 3617,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 17763,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 17763
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.53641475,
+ "durationApiMs": 43142,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:30:33.208Z"
+}

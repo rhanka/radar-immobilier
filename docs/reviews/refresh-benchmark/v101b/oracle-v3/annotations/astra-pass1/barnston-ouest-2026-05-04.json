@@ -1,0 +1,164 @@
+{
+ "documentId": "barnston-ouest-2026-05-04",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "9798556d1270594f7c233a5a022c558a27ae5f5ab5812470ce0922ccbf0cc402",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt et présentation du projet de règlement 325-2026 modifiant le plan d’urbanisme\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"325-2026\",\n        \"page\": 7,\n        \"citation\": \"6.2.3. Dépôt et présentation du Règlement numéro 325-2026 modifiant le\\nrèglement numéro 224 Plan d’urbanisme\",\n        \"anchor\": \"Règlement numéro 325-2026\"\n      },\n      \"reason\": \"Le document constate le dépôt et la présentation du projet modifiant le plan d’urbanisme, étape distincte de l’avis de motion.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 325-2026 modifiant le plan d’urbanisme\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"325-2026\",\n        \"page\": 8,\n        \"citation\": \"6.2.4. Avis de motion - Règlement numéro 325-2026 modifiant le\\nrèglement numéro 224 Plan d’urbanisme\",\n        \"anchor\": \"Règlement numéro 325-2026\"\n      },\n      \"reason\": \"L’avis de motion est donné lors de cette séance et constitue une unité distincte du dépôt du projet de règlement.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt et présentation du projet de règlement 326-2026 modifiant le zonage\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"326-2026\",\n        \"page\": 8,\n        \"citation\": \"6.2.5. Dépôt et présentation du Règlement numéro 326-2026 modifiant le\\nrèglement numéro 225 de zonage\",\n        \"anchor\": \"Règlement numéro 326-2026\"\n      },\n      \"reason\": \"Le dépôt et la présentation du projet modifiant le règlement de zonage sont expressément constatés dans le procès-verbal.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 326-2026 modifiant le zonage\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"326-2026\",\n        \"page\": 8,\n        \"citation\": \"6.2.6. Avis de motion - Règlement numéro 326-2026 modifiant le\\nrèglement numéro 225 de zonage\",\n        \"anchor\": \"Règlement numéro 326-2026\"\n      },\n      \"reason\": \"L’avis de motion donné pour le règlement 326-2026 doit être compté séparément de son projet actuel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt et présentation du projet de règlement 327-2026 modifiant le lotissement\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"327-2026\",\n        \"page\": 8,\n        \"citation\": \"6.2.7. Dépôt et présentation du Règlement numéro 327-2026 modifiant le\\nrèglement numéro 226 (2012) de lotissement\",\n        \"anchor\": \"Règlement numéro 327-2026\"\n      },\n      \"reason\": \"Le document constate le dépôt et la présentation d’un projet modifiant le règlement de lotissement, objet réglementaire inclus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 327-2026 modifiant le lotissement\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"327-2026\",\n        \"page\": 8,\n        \"citation\": \"6.2.8. Avis de motion - Règlement numéro 327-2026 modifiant le\\nrèglement numéro 226 (2012) de lotissement\",\n        \"anchor\": \"Règlement numéro 327-2026\"\n      },\n      \"reason\": \"L’avis de motion est effectivement donné et forme une unité distincte du dépôt du projet de règlement 327-2026.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt et présentation du projet de règlement 328-2026 modifiant le règlement sur les PIIA\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"328-2026\",\n        \"page\": 8,\n        \"citation\": \"6.2.9. Dépôt et présentation du Règlement numéro 328-2026 modifiant le\\nrèglement numéro 221 sur les plans d’implantation et d’intégration\\narchitecturale\",\n        \"anchor\": \"Règlement numéro 328-2026\"\n      },\n      \"reason\": \"Il s’agit du dépôt d’un projet modifiant le règlement sur les PIIA, et non d’une décision sur une demande individuelle de PIIA.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 328-2026 modifiant le règlement sur les PIIA\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"328-2026\",\n        \"page\": 9,\n        \"citation\": \"6.2.10. Avis de motion - Règlement numéro 328-2026 modifiant le\\nrèglement numéro 221 sur les plans d’implantation et d’intégration\\narchitecturale\",\n        \"anchor\": \"Règlement numéro 328-2026\"\n      },\n      \"reason\": \"Le procès-verbal constate un avis de motion pour le règlement 328-2026, à compter séparément de la présentation de son projet.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt et présentation du projet de règlement 325-2026 modifiant le plan d’urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "325-2026",
+    "page": 7,
+    "citation": "6.2.3. Dépôt et présentation du Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme",
+    "anchor": "Règlement numéro 325-2026"
+   },
+   "reason": "Le document constate le dépôt et la présentation du projet modifiant le plan d’urbanisme, étape distincte de l’avis de motion."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion du règlement 325-2026 modifiant le plan d’urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "325-2026",
+    "page": 8,
+    "citation": "6.2.4. Avis de motion - Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme",
+    "anchor": "Règlement numéro 325-2026"
+   },
+   "reason": "L’avis de motion est donné lors de cette séance et constitue une unité distincte du dépôt du projet de règlement."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt et présentation du projet de règlement 326-2026 modifiant le zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "326-2026",
+    "page": 8,
+    "citation": "6.2.5. Dépôt et présentation du Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage",
+    "anchor": "Règlement numéro 326-2026"
+   },
+   "reason": "Le dépôt et la présentation du projet modifiant le règlement de zonage sont expressément constatés dans le procès-verbal."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion du règlement 326-2026 modifiant le zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "326-2026",
+    "page": 8,
+    "citation": "6.2.6. Avis de motion - Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage",
+    "anchor": "Règlement numéro 326-2026"
+   },
+   "reason": "L’avis de motion donné pour le règlement 326-2026 doit être compté séparément de son projet actuel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt et présentation du projet de règlement 327-2026 modifiant le lotissement",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "327-2026",
+    "page": 8,
+    "citation": "6.2.7. Dépôt et présentation du Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement",
+    "anchor": "Règlement numéro 327-2026"
+   },
+   "reason": "Le document constate le dépôt et la présentation d’un projet modifiant le règlement de lotissement, objet réglementaire inclus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion du règlement 327-2026 modifiant le lotissement",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "327-2026",
+    "page": 8,
+    "citation": "6.2.8. Avis de motion - Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement",
+    "anchor": "Règlement numéro 327-2026"
+   },
+   "reason": "L’avis de motion est effectivement donné et forme une unité distincte du dépôt du projet de règlement 327-2026."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt et présentation du projet de règlement 328-2026 modifiant le règlement sur les PIIA",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "328-2026",
+    "page": 8,
+    "citation": "6.2.9. Dépôt et présentation du Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’intégration\narchitecturale",
+    "anchor": "Règlement numéro 328-2026"
+   },
+   "reason": "Il s’agit du dépôt d’un projet modifiant le règlement sur les PIIA, et non d’une décision sur une demande individuelle de PIIA."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion du règlement 328-2026 modifiant le règlement sur les PIIA",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "328-2026",
+    "page": 9,
+    "citation": "6.2.10. Avis de motion - Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’intégration\narchitecturale",
+    "anchor": "Règlement numéro 328-2026"
+   },
+   "reason": "Le procès-verbal constate un avis de motion pour le règlement 328-2026, à compter séparément de la présentation de son projet."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 8
+}

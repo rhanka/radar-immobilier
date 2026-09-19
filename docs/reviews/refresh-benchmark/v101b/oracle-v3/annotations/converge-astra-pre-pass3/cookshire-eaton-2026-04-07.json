@@ -1,0 +1,81 @@
+{
+ "documentId": "cookshire-eaton-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "dcef823e0abf9b897d88bdb82b1720374565a8af97cb1bd96327247ddafd2b5b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-0726, page 6, autorise explicitement la dérogation mineure 26-DM-01 pour le 978, rue Faulkner, lot 4 487 978.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-0727, page 6, autorise la vente du lot 4 487 586 à Stéphanie Beaudoin pour 1 300 $ et précise que l’immeuble est vacant et non constructible.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L’intitulé cité et la résolution 2026-04-0735, page 10, attestent l’avis de motion du règlement 400-2026 concernant l’occupation et l’entretien des bâtiments.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-0736, page 10, adopte explicitement le projet de règlement 400-2026, étape distincte de l’avis de motion.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L’intitulé N.3 cité à la page 10 rattache explicitement l’avis de motion au règlement 399-2026 amendant le règlement de démolition 316-2023, avec la résolution d’avis de motion 2026-04-0739 à la page suivante.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-0740, page 11, adopte explicitement le projet de règlement 399-2026 amendant le règlement relatif à la démolition d’immeubles 316-2023.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-0726, page 6, autorise explicitement la dérogation mineure 26-DM-01 pour le 978, rue Faulkner, lot 4 487 978."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-0727, page 6, autorise la vente du lot 4 487 586 à Stéphanie Beaudoin pour 1 300 $ et précise que l’immeuble est vacant et non constructible."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L’intitulé cité et la résolution 2026-04-0735, page 10, attestent l’avis de motion du règlement 400-2026 concernant l’occupation et l’entretien des bâtiments."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-0736, page 10, adopte explicitement le projet de règlement 400-2026, étape distincte de l’avis de motion."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L’intitulé N.3 cité à la page 10 rattache explicitement l’avis de motion au règlement 399-2026 amendant le règlement de démolition 316-2023, avec la résolution d’avis de motion 2026-04-0739 à la page suivante."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-0740, page 11, adopte explicitement le projet de règlement 399-2026 amendant le règlement relatif à la démolition d’immeubles 316-2023."
+  }
+ ]
+}

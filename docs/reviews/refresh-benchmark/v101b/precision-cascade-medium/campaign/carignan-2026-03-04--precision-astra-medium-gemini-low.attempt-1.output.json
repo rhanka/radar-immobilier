@@ -1,0 +1,795 @@
+{
+ "nodes": [
+  {
+   "id": "dm-2026-007",
+   "label": "Dérogation mineure 2026-007 — remise en cour avant",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-04",
+   "dossier": "2026-007",
+   "resolution": "26-03-100",
+   "decision": "approuvé",
+   "no_lot": "2600386",
+   "description": "Implantation d'une remise en cour avant au 1621, rue des Roses, en remplacement d'une remise existante.",
+   "motif": "La remise existante est camouflée par la végétation; les zones inondables et le talus riverain contraignent son implantation ailleurs.",
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "D'APPROUVER la demande de de dérogation mineure 2026-007\ndans le but d'autoriser l'implantation d'une remise en cour avant",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-013",
+   "label": "Dérogation mineure 2026-013 — conteneurs semi-enfouis",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-04",
+   "dossier": "2026-013",
+   "resolution": "26-03-101",
+   "decision": "approuvé",
+   "no_lot": "6630145",
+   "description": "Installation de conteneurs semi-enfouis en cour avant au 150, rue de l'Aigle.",
+   "conditions": [
+    "Réaliser l'aménagement paysager composé d'arbres et d'une haie conformément au plan soumis afin de camoufler les conteneurs depuis la voie publique."
+   ],
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "D'APPROUVER la demande de dérogation mineure 2026-013\nconcernant l'installation de conteneurs semi-enfouis en cour avant",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2025-113",
+   "label": "Dérogation mineure 2025-113 — emprise au sol de 24 %",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-04",
+   "dossier": "2025-113",
+   "resolution": "26-03-102",
+   "decision": "approuvé",
+   "no_lot": "2600450",
+   "description": "Autorisation d'un coefficient d'emprise au sol de 24 % plutôt que le maximum réglementaire de 20 % au 2157, rue des Roses.",
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "D'APPROUVER la demande de dérogation mineure 2025-113\ndans le but de permettre un coefficient d'emprise au sol de 24 %",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2025-015",
+   "label": "PIIA 2025-015 — agrandissement au 2157, rue des Roses",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-04",
+   "dossier": "2025-015",
+   "resolution": "26-03-103",
+   "decision": "approuvé",
+   "no_lot": "2600450",
+   "description": "Agrandissement de la résidence unifamiliale isolée au 2157, rue des Roses.",
+   "conditions": [
+    "Replanter un arbre en cour avant dont la largeur à maturité et l'emplacement ne risquent pas d'entrer en conflit avec les fils électriques."
+   ],
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "D'APPROUVER la demande de PIIA 2025-015 concernant\nl'agrandissement de la résidence unifamiliale isolée située au\n2157, rue des Roses, sur le lot 2 600 450.",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2025-121",
+   "label": "PIIA 2025-121 — rénovations au 2167, rue des Roses",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-04",
+   "dossier": "2025-121",
+   "resolution": "26-03-104",
+   "decision": "approuvé",
+   "no_lot": "2600445",
+   "description": "Rénovations de la résidence unifamiliale isolée au 2167, rue des Roses.",
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "D'APPROUVER la demande de PIIA 2025-121 concernant les\nrénovations de la résidence unifamiliale isolée située au 2167, rue\ndes Roses, sur le lot 2 600 445.",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2025-125",
+   "label": "PIIA 2025-125 — revêtements au 4400, chemin Bellerive",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-04",
+   "dossier": "2025-125",
+   "resolution": "26-03-105",
+   "decision": "approuvé",
+   "no_lot": "5357275",
+   "description": "Remplacement de certains revêtements extérieurs au 4400, chemin Bellerive.",
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "D'APPROUVER la demande de PIIA 2025-125 concernant le\nremplacement de certains revêtements extérieurs de la résidence\nsituée au 4400, chemin Bellerive, sur le lot 5 357 275.",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2025-126",
+   "label": "PIIA 2025-126 — revêtement au 1463, rue Marie-Gendron",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-04",
+   "dossier": "2025-126",
+   "resolution": "26-03-106",
+   "decision": "approuvé",
+   "no_lot": "2601260",
+   "description": "Remplacement du revêtement léger extérieur au 1463, rue Marie-Gendron.",
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "D'APPROUVER la demande de PIIA 2025-126 concernant le\nremplacement du revêtement léger extérieur de la résidence\nsituée au 1463, rue Marie-Gendron, sur le lot 2 601 260.",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2025-128",
+   "label": "PIIA 2025-128 — revêtement d'un bâtiment patrimonial",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-04",
+   "dossier": "2025-128",
+   "resolution": "26-03-107",
+   "decision": "approuvé",
+   "no_lot": "2344856",
+   "description": "Remplacement du revêtement extérieur d'un bâtiment patrimonial au 3968, chemin Sainte-Thérèse.",
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "D'APPROUVER la demande de PIIA 2025-128 concernant le\nremplacement du revêtement extérieur sur un bâtiment\npatrimonial située au 3968, chemin Sainte-Thérèse, sur le lot 2\n344 856.",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2026-001",
+   "label": "PIIA 2026-001 — remplacement de revêtement refusé",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-04",
+   "dossier": "2026-001",
+   "resolution": "26-03-108",
+   "decision": "refusé",
+   "no_lot": "2347167",
+   "description": "Remplacement du revêtement en clin par de l'acrylique et remplacement de deux fenêtres au 4639, rue de l'Île-Sainte-Marie.",
+   "motif": "Le matériau réduit la qualité architecturale et sa couleur moins compatible crée une impression de massivité, notamment sur le côté gauche du bâtiment.",
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "DE REFUSER la demande de PIIA 2026-001 consistant au\nremplacement du revêtement en clin par un revêtement\nd'acrylique ainsi que le remplacement de deux fenêtres de la",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2026-002",
+   "label": "PIIA 2026-002 — construction rue Étienne-Provost",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-04",
+   "dossier": "2026-002",
+   "resolution": "26-03-109",
+   "decision": "approuvé",
+   "no_lot": "6710900",
+   "description": "Construction au 2014-2016, rue Étienne-Provost d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio. Le conseil suggère de varier davantage les modèles extérieurs pour les futurs projets.",
+   "citations": [
+    {
+     "page": 25,
+     "excerpt": "D'APPROUVER la demande de PIIA 2026-002 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2026-004",
+   "label": "PIIA 2026-004 — construction rue Étienne-Provost",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-04",
+   "dossier": "2026-004",
+   "resolution": "26-03-110",
+   "decision": "approuvé",
+   "no_lot": "6710901",
+   "description": "Construction au 2018-2020, rue Étienne-Provost d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio. Le conseil suggère de varier davantage les modèles extérieurs pour les futurs projets.",
+   "citations": [
+    {
+     "page": 25,
+     "excerpt": "D'APPROUVER la demande de PIIA 2026-004 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2026-005",
+   "label": "PIIA 2026-005 — construction rue Liliane Ouest",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-04",
+   "dossier": "2026-005",
+   "resolution": "26-03-111",
+   "decision": "approuvé",
+   "no_lot": "6710902",
+   "description": "Construction au 2011-2013, rue Liliane Ouest d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio. Le conseil suggère de varier davantage les modèles extérieurs pour les futurs projets.",
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "D'APPROUVER la demande de PIIA 2026-005 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2026-006",
+   "label": "PIIA 2026-006 — construction rue Liliane Ouest",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-04",
+   "dossier": "2026-006",
+   "resolution": "26-03-112",
+   "decision": "approuvé",
+   "no_lot": "6710903",
+   "description": "Construction au 2015-2017, rue Liliane Ouest d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio. Le conseil suggère de varier davantage les modèles extérieurs pour les futurs projets.",
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "D'APPROUVER la demande de PIIA 2026-006 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "contrainte-inondable-2600386",
+   "label": "Zones inondables et talus — 1621, rue des Roses",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "constraintType": "inondable",
+   "meetingDate": "2026-03-04",
+   "resolution": "26-03-100",
+   "dossier": "2026-007",
+   "description": "Les zones inondables et le talus en bordure de rivière contraignent l'installation d'une remise en cour arrière ou latérale au 1621, rue des Roses, lot 2 600 386.",
+   "evidence_refs": [
+    "ev-inondable"
+   ],
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "CONSIDÉRANT que les zones inondables et le talus en bordure\nde rivière contraignent le demandeur pour installer sa remise en\ncours arrière ou latérale;",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "contrainte-riveraine-2600450",
+   "label": "Protection riveraine et espaces verts — 2157, rue des Roses",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "constraintType": "riveraine",
+   "meetingDate": "2026-03-04",
+   "resolution": "26-03-102",
+   "dossier": "2025-113",
+   "description": "La propriété au 2157, rue des Roses, lot 2 600 450, doit continuer de respecter la bande de protection riveraine, un minimum de 30 % d'espaces verts, les marges latérales et les autres normes d'aménagement.",
+   "evidence_refs": [
+    "ev-riveraine"
+   ],
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "CONSIDÉRANT que la propriété devra continuer de respecter le\nminimum de 30 % de superficie d'espaces verts, la bande de\nprotection riveraine, les marges latérales",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-483-41-U",
+   "label": "Règlement 483-41-U — sécurité des piscines et usages",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "numero": "483-41-U",
+   "title": "Règlement modifiant le règlement de zonage numéro 483-U (Sécurité des piscines & usages des zones IDI-489 et IDI-490)",
+   "stage": "adoption",
+   "date": "2026-03-04",
+   "resolution": "26-03-123",
+   "zones_ciblees": [
+    "IDI-489",
+    "IDI-490"
+   ],
+   "citations": [
+    {
+     "page": 33,
+     "excerpt": "D'ADOPTER, pour valoir à toutes fins que de droit, le Règlement\nnuméro 483-41-U modifiant le règlement de zonage numéro 483U.",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-IDI-489",
+   "label": "Zone IDI-489",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "code": "IDI-489",
+   "citations": [
+    {
+     "page": 33,
+     "excerpt": "Adoption - Règlement numéro 483-41-U modifiant le\nrèglement de zonage numéro 483-U (Sécurité des\npiscines & usages des zones IDI-489 et IDI-490)",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-IDI-490",
+   "label": "Zone IDI-490",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "code": "IDI-490",
+   "citations": [
+    {
+     "page": 33,
+     "excerpt": "Adoption - Règlement numéro 483-41-U modifiant le\nrèglement de zonage numéro 483-U (Sécurité des\npiscines & usages des zones IDI-489 et IDI-490)",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-310-2026-1",
+   "label": "Projet de règlement 310 (2026) - 1 — tarifs",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "numero": "310 (2026) - 1",
+   "title": "Tarifs pour divers services rendus par la Ville de Carignan et remplacement du règlement numéro 310 (2026)",
+   "stage": "projet",
+   "meetingDate": "2026-03-04",
+   "resolutionRef": "26-03-120",
+   "citations": [
+    {
+     "page": 32,
+     "excerpt": "La conseillère Diane Morneau donne avis de motion qu'il y aura,\nlors d'une prochaine séance du conseil municipal, l'adoption du\nRèglement numéro 310 (2026) - 1",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-568-2026",
+   "label": "Projet de règlement d'emprunt 568 (2026) — chemin Brunelle",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "numero": "568 (2026)",
+   "title": "Travaux de réfection du chemin Brunelle décrétant une dépense et un emprunt à long terme n'excédant pas 3 637 000 $",
+   "stage": "projet",
+   "meetingDate": "2026-03-04",
+   "resolutionRef": "26-03-121",
+   "citations": [
+    {
+     "page": 32,
+     "excerpt": "Le conseiller Daniel St-Jean donne avis de motion qu'il y aura,\nlors d'une prochaine séance du conseil municipal, l'adoption du\nRèglement d'emprunt numéro 568 (2026) autorisant les travaux",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-569-2026",
+   "label": "Projet de règlement d'emprunt 569 (2026) — pavage 2026",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "numero": "569 (2026)",
+   "title": "Travaux de pavage de chaussée pour l'année 2026 décrétant une dépense et un emprunt à long terme n'excédant pas 1 317 000 $",
+   "stage": "projet",
+   "meetingDate": "2026-03-04",
+   "resolutionRef": "26-03-122",
+   "citations": [
+    {
+     "page": 33,
+     "excerpt": "Le conseiller Daniel St-Jean donne avis de motion qu'il y aura,\nlors d'une prochaine séance du conseil municipal, l'adoption du\nRèglement d'emprunt numéro 569 (2026) autorisant les travaux",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-offre-gemdev",
+   "label": "Acceptation de l'offre d'achat de GemDev — rue Marie-Anne Est",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "resolution": "26-03-124",
+   "category": "transaction_fonciere",
+   "scope": "local",
+   "description": "Acceptation de l'offre d'achat de GemDev datée du 2 mars 2026 pour les lots 2 597 589 et 6 508 688, rue Marie-Anne Est, d'une superficie totale de 1 624,8 m². Signature de l'offre et de l'acte de vente autorisée.",
+   "outcome": "Offre acceptée; signatures autorisées.",
+   "citations": [
+    {
+     "page": 34,
+     "excerpt": "D'ACCEPTER l'offre d'achat datée du 2 mars 2026 des lots 2 597\n589 et 6 508 688 du cadastre du Québec circonscription foncière\nde Chambly présentée par l'entreprise GemDev;",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-vente-26-03-93",
+   "label": "Acte de vente définitif — trois lots adjugés pour taxes",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "needs_review",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "resolution": "26-03-93",
+   "category": "transaction_fonciere",
+   "scope": "local",
+   "description": "Signature autorisée de l'acte de vente définitif des lots 2 597 876, 2 598 251 et 2 599 459, adjugés à 9527-0120 Québec Inc. lors de la vente pour taxes du 10 décembre 2024. Divergence du texte : le titre indique 2 598 551 tandis que le considérant et la décision indiquent 2 598 251.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D'AUTORISER le maire ou en son absence, la mairesse\nsuppléante, et la greffière à signer pour et au nom de la Ville, l'acte\nde vente définitif des lots 2 597 876, 2 598 251 et 2 599 459 du",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-vente-6504999",
+   "label": "Acte de vente définitif — lot 6 504 999",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "resolution": "26-03-94",
+   "category": "transaction_fonciere",
+   "scope": "local",
+   "no_lot": "6504999",
+   "description": "Signature autorisée de l'acte de vente définitif du lot 6 504 999, adjugé lors de la vente pour défaut de paiement des taxes municipales du 10 décembre 2024.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D'AUTORISER le maire ou en son absence, la mairesse\nsuppléante, et la greffière à signer pour et au nom de la Ville, l'acte\nde vente définitif du lot 6 504 999 du cadastre du Québec et à",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-redevances",
+   "label": "Demande de retrait du projet gouvernemental encadrant les redevances",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "resolution": "26-03-91",
+   "category": "redevances_developpement",
+   "description": "Le conseil demande le retrait du projet gouvernemental concernant les contributions exigées pour la délivrance d'un permis ou certificat afin de préserver les catégories d'infrastructures finançables. Il demande également au gouvernement fédéral de ne plus exiger un encadrement plus strict des redevances.",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "DE DEMANDER à la ministre des Affaires municipales et de\nl'Habitation du Québec, Geneviève Guilbault, de retirer le Projet\nde Règlement concernant certaines contributions à des services",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-planification-scolaire",
+   "label": "Avis favorable sous réserves — besoins d'espace scolaires 2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "status": "candidate",
+   "municipality": "carignan",
+   "date": "2026-03-04",
+   "resolution": "26-03-89",
+   "category": "planification_equipements_collectifs",
+   "description": "Avis favorable au projet de planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes, sous réserves de clarifications sur la francisation, les travaux et capacités de l'école secondaire de Chambly, leur échéancier et les espaces scolaires transitoires.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE le Conseil municipal donne un avis favorable au projet de\nPlanification des besoins d'espace 2026 du Centre de services\nscolaire des Patriotes, sous réserves des clarifications\ndemandées :",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "bylaw-483-41-U",
+   "target": "zone-IDI-489",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 33,
+     "excerpt": "Adoption - Règlement numéro 483-41-U modifiant le\nrèglement de zonage numéro 483-U (Sécurité des\npiscines & usages des zones IDI-489 et IDI-490)",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "bylaw-483-41-U",
+   "target": "zone-IDI-490",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 33,
+     "excerpt": "Adoption - Règlement numéro 483-41-U modifiant le\nrèglement de zonage numéro 483-U (Sécurité des\npiscines & usages des zones IDI-489 et IDI-490)",
+     "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+     "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+     "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-zonage",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+   "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+   "modality": "pdf",
+   "page": 33,
+   "excerpt": "Adoption - Règlement numéro 483-41-U modifiant le\nrèglement de zonage numéro 483-U (Sécurité des\npiscines & usages des zones IDI-489 et IDI-490)"
+  },
+  {
+   "id": "ev-inondable",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+   "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+   "modality": "pdf",
+   "page": 20,
+   "excerpt": "CONSIDÉRANT que les zones inondables et le talus en bordure\nde rivière contraignent le demandeur pour installer sa remise en\ncours arrière ou latérale;"
+  },
+  {
+   "id": "ev-riveraine",
+   "source_file": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "rawRef": "raw/proces-verbaux-carignan/cas/2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082.pdf",
+   "docSha": "2ab02c400c870bd6878de9b6789e25bd3aabb26f9cfc37622b2292c8cdfa8082",
+   "sourceUrl": "https://carignan-22793.kxcdn.com/wp-content/uploads/2026/04/Proces-verbal_4_mars_2026.pdf",
+   "modality": "pdf",
+   "page": 21,
+   "excerpt": "CONSIDÉRANT que la propriété devra continuer de respecter le\nminimum de 30 % de superficie d'espaces verts, la bande de\nprotection riveraine, les marges latérales ainsi que toute autre\nnorme relative à l'aménagement du terrain;"
+  }
+ ],
+ "input_tokens": 19300,
+ "output_tokens": 10000
+}

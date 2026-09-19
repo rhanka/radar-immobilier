@@ -1,5 +1,16 @@
 # v101b cost snapshot
 
+> **SECTION « Siège vs token » OBSOLÈTE — marquée le 2026-09-19 ; valeurs conservées, ne pas les utiliser.**
+> Cet instantané date du 2026-09-17T09:50Z. Sa section « Siège vs token » (colonnes « Tokens / semaine »,
+> « Docs / semaine », « Siège/doc », capacités par palier) vient de l'ancien mode de la calculatrice, qui
+> suppose un quota **linéaire en jetons**. Cette hypothèse n'est pas vérifiée et sous-pèse les jetons de
+> sortie : −2 % sur astra-low et −10 % sur astra-medium par rapport à la méthode de référence.
+> **Méthode qui fait foi** (rapport v10, section 8 ; `cost-calculator.mjs`, mode `api-cost-proportional`) :
+> siège d'une passe = coût API × facteur du fournisseur, avec facteur = prix mensuel du plan / (équivalent
+> API du burn mesuré / fraction de quota × 52/12). Facteurs actuels : Codex (ChatGPT pro-20x)
+> 0,04423502937 ; Google (AI Pro) 0,03793111955 (`burn/seat-observations.json`). Les autres sections (coûts
+> API par bras, jetons, grilles tarifaires) restent valides.
+
 Generated: 2026-09-17T09:50:04.042Z. Every schema-v2 attempt receipt present under `campaign/` and `codex-replay/campaign/` is counted; retries are not discarded.
 
 Selected Gemini plan: **ai-pro**. Selected ChatGPT plan: **pro-20x**.
@@ -41,6 +52,8 @@ Output is billable output: visible output plus separately reported thinking toke
 The benchmark-cycle projection uses the frozen manifest's 100 documents. Production refresh cycle = **source-gap**: the CronJobs define schedules but no stable document count per run.
 
 ## Siège vs token
+
+> **OBSOLÈTE (2026-09-19)** : capacité supposée linéaire en jetons, non vérifiée. Voir la note en tête de fichier ; la méthode qui fait foi est siège = coût API × facteur du fournisseur. Valeurs conservées pour trace.
 
 Une capacité n'est publiée que pour une fenêtre attestée de 7 jours. `scenario` est le ratio indirect quota compte/tokens campagne; il suppose un quota linéaire en tokens et une pondération Sol/Luna identique, toutes deux non vérifiées.
 

@@ -1,0 +1,74 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01d555b9144977e58926b82bb8440d1531b599d66161fc3fb838739681afff4f",
+ "verificationSha256": "9a6cb5ff340d25d6865af71fa65c0bd60c185c2cac1125e2c2ce6cad5906fd8a",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-04-055 est une autorisation administrative générale donnée aux fonctionnaires d'enchérir et ne comporte aucun « objet réglementaire ou foncier explicite » (aucun lot ni immeuble identifié), ce qui contrevient à la définition même d'une unité admissible.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir des immeubles — vente pour taxes du 11 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Vente d’immeubles pour taxes",
+      "page": 8,
+      "citation": "et à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente",
+      "anchor": "tout immeuble de son territoire",
+      "spanStart": 2787,
+      "spanEnd": 2873
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-055, adoptée page 8, autorise expressément à enchérir et à acquérir des immeubles lors de la vente pour taxes du 11 juin 2026, ce qui constitue un acte foncier inclus."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-04-055 page 8 autorisant à enchérir et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » lors de la vente pour taxes du 11 juin 2026 : acte foncier inclus au rappel, citation exacte."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Cette résolution d'autorisation générale d'enchérir ne comporte aucun objet foncier explicite et le statut adoption est erroné pour une résolution administrative."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La résolution 2026-04-055 est une autorisation administrative générale donnée aux fonctionnaires d'enchérir et ne comporte aucun « objet réglementaire ou foncier explicite » (aucun lot ni immeuble identifié), ce qui contrevient à la définition même d'une unité admissible."
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "documentId": "stoneham-et-tewkesbury-2026-06-08",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "fb01cb7d80ff17759f3653fc7e8c1f3a5ef0c6b1da2235b2a3180d8ffe5873d5",
+ "inputSha256": "6fb9a7c052053a7e30f3811d86dd3dfe212288719864d61db2158082f232c035",
+ "responseSha256": "2eee03f58d72f27e903949fe523dcbb924797873e9c9caddb32c07e6a289d980",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 52558,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 10542,
+  "outputTokens": 1661,
+  "totalTokens": 12203
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 52555,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:20:47.273Z"
+}

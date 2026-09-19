@@ -1,0 +1,35 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "1698f06b24e7e8b0fde74e799e66c2be3e435ae9c4f72f1f3690c77726729eef",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2597,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 16572,
+   "outputTokens": 732,
+   "totalTokens": 17304
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2446
+  },
+  "inputSha256": "1ac23460d68f211063eca9d20fa83f4c86507699f1bfba95562d2c0d3cb9a4ad"
+ },
+ "at": "2026-09-19T03:23:03.805Z"
+}

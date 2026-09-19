@@ -1,0 +1,366 @@
+{
+ "interim": false,
+ "documents": [
+  {
+   "documentId": "lac-des-seize-iles-2026-09-agenda",
+   "available": true,
+   "arbitrationDone": true,
+   "partialHuman": false,
+   "human": 4,
+   "v3": 4,
+   "matched": 4,
+   "recall": 1,
+   "precision": 1,
+   "pairs": [
+    {
+     "human": "L36",
+     "v3": "lac-des-seize-iles-2026-09-agenda#u01",
+     "stage": "avis_motion",
+     "humanLabel": "Avis de motion 2026-08 sur occupation du domaine public, prévu",
+     "v3Label": "Avis de motion prévu – règlement 2026-08 sur l’occupation du domaine public municipal"
+    },
+    {
+     "human": "L37",
+     "v3": "lac-des-seize-iles-2026-09-agenda#u02",
+     "stage": "projet_reglement",
+     "humanLabel": "Dépôt 2026-08 sur occupation du domaine public, prévu",
+     "v3Label": "Dépôt prévu du projet de règlement 2026-08 sur l’occupation du domaine public municipal"
+    },
+    {
+     "human": "L54",
+     "v3": "lac-des-seize-iles-2026-09-agenda#u03",
+     "stage": "derogation_mineure",
+     "humanLabel": "Dérogation DDM2026-058, 252 chemin du Village, prévue",
+     "v3Label": "Examen prévu de la dérogation mineure DDM2026-058 – 252, chemin du Village"
+    },
+    {
+     "human": "L55",
+     "v3": "lac-des-seize-iles-2026-09-agenda#u04",
+     "stage": "adoption",
+     "humanLabel": "Adoption 2026-102-01, contribution pour parcs, prévue",
+     "v3Label": "Adoption prévue du règlement 2026-102-01 – lotissement et calcul de la contribution pour parcs"
+    }
+   ],
+   "missed": [],
+   "added": []
+  },
+  {
+   "documentId": "saint-etienne-de-bolton-2026-08-04",
+   "available": true,
+   "arbitrationDone": true,
+   "partialHuman": false,
+   "human": 17,
+   "v3": 17,
+   "matched": 17,
+   "recall": 1,
+   "precision": 1,
+   "pairs": [
+    {
+     "human": "B04",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u01",
+     "stage": "adoption",
+     "humanLabel": "Adoption 2026-04, plan d’urbanisme",
+     "v3Label": "Adoption du règlement 2026-04 modifiant le plan d’urbanisme"
+    },
+    {
+     "human": "B05",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u02",
+     "stage": "adoption",
+     "humanLabel": "Adoption 2026-05, zonage",
+     "v3Label": "Adoption du règlement 2026-05 modifiant le zonage"
+    },
+    {
+     "human": "B06",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u03",
+     "stage": "adoption",
+     "humanLabel": "Adoption 2026-06, lotissement",
+     "v3Label": "Adoption du règlement 2026-06 modifiant le lotissement"
+    },
+    {
+     "human": "B07",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u04",
+     "stage": "adoption",
+     "humanLabel": "Adoption 2026-07, construction",
+     "v3Label": "Adoption du règlement 2026-07 modifiant la construction"
+    },
+    {
+     "human": "B08",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u05",
+     "stage": "adoption",
+     "humanLabel": "Adoption 2026-08, PIIA",
+     "v3Label": "Adoption du règlement 2026-08 modifiant le PIIA"
+    },
+    {
+     "human": "B09",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u06",
+     "stage": "adoption",
+     "humanLabel": "Adoption 2026-09, permis et certificats",
+     "v3Label": "Adoption du règlement 2026-09 modifiant les permis et certificats"
+    },
+    {
+     "human": "B10",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u07",
+     "stage": "adoption",
+     "humanLabel": "Adoption 2026-10, dérogation mineure",
+     "v3Label": "Adoption du règlement 2026-10 modifiant les dérogations mineures"
+    },
+    {
+     "human": "B11",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u08",
+     "stage": "adoption",
+     "humanLabel": "Adoption du règlement 2025-11, occupation et entretien",
+     "v3Label": "Adoption du règlement 2025-11 sur l’occupation et l’entretien des bâtiments"
+    },
+    {
+     "human": "B14",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u09",
+     "stage": "adoption",
+     "humanLabel": "Adoption 2026-14, usages conditionnels",
+     "v3Label": "Adoption du règlement 2026-14 modifiant le règlement sur les usages conditionnels"
+    },
+    {
+     "human": "BC2010-11",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u10",
+     "stage": "inconnu",
+     "humanLabel": "Avis et transmission de non-modification du règlement 2010-11",
+     "v3Label": "Avis de non-modification du règlement 2010-11 — concordance au schéma"
+    },
+    {
+     "human": "BC2014-11",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u11",
+     "stage": "inconnu",
+     "humanLabel": "Avis et transmission de non-modification du règlement 2014-11",
+     "v3Label": "Avis de non-modification du règlement 2014-11 — concordance au schéma"
+    },
+    {
+     "human": "BC2023-02",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u12",
+     "stage": "inconnu",
+     "humanLabel": "Avis et transmission de non-modification du règlement 2023-02",
+     "v3Label": "Avis de non-modification du règlement 2023-02 — concordance au schéma"
+    },
+    {
+     "human": "B154",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u13",
+     "stage": "piia",
+     "humanLabel": "PIIA toiture chambre froide, 12 rue Principale, lot 5 191 695",
+     "v3Label": "PIIA accordé — toiture de la chambre froide au 12, rue Principale"
+    },
+    {
+     "human": "B155",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u14",
+     "stage": "piia",
+     "humanLabel": "PIIA garage remplaçant un abri, 24 Allée des Sommets",
+     "v3Label": "PIIA accordé — remplacement de l’abri automobile par un garage au 24, Allée des Sommets"
+    },
+    {
+     "human": "B156",
+     "v3": "saint-etienne-de-bolton-2026-08-04#h:B156",
+     "stage": "derogation_mineure",
+     "humanLabel": "Refus de dérogation piscine 135 rue de la Serpentine",
+     "v3Label": "Refus de dérogation piscine 135 rue de la Serpentine"
+    },
+    {
+     "human": "B157",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u16",
+     "stage": "derogation_mineure",
+     "humanLabel": "Refus de dérogation abattage, lot 5 191 546",
+     "v3Label": "Refus de dérogation mineure — abattage hors période de gel sur le lot 5 191 546, chemin de la Tour"
+    },
+    {
+     "human": "B158",
+     "v3": "saint-etienne-de-bolton-2026-08-04#u17",
+     "stage": "piia",
+     "humanLabel": "PIIA toiture résidentielle, 572 1er Rang",
+     "v3Label": "PIIA accordé — remplacement du revêtement de toiture au 572, 1er Rang"
+    }
+   ],
+   "missed": [],
+   "added": []
+  },
+  {
+   "documentId": "valcourt-2026-06-01-agenda",
+   "available": true,
+   "arbitrationDone": true,
+   "partialHuman": false,
+   "human": 6,
+   "v3": 6,
+   "matched": 6,
+   "recall": 1,
+   "precision": 1,
+   "pairs": [
+    {
+     "human": "V71",
+     "v3": "valcourt-2026-06-01-agenda#u01",
+     "stage": "piia",
+     "humanLabel": "PIIA lotissement 1070 rue Bissonnette inscrit à l’ordre du jour",
+     "v3Label": "PIIA prévu — 1070, rue Bissonnette — lotissement"
+    },
+    {
+     "human": "V72",
+     "v3": "valcourt-2026-06-01-agenda#u02",
+     "stage": "piia",
+     "humanLabel": "PIIA deux bâtiments unifamiliaux jumelés 1070 Bissonnette, prévu",
+     "v3Label": "PIIA prévu — 1070, rue Bissonnette — construction de deux bâtiments principaux unifamiliaux jumelés"
+    },
+    {
+     "human": "V73",
+     "v3": "valcourt-2026-06-01-agenda#u03",
+     "stage": "piia",
+     "humanLabel": "PIIA habitation unifamiliale isolée 1045 Bissonnette, prévu",
+     "v3Label": "PIIA prévu — 1045, rue Bissonnette — construction d'une habitation unifamiliale isolée"
+    },
+    {
+     "human": "V74",
+     "v3": "valcourt-2026-06-01-agenda#u04",
+     "stage": "piia",
+     "humanLabel": "PIIA remblai 1075 Bissonnette, prévu",
+     "v3Label": "PIIA prévu — 1075, rue Bissonnette — remblai"
+    },
+    {
+     "human": "V75",
+     "v3": "valcourt-2026-06-01-agenda#u05",
+     "stage": "second_projet",
+     "humanLabel": "Second projet 560-28 inscrit à l’ordre du jour, adoption non confirmée",
+     "v3Label": "Adoption prévue du second projet de règlement 560-28 modifiant le zonage"
+    },
+    {
+     "human": "V132",
+     "v3": "valcourt-2026-06-01-agenda#u07",
+     "stage": "inconnu",
+     "humanLabel": "Convention de prêt à usage 4111 Carpentier inscrite à l’ordre du jour",
+     "v3Label": "Convention de prêt à usage prévue — 4111 rue Carpentier"
+    }
+   ],
+   "missed": [],
+   "added": []
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "available": true,
+   "arbitrationDone": true,
+   "partialHuman": false,
+   "human": 8,
+   "v3": 6,
+   "matched": 4,
+   "recall": 0.5,
+   "precision": 0.6666666666666666,
+   "pairs": [
+    {
+     "human": "S739M",
+     "v3": "saint-barthelemy-2026-09-08#u02",
+     "stage": "avis_motion",
+     "humanLabel": "Avis de motion : logements R-7 et R-8",
+     "v3Label": "Avis de motion — modification du zonage 288-90 pour permettre des immeubles à logements dans les zones R-7 et R-8"
+    },
+    {
+     "human": "S194",
+     "v3": "saint-barthelemy-2026-09-08#u04",
+     "stage": "adoption",
+     "humanLabel": "Vente terrains du Camping du Vieux Moulin, contrainte permanente",
+     "v3Label": "Vente autorisée du matricule 3220-74-4030 près du Camping du Vieux Moulin — sans aménagement permanent"
+    },
+    {
+     "human": "S196",
+     "v3": "saint-barthelemy-2026-09-08#u07",
+     "stage": "adoption",
+     "humanLabel": "Vente du terrain du 180 rang York, contrainte de pente",
+     "v3Label": "Vente autorisée du terrain du 180, rang York — matricule 3418-41-5276 — aménagements permanents interdits sauf travaux de correction majeurs de la pente"
+    },
+    {
+     "human": "S197",
+     "v3": "saint-barthelemy-2026-09-08#u08",
+     "stage": "adoption",
+     "humanLabel": "Transfert du lot 6 621 027, maintien des clauses",
+     "v3Label": "Vente autorisée de l’immeuble 6 621 027 de Chéné Immobilier Inc. à Hulix S.E.N.C., sous conditions"
+    }
+   ],
+   "missed": [
+    {
+     "id": "S738",
+     "stage": "adoption",
+     "label": "Adoption 738-26 : accessoires en cour avant au bord des lacs",
+     "page": 4,
+     "explained": true
+    },
+    {
+     "id": "S739P",
+     "stage": "projet_reglement",
+     "label": "Premier projet 739-26 : densification R-7 et R-8",
+     "page": 5,
+     "explained": true
+    },
+    {
+     "id": "S195",
+     "stage": "adoption",
+     "label": "Acquisition Montée du Lac-Robert, développement de terrains",
+     "page": 7,
+     "explained": true
+    },
+    {
+     "id": "S203",
+     "stage": "adoption",
+     "label": "Aqueduc rang York vers Saint-Cuthbert pour résidences supplémentaires",
+     "page": 10,
+     "explained": true
+    }
+   ],
+   "added": [
+    {
+     "id": "saint-barthelemy-2026-09-08#u05",
+     "stage": "adoption",
+     "label": "Vente autorisée du matricule 3220-73-6695 près du Camping du Vieux Moulin — sans aménagement permanent",
+     "page": 6,
+     "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695",
+     "explained": true
+    },
+    {
+     "id": "saint-barthelemy-2026-09-08#u06",
+     "stage": "adoption",
+     "label": "Acquisition autorisée d’une portion de la Montée du Lac-Robert — matricule 2723-93-7328",
+     "page": 7,
+     "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à l'achat de l'immeuble identifié par le matricule 2723-93-7328",
+     "explained": true
+    }
+   ]
+  },
+  {
+   "documentId": "waterloo-2026-08-18",
+   "available": true,
+   "arbitrationDone": true,
+   "partialHuman": true,
+   "human": 1,
+   "v3": 15,
+   "matched": 1,
+   "recall": 1,
+   "precision": null,
+   "pairs": [
+    {
+     "human": "W001",
+     "v3": "waterloo-2026-08-18#u03",
+     "stage": "adoption",
+     "humanLabel": "Adoption 26-956-2",
+     "v3Label": "Adoption du règlement 26-956-2 — zonage et encadrement des projets intégrés"
+    }
+   ],
+   "missed": [],
+   "added": []
+  }
+ ],
+ "recall": 0.8888888888888888,
+ "precision": 0.9393939393939394,
+ "humanUnitsCovered": 36,
+ "note": "waterloo-2026-08-18: human gold partial, precision N-A there",
+ "differences": {
+  "arbitrated": 10,
+  "byKindAndVerdict": {
+   "human_only:human_right": 1,
+   "v3_only:unresolved": 3,
+   "split:unresolved": 1,
+   "human_only:unresolved": 2,
+   "human_only:v3_right": 1,
+   "v3_only:v3_right": 2
+  },
+  "unexplainedAfterArbitration": 0
+ }
+}

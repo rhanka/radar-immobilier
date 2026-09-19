@@ -1,0 +1,62 @@
+{
+ "documentId": "dosquet-2026-01-13",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "20dd362ee2dc92a8ffc46259bee7faedcfa5c2d8f702ee07a29490adf97faf53",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature d’un bail pour le service de garde — 368 route 116\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"368 route 116\",\n        \"page\": 3,\n        \"citation\": \"à signer pour et au nom de la municipalité un\\nbail liant la municipalité et les responsables de garde qui utiliseront les locaux\\ndédiés à ce service au 368 route 116.\",\n        \"anchor\": \"au 368 route 116\"\n      },\n      \"reason\": \"La résolution 26-01-04 autorise une convention de location immobilière explicite, incluse au titre des actes fonciers même non résidentiels.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Appui à la demande CPTAQ — droit résidentiel au lot 6 274 449 et aliénation des lots 5 376 188 et 4 819 191\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"6 274 449\",\n        \"page\": 8,\n        \"citation\": \"ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit\\nrésidentiel à la partie du lot située en zone agricole;\",\n        \"anchor\": \"lot 6 274 449\"\n      },\n      \"reason\": \"La résolution 26-01-08 appuie une même demande foncière portant sur l’extension du droit résidentiel et l’aliénation de deux lots dont l’usage agricole sera préservé, sans constater une autorisation de la CPTAQ.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de signature d’un bail pour le service de garde — 368 route 116",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "368 route 116",
+    "page": 3,
+    "citation": "à signer pour et au nom de la municipalité un\nbail liant la municipalité et les responsables de garde qui utiliseront les locaux\ndédiés à ce service au 368 route 116.",
+    "anchor": "au 368 route 116"
+   },
+   "reason": "La résolution 26-01-04 autorise une convention de location immobilière explicite, incluse au titre des actes fonciers même non résidentiels."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Appui à la demande CPTAQ — droit résidentiel au lot 6 274 449 et aliénation des lots 5 376 188 et 4 819 191",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "6 274 449",
+    "page": 8,
+    "citation": "ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit\nrésidentiel à la partie du lot située en zone agricole;",
+    "anchor": "lot 6 274 449"
+   },
+   "reason": "La résolution 26-01-08 appuie une même demande foncière portant sur l’extension du droit résidentiel et l’aliénation de deux lots dont l’usage agricole sera préservé, sans constater une autorisation de la CPTAQ."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 2
+}

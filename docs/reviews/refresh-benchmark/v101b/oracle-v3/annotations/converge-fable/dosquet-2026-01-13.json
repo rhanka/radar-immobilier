@@ -1,0 +1,51 @@
+{
+ "documentId": "dosquet-2026-01-13",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fe84f010581e156c6284b7feda317b884cef1595b74d882c61dd954e7e00107a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 26-01-04 (page 3) autorise la signature d'un bail sur les locaux du 368 route 116, acte foncier explicite inclus par la règle « petits PIIA et actes fonciers, même non résidentiels », et la citation est exacte au texte.\"},{\"item\":\"i02\",\"choice\":\"v2\",\"reason\":\"La résolution 26-01-08 (page 8) appuie l'extension du droit résidentiel sur le lot 6 274 449, objet foncier explicite distinct des lots aliénés traités en i03 ; le label v1 mélange deux objets alors que son objet ne cite que 6 274 449.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La même résolution 26-01-08 (page 8) atteste l'aliénation des lots 5 376 188 et 4 819 191, objet foncier explicite distinct du lot 6 274 449, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v2"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 26-01-04 (page 3) autorise la signature d'un bail sur les locaux du 368 route 116, acte foncier explicite inclus par la règle « petits PIIA et actes fonciers, même non résidentiels », et la citation est exacte au texte."
+  },
+  {
+   "item": "i02",
+   "choice": "v2",
+   "reason": "La résolution 26-01-08 (page 8) appuie l'extension du droit résidentiel sur le lot 6 274 449, objet foncier explicite distinct des lots aliénés traités en i03 ; le label v1 mélange deux objets alors que son objet ne cite que 6 274 449."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La même résolution 26-01-08 (page 8) atteste l'aliénation des lots 5 376 188 et 4 819 191, objet foncier explicite distinct du lot 6 274 449, citation et page exactes."
+  }
+ ]
+}

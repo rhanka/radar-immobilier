@@ -1,0 +1,35 @@
+{
+ "documentId": "lac-etchemin-2026-02-03",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "90cf352fad21a1a6a8515d51851456dca42791133445e45b577a85a2851522b5",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2095,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 14416,
+   "outputTokens": 394,
+   "totalTokens": 14810
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1935
+  },
+  "inputSha256": "50261596085c6b05481a97744815d2c20cd2ecbdfe7262aacfc4bc1d6be39f97"
+ },
+ "at": "2026-09-19T03:23:05.910Z"
+}

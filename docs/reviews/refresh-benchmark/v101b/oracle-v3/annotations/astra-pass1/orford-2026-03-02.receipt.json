@@ -1,0 +1,36 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "65a820678700bb1058c82112a314aefa981bad8f7ea1c9f8f1c67b9cb88ed569",
+ "inputSha256": "9075731435b14005902f2f43ce8f4f34334ddfd8c9a7ea9a45d63dca48c4759f",
+ "responseSha256": "b7d5c5f95ec1ad99b36c5a44f6e46246a22f8ebe78208191468012e4788b3afd",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 163112,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 30089,
+  "outputTokens": 5346,
+  "totalTokens": 35435
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 163107,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:36:27.636Z"
+}

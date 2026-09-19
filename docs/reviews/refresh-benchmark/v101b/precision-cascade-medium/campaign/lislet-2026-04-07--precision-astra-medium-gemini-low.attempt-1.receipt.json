@@ -1,0 +1,35 @@
+{
+ "documentId": "lislet-2026-04-07",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "19f2984e97a566e8c63e371810022faeb9747a30ae2e628b9aae2b3ac2a1ddd7",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2010,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2775,
+   "outputTokens": 579,
+   "totalTokens": 3354
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1854
+  },
+  "inputSha256": "75c58f13f14fc0e99e4ec96404fd512ced12d8787de688829111d3851e75cf8b"
+ },
+ "at": "2026-09-19T03:22:17.750Z"
+}

@@ -1,0 +1,77 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "5f1bbf77aaa39f7204ab1991b2718224156c3ee2009dc6d1c608098c890f4d79",
+ "inputSha256": "fce1b2343c257eb38b58601e46da2bbe5d1852040993d387ae97d7280ee2f42d",
+ "responseSha256": "c334f87d64b9c88805e95d9f759828fcc22e862d07e1d3eceda020df9e958c9e",
+ "rc": 0,
+ "latencyMs": 64913,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "8f8ce0a2-0fb1-4bf5-ae2d-5c3a0474c2c8",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 5095,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 51832,
+   "webSearchRequests": 0,
+   "costUSD": 1.29169475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 4246,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 51832,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 5095,
+  "output_tokens_details": {
+   "thinking_tokens": 4246
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 51832,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 5095,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 51832,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 51832
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 1.29169475,
+ "durationApiMs": 63085,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:37:04.152Z"
+}

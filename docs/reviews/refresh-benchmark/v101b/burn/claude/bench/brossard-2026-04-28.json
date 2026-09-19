@@ -1,0 +1,13 @@
+{
+ "id": "brossard-2026-04-28",
+ "rc": 0,
+ "latencyMs": 563326,
+ "inputTokens": 6,
+ "outputTokens": 85815,
+ "cacheRead": 29823,
+ "cacheCreate": 93888,
+ "costUsd": 3.1206635,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 48542
+}

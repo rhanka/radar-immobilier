@@ -1,0 +1,81 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "3a6ae6809f0da4a89c45b1e2bc32faf27033a275dbb2da9d785a50ccdb404e82",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 61-05-2026 et le titre 9.2 à la page 7 attestent l'adoption du second projet de règlement #55-2026 modifiant le zonage.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 62-05-2026 à la page 8 atteste l'adoption du règlement #56-2026 sur les entrées privées et la fermeture des fossés.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 9.5 à la page 8 atteste l'avis de motion donné par Chantal Séguin pour le règlement #58-2026 modifiant le plan d'urbanisme.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 9.5 à la page 8 confirme le dépôt d'un projet de règlement #58-2026 séance tenante, distinct de l'avis de motion selon les règles.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 9.6 à la page 8 atteste l'avis de motion donné par Yvon Paulin pour le règlement #59-2026 modifiant le règlement de construction.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 9.6 à la page 8 confirme le dépôt d'un projet de règlement #59-2026 séance tenante, distinct de l'avis de motion.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 61-05-2026 et le titre 9.2 à la page 7 attestent l'adoption du second projet de règlement #55-2026 modifiant le zonage."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 62-05-2026 à la page 8 atteste l'adoption du règlement #56-2026 sur les entrées privées et la fermeture des fossés."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 9.5 à la page 8 atteste l'avis de motion donné par Chantal Séguin pour le règlement #58-2026 modifiant le plan d'urbanisme."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 9.5 à la page 8 confirme le dépôt d'un projet de règlement #58-2026 séance tenante, distinct de l'avis de motion selon les règles."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 9.6 à la page 8 atteste l'avis de motion donné par Yvon Paulin pour le règlement #59-2026 modifiant le règlement de construction."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 9.6 à la page 8 confirme le dépôt d'un projet de règlement #59-2026 séance tenante, distinct de l'avis de motion."
+  }
+ ]
+}

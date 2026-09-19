@@ -1,0 +1,158 @@
+{
+ "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+ "nextId": 5,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement no 50907-04-26 modifiant le plan d’urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "50907-04-26",
+    "page": 3,
+    "citation": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme règlement no 309-19-01-09",
+    "anchor": "règlement no 50907-04-26",
+    "spanStart": 0,
+    "spanEnd": 144
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement no 50907-04-26 modifiant le plan d’urbanisme",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "50907-04-26",
+      "page": 3,
+      "citation": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme règlement no 309-19-01-09",
+      "anchor": "règlement no 50907-04-26",
+      "spanStart": 0,
+      "spanEnd": 144
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cet avis de motion actuel constitue une unité distincte du premier projet; son numéro et son objet sont conservés tels qu’écrits dans l’avis, malgré la discordance avec l’intitulé du projet."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement no 51007-04-26 modifiant le règlement de zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "51007-04-26",
+    "page": 3,
+    "citation": "Avis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage no 310-19-01-09",
+    "anchor": "règlement no 51007-04-26",
+    "spanStart": 208,
+    "spanEnd": 346
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement no 51007-04-26 modifiant le règlement de zonage",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "51007-04-26",
+      "page": 3,
+      "citation": "Avis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage no 310-19-01-09",
+      "anchor": "règlement no 51007-04-26",
+      "spanStart": 208,
+      "spanEnd": 346
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cet avis de motion actuel constitue une unité distincte du premier projet; son numéro et son objet sont conservés tels qu’écrits dans l’avis, malgré la discordance avec l’intitulé du projet."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de règlement 509-07-04-26 modifiant le zonage — captages souterrains et éoliennes",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "509-07-04-26",
+    "page": 3,
+    "citation": "ADOPTION DU 1ER PROJET DE RÈGLEMENT NUMÉRO 509-07-04-26 MODIFIANT LE RÈGLEMENT DE ZONAGE 310-19-01-09",
+    "anchor": "RÈGLEMENT NUMÉRO 509-07-04-26",
+    "spanStart": 433,
+    "spanEnd": 534
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 509-07-04-26 modifiant le zonage — captages souterrains et éoliennes",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "509-07-04-26",
+      "page": 3,
+      "citation": "ADOPTION DU 1ER PROJET DE RÈGLEMENT NUMÉRO 509-07-04-26 MODIFIANT LE RÈGLEMENT DE ZONAGE 310-19-01-09",
+      "anchor": "RÈGLEMENT NUMÉRO 509-07-04-26",
+      "spanStart": 433,
+      "spanEnd": 534
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-04-04 constate explicitement l’adoption du premier projet de règlement de zonage, étape distincte de l’avis de motion et non une adoption finale."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de règlement 510-07-04-26 modifiant le plan d’urbanisme — captages souterrains et éoliennes",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "510-07-04-26",
+    "page": 10,
+    "citation": "ADOPTION DU 1er PROJET DE RÈGLEMENT NO 510-07-04-26 MODIFIANT LE PLAN D’URBANISME",
+    "anchor": "RÈGLEMENT NO 510-07-04-26",
+    "spanStart": 9,
+    "spanEnd": 90
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 510-07-04-26 modifiant le plan d’urbanisme — captages souterrains et éoliennes",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "510-07-04-26",
+      "page": 10,
+      "citation": "ADOPTION DU 1er PROJET DE RÈGLEMENT NO 510-07-04-26 MODIFIANT LE PLAN D’URBANISME",
+      "anchor": "RÈGLEMENT NO 510-07-04-26",
+      "spanStart": 9,
+      "spanEnd": 90
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-04-05 constate explicitement l’adoption du premier projet modifiant le plan d’urbanisme, étape distincte de l’avis de motion et non une adoption finale."
+    }
+   ]
+  }
+ ]
+}

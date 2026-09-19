@@ -1,0 +1,347 @@
+{
+ "nodes": [
+  {
+   "id": "source-dosquet-2026-01-13",
+   "label": "Procès-verbal de Dosquet du 13 janvier 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "status": "candidate",
+   "date": "2026-01-13",
+   "municipality": "dosquet",
+   "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+   "url": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Séance ordinaire du conseil de cette municipalité tenue le mardi, 13 janvier 2026,",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-cptaq-26-01-08",
+   "label": "Appui municipal à une demande à la CPTAQ",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "status": "candidate",
+   "municipality": "dosquet",
+   "date": "2026-01-13",
+   "meetingDate": "2026-01-13",
+   "kind": "cptaq",
+   "resolution": "26-01-08",
+   "decision": "approuvé",
+   "etape": "inconnu",
+   "etape_date": "2026-01-13",
+   "no_lot": "6274449",
+   "superficie_m2": 4631.6,
+   "description": "Appui municipal, et non autorisation de la CPTAQ, à la demande d'étendre le droit résidentiel à la portion agricole du lot 6 274 449. Le propriétaire souhaite également aliéner les lots 5 376 188 et 4 819 191, totalisant 107,9684 hectares, dont l'usage agricole sera préservé.",
+   "motif": "Usage résidentiel autorisé dans les zones 25A et 5H; absence d'impact annoncé sur la zone agricole compte tenu de son usage actuel.",
+   "evidence_refs": [
+    "ev-cptaq",
+    "ev-zones",
+    "ev-agricole"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Que la municipalité est favorable et recommande la demande.",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit\nrésidentiel à la partie du lot située en zone agricole;",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-dosquet-25A",
+   "label": "Zone 25A",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "status": "candidate",
+   "municipality": "dosquet",
+   "code": "25A",
+   "usages_autorises": [
+    "résidentiel"
+   ],
+   "evidence_refs": [
+    "ev-zones"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est\nautorisé dans ces deux zones,",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-dosquet-5H",
+   "label": "Zone 5H",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "status": "candidate",
+   "municipality": "dosquet",
+   "code": "5H",
+   "usages_autorises": [
+    "résidentiel"
+   ],
+   "evidence_refs": [
+    "ev-zones"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est\nautorisé dans ces deux zones,",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-agricole-6274449",
+   "label": "Portion agricole du lot 6 274 449",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "status": "candidate",
+   "municipality": "dosquet",
+   "constraintType": "cptaq",
+   "organisme": "Commission de protection du territoire agricole du Québec",
+   "resolution": "26-01-08",
+   "meetingDate": "2026-01-13",
+   "superficie_concernee_m2": 4631.6,
+   "description": "Le lot 6 274 449, d'une superficie totale de 7 200 m², est situé en partie dans le périmètre urbain et en partie dans la zone agricole. La demande vise les 4 631,6 m² situés dans la zone agricole.",
+   "evidence_refs": [
+    "ev-agricole"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE la superficie visée par la demande correspond à la portion située\ndans la zone agricole, laquelle a une superficie de 4 631,6 m²;",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2025-499",
+   "label": "Règlement 2025-499 — Taxes et compensations 2026",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "status": "candidate",
+   "municipality": "dosquet",
+   "numero": "2025-499",
+   "title": "Règlement décrétant les taux de taxes et les tarifs de compensation pour l’année financière 2026 et les conditions de leur perception",
+   "stage": "projet",
+   "meetingDate": "2026-01-13",
+   "resolution": "26-01-06",
+   "evidence_refs": [
+    "ev-taxes"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À\nL’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que\nsuit;",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-dosquet-2026-01-13",
+   "target": "event-cptaq-26-01-08",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "evidence_refs": [
+    "ev-cptaq"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Que la municipalité est favorable et recommande la demande.",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-cptaq-26-01-08",
+   "target": "zone-dosquet-25A",
+   "relation": "concerns",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "evidence_refs": [
+    "ev-zones"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est\nautorisé dans ces deux zones,",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-cptaq-26-01-08",
+   "target": "zone-dosquet-5H",
+   "relation": "concerns",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "evidence_refs": [
+    "ev-zones"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est\nautorisé dans ces deux zones,",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-dosquet-2026-01-13",
+   "target": "constraint-agricole-6274449",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "evidence_refs": [
+    "ev-agricole"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE la superficie visée par la demande correspond à la portion située\ndans la zone agricole, laquelle a une superficie de 4 631,6 m²;",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-dosquet-2026-01-13",
+   "target": "bylaw-2025-499",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "evidence_refs": [
+    "ev-taxes"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À\nL’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que\nsuit;",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-cptaq",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+   "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit\nrésidentiel à la partie du lot située en zone agricole;\nATTENDU QUE l’étendue du droit résidentiel n’aura pas d’impact sur la zone\nagricole actuelle, considérant l’usage actuel de celle-ci;\nATTENDU QUE le propriétaire souhaite également aliéner les lots 5 376 188 et\n4 819 191, d’une superficie totale de 107,9684 hectares;\nATTENDU QUE l’usage agricole des lots 5 376 188 et 4 819 191 sera préservé.\nPOUR CES MOTIFS : IL EST PROPOSÉ par madame Mélanie St-Jean ET\nRÉSOLU À L’UNANIMITÉ des membres présents :\nQue la municipalité est favorable et recommande la demande."
+  },
+  {
+   "id": "ev-zones",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+   "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est\nautorisé dans ces deux zones, conformément à la réglementation d’urbanisme\nmunicipale;"
+  },
+  {
+   "id": "ev-agricole",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+   "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "ATTENDU QUE le lot 6 274 449 est situé en partie dans le périmètre urbain et en\npartie dans la zone agricole, et qu’il possède une superficie totale de 7 200 m²;\nATTENDU QUE la superficie visée par la demande correspond à la portion située\ndans la zone agricole, laquelle a une superficie de 4 631,6 m²;"
+  },
+  {
+   "id": "ev-taxes",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+   "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À\nL’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que\nsuit;"
+  },
+  {
+   "id": "ev-emprunt",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+   "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "QU’UN emprunt par billet au montant de 85 000 $ prévu au règlement d’emprunt\nnuméro 2022-459 soit réalisé au taux annuel de 5,01%.\nQUE le billet soit émis et daté du 20 janvier 2026."
+  }
+ ],
+ "input_tokens": 12500,
+ "output_tokens": 5900
+}

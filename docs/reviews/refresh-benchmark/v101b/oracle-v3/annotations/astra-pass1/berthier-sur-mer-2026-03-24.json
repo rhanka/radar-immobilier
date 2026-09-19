@@ -1,0 +1,96 @@
+{
+ "documentId": "berthier-sur-mer-2026-03-24",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "80d90ed3363402979de13c88f4deadf5c471139bfec83cc1b7dc30035054c908",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation du bail du terrain de La Marée Gourmande pour cinq ans\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"La Marée Gourmande\",\n        \"page\": 4,\n        \"citation\": \"QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\\nGourmande, pour une durée de cinq (5) ans\",\n        \"anchor\": \"La Marée\\nGourmande\"\n      },\n      \"reason\": \"La résolution autorise la conclusion d'un bail sur un terrain municipal, soit un acte foncier décidé à inclure même pour un usage non résidentiel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du deuxième projet de règlement 369 modifiant la grille des usages du règlement de zonage 265\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"369\",\n        \"page\": 6,\n        \"citation\": \"QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\\n\\ndu règlement de zonage numéro 265 soit adopté.\",\n        \"anchor\": \"règlement numéro 369\"\n      },\n      \"reason\": \"La résolution 2026-067 adopte explicitement le deuxième projet du règlement 369, sans créer d'unité supplémentaire pour les étapes historiques ou sa reproduction en annexe.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 372 modifiant le règlement 360 relatif à la démolition d'immeubles\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"372\",\n        \"page\": 7,\n        \"citation\": \"QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\\n\\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté.\",\n        \"anchor\": \"règlement numéro 372\"\n      },\n      \"reason\": \"La résolution 2026-068 adopte le premier projet du règlement 372 sur la démolition d'immeubles, objet réglementaire d'urbanisme explicite.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"373\",\n        \"page\": 7,\n        \"citation\": \"QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté.\",\n        \"anchor\": \"Règlement numéro373\"\n      },\n      \"reason\": \"La résolution 2026-069 adopte le premier projet du règlement 373; l'avis de motion et le dépôt du 9 mars sont des rappels historiques qui ne créent pas d'unités supplémentaires.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation du bail du terrain de La Marée Gourmande pour cinq ans",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "La Marée Gourmande",
+    "page": 4,
+    "citation": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\nGourmande, pour une durée de cinq (5) ans",
+    "anchor": "La Marée\nGourmande"
+   },
+   "reason": "La résolution autorise la conclusion d'un bail sur un terrain municipal, soit un acte foncier décidé à inclure même pour un usage non résidentiel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du deuxième projet de règlement 369 modifiant la grille des usages du règlement de zonage 265",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "369",
+    "page": 6,
+    "citation": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté.",
+    "anchor": "règlement numéro 369"
+   },
+   "reason": "La résolution 2026-067 adopte explicitement le deuxième projet du règlement 369, sans créer d'unité supplémentaire pour les étapes historiques ou sa reproduction en annexe."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 372 modifiant le règlement 360 relatif à la démolition d'immeubles",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "372",
+    "page": 7,
+    "citation": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté.",
+    "anchor": "règlement numéro 372"
+   },
+   "reason": "La résolution 2026-068 adopte le premier projet du règlement 372 sur la démolition d'immeubles, objet réglementaire d'urbanisme explicite."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "373",
+    "page": 7,
+    "citation": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté.",
+    "anchor": "Règlement numéro373"
+   },
+   "reason": "La résolution 2026-069 adopte le premier projet du règlement 373; l'avis de motion et le dépôt du 9 mars sont des rappels historiques qui ne créent pas d'unités supplémentaires."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

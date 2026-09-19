@@ -1,0 +1,13 @@
+{
+ "id": "chesterville-2026-03-02",
+ "rc": 0,
+ "latencyMs": 79836,
+ "inputTokens": 2,
+ "outputTokens": 8622,
+ "cacheRead": 0,
+ "cacheCreate": 3307,
+ "costUsd": 0.250448,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 15201
+}

@@ -1,0 +1,464 @@
+{
+ "documentId": "mont-saint-hilaire-2026-04-13",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "298a6b970744988a89fc5a5c0a1d4a885d87294e21cfc2920ce6fa8ec533d18d",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-1230-7"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1230-7 — Concordance du plan d’urbanisme, ilots déstructurés",
+     "stage": "adoption",
+     "objet": "1230-7",
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan\nd’urbanisme durable numéro 1230"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-1230-8-motion"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — Règlement 1230-8, orientation en habitation",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "Monsieur Claude Rainville, conseiller municipal, donne un avis de motion à l'effet\nqu'à une prochaine séance, il présentera ou fera présenter un règlement amendant"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-1230-8"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 1230-8 — Concordance en matière d’habitation",
+     "stage": "projet",
+     "objet": "1230-8",
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement\ndu Plan d’urbanisme durable numéro 1230"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-1235-34"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Second projet de règlement 1235-34 — Rue des Vétérans",
+     "stage": "2e_projet",
+     "objet": "1235-34",
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "Que le second projet de Règlement numéro 1235-34, intitulé : « Règlement amendant\nle Règlement de zonage numéro 1235"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-1235-35"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1235-35 — Concordance du zonage, ilots déstructurés",
+     "stage": "adoption",
+     "objet": "1235-35",
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement\nde zonage numéro 1235"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-piia-2026-128"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbation conditionnelle de seize dossiers PIIA",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et\nles recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-piia-26032411"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Habitation unifamiliale isolée, 734, rue Rembrandt",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et\nles recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-piia-26032412"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Habitation unifamiliale isolée, 15, rue Campbell",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et\nles recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-piia-26032414"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Habitation unifamiliale isolée, 675, rue Cardinal",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et\nles recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-piia-2026-129"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Refus de trois dossiers PIIA — Villeneuve, Martinets et Doyle",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "Que ce conseil approuve les recommandations et refuse les plans d'implantation et\nd'intégration architecturale énumérés ci-dessus, et ce, selon les motifs formulés auxdites"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "signal-certificat-1371"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Dépôt du certificat d’enregistrement — Règlement 1371",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "Conformément à l’article 557 de la Loi sur les élections et les référendums dans\nles municipalités, la greffière dépose le certificat attestant le résultat de la procédure"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-recours-casavant"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Extension du mandat de recours — 1580, rue Casavant",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "Que ce conseil modifie la résolution 2024-159 en ajoutant, à la fin de ladite résolution,\nle paragraphe suivant :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-servitudes-chenier"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Servitudes d’aqueduc et d’égouts — Rue Chénier",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "Que ce conseil autorise la signature d'actes de servitude d'installation, d'entretien et\nde passage d'égouts et d'aqueduc dans le cadre des travaux à venir sur la rue Chénier"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "bylaw-1379"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1379 — Réfection d’infrastructures, rue du Parc",
+     "stage": "adoption",
+     "objet": "1379",
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "Que le Règlement numéro 1379, intitulé : « Règlement décrétant des travaux de réfection\nd’infrastructures, soit le remplacement des conduites d’aqueduc, d’égout sanitaire, d’égout"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement 1230-7 est adopté par la résolution 2026-131.\",\"excerpt\":\"Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan\\nd’urbanisme durable numéro 1230\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion pour le règlement 1230-8 est donné par Claude Rainville (résolution 2026-132).\",\"excerpt\":\"Monsieur Claude Rainville, conseiller municipal, donne un avis de motion à l'effet\\nqu'à une prochaine séance, il présentera ou fera présenter un règlement amendant\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement 1230-8 est adopté par la résolution 2026-133.\",\"excerpt\":\"Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement\\ndu Plan d’urbanisme durable numéro 1230\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le second projet de règlement 1235-34 est adopté par la résolution 2026-134.\",\"excerpt\":\"Que le second projet de Règlement numéro 1235-34, intitulé : « Règlement amendant\\nle Règlement de zonage numéro 1235\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement 1235-35 est adopté par la résolution 2026-135.\",\"excerpt\":\"Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement\\nde zonage numéro 1235\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-128 approuve conditionnellement seize plans d'implantation et d'intégration architecturale.\",\"excerpt\":\"Que ce conseil approuve les plans d'implantation et d'intégration architecturale et\\nles recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour le 734, rue Rembrandt fait partie des dossiers approuvés à la résolution 2026-128.\",\"excerpt\":\"734, rue Rembrandt (lot 1 815 260)\\nConstruction d'une habitation unifamiliale isolée\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour le 15, rue Campbell fait partie des dossiers approuvés à la résolution 2026-128.\",\"excerpt\":\"15, rue Campbell (lot 3 956 018)\\nConstruction d'une habitation unifamiliale isolée\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour le 675, rue Cardinal fait partie des dossiers approuvés à la résolution 2026-128.\",\"excerpt\":\"675, rue Cardinal (lot 1 816 633)\\nConstruction d'une habitation unifamiliale isolée\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-129 refuse les PIIA pour Villeneuve, Martinets et Doyle.\",\"excerpt\":\"Que ce conseil approuve les recommandations et refuse les plans d'implantation et\\nd'intégration architecturale énumérés ci-dessus, et ce, selon les motifs formulés auxdites\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt du certificat relatif au règlement 1371 est acté sous le point 2026-130.\",\"excerpt\":\"Conformément à l’article 557 de la Loi sur les élections et les référendums dans\\nles municipalités, la greffière dépose le certificat attestant le résultat de la procédure\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-124 modifie le mandat judiciaire en vertu de l'article 227 LAU pour le 1580, rue Casavant.\",\"excerpt\":\"Que ce conseil modifie la résolution 2024-159 en ajoutant, à la fin de ladite résolution,\\nle paragraphe suivant :\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-125 autorise la signature d'actes de servitudes d'égouts et d'aqueduc sur la rue Chénier.\",\"excerpt\":\"Que ce conseil autorise la signature d'actes de servitude d'installation, d'entretien et\\nde passage d'égouts et d'aqueduc dans le cadre des travaux à venir sur la rue Chénier\"},{\"act\":\"A14\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement 1379 décrétant des travaux d'infrastructures et un emprunt est adopté par la résolution 2026-139.\",\"excerpt\":\"Que le Règlement numéro 1379, intitulé : « Règlement décrétant des travaux de réfection\\nd’infrastructures, soit le remplacement des conduites d’aqueduc, d’égout sanitaire, d’égout\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le règlement 1230-7 est adopté par la résolution 2026-131.",
+   "excerpt": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan\nd’urbanisme durable numéro 1230"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion pour le règlement 1230-8 est donné par Claude Rainville (résolution 2026-132).",
+   "excerpt": "Monsieur Claude Rainville, conseiller municipal, donne un avis de motion à l'effet\nqu'à une prochaine séance, il présentera ou fera présenter un règlement amendant"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement 1230-8 est adopté par la résolution 2026-133.",
+   "excerpt": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement\ndu Plan d’urbanisme durable numéro 1230"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le second projet de règlement 1235-34 est adopté par la résolution 2026-134.",
+   "excerpt": "Que le second projet de Règlement numéro 1235-34, intitulé : « Règlement amendant\nle Règlement de zonage numéro 1235"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le règlement 1235-35 est adopté par la résolution 2026-135.",
+   "excerpt": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement\nde zonage numéro 1235"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-128 approuve conditionnellement seize plans d'implantation et d'intégration architecturale.",
+   "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et\nles recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour le 734, rue Rembrandt fait partie des dossiers approuvés à la résolution 2026-128.",
+   "excerpt": "734, rue Rembrandt (lot 1 815 260)\nConstruction d'une habitation unifamiliale isolée"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour le 15, rue Campbell fait partie des dossiers approuvés à la résolution 2026-128.",
+   "excerpt": "15, rue Campbell (lot 3 956 018)\nConstruction d'une habitation unifamiliale isolée"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour le 675, rue Cardinal fait partie des dossiers approuvés à la résolution 2026-128.",
+   "excerpt": "675, rue Cardinal (lot 1 816 633)\nConstruction d'une habitation unifamiliale isolée"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-129 refuse les PIIA pour Villeneuve, Martinets et Doyle.",
+   "excerpt": "Que ce conseil approuve les recommandations et refuse les plans d'implantation et\nd'intégration architecturale énumérés ci-dessus, et ce, selon les motifs formulés auxdites"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le dépôt du certificat relatif au règlement 1371 est acté sous le point 2026-130.",
+   "excerpt": "Conformément à l’article 557 de la Loi sur les élections et les référendums dans\nles municipalités, la greffière dépose le certificat attestant le résultat de la procédure"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-124 modifie le mandat judiciaire en vertu de l'article 227 LAU pour le 1580, rue Casavant.",
+   "excerpt": "Que ce conseil modifie la résolution 2024-159 en ajoutant, à la fin de ladite résolution,\nle paragraphe suivant :"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-125 autorise la signature d'actes de servitudes d'égouts et d'aqueduc sur la rue Chénier.",
+   "excerpt": "Que ce conseil autorise la signature d'actes de servitude d'installation, d'entretien et\nde passage d'égouts et d'aqueduc dans le cadre des travaux à venir sur la rue Chénier"
+  },
+  {
+   "act": "A14",
+   "verdict": "soutenu",
+   "reason": "Le règlement 1379 décrétant des travaux d'infrastructures et un emprunt est adopté par la résolution 2026-139.",
+   "excerpt": "Que le Règlement numéro 1379, intitulé : « Règlement décrétant des travaux de réfection\nd’infrastructures, soit le remplacement des conduites d’aqueduc, d’égout sanitaire, d’égout"
+  }
+ ],
+ "filter": {
+  "acts": 14,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le règlement 1230-7 est adopté par la résolution 2026-131."
+   },
+   {
+    "act": "A02",
+    "reason": "Un avis de motion pour le règlement 1230-8 est donné par Claude Rainville (résolution 2026-132)."
+   },
+   {
+    "act": "A03",
+    "reason": "Le projet de règlement 1230-8 est adopté par la résolution 2026-133."
+   },
+   {
+    "act": "A04",
+    "reason": "Le second projet de règlement 1235-34 est adopté par la résolution 2026-134."
+   },
+   {
+    "act": "A05",
+    "reason": "Le règlement 1235-35 est adopté par la résolution 2026-135."
+   },
+   {
+    "act": "A06",
+    "reason": "La résolution 2026-128 approuve conditionnellement seize plans d'implantation et d'intégration architecturale."
+   },
+   {
+    "act": "A07",
+    "reason": "Le PIIA pour le 734, rue Rembrandt fait partie des dossiers approuvés à la résolution 2026-128."
+   },
+   {
+    "act": "A08",
+    "reason": "Le PIIA pour le 15, rue Campbell fait partie des dossiers approuvés à la résolution 2026-128."
+   },
+   {
+    "act": "A09",
+    "reason": "Le PIIA pour le 675, rue Cardinal fait partie des dossiers approuvés à la résolution 2026-128."
+   },
+   {
+    "act": "A10",
+    "reason": "La résolution 2026-129 refuse les PIIA pour Villeneuve, Martinets et Doyle."
+   },
+   {
+    "act": "A11",
+    "reason": "Le dépôt du certificat relatif au règlement 1371 est acté sous le point 2026-130."
+   },
+   {
+    "act": "A12",
+    "reason": "La résolution 2026-124 modifie le mandat judiciaire en vertu de l'article 227 LAU pour le 1580, rue Casavant."
+   },
+   {
+    "act": "A13",
+    "reason": "La résolution 2026-125 autorise la signature d'actes de servitudes d'égouts et d'aqueduc sur la rue Chénier."
+   },
+   {
+    "act": "A14",
+    "reason": "Le règlement 1379 décrétant des travaux d'infrastructures et un emprunt est adopté par la résolution 2026-139."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3851,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 20764,
+   "outputTokens": 1182,
+   "totalTokens": 21946
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3701
+  },
+  "inputSha256": "53f09f6bd130cd3c8b5a14122a87b8020ed8cf1df527aab08cf64edd159a4188"
+ }
+}

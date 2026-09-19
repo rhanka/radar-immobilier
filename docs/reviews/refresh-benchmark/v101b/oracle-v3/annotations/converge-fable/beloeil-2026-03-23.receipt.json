@@ -1,0 +1,77 @@
+{
+ "documentId": "beloeil-2026-03-23",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c2d735769759743298d7dd16de8395a4b4fa202353daa334488a06b35c10463b",
+ "inputSha256": "8a98d6ea1c07da226c7d752d0d06f238539bea50e439f4406f1e91f694351ebf",
+ "responseSha256": "f8fbf2d9eac51636df64aad42e046a7cc17ff34abf57794732d1f4be6fa9805a",
+ "rc": 0,
+ "latencyMs": 62283,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "335da2fe-fe08-4e1b-b287-734509017da9",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 6150,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 39651,
+   "webSearchRequests": 0,
+   "costUSD": 1.10082475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 3919,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 39651,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 6150,
+  "output_tokens_details": {
+   "thinking_tokens": 3919
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 39651,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 6150,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 39651,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 39651
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 1.10082475,
+ "durationApiMs": 60499,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:35:38.800Z"
+}

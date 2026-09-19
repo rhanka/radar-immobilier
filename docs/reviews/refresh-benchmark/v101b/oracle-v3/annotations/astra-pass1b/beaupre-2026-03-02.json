@@ -1,0 +1,143 @@
+{
+ "documentId": "beaupre-2026-03-02",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "2b911184ef6af74e9fd76a4f9d2c7d7ece1794da0f868e6ecddb6b81d46b8880",
+ "rawText": "{\"operations\":[{\"op\":\"add\",\"unit\":{\"label\":\"Prêt de la salle du centre communautaire à l’Association Bénévole Côte-de-Beaupré — 4 mars\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"salle au centre communautaire\",\"page\":5,\"citation\":\"prêter la salle au centre communautaire à l’Association Bénévole Côte-deBeaupré pour le 4 mars prochain de 16 h à 18 h.\",\"anchor\":\"salle au centre communautaire\"},\"reason\":\"La résolution 11980-020326 autorise explicitement une mise à disposition immobilière par prêt, relevant de l’étape « inconnu » comme le prêt à usage d’un immeuble.\"},{\"op\":\"correct\",\"id\":\"u01\",\"unit\":{\"label\":\"Autorisation du protocole d’entente Horizon Boréal — prolongement de la rue Belhumeur et d’une autre rue\",\"stage\":\"adoption\",\"procedure\":null,\"objet\":\"rue Belhumeur\",\"page\":5,\"citation\":\"signer tous les documents nécessaires aux travaux\\nmunicipaux de prolongement de la rue Belhumeur et autre rue ainsi que\\ntous les documents nécessaires à cet effet\",\"anchor\":\"rue Belhumeur\"},\"reason\":\"La citation courante supprime les sauts de ligne du document, alors que l’extrait doit être recopié à l’identique.\"},{\"op\":\"correct\",\"id\":\"u03\",\"unit\":{\"label\":\"Approbation PIIA — 155, rue de Cassiopée, FYRA QUARTIER\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"155, rue de Cassiopée\",\"page\":5,\"citation\":\"11984-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (155, rue de\\nCassiopée)\",\"anchor\":\"155, rue de\\nCassiopée\"},\"reason\":\"La citation et l’ancre courantes omettent le saut de ligne avant « Cassiopée » et doivent reproduire exactement le texte.\"},{\"op\":\"correct\",\"id\":\"u04\",\"unit\":{\"label\":\"Approbation PIIA — 145, rue de Cassiopée, FYRA QUARTIER\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"145, rue de Cassiopée\",\"page\":6,\"citation\":\"11985-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (145, rue de\\nCassiopée)\",\"anchor\":\"145, rue de\\nCassiopée\"},\"reason\":\"La citation et l’ancre courantes omettent le saut de ligne avant « Cassiopée » et doivent reproduire exactement le texte.\"},{\"op\":\"correct\",\"id\":\"u05\",\"unit\":{\"label\":\"Refus PIIA — 150, rue de l’Aurore-Boréale, FYRA QUARTIER\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"150, rue de l’Aurore-Boréale\",\"page\":6,\"citation\":\"11986-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (150, rue de\\nl’Aurore-Boréale)\",\"anchor\":\"150, rue de\\nl’Aurore-Boréale\"},\"reason\":\"La citation et l’ancre doivent conserver le saut de ligne avant « l’Aurore-Boréale », sans modifier le refus expressément décidé à la page 7.\"}]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Prêt de la salle du centre communautaire à l’Association Bénévole Côte-de-Beaupré — 4 mars",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "salle au centre communautaire",
+    "page": 5,
+    "citation": "prêter la salle au centre communautaire à l’Association Bénévole Côte-deBeaupré pour le 4 mars prochain de 16 h à 18 h.",
+    "anchor": "salle au centre communautaire"
+   },
+   "reason": "La résolution 11980-020326 autorise explicitement une mise à disposition immobilière par prêt, relevant de l’étape « inconnu » comme le prêt à usage d’un immeuble."
+  },
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Autorisation du protocole d’entente Horizon Boréal — prolongement de la rue Belhumeur et d’une autre rue",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "rue Belhumeur",
+    "page": 5,
+    "citation": "signer tous les documents nécessaires aux travaux\nmunicipaux de prolongement de la rue Belhumeur et autre rue ainsi que\ntous les documents nécessaires à cet effet",
+    "anchor": "rue Belhumeur"
+   },
+   "reason": "La citation courante supprime les sauts de ligne du document, alors que l’extrait doit être recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Approbation PIIA — 155, rue de Cassiopée, FYRA QUARTIER",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "155, rue de Cassiopée",
+    "page": 5,
+    "citation": "11984-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (155, rue de\nCassiopée)",
+    "anchor": "155, rue de\nCassiopée"
+   },
+   "reason": "La citation et l’ancre courantes omettent le saut de ligne avant « Cassiopée » et doivent reproduire exactement le texte."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Approbation PIIA — 145, rue de Cassiopée, FYRA QUARTIER",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "145, rue de Cassiopée",
+    "page": 6,
+    "citation": "11985-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (145, rue de\nCassiopée)",
+    "anchor": "145, rue de\nCassiopée"
+   },
+   "reason": "La citation et l’ancre courantes omettent le saut de ligne avant « Cassiopée » et doivent reproduire exactement le texte."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Refus PIIA — 150, rue de l’Aurore-Boréale, FYRA QUARTIER",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "150, rue de l’Aurore-Boréale",
+    "page": 6,
+    "citation": "11986-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (150, rue de\nl’Aurore-Boréale)",
+    "anchor": "150, rue de\nl’Aurore-Boréale"
+   },
+   "reason": "La citation et l’ancre doivent conserver le saut de ligne avant « l’Aurore-Boréale », sans modifier le refus expressément décidé à la page 7."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u06"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 5,
+   "citation": "signer tous les documents nécessaires aux travaux\nmunicipaux de prolongement de la rue Belhumeur et autre rue ainsi que\ntous les documents nécessaires à cet effet"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "piia",
+   "page": 5,
+   "citation": "11984-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (155, rue de\nCassiopée)"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "piia",
+   "page": 6,
+   "citation": "11985-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (145, rue de\nCassiopée)"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "piia",
+   "page": 6,
+   "citation": "11986-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (150, rue de\nl’Aurore-Boréale)"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6,
+ "relabeledFrom": "astra-pass2"
+}

@@ -1,0 +1,120 @@
+{
+ "documentId": "ayers-cliff-2026-03-02",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu de la demande de PPCMOI — 881-883 Main et 828, Strathcona",
+    "stage": "inconnu",
+    "procedure": "ppcmoi",
+    "objet": "1904-14-2760",
+    "page": 2,
+    "citation": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828, Strathcona – Demande de PPCMOI",
+    "anchor": "Matricule 1904-14-2760",
+    "spanStart": 2165,
+    "spanEnd": 2279
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu de la demande de PPCMOI — 881-883 Main et 828, Strathcona",
+      "stage": "inconnu",
+      "procedure": "ppcmoi",
+      "objet": "1904-14-2760",
+      "page": 2,
+      "citation": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828, Strathcona – Demande de PPCMOI",
+      "anchor": "Matricule 1904-14-2760",
+      "spanStart": 2165,
+      "spanEnd": 2279
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 16.1.1 prévoit l’examen d’une demande explicite de PPCMOI regroupant plusieurs matricules, sans préciser une étape de projet de résolution ou d’adoption."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu du PPCMOI — 329 rue Tyler, bâtiment de deux étages et quatre logements",
+    "stage": "inconnu",
+    "procedure": "ppcmoi",
+    "objet": "4 665 202",
+    "page": 2,
+    "citation": "Matricule 1904-97-9556 lot 4 665 202, 329 rue Tyler, Res-10 Projet PPCMOI construction 1 bâtiment 2 étages 4 logement au total",
+    "anchor": "lot 4 665 202",
+    "spanStart": 2426,
+    "spanEnd": 2552
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu du PPCMOI — 329 rue Tyler, bâtiment de deux étages et quatre logements",
+      "stage": "inconnu",
+      "procedure": "ppcmoi",
+      "objet": "4 665 202",
+      "page": 2,
+      "citation": "Matricule 1904-97-9556 lot 4 665 202, 329 rue Tyler, Res-10 Projet PPCMOI construction 1 bâtiment 2 étages 4 logement au total",
+      "anchor": "lot 4 665 202",
+      "spanStart": 2426,
+      "spanEnd": 2552
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 16.1.2 porte sur un PPCMOI explicitement localisé et prévu à l’ordre du jour, mais le projet de construction mentionné n’atteste pas un premier projet de résolution."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu du PIIA-9 — lot 6 108 937, Ripple Cove",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 108 937",
+    "page": 2,
+    "citation": "Matricule 1805-72-3947 lot 6 108 937, 329 chemin 694 -716 Ripple Cove, Rec-5- Projet plan globale, future construction et Agrandissements (PIIA-9",
+    "anchor": "lot 6 108 937",
+    "spanStart": 2715,
+    "spanEnd": 2860
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu du PIIA-9 — lot 6 108 937, Ripple Cove",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 108 937",
+      "page": 2,
+      "citation": "Matricule 1805-72-3947 lot 6 108 937, 329 chemin 694 -716 Ripple Cove, Rec-5- Projet plan globale, future construction et Agrandissements (PIIA-9",
+      "anchor": "lot 6 108 937",
+      "spanStart": 2715,
+      "spanEnd": 2860
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 16.1.3 prévoit l’examen d’un projet explicitement soumis au PIIA-9; les demandes de PIIA sont incluses, sans présenter ce point d’ordre du jour comme une décision acquise."
+    }
+   ]
+  }
+ ]
+}

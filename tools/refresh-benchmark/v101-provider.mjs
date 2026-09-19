@@ -18,6 +18,51 @@ export class ProviderError extends Error {
   }
 }
 
+// Fetch with deadlines that really cut the connection (2026-09-18: oracle-v3 arbitrate-astra calls
+// hung ~58 min on dead sockets although the deadline was 30 min; AbortSignal.timeout combined with
+// AbortSignal.any did not fire). One AbortController per request, driven by ordinary (ref'd) timers:
+//   deadlineMs        total time for connection + headers + full body;
+//   headersTimeoutMs  connection + request until response headers (optional);
+//   idleTimeoutMs     longest silence between two body chunks (optional).
+// Aborting the fetch signal makes undici destroy the socket. The whole body is read here (tee), so
+// every network wait happens under these timers. Returns { response, transcript }.
+export async function timedFetch(url, init = {}, { deadlineMs, headersTimeoutMs = null, idleTimeoutMs = null } = {}) {
+  const controller = new AbortController();
+  const stop = (code) => controller.abort(new ProviderError(code));
+  const timers = new Set();
+  const arm = (ms, code) => { if (!ms) return null; const timer = setTimeout(() => stop(code), ms); timers.add(timer); return timer; };
+  const disarm = (timer) => { if (timer) { clearTimeout(timer); timers.delete(timer); } };
+  arm(deadlineMs, "DEADLINE_EXCEEDED");
+  let headersTimer = arm(headersTimeoutMs, "HEADERS_TIMEOUT");
+  const outer = init.signal;
+  const forward = () => controller.abort(outer.reason);
+  if (outer?.aborted) forward(); else outer?.addEventListener("abort", forward, { once: true });
+  const reasonOf = (error) => controller.signal.aborted && controller.signal.reason instanceof ProviderError
+    ? controller.signal.reason : error;
+  try {
+    let response;
+    try { response = await fetch(url, { ...init, signal: controller.signal }); }
+    catch (error) { throw reasonOf(error); }
+    disarm(headersTimer); headersTimer = null;
+    const reader = response.clone().body?.getReader();
+    const decoder = new TextDecoder(); let transcript = "";
+    let idleTimer = arm(idleTimeoutMs, "IDLE_TIMEOUT");
+    try {
+      for (;;) {
+        const { done, value } = reader ? await reader.read() : { done: true };
+        if (done) break;
+        transcript += decoder.decode(value, { stream: true });
+        disarm(idleTimer); idleTimer = arm(idleTimeoutMs, "IDLE_TIMEOUT");
+      }
+      transcript += decoder.decode();
+    } catch (error) { throw reasonOf(error); }
+    return { response, transcript };
+  } finally {
+    for (const timer of timers) clearTimeout(timer);
+    outer?.removeEventListener("abort", forward);
+  }
+}
+
 function rateHeaders(headers) {
   return Object.fromEntries(limitNames.map((name) => [name, headers.get(name)])
     .filter(([, value]) => value !== null));
@@ -82,8 +127,11 @@ function normalizedUsage(value) {
     : null;
 }
 
+// Output cap sent on the wire: 32 768 for every benchmark arm; a caller may raise it per arm
+// (arm.maxOutputTokens, oracle-v3 Gemini steps). The wire check below enforces the same value.
+export const capOf = (arm) => arm.maxOutputTokens ?? 32_768;
 export function codexCapOption(arm) {
-  return arm.capEnforced === false ? {} : { maxOutputTokens: 32_768 };
+  return arm.capEnforced === false ? {} : { maxOutputTokens: capOf(arm) };
 }
 
 function directResult(arm, payload) {
@@ -165,7 +213,7 @@ export async function generateClaudeCli(messages, { beforeRequest, timeoutMs }) 
       requestId: null, terminalSse: { expected: false, terminal: true }, headers: {} } };
 }
 
-export async function createProvider(arm, { beforeRequest, timeoutMs }) {
+export async function createProvider(arm, { beforeRequest, timeoutMs, headersTimeoutMs = null, idleTimeoutMs = null }) {
   if (arm.transport === "claude-cli") return { accountPseudonym: "oauth:claude-code",
     generate(messages) { return generateClaudeCli(messages, { beforeRequest, timeoutMs }); } };
   let facade = null; let account = null; let mesh = null; let recentWire = null;
@@ -192,18 +240,20 @@ export async function createProvider(arm, { beforeRequest, timeoutMs }) {
     let body = null; try { body = JSON.parse(bodyText); } catch { /* recorded as null */ }
     const fields = wireFields(arm, body);
     const generationRequest = !String(url).includes("fetchAvailableModels");
-    if (generationRequest && arm.capEnforced !== false && fields.maxOutputTokens !== 32_768) {
+    if (generationRequest && arm.capEnforced !== false && fields.maxOutputTokens !== capOf(arm)) {
       throw new ProviderError("CAP_NOT_MATERIALIZED", { wire: fields });
     }
     if (generationRequest && arm.capEnforced === false && fields.maxOutputTokens !== null) {
       throw new ProviderError("CAP_EXCEPTION_DRIFT", { wire: fields });
     }
-    const controller = AbortSignal.timeout(timeoutMs);
-    const signal = init.signal ? AbortSignal.any([init.signal, controller]) : controller;
-    let response;
-    try { response = await fetch(url, { ...init, signal }); }
-    catch (error) { throw new ProviderError(error?.code ?? error?.cause?.code ?? "NETWORK_ERROR"); }
-    const transcript = await response.clone().text();
+    let response; let transcript;
+    try {
+      ({ response, transcript } = await timedFetch(url, init,
+        { deadlineMs: timeoutMs, headersTimeoutMs, idleTimeoutMs }));
+    } catch (error) {
+      if (error instanceof ProviderError) throw error;
+      throw new ProviderError(error?.code ?? error?.cause?.code ?? "NETWORK_ERROR");
+    }
     const headers = rateHeaders(response.headers);
     let responseError = null;
     if (!response.ok) {

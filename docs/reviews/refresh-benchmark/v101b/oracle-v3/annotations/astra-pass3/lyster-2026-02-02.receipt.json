@@ -1,0 +1,36 @@
+{
+ "documentId": "lyster-2026-02-02",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "092e8dfeb56a8da806cc0d2322c3112274a690fd04d48f8c24b20e75560b1bfe",
+ "inputSha256": "47a077c06aa7b66a48627ba1f49d7c6b2015334ad95933bd534422464257ee4e",
+ "responseSha256": "e30bec4e2029c152cf108da825901080f3386db9895b32d39f2710265cfd2137",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 29389,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 8446,
+  "outputTokens": 896,
+  "totalTokens": 9342
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 29386,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:37:00.657Z"
+}

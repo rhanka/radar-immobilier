@@ -1,0 +1,18 @@
+{
+ "documentId": "abercorn-2026-03-30",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "c67d2e7bd64ad2477bb65f500c379413c19ec275b8ff833d3162b84e94736445",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

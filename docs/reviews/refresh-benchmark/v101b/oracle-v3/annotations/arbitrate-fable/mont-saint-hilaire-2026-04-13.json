@@ -1,0 +1,74 @@
+{
+ "documentId": "mont-saint-hilaire-2026-04-13",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2dc49be12c6700e289e928622d9c1aed1d0f2ba7bbf5be3715bdd07b8c789da3",
+ "verificationSha256": "d133720d3810cbe29b207a1613e5659c144cc495971cfc4d4a149c5bdebeac26",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-124 (p. 13) est une décision actuelle d'application réglementaire d'urbanisme à objet foncier explicite : « recours judiciaire en vertu de l'article 227 de la Loi sur l'aménagement et l'urbanisme … envers les propriétaires du 1580, rue Casavant (lots 1 818 249 et 1 818 255 au cadastre du Québec) concernant des infractions commises lors de travaux effectués sans permis », étendue par le conseil aux « propriétaires de la structure érigée sur ladite propriété » ; cela relève des inclusions « urbanisme … actes fonciers » et l'étape « inconnu » convient. La position de B est écartée : le texte n'octroie aucun contrat ni honoraires (pas de soumission, pas de montant), il modifie la portée d'un recours LAU visant des lots précis, ce qui n'est pas un « marché de services » ; le point 19 de l'ordre du jour est la même unité et ne s'ajoute pas.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u27",
+   "verificationItem": "i27",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Modification du mandat de recours en vertu de l'article 227 LAU — 1580, rue Casavant (lots 1 818 249 et 1 818 255), travaux sans permis",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1580, rue Casavant",
+      "page": 13,
+      "citation": "MODIFICATION À LA RÉSOLUTION 2024-159 - MANDAT - RECOURS EN VERTU DE L'ARTICLE 227 DE LA LOI SUR L'AMÉNAGEMENT ET L'URBANISME OU TOUT RECOURS APPROPRIÉ - 1580, RUE CASAVANT",
+      "anchor": "1580, RUE CASAVANT",
+      "spanStart": 1333,
+      "spanEnd": 1505
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-124, page 13, étend actuellement le mandat de recours urbanistique aux propriétaires de la structure du 1580, rue Casavant, sans constituer un simple rappel historique."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "2026-124 (p. 13) modifie le mandat de recours en vertu de l'art. 227 LAU visant le 1580, rue Casavant (lots 1 818 249 et 1 818 255) pour travaux sans permis : fait d'urbanisme à objet foncier explicite, étape « inconnu », citation exacte."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La modification d'un mandat judiciaire confié à des avocats relève des marchés de services exclus du rappel et ne constitue pas un objet réglementaire ou foncier du profil."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "La résolution 2026-124 (p. 13) est une décision actuelle d'application réglementaire d'urbanisme à objet foncier explicite : « recours judiciaire en vertu de l'article 227 de la Loi sur l'aménagement et l'urbanisme … envers les propriétaires du 1580, rue Casavant (lots 1 818 249 et 1 818 255 au cadastre du Québec) concernant des infractions commises lors de travaux effectués sans permis », étendue par le conseil aux « propriétaires de la structure érigée sur ladite propriété » ; cela relève des inclusions « urbanisme … actes fonciers » et l'étape « inconnu » convient. La position de B est écartée : le texte n'octroie aucun contrat ni honoraires (pas de soumission, pas de montant), il modifie la portée d'un recours LAU visant des lots précis, ce qui n'est pas un « marché de services » ; le point 19 de l'ordre du jour est la même unité et ne s'ajoute pas."
+  }
+ ]
+}

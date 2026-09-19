@@ -1,0 +1,51 @@
+{
+ "documentId": "lyster-2026-02-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "092e8dfeb56a8da806cc0d2322c3112274a690fd04d48f8c24b20e75560b1bfe",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-02-28 autorise la transmission à la MRC des immeubles à vendre pour taxes impayées, dont le lot 5 835 056 cité page 5, où figure la mention « ADOPTÉE ».\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le lot 5 834 167 est explicitement cité page 5 dans la liste visée par la résolution 2026-02-28 adoptée autorisant la mise en vente pour taxes impayées, ce qui constitue un acte foncier inclus.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le lot 5 834 895 figure dans la citation page 5 et relève de l’autorisation adoptée par la résolution 2026-02-28 pour la vente des immeubles en défaut de paiement des taxes, sous réserve de leur paiement avant la vente.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-02-28 autorise la transmission à la MRC des immeubles à vendre pour taxes impayées, dont le lot 5 835 056 cité page 5, où figure la mention « ADOPTÉE »."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le lot 5 834 167 est explicitement cité page 5 dans la liste visée par la résolution 2026-02-28 adoptée autorisant la mise en vente pour taxes impayées, ce qui constitue un acte foncier inclus."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le lot 5 834 895 figure dans la citation page 5 et relève de l’autorisation adoptée par la résolution 2026-02-28 pour la vente des immeubles en défaut de paiement des taxes, sous réserve de leur paiement avant la vente."
+  }
+ ]
+}

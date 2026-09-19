@@ -1,0 +1,37 @@
+{
+ "documentId": "saint-felix-de-kingsey-2026-04-07",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "3af0de69954f704c23483e712159a82d4849c7f5137fb1ff3937ee8794f66a3a",
+ "inputSha256": "5963078d87d9b9bddeed545848f99408d46839f15802dffd620810c6dc7a9a15",
+ "responseSha256": "b75d7fdbe8beb64fdc7d2e490d13c61ee69d0828171a1359d754c6fd44d0b090",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 4526,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 8163,
+  "outputTokens": 153,
+  "totalTokens": 9813,
+  "thoughtsTokenCount": 1497
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 4328,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:44:42.970Z"
+}

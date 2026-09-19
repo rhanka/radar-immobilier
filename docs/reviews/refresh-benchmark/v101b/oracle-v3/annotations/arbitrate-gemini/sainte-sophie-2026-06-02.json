@@ -1,0 +1,74 @@
+{
+ "documentId": "sainte-sophie-2026-06-02",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b12e935d6f4ef979a86094865d8385d31cb11d7e3c998e244e25419e22ffee56",
+ "verificationSha256": "cf85178f7a167c55b777facd40b26cb089f68702e1b13778a1979f5cef789637",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"Le point 6.3 à la page 2 constitue un acte foncier explicite (« Inclusions: urbanisme, petits PIIA et actes fonciers, même non résidentiels ») visant le lot 4 037 185, qui doit être retenu comme unité prévue au stade « adoption ». La position de l'annotateur B est écartée car, dans un ordre du jour, le libellé du point d'affaires immobilières vaut pour l'acte prévu sans exiger la mention explicite du mot adoption.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u09",
+   "verificationItem": "i09",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation prévue d'une servitude de tolérance — lot 4 037 185, rue Samson",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "4 037 185",
+      "page": 2,
+      "citation": "Servitude de tolérance pour l'empiètement d'un mur de soutènement en roche dans l'emprise de la rue Samson sur une parcelle du lot 4 037 185",
+      "anchor": "lot 4 037 185",
+      "spanStart": 2084,
+      "spanEnd": 2224
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Le point 6.3, page 2, inscrit bien la servitude sur le lot 4 037 185, mais ne précise aucune adoption ou autorisation, même prévue, permettant de valider l’étape « adoption » proposée."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 6.3 (page 2) est un acte foncier explicite inclus par la règle (« actes fonciers, même non résidentiels ») visant le lot 4 037 185 ; point prévu d'ordre du jour, citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Le point 6.3 à la page 2 concerne un acte foncier explicite (servitude de tolérance) sur une parcelle du lot 4 037 185."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "Le point 6.3 à la page 2 constitue un acte foncier explicite (« Inclusions: urbanisme, petits PIIA et actes fonciers, même non résidentiels ») visant le lot 4 037 185, qui doit être retenu comme unité prévue au stade « adoption ». La position de l'annotateur B est écartée car, dans un ordre du jour, le libellé du point d'affaires immobilières vaut pour l'acte prévu sans exiger la mention explicite du mot adoption."
+  }
+ ]
+}

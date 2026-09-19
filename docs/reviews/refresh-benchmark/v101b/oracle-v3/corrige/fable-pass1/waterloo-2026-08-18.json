@@ -1,0 +1,652 @@
+{
+ "documentId": "waterloo-2026-08-18",
+ "nextId": 18,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du certificat de résultat d'approbation référendaire — règlement 26-956-2",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "26-956-2",
+    "page": 2,
+    "citation": "Dépôt du certificat de résultat - Processus d'approbation par les personnes habiles à voter - Règlement 26-956-2",
+    "anchor": "Règlement 26-956-2",
+    "spanStart": 721,
+    "spanEnd": 833
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du certificat de résultat d'approbation référendaire — règlement 26-956-2",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "26-956-2",
+      "page": 2,
+      "citation": "Dépôt du certificat de résultat - Processus d'approbation par les personnes habiles à voter - Règlement 26-956-2",
+      "anchor": "Règlement 26-956-2",
+      "spanStart": 721,
+      "spanEnd": 833
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dépôt du certificat constitue une étape actuelle explicitement constatée pour ce règlement de zonage, distincte de son adoption, et le document précise qu'aucune demande ou signature n'a été reçue."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du procès-verbal de consultation publique — règlement 26-957-1",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "26-957-1",
+    "page": 2,
+    "citation": "Le procès-verbal de l'assemblée publique de consultation sur le projet de règlement de lotissement 26-957-1, qui s'est tenue le 3 août 2026, est déposé",
+    "anchor": "règlement de lotissement 26-957-1",
+    "spanStart": 1336,
+    "spanEnd": 1487
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du procès-verbal de consultation publique — règlement 26-957-1",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "26-957-1",
+      "page": 2,
+      "citation": "Le procès-verbal de l'assemblée publique de consultation sur le projet de règlement de lotissement 26-957-1, qui s'est tenue le 3 août 2026, est déposé",
+      "anchor": "règlement de lotissement 26-957-1",
+      "spanStart": 1336,
+      "spanEnd": 1487
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L'étape constatée dans cette séance est le dépôt du procès-verbal relatif au règlement identifié, et non la tenue d'une nouvelle consultation publique."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 26-956-2 — zonage et encadrement des projets intégrés",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-956-2",
+    "page": 3,
+    "citation": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés tel que soumis",
+    "anchor": "Règlement 26-956-2",
+    "spanStart": 86,
+    "spanEnd": 239
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 26-956-2 — zonage et encadrement des projets intégrés",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "26-956-2",
+      "page": 3,
+      "citation": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés tel que soumis",
+      "anchor": "Règlement 26-956-2",
+      "spanStart": 86,
+      "spanEnd": 239
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil adopte expressément ce règlement de zonage, tandis que les avis et projets antérieurs rappelés dans les considérants ne créent pas d'unités supplémentaires."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 26-957-1 — lotissement et sites patrimoniaux",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-957-1",
+    "page": 3,
+    "citation": "Que le conseil municipal adopte le Règlement 26-957-1 sur le lotissement en lien avec certains sites patrimoniaux tel que soumis",
+    "anchor": "Règlement 26-957-1",
+    "spanStart": 1081,
+    "spanEnd": 1209
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 26-957-1 — lotissement et sites patrimoniaux",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "26-957-1",
+      "page": 3,
+      "citation": "Que le conseil municipal adopte le Règlement 26-957-1 sur le lotissement en lien avec certains sites patrimoniaux tel que soumis",
+      "anchor": "Règlement 26-957-1",
+      "spanStart": 1081,
+      "spanEnd": 1209
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution constate l'adoption actuelle du règlement de lotissement, sans multiplier les unités pour son avis de motion et son projet historiques."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 26-972 — réaménagement du 415, rue de la Cour pour le CLSC",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-972",
+    "page": 3,
+    "citation": "Adoption - Règlement parapluie 26-972 décrétant des dépenses et un emprunt de 1 360 000 $ pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour",
+    "anchor": "Règlement parapluie 26-972",
+    "spanStart": 1341,
+    "spanEnd": 1506
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 26-972 — réaménagement du 415, rue de la Cour pour le CLSC",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "26-972",
+      "page": 3,
+      "citation": "Adoption - Règlement parapluie 26-972 décrétant des dépenses et un emprunt de 1 360 000 $ pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour",
+      "anchor": "Règlement parapluie 26-972",
+      "spanStart": 1341,
+      "spanEnd": 1506
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement adopté finance explicitement le réaménagement d'un immeuble identifié pour accueillir le CLSC, indépendamment du marché de travaux traité ailleurs."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de vente pour taxes — immeubles de la liste annexée, 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "vente pour taxes",
+    "page": 6,
+    "citation": "Que la Ville de Waterloo autorise la greffière à effectuer et signer individuellement toute démarche et à signer tout document dans le but de mener à terme la vente pour taxes",
+    "anchor": "vente pour taxes",
+    "spanStart": 85,
+    "spanEnd": 260
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de vente pour taxes — immeubles de la liste annexée, 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "vente pour taxes",
+      "page": 6,
+      "citation": "Que la Ville de Waterloo autorise la greffière à effectuer et signer individuellement toute démarche et à signer tout document dans le but de mener à terme la vente pour taxes",
+      "anchor": "vente pour taxes",
+      "spanStart": 85,
+      "spanEnd": 260
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise un acte foncier de vente des immeubles de la liste annexée, sans permettre de créer des unités individuelles puisque cette liste n'est pas reproduite."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Prêt à usage gratuit d'un espace au 417, rue de la Cour — Télévision communautaire",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "417, rue de la Cour",
+    "page": 8,
+    "citation": "à titre gratuit, pour une durée d'un an, d'un espace de rangement clôturé situé au rez-de-chaussée du garage détaché municipal du 417, rue de la Cour",
+    "anchor": "417, rue de la Cour",
+    "spanStart": 1865,
+    "spanEnd": 2014
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Prêt à usage gratuit d'un espace au 417, rue de la Cour — Télévision communautaire",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "417, rue de la Cour",
+      "page": 8,
+      "citation": "à titre gratuit, pour une durée d'un an, d'un espace de rangement clôturé situé au rez-de-chaussée du garage détaché municipal du 417, rue de la Cour",
+      "anchor": "417, rue de la Cour",
+      "spanStart": 1865,
+      "spanEnd": 2014
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil autorise une entente de prêt temporaire gratuit d'un espace immobilier pour un an, type d'acte foncier classé au stade inconnu par le vocabulaire fourni."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Autorisation d'une servitude réelle et perpétuelle à Hydro-Québec — rue Nadeau",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "rue Nadeau",
+    "page": 9,
+    "citation": "d'une servitude réelle et perpétuelle en faveur d'Hydro-Québec de la manière prévue au document joint à la présente résolution pour permettre le prolongement du réseau électrique sur la rue Nadeau",
+    "anchor": "la rue Nadeau",
+    "spanStart": 395,
+    "spanEnd": 591
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation d'une servitude réelle et perpétuelle à Hydro-Québec — rue Nadeau",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "rue Nadeau",
+      "page": 9,
+      "citation": "d'une servitude réelle et perpétuelle en faveur d'Hydro-Québec de la manière prévue au document joint à la présente résolution pour permettre le prolongement du réseau électrique sur la rue Nadeau",
+      "anchor": "la rue Nadeau",
+      "spanStart": 395,
+      "spanEnd": 591
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise expressément cette servitude foncière, sous conditions d'absence de nuisance et de prise en charge des coûts par le propriétaire desservi."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Accord de principe conditionnel — tour Bell sur les lots 4 161 789 ou 6 098 789",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "4 161 789 ou 6 098 789",
+    "page": 9,
+    "citation": "Le conseil donne son accord de principe à l'implantation d'une tour de télécommunications d'une hauteur maximale de 40 mètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre du Québec",
+    "anchor": "lots 4 161 789 ou 6 098 789",
+    "spanStart": 1823,
+    "spanEnd": 2012
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Accord de principe conditionnel — tour Bell sur les lots 4 161 789 ou 6 098 789",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "4 161 789 ou 6 098 789",
+      "page": 9,
+      "citation": "Le conseil donne son accord de principe à l'implantation d'une tour de télécommunications d'une hauteur maximale de 40 mètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre du Québec",
+      "anchor": "lots 4 161 789 ou 6 098 789",
+      "spanStart": 1823,
+      "spanEnd": 2012
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil donne un accord de principe conditionnel pour une seule implantation sur deux lots alternatifs, sans adopter dès maintenant la modification réglementaire annoncée comme nécessaire."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée — implantation latérale et arrière, 80, rue Yves-Malouin",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "CCU 2026-107",
+    "page": 11,
+    "citation": "Dérogation mineure, implantation latérale et arrière, 80, rue Yves-Malouin (CCU 2026-107",
+    "anchor": "CCU 2026-107",
+    "spanStart": 482,
+    "spanEnd": 570
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée — implantation latérale et arrière, 80, rue Yves-Malouin",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "CCU 2026-107",
+      "page": 11,
+      "citation": "Dérogation mineure, implantation latérale et arrière, 80, rue Yves-Malouin (CCU 2026-107",
+      "anchor": "CCU 2026-107",
+      "spanStart": 482,
+      "spanEnd": 570
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26.08.26.2 accorde expressément cette demande de dérogation mineure pour l'implantation et la marge arrière du 80, rue Yves-Malouin."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée — implantation latérale et arrière, 82, rue Yves-Malouin",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "CCU 2026-108",
+    "page": 11,
+    "citation": "Dérogation mineure, implantation latérale et arrière, 82, rue Yves-Malouin (CCU 2026-108",
+    "anchor": "CCU 2026-108",
+    "spanStart": 1568,
+    "spanEnd": 1656
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée — implantation latérale et arrière, 82, rue Yves-Malouin",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "CCU 2026-108",
+      "page": 11,
+      "citation": "Dérogation mineure, implantation latérale et arrière, 82, rue Yves-Malouin (CCU 2026-108",
+      "anchor": "CCU 2026-108",
+      "spanStart": 1568,
+      "spanEnd": 1656
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26.08.26.3, dont la décision se poursuit page 12, accorde cette demande distincte de celle du 80, rue Yves-Malouin."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée sous condition — implantation au 153, rue du Manège",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "153, rue du Manège",
+    "page": 12,
+    "citation": "Que le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 153, rue du Manège, telle que demandée",
+    "anchor": "153, rue du Manège",
+    "spanStart": 1011,
+    "spanEnd": 1130
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée sous condition — implantation au 153, rue du Manège",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "153, rue du Manège",
+      "page": 12,
+      "citation": "Que le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 153, rue du Manège, telle que demandée",
+      "anchor": "153, rue du Manège",
+      "spanStart": 1011,
+      "spanEnd": 1130
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil approuve cette dérogation sous condition d'obtenir l'aval du service des incendies concernant la distance entre le stationnement et la future borne-fontaine."
+    }
+   ]
+  },
+  {
+   "id": "u13",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée — implantation au 155, rue du Manège",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "155, rue du Manège",
+    "page": 13,
+    "citation": "Que le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 155, rue du Manège, telle que demandée",
+    "anchor": "155, rue du Manège",
+    "spanStart": 91,
+    "spanEnd": 210
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée — implantation au 155, rue du Manège",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "155, rue du Manège",
+      "page": 13,
+      "citation": "Que le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 155, rue du Manège, telle que demandée",
+      "anchor": "155, rue du Manège",
+      "spanStart": 91,
+      "spanEnd": 210
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution approuve une demande distincte pour le 155, rue du Manège, sans lui imposer la condition incendie énoncée uniquement pour le 153."
+    }
+   ]
+  },
+  {
+   "id": "u14",
+   "status": "active",
+   "current": {
+    "label": "PIIA approuvé — ajout de lettrage au 4906, rue Foster",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "4906, rue Foster",
+    "page": 13,
+    "citation": "Que le conseil approuve l'ajout de lettrage en façade, tel que présenté, pour le 4906, rue Foster",
+    "anchor": "4906, rue Foster",
+    "spanStart": 912,
+    "spanEnd": 1009
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA approuvé — ajout de lettrage au 4906, rue Foster",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "4906, rue Foster",
+      "page": 13,
+      "citation": "Que le conseil approuve l'ajout de lettrage en façade, tel que présenté, pour le 4906, rue Foster",
+      "anchor": "4906, rue Foster",
+      "spanStart": 912,
+      "spanEnd": 1009
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil approuve cette demande de PIIA pour une enseigne commerciale, les petits PIIA non résidentiels étant explicitement inclus."
+    }
+   ]
+  },
+  {
+   "id": "u15",
+   "status": "active",
+   "current": {
+    "label": "PIIA approuvé — rénovations extérieures au 5, rue Nord",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU 2026-106",
+    "page": 13,
+    "citation": "PIIA - Rénovations extérieures, 5, rue Nord (CCU 2026-106",
+    "anchor": "CCU 2026-106",
+    "spanStart": 1032,
+    "spanEnd": 1089
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA approuvé — rénovations extérieures au 5, rue Nord",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU 2026-106",
+      "page": 13,
+      "citation": "PIIA - Rénovations extérieures, 5, rue Nord (CCU 2026-106",
+      "anchor": "CCU 2026-106",
+      "spanStart": 1032,
+      "spanEnd": 1089
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26.08.26.7 approuve le projet de rénovation extérieure du bâtiment commercial et constitue une décision actuelle sur une demande de PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u16",
+   "status": "active",
+   "current": {
+    "label": "PIIA approuvé sous condition — construction neuve au 80-82, rue Yves-Malouin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "80-82, rue Yves-Malouin",
+    "page": 14,
+    "citation": "Que le conseil municipal approuve la demande PIIA pour une construction neuve au 80-82, rue Yves-Malouin, tel que demandé",
+    "anchor": "80-82, rue Yves-Malouin",
+    "spanStart": 836,
+    "spanEnd": 957
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA approuvé sous condition — construction neuve au 80-82, rue Yves-Malouin",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "80-82, rue Yves-Malouin",
+      "page": 14,
+      "citation": "Que le conseil municipal approuve la demande PIIA pour une construction neuve au 80-82, rue Yves-Malouin, tel que demandé",
+      "anchor": "80-82, rue Yves-Malouin",
+      "spanStart": 836,
+      "spanEnd": 957
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Une seule demande de PIIA est approuvée pour le 80-82, sous condition de présenter ultérieurement au CCU les plans d'aménagement du terrain pour approbation."
+    }
+   ]
+  },
+  {
+   "id": "u17",
+   "status": "active",
+   "current": {
+    "label": "PIIA approuvé — construction neuve aux 153 et 155, rue du Manège",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "153 et 155, rue du Manège",
+    "page": 14,
+    "citation": "Que le conseil approuve le projet de construction résidentielle neuve au 153 et 155, rue du Manège, tel que présenté",
+    "anchor": "153 et 155, rue du Manège",
+    "spanStart": 1744,
+    "spanEnd": 1860
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA approuvé — construction neuve aux 153 et 155, rue du Manège",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "153 et 155, rue du Manège",
+      "page": 14,
+      "citation": "Que le conseil approuve le projet de construction résidentielle neuve au 153 et 155, rue du Manège, tel que présenté",
+      "anchor": "153 et 155, rue du Manège",
+      "spanStart": 1744,
+      "spanEnd": 1860
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil approuve un dossier de PIIA commun aux deux adresses, qui constitue une unité distincte des deux demandes de dérogation mineure."
+    }
+   ]
+  }
+ ]
+}

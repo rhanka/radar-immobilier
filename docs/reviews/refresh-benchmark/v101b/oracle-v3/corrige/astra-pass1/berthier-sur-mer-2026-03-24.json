@@ -1,0 +1,158 @@
+{
+ "documentId": "berthier-sur-mer-2026-03-24",
+ "nextId": 5,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation du bail du terrain de La Marée Gourmande pour cinq ans",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "La Marée Gourmande",
+    "page": 4,
+    "citation": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain avec le nouveau propriétaire du bâtiment exploité sous le nom La Marée Gourmande, pour une durée de cinq (5) ans",
+    "anchor": "La Marée Gourmande",
+    "spanStart": 132,
+    "spanEnd": 325
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation du bail du terrain de La Marée Gourmande pour cinq ans",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "La Marée Gourmande",
+      "page": 4,
+      "citation": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain avec le nouveau propriétaire du bâtiment exploité sous le nom La Marée Gourmande, pour une durée de cinq (5) ans",
+      "anchor": "La Marée Gourmande",
+      "spanStart": 132,
+      "spanEnd": 325
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise la conclusion d'un bail sur un terrain municipal, soit un acte foncier décidé à inclure même pour un usage non résidentiel."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Adoption du deuxième projet de règlement 369 modifiant la grille des usages du règlement de zonage 265",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "369",
+    "page": 6,
+    "citation": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages du règlement de zonage numéro 265 soit adopté",
+    "anchor": "règlement numéro 369",
+    "spanStart": 1412,
+    "spanEnd": 1536
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du deuxième projet de règlement 369 modifiant la grille des usages du règlement de zonage 265",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "369",
+      "page": 6,
+      "citation": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages du règlement de zonage numéro 265 soit adopté",
+      "anchor": "règlement numéro 369",
+      "spanStart": 1412,
+      "spanEnd": 1536
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-067 adopte explicitement le deuxième projet du règlement 369, sans créer d'unité supplémentaire pour les étapes historiques ou sa reproduction en annexe."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de règlement 372 modifiant le règlement 360 relatif à la démolition d'immeubles",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "372",
+    "page": 7,
+    "citation": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le règlement numéro 360 relatif à la démolition d'immeubles soit adopté",
+    "anchor": "règlement numéro 372",
+    "spanStart": 248,
+    "spanEnd": 395
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 372 modifiant le règlement 360 relatif à la démolition d'immeubles",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "372",
+      "page": 7,
+      "citation": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le règlement numéro 360 relatif à la démolition d'immeubles soit adopté",
+      "anchor": "règlement numéro 372",
+      "spanStart": 248,
+      "spanEnd": 395
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-068 adopte le premier projet du règlement 372 sur la démolition d'immeubles, objet réglementaire d'urbanisme explicite."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de règlement 373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "373",
+    "page": 7,
+    "citation": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à la salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté",
+    "anchor": "Règlement numéro373",
+    "spanStart": 1613,
+    "spanEnd": 1775
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 373 relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "373",
+      "page": 7,
+      "citation": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à la salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté",
+      "anchor": "Règlement numéro373",
+      "spanStart": 1613,
+      "spanEnd": 1775
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-069 adopte le premier projet du règlement 373; l'avis de motion et le dépôt du 9 mars sont des rappels historiques qui ne créent pas d'unités supplémentaires."
+    }
+   ]
+  }
+ ]
+}

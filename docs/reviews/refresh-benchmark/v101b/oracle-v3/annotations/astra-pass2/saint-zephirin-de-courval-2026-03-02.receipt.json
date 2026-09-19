@@ -1,0 +1,36 @@
+{
+ "documentId": "saint-zephirin-de-courval-2026-03-02",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "97f7e0b7e51578bbfebf6ce80068634ffb184b229280037be9abe204a107acd4",
+ "inputSha256": "46abb20275b9ec617ba26a1ac590a8fc968e19a7d80fe3ef62d5a49d56bd586e",
+ "responseSha256": "fa076b1f66818badc5beede7c0e7ed6c504c4fa038c8f614b1b0b29198c69089",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 54679,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 9309,
+  "outputTokens": 1712,
+  "totalTokens": 11021
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 54676,
+  "requestId": null
+ },
+ "at": "2026-09-18T14:13:37.080Z"
+}

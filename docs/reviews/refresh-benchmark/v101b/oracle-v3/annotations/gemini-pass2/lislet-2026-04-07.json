@@ -1,0 +1,76 @@
+{
+ "documentId": "lislet-2026-04-07",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "efebde05d360c9d992a4b8fc70721d5306bb4bf14ac13bfa9caa7734911b6227",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u04\",\"unit\":{\"label\":\"Entérinement prévu d’une décision sur l’entreposage temporaire d’un conteneur — 2, rue Chanoine-Martel\",\"stage\":\"adoption\",\"procedure\":null,\"objet\":\"2, rue Chanoine-Martel\",\"page\":2,\"citation\":\"33. Entérinement de la décision concernant la demande d’entreposage temporaire d’un conteneur au\\n2, rue Chanoine-Martel\",\"anchor\":\"2, rue Chanoine-Martel\"},\"reason\":\"La citation doit être recopiée à l'identique du texte source, qui contient un saut de ligne après 'au'.\"},\n {\"op\":\"correct\",\"id\":\"u05\",\"unit\":{\"label\":\"Demande prévue à la CPTAQ — renouvellement du permis d’exploitation de la sablière Michel Gamache & Frères\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"sablière (Michel Gamache & Frères)\",\"page\":2,\"citation\":\"34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\\nsablière (Michel Gamache & Frères)\",\"anchor\":\"sablière (Michel Gamache & Frères)\"},\"reason\":\"La citation et l'ancre étaient tronquées (parenthèse fermante manquante) et ne reproduisaient pas le saut de ligne présent dans le texte.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Entérinement prévu d’une décision sur l’entreposage temporaire d’un conteneur — 2, rue Chanoine-Martel",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2, rue Chanoine-Martel",
+    "page": 2,
+    "citation": "33. Entérinement de la décision concernant la demande d’entreposage temporaire d’un conteneur au\n2, rue Chanoine-Martel",
+    "anchor": "2, rue Chanoine-Martel"
+   },
+   "reason": "La citation doit être recopiée à l'identique du texte source, qui contient un saut de ligne après 'au'."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Demande prévue à la CPTAQ — renouvellement du permis d’exploitation de la sablière Michel Gamache & Frères",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "sablière (Michel Gamache & Frères)",
+    "page": 2,
+    "citation": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)",
+    "anchor": "sablière (Michel Gamache & Frères)"
+   },
+   "reason": "La citation et l'ancre étaient tronquées (parenthèse fermante manquante) et ne reproduisaient pas le saut de ligne présent dans le texte."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "gemini-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "33. Entérinement de la décision concernant la demande d’entreposage temporaire d’un conteneur au\n2, rue Chanoine-Martel"
+  },
+  {
+   "step": "gemini-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

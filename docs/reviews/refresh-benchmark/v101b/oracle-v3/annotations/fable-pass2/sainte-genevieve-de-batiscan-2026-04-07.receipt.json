@@ -1,0 +1,75 @@
+{
+ "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "9d523d36752582a0448cd5695ff41c885691c4b98d0a03b9df489ebd43629e93",
+ "inputSha256": "f36bf70d03053ec6ba4e1cd192f71cc9db90af92747905b02d2ddf58fb7b4c8a",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "rc": 0,
+ "latencyMs": 46285,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "80fd47a6-9f4e-4683-98b4-0e6feebd6c04",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 3757,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 28530,
+   "webSearchRequests": 0,
+   "costUSD": 0.7591432499999999,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 3747,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 28530,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 3757,
+  "output_tokens_details": {
+   "thinking_tokens": 3747
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 28530,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 3757,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 28530,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 28530
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.7591432499999999,
+ "durationApiMs": 44391,
+ "stderrTail": "",
+ "at": "2026-09-18T17:53:02.566Z"
+}

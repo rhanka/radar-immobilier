@@ -1,0 +1,311 @@
+{
+ "documentId": "brownsburg-chatham-2026-03-10",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "74d11969a462e6c5249baa54eed2ad32210241b1b1ec2b5ac6d3225521ce65b0",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-066 p.18 : le conseil « s’engage à céder une partie des lots 4 235 205 et 5 641 417 », acte foncier explicite adopté; citation et page exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-086 p.41-43 : le conseil accepte la demande de PIIA 2026-006 pour le lot 4 234 857 avec conditions; en-tête cité exact en page 41, étape piia.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-087 : « QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00030 » pour le lot projeté 6 721 120, texte exact en page 44.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-088 p.45 : acceptation de DM-2026-00031 pour le lot projeté 6 721 733, emprise de 13 m; citation exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-089 p.46 : acceptation de DM-2026-00032 pour le lot projeté 6 721 108, profondeur 27,46 m; citation exacte.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-090 : le « QUE le conseil municipal accepte » DM-2026-00033 pour le lot 6 721 109 figure en page 48; citation exacte.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-091 p.49 : acceptation de DM-2026-00034 pour le lot projeté 6 721 110, profondeur 26,59 m; citation exacte.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-092 p.50 : acceptation de DM-2026-00035 pour le lot projeté 6 721 111, profondeur 27,76 m; citation exacte.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-093 : le dispositif acceptant DM-2026-00036 pour le lot 6 686 339 est en page 52; citation exacte.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-094 p.53 : acceptation de DM-2026-00037 pour le lot projeté 6 686 340, profondeur 26,78 m; citation exacte.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-095 p.54 : acceptation de DM-2026-00038 pour le lot projeté 6 686 341, profondeur 27,31 m; citation exacte.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-096 p.55 : acceptation de DM-2026-00039 pour le lot projeté 6 686 343, profondeur 27,70 m; citation exacte.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-097 : le dispositif acceptant DM-2026-00040 pour le lot 6 686 344 est en page 57; citation exacte.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-098 : le dispositif acceptant DM-2025-00725 (zonage 197-2013, lot projeté 6 703 926, enseigne) est en page 58; citation exacte.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-099 dont l’en-tête « DEMANDE DE PIIA NUMÉRO 2026-007 … (C302) » est en page 58; le conseil accepte la demande, étape piia.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-100 p.59-61 : PIIA 2026-008 accepté pour la remise et l’abri à bois au 815, route des Outaouais; en-tête cité exact en page 59.\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-101 p.61-62 : PIIA 2026-009 accepté pour une habitation bifamiliale sur le lot 4 235 765; en-tête cité exact en page 61.\"},{\"item\":\"i18\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-102 p.62-63 : PIIA 2026-010 accepté pour la rénovation au 332-332A, rue Saint-Joseph; en-tête cité exact en page 62.\"},{\"item\":\"i19\",\"choice\":\"v2\",\"reason\":\"Résolution 26-03-103 p.63-64 : PIIA 2026-011 accepté pour le bâtiment agricole au 309, route du Canton (lot 4 423 780); la citation de v2 est un extrait exact de l’en-tête et le label précise le lot, alors que la citation de v1 omet le tiret séparant « AGRICOLE » et « PROPRIÉTÉ ».\"},{\"item\":\"i20\",\"choice\":\"v1\",\"reason\":\"Point 14.19 p.64 : « Madame la conseillère Martine Renaud donne avis de motion … le Règlement numéro 361-2026 »; avis de motion distinct du projet selon la règle « Avis de motion et projet actuels séparés ».\"},{\"item\":\"i21\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-104 p.65-66 : adoption du projet de règlement 361-2026 (LAU art. 145.41, consultation publique le 7 avril 2026); étape projet_reglement distincte de l’avis de motion.\"},{\"item\":\"i22\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-105 p.67 : contribution de 810 $ pour fins de parcs liée au permis de lotissement 2025-00021, contrepartie en argent acceptée; citation exacte, acte foncier inclus.\"},{\"item\":\"i23\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-106 p.68-69 : contribution de 16 950 $ liée au permis de lotissement 2026-00001, acceptée; citation exacte en page 68.\"},{\"item\":\"i24\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-107 p.70 : contribution de 21 150 $ liée au permis de lotissement 2026-00002, acceptée; citation exacte.\"},{\"item\":\"i25\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-108 p.71 : contribution de 123 000 $ liée au permis de lotissement 2026-00005, acceptée; citation exacte.\"},{\"item\":\"i26\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-110 p.73-74 : acceptation provisoire des travaux du prolongement de la rue de la Septaco selon le protocole d’entente promoteur, avec engagement de reprise de rue; développement explicite, non simple entretien de voirie.\"},{\"item\":\"i27\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-111 p.74-75 : autorisation de signer l’entente promoteur avec Gestion Or Concept inc. pour le domaine Oria (prolongement des rues Lacasse et Saint-Denis); en-tête cité exact.\"},{\"item\":\"i28\",\"choice\":\"v2\",\"reason\":\"Résolution 26-03-112 p.75-76 : autorisation de dépôt au MELCCFP pour le Domaine Oria, lots projetés 6 721 120, 6 721 121, 6 721 733 et 6 721 734; v2 porte l’objet foncier explicite (Domaine Oria) alors que « déclaration de conformité » n’est pas un objet réglementaire ou foncier.\"},{\"item\":\"i29\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-113 p.77 : le conseil « s’engage à céder, si le besoin se présente, un terrain à titre gratuit pour l’établissement d’une école secondaire »; acte foncier explicite adopté, label conforme au caractère conditionnel.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v2"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  },
+  {
+   "item": "i22",
+   "unitId": "u22",
+   "current": "v1"
+  },
+  {
+   "item": "i23",
+   "unitId": "u23",
+   "current": "v1"
+  },
+  {
+   "item": "i24",
+   "unitId": "u24",
+   "current": "v1"
+  },
+  {
+   "item": "i25",
+   "unitId": "u25",
+   "current": "v1"
+  },
+  {
+   "item": "i26",
+   "unitId": "u26",
+   "current": "v1"
+  },
+  {
+   "item": "i27",
+   "unitId": "u27",
+   "current": "v1"
+  },
+  {
+   "item": "i28",
+   "unitId": "u28",
+   "current": "v2"
+  },
+  {
+   "item": "i29",
+   "unitId": "u29",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 26-03-066 p.18 : le conseil « s’engage à céder une partie des lots 4 235 205 et 5 641 417 », acte foncier explicite adopté; citation et page exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 26-03-086 p.41-43 : le conseil accepte la demande de PIIA 2026-006 pour le lot 4 234 857 avec conditions; en-tête cité exact en page 41, étape piia."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 26-03-087 : « QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00030 » pour le lot projeté 6 721 120, texte exact en page 44."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Résolution 26-03-088 p.45 : acceptation de DM-2026-00031 pour le lot projeté 6 721 733, emprise de 13 m; citation exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution 26-03-089 p.46 : acceptation de DM-2026-00032 pour le lot projeté 6 721 108, profondeur 27,46 m; citation exacte."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Résolution 26-03-090 : le « QUE le conseil municipal accepte » DM-2026-00033 pour le lot 6 721 109 figure en page 48; citation exacte."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Résolution 26-03-091 p.49 : acceptation de DM-2026-00034 pour le lot projeté 6 721 110, profondeur 26,59 m; citation exacte."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Résolution 26-03-092 p.50 : acceptation de DM-2026-00035 pour le lot projeté 6 721 111, profondeur 27,76 m; citation exacte."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Résolution 26-03-093 : le dispositif acceptant DM-2026-00036 pour le lot 6 686 339 est en page 52; citation exacte."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Résolution 26-03-094 p.53 : acceptation de DM-2026-00037 pour le lot projeté 6 686 340, profondeur 26,78 m; citation exacte."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Résolution 26-03-095 p.54 : acceptation de DM-2026-00038 pour le lot projeté 6 686 341, profondeur 27,31 m; citation exacte."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Résolution 26-03-096 p.55 : acceptation de DM-2026-00039 pour le lot projeté 6 686 343, profondeur 27,70 m; citation exacte."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "Résolution 26-03-097 : le dispositif acceptant DM-2026-00040 pour le lot 6 686 344 est en page 57; citation exacte."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Résolution 26-03-098 : le dispositif acceptant DM-2025-00725 (zonage 197-2013, lot projeté 6 703 926, enseigne) est en page 58; citation exacte."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Résolution 26-03-099 dont l’en-tête « DEMANDE DE PIIA NUMÉRO 2026-007 … (C302) » est en page 58; le conseil accepte la demande, étape piia."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "Résolution 26-03-100 p.59-61 : PIIA 2026-008 accepté pour la remise et l’abri à bois au 815, route des Outaouais; en-tête cité exact en page 59."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "Résolution 26-03-101 p.61-62 : PIIA 2026-009 accepté pour une habitation bifamiliale sur le lot 4 235 765; en-tête cité exact en page 61."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "Résolution 26-03-102 p.62-63 : PIIA 2026-010 accepté pour la rénovation au 332-332A, rue Saint-Joseph; en-tête cité exact en page 62."
+  },
+  {
+   "item": "i19",
+   "choice": "v2",
+   "reason": "Résolution 26-03-103 p.63-64 : PIIA 2026-011 accepté pour le bâtiment agricole au 309, route du Canton (lot 4 423 780); la citation de v2 est un extrait exact de l’en-tête et le label précise le lot, alors que la citation de v1 omet le tiret séparant « AGRICOLE » et « PROPRIÉTÉ »."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "Point 14.19 p.64 : « Madame la conseillère Martine Renaud donne avis de motion … le Règlement numéro 361-2026 »; avis de motion distinct du projet selon la règle « Avis de motion et projet actuels séparés »."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "Résolution 26-03-104 p.65-66 : adoption du projet de règlement 361-2026 (LAU art. 145.41, consultation publique le 7 avril 2026); étape projet_reglement distincte de l’avis de motion."
+  },
+  {
+   "item": "i22",
+   "choice": "v1",
+   "reason": "Résolution 26-03-105 p.67 : contribution de 810 $ pour fins de parcs liée au permis de lotissement 2025-00021, contrepartie en argent acceptée; citation exacte, acte foncier inclus."
+  },
+  {
+   "item": "i23",
+   "choice": "v1",
+   "reason": "Résolution 26-03-106 p.68-69 : contribution de 16 950 $ liée au permis de lotissement 2026-00001, acceptée; citation exacte en page 68."
+  },
+  {
+   "item": "i24",
+   "choice": "v1",
+   "reason": "Résolution 26-03-107 p.70 : contribution de 21 150 $ liée au permis de lotissement 2026-00002, acceptée; citation exacte."
+  },
+  {
+   "item": "i25",
+   "choice": "v1",
+   "reason": "Résolution 26-03-108 p.71 : contribution de 123 000 $ liée au permis de lotissement 2026-00005, acceptée; citation exacte."
+  },
+  {
+   "item": "i26",
+   "choice": "v1",
+   "reason": "Résolution 26-03-110 p.73-74 : acceptation provisoire des travaux du prolongement de la rue de la Septaco selon le protocole d’entente promoteur, avec engagement de reprise de rue; développement explicite, non simple entretien de voirie."
+  },
+  {
+   "item": "i27",
+   "choice": "v1",
+   "reason": "Résolution 26-03-111 p.74-75 : autorisation de signer l’entente promoteur avec Gestion Or Concept inc. pour le domaine Oria (prolongement des rues Lacasse et Saint-Denis); en-tête cité exact."
+  },
+  {
+   "item": "i28",
+   "choice": "v2",
+   "reason": "Résolution 26-03-112 p.75-76 : autorisation de dépôt au MELCCFP pour le Domaine Oria, lots projetés 6 721 120, 6 721 121, 6 721 733 et 6 721 734; v2 porte l’objet foncier explicite (Domaine Oria) alors que « déclaration de conformité » n’est pas un objet réglementaire ou foncier."
+  },
+  {
+   "item": "i29",
+   "choice": "v1",
+   "reason": "Résolution 26-03-113 p.77 : le conseil « s’engage à céder, si le besoin se présente, un terrain à titre gratuit pour l’établissement d’une école secondaire »; acte foncier explicite adopté, label conforme au caractère conditionnel."
+  }
+ ]
+}

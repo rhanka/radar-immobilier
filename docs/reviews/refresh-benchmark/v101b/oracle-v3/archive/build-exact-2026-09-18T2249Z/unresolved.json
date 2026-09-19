@@ -1,0 +1,3879 @@
+{
+ "interim": false,
+ "note": "pour l'owner : points restés non unanimes après arbitrage (ou version non ancrée), exclus de la référence",
+ "count": 47,
+ "entries": [
+  {
+   "documentId": "saint-polycarpe-2026-01-19",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation prévue de l’état relatif à la vente des immeubles pour défaut de paiement de taxes",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "vente des immeubles",
+      "page": 1,
+      "citation": "AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES",
+      "anchor": "VENTE DES IMMEUBLES",
+      "spanStart": 1633,
+      "spanEnd": 1730
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 5.2, page 1, prévoit l’autorisation de l’état relatif à la vente des immeubles pour défaut de paiement de taxes municipales, un acte foncier inclus."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 5.2 (page 1) atteste un acte foncier prévu (vente des immeubles pour défaut de taxes) avec citation exacte ; unité retenue comme représentation unique de ce fait, les points d'ordre du jour étant « prévus »."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'état de vente pour défaut de paiement de taxes relève des finances municipales et ne comporte aucun objet foncier explicite."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le point 5.2 prévoit une « AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES », ce qui nomme explicitement un objet foncier inclus par les règles. Le classement sous « FINANCES » ne justifie pas son exclusion : l’unité concerne l’autorisation prévue de cet état, sans attester une vente réalisée."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Le point 5.2 est classé sous « 5. FINANCES » et vise l’« ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES », une procédure de recouvrement fiscal sans « objet réglementaire ou foncier explicite » (aucun lot ni immeuble identifié) ; les positions A et B assimilent à tort un état de perception de taxes à un acte foncier, alors que la règle exclut les « comptes » du rappel."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Le point 5.2 relève des finances municipales et ne désigne aucun objet foncier explicite ; un état général de vente d'immeubles pour non-paiement de taxes ne constitue pas un acte foncier ciblé au sens des règles d'inclusion."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 1,
+     "citation": "AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-polycarpe-2026-01-19",
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u04",
+   "verificationItem": "i04",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Avis de motion prévu — règlement 169-2019-01 remplaçant le règlement sur les nuisances",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "169-2019-01",
+      "page": 2,
+      "citation": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT LE RÈGLEMENT SUR LES NUISANCES (RMH 450",
+      "anchor": "RÈGLEMENT NO 169-2019-01",
+      "spanStart": 1531,
+      "spanEnd": 1640
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 10.1, page 2, prévoit explicitement un avis de motion pour le règlement no 169-2019-01 remplaçant le règlement sur les nuisances."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 10.1 (page 2) atteste un avis de motion prévu pour le règlement no 169-2019-01, objet réglementaire explicite ; citation, étape avis_motion et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le règlement sur les nuisances ne relève pas de l'urbanisme et constitue un fait hors gold dont la citation est de surcroît tronquée."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "Le point 10.1 prévoit explicitement un « AVIS DE MOTION » pour le « RÈGLEMENT NO 169-2019-01 REMPLAÇANT LE RÈGLEMENT SUR LES NUISANCES (RMH 450) », soit un objet réglementaire nommé et une étape prévue. Les règles fournies ne justifient pas l’exclusion catégorique des règlements sur les nuisances, et la parenthèse finale manquante dans la citation proposée n’altère ni l’objet ni l’étape."
+    },
+    "fable": {
+     "item": "a03",
+     "choice": "absent",
+     "reason": "Le point 10.1 concerne un « RÈGLEMENT NO 169-2019-01 REMPLAÇANT LE RÈGLEMENT SUR LES NUISANCES (RMH 450) », règlement harmonisé de paix et d’ordre public qui ne relève ni de l’urbanisme, ni des PIIA, ni des actes fonciers visés par les inclusions du corrigé ; conformément à la règle « un fait complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur », il ne crée pas d’unité gold malgré l’objet réglementaire explicite invoqué par A et B."
+    },
+    "gemini": {
+     "item": "a03",
+     "choice": "absent",
+     "reason": "Le règlement no 169-2019-01 sur les nuisances ne relève pas du domaine de l'urbanisme ou des actes fonciers, constituant un fait hors gold, et la citation fournie dans v1 est de surcroît tronquée."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 2,
+     "citation": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT LE RÈGLEMENT SUR LES NUISANCES (RMH 450"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-roch-de-lachigan-2026-05-11",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Exercice du droit de préemption prévu — vente du lot 6 141 751",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 141 751",
+      "page": 2,
+      "citation": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption",
+      "anchor": "lot 6 141 751",
+      "spanStart": 436,
+      "spanEnd": 498
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Le point 8.5, page 2, prévoit l'exercice du droit de préemption sur le lot 6 141 751, mais n'atteste pas l'étape « adoption » proposée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Acte foncier explicite (lot 6 141 751, droit de préemption) attesté mot pour mot au point 8.5 de l'ordre du jour, page 2 ; point prévu, inclus au titre des actes fonciers."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Acte foncier prévu à l'ordre du jour concernant l'exercice du droit de préemption sur le lot 6 141 751, textuellement attesté en page 2."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Le point 8.5, « Vente du lot lot 6 141 751-exercise du droit de préemption », atteste un acte foncier prévu, mais ne mentionne aucune étape d’adoption. L’inclusion des actes fonciers défendue par A et C est pertinente, mais ne valide pas l’étape « adoption » ajoutée par la seule version proposée."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le point « 8.5 Vente du lot lot 6 141 751-exercise du droit de préemption » (page 2) est un acte foncier explicite (lot cadastral nommé), inclus au rappel selon la règle « Inclusions: urbanisme, petits PIIA et actes fonciers » ; un point d'ordre du jour est une unité « prévue » et le libellé v1 dit bien « prévu », sans affirmer de décision acquise. L'objection de B sur l'étape « adoption » ne justifie pas « absent » : elle supprimerait une unité textuellement attestée, alors que le libellé « prévu » respecte la règle sur les ordres du jour."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le point 8.5 atteste textuellement « Vente du lot lot 6 141 751-exercise du droit de préemption », ce qui constitue un acte foncier explicite prévu à l'ordre du jour et expressément inclus par les règles du corrigé, rendant le rejet de l'annotateur B injustifié."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 2,
+     "citation": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-roch-de-lachigan-2026-05-11",
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation prévue de modification d'affichage — immeuble cité au 1224 rue Principale",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1224 rue Principale",
+      "page": 2,
+      "citation": "10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation",
+      "anchor": "1224 rue Principale",
+      "spanStart": 1254,
+      "spanEnd": 1348
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Le point 10.4, page 2, prévoit une autorisation de modification d'affichage au 1224 rue Principale, sans attester l'étape « adoption » proposée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 10.4 cité exactement en page 2 (modification d'affichage à un immeuble cité, 1224 rue Principale, autorisation) ; objet urbanistique explicite et point prévu, inclus au rappel."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Autorisation de modification d'affichage sur un immeuble cité prévue à l'ordre du jour pour le 1224 rue Principale, textuellement attestée en page 2."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "Le point 10.4 annonce une « Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation » dans un « PROJET D’ORDRE DU JOUR », sans identifier une étape d’adoption. L’objet urbanistique est bien explicite et prévu, comme le relèvent A et C, mais v1 ne respecte pas l’exigence d’une étape attestée par le texte."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "Le point « 10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation » (page 2, section 10 SERVICE DE L'URBANISME) est un objet d'urbanisme explicite (immeuble cité, adresse nommée) et donc une unité « prévue » de l'ordre du jour. Le libellé v1 indique « prévue » conformément à la règle « attestent des points prévus et non des décisions acquises » ; choisir « absent » comme B écarterait sans motif une unité attestée mot pour mot."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "La demande de modification d'affichage pour l'immeuble cité au 1224 rue Principale figure explicitement sous le Service de l'urbanisme au point 10.4 (« Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation ») et constitue une unité d'urbanisme patrimoniale prévue, à inclure selon les règles."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 2,
+     "citation": "10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-roch-de-lachigan-2026-05-11",
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation prévue de travaux — immeuble cité au 1484, rue Principale",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1484, rue Principale",
+      "page": 2,
+      "citation": "10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation",
+      "anchor": "1484, rue Principale",
+      "spanStart": 1349,
+      "spanEnd": 1431
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Le point 10.5, page 2, prévoit une autorisation de travaux sur l'immeuble cité au 1484, rue Principale, sans attester l'étape « adoption » proposée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 10.5 cité exactement en page 2 (travaux sur un immeuble cité, 1484, rue Principale, autorisation) ; objet urbanistique explicite et point prévu, inclus au rappel."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Autorisation de travaux sur un immeuble cité prévue à l'ordre du jour pour le 1484, rue Principale, textuellement attestée en page 2."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a03",
+     "choice": "absent",
+     "reason": "Le point 10.5, « Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation », atteste une autorisation prévue à l’ordre du jour, non une étape explicitement qualifiée d’adoption. A et C établissent correctement la présence de l’objet urbanistique, mais cela ne suffit pas à retenir v1 avec son étape « adoption » non étayée."
+    },
+    "fable": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "Le point « 10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation » (page 2, section urbanisme) est un objet urbanistique explicite (immeuble cité, adresse nommée) et constitue une unité « prévue » de l'ordre du jour, ce que le libellé v1 reflète. La position « absent » de B, fondée sur le seul mot « adoption » de l'étape, contredit la règle qui reconnaît les points prévus des ordres du jour comme unités du rappel."
+    },
+    "gemini": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "Le point 10.5 atteste mot pour mot une « Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation », objet d'urbanisme patrimonial explicite prévu à l'ordre du jour et expressément visé par les inclusions."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 2,
+     "citation": "10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation"
+    }
+   ]
+  },
+  {
+   "documentId": "stratford-2026-04-20",
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u04",
+   "verificationItem": "i04",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Examen prévu du bail du bureau de poste",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Bail bureau de poste",
+      "page": 1,
+      "citation": "Bail bureau de poste",
+      "anchor": "Bail bureau de poste",
+      "spanStart": 1176,
+      "spanEnd": 1196
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point « Bail bureau de poste » figure pour décision à la page 1 et constitue un objet foncier prévu, même non résidentiel, sans étape plus précise attestée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "« Bail bureau de poste » n'est pas un objet réglementaire ou foncier explicite (aucun lot ni adresse, un bail est un contrat et non un acte foncier de type vente/achat/servitude), donc hors du périmètre du rappel ; fait complémentaire éventuel à signaler séparément."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Un bail pour un bureau de poste est un contrat de louage/services et non un acte foncier ou une unité d'urbanisme."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "« Bail bureau de poste », inscrit pour « Décision », désigne une location immobilière prévue, relevant des « actes fonciers, même non résidentiels ». Les règles n’exigent ni lot cadastral ni adresse, et rien ne permet de requalifier ce bail en marché de services ; l’étape « inconnu » respecte le manque de précision."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "« Bail bureau de poste » (section Stratford 2030, entre contributions et ententes) est un contrat de louage sans lot ni adresse, donc pas un « objet réglementaire ou foncier explicite » ni un acte foncier au sens des inclusions (vente, achat, servitude) ; il relève des contrats administratifs exclus du rappel, et un fait complémentaire éventuel se signale séparément sans toucher le dénominateur, ce qui écarte la position de B."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "La mention « Bail bureau de poste » relève d'un contrat de louage sans désignation foncière explicite (ni lot, ni adresse), ce qui l'exclut du périmètre des actes fonciers et de l'urbanisme du gold."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 1,
+     "citation": "Bail bureau de poste"
+    }
+   ]
+  },
+  {
+   "documentId": "stratford-2026-04-20",
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Achat prévu d’un terrain sur la rue des Érables",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "rue des Érables",
+      "page": 1,
+      "citation": "Achat d’un terrain sur la rue des Érables",
+      "anchor": "rue des Érables",
+      "spanStart": 1391,
+      "spanEnd": 1432
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "La page 1 inscrit l’achat du terrain pour décision, mais n’annonce pas explicitement une adoption, de sorte que l’étape « adoption » proposée n’est pas attestée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le point 4.2 « Achat d'un terrain sur la rue des Érables » est attesté page 1 comme point prévu (Décision) ; acte foncier explicite inclus par la règle « actes fonciers, même non résidentiels », label « prévu » conforme à un ordre du jour."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Le texte atteste en page 1 l'achat prévu d'un terrain sur la rue des Érables, acte foncier au stade d'adoption prévu."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a03",
+     "choice": "absent",
+     "reason": "« Achat d’un terrain sur la rue des Érables » atteste bien un objet foncier prévu, mais la seule indication procédurale est « Décision », sans adoption annoncée. La version v1 est donc écartée pour son étape « adoption » non attestée, et non parce que l’achat serait hors périmètre."
+    },
+    "fable": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "Le point 4.2 « Achat d'un terrain sur la rue des Érables » marqué « Décision » en page 1 est un acte foncier explicite avec objet identifié, inclus par la règle « actes fonciers, même non résidentiels » ; le libellé « prévu » respecte le principe qu'un ordre du jour atteste un point prévu et non une décision acquise, et la mention « Décision » attestant une résolution d'adoption attendue, l'objection de B sur le stage ne justifie pas de supprimer l'unité."
+    },
+    "gemini": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "Le point 4.2 « Achat d’un terrain sur la rue des Érables » est un acte foncier explicite inscrit pour décision à l'ordre du jour, ce qui justifie son inclusion au stade d'adoption prévu."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 1,
+     "citation": "Achat d’un terrain sur la rue des Érables"
+    }
+   ]
+  },
+  {
+   "documentId": "stratford-2026-04-20",
+   "item": "a04",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Vente prévue d’une lisière de terrain sur le chemin des Hauts-Cantons",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "chemin des Hauts-Cantons",
+      "page": 1,
+      "citation": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons",
+      "anchor": "chemin des Hauts-Cantons",
+      "spanStart": 1433,
+      "spanEnd": 1495
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "La vente de la lisière de terrain est prévue pour décision à la page 1, mais le texte ne précise pas l’étape « adoption » attribuée à cette version."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le point 4.3 « Vente d'une lisière de terrain sur le chemin des Hauts-Cantons » est attesté page 1 ; acte foncier explicite, point prévu et non décision acquise, citation exacte."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Le texte atteste en page 1 la vente prévue d'une lisière de terrain sur le chemin des Hauts-Cantons, acte foncier au stade d'adoption prévu."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a04",
+     "choice": "absent",
+     "reason": "« Vente d’une lisière de terrain sur le chemin des Hauts-Cantons » est un acte foncier inscrit pour « Décision », mais le texte ne précise pas une étape d’adoption. Le caractère « prévu » du libellé ne corrige pas cette attribution non attestée dans v1."
+    },
+    "fable": {
+     "item": "a04",
+     "choice": "v1",
+     "reason": "Le point 4.3 « Vente d'une lisière de terrain sur le chemin des Hauts-Cantons » marqué « Décision » en page 1 est un acte foncier explicite (vente) avec objet identifié, unité prévue d'un ordre du jour conformément au libellé « prévue » ; la mention « Décision » atteste la résolution attendue, donc la position « absent » de B, fondée uniquement sur l'étiquette de stage, est écartée."
+    },
+    "gemini": {
+     "item": "a04",
+     "choice": "v1",
+     "reason": "Le point 4.3 « Vente d’une lisière de terrain sur le chemin des Hauts-Cantons » constitue un acte foncier explicite inscrit pour décision au conseil, correspondant bien au stade d'adoption prévu."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 1,
+     "citation": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons"
+    }
+   ]
+  },
+  {
+   "documentId": "stratford-2026-04-20",
+   "item": "a05",
+   "kind": "split",
+   "unitId": "u07",
+   "verificationItem": "i07",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Décision prévue sur une servitude d’écoulement des eaux — 467 rang Beau-Lac",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "467 rang Beau-Lac",
+      "page": 1,
+      "citation": "Servitude d’écoulement des eaux au 467 rang Beau-Lac",
+      "anchor": "467 rang Beau-Lac",
+      "spanStart": 1496,
+      "spanEnd": 1548
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "La servitude au 467 rang Beau-Lac est inscrite pour décision à la page 1, sans mention d’une adoption permettant de confirmer l’étape proposée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le point 4.4 « Servitude d'écoulement des eaux au 467 rang Beau-Lac » est attesté page 1 ; servitude = acte foncier explicite avec adresse identifiée, point prévu, citation exacte."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Le texte atteste en page 1 l'octroi prévu d'une servitude d'écoulement des eaux au 467 rang Beau-Lac, acte foncier au stade d'adoption prévu."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a05",
+     "choice": "absent",
+     "reason": "« Servitude d’écoulement des eaux au 467 rang Beau-Lac » établit un objet foncier prévu pour « Décision », sans annoncer son adoption ni son octroi. L’inclusion des servitudes dans le périmètre ne suffit donc pas à valider l’étape « adoption » proposée par v1."
+    },
+    "fable": {
+     "item": "a05",
+     "choice": "v1",
+     "reason": "Le point 4.4 « Servitude d'écoulement des eaux au 467 rang Beau-Lac » marqué « Décision » en page 1 est un acte foncier explicite (servitude) avec adresse identifiée, point prévu et non décision acquise selon le libellé ; l'objection de B sur l'absence du mot « adoption » ne suffit pas à écarter une unité foncière explicite attestée par le texte."
+    },
+    "gemini": {
+     "item": "a05",
+     "choice": "v1",
+     "reason": "Le point 4.4 « Servitude d’écoulement des eaux au 467 rang Beau-Lac » atteste un acte foncier explicite avec localisation précise, prévu pour décision (adoption) par le conseil municipal."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 1,
+     "citation": "Servitude d’écoulement des eaux au 467 rang Beau-Lac"
+    }
+   ]
+  },
+  {
+   "documentId": "grenville-sur-la-rouge-2026-04-14",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u04",
+   "verificationItem": "i04",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Refus de dérogation mineure — 47, rue Donald Campbell — abri d’auto",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "47, rue Donald Campbell",
+      "page": 2,
+      "citation": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus d’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto",
+      "anchor": "47, rue Donald Campbell",
+      "spanStart": 1206,
+      "spanEnd": 1370
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 2 atteste expressément le refus de la dérogation mineure concernant l’abri d’auto au 47, rue Donald Campbell, procédure distincte du PIIA."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le texte page 2 atteste le « refus d'accorder la demande de dérogation mineure concernant la construction d'un abri d'auto », objet distinct de type derogation_mineure sur la même adresse, donc pas un doublon même type/même fait; les refus doivent rester des refus."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La dérogation mineure n'est mentionnée que comme motif justificatif du refus de PIIA pour le même dossier, or les mentions historiques du même dossier ne multiplient pas le rappel."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le texte atteste expressément le « refus d’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto empiétant sur la marge latérale droite du terrain » au 47, rue Donald Campbell. Cette dérogation constitue un objet distinct du PIIA : sa mention comme motif du refus de PIIA ne suffit pas à en faire un rappel historique, et la règle précise que « les refus doivent rester des refus »."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le texte page 2 atteste explicitement « le refus d'accorder la demande de dérogation mineure concernant la construction d'un abri d'auto empiétant sur la marge latérale droite du terrain » au 47, rue Donald Campbell : objet réglementaire explicite, étape derogation_mineure distincte du PIIA (types différents, donc pas un « doublon même type/même fait »), et rien dans le texte ne présente ce refus comme une décision antérieure ou une simple mention historique. La position A est écartée car la règle sur les mentions historiques ne s'applique pas à un fait non daté comme antérieur et de type différent ; « les refus doivent rester des refus »."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La seule décision adoptée lors de la séance est le « Refus de la demande de PIIA du 47, rue Donald Campbell », la mention « compte tenu du refus d’accorder la demande de dérogation mineure » n'étant qu'un motif justificatif ou rappel historique au sein du même dossier qui, selon les règles, « ne crée pas d'unité en plus de la résolution qui la traite » et ne doit pas multiplier le rappel. Les positions B et C sont rejetées car elles créent une unité distincte à partir d'un simple considérant causal."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 2,
+     "citation": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus d’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-constant-2026-01-20",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Consultation publique prévue le 3 mars 2026 – premier projet de résolution 037-01-26",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "037-01-26",
+      "page": 1,
+      "citation": "CONSULTATION PUBLIQUE SUR LE PREMIER PROJET DE RÉSOLUTION NUMÉRO 037-01-26 VISANT UNE DEMANDE D’AUTORISATION D’UN PROJET PARTICULIER",
+      "anchor": "037-01-26 VISANT UNE DEMANDE",
+      "spanStart": 55,
+      "spanEnd": 187
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "L’avis de la page 1 annonce explicitement une consultation publique sur le premier projet de résolution 037-01-26, dont la page 2 fixe la tenue au 3 mars 2026 : il s’agit d’une étape prévue, non d’une consultation déjà réalisée."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "L'avis public en page 1 atteste mot pour mot « CONSULTATION PUBLIQUE SUR LE PREMIER PROJET DE RÉSOLUTION NUMÉRO 037-01-26 VISANT UNE DEMANDE D’AUTORISATION D’UN PROJET PARTICULIER », avec consultation prévue le 3 mars 2026 (page 2) ; c'est un fait distinct de l'adoption du premier projet (étape prévue, non historique), donc une unité séparée et non un doublon du même fait."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'avis annonçant la tenue future d'une assemblée publique de consultation ne constitue pas une unité réglementaire ou foncière distincte du projet de résolution."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "L’avis précise que le projet « fera l’objet d’une assemblée publique de consultation » qui « sera tenue par le Conseil municipal le 3 mars 2026 à 18h00 » (p. 2). Cette consultation explicitement programmée sur le projet 037-01-26 constitue une étape prévue distincte de l’adoption du premier projet, et non un simple rappel de celle-ci : l’option « absent » est donc écartée, sans présenter la consultation comme déjà réalisée."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La consultation n'est pas une étape constatée dans ce document mais seulement annoncée (« fera l'objet d'une assemblée publique de consultation qui sera tenue ... le 3 mars 2026 ») et découle de la résolution elle-même (« De mandater le Service ... afin qu'il soit tenu, une consultation publique à l'égard de ce projet ») ; l'objet est le même que l'unité d'adoption du premier projet 037-01-26 (PPCMOI 2025-00114, 42, montée Saint-Régis), et seuls avis de motion, projet, second projet et adoption multiplient les unités d'un même dossier. Les positions B et C sont écartées car le statut « prévu » ne vaut que pour les points d'ordre du jour, et cette date de consultation est un fait complémentaire à signaler séparément « sans retoucher le dénominateur »."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "L'avis public officiel des pages 1 et 2 annonce expressément la tenue d'une « CONSULTATION PUBLIQUE SUR LE PREMIER PROJET DE RÉSOLUTION NUMÉRO 037-01-26 » fixée au 3 mars 2026, ce qui constitue un fait procédural d'urbanisme distinct et actuel dans ce document, et non un simple doublon ou un rappel historique de l'adoption du premier projet résolue aux pages 3 à 6 ; la position de l'annotateur A doit donc être écartée."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 1,
+     "citation": "CONSULTATION PUBLIQUE SUR LE PREMIER PROJET DE RÉSOLUTION NUMÉRO 037-01-26 VISANT UNE DEMANDE D’AUTORISATION D’UN PROJET PARTICULIER"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir des immeubles pour taxes impayées — vente du 11 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "immeubles identifiés en annexe",
+      "page": 4,
+      "citation": "la directrice générale à enchérir au nom de la Municipalité et à acquérir les immeubles identifiés en annexe sur lesquels des taxes demeurent impayées au moment de la vente",
+      "anchor": "immeubles identifiés en annexe",
+      "spanStart": 1515,
+      "spanEnd": 1687
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-50, page 4, autorise expressément à enchérir et à acquérir les immeubles identifiés en annexe lors de la vente du 11 juin 2026 : il s’agit d’une autorisation foncière adoptée, et non d’une simple nomination."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-04-50 (page 4) autorise la directrice générale « à enchérir au nom de la Municipalité et à acquérir les immeubles identifiés en annexe sur lesquels des taxes demeurent impayées » : acte foncier inclus par la règle « petits PIIA et actes fonciers, même non résidentiels », citation et page exactes."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Il s'agit d'une simple nomination/autorisation de renchérir pour recouvrement de taxes, sans objet foncier explicite dans le texte, ce qui relève des exclusions du rappel."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-50, page 4, adoptée à l’unanimité, autorise la directrice générale « à enchérir au nom de la Municipalité et à acquérir les immeubles identifiés en annexe » pour la vente du 11 juin 2026. Cette autorisation porte sur un objet foncier explicite et relève des « actes fonciers » inclus, plutôt que d’une simple nomination : l’étape constatée est l’adoption de l’autorisation, non une acquisition déjà réalisée."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La règle exige un « objet réglementaire ou foncier explicite » ; or la résolution 2026-04-50 ne vise que « les immeubles identifiés en annexe » (annexe absente du texte), sans lot, matricule ni adresse, et le point 5.4 est intitulé « Autorisation de renchérir – Nomination » : il désigne la directrice générale (et le maire comme substitut) pour enchérir éventuellement le 11 juin 2026, ce qui relève des « simples nominations » exclues du rappel et non d’un acte foncier constaté. Les positions A et C sont écartées car l’acquisition reste conditionnelle et son objet non explicite ; ce fait peut au plus être signalé séparément « sans retoucher le dénominateur »."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La résolution 2026-04-50 (« Autorisation de renchérir – Nomination ») est une simple nomination/délégation à la directrice générale et au maire pour représenter la municipalité lors de la vente pour taxes, sans aucun « objet réglementaire ou foncier explicite » identifiable dans le texte (renvoi à une annexe absente), ce qui relève des exclusions du rappel."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 4,
+     "citation": "la directrice générale à enchérir au nom de la Municipalité et à acquérir les immeubles identifiés en annexe sur lesquels des taxes demeurent impayées au moment de la vente"
+    }
+   ]
+  },
+  {
+   "documentId": "sainte-francoise--becancour-2026-05-04",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption du second projet du règlement #55-2026 modifiant le zonage",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "55-2026",
+      "page": 7,
+      "citation": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03",
+      "anchor": "RÈGLEMENT #55-2026",
+      "spanStart": 501,
+      "spanEnd": 590
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Malgré le titre annonçant un second projet à la page 7, la résolution 61-05-2026 dispose que le conseil « dépose et adopte le premier projet de règlement #55-2026 », ce qui ne confirme pas l’étape second_projet proposée."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le titre du point 9.2 (page 7) et l'ordre du jour attestent « ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03 » ; objet réglementaire d'urbanisme explicite, étape second_projet conforme à la séquence (avis de motion 13 avril, consultation 27 avril), citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "La résolution 61-05-2026 et le titre 9.2 à la page 7 attestent l'adoption du second projet de règlement #55-2026 modifiant le zonage."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La résolution 61-05-2026 (p. 7) dispose que le conseil « dépose et adopte le premier projet de règlement #55-2026 », et non le second projet. Malgré l’intitulé du point 9.2 et l’ordre du jour, l’exigence d’une « étape constatée dans CE document » conduit à écarter v1 : la chronologie invoquée ne permet pas de corriger implicitement le dispositif contradictoire."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "L'objet réglementaire est explicite et l'étape est constatée dans ce document par l'ordre du jour adopté (« 9.2 Adoption du 2e projet – Règlement #55-2026 modifiant le règlement de zonage #2010-03 ») et par le titre du point 9.2 (« ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03 »), cohérents avec la séquence attestée (avis de motion le 13 avril 2026, consultation publique du 27 avril 2026) ; la mention « premier projet » dans la résolution 61-05-2026 est un report du libellé d'avril (le considérant dit encore que le premier projet « sera présenté » à la consultation du 27 avril, déjà passée) et ne suffit pas à effacer l'unité. La position « absent » de A est écartée car elle supprimerait un fait d'urbanisme explicitement traité, alors que la règle d'inclusion vise l'urbanisme et que le document n'offre aucune autre étape crédible pour ce règlement à cette séance."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le point 9.2 s'intitule explicitement « ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03 » et fait suite à la consultation publique du 27 avril rappelée aux considérants, ce qui établit sans ambiguïté l'étape « second_projet » malgré la coquille de rédaction dans le texte résolu de la résolution 61-05-2026."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 7,
+     "citation": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03"
+    }
+   ]
+  },
+  {
+   "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir des immeubles — vente pour taxes du 11 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Vente d’immeubles pour taxes",
+      "page": 8,
+      "citation": "et à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente",
+      "anchor": "tout immeuble de son territoire",
+      "spanStart": 2787,
+      "spanEnd": 2873
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-055, adoptée page 8, autorise expressément à enchérir et à acquérir des immeubles lors de la vente pour taxes du 11 juin 2026, ce qui constitue un acte foncier inclus."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-04-055 page 8 autorisant à enchérir et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » lors de la vente pour taxes du 11 juin 2026 : acte foncier inclus au rappel, citation exacte."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Cette résolution d'autorisation générale d'enchérir ne comporte aucun objet foncier explicite et le statut adoption est erroné pour une résolution administrative."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-055 (page 8) autorise expressément à enchérir lors de la vente pour taxes du 11 juin 2026 et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » : cette autorisation a un objet foncier explicite, couvert par l’inclusion des actes fonciers. Contrairement à la position C, l’absence de lot individualisé ne supprime pas cet objet, et la mention « Adoptée à l’unanimité » atteste l’adoption de l’autorisation, sans attester une acquisition déjà réalisée."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Page 8, résolution 2026-04-055 adoptée à l’unanimité : le conseil autorise le DG « lors de la vente pour défaut de paiement de taxes du 11 juin 2026, à enchérir, pour et au nom de la Municipalité […] et à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » (art. 1038 CM, liste transmise à la MRC par 2026-02-026) : c’est un acte foncier explicite et daté, inclus au rappel selon la règle « Inclusions : urbanisme, petits PIIA et actes fonciers, même non résidentiels ». L’objection de C est écartée : l’absence d’un lot nommé ne retire pas la nature foncière de l’objet (vente d’immeubles pour taxes du 11 juin 2026), et une réserve sur l’étiquette d’étape (résolution adoptée dans ce document) ne justifie pas de rendre l’unité absente."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La résolution 2026-04-055 est une autorisation administrative générale donnée aux fonctionnaires d'enchérir et ne comporte aucun « objet réglementaire ou foncier explicite » (aucun lot ni immeuble identifié), ce qui contrevient à la définition même d'une unité admissible."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 8,
+     "citation": "et à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-just-de-bretenieres-2026-02-02",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande d’information sur la vente de terrain — rang St-Isidore",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "RANG ST-ISIDORE",
+      "page": 2,
+      "citation": "VENTE DE TERRAIN – RANG ST-ISIDORE Les élus demandent plus d’information, dont la valeur du terrain",
+      "anchor": "RANG ST-ISIDORE",
+      "spanStart": 142,
+      "spanEnd": 241
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 2 atteste une demande actuelle d’information, notamment sur la valeur du terrain du rang St-Isidore, constituant un suivi foncier explicite sans attester une vente conclue."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Acte foncier explicite (vente de terrain – rang St-Isidore) attesté p.2 sous « Affaires découlant du procès-verbal », les élus demandant plus d'information ; étape inconnu et citation exactes, les actes fonciers étant inclus au rappel."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La mention sous Affaires découlant du procès-verbal est une simple demande d'information sans acte foncier ni résolution, et le rang St-Isidore ne constitue pas un objet foncier explicite."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le point « VENTE DE TERRAIN – RANG ST-ISIDORE » précise : « Les élus demandent plus d’information, dont la valeur du terrain » (p. 2), attestant un suivi actuel sur un objet foncier explicite, et non un simple rappel historique. L’absence de résolution numérotée ou de numéro cadastral ne justifie pas l’exclusion : v1 conserve l’étape « inconnu » sans présenter la vente comme conclue."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le texte (p. 2) traite actuellement un acte foncier explicite, « AFFAIRES DÉCOULANT DU PROCÈS-VERBAL – VENTE DE TERRAIN – RANG ST-ISIDORE », où « Les élus demandent plus d’information, dont la valeur du terrain » : les actes fonciers sont inclus, l’objet (terrain du rang St-Isidore) est nommé, l’étape est constatée dans ce document même sans résolution (l’étape « inconnu » existe pour cela), et un point simplement prévu à l’ordre du jour crée déjà une unité, a fortiori un point traité ; la position C, qui exige une résolution formelle, ajoute une condition absente des règles."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Le texte p. 2 sous « Affaires découlant du procès-verbal » indique seulement que « les élus demandent plus d’information, dont la valeur du terrain », ce qui ne constitue ni un objet foncier explicite (aucun lot ni terrain délimité) ni un acte foncier constaté."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 2,
+     "citation": "VENTE DE TERRAIN – RANG ST-ISIDORE Les élus demandent plus d’information, dont la valeur du terrain"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-just-de-bretenieres-2026-02-02",
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande de révision du règlement exigeant une bande boisée de 20 mètres",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "règlement de déboisement",
+      "page": 7,
+      "citation": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le règlement soit revu en tenant compte des éléments soulevés",
+      "anchor": "règlement soit revu",
+      "spanStart": 877,
+      "spanEnd": 1047
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 40-02-2026, page 7, demande expressément la révision du règlement exigeant une bande boisée de 20 mètres, sans adopter de modification réglementaire, ce qui justifie l’étape « inconnu »."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 40-02-2026 p.7 demandant que le règlement existant exigeant une bande boisée de 20 mètres soit revu : objet réglementaire explicite, citation mot pour mot, étape inconnu appropriée."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le texte ne mentionne aucun objet réglementaire explicite ni 'règlement de déboisement', s'agissant seulement d'une demande politique visant un règlement existant non spécifié."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "La résolution 40-02-2026 précise qu’« un règlement existant exige le maintien d’une bande boisée de 20 mètres » et décide « de demander que le règlement soit revu » (p. 7). Contrairement à la position d’exclusion, l’objet réglementaire est donc explicite malgré l’absence de numéro ou de titre officiel ; la demande actuelle de révision justifie l’étape « inconnu », sans constituer une modification adoptée."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "La résolution 40-02-2026 (p. 7) vise un objet réglementaire explicite d’urbanisme, « un règlement existant exige le maintien d’une bande boisée de 20 mètres », et constate une étape dans ce document : « RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le règlement soit revu en tenant compte des éléments soulevés » ; l’étape « inconnu » convient puisqu’il ne s’agit ni d’un avis de motion ni d’un projet, et l’absence de numéro de règlement (position C) n’empêche pas l’identification explicite par son contenu, le déboisement/bande boisée relevant de l’urbanisme inclus au rappel."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "La résolution 40-02-2026 évoque seulement « un règlement existant » sans numéro ni intitulé officiel (« règlement de déboisement » n'apparaît pas dans le texte), et un simple vœu de révision ne constitue pas un objet réglementaire explicite ni une étape de modification au sens du profil."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 7,
+     "citation": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le règlement soit revu en tenant compte des éléments soulevés"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-just-de-bretenieres-2026-02-02",
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acceptation de la déclaration de compétence de la MRC de Montmagny — autorisations en milieux hydriques",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "déclaration de compétence",
+      "page": 8,
+      "citation": "accepte et se déclare favorable à l’intention de déclaration de compétence de la MRC de Montmagny concernant la délivrance de certaines autorisations en vertu du Règlement sur l’encadrement",
+      "anchor": "déclaration de compétence de la MRC",
+      "spanStart": 162,
+      "spanEnd": 351
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 8 atteste l’acceptation de l’intention de déclaration de compétence de la MRC concernant certaines autorisations en milieux hydriques, conformément à l’objet et à la citation proposés, sans constituer une adoption de règlement."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 41-02-2026 (citation p.8) acceptant la déclaration de compétence de la MRC pour la délivrance d'autorisations en vertu du Règlement sur l'encadrement d'activités en milieux hydriques : objet réglementaire explicite, hors exclusions, citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'acceptation d'une déclaration de compétence de la MRC ne constitue ni un objet réglementaire d'urbanisme ni un objet foncier explicite correspondant au profil Signal/DesignationEvent."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "La résolution 41-02-2026 « accepte et se déclare favorable à l’intention de déclaration de compétence de la MRC de Montmagny concernant la délivrance de certaines autorisations » (p. 8), expressément rattachées au règlement encadrant les activités en milieux hydriques. L’exclusion est écartée parce que cette acceptation constitue une étape actuelle concernant une compétence réglementaire territoriale explicite ; l’étape « inconnu » ne transforme cet accord ni en adoption de règlement ni en transfert déjà effectif."
+    },
+    "fable": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "La résolution 41-02-2026 (p. 8) porte sur un objet réglementaire explicite d’encadrement territorial : le conseil « accepte et se déclare favorable à l’intention de déclaration de compétence de la MRC de Montmagny concernant la délivrance de certaines autorisations en vertu du Règlement sur l’encadrement d’activités sous la responsabilité des municipalités réalisées dans des milieux hydriques et sur des ouvrages de protection contre les inondations » ; ce transfert du régime d’autorisations en rives, littoral et zones inondables relève de l’urbanisme inclus et ne figure dans aucune exclusion (nominations, comptes, marchés, loisirs, voirie), donc la position C est écartée ; étape « inconnu » puisqu’aucune adoption de règlement n’est attestée."
+    },
+    "gemini": {
+     "item": "a03",
+     "choice": "absent",
+     "reason": "La résolution 41-02-2026 porte sur l'acceptation de l'intention de déclaration de compétence de la MRC en vertu du Code municipal, ce qui constitue une compétence administrative intermunicipale et non un objet réglementaire ou foncier d'urbanisme correspondant à Signal/DesignationEvent."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 8,
+     "citation": "accepte et se déclare favorable à l’intention de déclaration de compétence de la MRC de Montmagny concernant la délivrance de certaines autorisations en vertu du Règlement sur l’encadrement"
+    }
+   ]
+  },
+  {
+   "documentId": "eastman-2026-06-01",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Renouvellement du bail de La Corde-à-linge — juillet 2026 à juin 2027",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "La Corde-à-linge",
+      "page": 4,
+      "citation": "DE renouveler le bail de location de La Corde-à-linge pour une période de douze (12) mois, soit du 1er juillet 2026 au 30 juin 2027",
+      "anchor": "La Corde-à-linge",
+      "spanStart": 1711,
+      "spanEnd": 1842
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-06-122, page 4, renouvelle explicitement ce bail du 1er juillet 2026 au 30 juin 2027, acte foncier inclus même non résidentiel."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "Le renouvellement du bail de la friperie ne désigne aucun objet foncier explicite (ni lot ni adresse) et relève de la gestion locative, hors « objet réglementaire ou foncier explicite » du profil."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le renouvellement d'un bail de location d'une friperie ne constitue ni un acte d'urbanisme ni un acte foncier."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 2026-06-122 décide de « renouveler le bail de location de La Corde-à-linge » du 1er juillet 2026 au 30 juin 2027 et en autorise la signature : cet acte locatif relève des « actes fonciers, même non résidentiels » inclus. Contrairement aux exclusions proposées par A et B, les règles n’imposent ni adresse ni numéro cadastral pour retenir ce bail explicitement identifié."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La résolution 2026-06-122 renouvelle « le bail de location de la friperie La Corde-à-linge » sans désigner aucun lot ni adresse : il n'y a pas d'« objet réglementaire ou foncier explicite » au sens du profil, et un bail commercial de friperie relève de la gestion contractuelle/locative, pas d'un acte foncier (vente, don, servitude, lots) comme ceux de la résolution 2026-06-127. La position C est écartée ; le fait peut au plus être signalé comme complément hors gold « sans retoucher le dénominateur »."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Le renouvellement du bail de la friperie La Corde-à-linge ne comporte aucun objet foncier explicite (ni lot cadastral ni adresse) et relève de la simple gestion locative municipale, hors du champ des actes fonciers d'urbanisme."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 4,
+     "citation": "DE renouveler le bail de location de La Corde-à-linge pour une période de douze (12) mois, soit du 1er juillet 2026 au 30 juin 2027"
+    }
+   ]
+  },
+  {
+   "documentId": "richelieu-2026-02-03",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Vente aux enchères autorisée des immeubles pour défaut de paiement de taxes",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "immeubles à être vendus",
+      "page": 6,
+      "citation": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère publique",
+      "anchor": "vendre à l'enchère publique",
+      "spanStart": 1731,
+      "spanEnd": 1822
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "À la page 6, la résolution 26-02-037 ordonne la vente à l'enchère publique des immeubles inscrits au rapport de la trésorière, ce qui atteste l'autorisation de cet acte foncier."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 26-02-037 (p. 6) ordonne de « vendre à l'enchère publique » les immeubles pour arrérages de taxes : acte foncier explicite adopté, citation et page exactes."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La vente pour défaut de paiement de taxes est une mesure financière de recouvrement sans objet foncier explicite ni lien avec l'urbanisme."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 26-02-037 (p. 6-7), adoptée, ordonne de « vendre à l'enchère publique » les « immeubles apparaissant au rapport de la trésorière » : elle autorise donc explicitement un acte foncier, sans attester que la vente est déjà réalisée. La finalité de recouvrement fiscal n'écarte pas cette unité, puisque les règles incluent les actes fonciers et que l'objet immobilier est explicite."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 26-02-037 (p. 6-7) « ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère publique » les immeubles en arrérages et autorise arpenteur-géomètre, vérification des titres et publication « au Registre foncier » : c'est un acte foncier explicite adopté, couvert par la règle « Inclusions : ... actes fonciers, même non résidentiels », et non un simple « compte » exclu ; la position A (mesure financière) est écartée car l'objet est bien la vente d'immeubles."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La résolution 26-02-037 ordonne la vente pour taxes d'immeubles non identifiés dans le texte (« apparaissant au rapport de la trésorière »), ce qui ne constitue pas un objet foncier explicite au sens des règles ; les positions v1 sont écartées car il s'agit d'une mesure financière de recouvrement fiscal sans désignation cadastrale."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 6,
+     "citation": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère publique"
+    }
+   ]
+  },
+  {
+   "documentId": "stoneham-et-tewkesbury-2026-06-08",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Avis de motion — règlement sur la vidange des fosses septiques et des fosses de rétention",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "Vidange des fosses septiques",
+      "page": 20,
+      "citation": "Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention",
+      "anchor": "Vidange des fosses septiques",
+      "spanStart": 5,
+      "spanEnd": 109
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 20 annonce explicitement l’avis de motion concernant la vidange des fosses septiques et des fosses de rétention, unité distincte du dépôt du projet."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 20, point 9.1 « Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention » : objet réglementaire explicite, étape avis_motion attestée, hors des exclusions (nominations, comptes, marchés, loisirs, voirie)."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La vidange des fosses septiques relève de l'hygiène du milieu et non de l'urbanisme, constituant un fait complémentaire hors gold."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La page 20 annonce « Avis de motion et dépôt d’un projet de règlement » sur la « Vidange des fosses septiques et des fosses de rétention » : l’avis actuel porte sur un objet réglementaire explicite encadrant les installations septiques. Il ne s’agit pas d’un marché de vidange, et son rattachement à l’hygiène du milieu ne constitue pas à lui seul une exclusion prévue par les règles."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Le point 9.1 « Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention » porte sur un service d’hygiène du milieu (« ajuste les fréquences de vidange », « clarifie les responsabilités ») et non sur un objet d’urbanisme, un PIIA ou un acte foncier, seules inclusions prévues ; le document lui-même le range en section 9 avec la gestion contractuelle, hors des sections 15-16 d’urbanisme. L’argument d’A et B par simple non-exclusion ne suffit pas : la règle définit le périmètre positivement, et ce fait « complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur »."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Le règlement sur la vidange des fosses septiques (page 20) relève de l'hygiène du milieu et non du champ défini par la règle (« Inclusions: urbanisme, petits PIIA et actes fonciers »). Il s'agit d'un fait complémentaire hors gold qui ne doit pas retoucher le dénominateur, écartant ainsi l'inclusion proposée par A et B."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 20,
+     "citation": "Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention"
+    }
+   ]
+  },
+  {
+   "documentId": "stoneham-et-tewkesbury-2026-06-08",
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Dépôt du projet de règlement sur la vidange des fosses septiques et des fosses de rétention",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "Vidange des fosses septiques",
+      "page": 20,
+      "citation": "Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention",
+      "anchor": "Vidange des fosses septiques",
+      "spanStart": 5,
+      "spanEnd": 109
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 20 atteste le dépôt du projet de règlement sur la vidange des fosses septiques et des fosses de rétention, distinct de l’avis de motion."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Même point 9.1 page 20 : « Avis de motion et projet actuels séparés », le dépôt du projet de règlement est une unité distincte à l’étape projet_reglement."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le projet de règlement sur la vidange des fosses septiques relève de l'hygiène du milieu et non de l'urbanisme (hors gold)."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "Le point 9.1 atteste le « dépôt d’un projet de règlement » et précise que « Le nouveau règlement proposé remplace entièrement celui de 2008 ». Pour cet objet réglementaire relatif aux installations septiques, et non un simple marché de services, la règle « Avis de motion et projet actuels séparés » impose une unité projet distincte, sans compter le rappel historique de 2008."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "Même point 9.1 page 20 : le dépôt du projet de règlement sur la vidange des fosses septiques relève de l’hygiène du milieu (remplacement du Règlement 08-573, fréquences de vidange, terminologie) et non des inclusions « urbanisme, petits PIIA et actes fonciers » ; la séparation avis de motion / projet ne vaut que pour un objet réglementaire déjà dans le périmètre. Fait complémentaire à signaler hors gold, sans crédit au rappel."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "Le dépôt du projet de règlement au point 9.1 (page 20) vise les fréquences de vidange des installations septiques, matière d'hygiène du milieu étrangère à l'urbanisme. Conformément à la règle excluant les faits complémentaires hors gold du dénominateur, ce point ne doit pas figurer dans le corrigé de référence."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 20,
+     "citation": "Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention"
+    }
+   ]
+  },
+  {
+   "documentId": "stoneham-et-tewkesbury-2026-06-08",
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de signature de l’entente de stationnement commun avec la Résidence des Cantons-Unis",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "stationnement commun",
+      "page": 23,
+      "citation": "signer une entente avec La Résidence des Cantons-Unis de Stoneham-et-Tewkesbury relative au stationnement commun du complexe municipal et de la Résidence",
+      "anchor": "stationnement commun",
+      "spanStart": 83,
+      "spanEnd": 236
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution de la page 23 autorise la signature d’une entente avec la Résidence des Cantons-Unis concernant le stationnement commun, objet foncier explicitement décrit."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 23, résolution 9.4 « signer une entente avec La Résidence des Cantons-Unis ... relative au stationnement commun » : acte foncier explicitement nommé (convention d’occupation de lots), citation et page exactes, étape inconnu acceptable pour une autorisation de signature."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'entente de partage de stationnement est une entente administrative contractuelle hors urbanisme et l'étape indiquée est inexacte."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "La page 23 autorise à « signer une entente » relative au « stationnement commun du complexe municipal et de la Résidence », dont le contexte précise que les parties ont convenu du partage. L’entente porte donc sur l’utilisation d’un objet foncier identifié, inclus même non résidentiel, et l’étape « inconnu » convient à cette autorisation de signature sans lui attribuer une procédure réglementaire particulière."
+    },
+    "fable": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "Page 23, résolution 9.4 : « signer une entente avec La Résidence des Cantons-Unis de Stoneham-et-Tewkesbury relative au stationnement commun du complexe municipal et de la Résidence », entente d’usage partagé d’un stationnement sur des lots identifiés (« partager un stationnement commun du côté du chemin du Hibou », acquisition d’une partie du lot 6 564 346), soit un acte foncier explicite « même non résidentiel », et non un marché de services exclu. L’étape « inconnu » est le seul libellé applicable à une autorisation de signature ; l’objection de C sur l’étape ne fait pas disparaître le fait."
+    },
+    "gemini": {
+     "item": "a03",
+     "choice": "absent",
+     "reason": "L'entente relative au stationnement commun (page 23, point 9.4) constitue un partenariat administratif pour coordonner des travaux et partager des coûts, et non un acte foncier ou un fait d'urbanisme. L'acte foncier de la résolution réside dans l'acquisition du lot au second tiret, ce qui rend cette unité administrative hors gold."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 23,
+     "citation": "signer une entente avec La Résidence des Cantons-Unis de Stoneham-et-Tewkesbury relative au stationnement commun du complexe municipal et de la Résidence"
+    }
+   ]
+  },
+  {
+   "documentId": "stoneham-et-tewkesbury-2026-06-08",
+   "item": "a04",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation des servitudes d’utilité publique nécessaires sur les lots du stationnement commun",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "servitudes d’utilité publique",
+      "page": 23,
+      "citation": "d’autoriser l’établissement de toutes ententes, conventions d’occupation et servitudes d’utilité publique jugées nécessaires sur les lots concernés par l’entente",
+      "anchor": "servitudes d’utilité publique",
+      "spanStart": 373,
+      "spanEnd": 534
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution de la page 23 autorise l’établissement d’ententes, de conventions d’occupation et de servitudes d’utilité publique sur les lots concernés par l’entente."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 23 : « servitudes d’utilité publique jugées nécessaires sur les lots concernés par l’entente » — acte foncier explicitement nommé dans la résolution, un nœud groupé pouvant couvrir plusieurs unités nommées."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'autorisation générale de servitudes jugées nécessaires est une clause accessoire indéterminée sans objet foncier explicite."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a04",
+     "choice": "v1",
+     "reason": "La résolution autorise expressément « l’établissement de toutes ententes, conventions d’occupation et servitudes d’utilité publique jugées nécessaires sur les lots concernés par l’entente » : les droits fonciers visés et leurs terrains de rattachement sont explicites. L’étape « adoption » désigne ici l’autorisation décidée par la résolution, non des servitudes déjà constituées; la réserve « jugées nécessaires » ne supprime pas cette étape actuelle."
+    },
+    "fable": {
+     "item": "a04",
+     "choice": "v1",
+     "reason": "La même résolution 9.4 autorise expressément « l’établissement de toutes ententes, conventions d’occupation et servitudes d’utilité publique jugées nécessaires sur les lots concernés par l’entente » : les servitudes sont un acte foncier nommé, de type distinct de l’acquisition de lot et de l’entente de stationnement, donc pas un « doublon même type/même fait ». L’indétermination invoquée par C porte sur le nombre de servitudes, non sur leur nature ni leur assiette (lots du stationnement commun), et la décision est bien constatée dans ce document (« Il est résolu »)."
+    },
+    "gemini": {
+     "item": "a04",
+     "choice": "absent",
+     "reason": "L'autorisation visant les servitudes d'utilité publique « jugées nécessaires » (page 23, point 9.4) est une clause habilitante accessoire et indéterminée, dépourvue d'assiette ou d'acte foncier explicite au sens de la règle de l'unité, ce qui infirme la position de A et B."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 23,
+     "citation": "d’autoriser l’établissement de toutes ententes, conventions d’occupation et servitudes d’utilité publique jugées nécessaires sur les lots concernés par l’entente"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-tite-des-caps-2026-02-02",
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u07",
+   "verificationItem": "i07",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Renouvellement automatique de la demande de bail exclusif (BEX) — carrière du TNO Saut-au-Cochon, information rapportée",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "bail exclusif (BEX)",
+      "page": 2,
+      "citation": "et que celui-ci a été informé du renouvellement de la demande de bail exclusif (BEX) de la carrière située sur le territoire non organisé (TNO) Saut-au-Cochon, et ce, de façon automatique",
+      "anchor": "bail exclusif (BEX",
+      "spanStart": 338,
+      "spanEnd": 525
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le suivi des comités rapporte à la page 2 le renouvellement automatique de la demande de bail exclusif de la carrière du TNO Saut-au-Cochon, objet foncier explicite présenté comme information rapportée."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "Simple information rapportée au « Suivi des comités » sur un bail minier provincial (BEX) d'une carrière située sur un TNO hors territoire municipal, sans décision ni étape réglementaire ou foncière constatée dans ce document ; fait complémentaire à signaler hors gold, et doublon même type/même fait avec i08."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Simple mention informative lors d'un suivi de comité concernant un TNO, ne constituant ni un acte foncier ni une étape décisionnelle de la municipalité."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "Le suivi des comités rapporte explicitement le « renouvellement de la demande de bail exclusif (BEX) » de la carrière du TNO Saut-au-Cochon, « de façon automatique » : un objet foncier et une étape sont donc attestés, sans affirmer l’octroi du bail ni une adoption municipale. Les règles n’exigent pas une décision du conseil ni une localisation dans la municipalité pour cette information foncière rapportée, et le doublon allégué avec « i08 » n’est pas établi par le texte fourni."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "Le passage du « Suivi des comités » (p. 2) rapporte seulement qu'un comité « a été informé du renouvellement de la demande de bail exclusif (BEX) de la carrière située sur le territoire non organisé (TNO) Saut-au-Cochon, et ce, de façon automatique » : bail minier provincial sur un TNO hors territoire municipal, sans décision ni étape réglementaire ou foncière constatée dans ce document, donc pas d'unité gold (« objet ... ET une étape constatée dans CE document ») ; conformément à la règle, c'est au plus « un fait complémentaire valable hors gold ... à signaler séparément, sans retoucher le dénominateur », ce qui écarte la position de C."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "La mention au point 3 (« Suivi des comités ») constitue une simple transmission verbale d'information concernant un bail sur un TNO sans acte foncier ni étape réglementaire municipale constatée dans ce document ; il s'agit d'un fait hors gold."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 2,
+     "citation": "et que celui-ci a été informé du renouvellement de la demande de bail exclusif (BEX) de la carrière située sur le territoire non organisé (TNO) Saut-au-Cochon, et ce, de façon automatique"
+    }
+   ]
+  },
+  {
+   "documentId": "mont-saint-hilaire-2026-04-13",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u27",
+   "verificationItem": "i27",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Modification du mandat de recours en vertu de l'article 227 LAU — 1580, rue Casavant (lots 1 818 249 et 1 818 255), travaux sans permis",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1580, rue Casavant",
+      "page": 13,
+      "citation": "MODIFICATION À LA RÉSOLUTION 2024-159 - MANDAT - RECOURS EN VERTU DE L'ARTICLE 227 DE LA LOI SUR L'AMÉNAGEMENT ET L'URBANISME OU TOUT RECOURS APPROPRIÉ - 1580, RUE CASAVANT",
+      "anchor": "1580, RUE CASAVANT",
+      "spanStart": 1333,
+      "spanEnd": 1505
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-124, page 13, étend actuellement le mandat de recours urbanistique aux propriétaires de la structure du 1580, rue Casavant, sans constituer un simple rappel historique."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "2026-124 (p. 13) modifie le mandat de recours en vertu de l'art. 227 LAU visant le 1580, rue Casavant (lots 1 818 249 et 1 818 255) pour travaux sans permis : fait d'urbanisme à objet foncier explicite, étape « inconnu », citation exacte."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La modification d'un mandat judiciaire confié à des avocats relève des marchés de services exclus du rappel et ne constitue pas un objet réglementaire ou foncier du profil."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 2026-124 (p. 13) étend actuellement le recours visant le 1580, rue Casavant (lots 1 818 249 et 1 818 255), en ajoutant : « Que ce mandat soit également applicable envers les propriétaires de la structure érigée sur ladite propriété. » Cette modification constitue une étape d’intervention urbanistique sur un objet foncier explicite pour des « travaux effectués sans permis » (étape « inconnu »), et non un simple marché de services ou un rappel historique du mandat de 2024."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 2026-124 (p. 13) est une décision actuelle d'application réglementaire d'urbanisme à objet foncier explicite : « recours judiciaire en vertu de l'article 227 de la Loi sur l'aménagement et l'urbanisme … envers les propriétaires du 1580, rue Casavant (lots 1 818 249 et 1 818 255 au cadastre du Québec) concernant des infractions commises lors de travaux effectués sans permis », étendue par le conseil aux « propriétaires de la structure érigée sur ladite propriété » ; cela relève des inclusions « urbanisme … actes fonciers » et l'étape « inconnu » convient. La position de B est écartée : le texte n'octroie aucun contrat ni honoraires (pas de soumission, pas de montant), il modifie la portée d'un recours LAU visant des lots précis, ce qui n'est pas un « marché de services » ; le point 19 de l'ordre du jour est la même unité et ne s'ajoute pas."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La résolution 2026-124 ne constitue ni un objet réglementaire ni un acte foncier du profil, mais une simple modification d'un mandat judiciaire confié à une firme d'avocats (« mandatait la firme Bélanger Sauvé, avocats »), ce qui relève des mandats et marchés de services expressément exclus du rappel."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 13,
+     "citation": "MODIFICATION À LA RÉSOLUTION 2024-159 - MANDAT - RECOURS EN VERTU DE L'ARTICLE 227 DE LA LOI SUR L'AMÉNAGEMENT ET L'URBANISME OU TOUT RECOURS APPROPRIÉ - 1580, RUE CASAVANT"
+    }
+   ]
+  },
+  {
+   "documentId": "brossard-2026-04-28",
+   "item": "a07",
+   "kind": "split",
+   "unitId": "u32",
+   "verificationItem": "i32",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Modification de la date de l'ordonnance de vente d'immeubles pour défaut de taxes",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "vente aux enchères",
+      "page": 15,
+      "citation": "de procéder à la vente aux enchères des immeubles pour défaut de paiement de taxes le jeudi 11 juin 2026, à 10 h, par celle du 28 avril 2026",
+      "anchor": "vente aux enchères des immeubles",
+      "spanStart": 2884,
+      "spanEnd": 3024
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 260428-124, page 15, modifie la date de l'ordonnance de vente d'immeubles pour défaut de taxes, ce qui constitue une étape foncière explicite sans attester une vente réalisée."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La modification de date de l'ordonnance de vente pour défaut de taxes (section Administration et finances) est un acte fiscal sans objet foncier explicite (aucun immeuble identifié) ; exclusion « comptes », et doublon des items i33/i34."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La modification de la date d'une vente aux enchères pour défaut de taxes est une mesure administrative et fiscale, non un acte foncier ou d'urbanisme."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a07",
+     "choice": "v1",
+     "reason": "La résolution 260428-124 modifie « la date du 17 mars 2026 » de l’ordonnance de « vente aux enchères des immeubles » pour la remplacer par « celle du 28 avril 2026 » : elle constate donc une étape actuelle relative à un acte foncier explicite, malgré sa finalité fiscale et l’absence de numéros de lots. Il ne s’agit ni d’un simple compte ni d’un doublon attesté dans le document, et v1 décrit correctement la modification de l’ordonnance sans affirmer une vente réalisée ou un changement de la date de vente du 11 juin."
+    },
+    "fable": {
+     "item": "a07",
+     "choice": "absent",
+     "reason": "La résolution 260428-124 (p. 15, section Administration et finances) se borne à « modifier la date du 17 mars 2026 ordonnant ... de procéder à la vente aux enchères des immeubles pour défaut de paiement de taxes » : mesure fiscale et administrative sans immeuble ni lot identifié, donc sans objet foncier explicite requis par la règle d'unité, et relevant de l'exclusion « comptes ». La position A est écartée car un changement de date d'ordonnance ne constate aucun acte foncier."
+    },
+    "gemini": {
+     "item": "a07",
+     "choice": "absent",
+     "reason": "La résolution 260428-124 (p. 15) modifie la date d'une vente aux enchères pour défaut de taxes sans désigner d'immeuble spécifique ; cette procédure de recouvrement fiscal relève de l'administration et des comptes, exclus du rappel."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 15,
+     "citation": "de procéder à la vente aux enchères des immeubles pour défaut de paiement de taxes le jeudi 11 juin 2026, à 10 h, par celle du 28 avril 2026"
+    }
+   ]
+  },
+  {
+   "documentId": "rosemere-2026-04-13",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u10",
+   "verificationItem": "i10",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Avis de motion — règlement 1015 sur la sensibilisation et l'accompagnement des propriétés vulnérables aux inondations pluviales",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "1015",
+      "page": 6,
+      "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques - Avis de motion et dépôt",
+      "anchor": "1015 - Règlement",
+      "spanStart": 595,
+      "spanEnd": 788
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 6.3, page 6, atteste que Stéphanie Nantel donne avis de motion pour le règlement 1015 concernant les propriétés vulnérables aux inondations pluviales."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 6, 2026-04-137 : « donne avis de motion qu'il sera adopté à une séance subséquente le Règlement 1015 décrétant un programme ... des propriétés vulnérables aux inondations pluviales » — règlement explicite visant les propriétés et une contrainte territoriale (inondations), citation du point 6.3 exacte, étape avis_motion."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le règlement 1015 décrétant un programme d'accompagnement et de sensibilisation relève d'une autre réglementation municipale et non de l'urbanisme ou du foncier."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Au point 6.3 (p. 6, 2026-04-137), Stéphanie Nantel « donne avis de motion » pour le règlement 1015 visant les « propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques ». Cet objet réglementaire de prévention des risques touchant les propriétés relève du champ urbanistique retenu; son classement sous « AUTRE RÈGLEMENTATION » ne suffit pas à l'exclure."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Le Règlement 1015 est classé par la Ville sous « 6. AUTRE RÈGLEMENTATION » (et non sous « 5. URBANISME »), suit la procédure LCV « avis de motion ... et dépose le projet de règlement » sans référence à la LAU, et « décrète un programme de sensibilisation et d'accompagnement » — un programme d'aide/service aux propriétaires, non une norme d'usage du sol, une désignation de terrain ni un acte foncier ; il ne relève donc pas des inclusions « urbanisme, petits PIIA et actes fonciers » ni d'un Signal/DesignationEvent du profil. Les positions A et C attestent correctement le fait mais confondent une population cible (« propriétés vulnérables ») avec un objet réglementaire d'urbanisme ; ce fait valable reste « à signaler séparément, sans retoucher le dénominateur »."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Le règlement 1015 porte sur un programme municipal de sensibilisation et d'accompagnement et figure sous la section 6 « AUTRE RÈGLEMENTATION »; il ne constitue ni un acte d'urbanisme ni un acte foncier au sens des règles d'inclusion (« Inclusions: urbanisme, petits PIIA et actes fonciers »). Les positions de A et C étendent indûment le champ du gold aux simples programmes citoyens."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 6,
+     "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques - Avis de motion et dépôt"
+    }
+   ]
+  },
+  {
+   "documentId": "rosemere-2026-04-13",
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u11",
+   "verificationItem": "i11",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Dépôt du projet de règlement 1015 — sensibilisation et accompagnement des propriétés vulnérables aux inondations pluviales",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "1015",
+      "page": 6,
+      "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques - Avis de motion et dépôt",
+      "anchor": "1015 - Règlement",
+      "spanStart": 595,
+      "spanEnd": 788
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 6.3, page 6, précise que Stéphanie Nantel « dépose le projet de règlement », ce qui constitue une unité distincte de l'avis de motion pour le règlement 1015."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Même résolution 2026-04-137 page 6 : « ... et dépose le projet de règlement » — dépôt du projet du Règlement 1015 attesté, étape projet_reglement distincte de l'avis de motion selon la règle « Avis de motion et projet actuels séparés »."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le règlement 1015 est hors du champ de l'urbanisme et du foncier, et il s'agit d'un simple dépôt sans adoption de projet de règlement."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "Le point 6.3 (p. 6, 2026-04-137) précise que la conseillère « dépose le projet de règlement », ce qui atteste l'étape projet_reglement du règlement 1015 relatif aux propriétés vulnérables aux inondations pluviales, objet inclus pour sa portée de prévention des risques immobiliers. La règle « Avis de motion et projet actuels séparés » impose une unité distincte de l'avis de motion : l'absence d'adoption du projet ne permet pas d'écarter son dépôt explicitement constaté."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "Même dossier que a01 : le dépôt du projet du Règlement 1015 est bien attesté à la résolution 2026-04-137 (« et dépose le projet de règlement »), mais l'objet — un « programme de sensibilisation et d'accompagnement » placé sous « AUTRE RÈGLEMENTATION », sans procédure LAU ni effet sur l'usage du sol ou le foncier — est hors du champ « urbanisme, petits PIIA et actes fonciers » ; la règle « Avis de motion et projet actuels séparés » invoquée par C ne s'applique qu'à un objet déjà dans le champ. Fait complémentaire à signaler séparément, sans retoucher le dénominateur."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "Puisque le règlement 1015 relève d'un programme de sensibilisation étranger à la réglementation d'urbanisme et aux actes fonciers, son dépôt de projet ne constitue pas une unité admissible au gold (« Inclusions: urbanisme, petits PIIA et actes fonciers »). L'argument de B est retenu et les positions de A et C sont écartées."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 6,
+     "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques - Avis de motion et dépôt"
+    }
+   ]
+  },
+  {
+   "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u10",
+   "verificationItem": "i10",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de location à Yogi Nomade — bâtiment et emplacement au parc du Grand-Héron, été 2026",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "parc du Grand-Héron",
+      "page": 29,
+      "citation": "ET RÉSOLU d’autoriser le directeur du Service sports, loisirs, culture et vie communautaire à signer un contrat de location d’un bâtiment et d’un emplacement dans le parc du Grand-Héron",
+      "anchor": "parc du Grand-Héron",
+      "spanStart": 560,
+      "spanEnd": 745
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 124-2026 autorise à la page 29 la location d’un bâtiment et d’un emplacement à Yogi Nomade, soit un acte foncier explicite même si sa destination est récréative."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "Contrat de location d'un bâtiment au parc du Grand-Héron pour location de planches à pagaie (résolution 124-2026) relève des loisirs et d'un marché de services, exclus du rappel; de plus doublon de i12."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Ce bail saisonnier pour la location de planches à pagaie relève des loisirs et est expressément exclu du périmètre."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "La résolution 124-2026 autorise la signature d’« un contrat de location d’un bâtiment et d’un emplacement dans le parc du Grand-Héron » (p. 29), soit un acte foncier explicite relevant de l’inclusion des « actes fonciers, même non résidentiels ». Sa finalité récréative ne le réduit pas à un simple marché de services ou à une activité de loisirs, et le doublon allégué avec « i12 » n’est pas établi par les éléments fournis."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "La résolution 124-2026 (section SPORTS, LOISIRS, CULTURE ET VIE COMMUNAUTAIRE) autorise un contrat de location saisonnier « afin de fournir un service de formation et de location de planches à pagaie à l’été 2026 » : il s'agit d'un contrat de service récréatif, exclu du rappel par la règle « Exclusions du rappel: ... marchés de services, loisirs », et non d'un acte foncier (servitude, cession, acquisition) ; la position A est écartée car la seule mention d'un bâtiment et d'un emplacement ne transforme pas une concession de loisirs en objet foncier du profil."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "La résolution 124-2026 vise l'autorisation de location d'un emplacement au parc du Grand-Héron pour « un service de formation et de location de planches à pagaie », ce qui relève directement des « loisirs », expressément exclus du rappel par les règles du corrigé. La qualification d'acte foncier d'urbanisme avancée par l'annotateur A doit donc être rejetée."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 29,
+     "citation": "ET RÉSOLU d’autoriser le directeur du Service sports, loisirs, culture et vie communautaire à signer un contrat de location d’un bâtiment et d’un emplacement dans le parc du Grand-Héron"
+    }
+   ]
+  },
+  {
+   "documentId": "sacre-coeur-2026-05-11",
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u04",
+   "verificationItem": "i04",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425",
+      "stage": "adoption",
+      "procedure": "ppcmoi",
+      "objet": "2026-009",
+      "page": 19,
+      "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425",
+      "anchor": "demande numéro 2026-009",
+      "spanStart": 1972,
+      "spanEnd": 2143
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Projet de résolution du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425",
+      "stage": "projet_reglement",
+      "procedure": "ppcmoi",
+      "objet": "2026-009",
+      "page": 19,
+      "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425",
+      "anchor": "demande numéro 2026-009",
+      "spanStart": 1972,
+      "spanEnd": 2143
+     }
+    },
+    {
+     "option": "v3",
+     "unit": {
+      "label": "Second projet de résolution du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425",
+      "stage": "second_projet",
+      "procedure": "ppcmoi",
+      "objet": "2026-009",
+      "page": 19,
+      "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425",
+      "anchor": "demande numéro 2026-009",
+      "spanStart": 1972,
+      "spanEnd": 2143
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v2",
+     "reason": "Le dispositif de la page 19 autorise expressément la demande 2026-009 « par projet de résolution », sans qualifier cette étape d’adoption définitive ou de second projet."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v3",
+     "reason": "Le texte dit « d’autoriser par projet de résolution la demande numéro 2026-009 » après un premier projet de résolution #2026-03-93 déjà approuvé et la consultation tenue ; il s'agit donc d'un second projet de résolution, non d'une adoption finale ni d'un premier projet."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "La résolution 2026-05-186 constitue l'adoption finale de la demande de PPCMOI 2026-009 à la suite des étapes de consultation et d'approbation sans opposition."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "v2",
+     "reason": "Le dispositif de la résolution 2026-05-186 dit expressément « d’autoriser par projet de résolution la demande numéro 2026-009 » (p. 19), ce qui justifie l’étape projet_reglement. Le rappel du projet antérieur #2026-03-93 et du processus de consultation et d’approbation ne permet pas de requalifier l’acte actuel en adoption définitive ou en second projet, qualifications que le texte ne lui donne pas."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "v3",
+     "reason": "Le dispositif de la page 19 dit expressément « d'autoriser par projet de résolution la demande numéro 2026-009 », alors que les considérants constatent qu'« le conseil municipal a approuvé le projet de résolution #2026-03-93 » et que « suite à l'adoption du projet de résolution, le projet a été soumis au processus de consultation » : il s'agit donc d'un projet de résolution postérieur au premier, soit un second projet ; v1 (adoption) contredit le mot « projet » du dispositif et v2 (premier projet) contredit l'existence du projet #2026-03-93 déjà adopté."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "v3",
+     "reason": "La résolution 2026-05-186 intervient après l'adoption d'un premier projet de résolution (#2026-03-93) et la consultation publique, et son dispositif autorise la demande « par projet de résolution », ce qui correspond au second projet de résolution dans le cadre d'un PPCMOI. Les positions v1 (adoption finale) et v2 (premier projet) ne respectent pas le dispositif explicite ni la séquence procédurale constatée dans le document."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v2": 1,
+     "v3": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 19,
+     "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425"
+    },
+    {
+     "option": "v2",
+     "page": 19,
+     "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425"
+    },
+    {
+     "option": "v3",
+     "page": 19,
+     "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425"
+    }
+   ]
+  },
+  {
+   "documentId": "notre-dame-du-rosaire-2026-03-02",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Conclusion autorisée de l’entente avec le CAD encadrant la mise à disposition d’un local municipal",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Entente de collaboration",
+      "page": 21,
+      "citation": "QUE le conseil municipal autorise la conclusion de l’Entente de collaboration entre la Municipalité de Notre-Dame-du-Rosaire et le Comité d’action et de développement (CAD), telle que présentée",
+      "anchor": "l’Entente de collaboration",
+      "spanStart": 1836,
+      "spanEnd": 2029
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 21 autorise la conclusion de l’entente encadrant explicitement la mise à disposition d’un local municipal, objet immobilier visé par l’inclusion des actes fonciers même non résidentiels."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "L'entente de collaboration avec le CAD (prêt, cautionnements, local non identifié) n'est pas un objet réglementaire ou foncier explicite au sens de la règle « Unité: objet réglementaire ou foncier explicite » ; relève des ententes de services exclues du rappel."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'entente de collaboration relative à la mise à disposition d'un local municipal, un prêt et un cautionnement ne constitue ni un acte foncier ni un fait d'urbanisme."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-19 autorise la conclusion de l’entente visant expressément à « encadrer la mise à disposition d’un local municipal » : cet objet immobilier et cette étape constatée relèvent de l’inclusion des « actes fonciers, même non résidentiels ». L’absence d’adresse ou de numéro de lot n’est pas un critère d’exclusion prévu, et les volets prêt et cautionnements n’annulent pas cet objet explicite ni ne permettent de réduire l’entente à un simple marché de services."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "L'entente avec le CAD (p. 21) vise « la mise à disposition d’un local municipal, l’octroi d’un prêt ainsi que l’émission de cautionnements » : aucun lot, adresse ou immeuble n'est identifié, il s'agit d'une entente de collaboration financière et de prêt d'usage, non d'un acte foncier ni d'un « objet réglementaire ou foncier explicite » au sens de la règle d'unité ; elle relève des ententes de services exclues du rappel, et un tel fait ne peut qu'être signalé séparément « sans retoucher le dénominateur ». La position C est écartée car la simple mention d'un local non identifié ne crée pas d'objet foncier explicite."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "L'entente de collaboration visant à « encadrer la mise à disposition d’un local municipal, l’octroi d’un prêt ainsi que l’émission de cautionnements » ne constitue pas un acte foncier ou un fait d'urbanisme portant sur un « objet réglementaire ou foncier explicite » au sens des règles, aucun immeuble ou lot n'étant d'ailleurs précisément désigné."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 21,
+     "citation": "QUE le conseil municipal autorise la conclusion de l’Entente de collaboration entre la Municipalité de Notre-Dame-du-Rosaire et le Comité d’action et de développement (CAD), telle que présentée"
+    }
+   ]
+  },
+  {
+   "documentId": "pierreville-2026-03-10",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acquisition conditionnelle du terrain au matricule 6100-38-1522 après démolition complète",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6100-38-1522",
+      "page": 7,
+      "citation": "à procéder à l’acquisition du lot qui porte le matricule 6100-38-1522 appartenant à monsieur William Pilon et madame Mahélie Campagna",
+      "anchor": "matricule 6100-38-1522",
+      "spanStart": 1689,
+      "spanEnd": 1822
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "La citation de la page 7 rappelle l’intérêt exprimé dans la résolution historique 2025-08-304, tandis que la décision actuelle d’acquisition après démolition figure à la page 8 dans la résolution 2026-03-70."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Acte foncier explicite attesté p. 7-8 : la résolution 2026-03-70 résout « QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain lorsque les bâtiments ... seront entièrement démoli », citation exacte p. 7 sur le matricule 6100-38-1522."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La citation provient d'un considérant historique rappelant une résolution de 2025 dans une résolution de crédit de taxes, ce qui enfreint la règle interdisant les mentions historiques."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Même si la citation de la p. 7 rappelle une résolution historique, elle identifie le matricule 6100-38-1522 auquel se rapporte la décision actuelle 2026-03-70, p. 8 : « QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain lorsque les bâtiments qui y sont érigés dessus seront entièrement démoli ». L’acquisition conditionnelle est donc bien décidée dans ce document : l’objection fondée uniquement sur le caractère historique du considérant ne justifie pas son exclusion."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "L'acte foncier n'est pas seulement historique : la résolution 2026-03-70 (p. 8) résout « QUE la municipalité de Pierreville procèdera à l'acquisition dudit terrain lorsque les bâtiments qui y sont érigés dessus seront entièrement démoli », étape constatée dans ce document, et la citation p. 7 identifie l'objet foncier explicite (« le lot qui porte le matricule 6100-38-1522 »). A et B écartés : le considérant n'est que le rappel du dossier, mais la décision conditionnelle est bien prise ici."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La citation proposée provient d'un considérant rappelant une résolution de 2025 dans le cadre d'un crédit de compte de taxes, ce qui enfreint la règle excluant les mentions historiques et les opérations de compte."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 7,
+     "citation": "à procéder à l’acquisition du lot qui porte le matricule 6100-38-1522 appartenant à monsieur William Pilon et madame Mahélie Campagna"
+    }
+   ]
+  },
+  {
+   "documentId": "pierreville-2026-03-10",
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir à la vente pour taxes du 16 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "vente pour taxes municipales",
+      "page": 8,
+      "citation": "lors de la vente pour défaut de paiement de taxes du 16 juin 2026, à enchérir, pour et au nom de la Municipalité, jusqu’à un montant maximal",
+      "anchor": "vente pour défaut de paiement de taxes",
+      "spanStart": 1714,
+      "spanEnd": 1854
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-71, page 8, autorise les enchères et l’acquisition d’immeubles à la vente pour taxes du 16 juin 2026, constituant un acte foncier explicite."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-03-71 p. 8 autorisant à enchérir et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » le 16 juin 2026 : acte foncier inclus par la règle, citation et page exactes."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'autorisation générale d'enchérir pour défaut de paiement de taxes ne comporte aucun objet foncier explicite et relève des exclusions administratives."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-71, p. 8, autorise, lors de la vente du 16 juin 2026, « à enchérir » et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente ». Cette opération d’acquisition explicitement autorisée relève des « actes fonciers » inclus, malgré l’absence de parcelles énumérées, et non d’une simple opération comptable ; elle n’atteste toutefois aucune acquisition déjà réalisée."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-71 (p. 8) autorise à « enchérir, pour et au nom de la Municipalité » et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » à la vente pour taxes du 16 juin 2026 : acte foncier explicite (acquisition d'immeubles) inclus par la règle, non une simple nomination ni un compte. La position A est écartée car l'objet est la vente pour taxes du 16 juin 2026 et l'acquisition d'immeubles, pas une désignation administrative."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "L'autorisation générale d'enchérir pour défaut de paiement de taxes ne désigne aucun objet foncier explicite et constitue une mesure fiscale administrative exclue du rappel."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 8,
+     "citation": "lors de la vente pour défaut de paiement de taxes du 16 juin 2026, à enchérir, pour et au nom de la Municipalité, jusqu’à un montant maximal"
+    }
+   ]
+  },
+  {
+   "documentId": "sainte-croix-2026-05-05",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Engagement à octroyer des droits fonciers municipaux — projet éolien Lotbinière Ndakina",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "droits fonciers municipaux",
+      "page": 14,
+      "citation": "QUE Ia Municipalité confirme son engagement à l'octroi des droits fonciers sur les terres du domaine municipal qui pourront être requises pour la réalisation du Projet",
+      "anchor": "l'octroi des droits fonciers",
+      "spanStart": 1506,
+      "spanEnd": 1673
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 14 confirme expressément l'engagement municipal à octroyer les droits fonciers nécessaires au projet éolien sur les terres municipales, objet foncier distinct de la recommandation à la CPTAQ."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Fait distinct dans la même résolution 121-2026 (p. 14) : « confirme son engagement à l'octroi des droits fonciers sur les terres du domaine municipal », acte foncier propre, non un doublon de la recommandation CPTAQ."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'engagement relatif aux droits fonciers est une clause accessoire de la résolution 121-2026 et ne porte sur aucun objet foncier explicite."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 121-2026 (p. 14) « confirme son engagement à l'octroi des droits fonciers sur les terres du domaine municipal » nécessaires au projet éolien : l'objet foncier et l'engagement actuel sont donc explicites. Cet engagement constitue une unité distincte de la recommandation à la CPTAQ, malgré leur présence dans la même résolution, sans attester un octroi déjà réalisé."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La règle exige un « objet réglementaire ou foncier explicite » ; or la clause de la résolution 121-2026 vise des « terres du domaine municipal qui pourront être requises », sans lot ni emprise identifiés, et n'est qu'une confirmation faite « dans le cadre de la Demande à être déposée » à la CPTAQ, donc accessoire au même dossier déjà couvert par la recommandation à la Commission. Les positions A et B sont écartées car un engagement conditionnel sans objet foncier explicite ne constitue pas une unité distincte ; il peut au plus être signalé comme fait complémentaire hors gold."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La clause de la résolution 121-2026 confirmant l'engagement municipal à l'octroi de droits fonciers n'identifie aucun terrain ni lot précis, ne satisfaisant pas l'exigence d'un « objet foncier explicite », et constitue une modalité accessoire de la recommandation CPTAQ."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 14,
+     "citation": "QUE Ia Municipalité confirme son engagement à l'octroi des droits fonciers sur les terres du domaine municipal qui pourront être requises pour la réalisation du Projet"
+    }
+   ]
+  },
+  {
+   "documentId": "stanstead-est-2026-04-13",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Location autorisée du garage au 1420 chemin Ball brook pour douze mois",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1420 chemin Ball brook",
+      "page": 13,
+      "citation": "location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de 1 350",
+      "anchor": "1420 chemin Ball brook",
+      "spanStart": 2587,
+      "spanEnd": 2720
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-22, page 13, accepte la location du garage au 1420 chemin Ball brook pour douze mois à 1 350 $ par mois, acte foncier non résidentiel inclus par les règles."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La location temporaire d'un garage privé par acceptation de la soumission des Entreprises Y. Fecteau (12 mois, 1 350 $/mois) est un marché de location/services et non un acte réglementaire ou foncier explicite ; les règles excluent les marchés de services du rappel, à signaler au plus comme fait complémentaire hors gold."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La location temporaire d'un garage pour les travaux de voirie relève d'un marché ou d'un bail d'entretien et ne constitue pas un acte foncier ou d'urbanisme."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-22 accepte une « location de son garage situé au 1420 chemin Ball brook » pour « une durée de 12 mois » et autorise le directeur général à négocier et signer l’entente : un immeuble précis et une étape d’autorisation actuelle sont donc explicites. Cette location immobilière relève des « actes fonciers, même non résidentiels » ; son caractère temporaire et sa finalité d’efficacité des travaux de voirie ne la transforment pas en simple marché de services ou en travaux d’entretien exclus, contrairement aux positions A et C."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La résolution 2026-04-22 (p. 13) « accepte la soumission de M. Yannick Fecteau [...] pour une location de son garage situé au 1420 chemin Ball brook à Barnston-Ouest pour une durée de 12 mois moyennant un montant mensuel de 1 350 $ » : il s'agit d'un bail temporaire retenu par soumission « pour augmenter l'efficacité de nos travaux en voirie », soit un marché de services/entretien de voirie sans développement explicite, exclu du rappel, et non un objet réglementaire ou foncier explicite (aucun lot, permis, zonage, acquisition ou servitude ; l'immeuble est d'ailleurs hors du territoire). La position B est écartée car un bail commercial d'un an n'est pas un acte foncier au sens du gold ; le fait reste au plus à signaler séparément hors gold sans retoucher le dénominateur."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La résolution 2026-04-22 ne constitue pas un acte foncier ou réglementaire d'urbanisme, mais l'acceptation d'une soumission pour la « location de son garage situé au 1420 chemin Ball brook [...] pour une durée de 12 mois » à titre de « solution temporaire » pour les travaux de voirie, ce qui relève de la gestion contractuelle courante exclue du rappel."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 13,
+     "citation": "location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de 1 350"
+    }
+   ]
+  },
+  {
+   "documentId": "sainte-thecle-2026-03-09",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Engagement des procédures de modification du règlement 389-2021 — circulation des motoneiges",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "389-2021",
+      "page": 16,
+      "citation": "que le conseil de la municipalité de Sainte-Thècle entame les procédures de modification du règlement 389-2021 afin de donner accès aux motoneigistes à un poste d’essence dans la municipalité",
+      "anchor": "règlement 389-2021",
+      "spanStart": 1642,
+      "spanEnd": 1833
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-070, page 16, engage explicitement les procédures de modification du règlement d’urbanisme 389-2021, sans constater un avis de motion ni une adoption."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Rés. 2026-03-070 p.16 atteste que le conseil « entame les procédures de modification du règlement 389-2021 » ; objet réglementaire explicite, aucune étape formelle (avis de motion) constatée, donc stage inconnu correct."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La circulation des motoneiges sur les chemins municipaux relève des loisirs et de la voirie sans développement explicite, exclu par les règles du corrigé, et l'engagement de procédures ne constitue pas une étape réglementaire formelle."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-070 (p. 16) vise expressément un « règlement d’urbanisme » et décide que le conseil « entame les procédures de modification du règlement 389-2021 » : l’objet réglementaire et la démarche actuelle sont donc explicites. Contrairement à A, il ne s’agit pas d’une simple activité de loisirs ou d’entretien de voirie ; l’absence d’avis de motion, de projet ou d’adoption du règlement justifie l’étape « inconnu », non l’exclusion."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La rés. 2026-03-070 (p.16) vise un objet réglementaire explicite que le texte qualifie lui-même de « règlement d’urbanisme #389-2021 » et constate une décision du conseil qui « entame les procédures de modification du règlement 389-2021 » ; aucun avis de motion, projet ou adoption n’étant constaté, le stage « inconnu » est le seul exact. L’exclusion invoquée par A (loisirs, « entretiens de voirie sans développement explicite ») vise des travaux ou activités, non une modification de règlement d’urbanisme nommée comme telle par le document, donc « absent » est écarté."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La résolution 2026-03-070 vise uniquement à permettre la circulation de véhicules hors route (motoneiges) sur des chemins municipaux, ce qui relève expressément des exclusions du corrigé (« loisirs, entretiens de voirie sans développement explicite »). La mention incidente de « règlement d'urbanisme » dans l'intitulé ne change pas la nature réelle de l'objet, et une simple résolution chargeant d'entamer des procédures ne constitue pas une étape réglementaire d'urbanisme retenue au gold."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 16,
+     "citation": "que le conseil de la municipalité de Sainte-Thècle entame les procédures de modification du règlement 389-2021 afin de donner accès aux motoneigistes à un poste d’essence dans la municipalité"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Refus de remboursement des pénalités de construction — terrain de Jean-Pierre Labbé",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Terrain de Jean-Pierre Labbé",
+      "page": 16,
+      "citation": "DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé; DE CONFIRMER que les pénalités ont été appliquées conformément aux termes du contrat de vente",
+      "anchor": "M. Jean-Pierre Labbé",
+      "spanStart": 111,
+      "spanEnd": 292
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 12-01-2026 refuse explicitement à la page 16 le remboursement des pénalités liées au contrat de vente du terrain destiné à un immeuble multilogement, ce qui constitue une décision foncière dont le refus est correctement conservé."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Acte foncier explicite (contrat de vente d'un terrain avec obligation de construction et pénalités) et page 16 atteste « DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé » ; les refus restent des refus, étape inconnu appropriée."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le refus de rembourser des pénalités contractuelles de construction est une décision financière et non un acte foncier ou un objet d'urbanisme correspondant au profil."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le refus concerne les obligations de construction du contrat de vente d’un terrain destiné à un « immeuble multi-logement » (p. 15), et la résolution décide « DE REFUSER la demande de remboursement des pénalités » et de confirmer leur application « conformément aux termes du contrat de vente » (p. 16). Cette décision actuelle sur les conditions d’un dossier foncier relève de l’inclusion des actes fonciers, avec refus conservé et étape « inconnu » : sa portée financière ne la réduit pas à une simple opération de comptes à exclure."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 12-01-2026 (point 3.2, section « Aménagement, urbanisme et hygiène du milieu ») porte sur un acte foncier explicite : « M. Jean-Pierre Labbé a acquis un terrain en vue de la construction d'un immeuble multi-logement », le « contrat de vente prévoit expressément un délai maximal pour le début des travaux de construction » et le conseil vise « l'atteinte des objectifs de développement du secteur » ; la page 16 atteste la décision « DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé; DE CONFIRMER que les pénalités ont été appliquées conformément aux termes du contrat de vente ». Les règles incluent les « actes fonciers, même non résidentiels » et imposent que « les refus doivent rester des refus » ; la position C (simple décision financière) est écartée car l'objet n'est ni un compte, ni un marché de services, mais l'exécution d'une obligation de construction attachée à la vente d'un terrain municipal, et l'étape « inconnu » est la seule appropriée."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Selon la règle, une unité doit être un « objet réglementaire ou foncier explicite correspondant à Signal/DesignationEvent du profil ». La résolution 12-01-2026 ne constitue ni un acte foncier (aucun transfert, acquisition ou constitution de droit réel) ni une procédure d'urbanisme, mais le refus d'une réclamation d'ordre strictement financier portant sur des pénalités contractuelles (« DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé »)."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 16,
+     "citation": "DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé; DE CONFIRMER que les pénalités ont été appliquées conformément aux termes du contrat de vente"
+    }
+   ]
+  },
+  {
+   "documentId": "lac-brome-2026-04-07",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u07",
+   "verificationItem": "i07",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Tenue d'une procédure d'enregistrement ordonnée — règlement 596-21",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "596-21",
+      "page": 21,
+      "citation": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-21",
+      "anchor": "règlement 596-21",
+      "spanStart": 1492,
+      "spanEnd": 1678
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 21 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-21, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 21 atteste une décision distincte de l'adoption : « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-21 » ; fait différent du même règlement, étape hors liste donc inconnu."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-099 et ne constitue pas une unité d'urbanisme distincte."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "À la page 21, la résolution 2026-04-099 distingue l’adoption du règlement 596-21 de l’ordre au greffier « de tenir une procédure d'enregistrement des personnes habiles à voter ». Cet ordre constitue une étape procédurale actuelle distincte sur un objet réglementaire explicite, classée « inconnu » : sa présence dans la même résolution ne suffit pas à l’exclure comme clause accessoire, et v1 n’affirme pas que le registre a déjà été tenu."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Page 21, résolution 2026-04-099 contient deux décisions distinctes : « le Conseil adopte le règlement distinct Règlement 596-21 » puis « le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter … pour le règlement 596-21 » ; la règle veut que les étapes d'un même règlement soient des unités distinctes (« Avis de motion et projet actuels séparés » même au sein d'un seul point), et le registre prévu aux art. 136 LAU / 532 LERM est une étape procédurale propre (elle décide de la tenue d'un scrutin), donc un fait différent de l'adoption, non un doublon même type/même fait ; étape hors liste → inconnu, libellé « ordonnée » sans affirmer que le registre a été tenu. La thèse de B (clause accessoire d'exécution) est écartée car il ne s'agit pas d'une formalité de transmission mais d'une étape substantielle du processus référendaire, actuelle et non historique."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "L'ordonnance faite au greffier de tenir un registre fait partie intégrante de la résolution 2026-04-099 qui adopte le règlement 596-21. Il s'agit d'une clause accessoire d'exécution de l'adoption et non d'une étape réglementaire distincte à inscrire au dénominateur du corrigé."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 21,
+     "citation": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-21"
+    }
+   ]
+  },
+  {
+   "documentId": "lac-brome-2026-04-07",
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u08",
+   "verificationItem": "i08",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Tenue d'une procédure d'enregistrement ordonnée — règlement 596-22",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "596-22",
+      "page": 23,
+      "citation": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-22",
+      "anchor": "règlement 596-22",
+      "spanStart": 525,
+      "spanEnd": 711
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 23 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-22, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 23 atteste « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-22 » ; décision de registre distincte de l'adoption, non un doublon du même fait."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-100 et ne constitue pas une unité d'urbanisme distincte."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "À la page 23, outre l’adoption du règlement 596-22, le Conseil « ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter » pour ce règlement. L’unité repose sur l’objet réglementaire et l’étape constatée : cet ordre actuel, classé « inconnu », se distingue de l’adoption malgré leur résolution commune, sans attester une tenue déjà réalisée du registre."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "Page 23, résolution 2026-04-100 : après « le Conseil adopte le règlement distinct Règlement 596-22 », une décision séparée « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-22 » ; même raisonnement que a01 : objet réglementaire explicite (596-22) et étape constatée dans ce document, distincte de l'adoption (« Doublon même type/même fait non crédité » ne s'applique pas puisque le type et le fait diffèrent), étape hors liste → inconnu, page et citation exactes. La position de B est écartée : l'ordre de registre n'est pas une simple clause d'exécution mais l'étape qui détermine si un scrutin référendaire doit être tenu."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "L'ordre de tenir une procédure d'enregistrement est une clause d'exécution comprise dans la résolution d'adoption 2026-04-100 du règlement 596-22. Elle ne constitue pas une unité d'urbanisme distincte de l'adoption, les étapes d'un règlement se limitant aux avis de motion, projets et adoption."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 23,
+     "citation": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-22"
+    }
+   ]
+  },
+  {
+   "documentId": "lac-brome-2026-04-07",
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u09",
+   "verificationItem": "i09",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Tenue d'une procédure d'enregistrement ordonnée — règlement 596-23",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "596-23",
+      "page": 24,
+      "citation": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-23",
+      "anchor": "règlement 596-23",
+      "spanStart": 2171,
+      "spanEnd": 2357
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 24 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-23, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 24 atteste « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-23 » ; décision de registre distincte, citation et page exactes."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-101 et ne constitue pas une unité d'urbanisme distincte."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "À la page 24, la résolution 2026-04-101 adopte le règlement 596-23 puis ordonne expressément une procédure d’enregistrement « afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-23 ». Contrairement à la position d’exclusion, cet ordre constate une décision procédurale distincte de l’adoption sur un objet réglementaire explicite, recevable au stade « inconnu », sans présumer que l’enregistrement ou le scrutin a eu lieu."
+    },
+    "fable": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "Page 24, résolution 2026-04-101 : « le Conseil adopte le règlement distinct Règlement 596-23 » puis « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-23 » ; unité distincte de l'adoption selon la règle « avis de motion, projet, second projet et adoption d'un même règlement sont des unités distinctes » étendue par « inconnu » aux étapes hors liste, ici l'étape de registre (art. 136 LAU, 532 LERM) explicitement décidée dans ce document et non historique ; le libellé « ordonnée » respecte le texte sans surinterpréter. B est écarté pour les mêmes motifs qu'en a01 et a02 : fait différent, type différent, décision actuelle du Conseil."
+    },
+    "gemini": {
+     "item": "a03",
+     "choice": "absent",
+     "reason": "L'instruction au greffier de tenir un registre au sein de la résolution 2026-04-101 découle directement de l'adoption du règlement distinct 596-23. Il s'agit d'une mesure d'application interne à la même résolution et non d'une étape réglementaire indépendante."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 24,
+     "citation": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-23"
+    }
+   ]
+  },
+  {
+   "documentId": "valcourt-2026-06-01-agenda",
+   "item": "a01",
+   "kind": "v3_only",
+   "unitId": "u06",
+   "humanId": null,
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Révision prévue du projet de règlement sur les pratiques agroenvironnementales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "pratiques agroenvironnementales",
+      "page": 2,
+      "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES",
+      "anchor": "PRATIQUES AGROENVIRONNEMENTALES",
+      "spanStart": 1106,
+      "spanEnd": 1188
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 11.1, page 2, prévoit une révision du projet de règlement sur les pratiques agroenvironnementales, objet réglementaire explicite dont aucune étape plus précise que inconnu n’est attestée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 11.1, page 2, citation exacte ; objet réglementaire explicite (projet de règlement municipal), étape inconnu adaptée à une « révision nécessaire » prévue et non à une adoption acquise."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Projet de règlement sur les pratiques agroenvironnementales prévu au point 11.1 en page 2."
+    }
+   ],
+   "human": {
+    "humanId": null,
+    "choice": "absent"
+   },
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le point 11.1, page 2, prévoit la « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES » : il s’agit d’un objet réglementaire explicite, et non d’un simple rappel historique. L’option « absent » est donc écartée : conformément à la règle sur les ordres du jour, cette révision constitue une unité prévue, à l’étape « inconnu », sans attester une adoption ni le dépôt d’un nouveau projet."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "Le point 11.1 « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES » est classé par le document lui-même sous « 11. TRAVAUX PUBLICS, ENVIRONNEMENT ET GESTION DES EAUX » et non sous « 7. URBANISME » : c'est un règlement environnemental sur des pratiques agricoles, sans objet d'urbanisme, de PIIA ni d'acte foncier, donc hors des inclusions du corrigé (« urbanisme, petits PIIA et actes fonciers ») et sans étape procédurale constatée (ni avis de motion, ni projet, ni adoption, seulement une « révision nécessaire »). Les annotateurs A, B et C sont écartés car ils assimilent tout « projet de règlement » à un objet du profil ; conformément à la règle « Un fait complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur », ce point est un signal complémentaire et non une unité gold."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Le point 11.1 en page 2 (« RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES ») mentionne explicitement un objet réglementaire prévu à l'ordre du jour ; l'étape « inconnu » est conforme aux règles régissant les points prévus non formellement qualifiés en avis de motion ou adoption, ce qui écarte « absent »."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 2,
+     "absent": 1
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 2,
+     "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u09",
+   "verificationItem": "i09",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation du prolongement du réseau d’aqueduc sur le rang York à Saint-Cuthbert",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "réseau d'aqueduc",
+      "page": 10,
+      "citation": "la Municipalité de Saint-Barthélemy accepte la demande de Saint-Cuthbert pour prolonger le réseau d'aqueduc afin de desservir quelques résidences supplémentaires sur leur territoire",
+      "anchor": "prolonger le réseau d'aqueduc",
+      "spanStart": 2300,
+      "spanEnd": 2481
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-09-203, page 10, accepte le prolongement de l’aqueduc pour desservir des résidences supplémentaires, soit un développement explicite et non un simple entretien."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 10, résolution 2026-09-203 accepte le prolongement du réseau d'aqueduc pour desservir des résidences supplémentaires; développement explicite, donc hors de l'exclusion « entretiens de voirie sans développement explicite », citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le prolongement du réseau d'aqueduc n'est ni un objet réglementaire d'urbanisme ni un acte foncier selon les règles du corrigé."
+    }
+   ],
+   "human": {
+    "humanId": "S203",
+    "choice": "v1"
+   },
+   "votes": {
+    "astra": {
+     "item": "a01",
+     "choice": "absent",
+     "reason": "La résolution 2026-09-203 accepte de « prolonger le réseau d'aqueduc afin de desservir quelques résidences supplémentaires », mais ne constate aucun objet réglementaire ni acte foncier explicite. Le développement invoqué par A et B ne suffit pas à satisfaire cette condition : le prolongement constitue un fait complémentaire d'infrastructure à signaler hors gold."
+    },
+    "fable": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "Page 10, résolution 2026-09-203 : la Municipalité « accepte la demande de Saint-Cuthbert pour prolonger le réseau d'aqueduc afin de desservir quelques résidences supplémentaires », avec mention des « résidences projetées dans les zones de développement possibles » ; il s'agit d'un développement explicite, donc hors de l'exclusion « entretiens de voirie sans développement explicite ». La position C (absent) est écartée car la règle n'exclut que les travaux sans développement explicite."
+    },
+    "gemini": {
+     "item": "a01",
+     "choice": "v1",
+     "reason": "La résolution 2026-09-203 en page 10 autorise le prolongement du réseau d'aqueduc pour desservir de nouvelles résidences, ce qui constitue un développement d'infrastructure explicite inclus par les règles."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 10,
+     "citation": "la Municipalité de Saint-Barthélemy accepte la demande de Saint-Cuthbert pour prolonger le réseau d'aqueduc afin de desservir quelques résidences supplémentaires sur leur territoire"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a02",
+   "kind": "human_only",
+   "unitId": null,
+   "humanId": "S738",
+   "verificationItem": null,
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption 738-26 : accessoires en cour avant au bord des lacs",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "QUE le règlement 738-26 ayant comme titre",
+      "page": 4,
+      "citation": "QUE le règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le règlement de zonage numéro 288-90 afin de permettre les constructions accessoires en cour avant pour les propriétés en b",
+      "anchor": "QUE le règlement 738-26 ayant comme titre",
+      "spanStart": 341,
+      "spanEnd": 542,
+      "humanId": "S738",
+      "grounded": true
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    }
+   ],
+   "human": {
+    "humanId": "S738",
+    "choice": "v1"
+   },
+   "votes": {
+    "astra": {
+     "item": "a02",
+     "choice": "v1",
+     "reason": "À la page 4, le dispositif de la résolution 2026-09-189 indique que le règlement 738-26 permettant les constructions accessoires en cour avant des propriétés riveraines « soit et est adopté ». L'absence de proposition automatique n'est pas un motif d'exclusion; cette adoption est retenue une seule fois, le point a05 reprenant le même acte."
+    },
+    "fable": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "L'adoption du règlement 738-26 (« soit et est adopté », page 4) est un fait réel, mais il est déjà crédité par l'unité a05 (même type adoption, même règlement 738-26) : « Doublon même type/même fait non crédité ». De plus l'objet proposé (« QUE le règlement 738-26 ayant comme titre ») n'est pas un objet réglementaire explicite ; la référence humaine est écartée pour éviter le doublon."
+    },
+    "gemini": {
+     "item": "a02",
+     "choice": "absent",
+     "reason": "Doublon de l'item a05 portant sur l'adoption du même règlement 738-26, avec un libellé d'objet mal découpé."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 4,
+     "citation": "QUE le règlement 738-26 ayant comme titre « Règlement numéro 738-26 amendant le règlement de zonage numéro 288-90 afin de permettre les constructions accessoires en cour avant pour les propriétés en b"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a03",
+   "kind": "human_only",
+   "unitId": null,
+   "humanId": "S739P",
+   "verificationItem": null,
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Premier projet 739-26 : densification R-7 et R-8",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "QUE le premier projet de règlement 739-26 ayant comme titre",
+      "page": 5,
+      "citation": "QUE le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26 amendant le règlement de zonage numéro 288-90 afin de permettre des immeubles à logements dans les zones R-7 et R",
+      "anchor": "QUE le premier projet de règlement 739-26 ayant comme titre",
+      "spanStart": 0,
+      "spanEnd": 200,
+      "humanId": "S739P",
+      "grounded": true
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    }
+   ],
+   "human": {
+    "humanId": "S739P",
+    "choice": "v1"
+   },
+   "votes": {
+    "astra": {
+     "item": "a03",
+     "choice": "v1",
+     "reason": "À la page 5, la résolution 2026-09-191 dispose que « le premier projet de règlement 739-26 » relatif aux immeubles à logements dans les zones R-7 et R-8 « soit et est adopté ». Cette étape actuelle est distincte de l'avis de motion, indépendamment de son absence parmi les propositions automatiques, mais ne doit pas être recomptée sous a06."
+    },
+    "fable": {
+     "item": "a03",
+     "choice": "absent",
+     "reason": "L'adoption du premier projet 739-26 (page 5, « soit et est adopté ») est déjà créditée par l'unité a06 avec l'objet propre « 739-26 » et l'étape projet_reglement ; garder a03 créerait un doublon même type/même fait, et son objet (« QUE le premier projet de règlement 739-26 ayant comme titre ») n'est pas un objet réglementaire explicite."
+    },
+    "gemini": {
+     "item": "a03",
+     "choice": "absent",
+     "reason": "Doublon de l'item a06 portant sur le même premier projet de règlement 739-26, avec un objet mal formulé."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 5,
+     "citation": "QUE le premier projet de règlement 739-26 ayant comme titre « Règlement numéro 739-26 amendant le règlement de zonage numéro 288-90 afin de permettre des immeubles à logements dans les zones R-7 et R"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a05",
+   "kind": "v3_only",
+   "unitId": "u01",
+   "humanId": null,
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption du règlement 738-26 — constructions accessoires en cour avant des propriétés en bordure d’un lac",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "738-26",
+      "page": 3,
+      "citation": "4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS ACCESSOIRES EN COUR AVANT",
+      "anchor": "RÈGLEMENT NUMÉRO 738-26",
+      "spanStart": 1560,
+      "spanEnd": 1707
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 4.1 commence à la page 3 sous le titre cité, et la résolution 2026-09-189 adopte explicitement le règlement 738-26 dans son dispositif à la page 4."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "La résolution 2026-09-189 en page 3 adopte le règlement 738-26 (« soit et est adopté ») après avis de motion du 7 juillet et consultation; citation, étape adoption, objet 738-26 et page exacts."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "L'adoption du règlement de zonage 738-26 à la page 3 est un fait réglementaire attesté par le texte."
+    }
+   ],
+   "human": {
+    "humanId": null,
+    "choice": "absent"
+   },
+   "votes": {
+    "astra": {
+     "item": "a05",
+     "choice": "absent",
+     "reason": "Le titre « ADOPTION DU RÈGLEMENT NUMÉRO 738-26 » de la page 3 et le dispositif « soit et est adopté » de la page 4 appartiennent à la même résolution 2026-09-189, déjà retenue sous a02. Le fait relevé par les annotateurs est exact, mais absent comme unité supplémentaire selon la règle du rappel par unité gold distincte."
+    },
+    "fable": {
+     "item": "a05",
+     "choice": "v1",
+     "reason": "Page 3, résolution 2026-09-189 sous le titre « 4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26... », dispositif page 4 : « le règlement 738-26 ... soit et est adopté » après avis de motion du 7 juillet 2026 et consultation du 22 juillet ; étape adoption, objet 738-26 et citation exacts. La référence humaine (absent) est écartée car elle ne conservait que la variante a02, dont l'objet est malformé ; une seule unité d'adoption 738-26 est due et c'est celle-ci."
+    },
+    "gemini": {
+     "item": "a05",
+     "choice": "v1",
+     "reason": "La résolution 2026-09-189 débutant à la page 3 adopte le règlement de zonage 738-26, avec un objet et une citation conformes et précis."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 3,
+     "citation": "4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS ACCESSOIRES EN COUR AVANT"
+    }
+   ]
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "item": "a06",
+   "kind": "v3_only",
+   "unitId": "u03",
+   "humanId": null,
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 739-26 — immeubles à logements dans les zones R-7 et R-8",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "739-26",
+      "page": 4,
+      "citation": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8",
+      "anchor": "RÈGLEMENT NUMÉRO 739-26",
+      "spanStart": 2148,
+      "spanEnd": 2321
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le premier projet 739-26 est présenté sous le titre cité à la page 4 et adopté à la page 5, constituant une unité distincte de l’avis de motion."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 4-5, résolution 2026-09-191 : « le premier projet de règlement 739-26 ... soit et est adopté »; étape projet_reglement, objet 739-26 et citation du titre 4.3 exacts."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "L'adoption du premier projet de règlement 739-26 est attestée à la page 4 par la résolution 2026-09-191."
+    }
+   ],
+   "human": {
+    "humanId": null,
+    "choice": "absent"
+   },
+   "votes": {
+    "astra": {
+     "item": "a06",
+     "choice": "absent",
+     "reason": "Le titre « ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 » à la page 4 introduit la résolution 2026-09-191 dont le dispositif figure à la page 5, retenu sous a03. Il ne s'agit ni d'un autre projet ni d'une autre étape : ajouter cette unité compterait deux fois le même fait."
+    },
+    "fable": {
+     "item": "a06",
+     "choice": "v1",
+     "reason": "Page 4, résolution 2026-09-191 « 4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 », dispositif page 5 : « le premier projet de règlement 739-26 ... soit et est adopté » ; unité projet_reglement distincte de l'avis de motion 4.2 (« Avis de motion et projet actuels séparés »). La référence humaine (absent) est écartée puisque le fait doit être crédité une fois et cette version porte l'objet réglementaire explicite « 739-26 »."
+    },
+    "gemini": {
+     "item": "a06",
+     "choice": "v1",
+     "reason": "La résolution 2026-09-191 à la page 4 adopte le premier projet de règlement de zonage 739-26, constituant une étape distincte valide."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "absent": 1,
+     "v1": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 4,
+     "citation": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8"
+    }
+   ]
+  },
+  {
+   "documentId": "waterloo-2026-08-18",
+   "item": "a05",
+   "kind": "split",
+   "unitId": "u07",
+   "verificationItem": "i07",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Prêt à usage gratuit d'un espace au 417, rue de la Cour — Télévision communautaire",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "417, rue de la Cour",
+      "page": 8,
+      "citation": "à titre gratuit, pour une durée d'un an, d'un espace de rangement clôturé situé au rez-de-chaussée du garage détaché municipal du 417, rue de la Cour",
+      "anchor": "417, rue de la Cour",
+      "spanStart": 1865,
+      "spanEnd": 2014
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 8 autorise expressément le prêt gratuit d'un espace immobilier au 417, rue de la Cour pour un an, conformément à l'inclusion des actes fonciers même non résidentiels."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "L'entente de prêt temporaire à titre gratuit d'un espace de rangement à un organisme communautaire (page 8) est une entente d'utilisation de locaux, non un acte foncier ni un objet d'urbanisme; elle relève du soutien aux organismes exclu du rappel."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le prêt à usage d'un espace de rangement dans un garage municipal à un organisme local relève de la gestion interne et de la vie communautaire, et non d'un acte foncier d'urbanisme."
+    }
+   ],
+   "human": null,
+   "votes": {
+    "astra": {
+     "item": "a05",
+     "choice": "v1",
+     "reason": "Le conseil « autorise l'entente de prêt temporaire » pour un an d'un espace précisément situé dans le garage municipal du « 417, rue de la Cour ». Cette convention d'usage d'un bien immobilier identifié relève des actes fonciers, même non résidentiels; ni sa gratuité ni son bénéficiaire communautaire ne constituent les exclusions invoquées par les positions contraires."
+    },
+    "fable": {
+     "item": "a05",
+     "choice": "absent",
+     "reason": "Page 8, 26.08.25.2 « Entente d'utilisation de locaux - Télévision communautaire de Waterloo » : un « prêt temporaire [...] à titre gratuit, pour une durée d'un an, d'un espace de rangement clôturé » à un « organisme reconnu » est une entente d'usage de locaux en soutien communautaire, sans transfert ni constitution de droit réel sur l'immeuble, donc ni acte foncier ni objet d'urbanisme au sens des inclusions (comparer avec la servitude réelle et perpétuelle de 26.08.25.3) ; l'adresse explicite invoquée par C ne suffit pas à en faire un acte foncier."
+    },
+    "gemini": {
+     "item": "a05",
+     "choice": "absent",
+     "reason": "Le prêt gratuit d'un espace de rangement dans un garage municipal au profit d'un organisme local (point 26.08.25.2) relève de la gestion interne et de la vie communautaire, et non d'un acte foncier ou d'une décision d'urbanisme."
+    }
+   },
+   "resolution": {
+    "outcome": "unresolved",
+    "choice": null,
+    "tally": {
+     "v1": 1,
+     "absent": 2
+    },
+    "cause": "no_unanimity"
+   },
+   "excerpts": [
+    {
+     "option": "v1",
+     "page": 8,
+     "citation": "à titre gratuit, pour une durée d'un an, d'un espace de rangement clôturé situé au rez-de-chaussée du garage détaché municipal du 417, rue de la Cour"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,175 @@
+{
+ "nodes": [
+  {
+   "id": "source-2026-06-08",
+   "label": "Amherst — Ordre du jour de la séance du 8 juin 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "status": "candidate",
+   "date": "2026-06-08",
+   "municipality": "amherst",
+   "format": "pdf",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "url": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "SÉANCE ORDINAIRE DU CONSEIL",
+     "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+     "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-source"
+   ]
+  },
+  {
+   "id": "signal-acquisition-5197804",
+   "label": "Demande d’acquisition du lot 5 197 804 — Route 323",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "status": "candidate",
+   "category": "acquisition_fonciere",
+   "meetingDate": "2026-06-08",
+   "municipality": "amherst",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "no_lot": "5197804",
+   "description": "Demande d’acquisition du lot 5 197 804 (route 323) inscrite au point 6.4 de l’ordre du jour. Aucune décision n’est documentée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande d’acquisition du lot 5 197 804 (route 323)",
+     "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+     "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-acquisition"
+   ]
+  },
+  {
+   "id": "signal-fonds-parcs",
+   "label": "Affectation budgétaire au fonds de parcs, terrains de jeux et espaces verts",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "status": "candidate",
+   "category": "amenagement_espaces_verts",
+   "meetingDate": "2026-06-08",
+   "municipality": "amherst",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "description": "Affectation budgétaire au fonds de parcs, terrains de jeux et espaces verts inscrite au point 10.4 de l’ordre du jour, sans montant ni décision documentés.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "10.4 Affectation budgétaire – Fonds de parcs, terrains de jeux et espaces verts",
+     "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+     "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-parcs"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-2026-06-08",
+   "target": "signal-acquisition-5197804",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "evidence_refs": [
+    "ev-acquisition"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande d’acquisition du lot 5 197 804 (route 323)",
+     "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+     "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-06-08",
+   "target": "signal-fonds-parcs",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "evidence_refs": [
+    "ev-parcs"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "10.4 Affectation budgétaire – Fonds de parcs, terrains de jeux et espaces verts",
+     "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+     "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-source",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "SÉANCE ORDINAIRE DU CONSEIL\nDATE :\nHEURE :\nLIEU :\n\nLundi 8 juin 2026\n19 h 30\n245 rue Amherst"
+  },
+  {
+   "id": "ev-acquisition",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Demande d’acquisition du lot 5 197 804 (route 323)"
+  },
+  {
+   "id": "ev-parcs",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "10.4 Affectation budgétaire – Fonds de parcs, terrains de jeux et espaces verts"
+  },
+  {
+   "id": "ev-passerelle",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "10.5 Passerelle du lac de la Décharge – Autorisation de dépense"
+  }
+ ],
+ "input_tokens": 7050,
+ "output_tokens": 2900
+}

@@ -1,0 +1,329 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-cm-pv-2026-04",
+      "label": "Procès-verbal - Séance ordinaire du 13 avril 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "status": "validated",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "date": "2026-04-13",
+      "municipality": "stanstead-est",
+      "url": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Lors d’une séance régulière du conseil municipal du 13 avril 2026 à 19h30, formant quorum sous la présidence de la mairesse, Madame Pamela B."
+        }
+      ]
+    },
+    {
+      "id": "event-res-2026-04-03",
+      "label": "Appui demande CPTAQ - Lot 6 374 262",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "status": "candidate",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "municipality": "stanstead-est",
+      "resolution": "2026-04-03",
+      "resolutionRef": "Rés. 2026-04-03",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "no_lot": "6374262",
+      "description": "Appui à la demande déposée par Madame Mélanie Banville auprès de la CPTAQ concernant l'acquisition d'une superficie de 54 acres du lot 6 374 262 pour activités agricoles (acériculture, myciculture, verger).",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Il est proposé par Matthew Farfan, appuyé par Mathieu Laliberté, et résolu à l'unanimité ;"
+        },
+        {
+          "page": 2,
+          "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée par Madame Mélanie Banville auprès de la CPTAQ concernant l’acquisition d’une superficie de 54 acres du lot 6 374 262."
+        }
+      ]
+    },
+    {
+      "id": "event-res-2026-04-04",
+      "label": "Appui demande CPTAQ - Lot 5 417 438",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "status": "candidate",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "municipality": "stanstead-est",
+      "resolution": "2026-04-04",
+      "resolutionRef": "Rés. 2026-04-04",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "no_lot": "5417438",
+      "superficie_m2": 4000,
+      "description": "Appui à la demande déposée à la CPTAQ par le propriétaire du lot 5 417 438 visant à autoriser la construction d'une nouvelle résidence dans la portion nord-ouest, avec démolition de la résidence actuelle et remise en culture.",
+      "conditions": [
+        "démolition de la résidence actuelle et remise en culture de cette portion"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Il est proposé par Mathieu Laliberté, appuyé par Rock Simard, et résolu à l'unanimité ; QUE la municipalité de Stanstead-Est appuie la demande déposée à la CPTAQ par le propriétaire du lot 5 417 438"
+        }
+      ]
+    },
+    {
+      "id": "event-res-2026-03-21",
+      "label": "Appui demande CPTAQ RIGDSC - Lot 2 935 698",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "status": "candidate",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "dossier": "45064",
+      "municipality": "stanstead-est",
+      "resolution": "2026-03-21",
+      "resolutionRef": "Rés. 2026-03-21",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "no_lot": "2935698",
+      "superficie_m2": 255000,
+      "description": "Appui de la demande de la RIGDSC à la CPTAQ pour l'agrandissement d'un lieu d'enfouissement technique (LET) sur une partie du lot 2 935 698 d'environ 25,5 hectares.",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Il est proposé par Mathieu Laliberté, appuyé par Jacques Picard, et résolu à l’unanimité ; QUE la municipalité de Stanstead-Est appuie la demande de la Régie intermunicipale de gestion des déchets"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2026-04",
+      "label": "Règlement 2026-04 - Tarification des permis et certificats",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "status": "validated",
+      "numero": "2026-04",
+      "stage": "adoption",
+      "date": "2026-04-13",
+      "meetingDate": "2026-04-13",
+      "municipality": "stanstead-est",
+      "resolution": "2026-04-34",
+      "resolutionRef": "Rés. 2026-04-34",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "title": "Règlement 2026-04 modifiant 2016-10 sur la tarification des permis et certificats",
+      "objet": "Ajustement de la tarification des permis et certificats afin de rattraper l'indexation",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Il est proposé par Mathieu Laliberté, appuyé par Patrick Prince, et résolu à l’unanimité ; D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10 sur la tarification des permis et certificats"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2016-10",
+      "label": "Règlement 2016-10",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "status": "candidate",
+      "numero": "2016-10",
+      "municipality": "stanstead-est",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "title": "Règlement sur la tarification des permis et certificats",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10 sur la tarification des permis et certificats ;"
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-2935698",
+      "label": "Zone agricole permanente - Lot 2 935 698",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "municipality": "stanstead-est",
+      "organisme": "CPTAQ",
+      "dossier": "45064",
+      "resolution": "2026-03-21",
+      "resolutionRef": "Rés. 2026-03-21",
+      "meetingDate": "2026-04-13",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "description": "Lot se trouvant à l'intérieur de la zone agricole permanente, assujetti à autorisation de la CPTAQ pour fins autres qu'agricoles.",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "ATTENDU que la Régie intermunicipale de gestion des déchets solides de la région de Coaticook (la «Régie») veut procéder à l’agrandissement de son lieu d’enfouissement technique (le «LET») situé sur le lot 2 935 698"
+        }
+      ],
+      "evidence_refs": [
+        "ev-cptaq-698"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-cm-pv-2026-04",
+      "target": "event-res-2026-04-03",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Il est proposé par Matthew Farfan, appuyé par Mathieu Laliberté, et résolu à l'unanimité ;"
+        }
+      ],
+      "evidence_refs": [
+        "ev-event-03"
+      ]
+    },
+    {
+      "source": "source-cm-pv-2026-04",
+      "target": "event-res-2026-04-04",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Il est proposé par Mathieu Laliberté, appuyé par Rock Simard, et résolu à l'unanimité ; QUE la municipalité de Stanstead-Est appuie la demande déposée à la CPTAQ par le propriétaire du lot 5 417 438"
+        }
+      ],
+      "evidence_refs": [
+        "ev-event-04"
+      ]
+    },
+    {
+      "source": "source-cm-pv-2026-04",
+      "target": "event-res-2026-03-21",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "citations": [
+        {
+          "page": 13,
+          "excerpt": "Il est proposé par Mathieu Laliberté, appuyé par Jacques Picard, et résolu à l’unanimité ; QUE la municipalité de Stanstead-Est appuie la demande de la Régie intermunicipale de gestion des déchets"
+        }
+      ],
+      "evidence_refs": [
+        "ev-event-21"
+      ]
+    },
+    {
+      "source": "source-cm-pv-2026-04",
+      "target": "bylaw-2026-04",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "Il est proposé par Mathieu Laliberté, appuyé par Patrick Prince, et résolu à l’unanimité ; D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10 sur la tarification des permis et certificats"
+        }
+      ],
+      "evidence_refs": [
+        "ev-bylaw-2026-04"
+      ]
+    },
+    {
+      "source": "bylaw-2026-04",
+      "target": "bylaw-2016-10",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "citations": [
+        {
+          "page": 18,
+          "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10 sur la tarification des permis et certificats ;"
+        }
+      ],
+      "evidence_refs": [
+        "ev-bylaw-2026-04"
+      ]
+    },
+    {
+      "source": "source-cm-pv-2026-04",
+      "target": "constraint-cptaq-2935698",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "citations": [
+        {
+          "page": 12,
+          "excerpt": "ATTENDU que la Régie intermunicipale de gestion des déchets solides de la région de Coaticook (la «Régie») veut procéder à l’agrandissement de son lieu d’enfouissement technique (le «LET») situé sur le lot 2 935 698"
+        }
+      ],
+      "evidence_refs": [
+        "ev-cptaq-698"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-event-03",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "Il est proposé par Matthew Farfan, appuyé par Mathieu Laliberté, et résolu à l'unanimité ;"
+    },
+    {
+      "id": "ev-event-04",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Il est proposé par Mathieu Laliberté, appuyé par Rock Simard, et résolu à l'unanimité ; QUE la municipalité de Stanstead-Est appuie la demande déposée à la CPTAQ par le propriétaire du lot 5 417 438"
+    },
+    {
+      "id": "ev-event-21",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "modality": "pdf",
+      "page": 13,
+      "excerpt": "Il est proposé par Mathieu Laliberté, appuyé par Jacques Picard, et résolu à l’unanimité ; QUE la municipalité de Stanstead-Est appuie la demande de la Régie intermunicipale de gestion des déchets"
+    },
+    {
+      "id": "ev-bylaw-2026-04",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "modality": "pdf",
+      "page": 18,
+      "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10 sur la tarification des permis et certificats ;"
+    },
+    {
+      "id": "ev-cptaq-698",
+      "source_file": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "rawRef": "raw/proces-verbaux-stanstead-est/cas/24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611.pdf",
+      "docSha": "24fe500b800d92acb68a4455ca45cf8b88cb7d0d7b1025a3c94ad2ac1dc31611",
+      "sourceUrl": "https://www.stansteadest.ca/wp-content/uploads/2026/06/CM-PV_2026-04-Avril.pdf",
+      "modality": "pdf",
+      "page": 12,
+      "excerpt": "ATTENDU que la Régie intermunicipale de gestion des déchets solides de la région de Coaticook (la «Régie») veut procéder à l’agrandissement de son lieu d’enfouissement technique (le «LET») situé sur le lot 2 935 698"
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 5800,
+  "output_tokens": 1250
+}
+```

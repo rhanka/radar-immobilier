@@ -1,0 +1,13 @@
+{
+ "id": "hatley-2026-04-07",
+ "rc": 0,
+ "latencyMs": 292959,
+ "inputTokens": 2,
+ "outputTokens": 44338,
+ "cacheRead": 0,
+ "cacheCreate": 21934,
+ "costUsd": 1.3441380000000003,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 65858
+}

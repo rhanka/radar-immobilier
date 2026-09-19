@@ -1,0 +1,231 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01e174afa3871e892056b2ac16eff8c2088afe711ebcf965b22813672952c4c2",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"La circulation des motoneiges sur les chemins municipaux relève des loisirs et de la voirie sans développement explicite, exclu par les règles du corrigé, et l'engagement de procédures ne constitue pas une étape réglementaire formelle.\"},{\"item\":\"i02\",\"choice\":\"v2\",\"reason\":\"Il s'agit d'une décision du conseil sur une demande d'autorisation pour un conteneur et non d'une adoption de règlement; l'étape est donc inconnu et les mentions sont exactes en page 17.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'adoption du second projet de règlement 434-2026 est attestée par la résolution 2026-03-075 en page 20.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement 435-2026 est formellement donné par Roxanne Bureau-Grenier en page 20.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet de règlement 435-2026 est attestée par la résolution 2026-03-076 en page 20.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La tenue de l'assemblée publique de consultation pour le règlement 435-2026 est formellement fixée par la résolution 2026-03-077 en page 21.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement 436-2026 est formellement donné par Danny Dionne en page 21.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet de règlement 436-2026 est attestée par la résolution 2026-03-078 en page 22.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"La tenue de l'assemblée publique de consultation pour le règlement 436-2026 est formellement fixée par la résolution 2026-03-079 en page 22.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement 437-2026 est formellement donné par Roxanne Bureau-Grenier en page 23.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet de règlement 437-2026 est attestée par la résolution 2026-03-080 en page 23.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"La tenue de l'assemblée publique de consultation pour le règlement 437-2026 est formellement fixée par la résolution 2026-03-081 en page 23.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement 438-2026 est formellement donné par Jacques Tessier en page 24.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"Le dépôt du projet de règlement 438-2026 est formellement effectué par Jacques Tessier en page 24.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-082 en page 25 concerne expressément la demande de suspension des activités dans les limites du projet d'aire protégée PR-1013718.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement 440-2026 est formellement donné par Frédéric Lapointe en page 25.\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet de règlement 440-2026 est attestée par la résolution 2026-03-083 en page 26.\"},{\"item\":\"i18\",\"choice\":\"v1\",\"reason\":\"La tenue de l'assemblée publique de consultation pour le règlement 440-2026 est formellement fixée par la résolution 2026-03-084 en page 26.\"},{\"item\":\"i19\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-085 en page 26 appuie la demande d'aliénation agricole à la CPTAQ pour une partie du lot 4 756 274.\"},{\"item\":\"i20\",\"choice\":\"v1\",\"reason\":\"L'octroi de la dérogation mineure pour le 250-252, rue Notre-Dame est attesté par la résolution 2026-03-086 en page 27.\"},{\"item\":\"i21\",\"choice\":\"v1\",\"reason\":\"La décision mixte (refus de superficie et autorisation conditionnelle de marge) sur la dérogation mineure du 500, rue Bédard est attestée par la résolution 2026-03-087 en page 27.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v2"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La circulation des motoneiges sur les chemins municipaux relève des loisirs et de la voirie sans développement explicite, exclu par les règles du corrigé, et l'engagement de procédures ne constitue pas une étape réglementaire formelle."
+  },
+  {
+   "item": "i02",
+   "choice": "v2",
+   "reason": "Il s'agit d'une décision du conseil sur une demande d'autorisation pour un conteneur et non d'une adoption de règlement; l'étape est donc inconnu et les mentions sont exactes en page 17."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'adoption du second projet de règlement 434-2026 est attestée par la résolution 2026-03-075 en page 20."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement 435-2026 est formellement donné par Roxanne Bureau-Grenier en page 20."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet de règlement 435-2026 est attestée par la résolution 2026-03-076 en page 20."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La tenue de l'assemblée publique de consultation pour le règlement 435-2026 est formellement fixée par la résolution 2026-03-077 en page 21."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement 436-2026 est formellement donné par Danny Dionne en page 21."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet de règlement 436-2026 est attestée par la résolution 2026-03-078 en page 22."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La tenue de l'assemblée publique de consultation pour le règlement 436-2026 est formellement fixée par la résolution 2026-03-079 en page 22."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement 437-2026 est formellement donné par Roxanne Bureau-Grenier en page 23."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet de règlement 437-2026 est attestée par la résolution 2026-03-080 en page 23."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "La tenue de l'assemblée publique de consultation pour le règlement 437-2026 est formellement fixée par la résolution 2026-03-081 en page 23."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement 438-2026 est formellement donné par Jacques Tessier en page 24."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Le dépôt du projet de règlement 438-2026 est formellement effectué par Jacques Tessier en page 24."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-082 en page 25 concerne expressément la demande de suspension des activités dans les limites du projet d'aire protégée PR-1013718."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement 440-2026 est formellement donné par Frédéric Lapointe en page 25."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet de règlement 440-2026 est attestée par la résolution 2026-03-083 en page 26."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "La tenue de l'assemblée publique de consultation pour le règlement 440-2026 est formellement fixée par la résolution 2026-03-084 en page 26."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-085 en page 26 appuie la demande d'aliénation agricole à la CPTAQ pour une partie du lot 4 756 274."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "L'octroi de la dérogation mineure pour le 250-252, rue Notre-Dame est attesté par la résolution 2026-03-086 en page 27."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "La décision mixte (refus de superficie et autorisation conditionnelle de marge) sur la dérogation mineure du 500, rue Bédard est attestée par la résolution 2026-03-087 en page 27."
+  }
+ ]
+}

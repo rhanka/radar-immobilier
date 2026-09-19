@@ -1,0 +1,111 @@
+{
+ "documentId": "saint-barthelemy-2026-09-08",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "8942644f3bccd5757ec4286a05384d385cab43e5f710cac83f6a72b8a6fb882a",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 4.1 commence à la page 3 sous le titre cité, et la résolution 2026-09-189 adopte explicitement le règlement 738-26 dans son dispositif à la page 4.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 4, François Bertrand donne expressément un avis de motion pour modifier le zonage 288-90 afin de permettre des immeubles à logements dans les zones R-7 et R-8.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le premier projet 739-26 est présenté sous le titre cité à la page 4 et adopté à la page 5, constituant une unité distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-09-194, page 6, autorise la vente du matricule 3220-74-4030 et précise l’interdiction d’y implanter des aménagements permanents.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 6 autorise explicitement la vente du second immeuble identifié par le matricule 3220-73-6695, également soumis à l’interdiction des aménagements permanents.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-09-195, page 7, autorise l’achat de la portion de la Montée du Lac-Robert identifiée par le matricule 2723-93-7328.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v2\",\n      \"reason\": \"La page 7 autorise la vente du matricule 3418-41-5276 et interdit les aménagements permanents sauf réalisation préalable de travaux majeurs de correction de la pente.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-09-197, page 8, autorise la vente de l’immeuble 6 621 027 à Hulix S.E.N.C., sous condition du transfert des responsabilités et des clauses de préemption.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-09-203, page 10, accepte le prolongement de l’aqueduc pour desservir des résidences supplémentaires, soit un développement explicite et non un simple entretien.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v2"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 4.1 commence à la page 3 sous le titre cité, et la résolution 2026-09-189 adopte explicitement le règlement 738-26 dans son dispositif à la page 4."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "À la page 4, François Bertrand donne expressément un avis de motion pour modifier le zonage 288-90 afin de permettre des immeubles à logements dans les zones R-7 et R-8."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le premier projet 739-26 est présenté sous le titre cité à la page 4 et adopté à la page 5, constituant une unité distincte de l’avis de motion."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-09-194, page 6, autorise la vente du matricule 3220-74-4030 et précise l’interdiction d’y implanter des aménagements permanents."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 6 autorise explicitement la vente du second immeuble identifié par le matricule 3220-73-6695, également soumis à l’interdiction des aménagements permanents."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-09-195, page 7, autorise l’achat de la portion de la Montée du Lac-Robert identifiée par le matricule 2723-93-7328."
+  },
+  {
+   "item": "i07",
+   "choice": "v2",
+   "reason": "La page 7 autorise la vente du matricule 3418-41-5276 et interdit les aménagements permanents sauf réalisation préalable de travaux majeurs de correction de la pente."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La résolution 2026-09-197, page 8, autorise la vente de l’immeuble 6 621 027 à Hulix S.E.N.C., sous condition du transfert des responsabilités et des clauses de préemption."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 2026-09-203, page 10, accepte le prolongement de l’aqueduc pour desservir des résidences supplémentaires, soit un développement explicite et non un simple entretien."
+  }
+ ]
+}

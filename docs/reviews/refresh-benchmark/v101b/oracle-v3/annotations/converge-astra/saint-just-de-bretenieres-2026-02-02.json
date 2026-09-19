@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4ed3478f674f30796abf8eaa9483b57afddcd46aeced0b635394e2896f556053",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La page 2 atteste une demande actuelle d’information, notamment sur la valeur du terrain du rang St-Isidore, constituant un suivi foncier explicite sans attester une vente conclue.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 40-02-2026, page 7, demande expressément la révision du règlement exigeant une bande boisée de 20 mètres, sans adopter de modification réglementaire, ce qui justifie l’étape « inconnu ».\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La page 8 atteste l’acceptation de l’intention de déclaration de compétence de la MRC concernant certaines autorisations en milieux hydriques, conformément à l’objet et à la citation proposés, sans constituer une adoption de règlement.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 2 atteste une demande actuelle d’information, notamment sur la valeur du terrain du rang St-Isidore, constituant un suivi foncier explicite sans attester une vente conclue."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 40-02-2026, page 7, demande expressément la révision du règlement exigeant une bande boisée de 20 mètres, sans adopter de modification réglementaire, ce qui justifie l’étape « inconnu »."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 8 atteste l’acceptation de l’intention de déclaration de compétence de la MRC concernant certaines autorisations en milieux hydriques, conformément à l’objet et à la citation proposés, sans constituer une adoption de règlement."
+  }
+ ]
+}

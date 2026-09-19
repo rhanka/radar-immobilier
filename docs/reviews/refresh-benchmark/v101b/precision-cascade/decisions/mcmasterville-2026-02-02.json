@@ -1,0 +1,282 @@
+{
+ "documentId": "mcmasterville-2026-02-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "aceb91e4dbd432232907494f811a558522be14b09f325527682b5083a705f9bd",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-7-2"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Versement à des fins de parcs — Projet de redéveloppement, 141, rue de Bretagne",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Autorisation – Versement à des fins de parcs, de terrains de jeu ou pour\nle maintien d'un espace naturel – Projet de redéveloppement"
+      },
+      {
+       "page": 2,
+       "excerpt": "Autorisation – Versement à des fins de parcs, de terrains de jeu ou pour\nle maintien d'un espace naturel – Projet de redéveloppement – Adresse\nprojetée 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 – Zone R-8"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-7-3"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — Stationnement, 938, rue Bernard-Pilon",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Demande de dérogation mineure – Stationnement – Lot 5 754 418 –\n938, rue Bernard-Pilon – Zone MXT-4"
+      },
+      {
+       "page": 2,
+       "excerpt": "Demande de dérogation mineure – Stationnement – Lot 5 754 418 –\n938, rue Bernard-Pilon – Zone MXT-4"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-7-4"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Exemption de cases de stationnement — 938, rue Bernard-Pilon",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Demande d'exemption de fournir et de maintenir des cases de\nstationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4"
+      },
+      {
+       "page": 2,
+       "excerpt": "Demande d'exemption de fournir et de maintenir des cases de\nstationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-7-5"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Modification de la résolution 2025-184 — Démolition, 129, rue de Bretagne",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Modification – Résolution 2025-184 – Demande de révision – Décision du\ncomité de démolition CD-2025-03 – Demande de démolition"
+      },
+      {
+       "page": 2,
+       "excerpt": "Modification – Résolution 2025-184 – Demande de révision – Décision du\ncomité de démolition CD-2025-03 – Demande de démolition – Bâtiment\nprincipal – Lot 4 494 281 – 129, rue de Bretagne – Zone R-8"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-7-6"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Modification de la résolution 2025-185 — Démolition, 143, rue de Bretagne",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Modification – Résolution 2025-185 – Demande de révision – Décision du\ncomité de démolition CD-2025-04 – Demande de démolition"
+      },
+      {
+       "page": 2,
+       "excerpt": "Modification – Résolution 2025-185 – Demande de révision – Décision du\ncomité de démolition CD-2025-04 – Demande de démolition – Bâtiment\nprincipal – Lot 4 494 279 – 143, rue de Bretagne – Zone R-8"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-7-7"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Projet de bâtiment résidentiel multifamilial — 141, rue de Bretagne",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Autorisation d'un projet de construction d'un bâtiment résidentiel\nmultifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 –\nZone R-8"
+      },
+      {
+       "page": 2,
+       "excerpt": "Autorisation d'un projet de construction d'un bâtiment résidentiel\nmultifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 –\nZone R-8 – Abrogation des résolutions 2025-154, 2025-229 et 2025-251"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-29-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 29-26 — Conduite maîtresse d'eau potable",
+     "stage": null,
+     "objet": "29-26",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Approbation – Règlement numéro 29-26 décrétant une dépense de\n9 960 000 $ et un emprunt de 9 960 000 $ pour la réalisation de travaux"
+      },
+      {
+       "page": 1,
+       "excerpt": "Approbation – Règlement numéro 29-26 décrétant une dépense de\n9 960 000 $ et un emprunt de 9 960 000 $ pour la réalisation de travaux\nd’installation de conduite maîtresse d’eau potable à McMasterville –\nRégie intermunicipale de l'Eau de la Vallée du Richelieu (RIEVR)"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"L'autorisation de versement à des fins de parcs est inscrite à l'ordre du jour au point 7.2.\",\"excerpt\":\"Autorisation – Versement à des fins de parcs, de terrains de jeu ou pour\\nle maintien d'un espace naturel – Projet de redéveloppement – Adresse\\nprojetée 141, rue de Bretagne\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La demande de dérogation mineure figure au point 7.3 de l'ordre du jour.\",\"excerpt\":\"Demande de dérogation mineure – Stationnement – Lot 5 754 418 –\\n938, rue Bernard-Pilon – Zone MXT-4\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La demande d'exemption de cases de stationnement est prévue au point 7.4.\",\"excerpt\":\"Demande d'exemption de fournir et de maintenir des cases de\\nstationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"La modification de la résolution concernant la démolition au 129, rue de Bretagne figure au point 7.5.\",\"excerpt\":\"Modification – Résolution 2025-184 – Demande de révision – Décision du\\ncomité de démolition CD-2025-03 – Demande de démolition – Bâtiment\\nprincipal – Lot 4 494 281 – 129, rue de Bretagne\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"La modification de la résolution concernant la démolition au 143, rue de Bretagne figure au point 7.6.\",\"excerpt\":\"Modification – Résolution 2025-185 – Demande de révision – Décision du\\ncomité de démolition CD-2025-04 – Demande de démolition – Bâtiment\\nprincipal – Lot 4 494 279 – 143, rue de Bretagne\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"L'autorisation d'un projet de construction multifamilial au 141, rue de Bretagne figure au point 7.7.\",\"excerpt\":\"Autorisation d'un projet de construction d'un bâtiment résidentiel\\nmultifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 –\\nZone R-8\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"L'approbation du règlement d'emprunt 29-26 est inscrite au point 3.3 de l'ordre du jour.\",\"excerpt\":\"Approbation – Règlement numéro 29-26 décrétant une dépense de\\n9 960 000 $ et un emprunt de 9 960 000 $ pour la réalisation de travaux\\nd’installation de conduite maîtresse d’eau potable\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "L'autorisation de versement à des fins de parcs est inscrite à l'ordre du jour au point 7.2.",
+   "excerpt": "Autorisation – Versement à des fins de parcs, de terrains de jeu ou pour\nle maintien d'un espace naturel – Projet de redéveloppement – Adresse\nprojetée 141, rue de Bretagne"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La demande de dérogation mineure figure au point 7.3 de l'ordre du jour.",
+   "excerpt": "Demande de dérogation mineure – Stationnement – Lot 5 754 418 –\n938, rue Bernard-Pilon – Zone MXT-4"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La demande d'exemption de cases de stationnement est prévue au point 7.4.",
+   "excerpt": "Demande d'exemption de fournir et de maintenir des cases de\nstationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "La modification de la résolution concernant la démolition au 129, rue de Bretagne figure au point 7.5.",
+   "excerpt": "Modification – Résolution 2025-184 – Demande de révision – Décision du\ncomité de démolition CD-2025-03 – Demande de démolition – Bâtiment\nprincipal – Lot 4 494 281 – 129, rue de Bretagne"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "La modification de la résolution concernant la démolition au 143, rue de Bretagne figure au point 7.6.",
+   "excerpt": "Modification – Résolution 2025-185 – Demande de révision – Décision du\ncomité de démolition CD-2025-04 – Demande de démolition – Bâtiment\nprincipal – Lot 4 494 279 – 143, rue de Bretagne"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "L'autorisation d'un projet de construction multifamilial au 141, rue de Bretagne figure au point 7.7.",
+   "excerpt": "Autorisation d'un projet de construction d'un bâtiment résidentiel\nmultifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 –\nZone R-8"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "L'approbation du règlement d'emprunt 29-26 est inscrite au point 3.3 de l'ordre du jour.",
+   "excerpt": "Approbation – Règlement numéro 29-26 décrétant une dépense de\n9 960 000 $ et un emprunt de 9 960 000 $ pour la réalisation de travaux\nd’installation de conduite maîtresse d’eau potable"
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "L'autorisation de versement à des fins de parcs est inscrite à l'ordre du jour au point 7.2."
+   },
+   {
+    "act": "A02",
+    "reason": "La demande de dérogation mineure figure au point 7.3 de l'ordre du jour."
+   },
+   {
+    "act": "A03",
+    "reason": "La demande d'exemption de cases de stationnement est prévue au point 7.4."
+   },
+   {
+    "act": "A04",
+    "reason": "La modification de la résolution concernant la démolition au 129, rue de Bretagne figure au point 7.5."
+   },
+   {
+    "act": "A05",
+    "reason": "La modification de la résolution concernant la démolition au 143, rue de Bretagne figure au point 7.6."
+   },
+   {
+    "act": "A06",
+    "reason": "L'autorisation d'un projet de construction multifamilial au 141, rue de Bretagne figure au point 7.7."
+   },
+   {
+    "act": "A07",
+    "reason": "L'approbation du règlement d'emprunt 29-26 est inscrite au point 3.3 de l'ordre du jour."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2271,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3827,
+   "outputTokens": 700,
+   "totalTokens": 4527
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2111
+  },
+  "inputSha256": "cf09a8f96f8b80614c099a95df469b0c4556a8a593c4e8ddeae3ab6d230cdb37"
+ }
+}

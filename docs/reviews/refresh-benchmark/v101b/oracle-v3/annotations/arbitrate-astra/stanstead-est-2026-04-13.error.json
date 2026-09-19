@@ -1,0 +1,25 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dde58b22ba15c59d0eb3228c87709123e0bb175a8e28a5158f89e617de9987e8",
+ "verificationSha256": "a81d7a8571e60589fadbefc1fbec14e4752d0028dc1f15817e2168ecd0e63edf",
+ "error": "MESH_FAILED ECONNRESET",
+ "receipt": {
+  "transport": "codex",
+  "latencyMs": 605035,
+  "code": "ECONNRESET",
+  "httpStatus": 200,
+  "responseError": null
+ },
+ "at": "2026-09-18T21:07:12.422Z"
+}

@@ -1,0 +1,414 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-419",
+   "label": "Règlement 419 — premier projet, agriculture sans élevage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "numero": "419",
+   "municipality": "tadoussac",
+   "stage": "1er_projet",
+   "meetingDate": "2026-01-13",
+   "resolution": "2026-01-15",
+   "zone_cible": "31-C",
+   "objet": "Permettre l’agriculture sans élevage à l’intérieur des bâtiments de la zone 31-C; la zone ne devient pas à dominance agricole.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419\nMODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE\nL’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE\n31-C",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-motion-419",
+   "label": "Avis de motion du règlement 419",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "municipality": "tadoussac",
+   "date": "2026-01-13",
+   "kind": "rezonage",
+   "etape": "avis_motion",
+   "etape_date": "2026-01-13",
+   "reglement_number": "419",
+   "zone_ref": "31-C",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Conformément à l’article 445 du Code municipal, je, soussigné, Bruno\nForest, conseiller, de la Municipalité du Village de Tadoussac, donne avis",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-project-419",
+   "label": "Adoption du premier projet du règlement 419",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "municipality": "tadoussac",
+   "date": "2026-01-13",
+   "kind": "rezonage",
+   "decision": "approuvé",
+   "etape": "projet_reglement",
+   "etape_date": "2026-01-13",
+   "reglement_number": "419",
+   "zone_ref": "31-C",
+   "resolution": "2026-01-15",
+   "description": "Premier projet permettant la classe Agriculture sans élevage dans les bâtiments de la zone 31-C, lié au projet de commerce et de culture et transformation de champignons au 122 rue des Érables. La date de consultation annoncée est contradictoire : 28 janvier dans le préambule et 27 janvier dans le calendrier.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419\nMODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE\nL’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE\n31-C",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-31-C",
+   "label": "Zone 31-C",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "code": "31-C",
+   "municipality": "tadoussac",
+   "bylaw": "253",
+   "secteur": "Route 138",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "ATTENDU QUE la zone 31­C se trouve le long de la route 138 et\ncomporte des terrains en grande majorité construits ;",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-forgerons",
+   "label": "Refus du changement de zonage — 247, rue des Forgerons",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "municipality": "tadoussac",
+   "date": "2026-01-13",
+   "kind": "rezonage",
+   "decision": "refusé",
+   "etape": "inconnu",
+   "reglement_number": "253",
+   "resolution": "2026-01-16",
+   "description": "Refus de transférer le 247, rue des Forgerons de la zone 24-H vers la zone 21-CH pour convertir le gîte en boutique de souvenirs.",
+   "motif": "Enjeux de logement et de sécurité piétonnière et routière.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE le conseil refuse la demande d’amendement au zonage 253 aux\nfins de transiter le 247, rue des Forgerons dans la zone 21­CH afin de\nleur permettre d’opérer une boutique souvenir.",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-24-H",
+   "label": "Zone 24-H",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "code": "24-H",
+   "municipality": "tadoussac",
+   "description": "Zone actuelle du 247, rue des Forgerons; l’usage commercial n’y est pas permis.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "CONSIDÉRANT QUE la zone 24­H à laquelle se retrouve l’adresse du\n247, rue des Forgerons ne permet pas l’usage commerciale ;",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-21-CH",
+   "label": "Zone 21-CH",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "code": "21-CH",
+   "municipality": "tadoussac",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE le conseil refuse la demande d’amendement au zonage 253 aux\nfins de transiter le 247, rue des Forgerons dans la zone 21­CH afin de\nleur permettre d’opérer une boutique souvenir.",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-ppcmoi",
+   "label": "Refus du PPCMOI — 176, rue du Bord-de-l’Eau",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "municipality": "tadoussac",
+   "date": "2026-01-13",
+   "decision": "refusé",
+   "etape": "ppcmoi",
+   "etape_date": "2026-01-13",
+   "zone_ref": "12-P",
+   "resolution": "2026-01-17",
+   "description": "Refus du projet d’hébergement touristique et commercial au 176, rue du Bord-de-l’Eau, sur recommandation du CCU.",
+   "motif": "Usages non permis dans la zone 12-P; fort caractère patrimonial de l’immeuble.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE le Conseil approuve la décision du Comité consultatif d’urbanisme\net refuse la demande du projet d’hébergement touristique et commercial",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-12-P",
+   "label": "Zone 12-P",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "code": "12-P",
+   "municipality": "tadoussac",
+   "description": "Zone du projet au 176, rue du Bord-de-l’Eau; les usages d’hébergement touristique et commercial demandés ne sont pas permis.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE le Conseil approuve la décision du Comité consultatif d’urbanisme\net refuse la demande du projet d’hébergement touristique et commercial",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-sale",
+   "label": "Vente municipale par invitation — lot 4 342 594",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "municipality": "tadoussac",
+   "date": "2026-01-13",
+   "category": "vente_terrain",
+   "no_lot": "4342594",
+   "resolution": "2026-01-06",
+   "amount_cad": 35980,
+   "description": "Vente par invitation à soumissionner autorisée. La municipalité souhaite récupérer 35 980 $ de coûts d’acquisition; ce montant n’est pas un prix de vente conclu. L’immeuble avait été acquis afin de procéder à sa démolition.",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "QUE le Conseil autorise la vente du lot 4 342 594 du cadastre du Québec\npar une invitation à soumissionner.",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-park",
+   "label": "Cessions pour le projet de parc national des Dunes-de-Tadoussac",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "municipality": "tadoussac",
+   "date": "2026-01-13",
+   "category": "cession_fonciere",
+   "resolution": "2026-01-31",
+   "description": "Fermeture et abolition d’une portion du chemin du Moulin-à-Baude sur les lots 4 344 119 et 6 683 045, cession gratuite au MELCCFP et cession du barrage. Servitude d’aqueduc en faveur de la municipalité et maintien de certaines obligations de déneigement. Modification du numéro de lot de la résolution 2025-04-106.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "QUE le Conseil municipal consente à fermer et abolir comme chemin\nmunicipal la portion du chemin du Moulin­à­Baude",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-415",
+   "label": "Règlement 415 — citation patrimoniale de la Maison du Tourisme",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "status": "candidate",
+   "municipality": "tadoussac",
+   "numero": "415",
+   "stage": "adoption",
+   "date": "2026-01-13",
+   "resolution": "2026-01-32",
+   "objet": "Citation de la Maison du Tourisme située au 197, rue des Pionniers, à titre d’immeuble patrimonial.",
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "D’adopter le règlement no 415 ayant pour objet la citation de la Maison\ndu Tourisme située au 197, Rue des Pionniers, à titre d’immeubles\npatrimonial.",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-project-419",
+   "target": "zone-31-C",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "evidence_refs": [
+    "ev-project"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419\nMODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE\nL’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE\n31-C",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-forgerons",
+   "target": "zone-21-CH",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "evidence_refs": [
+    "ev-refusal"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE le conseil refuse la demande d’amendement au zonage 253 aux\nfins de transiter le 247, rue des Forgerons dans la zone 21­CH afin de\nleur permettre d’opérer une boutique souvenir.",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-ppcmoi",
+   "target": "zone-12-P",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "evidence_refs": [
+    "ev-ppcmoi"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE le Conseil approuve la décision du Comité consultatif d’urbanisme\net refuse la demande du projet d’hébergement touristique et commercial",
+     "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+     "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+     "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-amends",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+   "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "Le cahier des spécifications faisant partie intégrante du règlement de\nzonage numéro 253, sous la cote « Annexe A » est modifié."
+  },
+  {
+   "id": "ev-project",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+   "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "ADOPTION DU PREMIER PROJET DU RÈGLEMENT NO 419\nMODIFIANT LE RÈGLEMENT DE ZONAGE AFIN DE PERMETTRE\nL’AGRICULTURE SANS ÉLEVAGE À L’INTÉRIEUR DE LA ZONAGE\n31-C"
+  },
+  {
+   "id": "ev-refusal",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+   "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "QUE le conseil refuse la demande d’amendement au zonage 253 aux\nfins de transiter le 247, rue des Forgerons dans la zone 21­CH afin de\nleur permettre d’opérer une boutique souvenir."
+  },
+  {
+   "id": "ev-ppcmoi",
+   "source_file": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "rawRef": "raw/proces-verbaux-tadoussac/cas/1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289.pdf",
+   "docSha": "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289",
+   "sourceUrl": "https://www.municipalite.tadoussac.com/fichiersUpload/fichiers/20260319111528-13-01-26-seance-ordinaire.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "QUE le Conseil approuve la décision du Comité consultatif d’urbanisme\net refuse la demande du projet d’hébergement touristique et commercial\nsitué dans la zone 12­P qui ne permet pas ces usages."
+  }
+ ],
+ "input_tokens": 14500,
+ "output_tokens": 5300
+}

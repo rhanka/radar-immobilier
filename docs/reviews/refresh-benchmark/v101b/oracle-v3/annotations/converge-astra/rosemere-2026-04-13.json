@@ -1,0 +1,131 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6bbeb215bfddb233381f5e7b8c9c44befae20c69c1d1080a965da0ab91962dd8",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-125, page 2, accorde la dérogation au 262, rue Westward pour permettre un recul arrière de 0,56 mètre au garage détaché existant.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-126, page 2, approuve à titre de P.I.I.A. une enseigne sur bâtiment et une enseigne sur pylône pour Continental au 307, boulevard Labelle.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le dispositif de la résolution 2026-04-127, page 3, approuve à titre de P.I.I.A. la modification des enseignes sur le pylône existant au 400, chemin de la Grande-Côte.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-128, page 3, approuve explicitement à titre de P.I.I.A. le projet d'agrandissement au 266, rue du Bocage.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-129, page 3, approuve à titre de P.I.I.A. l'agrandissement et la construction d'un garage annexé au 338, rue Montview.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le dispositif de la résolution 2026-04-130, page 4, approuve à titre de P.I.I.A. la modification des ouvertures au 355, rue Montcalm.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"L'intitulé cité et la résolution 2026-04-131 figurent page 4, où sont approuvés à titre de P.I.I.A. la substitution du revêtement des façades latérales et l'ajout d'une terrasse au toit au 5, chemin de la Grande-Côte.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 5.3.1, page 4, constate l'avis de motion donné par Marie-Hélène Fortin pour le règlement 1004-01 sur les contributions pour parcs, terrains de jeux et espaces naturels.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-133, page 5, adopte le projet du règlement 1004-01 et fixe sa consultation publique au 11 mai 2026, étape distincte de l'avis de motion.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.3, page 6, atteste que Stéphanie Nantel donne avis de motion pour le règlement 1015 concernant les propriétés vulnérables aux inondations pluviales.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.3, page 6, précise que Stéphanie Nantel « dépose le projet de règlement », ce qui constitue une unité distincte de l'avis de motion pour le règlement 1015.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-125, page 2, accorde la dérogation au 262, rue Westward pour permettre un recul arrière de 0,56 mètre au garage détaché existant."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-126, page 2, approuve à titre de P.I.I.A. une enseigne sur bâtiment et une enseigne sur pylône pour Continental au 307, boulevard Labelle."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 2026-04-127, page 3, approuve à titre de P.I.I.A. la modification des enseignes sur le pylône existant au 400, chemin de la Grande-Côte."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-128, page 3, approuve explicitement à titre de P.I.I.A. le projet d'agrandissement au 266, rue du Bocage."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-129, page 3, approuve à titre de P.I.I.A. l'agrandissement et la construction d'un garage annexé au 338, rue Montview."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 2026-04-130, page 4, approuve à titre de P.I.I.A. la modification des ouvertures au 355, rue Montcalm."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L'intitulé cité et la résolution 2026-04-131 figurent page 4, où sont approuvés à titre de P.I.I.A. la substitution du revêtement des façades latérales et l'ajout d'une terrasse au toit au 5, chemin de la Grande-Côte."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Le point 5.3.1, page 4, constate l'avis de motion donné par Marie-Hélène Fortin pour le règlement 1004-01 sur les contributions pour parcs, terrains de jeux et espaces naturels."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-133, page 5, adopte le projet du règlement 1004-01 et fixe sa consultation publique au 11 mai 2026, étape distincte de l'avis de motion."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Le point 6.3, page 6, atteste que Stéphanie Nantel donne avis de motion pour le règlement 1015 concernant les propriétés vulnérables aux inondations pluviales."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Le point 6.3, page 6, précise que Stéphanie Nantel « dépose le projet de règlement », ce qui constitue une unité distincte de l'avis de motion pour le règlement 1015."
+  }
+ ]
+}

@@ -1,0 +1,120 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Demande d’information sur la vente de terrain — rang St-Isidore",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "RANG ST-ISIDORE",
+    "page": 2,
+    "citation": "VENTE DE TERRAIN – RANG ST-ISIDORE Les élus demandent plus d’information, dont la valeur du terrain",
+    "anchor": "RANG ST-ISIDORE",
+    "spanStart": 142,
+    "spanEnd": 241
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande d’information sur la vente de terrain — rang St-Isidore",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "RANG ST-ISIDORE",
+      "page": 2,
+      "citation": "VENTE DE TERRAIN – RANG ST-ISIDORE Les élus demandent plus d’information, dont la valeur du terrain",
+      "anchor": "RANG ST-ISIDORE",
+      "spanStart": 142,
+      "spanEnd": 241
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le document constate une demande actuelle d’information sur une vente de terrain explicitement située, et non un simple rappel historique ou une vente autorisée."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Demande de révision du règlement exigeant une bande boisée de 20 mètres",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "règlement de déboisement",
+    "page": 7,
+    "citation": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le règlement soit revu en tenant compte des éléments soulevés",
+    "anchor": "règlement soit revu",
+    "spanStart": 877,
+    "spanEnd": 1047
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de révision du règlement exigeant une bande boisée de 20 mètres",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "règlement de déboisement",
+      "page": 7,
+      "citation": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le règlement soit revu en tenant compte des éléments soulevés",
+      "anchor": "règlement soit revu",
+      "spanStart": 877,
+      "spanEnd": 1047
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 40-02-2026 demande la révision du règlement imposant une bande boisée de 20 mètres, ce qui constitue une démarche réglementaire actuelle sans adoption d’une modification."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Acceptation de la déclaration de compétence de la MRC de Montmagny — autorisations en milieux hydriques",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "déclaration de compétence",
+    "page": 8,
+    "citation": "accepte et se déclare favorable à l’intention de déclaration de compétence de la MRC de Montmagny concernant la délivrance de certaines autorisations en vertu du Règlement sur l’encadrement",
+    "anchor": "déclaration de compétence de la MRC",
+    "spanStart": 162,
+    "spanEnd": 351
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation de la déclaration de compétence de la MRC de Montmagny — autorisations en milieux hydriques",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "déclaration de compétence",
+      "page": 8,
+      "citation": "accepte et se déclare favorable à l’intention de déclaration de compétence de la MRC de Montmagny concernant la délivrance de certaines autorisations en vertu du Règlement sur l’encadrement",
+      "anchor": "déclaration de compétence de la MRC",
+      "spanStart": 162,
+      "spanEnd": 351
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 41-02-2026 accepte expressément la déclaration de compétence relative aux autorisations en milieux hydriques ; cette étape réglementaire actuelle ne constitue ni l’adoption du règlement cité ni un simple rappel de la résolution antérieure de la MRC."
+    }
+   ]
+  }
+ ]
+}

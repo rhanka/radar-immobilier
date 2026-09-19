@@ -1,0 +1,62 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "3402179709b9ab9a37bf255cc4c670e6613a2050f4866666ab24f61d877208a9",
+ "rawText": "{\"operations\":[\n {\"op\":\"add\",\"unit\":{\"label\":\"Avis de motion — Règlement # 591-2026 sur l’épandage en 2026\",\"stage\":\"avis_motion\",\"procedure\":null,\"objet\":\"591-2026\",\"page\":2,\"citation\":\"donne avis que je présenterai, lors d’une prochaine assemblée, un règlement concernant l’épandage en 2026\",\"anchor\":\"un règlement concernant l’épandage en 2026\"},\"reason\":\"Point 5 (Avis # 12939) : avis de motion effectivement donné en séance pour le règlement sur l’épandage en 2026 (identifié # 591-2026 au point 6) ; la règle « Avis de motion et projet actuels séparés » et l’application 2 exigent une unité distincte pour l’avis de motion ; le considérant du point 6 rappelant cet avis ne crée pas d’unité supplémentaire.\"},\n {\"op\":\"add\",\"unit\":{\"label\":\"Dépôt et adoption du projet de règlement # 591-2026 — épandage en 2026\",\"stage\":\"projet_reglement\",\"procedure\":null,\"objet\":\"591-2026\",\"page\":2,\"citation\":\"Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains jours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté.\",\"anchor\":\"projet de règlement # 591-2026\"},\"reason\":\"Point 6 (Rés. # 12940) : objet réglementaire explicite (règlement numéroté # 591-2026) dont le projet est déposé et adopté à cette séance ; étape « projet_reglement » distincte de l’avis de motion selon l’application 2, absente du corrigé courant.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion — Règlement # 591-2026 sur l’épandage en 2026",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "591-2026",
+    "page": 2,
+    "citation": "donne avis que je présenterai, lors d’une prochaine assemblée, un règlement concernant l’épandage en 2026",
+    "anchor": "un règlement concernant l’épandage en 2026"
+   },
+   "reason": "Point 5 (Avis # 12939) : avis de motion effectivement donné en séance pour le règlement sur l’épandage en 2026 (identifié # 591-2026 au point 6) ; la règle « Avis de motion et projet actuels séparés » et l’application 2 exigent une unité distincte pour l’avis de motion ; le considérant du point 6 rappelant cet avis ne crée pas d’unité supplémentaire."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt et adoption du projet de règlement # 591-2026 — épandage en 2026",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "591-2026",
+    "page": 2,
+    "citation": "Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains jours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté.",
+    "anchor": "projet de règlement # 591-2026"
+   },
+   "reason": "Point 6 (Rés. # 12940) : objet réglementaire explicite (règlement numéroté # 591-2026) dont le projet est déposé et adopté à cette séance ; étape « projet_reglement » distincte de l’avis de motion selon l’application 2, absente du corrigé courant."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

@@ -1,0 +1,41 @@
+{
+ "documentId": "parisville-2026-05-05",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2aa5234b8f9ef2dd8ca8992165af580158825b1851a5554d291351cb6b12579a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le texte de la page 3 atteste « 6.1. AVIS D'ADOPTION_RÈGLEMENT 432-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE # 308-2011 » avec résolution 73-05-26 « adopte le règlement # 432-2026 » ADOPTÉE ; objet réglementaire explicite, étape adoption constatée, citation et page exactes ; les mentions historiques (avis de motion 10 mars, projets) ne multiplient pas le rappel.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le texte de la page 4 atteste « 6.2. AVIS D'ADOPTION_RÈGLEMENT 433-2026 MODIFIANT LE RÈGLEMENT DE LOTISSEMENT # 311-2011 » avec résolution 74-05-26 « adopte le règlement # 433-2026 » ADOPTÉE ; objet réglementaire explicite, étape adoption constatée dans ce document, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le texte de la page 3 atteste « 6.1. AVIS D'ADOPTION_RÈGLEMENT 432-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE # 308-2011 » avec résolution 73-05-26 « adopte le règlement # 432-2026 » ADOPTÉE ; objet réglementaire explicite, étape adoption constatée, citation et page exactes ; les mentions historiques (avis de motion 10 mars, projets) ne multiplient pas le rappel."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le texte de la page 4 atteste « 6.2. AVIS D'ADOPTION_RÈGLEMENT 433-2026 MODIFIANT LE RÈGLEMENT DE LOTISSEMENT # 311-2011 » avec résolution 74-05-26 « adopte le règlement # 433-2026 » ADOPTÉE ; objet réglementaire explicite, étape adoption constatée dans ce document, citation et page exactes."
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+ "documentId": "daveluyville-2026-05-04",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "06afa8b814e0d9623dfd8f1e5c5588565305993d4ac6e7a338776e5ffb4bff9f",
+ "verificationSha256": "4fb1c11b7d19ddb838314bc6f989d1a71ec3283f03c27e8db5199e1e02f4687f",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

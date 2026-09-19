@@ -1,0 +1,91 @@
+{
+ "documentId": "beaupre-2026-03-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "ba56fc293b175ddf19038dc81fdfc716da44090247d83e585740d2095735a01b",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 11982-020326, page 5, autorise la signature des documents pour le prolongement de la rue Belhumeur et d’une autre rue, soit un développement explicite et non un simple entretien de voirie.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 11983-020326, page 5, approuve le projet du 200, rue de Véga en application du règlement sur les PIIA, conformément à la recommandation 26-07 du CCU.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 11984-020326 commence à la page 5 avec l’intitulé cité et se poursuit à la page 6 par l’approbation du PIIA du 155, rue de Cassiopée.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 11985-020326, page 6, approuve le projet du 145, rue de Cassiopée en application du règlement sur les PIIA, suivant la recommandation 26-09 du CCU.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 11986-020326, dont l’intitulé figure page 6, conclut page 7 au refus du projet du 150, rue de l’Aurore-Boréale pour non-respect des objectifs et critères du PIIA, conformément à la règle selon laquelle les refus doivent rester des refus.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"absent\",\n      \"reason\": \"La résolution 11980-020326 prévoit seulement le prêt ponctuel d’une salle communautaire à une association, sans objet réglementaire ou foncier d’urbanisme explicite admissible au corrigé.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"absent\",\n      \"reason\": \"Le prêt de salle du 4 mars constitue une mise à disposition ponctuelle pour une association et non une unité réglementaire ou foncière d’urbanisme au sens des règles du corrigé.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 11982-020326, page 5, autorise la signature des documents pour le prolongement de la rue Belhumeur et d’une autre rue, soit un développement explicite et non un simple entretien de voirie."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 11983-020326, page 5, approuve le projet du 200, rue de Véga en application du règlement sur les PIIA, conformément à la recommandation 26-07 du CCU."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 11984-020326 commence à la page 5 avec l’intitulé cité et se poursuit à la page 6 par l’approbation du PIIA du 155, rue de Cassiopée."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 11985-020326, page 6, approuve le projet du 145, rue de Cassiopée en application du règlement sur les PIIA, suivant la recommandation 26-09 du CCU."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 11986-020326, dont l’intitulé figure page 6, conclut page 7 au refus du projet du 150, rue de l’Aurore-Boréale pour non-respect des objectifs et critères du PIIA, conformément à la règle selon laquelle les refus doivent rester des refus."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "La résolution 11980-020326 prévoit seulement le prêt ponctuel d’une salle communautaire à une association, sans objet réglementaire ou foncier d’urbanisme explicite admissible au corrigé."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Le prêt de salle du 4 mars constitue une mise à disposition ponctuelle pour une association et non une unité réglementaire ou foncière d’urbanisme au sens des règles du corrigé."
+  }
+ ]
+}

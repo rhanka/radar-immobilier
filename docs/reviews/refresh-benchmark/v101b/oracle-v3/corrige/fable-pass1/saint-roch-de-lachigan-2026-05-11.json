@@ -1,0 +1,234 @@
+{
+ "documentId": "saint-roch-de-lachigan-2026-05-11",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Exercice du droit de préemption prévu — vente du lot 6 141 751",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 141 751",
+    "page": 2,
+    "citation": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption",
+    "anchor": "lot 6 141 751",
+    "spanStart": 436,
+    "spanEnd": 498
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Exercice du droit de préemption prévu — vente du lot 6 141 751",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 141 751",
+      "page": 2,
+      "citation": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption",
+      "anchor": "lot 6 141 751",
+      "spanStart": 436,
+      "spanEnd": 498
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 8.5 prévoit un acte foncier concernant un lot explicitement identifié, à inclure comme point prévu et non comme décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu de la démolition — 16, rue de l'Île-Majeau",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "16, rue de l'Île-Majeau",
+    "page": 2,
+    "citation": "10.1 Démolition de l'immeuble situé au 16, rue de l'Île-Majeau",
+    "anchor": "16, rue de l'Île-Majeau",
+    "spanStart": 1043,
+    "spanEnd": 1105
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu de la démolition — 16, rue de l'Île-Majeau",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "16, rue de l'Île-Majeau",
+      "page": 2,
+      "citation": "10.1 Démolition de l'immeuble situé au 16, rue de l'Île-Majeau",
+      "anchor": "16, rue de l'Île-Majeau",
+      "spanStart": 1043,
+      "spanEnd": 1105
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 10.1 prévoit le traitement d'une démolition à une adresse explicite, sans préciser une étape d'adoption ou une procédure particulière."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Autorisation prévue de dérogation mineure — 296 rang de la Rivière Nord",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "296 rang de la Rivière Nord",
+    "page": 2,
+    "citation": "10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation",
+    "anchor": "296 rang de la Rivière Nord",
+    "spanStart": 1106,
+    "spanEnd": 1185
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation prévue de dérogation mineure — 296 rang de la Rivière Nord",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "296 rang de la Rivière Nord",
+      "page": 2,
+      "citation": "10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation",
+      "anchor": "296 rang de la Rivière Nord",
+      "spanStart": 1106,
+      "spanEnd": 1185
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 10.2 nomme une demande de dérogation mineure distincte dont l'autorisation est prévue à l'ordre du jour."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Autorisation prévue de dérogation mineure — 28 rue Beaucage",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "28 rue Beaucage",
+    "page": 2,
+    "citation": "10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation",
+    "anchor": "28 rue Beaucage",
+    "spanStart": 1186,
+    "spanEnd": 1253
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation prévue de dérogation mineure — 28 rue Beaucage",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "28 rue Beaucage",
+      "page": 2,
+      "citation": "10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation",
+      "anchor": "28 rue Beaucage",
+      "spanStart": 1186,
+      "spanEnd": 1253
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 10.3 nomme une autre demande de dérogation mineure, à compter séparément et à présenter comme prévue."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Autorisation prévue de modification d'affichage — immeuble cité au 1224 rue Principale",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1224 rue Principale",
+    "page": 2,
+    "citation": "10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation",
+    "anchor": "1224 rue Principale",
+    "spanStart": 1254,
+    "spanEnd": 1348
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation prévue de modification d'affichage — immeuble cité au 1224 rue Principale",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1224 rue Principale",
+      "page": 2,
+      "citation": "10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation",
+      "anchor": "1224 rue Principale",
+      "spanStart": 1254,
+      "spanEnd": 1348
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 10.4 prévoit une autorisation d'urbanisme sur un immeuble cité explicitement identifié, sans qualifier la demande de PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Autorisation prévue de travaux — immeuble cité au 1484, rue Principale",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1484, rue Principale",
+    "page": 2,
+    "citation": "10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation",
+    "anchor": "1484, rue Principale",
+    "spanStart": 1349,
+    "spanEnd": 1431
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation prévue de travaux — immeuble cité au 1484, rue Principale",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1484, rue Principale",
+      "page": 2,
+      "citation": "10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation",
+      "anchor": "1484, rue Principale",
+      "spanStart": 1349,
+      "spanEnd": 1431
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 10.5 prévoit une autorisation de travaux sur un immeuble cité distinct, à inclure sans présumer que l'autorisation est déjà accordée."
+    }
+   ]
+  }
+ ]
+}

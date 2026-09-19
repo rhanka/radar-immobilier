@@ -1,0 +1,35 @@
+{
+ "documentId": "eastman-2026-06-01",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "013e50a1db84050f8415eaa02349f4c80e23fcb26e07e5e05de41a77f5bd6109",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4322,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 15695,
+   "outputTokens": 1295,
+   "totalTokens": 16990
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4088
+  },
+  "inputSha256": "cac40a8f104ce34e290231a0e4549c6ced36ef904d9fcdd45a9973088ad3c5e1"
+ },
+ "at": "2026-09-19T03:22:41.891Z"
+}

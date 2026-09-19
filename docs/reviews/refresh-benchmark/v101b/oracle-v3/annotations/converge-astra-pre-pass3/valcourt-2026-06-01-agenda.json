@@ -1,0 +1,91 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "1646955ccb971540adbe2cc7d2f5f4a678bd94fcf63b0fe9a5fd6aae8d22a0db",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 7.1, page 1, prévoit le PIIA Boisé du Ruisseau pour le lotissement au 1070, rue Bissonnette, sans attester de décision acquise.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 7.2, page 1, prévoit le PIIA pour la construction de deux bâtiments principaux unifamiliaux jumelés au 1070, rue Bissonnette, objet distinct du lotissement.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 7.3, page 1, prévoit le PIIA pour la construction d’un bâtiment principal de type habitation unifamiliale isolée au 1045, rue Bissonnette.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 7.4, page 1, prévoit explicitement un PIIA Boisé du Ruisseau relatif au remblai au 1075, rue Bissonnette.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 7.5, page 1, prévoit l’adoption du second projet de règlement 560-28 amendant le règlement de zonage 560, ce qui correspond à l’étape second_projet et non à une adoption définitive acquise.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 11.1, page 2, inscrit la révision nécessaire du projet de règlement sur les pratiques agroenvironnementales, objet réglementaire explicite dont le traitement est prévu sans étape formelle plus précise attestée.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 13.2, page 3, prévoit une convention de prêt à usage pour le 4111 rue Carpentier, acte foncier inclus par les règles sans que sa conclusion soit attestée.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 7.1, page 1, prévoit le PIIA Boisé du Ruisseau pour le lotissement au 1070, rue Bissonnette, sans attester de décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 7.2, page 1, prévoit le PIIA pour la construction de deux bâtiments principaux unifamiliaux jumelés au 1070, rue Bissonnette, objet distinct du lotissement."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 7.3, page 1, prévoit le PIIA pour la construction d’un bâtiment principal de type habitation unifamiliale isolée au 1045, rue Bissonnette."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 7.4, page 1, prévoit explicitement un PIIA Boisé du Ruisseau relatif au remblai au 1075, rue Bissonnette."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 7.5, page 1, prévoit l’adoption du second projet de règlement 560-28 amendant le règlement de zonage 560, ce qui correspond à l’étape second_projet et non à une adoption définitive acquise."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 11.1, page 2, inscrit la révision nécessaire du projet de règlement sur les pratiques agroenvironnementales, objet réglementaire explicite dont le traitement est prévu sans étape formelle plus précise attestée."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le point 13.2, page 3, prévoit une convention de prêt à usage pour le 4111 rue Carpentier, acte foncier inclus par les règles sans que sa conclusion soit attestée."
+  }
+ ]
+}

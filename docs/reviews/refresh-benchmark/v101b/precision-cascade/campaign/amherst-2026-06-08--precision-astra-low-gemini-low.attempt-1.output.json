@@ -1,0 +1,116 @@
+{
+ "nodes": [
+  {
+   "id": "source-2026-06-08",
+   "label": "Ordre du jour de la séance ordinaire du 8 juin 2026 — Amherst",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "date": "2026-06-08",
+   "municipality": "amherst",
+   "url": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande d’acquisition du lot 5 197 804 (route 323)",
+     "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+     "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-acquisition-5197804",
+   "label": "Demande d’acquisition du lot 5 197 804",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "municipality": "amherst",
+   "meetingDate": "2026-06-08",
+   "category": "acquisition_fonciere",
+   "description": "Demande d’acquisition du lot 5 197 804 (route 323) inscrite au point 6.4 de l’ordre du jour. Aucune décision n’est consignée dans ce document.",
+   "no_lot": "5197804",
+   "etape": "inconnu",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-acquisition"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande d’acquisition du lot 5 197 804 (route 323)",
+     "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+     "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-2026-06-08",
+   "target": "signal-acquisition-5197804",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "evidence_refs": [
+    "ev-acquisition"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande d’acquisition du lot 5 197 804 (route 323)",
+     "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+     "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+     "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-acquisition",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Demande d’acquisition du lot 5 197 804 (route 323)"
+  },
+  {
+   "id": "ev-parcs",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "10.4 Affectation budgétaire – Fonds de parcs, terrains de jeux et espaces verts"
+  },
+  {
+   "id": "ev-passerelle",
+   "source_file": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "rawRef": "raw/proces-verbaux-amherst/cas/0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.pdf",
+   "docSha": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344",
+   "sourceUrl": "https://municipalite.amherst.qc.ca/wp-content/uploads/2026/06/Projet-dordre-du-jour-seance-8-juin-2026.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "10.5 Passerelle du lac de la Décharge – Autorisation de dépense"
+  }
+ ],
+ "input_tokens": 6900,
+ "output_tokens": 2700
+}

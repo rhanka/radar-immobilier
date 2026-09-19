@@ -1,0 +1,35 @@
+{
+ "documentId": "sainte-angele-de-monnoir-2026-01-13",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "6068f0996f75129dc0654ec4c483e3807ef9d93bd7655926ca7618104fe6fced",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3116,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10515,
+   "outputTokens": 556,
+   "totalTokens": 11071
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2961
+  },
+  "inputSha256": "c7af8edf7dc4d8b798299fe9db659400e3e823be06e69d95c783cc3b9ac4555c"
+ },
+ "at": "2026-09-19T03:22:46.673Z"
+}

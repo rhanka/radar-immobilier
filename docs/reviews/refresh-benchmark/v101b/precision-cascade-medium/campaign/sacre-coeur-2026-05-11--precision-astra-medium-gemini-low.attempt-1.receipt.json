@@ -1,0 +1,35 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c3439c75af500f458fb5943e95c03e72a58c3cdd3e76204888f7020529a5e958",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4058,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 22091,
+   "outputTokens": 1363,
+   "totalTokens": 23454
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3899
+  },
+  "inputSha256": "04828f323517301401d4c757c68f22bfc467ab2bd11e609fe4afe117ff0327ae"
+ },
+ "at": "2026-09-19T03:23:04.732Z"
+}

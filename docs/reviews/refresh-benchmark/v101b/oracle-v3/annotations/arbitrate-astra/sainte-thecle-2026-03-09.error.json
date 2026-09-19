@@ -1,0 +1,25 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01e174afa3871e892056b2ac16eff8c2088afe711ebcf965b22813672952c4c2",
+ "verificationSha256": "45a7ee7790ab17671049346278842ffbb0bef385bce236e320e0061864d2696e",
+ "error": "MESH_FAILED ECONNRESET",
+ "receipt": {
+  "transport": "codex",
+  "latencyMs": 600983,
+  "code": "ECONNRESET",
+  "httpStatus": 200,
+  "responseError": null
+ },
+ "at": "2026-09-18T21:07:13.447Z"
+}

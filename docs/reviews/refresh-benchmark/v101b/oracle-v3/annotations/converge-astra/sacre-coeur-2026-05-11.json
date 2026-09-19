@@ -1,0 +1,141 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c60bf030522dd5b0690362be3828e93dc6e6ecd023d549331d71c76ebdac0f58",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-167 adopte explicitement le règlement 645 sur l’occupation et l’entretien des bâtiments à la page 5.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-175, dont le titre est cité exactement à la page 12, demande à la page 14 la suspension et la révision du projet de règlement, sans en constater l’adoption.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 19 autorise la signature d’une modification de la convention de concession pour l’agrandissement du bâtiment de la halte routière, acte foncier inclus même s’il est non résidentiel.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v2\",\n      \"reason\": \"Le dispositif de la page 19 autorise expressément la demande 2026-009 « par projet de résolution », sans qualifier cette étape d’adoption définitive ou de second projet.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-187 autorise à la page 20 le PIIA 2026-010 pour la reconstruction de la maison au 318, chemin de L’Anse-de-Roche.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-188 autorise à la page 20 le PIIA 2026-008 pour la maison au 99, chemin du Fjord, conformément à la citation proposée.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-189 autorise à la page 21 le PIIA 2026-007 pour ajouter des panneaux de verre au patio du 322, chemin de L’Anse de Roche et en faire une verrière trois saisons.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-190 autorise à la page 21 le PIIA 2026-006 pour agrandir le patio à la place de la terrasse actuelle au 295, chemin de L’Anse de Roche.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 22 autorise la dérogation réduisant la marge arrière de huit à deux mètres pour le lot 4 700 841, avec le numéro « 20226-009 » effectivement écrit dans le document.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-192 autorise à la page 22 la dérogation 2026-011 réduisant la marge arrière de huit à 6,25 mètres derrière le garage attenant sur le lot 4 701 026.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"absent\",\n      \"reason\": \"Le développement du secteur de la rue Dufour est un fait complémentaire attesté, mais la résolution 2026-05-180 accepte un marché de services d’estimation de Stantec, catégorie exclue du rappel.\"\n    },\n    {\n      \"item\": \"i12\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition reprend exactement la demande de suspension et de révision de la résolution 2026-05-175 déjà couverte par i02, sans objet ni étape distincts, et constitue donc un doublon non crédité.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v2"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "absent"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-167 adopte explicitement le règlement 645 sur l’occupation et l’entretien des bâtiments à la page 5."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-175, dont le titre est cité exactement à la page 12, demande à la page 14 la suspension et la révision du projet de règlement, sans en constater l’adoption."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 19 autorise la signature d’une modification de la convention de concession pour l’agrandissement du bâtiment de la halte routière, acte foncier inclus même s’il est non résidentiel."
+  },
+  {
+   "item": "i04",
+   "choice": "v2",
+   "reason": "Le dispositif de la page 19 autorise expressément la demande 2026-009 « par projet de résolution », sans qualifier cette étape d’adoption définitive ou de second projet."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-187 autorise à la page 20 le PIIA 2026-010 pour la reconstruction de la maison au 318, chemin de L’Anse-de-Roche."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-188 autorise à la page 20 le PIIA 2026-008 pour la maison au 99, chemin du Fjord, conformément à la citation proposée."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-189 autorise à la page 21 le PIIA 2026-007 pour ajouter des panneaux de verre au patio du 322, chemin de L’Anse de Roche et en faire une verrière trois saisons."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-190 autorise à la page 21 le PIIA 2026-006 pour agrandir le patio à la place de la terrasse actuelle au 295, chemin de L’Anse de Roche."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La page 22 autorise la dérogation réduisant la marge arrière de huit à deux mètres pour le lot 4 700 841, avec le numéro « 20226-009 » effectivement écrit dans le document."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-192 autorise à la page 22 la dérogation 2026-011 réduisant la marge arrière de huit à 6,25 mètres derrière le garage attenant sur le lot 4 701 026."
+  },
+  {
+   "item": "i11",
+   "choice": "absent",
+   "reason": "Le développement du secteur de la rue Dufour est un fait complémentaire attesté, mais la résolution 2026-05-180 accepte un marché de services d’estimation de Stantec, catégorie exclue du rappel."
+  },
+  {
+   "item": "i12",
+   "choice": "absent",
+   "reason": "Cette proposition reprend exactement la demande de suspension et de révision de la résolution 2026-05-175 déjà couverte par i02, sans objet ni étape distincts, et constitue donc un doublon non crédité."
+  }
+ ]
+}

@@ -1,0 +1,35 @@
+{
+ "documentId": "bedford--brome-missisquoi-2026-06-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "1fcfa2e6f6cecf0975ceaf2b0b44b37e3ac6b76a0ff951fdb75a53ef3db41610",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3668,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 12898,
+   "outputTokens": 1157,
+   "totalTokens": 14055
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3288
+  },
+  "inputSha256": "24f09e3c4e1ae38eadd678a7962fa28848ba67e093b1def30fea692669175ffc"
+ },
+ "at": "2026-09-19T03:22:37.165Z"
+}

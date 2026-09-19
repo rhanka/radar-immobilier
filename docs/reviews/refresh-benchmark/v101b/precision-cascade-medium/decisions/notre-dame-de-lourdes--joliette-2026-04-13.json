@@ -1,0 +1,322 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "cf1de8040ccb69073dc81845b3dc8e04d211fb0ed10d0689082fb53e22954dbb",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "derogation-2025-0157"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2025-0157 — abri d’auto et garage",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil autorise la demande de dérogation mineure numéro 2025-0157 afin\nd’autoriser l’implantation d’un abri d’auto en cours avant rattaché au garage détaché et"
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil autorise la demande de dérogation mineure numéro 2025-0157 afin\nd’autoriser l’implantation d’un abri d’auto en cours avant rattaché au garage détaché et\nl’agrandissement du garage détaché en cours arrière."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "derogation-2026-0003"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-0003 — conteneur refusé",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "Que le conseil municipal refuse la demande de dérogation mineure numéro 2026-0003."
+      },
+      {
+       "page": 5,
+       "excerpt": "Que le conseil municipal refuse la demande de dérogation mineure numéro 2026-0003."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "derogation-2026-0002"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-0002 — largeur du lot 6 658 131",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2026-0002\nafin d’autoriser la forme du lot tel que présentée, avec une largeur sur la ligne avant sur"
+      },
+      {
+       "page": 6,
+       "excerpt": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2026-0002\nafin d’autoriser la forme du lot tel que présentée, avec une largeur sur la ligne avant sur\nla rue Maria de 30 mètres."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "derogation-2026-0005"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — clôture au 3741 rue Principale",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2025-0005 afin de\npermettre la construction de la clôture d’une hauteur de 1,52 mètre en cours avant\nsecondaire."
+      },
+      {
+       "page": 6,
+       "excerpt": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2025-0005 afin de\npermettre la construction de la clôture d’une hauteur de 1,52 mètre en cours avant\nsecondaire."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-02-2023"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 02-2023",
+     "stage": null,
+     "objet": "02-2023",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "ATTENDU QUE le règlement de zonage numéro 02-2023 est entré en vigueur le 13 avril\n2023 ;"
+      },
+      {
+       "page": 7,
+       "excerpt": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de\nzonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes\nATTENDU QUE le règlement de zonage numéro 02-2023 est entré en vigueur le 13 avril\n2023 ;\nATTENDU QUE le Conseil municipal peut modifier son règlement de zonage numéro 022023 en vertu de la Loi sur l’aménagement et l’urbanisme (RLRQ, c. A-19.1) ;\nATTENDU QU’un avis de motion a été dûment donné lors de la séance ordinaire du\nconseil municipal tenue le 9 mars 2026, qu’un projet de règlement a été déposé lors de\ncette même séance ;\nATTENDU QUE le présent règlement vise à modifier le nombre de logements, le nombre\nd’étages et la hauteur permise pour une habitation multifamiliale dans la zone U-41 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-03-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 03-2026 — modification du zonage U-41",
+     "stage": "2e_projet",
+     "objet": "03-2026",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de\nzonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes"
+      },
+      {
+       "page": 7,
+       "excerpt": "Que le conseil municipal de Notre-Dame-de-Lourdes adopte le règlement numéro 032026 modifiant le règlement de zonage 02-2023."
+      },
+      {
+       "page": 7,
+       "excerpt": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de\nzonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes\nATTENDU QUE le règlement de zonage numéro 02-2023 est entré en vigueur le 13 avril\n2023 ;\nATTENDU QUE le Conseil municipal peut modifier son règlement de zonage numéro 022023 en vertu de la Loi sur l’aménagement et l’urbanisme (RLRQ, c. A-19.1) ;\nATTENDU QU’un avis de motion a été dûment donné lors de la séance ordinaire du\nconseil municipal tenue le 9 mars 2026, qu’un projet de règlement a été déposé lors de\ncette même séance ;\nATTENDU QUE le présent règlement vise à modifier le nombre de logements, le nombre\nd’étages et la hauteur permise pour une habitation multifamiliale dans la zone U-41 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-03-2026-second-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption annoncée du second projet 03-2026",
+     "stage": "second_projet",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de\nzonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes"
+      },
+      {
+       "page": 7,
+       "excerpt": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de\nzonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes\nATTENDU QUE le règlement de zonage numéro 02-2023 est entré en vigueur le 13 avril\n2023 ;\nATTENDU QUE le Conseil municipal peut modifier son règlement de zonage numéro 022023 en vertu de la Loi sur l’aménagement et l’urbanisme (RLRQ, c. A-19.1) ;\nATTENDU QU’un avis de motion a été dûment donné lors de la séance ordinaire du\nconseil municipal tenue le 9 mars 2026, qu’un projet de règlement a été déposé lors de\ncette même séance ;\nATTENDU QUE le présent règlement vise à modifier le nombre de logements, le nombre\nd’étages et la hauteur permise pour une habitation multifamiliale dans la zone U-41 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-vente-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente pour taxes du 11 juin 2026 — autorisation d’enchérir",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "D’autoriser le directeur général et greffier-trésorier ou, en son absence, la directrice des\nfinances et greffière-trésorière adjointe, lors de la vente pour défaut de paiement de"
+      },
+      {
+       "page": 8,
+       "excerpt": "D’autoriser le directeur général et greffier-trésorier ou, en son absence, la directrice des\nfinances et greffière-trésorière adjointe, lors de la vente pour défaut de paiement de\ntaxes du 11 juin 2026, à enchérir, pour et au nom de la Municipalité, jusqu’à un montant\nmaximal équivalent au montant des taxes, en capital, intérêts, pénalité et frais, plus un\nmontant suffisant pour satisfaire à toute créance prioritaire ou hypothécaire d’un rang\nantérieur ou égal à celui des taxes municipales, et à acquérir, au nom de la Municipalité,\ntout immeuble de son territoire mis en vente."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la demande de dérogation mineure no 2025-0157 pour l'abri d'auto et le garage.\",\"excerpt\":\"Que le conseil autorise la demande de dérogation mineure numéro 2025-0157 afin d’autoriser l’implantation d’un abri d’auto en cours avant rattaché au garage détaché\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal refuse la demande de dérogation mineure no 2026-0003 relative à un conteneur.\",\"excerpt\":\"Que le conseil municipal refuse la demande de dérogation mineure numéro 2026-0003.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la dérogation mineure no 2026-0002 relative à la largeur du lot 6 658 131.\",\"excerpt\":\"Que le conseil municipal autorise la demande de dérogation mineure numéro 2026-0002 afin d’autoriser la forme du lot tel que présentée, avec une largeur sur la ligne avant sur la rue Maria de 30 mètres.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la dérogation mineure pour la clôture au 3741 rue Principale.\",\"excerpt\":\"Que le conseil municipal autorise la demande de dérogation mineure numéro 2025-0005 afin de permettre la construction de la clôture d’une hauteur de 1,52 mètre en cours avant secondaire.\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 02-2023 n'est mentionné que comme rappel historique et règlement modifié, sans acte propre à cette séance.\",\"excerpt\":\"ATTENDU QUE le règlement de zonage numéro 02-2023 est entré en vigueur le 13 avril 2023 ;\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil procède à l'adoption du second projet de règlement numéro 03-2026 modifiant le zonage.\",\"excerpt\":\"10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de zonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un doublon de l'acte d'adoption du second projet de règlement 03-2026 (A06).\",\"excerpt\":\"10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de zonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"L'autorisation d'enchérir lors d'une vente pour taxes relève de l'administration/finances et des exclusions, sans acte d'urbanisme ou foncier réglementaire.\",\"excerpt\":\"D’autoriser le directeur général et greffier-trésorier ou, en son absence, la directrice des finances et greffière-trésorière adjointe, lors de la vente pour défaut de paiement de taxes du 11 juin 2026, à enchérir\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la demande de dérogation mineure no 2025-0157 pour l'abri d'auto et le garage.",
+   "excerpt": "Que le conseil autorise la demande de dérogation mineure numéro 2025-0157 afin d’autoriser l’implantation d’un abri d’auto en cours avant rattaché au garage détaché"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal refuse la demande de dérogation mineure no 2026-0003 relative à un conteneur.",
+   "excerpt": "Que le conseil municipal refuse la demande de dérogation mineure numéro 2026-0003."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la dérogation mineure no 2026-0002 relative à la largeur du lot 6 658 131.",
+   "excerpt": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2026-0002 afin d’autoriser la forme du lot tel que présentée, avec une largeur sur la ligne avant sur la rue Maria de 30 mètres."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la dérogation mineure pour la clôture au 3741 rue Principale.",
+   "excerpt": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2025-0005 afin de permettre la construction de la clôture d’une hauteur de 1,52 mètre en cours avant secondaire."
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 02-2023 n'est mentionné que comme rappel historique et règlement modifié, sans acte propre à cette séance.",
+   "excerpt": "ATTENDU QUE le règlement de zonage numéro 02-2023 est entré en vigueur le 13 avril 2023 ;"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil procède à l'adoption du second projet de règlement numéro 03-2026 modifiant le zonage.",
+   "excerpt": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de zonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes"
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un doublon de l'acte d'adoption du second projet de règlement 03-2026 (A06).",
+   "excerpt": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de zonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "L'autorisation d'enchérir lors d'une vente pour taxes relève de l'administration/finances et des exclusions, sans acte d'urbanisme ou foncier réglementaire.",
+   "excerpt": "D’autoriser le directeur général et greffier-trésorier ou, en son absence, la directrice des finances et greffière-trésorière adjointe, lors de la vente pour défaut de paiement de taxes du 11 juin 2026, à enchérir"
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A05",
+    "reason": "Le règlement 02-2023 n'est mentionné que comme rappel historique et règlement modifié, sans acte propre à cette séance."
+   },
+   {
+    "act": "A07",
+    "reason": "Il s'agit d'un doublon de l'acte d'adoption du second projet de règlement 03-2026 (A06)."
+   },
+   {
+    "act": "A08",
+    "reason": "L'autorisation d'enchérir lors d'une vente pour taxes relève de l'administration/finances et des exclusions, sans acte d'urbanisme ou foncier réglementaire."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil autorise la demande de dérogation mineure no 2025-0157 pour l'abri d'auto et le garage."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil municipal refuse la demande de dérogation mineure no 2026-0003 relative à un conteneur."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil autorise la dérogation mineure no 2026-0002 relative à la largeur du lot 6 658 131."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil autorise la dérogation mineure pour la clôture au 3741 rue Principale."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil procède à l'adoption du second projet de règlement numéro 03-2026 modifiant le zonage."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2812,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 12472,
+   "outputTokens": 761,
+   "totalTokens": 13233
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2641
+  },
+  "inputSha256": "ed30c124e89789ccc9d38a0097dce17388e5f586719ba93608f42d9ca7cc1eb5"
+ }
+}

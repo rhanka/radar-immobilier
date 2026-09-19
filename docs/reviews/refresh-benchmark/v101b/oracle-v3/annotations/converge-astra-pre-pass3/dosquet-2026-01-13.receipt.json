@@ -1,0 +1,36 @@
+{
+ "documentId": "dosquet-2026-01-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "fe84f010581e156c6284b7feda317b884cef1595b74d882c61dd954e7e00107a",
+ "inputSha256": "446037657676bcbddd529cee264082a4cc2620e0abaa4cd4cb9a8316644c2407",
+ "responseSha256": "0ca063620a1819115a68fd8fe29fcbf39342b019f285dbd39ff524011b0982be",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 13597,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 8004,
+  "outputTokens": 392,
+  "totalTokens": 8396
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 13596,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:18:18.372Z"
+}

@@ -1,0 +1,189 @@
+{
+ "documentId": "chesterville-2026-03-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "9e2d8b49eb5ec241ac4191c09762b07260a8bfe6d189de092cf1a9793dd23617",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-267"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 267 N.S. — Occupation et entretien des bâtiments",
+     "stage": "projet",
+     "objet": "267 N.S.",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Avis de motion et dépôt du projet de règlement numéro 267\nN.S. relatif à l'occupation et l'entretien des bâtiments"
+      },
+      {
+       "page": 1,
+       "excerpt": "Adoption du projet de règlement numéro 267 N.S. relatif à\nl'occupation et l'entretien des bâtiments"
+      },
+      {
+       "page": 1,
+       "excerpt": "Avis de motion et dépôt du projet de règlement numéro 267\nN.S. relatif à l'occupation et l'entretien des bâtiments\nAdoption du projet de règlement numéro 267 N.S. relatif à\nl'occupation et l'entretien des bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-267"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Procédure prévue pour le projet de règlement 267 N.S.",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Avis de motion et dépôt du projet de règlement numéro 267\nN.S. relatif à l'occupation et l'entretien des bâtiments"
+      },
+      {
+       "page": 1,
+       "excerpt": "Adoption du projet de règlement numéro 267 N.S. relatif à\nl'occupation et l'entretien des bâtiments"
+      },
+      {
+       "page": 1,
+       "excerpt": "Avis de motion et dépôt du projet de règlement numéro 267\nN.S. relatif à l'occupation et l'entretien des bâtiments\nAdoption du projet de règlement numéro 267 N.S. relatif à\nl'occupation et l'entretien des bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-expropriation"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis d'expropriation prévu — Lot 6 185 428",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Avis d'expropriation aux propriétaires, lot 6 185 428"
+      },
+      {
+       "page": 1,
+       "excerpt": "Avis d'expropriation aux propriétaires, lot 6 185 428"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-eaux-usees"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Appel d'offres prévu pour la capacité d'eaux usées",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Autorisation -Appel d’offres pour la capacité d’eaux usées"
+      },
+      {
+       "page": 1,
+       "excerpt": "Autorisation -Appel d’offres pour la capacité d’eaux usées"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit l'avis de motion, le dépôt et l'adoption du projet de règlement numéro 267 N.S.\",\"excerpt\":\"Adoption du projet de règlement numéro 267 N.S. relatif à\\nl'occupation et l'entretien des bâtiments\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit la procédure relative au projet de règlement numéro 267 N.S.\",\"excerpt\":\"Avis de motion et dépôt du projet de règlement numéro 267\\nN.S. relatif à l'occupation et l'entretien des bâtiments\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 11.3 de l'ordre du jour en urbanisme prévoit l'avis d'expropriation concernant le lot 6 185 428.\",\"excerpt\":\"Avis d'expropriation aux propriétaires, lot 6 185 428\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une simple autorisation d'appel d'offres de services/travaux municipaux relevant des exclusions de compétence sans lien direct avec un acte d'urbanisme ou d'aménagement foncier.\",\"excerpt\":\"Autorisation -Appel d’offres pour la capacité d’eaux usées\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit l'avis de motion, le dépôt et l'adoption du projet de règlement numéro 267 N.S.",
+   "excerpt": "Adoption du projet de règlement numéro 267 N.S. relatif à\nl'occupation et l'entretien des bâtiments"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit la procédure relative au projet de règlement numéro 267 N.S.",
+   "excerpt": "Avis de motion et dépôt du projet de règlement numéro 267\nN.S. relatif à l'occupation et l'entretien des bâtiments"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 11.3 de l'ordre du jour en urbanisme prévoit l'avis d'expropriation concernant le lot 6 185 428.",
+   "excerpt": "Avis d'expropriation aux propriétaires, lot 6 185 428"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple autorisation d'appel d'offres de services/travaux municipaux relevant des exclusions de compétence sans lien direct avec un acte d'urbanisme ou d'aménagement foncier.",
+   "excerpt": "Autorisation -Appel d’offres pour la capacité d’eaux usées"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [
+   {
+    "act": "A04",
+    "reason": "Il s'agit d'une simple autorisation d'appel d'offres de services/travaux municipaux relevant des exclusions de compétence sans lien direct avec un acte d'urbanisme ou d'aménagement foncier."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "L'ordre du jour prévoit l'avis de motion, le dépôt et l'adoption du projet de règlement numéro 267 N.S."
+   },
+   {
+    "act": "A02",
+    "reason": "L'ordre du jour prévoit la procédure relative au projet de règlement numéro 267 N.S."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 11.3 de l'ordre du jour en urbanisme prévoit l'avis d'expropriation concernant le lot 6 185 428."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2699,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2136,
+   "outputTokens": 272,
+   "totalTokens": 2408
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2555
+  },
+  "inputSha256": "660d0ef2fc6732492bd408d3f6acdccb8ffe973cfb0a2ae875a638c6a87fe7fc"
+ }
+}

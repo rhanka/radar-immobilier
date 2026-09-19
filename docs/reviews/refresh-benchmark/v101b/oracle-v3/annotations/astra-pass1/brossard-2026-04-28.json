@@ -1,0 +1,572 @@
+{
+ "documentId": "brossard-2026-04-28",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "1678107d2c5f58f0ec8c170271bccbd8103d7b9b4534729f613cf7c23b673759",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation des dérogations mineures — 5641, rue Aline, lot projeté 6 720 588\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"6 720 588\",\n        \"page\": 2,\n        \"citation\": \"D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\\nAline, lot projeté 6 720 588, ayant pour effet de permettre :\",\n        \"anchor\": \"lot projeté 6 720 588\"\n      },\n      \"reason\": \"La résolution approuve une demande portant sur la largeur et la superficie du même lot projeté, ce qui constitue une unité de dérogation mineure.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2025-00304 — construction multifamiliale au 3605, rue de Châteauneuf\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-00304\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-3.1 PIIA – Construction multifamiliale 2025-00304 – 3605, rue de\\nChâteauneuf – Habitation multifamiliale isolée de quatre étages;\",\n        \"anchor\": \"multifamiliale 2025-00304\"\n      },\n      \"reason\": \"La résolution 260428-097 entérine cette recommandation favorable; chaque demande de PIIA explicitement nommée constitue une unité distincte.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2025-00305 — construction multifamiliale au 3665, rue de Châteauneuf\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-00305\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-3.2 PIIA – Construction multifamiliale 2025-00305 – 3665, rue de\\nChâteauneuf – Habitation multifamiliale isolée de quatre étages;\",\n        \"anchor\": \"multifamiliale 2025-00305\"\n      },\n      \"reason\": \"La résolution 260428-097 entérine cette demande de PIIA, distincte de celle visant le 3605, rue de Châteauneuf.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00036 — construction au 5892, rue Alexandre\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00036\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-5.1 PIIA – Construction unifamiliale 2026-00036 – 5892, rue Alexandre –\\nConstruction – Habitation unifamiliale isolée de deux étages;\",\n        \"anchor\": \"unifamiliale 2026-00036\"\n      },\n      \"reason\": \"Cette demande de construction unifamiliale figure parmi les recommandations favorables entérinées par le conseil.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2025-00320 — construction au 5641, rue Aline\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-00320\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-5.2 PIIA – Construction unifamiliale 2025-00320 – 5641, rue Aline –\\nHabitation unifamiliale isolée d'un étage;\",\n        \"anchor\": \"unifamiliale 2025-00320\"\n      },\n      \"reason\": \"Le conseil entérine ce PIIA, qui constitue un objet procédural distinct de la demande de dérogations mineures à la même adresse.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00005 — agrandissement au 3280, rue Bahamas\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00005\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-5.3 PIIA – Agrandissement unifamilial 2026-00005 – 3280, rue Bahamas –\\nPIIA – Agrandissement – Habitation unifamiliale isolée d'un étage;\",\n        \"anchor\": \"unifamilial 2026-00005\"\n      },\n      \"reason\": \"La résolution entérine cette demande d'agrandissement, et les petits PIIA sont expressément inclus dans le corrigé.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00024 — transformation au 5890, rue Bretagne\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00024\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-5.4 PIIA – Transformation bâtiment principal résidentiel 2026-00024 –\\n5890, rue Bretagne\",\n        \"anchor\": \"résidentiel 2026-00024\"\n      },\n      \"reason\": \"Le remplacement du revêtement, des portes et des fenêtres fait l'objet d'un PIIA favorable entériné par le conseil.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00049 — agrandissement au 2010, croissant Tourangeau\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00049\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-5.5 PIIA – Agrandissement unifamilial 2026-00049 – 2010, croissant\\nTourangeau – Agrandissement – Habitation unifamiliale isolée de deux étages;\",\n        \"anchor\": \"unifamilial 2026-00049\"\n      },\n      \"reason\": \"Cette demande d'agrandissement est explicitement nommée parmi les PIIA dont les recommandations favorables sont entérinées.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00027 — agrandissement au 7670, place Trudel\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00027\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-5.6 PIIA – Agrandissement unifamilial 2026-00027 – 7670, place Trudel –\\nPIIA – Agrandissement du rez-de-chaussée et modification des parements extérieurs –\",\n        \"anchor\": \"unifamilial 2026-00027\"\n      },\n      \"reason\": \"Le conseil entérine le PIIA relatif à l'agrandissement et aux parements extérieurs, ce qui forme une seule unité pour cette demande.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00039 — transformation de l'école Good Shepherd, 5770, rue Aline\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00039\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-6.1 PIIA – Transformation bâtiment principal non résidentiel 2026-00039 –\\n5770, rue Aline – Modification architecturale – École primaire Good Shepherd;\",\n        \"anchor\": \"non résidentiel 2026-00039\"\n      },\n      \"reason\": \"Ce PIIA scolaire est entériné par le conseil et demeure inclus malgré son caractère non résidentiel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00034 — transformation au 9550, boulevard Leduc, local 20\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00034\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-6.2 PIIA – Transformation bâtiment principal non résidentiel 2026-00034 –\\n9550, boulevard Leduc, local 20 – Modification architecturale commerciale – Local vacant;\",\n        \"anchor\": \"non résidentiel 2026-00034\"\n      },\n      \"reason\": \"La résolution entérine cette modification architecturale commerciale, les PIIA non résidentiels étant inclus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00048 — transformation au 9750, boulevard Leduc, local 25\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00048\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-6.3 PIIA – Transformation bâtiment principal non résidentiel 2026-00048 –\\n9750, boulevard Leduc, local 25 – Modification architecturale commerciale – Consignaction;\",\n        \"anchor\": \"non résidentiel 2026-00048\"\n      },\n      \"reason\": \"Le PIIA de transformation de Consignaction est une demande explicitement approuvée, distincte du PIIA d'enseigne au même local.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00033 — transformation au 9750, boulevard Leduc, local 30\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00033\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-6.4 PIIA – Transformation bâtiment principal non résidentiel 2026-00033 –\\n9750, boulevard Leduc, local 30 – Modification architecturale de la façade avant – Activate;\",\n        \"anchor\": \"non résidentiel 2026-00033\"\n      },\n      \"reason\": \"Le conseil entérine la modification de façade d'Activate, qui constitue une demande distincte de celle portant sur son enseigne.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00038 — transformation au 1520, avenue des Lumières, local 25\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00038\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-6.5 PIIA – Transformation bâtiment principal non résidentiel 2026-00038 –\\n1520, avenue des Lumières, local 25\",\n        \"anchor\": \"non résidentiel 2026-00038\"\n      },\n      \"reason\": \"Cette transformation commerciale de Meubles TOCO est explicitement comprise dans les recommandations favorables entérinées.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00046 — transformation au 1040, rue du Lux, local 15\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00046\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-6.6 PIIA – Transformation bâtiment principal non résidentiel 2026-00046 –\\n1040, rue du Lux, local 15 – Modification architecturale commerciale – UNIQLO;\",\n        \"anchor\": \"non résidentiel 2026-00046\"\n      },\n      \"reason\": \"Le conseil entérine ce PIIA commercial d'UNIQLO, lequel relève des inclusions non résidentielles.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00030 — enseigne au 8240, boulevard Leduc, local 30\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00030\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-7.1 PIIA – Enseignes 2026-00030 – 8240, boulevard Leduc, local 30 –\\nEnseigne sur bâtiment – King;\",\n        \"anchor\": \"Enseignes 2026-00030\"\n      },\n      \"reason\": \"L'enseigne King fait l'objet d'un PIIA favorable entériné, et les petits PIIA d'enseignes doivent être inclus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00042 — enseigne au 9550, boulevard Leduc, local 10\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00042\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-7.2 PIIA – Enseignes 2026-00042 – 9550, boulevard Leduc, local 10 –\\nEnseigne sur bâtiment – Le Tee Off Lounge;\",\n        \"anchor\": \"Enseignes 2026-00042\"\n      },\n      \"reason\": \"La résolution entérine cette demande d'enseigne du Tee Off Lounge, explicitement identifiée par son numéro de dossier.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00041 — enseigne au 9750, boulevard Leduc, local 25\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00041\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311-7.3 PIIA – Enseignes 2026-00041 – 9750, boulevard Leduc, local 25 –\\nEnseigne sur bâtiment – Consignaction;\",\n        \"anchor\": \"Enseignes 2026-00041\"\n      },\n      \"reason\": \"La demande d'enseigne de Consignaction est entérinée et possède un numéro distinct de sa demande de transformation architecturale.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00031 — enseigne au 9750, boulevard Leduc, local 30\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00031\",\n        \"page\": 3,\n        \"citation\": \"CCU-20260311.7.4 PIIA – Enseignes 2026-00031 – 9750, boulevard Leduc, local 30 –\\nEnseigne sur bâtiment – Activate;\",\n        \"anchor\": \"Enseignes 2026-00031\"\n      },\n      \"reason\": \"Ce PIIA d'enseigne d'Activate est une demande favorable entérinée distincte du PIIA de modification de façade.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00032 — enseigne au 9850, boulevard Leduc, local 20\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00032\",\n        \"page\": 4,\n        \"citation\": \"CCU-20260311-7.5 PIIA – Enseignes 2026-00032 – 9850, boulevard Leduc, local 20 –\\nEnseigne sur bâtiment – La Voûte;\",\n        \"anchor\": \"Enseignes 2026-00032\"\n      },\n      \"reason\": \"Cette demande d'enseigne poursuit la liste des PIIA favorables entérinés par la résolution 260428-097.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00026 — enseigne Meubles Toco\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00026\",\n        \"page\": 4,\n        \"citation\": \"CCU-20260311-7.6 PIIA – Enseignes 2026-00026 – 1520, venue des Lumières, local 25 –\\nEnseigne sur bâtiment – Meubles Toco;\",\n        \"anchor\": \"Enseignes 2026-00026\"\n      },\n      \"reason\": \"Le PIIA d'enseigne de Meubles Toco est explicitement entériné et reste distinct de la demande de transformation du bâtiment.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00056 — enseigne au 7185, boulevard du Quartier\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00056\",\n        \"page\": 4,\n        \"citation\": \"CCU-20260311-7.7 PIIA – Enseignes 2026-00056 – 7185, boulevard du Quartier –\\nEnseigne sur bâtiment – Coyote country;\",\n        \"anchor\": \"Enseignes 2026-00056\"\n      },\n      \"reason\": \"Cette enseigne de Coyote country fait l'objet d'une demande de PIIA favorable entérinée par le conseil.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-00044 — enseigne au 6598, boulevard Taschereau\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-00044\",\n        \"page\": 4,\n        \"citation\": \"CCU-20260311-7.8 PIIA – Enseignes 2026-00044 – 6598, boulevard Taschereau –\\nEnseigne sur marquise – Esso;\",\n        \"anchor\": \"Enseignes 2026-00044\"\n      },\n      \"reason\": \"Le conseil entérine le PIIA de l'enseigne sur marquise d'Esso, inclus même s'il s'agit d'un petit projet commercial.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2024-00225 — enseigne au 6633, boulevard Taschereau\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2024-00225\",\n        \"page\": 4,\n        \"citation\": \"CCU-20260311-7.9 PIIA – Enseignes 2024-00225 – 6633, boulevard Taschereau –\\nEnseigne détachée – Jurassique;\",\n        \"anchor\": \"Enseignes 2024-00225\"\n      },\n      \"reason\": \"Malgré le millésime du dossier, le document constate bien l'entérinement actuel de ce PIIA d'enseigne.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption conditionnelle du PPCMOI-2026-001 — 3605-3665, rue de Châteauneuf\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2026-001\",\n        \"page\": 6,\n        \"citation\": \"D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble\",\n        \"anchor\": \"résolution PPCMOI-2026-001\"\n      },\n      \"reason\": \"Le conseil adopte la résolution finale sous conditions; les premier et second projets rappelés dans les considérants sont historiques et ne créent pas d'unités supplémentaires.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation conditionnelle de l'entente MUP-B — propriété superficiaire au profit de LICC\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"MUP-B\",\n        \"page\": 7,\n        \"citation\": \"ENTENTE RELATIVE À LA PISTE MULTIFONCTIONNELLE MUP-B –\\nDEMANDE DE DÉCRET (M-30) ET AUTORISATION DE SIGNATURE\",\n        \"anchor\": \"MULTIFONCTIONNELLE MUP-B\"\n      },\n      \"reason\": \"L'entente approuvée prévoit une renonciation à l'accession et une propriété superficiaire sur le terrain municipal, ce qui constitue un acte foncier autorisé sous réserve du décret requis.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation conditionnelle de l'entente MUP-6 — régularisation de l'occupation des terrains municipaux\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"MUP-6\",\n        \"page\": 8,\n        \"citation\": \"ENTENTE RELATIVE À LA PISTE MULTIFONCTIONNELLE MUP-6 –\\nDEMANDE DE DÉCRET (M-30) ET AUTORISATION DE SIGNATURE\",\n        \"anchor\": \"MULTIFONCTIONNELLE MUP-6\"\n      },\n      \"reason\": \"L'entente actuelle régularise la présence de l'ouvrage sur les lots municipaux 4 537 690 et 5 701 948 et ses modalités d'accès, sans constituer une nouvelle renonciation à l'accession, celle-ci étant historique.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de l'entente de travaux municipaux — Pandora Matte Self-Storage, 3505, boulevard Matte\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"Pandora Matte Self-Storage\",\n        \"page\": 9,\n        \"citation\": \"D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative\\naux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage,\",\n        \"anchor\": \"projet Pandora Matte Self-Storage\"\n      },\n      \"reason\": \"La résolution autorise une entente de travaux municipaux explicitement liée à un projet de développement identifié, et non un simple marché d'entretien.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation de l'accord de développement — Plan A, site chemin des Prairies\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"Plan A - Site chemin des Prairies\",\n        \"page\": 9,\n        \"citation\": \"D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à\\nintervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec\\ninc.,\",\n        \"anchor\": \"Plan A - Site chemin des Prairies\"\n      },\n      \"reason\": \"Le conseil approuve et autorise la signature d'un accord portant explicitement sur le développement d'un site immobilier.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de demander l'autorisation ministérielle — prolongement de l'égout pluvial du projet Plan A\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"réseau d’égout pluvial\",\n        \"page\": 15,\n        \"citation\": \"une demande\\nd’autorisation ministérielle pour le prolongement du réseau d’égout pluvial\",\n        \"anchor\": \"réseau d’égout pluvial\"\n      },\n      \"reason\": \"La résolution autorise le dépôt d'une demande visant un prolongement de réseau explicitement lié au développement Plan A, sans constater la délivrance de l'autorisation ministérielle.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de déposer la déclaration de conformité — prolongement de l'aqueduc du projet Plan A\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"réseau d’aqueduc\",\n        \"page\": 15,\n        \"citation\": \"une\\ndéclaration de conformité pour le prolongement du réseau d’aqueduc auprès du ministère de\",\n        \"anchor\": \"réseau d’aqueduc\"\n      },\n      \"reason\": \"La déclaration de conformité du prolongement d'aqueduc est un objet explicitement nommé distinct de la demande d'autorisation concernant l'égout pluvial.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Modification de la date de l'ordonnance de vente d'immeubles pour défaut de taxes\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"vente aux enchères\",\n        \"page\": 15,\n        \"citation\": \"de procéder\\nà la vente aux enchères des immeubles pour défaut de paiement de taxes le jeudi\\n11 juin 2026, à 10 h, par celle du 28 avril 2026.\",\n        \"anchor\": \"vente aux enchères des immeubles\"\n      },\n      \"reason\": \"La résolution modifie la date de l'ordonnance relative à une vente foncière, sans modifier la date des enchères fixée au 11 juin 2026.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation des dérogations mineures — 5641, rue Aline, lot projeté 6 720 588",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "6 720 588",
+    "page": 2,
+    "citation": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588, ayant pour effet de permettre :",
+    "anchor": "lot projeté 6 720 588"
+   },
+   "reason": "La résolution approuve une demande portant sur la largeur et la superficie du même lot projeté, ce qui constitue une unité de dérogation mineure."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2025-00304 — construction multifamiliale au 3605, rue de Châteauneuf",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-00304",
+    "page": 3,
+    "citation": "CCU-20260311-3.1 PIIA – Construction multifamiliale 2025-00304 – 3605, rue de\nChâteauneuf – Habitation multifamiliale isolée de quatre étages;",
+    "anchor": "multifamiliale 2025-00304"
+   },
+   "reason": "La résolution 260428-097 entérine cette recommandation favorable; chaque demande de PIIA explicitement nommée constitue une unité distincte."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2025-00305 — construction multifamiliale au 3665, rue de Châteauneuf",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-00305",
+    "page": 3,
+    "citation": "CCU-20260311-3.2 PIIA – Construction multifamiliale 2025-00305 – 3665, rue de\nChâteauneuf – Habitation multifamiliale isolée de quatre étages;",
+    "anchor": "multifamiliale 2025-00305"
+   },
+   "reason": "La résolution 260428-097 entérine cette demande de PIIA, distincte de celle visant le 3605, rue de Châteauneuf."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00036 — construction au 5892, rue Alexandre",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00036",
+    "page": 3,
+    "citation": "CCU-20260311-5.1 PIIA – Construction unifamiliale 2026-00036 – 5892, rue Alexandre –\nConstruction – Habitation unifamiliale isolée de deux étages;",
+    "anchor": "unifamiliale 2026-00036"
+   },
+   "reason": "Cette demande de construction unifamiliale figure parmi les recommandations favorables entérinées par le conseil."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2025-00320 — construction au 5641, rue Aline",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-00320",
+    "page": 3,
+    "citation": "CCU-20260311-5.2 PIIA – Construction unifamiliale 2025-00320 – 5641, rue Aline –\nHabitation unifamiliale isolée d'un étage;",
+    "anchor": "unifamiliale 2025-00320"
+   },
+   "reason": "Le conseil entérine ce PIIA, qui constitue un objet procédural distinct de la demande de dérogations mineures à la même adresse."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00005 — agrandissement au 3280, rue Bahamas",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00005",
+    "page": 3,
+    "citation": "CCU-20260311-5.3 PIIA – Agrandissement unifamilial 2026-00005 – 3280, rue Bahamas –\nPIIA – Agrandissement – Habitation unifamiliale isolée d'un étage;",
+    "anchor": "unifamilial 2026-00005"
+   },
+   "reason": "La résolution entérine cette demande d'agrandissement, et les petits PIIA sont expressément inclus dans le corrigé."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00024 — transformation au 5890, rue Bretagne",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00024",
+    "page": 3,
+    "citation": "CCU-20260311-5.4 PIIA – Transformation bâtiment principal résidentiel 2026-00024 –\n5890, rue Bretagne",
+    "anchor": "résidentiel 2026-00024"
+   },
+   "reason": "Le remplacement du revêtement, des portes et des fenêtres fait l'objet d'un PIIA favorable entériné par le conseil."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00049 — agrandissement au 2010, croissant Tourangeau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00049",
+    "page": 3,
+    "citation": "CCU-20260311-5.5 PIIA – Agrandissement unifamilial 2026-00049 – 2010, croissant\nTourangeau – Agrandissement – Habitation unifamiliale isolée de deux étages;",
+    "anchor": "unifamilial 2026-00049"
+   },
+   "reason": "Cette demande d'agrandissement est explicitement nommée parmi les PIIA dont les recommandations favorables sont entérinées."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00027 — agrandissement au 7670, place Trudel",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00027",
+    "page": 3,
+    "citation": "CCU-20260311-5.6 PIIA – Agrandissement unifamilial 2026-00027 – 7670, place Trudel –\nPIIA – Agrandissement du rez-de-chaussée et modification des parements extérieurs –",
+    "anchor": "unifamilial 2026-00027"
+   },
+   "reason": "Le conseil entérine le PIIA relatif à l'agrandissement et aux parements extérieurs, ce qui forme une seule unité pour cette demande."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00039 — transformation de l'école Good Shepherd, 5770, rue Aline",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00039",
+    "page": 3,
+    "citation": "CCU-20260311-6.1 PIIA – Transformation bâtiment principal non résidentiel 2026-00039 –\n5770, rue Aline – Modification architecturale – École primaire Good Shepherd;",
+    "anchor": "non résidentiel 2026-00039"
+   },
+   "reason": "Ce PIIA scolaire est entériné par le conseil et demeure inclus malgré son caractère non résidentiel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00034 — transformation au 9550, boulevard Leduc, local 20",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00034",
+    "page": 3,
+    "citation": "CCU-20260311-6.2 PIIA – Transformation bâtiment principal non résidentiel 2026-00034 –\n9550, boulevard Leduc, local 20 – Modification architecturale commerciale – Local vacant;",
+    "anchor": "non résidentiel 2026-00034"
+   },
+   "reason": "La résolution entérine cette modification architecturale commerciale, les PIIA non résidentiels étant inclus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00048 — transformation au 9750, boulevard Leduc, local 25",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00048",
+    "page": 3,
+    "citation": "CCU-20260311-6.3 PIIA – Transformation bâtiment principal non résidentiel 2026-00048 –\n9750, boulevard Leduc, local 25 – Modification architecturale commerciale – Consignaction;",
+    "anchor": "non résidentiel 2026-00048"
+   },
+   "reason": "Le PIIA de transformation de Consignaction est une demande explicitement approuvée, distincte du PIIA d'enseigne au même local."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00033 — transformation au 9750, boulevard Leduc, local 30",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00033",
+    "page": 3,
+    "citation": "CCU-20260311-6.4 PIIA – Transformation bâtiment principal non résidentiel 2026-00033 –\n9750, boulevard Leduc, local 30 – Modification architecturale de la façade avant – Activate;",
+    "anchor": "non résidentiel 2026-00033"
+   },
+   "reason": "Le conseil entérine la modification de façade d'Activate, qui constitue une demande distincte de celle portant sur son enseigne."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00038 — transformation au 1520, avenue des Lumières, local 25",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00038",
+    "page": 3,
+    "citation": "CCU-20260311-6.5 PIIA – Transformation bâtiment principal non résidentiel 2026-00038 –\n1520, avenue des Lumières, local 25",
+    "anchor": "non résidentiel 2026-00038"
+   },
+   "reason": "Cette transformation commerciale de Meubles TOCO est explicitement comprise dans les recommandations favorables entérinées."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00046 — transformation au 1040, rue du Lux, local 15",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00046",
+    "page": 3,
+    "citation": "CCU-20260311-6.6 PIIA – Transformation bâtiment principal non résidentiel 2026-00046 –\n1040, rue du Lux, local 15 – Modification architecturale commerciale – UNIQLO;",
+    "anchor": "non résidentiel 2026-00046"
+   },
+   "reason": "Le conseil entérine ce PIIA commercial d'UNIQLO, lequel relève des inclusions non résidentielles."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00030 — enseigne au 8240, boulevard Leduc, local 30",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00030",
+    "page": 3,
+    "citation": "CCU-20260311-7.1 PIIA – Enseignes 2026-00030 – 8240, boulevard Leduc, local 30 –\nEnseigne sur bâtiment – King;",
+    "anchor": "Enseignes 2026-00030"
+   },
+   "reason": "L'enseigne King fait l'objet d'un PIIA favorable entériné, et les petits PIIA d'enseignes doivent être inclus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00042 — enseigne au 9550, boulevard Leduc, local 10",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00042",
+    "page": 3,
+    "citation": "CCU-20260311-7.2 PIIA – Enseignes 2026-00042 – 9550, boulevard Leduc, local 10 –\nEnseigne sur bâtiment – Le Tee Off Lounge;",
+    "anchor": "Enseignes 2026-00042"
+   },
+   "reason": "La résolution entérine cette demande d'enseigne du Tee Off Lounge, explicitement identifiée par son numéro de dossier."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00041 — enseigne au 9750, boulevard Leduc, local 25",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00041",
+    "page": 3,
+    "citation": "CCU-20260311-7.3 PIIA – Enseignes 2026-00041 – 9750, boulevard Leduc, local 25 –\nEnseigne sur bâtiment – Consignaction;",
+    "anchor": "Enseignes 2026-00041"
+   },
+   "reason": "La demande d'enseigne de Consignaction est entérinée et possède un numéro distinct de sa demande de transformation architecturale."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00031 — enseigne au 9750, boulevard Leduc, local 30",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00031",
+    "page": 3,
+    "citation": "CCU-20260311.7.4 PIIA – Enseignes 2026-00031 – 9750, boulevard Leduc, local 30 –\nEnseigne sur bâtiment – Activate;",
+    "anchor": "Enseignes 2026-00031"
+   },
+   "reason": "Ce PIIA d'enseigne d'Activate est une demande favorable entérinée distincte du PIIA de modification de façade."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00032 — enseigne au 9850, boulevard Leduc, local 20",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00032",
+    "page": 4,
+    "citation": "CCU-20260311-7.5 PIIA – Enseignes 2026-00032 – 9850, boulevard Leduc, local 20 –\nEnseigne sur bâtiment – La Voûte;",
+    "anchor": "Enseignes 2026-00032"
+   },
+   "reason": "Cette demande d'enseigne poursuit la liste des PIIA favorables entérinés par la résolution 260428-097."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00026 — enseigne Meubles Toco",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00026",
+    "page": 4,
+    "citation": "CCU-20260311-7.6 PIIA – Enseignes 2026-00026 – 1520, venue des Lumières, local 25 –\nEnseigne sur bâtiment – Meubles Toco;",
+    "anchor": "Enseignes 2026-00026"
+   },
+   "reason": "Le PIIA d'enseigne de Meubles Toco est explicitement entériné et reste distinct de la demande de transformation du bâtiment."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00056 — enseigne au 7185, boulevard du Quartier",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00056",
+    "page": 4,
+    "citation": "CCU-20260311-7.7 PIIA – Enseignes 2026-00056 – 7185, boulevard du Quartier –\nEnseigne sur bâtiment – Coyote country;",
+    "anchor": "Enseignes 2026-00056"
+   },
+   "reason": "Cette enseigne de Coyote country fait l'objet d'une demande de PIIA favorable entérinée par le conseil."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-00044 — enseigne au 6598, boulevard Taschereau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00044",
+    "page": 4,
+    "citation": "CCU-20260311-7.8 PIIA – Enseignes 2026-00044 – 6598, boulevard Taschereau –\nEnseigne sur marquise – Esso;",
+    "anchor": "Enseignes 2026-00044"
+   },
+   "reason": "Le conseil entérine le PIIA de l'enseigne sur marquise d'Esso, inclus même s'il s'agit d'un petit projet commercial."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2024-00225 — enseigne au 6633, boulevard Taschereau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2024-00225",
+    "page": 4,
+    "citation": "CCU-20260311-7.9 PIIA – Enseignes 2024-00225 – 6633, boulevard Taschereau –\nEnseigne détachée – Jurassique;",
+    "anchor": "Enseignes 2024-00225"
+   },
+   "reason": "Malgré le millésime du dossier, le document constate bien l'entérinement actuel de ce PIIA d'enseigne."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption conditionnelle du PPCMOI-2026-001 — 3605-3665, rue de Châteauneuf",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2026-001",
+    "page": 6,
+    "citation": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble",
+    "anchor": "résolution PPCMOI-2026-001"
+   },
+   "reason": "Le conseil adopte la résolution finale sous conditions; les premier et second projets rappelés dans les considérants sont historiques et ne créent pas d'unités supplémentaires."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation conditionnelle de l'entente MUP-B — propriété superficiaire au profit de LICC",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "MUP-B",
+    "page": 7,
+    "citation": "ENTENTE RELATIVE À LA PISTE MULTIFONCTIONNELLE MUP-B –\nDEMANDE DE DÉCRET (M-30) ET AUTORISATION DE SIGNATURE",
+    "anchor": "MULTIFONCTIONNELLE MUP-B"
+   },
+   "reason": "L'entente approuvée prévoit une renonciation à l'accession et une propriété superficiaire sur le terrain municipal, ce qui constitue un acte foncier autorisé sous réserve du décret requis."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation conditionnelle de l'entente MUP-6 — régularisation de l'occupation des terrains municipaux",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "MUP-6",
+    "page": 8,
+    "citation": "ENTENTE RELATIVE À LA PISTE MULTIFONCTIONNELLE MUP-6 –\nDEMANDE DE DÉCRET (M-30) ET AUTORISATION DE SIGNATURE",
+    "anchor": "MULTIFONCTIONNELLE MUP-6"
+   },
+   "reason": "L'entente actuelle régularise la présence de l'ouvrage sur les lots municipaux 4 537 690 et 5 701 948 et ses modalités d'accès, sans constituer une nouvelle renonciation à l'accession, celle-ci étant historique."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de l'entente de travaux municipaux — Pandora Matte Self-Storage, 3505, boulevard Matte",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Pandora Matte Self-Storage",
+    "page": 9,
+    "citation": "D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative\naux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage,",
+    "anchor": "projet Pandora Matte Self-Storage"
+   },
+   "reason": "La résolution autorise une entente de travaux municipaux explicitement liée à un projet de développement identifié, et non un simple marché d'entretien."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation de l'accord de développement — Plan A, site chemin des Prairies",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Plan A - Site chemin des Prairies",
+    "page": 9,
+    "citation": "D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à\nintervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec\ninc.,",
+    "anchor": "Plan A - Site chemin des Prairies"
+   },
+   "reason": "Le conseil approuve et autorise la signature d'un accord portant explicitement sur le développement d'un site immobilier."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de demander l'autorisation ministérielle — prolongement de l'égout pluvial du projet Plan A",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "réseau d’égout pluvial",
+    "page": 15,
+    "citation": "une demande\nd’autorisation ministérielle pour le prolongement du réseau d’égout pluvial",
+    "anchor": "réseau d’égout pluvial"
+   },
+   "reason": "La résolution autorise le dépôt d'une demande visant un prolongement de réseau explicitement lié au développement Plan A, sans constater la délivrance de l'autorisation ministérielle."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de déposer la déclaration de conformité — prolongement de l'aqueduc du projet Plan A",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "réseau d’aqueduc",
+    "page": 15,
+    "citation": "une\ndéclaration de conformité pour le prolongement du réseau d’aqueduc auprès du ministère de",
+    "anchor": "réseau d’aqueduc"
+   },
+   "reason": "La déclaration de conformité du prolongement d'aqueduc est un objet explicitement nommé distinct de la demande d'autorisation concernant l'égout pluvial."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Modification de la date de l'ordonnance de vente d'immeubles pour défaut de taxes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "vente aux enchères",
+    "page": 15,
+    "citation": "de procéder\nà la vente aux enchères des immeubles pour défaut de paiement de taxes le jeudi\n11 juin 2026, à 10 h, par celle du 28 avril 2026.",
+    "anchor": "vente aux enchères des immeubles"
+   },
+   "reason": "La résolution modifie la date de l'ordonnance relative à une vente foncière, sans modifier la date des enchères fixée au 11 juin 2026."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  },
+  {
+   "op": "add",
+   "id": "u09"
+  },
+  {
+   "op": "add",
+   "id": "u10"
+  },
+  {
+   "op": "add",
+   "id": "u11"
+  },
+  {
+   "op": "add",
+   "id": "u12"
+  },
+  {
+   "op": "add",
+   "id": "u13"
+  },
+  {
+   "op": "add",
+   "id": "u14"
+  },
+  {
+   "op": "add",
+   "id": "u15"
+  },
+  {
+   "op": "add",
+   "id": "u16"
+  },
+  {
+   "op": "add",
+   "id": "u17"
+  },
+  {
+   "op": "add",
+   "id": "u18"
+  },
+  {
+   "op": "add",
+   "id": "u19"
+  },
+  {
+   "op": "add",
+   "id": "u20"
+  },
+  {
+   "op": "add",
+   "id": "u21"
+  },
+  {
+   "op": "add",
+   "id": "u22"
+  },
+  {
+   "op": "add",
+   "id": "u23"
+  },
+  {
+   "op": "add",
+   "id": "u24"
+  },
+  {
+   "op": "add",
+   "id": "u25"
+  },
+  {
+   "op": "add",
+   "id": "u26"
+  },
+  {
+   "op": "add",
+   "id": "u27"
+  },
+  {
+   "op": "add",
+   "id": "u28"
+  },
+  {
+   "op": "add",
+   "id": "u29"
+  },
+  {
+   "op": "add",
+   "id": "u30"
+  },
+  {
+   "op": "add",
+   "id": "u31"
+  },
+  {
+   "op": "add",
+   "id": "u32"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 32
+}

@@ -1,0 +1,148 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "80ba3c9573865f5bee26dcf3f51b6394b57c31841ead8146d64e74a1126029c5",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Vente aux enchères autorisée des immeubles pour défaut de paiement de taxes\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"immeubles à être vendus\",\n        \"page\": 6,\n        \"citation\": \"ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\\npublique\",\n        \"anchor\": \"vendre à l'enchère\\npublique\"\n      },\n      \"reason\": \"L'exigence de transcription à l'identique impose de rétablir, dans la citation et l'ancre, le saut de ligne entre « l'enchère » et « publique ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Adoption finale du PPCMOI-2025-07 — fusion des lots 6 465 474 et 6 465 475\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2025-07\",\n        \"page\": 10,\n        \"citation\": \"Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\\nl'aspect suivant\",\n        \"anchor\": \"demande numéro PPCMOI-2025-07\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique de la page 10, avec les sauts de ligne après « pourra » et « sur ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption finale du PPCMOI-2025-08 — fusion des lots 6 465 476 et 6 465 477\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2025-08\",\n        \"page\": 11,\n        \"citation\": \"Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\\nl'aspect suivant\",\n        \"anchor\": \"demande numéro PPCMOI-2025-08\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique de la page 11, avec les sauts de ligne après « pourra » et « sur ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Adoption finale du PPCMOI-2025-09 — fusion des lots 6 465 470, 6 465 471 et 6 460 234\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2025-09\",\n        \"page\": 12,\n        \"citation\": \"Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\\nl'aspect suivant\",\n        \"anchor\": \"demande numéro PPCMOI-2025-09\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique de la page 12, avec les sauts de ligne après « pourra » et « sur ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Appui à la demande à la CPTAQ — habitation unifamiliale au 2860, chemin des Patriotes\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2860, chemin des Patriotes\",\n        \"page\": 13,\n        \"citation\": \"appuie la présente demande auprès de la CPTAQ pour\\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\\nnuméro 5 891 123 du cadastre du Québec\",\n        \"anchor\": \"2860, chemin des Patriotes\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique de la page 13, avec les sauts de ligne après « pour » et « lot ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Vente aux enchères autorisée des immeubles pour défaut de paiement de taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "immeubles à être vendus",
+    "page": 6,
+    "citation": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\npublique",
+    "anchor": "vendre à l'enchère\npublique"
+   },
+   "reason": "L'exigence de transcription à l'identique impose de rétablir, dans la citation et l'ancre, le saut de ligne entre « l'enchère » et « publique »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Adoption finale du PPCMOI-2025-07 — fusion des lots 6 465 474 et 6 465 475",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2025-07",
+    "page": 10,
+    "citation": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant",
+    "anchor": "demande numéro PPCMOI-2025-07"
+   },
+   "reason": "La citation doit être recopiée à l'identique de la page 10, avec les sauts de ligne après « pourra » et « sur »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption finale du PPCMOI-2025-08 — fusion des lots 6 465 476 et 6 465 477",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2025-08",
+    "page": 11,
+    "citation": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant",
+    "anchor": "demande numéro PPCMOI-2025-08"
+   },
+   "reason": "La citation doit être recopiée à l'identique de la page 11, avec les sauts de ligne après « pourra » et « sur »."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Adoption finale du PPCMOI-2025-09 — fusion des lots 6 465 470, 6 465 471 et 6 460 234",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2025-09",
+    "page": 12,
+    "citation": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant",
+    "anchor": "demande numéro PPCMOI-2025-09"
+   },
+   "reason": "La citation doit être recopiée à l'identique de la page 12, avec les sauts de ligne après « pourra » et « sur »."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Appui à la demande à la CPTAQ — habitation unifamiliale au 2860, chemin des Patriotes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2860, chemin des Patriotes",
+    "page": 13,
+    "citation": "appuie la présente demande auprès de la CPTAQ pour\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\nnuméro 5 891 123 du cadastre du Québec",
+    "anchor": "2860, chemin des Patriotes"
+   },
+   "reason": "La citation doit être recopiée à l'identique de la page 13, avec les sauts de ligne après « pour » et « lot »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 6,
+   "citation": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\npublique"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 10,
+   "citation": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 11,
+   "citation": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 12,
+   "citation": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 13,
+   "citation": "appuie la présente demande auprès de la CPTAQ pour\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\nnuméro 5 891 123 du cadastre du Québec"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 5
+}

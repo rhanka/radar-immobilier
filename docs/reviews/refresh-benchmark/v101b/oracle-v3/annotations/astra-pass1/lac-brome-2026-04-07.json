@@ -1,0 +1,130 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "471528c6be25ea2bffb377539173da3d962c744a0e7192753f517fe61ffce007",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement résiduel de zonage 596-20\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"596-20\",\n        \"page\": 20,\n        \"citation\": \"le Conseil adopte le règlement résiduel Règlement 596-20\\nmodifiant le règlement de zonage 596.\",\n        \"anchor\": \"Règlement 596-20\"\n      },\n      \"reason\": \"Le Conseil adopte expressément le règlement résiduel 596-20, sans les cinq dispositions visées par des demandes référendaires; les étapes antérieures rappelées ne créent pas d'unités supplémentaires.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement distinct 596-21 — définitions de hauteur et d'occupation du terrain\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"596-21\",\n        \"page\": 21,\n        \"citation\": \"le Conseil adopte le règlement distinct Règlement 596-21\\n(concernant les définitions de «Hauteur d'un bâtiment (en\\nmètre)» et de «Pourcentage d'occupation du terrain»)\",\n        \"anchor\": \"Règlement 596-21\"\n      },\n      \"reason\": \"L'adoption actuelle du règlement distinct 596-21 constitue une unité propre, même si ses dispositions proviennent du projet de règlement 596-20.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement distinct 596-22 — marge latérale et occupation du bâtiment principal, zone UV-4-I12\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"596-22\",\n        \"page\": 23,\n        \"citation\": \"le Conseil adopte le règlement distinct Règlement 596-22\\n(concernant la marge latérale minimale et le pourcentage\\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)\",\n        \"anchor\": \"Règlement 596-22\"\n      },\n      \"reason\": \"Le Conseil adopte un règlement de zonage distinct explicitement numéroté 596-22, ce qui impose une unité séparée des autres règlements adoptés.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement distinct 596-23 — occupation du bâtiment principal, zone UV-14-J13\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"596-23\",\n        \"page\": 24,\n        \"citation\": \"le Conseil adopte le règlement distinct Règlement 596-23\\n(concernant le pourcentage maximal d'occupation du\\nbâtiment principal dans la Zone UV-14-J13) modifiant le\\nrèglement de zonage 596;\",\n        \"anchor\": \"Règlement 596-23\"\n      },\n      \"reason\": \"La résolution adopte expressément le règlement distinct 596-23 concernant la zone UV-14-J13, soit un objet réglementaire supplémentaire.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — abri d'auto au 9, chemin Frank-Santerre\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"9, chemin Frank-Santerre\",\n        \"page\": 25,\n        \"citation\": \"le Conseil accorde le PIIA-2 concernant la demande de\\nconstruction d’un bâtiment accessoire de type abri d'auto\\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\\nUC-2-N3.\",\n        \"anchor\": \"9, chemin Frank-Santerre\"\n      },\n      \"reason\": \"La résolution accorde une demande explicite de PIIA pour un abri d'auto résidentiel, et les petits PIIA sont inclus dans le rappel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — demande révisée de bâtiment commercial au 753, chemin Lakeside\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 643 103\",\n        \"page\": 26,\n        \"citation\": \"le Conseil accorde le PIIA-3 concernant la demande révisée\\nde construction d’un bâtiment principal commercial au 753,\\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15.\",\n        \"anchor\": \"lot #6 643 103\"\n      },\n      \"reason\": \"Le Conseil accorde actuellement la demande révisée de PIIA commercial, incluse même si elle est non résidentielle, sans ajouter d'unité pour l'approbation historique rappelée.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement résiduel de zonage 596-20",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "596-20",
+    "page": 20,
+    "citation": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596.",
+    "anchor": "Règlement 596-20"
+   },
+   "reason": "Le Conseil adopte expressément le règlement résiduel 596-20, sans les cinq dispositions visées par des demandes référendaires; les étapes antérieures rappelées ne créent pas d'unités supplémentaires."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement distinct 596-21 — définitions de hauteur et d'occupation du terrain",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "596-21",
+    "page": 21,
+    "citation": "le Conseil adopte le règlement distinct Règlement 596-21\n(concernant les définitions de «Hauteur d'un bâtiment (en\nmètre)» et de «Pourcentage d'occupation du terrain»)",
+    "anchor": "Règlement 596-21"
+   },
+   "reason": "L'adoption actuelle du règlement distinct 596-21 constitue une unité propre, même si ses dispositions proviennent du projet de règlement 596-20."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement distinct 596-22 — marge latérale et occupation du bâtiment principal, zone UV-4-I12",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "596-22",
+    "page": 23,
+    "citation": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)",
+    "anchor": "Règlement 596-22"
+   },
+   "reason": "Le Conseil adopte un règlement de zonage distinct explicitement numéroté 596-22, ce qui impose une unité séparée des autres règlements adoptés."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement distinct 596-23 — occupation du bâtiment principal, zone UV-14-J13",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "596-23",
+    "page": 24,
+    "citation": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;",
+    "anchor": "Règlement 596-23"
+   },
+   "reason": "La résolution adopte expressément le règlement distinct 596-23 concernant la zone UV-14-J13, soit un objet réglementaire supplémentaire."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "PIIA accordé — abri d'auto au 9, chemin Frank-Santerre",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "9, chemin Frank-Santerre",
+    "page": 25,
+    "citation": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3.",
+    "anchor": "9, chemin Frank-Santerre"
+   },
+   "reason": "La résolution accorde une demande explicite de PIIA pour un abri d'auto résidentiel, et les petits PIIA sont inclus dans le rappel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "PIIA accordé — demande révisée de bâtiment commercial au 753, chemin Lakeside",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 643 103",
+    "page": 26,
+    "citation": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15.",
+    "anchor": "lot #6 643 103"
+   },
+   "reason": "Le Conseil accorde actuellement la demande révisée de PIIA commercial, incluse même si elle est non résidentielle, sans ajouter d'unité pour l'approbation historique rappelée."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

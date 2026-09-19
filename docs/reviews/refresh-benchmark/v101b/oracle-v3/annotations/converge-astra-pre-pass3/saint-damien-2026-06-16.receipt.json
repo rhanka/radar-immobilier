@@ -1,0 +1,36 @@
+{
+ "documentId": "saint-damien-2026-06-16",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "7cd332a5b358a642a48227ccfa91165d29c84bf486ec3871f5284bae68093fcd",
+ "inputSha256": "5985c13780abadabea1049ffb5c304885d6e17c070e98abd80a061c6dd3241ec",
+ "responseSha256": "81fcab156070dfd1bcd9b04c304495996aecc10d4b7bbe664254a2927dd5ab99",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 21821,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2440,
+  "outputTokens": 631,
+  "totalTokens": 3071
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 21818,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:15:26.730Z"
+}

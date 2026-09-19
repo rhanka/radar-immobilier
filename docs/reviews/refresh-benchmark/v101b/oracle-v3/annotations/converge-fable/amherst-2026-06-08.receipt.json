@@ -1,0 +1,77 @@
+{
+ "documentId": "amherst-2026-06-08",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "186cbcd5e89fc594a82f0f6604ffebe9c9a38c7b37d02acd1cba4947c8c11ed4",
+ "inputSha256": "b02a83be2774aeb957d0634e00c13aeed35bccb1550d7e3106b8c2b2fc90aa1e",
+ "responseSha256": "dd88eb3e03a5aa005aee765dfd5e01976e96f89ccd43a3cfc69e56b753281a27",
+ "rc": 0,
+ "latencyMs": 9266,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "996e0e73-c8e2-4d38-961b-b1289b31452b",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 530,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 4790,
+   "webSearchRequests": 0,
+   "costUSD": 0.12232,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 375,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 4790,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 530,
+  "output_tokens_details": {
+   "thinking_tokens": 375
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 4790,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 530,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 4790,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 4790
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.12232,
+ "durationApiMs": 7177,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:23:59.694Z"
+}

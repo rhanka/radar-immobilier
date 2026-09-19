@@ -1,0 +1,417 @@
+{
+ "documentId": "la-peche-2026-06-01",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "1a73be83c6efb9e0a998e4642877a8336d26389114439e550a86aeb62b544c11",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-113-2025"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 113-2025",
+     "stage": null,
+     "objet": "113-2025",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "Demande de dérogation mineure au règlement de zonage numéro 113-2025\n– 30, chemin Albert-Labelle"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-113-001-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de modification 113-001-2026",
+     "stage": "projet",
+     "objet": "113-001-2026",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "CONSIDÉRANT QUE le projet de Règlement no.113-001-2026 modifiant le\nRèglement de zonage 113-2025 est adopté conformément à loi;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-113-002-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de modification 113-002-2026",
+     "stage": "projet",
+     "objet": "113-002-2026",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "CONSIDÉRANT QUE le projet de Règlement no.113-002-2026 modifiant le\nRèglement de zonage 113-2025 est adopté conformément à loi;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-albert-labelle"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 30, chemin Albert-Labelle",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité\nconsultatif d’urbanisme et accorde la demande d’une dérogation mineure au"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-guertin"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 14, chemin Guertin",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Demande de dérogation mineure au règlement de zonage numéro 113-2025\n– 14, chemin Guertin"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-145.31-2025"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement relatif aux usages conditionnels 145.31-2025",
+     "stage": null,
+     "objet": "145.31-2025",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "c. Demande d’usage conditionnel, règlement aux usages\nconditionnels numéro 145.31-2025 : 75, chemin du Lac-Chip"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-lac-chip"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Usage conditionnel touristique — 75, chemin du Lac-Chip",
+     "stage": "usage_conditionnel",
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité\nconsultatif d’urbanisme et accorde la demande d’usage d’hébergement"
+      },
+      {
+       "page": 8,
+       "excerpt": "Demande d’usage conditionnel - hébergement touristique de type,\nétablissement de résidence principale – 75, chemin du Lac-Chip"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-vaillant"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Usage conditionnel touristique — 5, chemin Vaillant",
+     "stage": "usage_conditionnel",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité\nconsultatif d’urbanisme et accorde la demande d’usage d’hébergement"
+      },
+      {
+       "page": 9,
+       "excerpt": "Demande d’usage conditionnel – hébergement touristique de type,\nétablissement de résidence principale – 5, chemin Vaillant"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-riverside"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Servitude de tolérance d’empiètement — 741, chemin Riverside",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "ET RÉSOLU QUE ce Conseil municipal autorise une servitude de tolérance\nd’empiètement au bénéfice du propriétaire du lot 3 391 753, du cadastre du"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "bylaw-26-866"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "26-866 — Bon fonctionnement des installations septiques",
+     "stage": null,
+     "objet": "26-866",
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "Adoption du règlement numéro 26-866 relatif au bon fonctionnement des\ninstallations septiques"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "bylaw-26-867"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "26-867 — Aide financière à la mise aux normes des installations septiques",
+     "stage": null,
+     "objet": "26-867",
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "Adoption du règlement numéro 26-867 relatif à la création d’un programme\nd’aide financière pour la mise aux normes des installations septiques"
+      },
+      {
+       "page": 27,
+       "excerpt": "Le conseil décrète un programme d’aide financière visant la protection de\nl'environnement par la mise aux normes des installations de traitement individuel"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "bylaw-26-868"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "26-868 — Emprunt pour la mise aux normes des installations septiques",
+     "stage": null,
+     "objet": "26-868",
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "Adoption du règlement numéro 26-868 autorisant une dépense de\n5 737 912 $ et un emprunt de 5 737 912 $ aux fins du financement du"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage 113-2025 est simplement cité en référence pour des demandes de dérogations mineures sans faire l'objet d'un acte procédural propre dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le projet de règlement 113-001-2026 n'est mentionné que dans un considérant de rappel historique d'une dérogation mineure, aucun acte procédural ne lui est consacré lors de cette séance.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le projet de règlement 113-002-2026 n'est mentionné que dans un considérant de rappel historique pour une dérogation mineure, sans étape décisionnelle dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accorde la dérogation mineure pour le 30, chemin Albert-Labelle.\",\"excerpt\":\"ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité\\nconsultatif d’urbanisme et accorde la demande d’une dérogation mineure au\\nRèglement de zonage 113-2025 pour la propriété sise au 30, chemin AlbertLabelle\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accorde la demande de dérogation mineure pour le 14, chemin Guertin.\",\"excerpt\":\"ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité\\nconsultatif d’urbanisme et accorde la demande d’une dérogation mineure au\\nRèglement de zonage 113-2025 pour la propriété sise au 14, chemin Guertin\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 145.31-2025 n'est mentionné qu'en référence habilitante pour l'octroi d'usages conditionnels, sans être lui-même adopté ou modifié.\",\"excerpt\":\"\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal accorde la demande d'usage conditionnel pour le 75, chemin du Lac-Chip.\",\"excerpt\":\"accorde la demande d’usage d’hébergement\\ntouristique de type, établissement de résidence principale conformément au\\nRèglement relatif aux usages conditionnels 145.31-2025 pour la propriété sise au\\n75, chemin du Lac-Chip\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accorde la demande d'usage conditionnel pour le 5, chemin Vaillant.\",\"excerpt\":\"accorde la demande d’usage d’hébergement\\ntouristique de type, établissement de résidence principale conformément au\\nRèglement relatif aux usages conditionnels 145.31-2025 pour la propriété sise au\\n5, chemin Vaillant\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal autorise une servitude de tolérance d'empiètement au 741, chemin Riverside.\",\"excerpt\":\"ET RÉSOLU QUE ce Conseil municipal autorise une servitude de tolérance\\nd’empiètement au bénéfice du propriétaire du lot 3 391 753, du cadastre du\\nQuébec connu comme étant le 741, chemin Riverside\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement numéro 26-866 relatif au bon fonctionnement des installations septiques.\",\"excerpt\":\"ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26866 relatif au bon fonctionnement des installations septiques\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement numéro 26-867 établissant le programme d'aide financière pour les installations septiques.\",\"excerpt\":\"ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26867 relatif à la création d’un programme d’aide financière pour la mise aux normes\\ndes installations septiques\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement d'emprunt numéro 26-868.\",\"excerpt\":\"ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26868 autorisant une dépense de 5 737 912 $ et un emprunt de 5 737 912 $ aux\\nfins du financement du programme d’aide financière\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage 113-2025 est simplement cité en référence pour des demandes de dérogations mineures sans faire l'objet d'un acte procédural propre dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le projet de règlement 113-001-2026 n'est mentionné que dans un considérant de rappel historique d'une dérogation mineure, aucun acte procédural ne lui est consacré lors de cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le projet de règlement 113-002-2026 n'est mentionné que dans un considérant de rappel historique pour une dérogation mineure, sans étape décisionnelle dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil accorde la dérogation mineure pour le 30, chemin Albert-Labelle.",
+   "excerpt": "ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité\nconsultatif d’urbanisme et accorde la demande d’une dérogation mineure au\nRèglement de zonage 113-2025 pour la propriété sise au 30, chemin AlbertLabelle"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accorde la demande de dérogation mineure pour le 14, chemin Guertin.",
+   "excerpt": "ET RÉSOLU QUE ce Conseil municipal entérine la recommandation du comité\nconsultatif d’urbanisme et accorde la demande d’une dérogation mineure au\nRèglement de zonage 113-2025 pour la propriété sise au 14, chemin Guertin"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 145.31-2025 n'est mentionné qu'en référence habilitante pour l'octroi d'usages conditionnels, sans être lui-même adopté ou modifié.",
+   "excerpt": ""
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal accorde la demande d'usage conditionnel pour le 75, chemin du Lac-Chip.",
+   "excerpt": "accorde la demande d’usage d’hébergement\ntouristique de type, établissement de résidence principale conformément au\nRèglement relatif aux usages conditionnels 145.31-2025 pour la propriété sise au\n75, chemin du Lac-Chip"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil accorde la demande d'usage conditionnel pour le 5, chemin Vaillant.",
+   "excerpt": "accorde la demande d’usage d’hébergement\ntouristique de type, établissement de résidence principale conformément au\nRèglement relatif aux usages conditionnels 145.31-2025 pour la propriété sise au\n5, chemin Vaillant"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal autorise une servitude de tolérance d'empiètement au 741, chemin Riverside.",
+   "excerpt": "ET RÉSOLU QUE ce Conseil municipal autorise une servitude de tolérance\nd’empiètement au bénéfice du propriétaire du lot 3 391 753, du cadastre du\nQuébec connu comme étant le 741, chemin Riverside"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement numéro 26-866 relatif au bon fonctionnement des installations septiques.",
+   "excerpt": "ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26866 relatif au bon fonctionnement des installations septiques"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement numéro 26-867 établissant le programme d'aide financière pour les installations septiques.",
+   "excerpt": "ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26867 relatif à la création d’un programme d’aide financière pour la mise aux normes\ndes installations septiques"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement d'emprunt numéro 26-868.",
+   "excerpt": "ET RÉSOLU QUE ce Conseil municipal adopte le projet de règlement numéro 26868 autorisant une dépense de 5 737 912 $ et un emprunt de 5 737 912 $ aux\nfins du financement du programme d’aide financière"
+  }
+ ],
+ "filter": {
+  "acts": 12,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le règlement de zonage 113-2025 est simplement cité en référence pour des demandes de dérogations mineures sans faire l'objet d'un acte procédural propre dans cette séance."
+   },
+   {
+    "act": "A02",
+    "reason": "Le projet de règlement 113-001-2026 n'est mentionné que dans un considérant de rappel historique d'une dérogation mineure, aucun acte procédural ne lui est consacré lors de cette séance."
+   },
+   {
+    "act": "A03",
+    "reason": "Le projet de règlement 113-002-2026 n'est mentionné que dans un considérant de rappel historique pour une dérogation mineure, sans étape décisionnelle dans cette séance."
+   },
+   {
+    "act": "A06",
+    "reason": "Le règlement 145.31-2025 n'est mentionné qu'en référence habilitante pour l'octroi d'usages conditionnels, sans être lui-même adopté ou modifié."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A04",
+    "reason": "Le conseil accorde la dérogation mineure pour le 30, chemin Albert-Labelle."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil municipal accorde la demande de dérogation mineure pour le 14, chemin Guertin."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil municipal accorde la demande d'usage conditionnel pour le 75, chemin du Lac-Chip."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil accorde la demande d'usage conditionnel pour le 5, chemin Vaillant."
+   },
+   {
+    "act": "A09",
+    "reason": "Le conseil municipal autorise une servitude de tolérance d'empiètement au 741, chemin Riverside."
+   },
+   {
+    "act": "A10",
+    "reason": "Le conseil adopte le règlement numéro 26-866 relatif au bon fonctionnement des installations septiques."
+   },
+   {
+    "act": "A11",
+    "reason": "Le conseil adopte le règlement numéro 26-867 établissant le programme d'aide financière pour les installations septiques."
+   },
+   {
+    "act": "A12",
+    "reason": "Le conseil adopte le règlement d'emprunt numéro 26-868."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3976,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 23783,
+   "outputTokens": 1016,
+   "totalTokens": 24799
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3843
+  },
+  "inputSha256": "ef995d2c85928c1b9e198623165f1d45e96555915dd5e8f16c259e868115f51d"
+ }
+}

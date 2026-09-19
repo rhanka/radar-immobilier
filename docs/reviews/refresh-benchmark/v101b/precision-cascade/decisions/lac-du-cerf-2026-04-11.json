@@ -1,0 +1,112 @@
+{
+ "documentId": "lac-du-cerf-2026-04-11",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "dc110941dbc002bdd27d0561f446ba4bfaf9c8426f9618bb0afb7999feb488d9",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-1"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis"
+      },
+      {
+       "page": 1,
+       "excerpt": "8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-2"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Renforcement prévu de l’application du règlement sur les nuisances",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "8.2 Renforcement de l’application du règlement sur les nuisances pour la saison estivale"
+      },
+      {
+       "page": 1,
+       "excerpt": "8.2 Renforcement de l’application du règlement sur les nuisances pour la saison estivale"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple octroi de contrat de services professionnels pour une évaluation de terrains, ce qui relève des exclusions (contrats de services).\",\"excerpt\":\"8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le renforcement de l'application d'un règlement sur les nuisances ne constitue pas un acte de planification, de zonage, de lotissement ou d'urbanisme réglementaire au sens des règles d'extraction.\",\"excerpt\":\"8.2 Renforcement de l’application du règlement sur les nuisances pour la saison estivale\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple octroi de contrat de services professionnels pour une évaluation de terrains, ce qui relève des exclusions (contrats de services).",
+   "excerpt": "8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le renforcement de l'application d'un règlement sur les nuisances ne constitue pas un acte de planification, de zonage, de lotissement ou d'urbanisme réglementaire au sens des règles d'extraction.",
+   "excerpt": "8.2 Renforcement de l’application du règlement sur les nuisances pour la saison estivale"
+  }
+ ],
+ "filter": {
+  "acts": 2,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Il s'agit d'un simple octroi de contrat de services professionnels pour une évaluation de terrains, ce qui relève des exclusions (contrats de services)."
+   },
+   {
+    "act": "A02",
+    "reason": "Le renforcement de l'application d'un règlement sur les nuisances ne constitue pas un acte de planification, de zonage, de lotissement ou d'urbanisme réglementaire au sens des règles d'extraction."
+   }
+  ],
+  "kept": [],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1236,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 1699,
+   "outputTokens": 149,
+   "totalTokens": 1848
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1094
+  },
+  "inputSha256": "55b31cb443d70eda272553fa974b00db27d6781d6b2ea62dbd57ae055421a2db"
+ }
+}

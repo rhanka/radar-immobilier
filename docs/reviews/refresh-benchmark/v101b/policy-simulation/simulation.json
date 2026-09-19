@@ -1,0 +1,572 @@
+{
+ "generatedAt": "2026-09-19T03:33:25.335Z",
+ "network": "none",
+ "totals": {
+  "before": {
+   "tp": 330,
+   "fp": 558,
+   "fn": 344,
+   "precision": 0.3716216216216216,
+   "recall": 0.4896142433234421,
+   "f1": 0.4225352112676056
+  },
+  "beforeAllFallback": {
+   "tp": 201,
+   "fp": 222,
+   "fn": 473,
+   "precision": 0.475177304964539,
+   "recall": 0.29821958456973297,
+   "f1": 0.3664539653600729
+  },
+  "after": {
+   "tp": 358,
+   "fp": 383,
+   "fn": 316,
+   "precision": 0.48313090418353577,
+   "recall": 0.5311572700296736,
+   "f1": 0.5060070671378092
+  },
+  "afterWithFallback": {
+   "tp": 358,
+   "fp": 383,
+   "fn": 316,
+   "precision": 0.48313090418353577,
+   "recall": 0.5311572700296736,
+   "f1": 0.5060070671378092
+  }
+ },
+ "calls": {
+  "before": {
+   "astra": 100,
+   "gemini": 0
+  },
+  "after": {
+   "astra": 100,
+   "gemini": 99
+  }
+ },
+ "fallbackUsedBefore": 0,
+ "waterloo": {
+  "documentId": "waterloo-2026-08-18",
+  "before": {
+   "tp": 7,
+   "fp": 11,
+   "fn": 8,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  "after": {
+   "tp": 8,
+   "fp": 4,
+   "fn": 7,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  }
+ },
+ "perDocument": [
+  {
+   "documentId": "saint-polycarpe-2026-01-19",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-lin-laurentides-2026-06-09",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "amherst-2026-06-08",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "ayers-cliff-2026-03-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-roch-de-lachigan-2026-05-11",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-charles-de-bourget-2026-05-04",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-henri-2026-03-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "stratford-2026-04-20",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "coteau-du-lac-2026-02-10",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "abercorn-2026-03-30",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "grenville-sur-la-rouge-2026-04-14",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-damien-2026-06-16",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "chibougamau-2026-05-16",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "val-racine-2026-06-09",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "aumond-2026-01-14",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "val-dor-2026-06-01",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "lac-tremblant-nord-2026-05-09",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "candiac-2026-06-15",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "ogden-2026-03-09",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "lislet-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "dollard-des-ormeaux-2026-02-10",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "pincourt-2026-01-20",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "arundel-2026-07-31",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "bolton-est-2026-01-12",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "danville-2026-01-15",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "mcmasterville-2026-02-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "chesterville-2026-03-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "lac-du-cerf-2026-04-11",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "acton-vale-2026-03-16",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-constant-2026-01-20",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-brigide-diberville-2026-06-01",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "waterville-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "aucune"
+  },
+  {
+   "documentId": "lyster-2026-02-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "roxton-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "les-coteaux-2026-03-16",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-felix-de-kingsey-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "daveluyville-2026-05-04",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "lorraine-2026-01-13",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "beaupre-2026-03-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-bernard-de-michaudville-2026-04-01",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-francoise--becancour-2026-05-04",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "tadoussac-2026-01-13",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "blue-sea-2026-02-03",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-sylvere-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "parisville-2026-05-05",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "lac-saint-paul-2026-05-11",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "dosquet-2026-01-13",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "barnston-ouest-2026-05-04",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "bedford--brome-missisquoi-2026-06-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "wentworth-nord-2026-01-21",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-just-de-bretenieres-2026-02-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-clotilde-2026-04-20",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-zephirin-de-courval-2026-03-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "eastman-2026-06-01",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "warden-2026-04-08",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "bowman-2026-05-12",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "lavenir-2026-05-04",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "richelieu-2026-02-03",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "stoneham-et-tewkesbury-2026-06-08",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-tite-des-caps-2026-02-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "cookshire-eaton-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-angele-de-monnoir-2026-01-13",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "mont-saint-hilaire-2026-04-13",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "cowansville-2026-05-05",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "brossard-2026-04-28",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "contrecoeur-2026-04-14",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "frontenac-2026-03-10",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "hatley-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "beloeil-2026-03-23",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "la-peche-2026-06-01",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-sophie-2026-06-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-barbe-2026-05-05",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-martine-2026-03-17",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "rosemere-2026-04-13",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "orford-2026-03-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "berthier-sur-mer-2026-03-24",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "gracefield-2026-04-14",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sacre-coeur-2026-05-11",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "potton-2026-01-05",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "notre-dame-du-rosaire-2026-03-02",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "pierreville-2026-03-10",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-croix-2026-05-05",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "lac-etchemin-2026-02-03",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "stanstead-est-2026-04-13",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "brownsburg-chatham-2026-03-10",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-thecle-2026-03-09",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "carignan-2026-03-04",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "lac-brome-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "sainte-christine-2026-04-07",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "boisbriand-2026-05-05",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "lac-des-seize-iles-2026-09-agenda",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-etienne-de-bolton-2026-08-04",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "valcourt-2026-06-01-agenda",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  },
+  {
+   "documentId": "waterloo-2026-08-18",
+   "beforeFrom": "astra-low",
+   "afterFrom": "CP"
+  }
+ ]
+}

@@ -1,0 +1,724 @@
+{
+ "documentId": "brownsburg-chatham-2026-03-10",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "74d11969a462e6c5249baa54eed2ad32210241b1b1ec2b5ac6d3225521ce65b0",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Engagement de cession pour des HLM — parties des lots 4 235 205 et 5 641 417\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"4 235 205\",\n        \"page\": 18,\n        \"citation\": \"modique (HLM) sur son territoire, s’engage à céder une partie des\\nlots 4 235 205 et 5 641 417 du cadastre du Québec, et réitère sa\\npleine collaboration afin de mener ce projet à terme\",\n        \"anchor\": \"lots 4 235 205 et 5 641 417\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne du dispositif de la page 18, qui écrit bien « 4 235 205 » malgré la variante présente dans les considérants.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Acceptation conditionnelle du PIIA 2026-006 — développement sur le lot 4 234 857, prolongement de la rue Lacasse\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-006\",\n        \"page\": 41,\n        \"citation\": \"DEMANDE DE PIIA NUMÉRO 2026-006 RELATIVE À UN\\nPROJET\\nDE\\nDÉVELOPPEMENT\\nIMMOBILIER\\nD’ENVERGURE – LOT 4 234 857 DU CADASTRE DU\\nQUÉBEC\",\n        \"anchor\": \"PIIA NUMÉRO 2026-006\"\n      },\n      \"reason\": \"La citation courante fusionne les lignes du titre de la page 41, alors que la règle exige un extrait recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00030 accordée — lot projeté 6 721 120, emprise de rue de 13 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00030\",\n        \"page\": 44,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00030, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 721 120\",\n        \"anchor\": \"DM-2026-00030\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 44.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00031 accordée — lot projeté 6 721 733, emprise de rue de 13 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00031\",\n        \"page\": 45,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00031, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 721 733\",\n        \"anchor\": \"DM-2026-00031\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 45.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00032 accordée — lot projeté 6 721 108, profondeur de 27,46 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00032\",\n        \"page\": 46,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00032, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 721 108\",\n        \"anchor\": \"DM-2026-00032\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 46.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00033 accordée — lot projeté 6 721 109, profondeur de 26,70 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00033\",\n        \"page\": 48,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00033, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 721 109\",\n        \"anchor\": \"DM-2026-00033\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 48.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00034 accordée — lot projeté 6 721 110, profondeur de 26,59 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00034\",\n        \"page\": 49,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00034, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 721 110\",\n        \"anchor\": \"DM-2026-00034\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 49.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00035 accordée — lot projeté 6 721 111, profondeur de 27,76 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00035\",\n        \"page\": 50,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00035, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 721 111\",\n        \"anchor\": \"DM-2026-00035\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 50.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00036 accordée — lot projeté 6 686 339, profondeur de 27,41 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00036\",\n        \"page\": 52,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00036, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 686 339\",\n        \"anchor\": \"DM-2026-00036\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 52.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00037 accordée — lot projeté 6 686 340, profondeur de 26,78 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00037\",\n        \"page\": 53,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00037, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 686 340\",\n        \"anchor\": \"DM-2026-00037\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 53.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u11\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00038 accordée — lot projeté 6 686 341, profondeur de 27,31 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00038\",\n        \"page\": 54,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00038, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 686 341\",\n        \"anchor\": \"DM-2026-00038\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 54.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u12\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00039 accordée — lot projeté 6 686 343, profondeur de 27,70 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00039\",\n        \"page\": 55,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00039, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 686 343\",\n        \"anchor\": \"DM-2026-00039\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 55.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u13\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2026-00040 accordée — lot projeté 6 686 344, profondeur de 27,50 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2026-00040\",\n        \"page\": 57,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2026-00040, visant des dispositions du\\nRèglement de lotissement numéro 198-2013 pour le lot projeté\\n6 686 344\",\n        \"anchor\": \"DM-2026-00040\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 57.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u14\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure DM-2025-00725 accordée — lot projeté 6 703 926, superficie et emplacement d’une enseigne\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-2025-00725\",\n        \"page\": 58,\n        \"citation\": \"QUE le conseil municipal accepte la demande de dérogation\\nmineure numéro DM-2025-00725, visant des dispositions du\\nRèglement de zonage numéro 197-2013 pour le lot projeté\\n6 703 926\",\n        \"anchor\": \"DM-2025-00725\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 58.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u15\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-007 — établissement de restauration, lot projeté 6 703 926\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-007\",\n        \"page\": 58,\n        \"citation\": \"DEMANDE DE PIIA NUMÉRO 2026-007 RELATIVE À\\nUNE DEMANDE DE PERMIS DE CONSTRUCTION\\nVISANT LA CONSTRUCTION D’UN ÉTABLISSEMENT\\nDE RESTAURATION (C302)\",\n        \"anchor\": \"PIIA NUMÉRO 2026-007\"\n      },\n      \"reason\": \"La citation courante fusionne les lignes du titre de la page 58, alors que la règle exige un extrait recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u16\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-008 — remise et abri à bois au 815, route des Outaouais\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-008\",\n        \"page\": 59,\n        \"citation\": \"DEMANDE DE PIIA 2026-008 RELATIVE À UNE\\nDEMANDE DE CERTIFICAT D’AUTORISATION VISANT\\nLA CONSTRUCTION D’UNE REMISE AVEC UN ABRI À\\nBOIS ATTENANT\",\n        \"anchor\": \"PIIA 2026-008\"\n      },\n      \"reason\": \"La citation courante fusionne les lignes du titre de la page 59, alors que la règle exige un extrait recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u17\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-009 — habitation bifamiliale, lot 4 235 765, rue de l’Église\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-009\",\n        \"page\": 61,\n        \"citation\": \"DEMANDE DE PIIA NUMÉRO 2026-009 RELATIVE À\\nUNE DEMANDE DE PERMIS DE CONSTRUCTION\\nVISANT LA CONSTRUCTION D’UNE HABITATION\\nBIFAMILIALE – LOT 4 235 765\",\n        \"anchor\": \"PIIA NUMÉRO 2026-009\"\n      },\n      \"reason\": \"La citation courante fusionne les lignes du titre de la page 61, alors que la règle exige un extrait recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u18\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-010 — rénovation au 332-332A, rue Saint-Joseph\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-010\",\n        \"page\": 62,\n        \"citation\": \"DEMANDE DE PIIA 2026-010 RELATIVE À UNE\\nDEMANDE DE CERTIFICAT D’AUTORISATION VISANT\\nLA RÉNOVATION DE LA RÉSIDENCE – PROPRIÉTÉ\\nSITUÉE AU 332-332A, RUE SAINT-JOSEPH\",\n        \"anchor\": \"PIIA 2026-010\"\n      },\n      \"reason\": \"La citation courante fusionne les lignes du titre de la page 62, alors que la règle exige un extrait recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u19\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-011 — bâtiment agricole au 309, route du Canton (lot 4 423 780)\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-011\",\n        \"page\": 63,\n        \"citation\": \"DEMANDE DE PIIA 2026-011 RELATIVE À UNE\\nDEMANDE DE CERTIFICAT D’AUTORISATION VISANT\\nLA CONSTRUCTION D’UN BÂTIMENT AGRICOLE\",\n        \"anchor\": \"PIIA 2026-011\"\n      },\n      \"reason\": \"La citation courante fusionne les lignes du titre de la page 63, alors que la règle exige un extrait recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u20\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 361-2026 — occupation et entretien des bâtiments\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"361-2026\",\n        \"page\": 64,\n        \"citation\": \"Madame la conseillère Martine Renaud donne avis de motion qu’à\\nune séance subséquente, il sera proposé pour adoption le\\nRèglement numéro 361-2026\",\n        \"anchor\": \"Règlement numéro 361-2026\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de l’avis de motion donné à la page 64.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u21\",\n      \"unit\": {\n        \"label\": \"Adoption du projet de règlement 361-2026 — occupation et entretien des bâtiments\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"361-2026\",\n        \"page\": 65,\n        \"citation\": \"ADOPTION DU PROJET DE RÈGLEMENT NUMÉRO\\n361-2026\\nCONCERNANT\\nL’OCCUPATION\\nET\\nL’ENTRETIEN DES BÂTIMENTS\",\n        \"anchor\": \"RÈGLEMENT NUMÉRO\\n361-2026\"\n      },\n      \"reason\": \"La citation et l’ancre fusionnent les lignes du titre de la résolution 26-03-104 et doivent être reproduites à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u22\",\n      \"unit\": {\n        \"label\": \"Acceptation d’une contribution pour parcs de 810 $ — lotissement 2025-00021\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2025-00021\",\n        \"page\": 67,\n        \"citation\": \"CONSIDÉRANT QUE 10 % de 8 100 $ correspond à 810 $ et\\nqu’il s’agit de la contribution assujettie à la demande de permis de\\nlotissement 2025-00021\",\n        \"anchor\": \"lotissement 2025-00021\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne du considérant figurant à la page 67.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u23\",\n      \"unit\": {\n        \"label\": \"Acceptation d’une contribution pour parcs de 16 950 $ — lotissement 2026-00001\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-00001\",\n        \"page\": 68,\n        \"citation\": \"CONSIDÉRANT QUE 10 % de 169 500 $ correspond à 16 950 $\\net qu’il s’agit de la contribution assujettie à la demande de permis\\nde lotissement 2026-00001\",\n        \"anchor\": \"lotissement 2026-00001\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne du considérant figurant à la page 68.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u24\",\n      \"unit\": {\n        \"label\": \"Acceptation d’une contribution pour parcs de 21 150 $ — lotissement 2026-00002\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-00002\",\n        \"page\": 70,\n        \"citation\": \"CONSIDÉRANT QUE 10 % de 211 500 $ correspond à 21 150 $\\net qu’il s’agit de la contribution assujettie à la demande de permis\\nde lotissement 2026-00002\",\n        \"anchor\": \"lotissement 2026-00002\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne du considérant figurant à la page 70.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u25\",\n      \"unit\": {\n        \"label\": \"Acceptation d’une contribution pour parcs de 123 000 $ — lotissement 2026-00005\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-00005\",\n        \"page\": 71,\n        \"citation\": \"CONSIDÉRANT QUE 10 % de 1 230 000 $ correspond à\\n123 000 $ et qu’il s’agit de la contribution assujettie à la demande\\nde permis de lotissement 2026-00005\",\n        \"anchor\": \"lotissement 2026-00005\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne du considérant figurant à la page 71.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u26\",\n      \"unit\": {\n        \"label\": \"Acceptation provisoire des travaux du prolongement de la rue de la Septaco\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"RUE DE LA SEPTACO\",\n        \"page\": 73,\n        \"citation\": \"ACCEPTATION PROVISOIRE DES TRAVAUX DE LA\\nRUE DE LA SEPTACO\",\n        \"anchor\": \"RUE DE LA SEPTACO\"\n      },\n      \"reason\": \"Le titre cité est réparti sur deux lignes à la page 73 et doit être recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u27\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature de l’entente promoteur — domaine Oria, prolongements des rues Lacasse et Saint-Denis\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"DOMAINE ORIA\",\n        \"page\": 74,\n        \"citation\": \"AUTORISER\\nLA\\nSIGNATURE\\nDE\\nL’ENTENTE\\nPROMOTEUR ENTRE LA VILLE DE BROWNSBURGCHATHAM ET LA COMPAGNIE GESTION OR\\nCONCEPT INC CONCERNANT LE DÉVELOPPEMENT\\nDU DOMAINE ORIA\",\n        \"anchor\": \"DU DOMAINE ORIA\"\n      },\n      \"reason\": \"La citation courante fusionne les lignes du titre de la page 74, alors que la règle exige un extrait recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u28\",\n      \"unit\": {\n        \"label\": \"Autorisation de dépôt d’une demande au MELCCFP — développement du Domaine Oria (rue Saint-Denis et prolongement de la rue Lacasse)\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"Domaine Oria\",\n        \"page\": 75,\n        \"citation\": \"CONSIDÉRANT QUE le projet de développement du Domaine\\nOria concerne les lots projetés 6 721 120, 6 721 121, 6 721 733 et\\n6 721 734\",\n        \"anchor\": \"Domaine\\nOria concerne les lots projetés 6 721 120\"\n      },\n      \"reason\": \"La citation et l’ancre doivent conserver les retours à la ligne du considérant de la page 75, notamment entre « Domaine » et « Oria ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u29\",\n      \"unit\": {\n        \"label\": \"Engagement conditionnel de cession gratuite d’un terrain pour une école secondaire\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"terrain pour école secondaire\",\n        \"page\": 77,\n        \"citation\": \"s’engage à céder, si le besoin se présente, un terrain à titre gratuit\\npour l’établissement d’une école secondaire sur son territoire\",\n        \"anchor\": \"un terrain à titre gratuit\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique le retour à la ligne du dispositif figurant à la page 77.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Engagement de cession pour des HLM — parties des lots 4 235 205 et 5 641 417",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 235 205",
+    "page": 18,
+    "citation": "modique (HLM) sur son territoire, s’engage à céder une partie des\nlots 4 235 205 et 5 641 417 du cadastre du Québec, et réitère sa\npleine collaboration afin de mener ce projet à terme",
+    "anchor": "lots 4 235 205 et 5 641 417"
+   },
+   "reason": "La citation doit conserver les retours à la ligne du dispositif de la page 18, qui écrit bien « 4 235 205 » malgré la variante présente dans les considérants."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Acceptation conditionnelle du PIIA 2026-006 — développement sur le lot 4 234 857, prolongement de la rue Lacasse",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-006",
+    "page": 41,
+    "citation": "DEMANDE DE PIIA NUMÉRO 2026-006 RELATIVE À UN\nPROJET\nDE\nDÉVELOPPEMENT\nIMMOBILIER\nD’ENVERGURE – LOT 4 234 857 DU CADASTRE DU\nQUÉBEC",
+    "anchor": "PIIA NUMÉRO 2026-006"
+   },
+   "reason": "La citation courante fusionne les lignes du titre de la page 41, alors que la règle exige un extrait recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00030 accordée — lot projeté 6 721 120, emprise de rue de 13 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00030",
+    "page": 44,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00030, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 120",
+    "anchor": "DM-2026-00030"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 44."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00031 accordée — lot projeté 6 721 733, emprise de rue de 13 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00031",
+    "page": 45,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00031, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 733",
+    "anchor": "DM-2026-00031"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 45."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00032 accordée — lot projeté 6 721 108, profondeur de 27,46 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00032",
+    "page": 46,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00032, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 108",
+    "anchor": "DM-2026-00032"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 46."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00033 accordée — lot projeté 6 721 109, profondeur de 26,70 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00033",
+    "page": 48,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00033, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 109",
+    "anchor": "DM-2026-00033"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 48."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00034 accordée — lot projeté 6 721 110, profondeur de 26,59 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00034",
+    "page": 49,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00034, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 110",
+    "anchor": "DM-2026-00034"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 49."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00035 accordée — lot projeté 6 721 111, profondeur de 27,76 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00035",
+    "page": 50,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00035, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 111",
+    "anchor": "DM-2026-00035"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 50."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00036 accordée — lot projeté 6 686 339, profondeur de 27,41 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00036",
+    "page": 52,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00036, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 686 339",
+    "anchor": "DM-2026-00036"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 52."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00037 accordée — lot projeté 6 686 340, profondeur de 26,78 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00037",
+    "page": 53,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00037, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 686 340",
+    "anchor": "DM-2026-00037"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 53."
+  },
+  {
+   "op": "correct",
+   "id": "u11",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00038 accordée — lot projeté 6 686 341, profondeur de 27,31 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00038",
+    "page": 54,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00038, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 686 341",
+    "anchor": "DM-2026-00038"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 54."
+  },
+  {
+   "op": "correct",
+   "id": "u12",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00039 accordée — lot projeté 6 686 343, profondeur de 27,70 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00039",
+    "page": 55,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00039, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 686 343",
+    "anchor": "DM-2026-00039"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 55."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "Dérogation mineure DM-2026-00040 accordée — lot projeté 6 686 344, profondeur de 27,50 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00040",
+    "page": 57,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00040, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 686 344",
+    "anchor": "DM-2026-00040"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 57."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "Dérogation mineure DM-2025-00725 accordée — lot projeté 6 703 926, superficie et emplacement d’une enseigne",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2025-00725",
+    "page": 58,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2025-00725, visant des dispositions du\nRèglement de zonage numéro 197-2013 pour le lot projeté\n6 703 926",
+    "anchor": "DM-2025-00725"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de la décision figurant à la page 58."
+  },
+  {
+   "op": "correct",
+   "id": "u15",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-007 — établissement de restauration, lot projeté 6 703 926",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-007",
+    "page": 58,
+    "citation": "DEMANDE DE PIIA NUMÉRO 2026-007 RELATIVE À\nUNE DEMANDE DE PERMIS DE CONSTRUCTION\nVISANT LA CONSTRUCTION D’UN ÉTABLISSEMENT\nDE RESTAURATION (C302)",
+    "anchor": "PIIA NUMÉRO 2026-007"
+   },
+   "reason": "La citation courante fusionne les lignes du titre de la page 58, alors que la règle exige un extrait recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u16",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-008 — remise et abri à bois au 815, route des Outaouais",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-008",
+    "page": 59,
+    "citation": "DEMANDE DE PIIA 2026-008 RELATIVE À UNE\nDEMANDE DE CERTIFICAT D’AUTORISATION VISANT\nLA CONSTRUCTION D’UNE REMISE AVEC UN ABRI À\nBOIS ATTENANT",
+    "anchor": "PIIA 2026-008"
+   },
+   "reason": "La citation courante fusionne les lignes du titre de la page 59, alors que la règle exige un extrait recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u17",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-009 — habitation bifamiliale, lot 4 235 765, rue de l’Église",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-009",
+    "page": 61,
+    "citation": "DEMANDE DE PIIA NUMÉRO 2026-009 RELATIVE À\nUNE DEMANDE DE PERMIS DE CONSTRUCTION\nVISANT LA CONSTRUCTION D’UNE HABITATION\nBIFAMILIALE – LOT 4 235 765",
+    "anchor": "PIIA NUMÉRO 2026-009"
+   },
+   "reason": "La citation courante fusionne les lignes du titre de la page 61, alors que la règle exige un extrait recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u18",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-010 — rénovation au 332-332A, rue Saint-Joseph",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-010",
+    "page": 62,
+    "citation": "DEMANDE DE PIIA 2026-010 RELATIVE À UNE\nDEMANDE DE CERTIFICAT D’AUTORISATION VISANT\nLA RÉNOVATION DE LA RÉSIDENCE – PROPRIÉTÉ\nSITUÉE AU 332-332A, RUE SAINT-JOSEPH",
+    "anchor": "PIIA 2026-010"
+   },
+   "reason": "La citation courante fusionne les lignes du titre de la page 62, alors que la règle exige un extrait recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u19",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-011 — bâtiment agricole au 309, route du Canton (lot 4 423 780)",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-011",
+    "page": 63,
+    "citation": "DEMANDE DE PIIA 2026-011 RELATIVE À UNE\nDEMANDE DE CERTIFICAT D’AUTORISATION VISANT\nLA CONSTRUCTION D’UN BÂTIMENT AGRICOLE",
+    "anchor": "PIIA 2026-011"
+   },
+   "reason": "La citation courante fusionne les lignes du titre de la page 63, alors que la règle exige un extrait recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u20",
+   "unit": {
+    "label": "Avis de motion du règlement 361-2026 — occupation et entretien des bâtiments",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "361-2026",
+    "page": 64,
+    "citation": "Madame la conseillère Martine Renaud donne avis de motion qu’à\nune séance subséquente, il sera proposé pour adoption le\nRèglement numéro 361-2026",
+    "anchor": "Règlement numéro 361-2026"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de l’avis de motion donné à la page 64."
+  },
+  {
+   "op": "correct",
+   "id": "u21",
+   "unit": {
+    "label": "Adoption du projet de règlement 361-2026 — occupation et entretien des bâtiments",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "361-2026",
+    "page": 65,
+    "citation": "ADOPTION DU PROJET DE RÈGLEMENT NUMÉRO\n361-2026\nCONCERNANT\nL’OCCUPATION\nET\nL’ENTRETIEN DES BÂTIMENTS",
+    "anchor": "RÈGLEMENT NUMÉRO\n361-2026"
+   },
+   "reason": "La citation et l’ancre fusionnent les lignes du titre de la résolution 26-03-104 et doivent être reproduites à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u22",
+   "unit": {
+    "label": "Acceptation d’une contribution pour parcs de 810 $ — lotissement 2025-00021",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2025-00021",
+    "page": 67,
+    "citation": "CONSIDÉRANT QUE 10 % de 8 100 $ correspond à 810 $ et\nqu’il s’agit de la contribution assujettie à la demande de permis de\nlotissement 2025-00021",
+    "anchor": "lotissement 2025-00021"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne du considérant figurant à la page 67."
+  },
+  {
+   "op": "correct",
+   "id": "u23",
+   "unit": {
+    "label": "Acceptation d’une contribution pour parcs de 16 950 $ — lotissement 2026-00001",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-00001",
+    "page": 68,
+    "citation": "CONSIDÉRANT QUE 10 % de 169 500 $ correspond à 16 950 $\net qu’il s’agit de la contribution assujettie à la demande de permis\nde lotissement 2026-00001",
+    "anchor": "lotissement 2026-00001"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne du considérant figurant à la page 68."
+  },
+  {
+   "op": "correct",
+   "id": "u24",
+   "unit": {
+    "label": "Acceptation d’une contribution pour parcs de 21 150 $ — lotissement 2026-00002",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-00002",
+    "page": 70,
+    "citation": "CONSIDÉRANT QUE 10 % de 211 500 $ correspond à 21 150 $\net qu’il s’agit de la contribution assujettie à la demande de permis\nde lotissement 2026-00002",
+    "anchor": "lotissement 2026-00002"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne du considérant figurant à la page 70."
+  },
+  {
+   "op": "correct",
+   "id": "u25",
+   "unit": {
+    "label": "Acceptation d’une contribution pour parcs de 123 000 $ — lotissement 2026-00005",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-00005",
+    "page": 71,
+    "citation": "CONSIDÉRANT QUE 10 % de 1 230 000 $ correspond à\n123 000 $ et qu’il s’agit de la contribution assujettie à la demande\nde permis de lotissement 2026-00005",
+    "anchor": "lotissement 2026-00005"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne du considérant figurant à la page 71."
+  },
+  {
+   "op": "correct",
+   "id": "u26",
+   "unit": {
+    "label": "Acceptation provisoire des travaux du prolongement de la rue de la Septaco",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "RUE DE LA SEPTACO",
+    "page": 73,
+    "citation": "ACCEPTATION PROVISOIRE DES TRAVAUX DE LA\nRUE DE LA SEPTACO",
+    "anchor": "RUE DE LA SEPTACO"
+   },
+   "reason": "Le titre cité est réparti sur deux lignes à la page 73 et doit être recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u27",
+   "unit": {
+    "label": "Autorisation de signature de l’entente promoteur — domaine Oria, prolongements des rues Lacasse et Saint-Denis",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "DOMAINE ORIA",
+    "page": 74,
+    "citation": "AUTORISER\nLA\nSIGNATURE\nDE\nL’ENTENTE\nPROMOTEUR ENTRE LA VILLE DE BROWNSBURGCHATHAM ET LA COMPAGNIE GESTION OR\nCONCEPT INC CONCERNANT LE DÉVELOPPEMENT\nDU DOMAINE ORIA",
+    "anchor": "DU DOMAINE ORIA"
+   },
+   "reason": "La citation courante fusionne les lignes du titre de la page 74, alors que la règle exige un extrait recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u28",
+   "unit": {
+    "label": "Autorisation de dépôt d’une demande au MELCCFP — développement du Domaine Oria (rue Saint-Denis et prolongement de la rue Lacasse)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Domaine Oria",
+    "page": 75,
+    "citation": "CONSIDÉRANT QUE le projet de développement du Domaine\nOria concerne les lots projetés 6 721 120, 6 721 121, 6 721 733 et\n6 721 734",
+    "anchor": "Domaine\nOria concerne les lots projetés 6 721 120"
+   },
+   "reason": "La citation et l’ancre doivent conserver les retours à la ligne du considérant de la page 75, notamment entre « Domaine » et « Oria »."
+  },
+  {
+   "op": "correct",
+   "id": "u29",
+   "unit": {
+    "label": "Engagement conditionnel de cession gratuite d’un terrain pour une école secondaire",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "terrain pour école secondaire",
+    "page": 77,
+    "citation": "s’engage à céder, si le besoin se présente, un terrain à titre gratuit\npour l’établissement d’une école secondaire sur son territoire",
+    "anchor": "un terrain à titre gratuit"
+   },
+   "reason": "La citation doit reproduire à l’identique le retour à la ligne du dispositif figurant à la page 77."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 18,
+   "citation": "modique (HLM) sur son territoire, s’engage à céder une partie des\nlots 4 235 205 et 5 641 417 du cadastre du Québec, et réitère sa\npleine collaboration afin de mener ce projet à terme"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "piia",
+   "page": 41,
+   "citation": "DEMANDE DE PIIA NUMÉRO 2026-006 RELATIVE À UN\nPROJET\nDE\nDÉVELOPPEMENT\nIMMOBILIER\nD’ENVERGURE – LOT 4 234 857 DU CADASTRE DU\nQUÉBEC"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "derogation_mineure",
+   "page": 44,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00030, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 120"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "derogation_mineure",
+   "page": 45,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00031, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 733"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "derogation_mineure",
+   "page": 46,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00032, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 108"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "derogation_mineure",
+   "page": 48,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00033, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 109"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "derogation_mineure",
+   "page": 49,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00034, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 110"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "derogation_mineure",
+   "page": 50,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00035, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 721 111"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "derogation_mineure",
+   "page": 52,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00036, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 686 339"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "derogation_mineure",
+   "page": 53,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00037, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 686 340"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u11",
+   "stage": "derogation_mineure",
+   "page": 54,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00038, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 686 341"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u12",
+   "stage": "derogation_mineure",
+   "page": 55,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00039, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 686 343"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 12,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "derogation_mineure",
+   "page": 57,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00040, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté\n6 686 344"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 13,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "derogation_mineure",
+   "page": 58,
+   "citation": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2025-00725, visant des dispositions du\nRèglement de zonage numéro 197-2013 pour le lot projeté\n6 703 926"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 14,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u15",
+   "stage": "piia",
+   "page": 58,
+   "citation": "DEMANDE DE PIIA NUMÉRO 2026-007 RELATIVE À\nUNE DEMANDE DE PERMIS DE CONSTRUCTION\nVISANT LA CONSTRUCTION D’UN ÉTABLISSEMENT\nDE RESTAURATION (C302)"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 15,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u16",
+   "stage": "piia",
+   "page": 59,
+   "citation": "DEMANDE DE PIIA 2026-008 RELATIVE À UNE\nDEMANDE DE CERTIFICAT D’AUTORISATION VISANT\nLA CONSTRUCTION D’UNE REMISE AVEC UN ABRI À\nBOIS ATTENANT"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 16,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u17",
+   "stage": "piia",
+   "page": 61,
+   "citation": "DEMANDE DE PIIA NUMÉRO 2026-009 RELATIVE À\nUNE DEMANDE DE PERMIS DE CONSTRUCTION\nVISANT LA CONSTRUCTION D’UNE HABITATION\nBIFAMILIALE – LOT 4 235 765"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 17,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u18",
+   "stage": "piia",
+   "page": 62,
+   "citation": "DEMANDE DE PIIA 2026-010 RELATIVE À UNE\nDEMANDE DE CERTIFICAT D’AUTORISATION VISANT\nLA RÉNOVATION DE LA RÉSIDENCE – PROPRIÉTÉ\nSITUÉE AU 332-332A, RUE SAINT-JOSEPH"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 18,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u19",
+   "stage": "piia",
+   "page": 63,
+   "citation": "DEMANDE DE PIIA 2026-011 RELATIVE À UNE\nDEMANDE DE CERTIFICAT D’AUTORISATION VISANT\nLA CONSTRUCTION D’UN BÂTIMENT AGRICOLE"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 19,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u20",
+   "stage": "avis_motion",
+   "page": 64,
+   "citation": "Madame la conseillère Martine Renaud donne avis de motion qu’à\nune séance subséquente, il sera proposé pour adoption le\nRèglement numéro 361-2026"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 20,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u21",
+   "stage": "projet_reglement",
+   "page": 65,
+   "citation": "ADOPTION DU PROJET DE RÈGLEMENT NUMÉRO\n361-2026\nCONCERNANT\nL’OCCUPATION\nET\nL’ENTRETIEN DES BÂTIMENTS"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 21,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u22",
+   "stage": "adoption",
+   "page": 67,
+   "citation": "CONSIDÉRANT QUE 10 % de 8 100 $ correspond à 810 $ et\nqu’il s’agit de la contribution assujettie à la demande de permis de\nlotissement 2025-00021"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 22,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u23",
+   "stage": "adoption",
+   "page": 68,
+   "citation": "CONSIDÉRANT QUE 10 % de 169 500 $ correspond à 16 950 $\net qu’il s’agit de la contribution assujettie à la demande de permis\nde lotissement 2026-00001"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 23,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u24",
+   "stage": "adoption",
+   "page": 70,
+   "citation": "CONSIDÉRANT QUE 10 % de 211 500 $ correspond à 21 150 $\net qu’il s’agit de la contribution assujettie à la demande de permis\nde lotissement 2026-00002"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 24,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u25",
+   "stage": "adoption",
+   "page": 71,
+   "citation": "CONSIDÉRANT QUE 10 % de 1 230 000 $ correspond à\n123 000 $ et qu’il s’agit de la contribution assujettie à la demande\nde permis de lotissement 2026-00005"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 25,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u26",
+   "stage": "inconnu",
+   "page": 73,
+   "citation": "ACCEPTATION PROVISOIRE DES TRAVAUX DE LA\nRUE DE LA SEPTACO"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 26,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u27",
+   "stage": "adoption",
+   "page": 74,
+   "citation": "AUTORISER\nLA\nSIGNATURE\nDE\nL’ENTENTE\nPROMOTEUR ENTRE LA VILLE DE BROWNSBURGCHATHAM ET LA COMPAGNIE GESTION OR\nCONCEPT INC CONCERNANT LE DÉVELOPPEMENT\nDU DOMAINE ORIA"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 27,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u28",
+   "stage": "inconnu",
+   "page": 75,
+   "citation": "CONSIDÉRANT QUE le projet de développement du Domaine\nOria concerne les lots projetés 6 721 120, 6 721 121, 6 721 733 et\n6 721 734"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 28,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u29",
+   "stage": "adoption",
+   "page": 77,
+   "citation": "s’engage à céder, si le besoin se présente, un terrain à titre gratuit\npour l’établissement d’une école secondaire sur son territoire"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 29
+}

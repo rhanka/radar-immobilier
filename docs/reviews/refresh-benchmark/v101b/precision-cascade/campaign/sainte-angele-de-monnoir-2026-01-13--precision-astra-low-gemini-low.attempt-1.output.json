@@ -1,0 +1,133 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-597-25",
+   "label": "Règlement 597-25 — Taxes et tarifs 2026",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+   "status": "candidate",
+   "numero": "597-25",
+   "title": "Fixer des taxes et des tarifs pour l’exercice financier 2026 et les conditions de leur perception",
+   "date": "2026-01-13",
+   "stage": "adoption",
+   "resolution": "26-01-006",
+   "municipality": "sainte-angele-de-monnoir",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Sur proposition de M. Patrick Robert, appuyée par M. François\nCharbonneau, il est résolu d’adopter le Règlement numéro 597-25 pour fixer des",
+     "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+     "sourceUrl": "https://www.sainte-angele-de-monnoir.ca/wp-content/uploads/2026/02/2026-01_Proces-verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-599-26",
+   "label": "Règlement 599-26 — Projet d’interdiction temporaire d’épandage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+   "status": "candidate",
+   "numero": "599-26",
+   "title": "Interdisant l’épandage de déjections animales, de boues ou de résidus provenant d’une fabrique de pâtes et papiers",
+   "objet": "Interdire l’épandage les 22, 23 et 24 juin 2026 et les 11, 12 et 13 septembre 2026.",
+   "stage": "projet",
+   "meetingDate": "2026-01-13",
+   "municipality": "sainte-angele-de-monnoir",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés\npar Mme Johanne Lacourse, conseillère au poste # 3,",
+     "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+     "sourceUrl": "https://www.sainte-angele-de-monnoir.ca/wp-content/uploads/2026/02/2026-01_Proces-verbal.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 9,
+     "excerpt": "L’objet de ce règlement est d’interdire l’épandage de déjections animales, de\nboues ou de résidus provenant d’une fabrique de pâtes et papiers, les 22, 23 et 24\njuin 2026",
+     "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+     "sourceUrl": "https://www.sainte-angele-de-monnoir.ca/wp-content/uploads/2026/02/2026-01_Proces-verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2025-85",
+   "label": "PIIA 2025-85 — 152, rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+   "status": "candidate",
+   "date": "2026-01-13",
+   "municipality": "sainte-angele-de-monnoir",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-01-13",
+   "dossier": "2025-85",
+   "decision": "approuvé",
+   "resolution": "26-01-015",
+   "reglement_number": "382-07",
+   "description": "Acceptation de la demande de PIIA pour modifier les portes et fenêtres du bâtiment principal résidentiel au 152, rue Principale, inscrit à l’inventaire patrimonial de la MRC de Rouville et situé dans une zone patrimoniale. Émission du certificat d’autorisation autorisée sous condition.",
+   "conditions": [
+    "Que toutes les autres dispositions du règlement d’urbanisme soient respectées."
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de",
+     "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+     "sourceUrl": "https://www.sainte-angele-de-monnoir.ca/wp-content/uploads/2026/02/2026-01_Proces-verbal.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 12,
+     "excerpt": "PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation à\nla condition que toutes les autres dispositions du règlement d’urbanisme soient\nrespectées.",
+     "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+     "sourceUrl": "https://www.sainte-angele-de-monnoir.ca/wp-content/uploads/2026/02/2026-01_Proces-verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-pga-eau",
+   "label": "Approbation du Plan de gestion des actifs municipaux en eau",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+   "status": "candidate",
+   "category": "infrastructures",
+   "date": "2026-01-13",
+   "resolution": "26-01-013",
+   "municipality": "sainte-angele-de-monnoir",
+   "description": "Approbation du Plan de gestion des actifs municipaux en eau et autorisation de déposer les documents auprès du ministère des Affaires municipales et de l’Habitation.",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "Que le conseil municipal approuve le document « Plan de gestion des actifs\nmunicipaux en eau » et autorise le dépôt des documents auprès du\nMinistère.",
+     "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+     "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+     "sourceUrl": "https://www.sainte-angele-de-monnoir.ca/wp-content/uploads/2026/02/2026-01_Proces-verbal.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [],
+ "input_tokens": 12500,
+ "output_tokens": 2100
+}

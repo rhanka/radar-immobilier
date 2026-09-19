@@ -1,0 +1,74 @@
+{
+ "documentId": "val-racine-2026-06-09",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "76a286c0a70e28c654c1f4ea52589753cf8d14c57882e2bc1d85989f44c23d37",
+ "verificationSha256": "8a215d7c2d4234f898e0721416c2291a244a53acf58069885ef04bc052efd29b",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"Le point 6.2, « Vente des remises au plus offrant », ne précise aucune cession de terrain ou de droits immobiliers ni aucun objet réglementaire : il n’établit donc pas l’« objet réglementaire ou foncier explicite » requis. Le code « R : Résolution » dans ce « PROJET D’ORDRE DU JOUR » atteste une résolution prévue, comme le relève A, mais ne suffit pas à qualifier la vente d’acte foncier ; inversement, le texte ne permet pas non plus d’affirmer qu’il s’agit de biens meubles.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Vente des remises au plus offrant — prévue",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Vente des remises",
+      "page": 1,
+      "citation": "Vente des remises au plus offrant",
+      "anchor": "Vente des remises",
+      "spanStart": 1093,
+      "spanEnd": 1126
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 6.2 de la page 1 inscrit la « Vente des remises au plus offrant » comme résolution prévue (R), et non comme vente déjà décidée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "« Vente des remises au plus offrant » (6.2) vise la cession de remises sans lot ni immeuble identifié : ce n'est pas un objet réglementaire ou foncier explicite au sens de la règle, et l'étape « adoption » n'est pas attestée pour un simple point d'ordre du jour de type R."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La vente de remises constitue une disposition de biens meubles/surplus municipaux et non un acte foncier ou réglementaire explicite."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "Le point 6.2, « Vente des remises au plus offrant », ne précise aucune cession de terrain ou de droits immobiliers ni aucun objet réglementaire : il n’établit donc pas l’« objet réglementaire ou foncier explicite » requis. Le code « R : Résolution » dans ce « PROJET D’ORDRE DU JOUR » atteste une résolution prévue, comme le relève A, mais ne suffit pas à qualifier la vente d’acte foncier ; inversement, le texte ne permet pas non plus d’affirmer qu’il s’agit de biens meubles."
+  }
+ ]
+}

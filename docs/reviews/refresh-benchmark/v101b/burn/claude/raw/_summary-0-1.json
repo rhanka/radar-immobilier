@@ -1,0 +1,13 @@
+[
+ {
+  "id": "saint-polycarpe-2026-01-19",
+  "rc": 0,
+  "latencyMs": 565568,
+  "inputTokens": 62,
+  "outputTokens": 43927,
+  "cacheRead": 2237198,
+  "model": null,
+  "isError": false,
+  "costUsd": 3.374416
+ }
+]

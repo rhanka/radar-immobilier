@@ -1,0 +1,77 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "284ee220fe486f61e7cd108aa9b318d40b04767e6fdc298ec8d61395c1ba5810",
+ "inputSha256": "42154fd05eb54446fe4322cd42b5fde208d29b12fdee0332dfb0d183c41882d9",
+ "responseSha256": "a23d8213ef2aebfd6007e6cb9307529999878875e584d515c079756ebf0e96c1",
+ "rc": 0,
+ "latencyMs": 41543,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "77548e5e-dcc6-483a-87b6-c1ddb68ef225",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 3384,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 25542,
+   "webSearchRequests": 0,
+   "costUSD": 0.6803447499999999,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 2501,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 25542,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 3384,
+  "output_tokens_details": {
+   "thinking_tokens": 2501
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 25542,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 3384,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 25542,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 25542
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.6803447499999999,
+ "durationApiMs": 39657,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:38:08.856Z"
+}

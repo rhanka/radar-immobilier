@@ -1,0 +1,598 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "725bfed0210fb54958775b2298c4c1c5d770617d2e0436ec723472da080ca10e",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-04 — Modification du plan d’urbanisme",
+     "stage": "adoption",
+     "objet": "2026-04",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      },
+      {
+       "page": 10,
+       "excerpt": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;\n2026-05 modifiant le Règlement de zonage 2014-05 ;\n2026-06 modifiant le règlement de lotissement 2014-06 ;\n2026-07 modifiant le règlement de construction 2014-08;\n2026-08 modifiant le règlement de PIIA 2014-09 ;\n2026-09 modifiant le règlement de permis et certificats\n2014-10 ;\n2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;\n\nCONSIDÉRANT QU’une séance de consultation publique a été\ntenue à ce sujet le 28 avril 2026 ;\nCONSIDÉRANT QU’à la suite de l’assemblée de consultation et\ndes vérifications effectuées auprès de la MRC, des commentaires\nont été formulés et le conseil adopte les projets de règlement\navec les changements proposés ;\n2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2026-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-05 — Modification du zonage",
+     "stage": "adoption",
+     "objet": "2026-05",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      },
+      {
+       "page": 10,
+       "excerpt": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;\n2026-05 modifiant le Règlement de zonage 2014-05 ;\n2026-06 modifiant le règlement de lotissement 2014-06 ;\n2026-07 modifiant le règlement de construction 2014-08;\n2026-08 modifiant le règlement de PIIA 2014-09 ;\n2026-09 modifiant le règlement de permis et certificats\n2014-10 ;\n2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;\n\nCONSIDÉRANT QU’une séance de consultation publique a été\ntenue à ce sujet le 28 avril 2026 ;\nCONSIDÉRANT QU’à la suite de l’assemblée de consultation et\ndes vérifications effectuées auprès de la MRC, des commentaires\nont été formulés et le conseil adopte les projets de règlement\navec les changements proposés ;\n2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2026-06"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-06 — Modification du lotissement",
+     "stage": "adoption",
+     "objet": "2026-06",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      },
+      {
+       "page": 10,
+       "excerpt": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;\n2026-05 modifiant le Règlement de zonage 2014-05 ;\n2026-06 modifiant le règlement de lotissement 2014-06 ;\n2026-07 modifiant le règlement de construction 2014-08;\n2026-08 modifiant le règlement de PIIA 2014-09 ;\n2026-09 modifiant le règlement de permis et certificats\n2014-10 ;\n2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;\n\nCONSIDÉRANT QU’une séance de consultation publique a été\ntenue à ce sujet le 28 avril 2026 ;\nCONSIDÉRANT QU’à la suite de l’assemblée de consultation et\ndes vérifications effectuées auprès de la MRC, des commentaires\nont été formulés et le conseil adopte les projets de règlement\navec les changements proposés ;\n2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2026-07"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-07 — Modification du règlement de construction",
+     "stage": "adoption",
+     "objet": "2026-07",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      },
+      {
+       "page": 10,
+       "excerpt": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;\n2026-05 modifiant le Règlement de zonage 2014-05 ;\n2026-06 modifiant le règlement de lotissement 2014-06 ;\n2026-07 modifiant le règlement de construction 2014-08;\n2026-08 modifiant le règlement de PIIA 2014-09 ;\n2026-09 modifiant le règlement de permis et certificats\n2014-10 ;\n2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;\n\nCONSIDÉRANT QU’une séance de consultation publique a été\ntenue à ce sujet le 28 avril 2026 ;\nCONSIDÉRANT QU’à la suite de l’assemblée de consultation et\ndes vérifications effectuées auprès de la MRC, des commentaires\nont été formulés et le conseil adopte les projets de règlement\navec les changements proposés ;\n2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-2026-08"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-08 — Modification du PIIA",
+     "stage": "adoption",
+     "objet": "2026-08",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      },
+      {
+       "page": 10,
+       "excerpt": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;\n2026-05 modifiant le Règlement de zonage 2014-05 ;\n2026-06 modifiant le règlement de lotissement 2014-06 ;\n2026-07 modifiant le règlement de construction 2014-08;\n2026-08 modifiant le règlement de PIIA 2014-09 ;\n2026-09 modifiant le règlement de permis et certificats\n2014-10 ;\n2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;\n\nCONSIDÉRANT QU’une séance de consultation publique a été\ntenue à ce sujet le 28 avril 2026 ;\nCONSIDÉRANT QU’à la suite de l’assemblée de consultation et\ndes vérifications effectuées auprès de la MRC, des commentaires\nont été formulés et le conseil adopte les projets de règlement\navec les changements proposés ;\n2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-2026-09"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-09 — Modification des permis et certificats",
+     "stage": "adoption",
+     "objet": "2026-09",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      },
+      {
+       "page": 10,
+       "excerpt": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;\n2026-05 modifiant le Règlement de zonage 2014-05 ;\n2026-06 modifiant le règlement de lotissement 2014-06 ;\n2026-07 modifiant le règlement de construction 2014-08;\n2026-08 modifiant le règlement de PIIA 2014-09 ;\n2026-09 modifiant le règlement de permis et certificats\n2014-10 ;\n2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;\n\nCONSIDÉRANT QU’une séance de consultation publique a été\ntenue à ce sujet le 28 avril 2026 ;\nCONSIDÉRANT QU’à la suite de l’assemblée de consultation et\ndes vérifications effectuées auprès de la MRC, des commentaires\nont été formulés et le conseil adopte les projets de règlement\navec les changements proposés ;\n2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-2026-10"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-10 — Modification des dérogations mineures",
+     "stage": "adoption",
+     "objet": "2026-10",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      },
+      {
+       "page": 10,
+       "excerpt": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;\n2026-05 modifiant le Règlement de zonage 2014-05 ;\n2026-06 modifiant le règlement de lotissement 2014-06 ;\n2026-07 modifiant le règlement de construction 2014-08;\n2026-08 modifiant le règlement de PIIA 2014-09 ;\n2026-09 modifiant le règlement de permis et certificats\n2014-10 ;\n2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;\n\nCONSIDÉRANT QU’une séance de consultation publique a été\ntenue à ce sujet le 28 avril 2026 ;\nCONSIDÉRANT QU’à la suite de l’assemblée de consultation et\ndes vérifications effectuées auprès de la MRC, des commentaires\nont été formulés et le conseil adopte les projets de règlement\navec les changements proposés ;\n2026-08-150 Il est proposé par Vincent Jarry\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-2025-11"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2025-11 — Occupation et entretien des bâtiments",
+     "stage": "adoption",
+     "objet": "2025-11",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal adopte le Règlement 2025-11 créant le\nRèglement sur l’occupation et l’entretien des bâtiments."
+      },
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal adopte le Règlement 2025-11 créant le\nRèglement sur l’occupation et l’entretien des bâtiments."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "bylaw-2026-14"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-14 — Modification des usages conditionnels",
+     "stage": "adoption",
+     "objet": "2026-14",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "QUE le conseil adopte le Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels."
+      },
+      {
+       "page": 11,
+       "excerpt": "QUE le conseil adopte le Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-154"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — Toiture de la chambre froide, Coop du Grand-Bois",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale,"
+      },
+      {
+       "page": 11,
+       "excerpt": "g. Autorisation pour l’émission d’un permis pour\nl’installation à l’arrière du bâtiment de la Coop du\nGrand-Bois d’une chambre froide extérieure.\nDemandeur : Coopérative de solidarité de St-Étienne-de-Bolton\nAdresse : 12, rue Principale\nLot : 5 191 695\nZone : COM-1"
+      },
+      {
+       "page": 12,
+       "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale,\nlot 5 191 695, conformément aux documents et au plan projeté\ndaté du 12 juin 2026 soumis à l’appui de la demande."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-155"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — Garage au 24, Allée des Sommets",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886,"
+      },
+      {
+       "page": 12,
+       "excerpt": "h. Autorisation pour démolir l’abri automobile\nexistant et le remplacer par un garage au 24, Allée\ndes Sommets.\nAdresse : 24, Allée des Sommets\nLot : 5 662 886\nZone : RUR-12\nNature de la demande : Garage attaché à la résidence à la place\nde l’abri existant.\nAnnée de construction : 2016\nSuperficie du terrain : 5 749,2 m2\nCONSIDÉRANT QUE le requérant souhaite démolir l’abri\nautomobile existant et le remplacer par un garage ;\nCONSIDÉRANT\nQUE\nl’ajout\ndu\ngarage\ns’intègre\nharmonieusement à la résidence existante en utilisant le même\nrevêtement de bois noir et la même apparence architecturale ;\nCONSIDÉRANT QUE les critères du PIIA ont été étudiés ;\n2026-08-155 Il est proposé par Harry Bird\nappuyé par Jocelyn Brasseur\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886, conformément aux documents et au plan\npréparé par Daniel Laflamme, architecte et daté du 19 juin 2026\nsoumis à l’appui de la demande."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "event-156"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation refusée — Piscine au 135, rue de la Serpentine",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1"
+      },
+      {
+       "page": 13,
+       "excerpt": "Adresse : 135, rue de la Serpentine\nLot : 6 380 011\nZone : RUR-8\nNature de la demande : Document photo en complément avec la\ndernière présentation auprès du CCU.\nDemande initiale : Réduire la distance entre une piscine creusée\net la limite latérale à 2,4 mètres au lieu de 3 mètres.\nAnnée de construction : 2022\nSuperficie du terrain : 14 689.8 m2\nCONSIDERANT QUE la piscine de même que les éléments\npaysagers à son pourtour doivent se situer à 3 mètres de la limite\nlatérale du lot selon le tableau 1 « Bâtiment, construction,\nutilisation et ouvrage accessoire permis dans la cour » de l’article\n39 du règlement de zonage ;\nCONSIDERANT QUE la piscine ainsi que les éléments\npaysagers requis à son pourtour peuvent être localisés dans la\ncour arrière conformément à la réglementation ;\nCONSIDERANT QUE le respect de la réglementation ne\nconstitue aucun préjudice sérieux à la requérante ;\n2026-08-156\n\nIl est proposé par Jocelyn Brasseur\nappuyé par Harry Bird\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1 « Bâtiment,\nconstruction, utilisation et ouvrage accessoire permis dans la\ncour» de l’article 39 du règlement de zonage pour permettre la\nconstruction d’une piscine creusée au 135, rue de la Serpentine,\nlot 6 380 011."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "event-157"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation refusée — Abattage hors période de gel, chemin de la Tour",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la"
+      },
+      {
+       "page": 13,
+       "excerpt": "j. Refus de la demande de dérogation mineure visant\nà permettre l’abattage d’arbre sur le lot 5 191 546\ndu chemin de la Tour en dehors de la période de\ngel.\nAdresse : de la Tour\nLot : 5 191 546\nZone : RUR-12\nNature de la demande : Procéder à un abattage d’arbres\nconformément aux permis émis mais en période de dégel (Article\n116 du règlement de zonage 2014-05).\nCONSIDÉRANT QUE le requérant a déjà obtenu un permis\nl’autorisant conformément à la réglementation à procéder à\nl’abattage d’arbres en période de gel ;\nCONSIDERANT QUE l’abattage d’arbre en période de gel est\nune\nnorme\nrèglementaire\nspécifique\npour\nprotéger\nl’environnement dans les milieux sensibles et les paysages\nnaturels d’intérêt supérieur tel le mont Gauvin ;"
+      },
+      {
+       "page": 14,
+       "excerpt": "CONSIDERANT QUE la dérogation mineure ne peut être\naccordée lorsqu’elle concerne un article du règlement de zonage\nayant trait à la protection de l’environnement ;\n2026-08-157\n\nIl est proposé par Vincent Jarry\nappuyé par Alexandre Berger\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "event-158"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — Toiture au 572, 1er Rang",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952,"
+      },
+      {
+       "page": 14,
+       "excerpt": "k. Autorisation pour le remplacement du revêtement\nde la toiture de la résidence située au 572, 1er Rang.\nAdresse : 572, 1er Rang\nLot : 5 191 952\nZone : VIL-2\nNature de la demande : Remplacement du revêtement de la\ntoiture en bardeaux d’asphalte pour de la tôle.\nAnnée de construction : 1948\nCONSIDÉRANT QUE le revêtement de tôle de couleur gris foncé\ns’intègre harmonieusement au bâtiment ;\nCONSIDÉRANT QUE les critères du PIIA ont été étudiés ;\n\n2026-08-158 Il est proposé par Robert Bergeron\nappuyé par Christine Boutin\net résolu à l’unanimité des conseillers présents\nQUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle\nde couleur gris foncé tel que présenté dans l’échantillon soumis\nà l’appui de la demande."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "bylaw-2026-15"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-15 — Nouveau projet sur la sécurité incendie",
+     "stage": "projet",
+     "objet": "2026-15",
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "AVIS DE MOTION est donné est donné par la mairesse, Diane\nDesjardins, qu’à une prochaine séance du conseil sera adopté le"
+      },
+      {
+       "page": 17,
+       "excerpt": "AVIS DE MOTION est donné est donné par la mairesse, Diane\nDesjardins, qu’à une prochaine séance du conseil sera adopté le\nRèglement 2026-15 abrogeant le règlement 2022-09 et modifiant\nle règlement 2015-14 sur la sécurité incendie.\nDans le but de respecter les exigences prévues à l’article 445 du\nCode municipal du Québec, une copie du nouveau projet de\nrèglement est présentement déposée."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A16",
+   "nodeIds": [
+    "signal-voirie"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Plans et devis — Réfection du chemin du Lac-Trousers",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "QUE le conseil accepte la soumission d’EXP pour un montant\ntotal maximal d’environ 4 500 $ (avant taxes)."
+      },
+      {
+       "page": 8,
+       "excerpt": "CONSIDÉRANT QUE la municipalité veut effectuer des travaux\nde réfection sur certains secteurs du chemin du Lac-Trousers,\nafin d’améliorer son drainage et de prévenir des inondations\nsimilaires à celles survenues vers le 15 juin 2026 ;\nCONSIDÉRANT QU’elle a reçu une soumission de la part de la\nfirme EXP pour la préparation des plans et devis et des\ndocuments nécessaires au dépôt d’une demande de subvention\ndans le cadre du Programme d’aide à la voirie locale (PAVL).\n2026-08-148 Il est proposé par Alexandre Berger\nappuyé par Robert Bergeron\net résolu à l’unanimité des conseillers présents\nQUE le conseil accepte la soumission d’EXP pour un montant\ntotal maximal d’environ 4 500 $ (avant taxes)."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement 2026-04 modifiant le plan d'urbanisme par la résolution 2026-08-150.\",\"excerpt\":\"QUE le conseil municipal adopte les Règlements ci-dessus\\nmentionnés.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement 2026-05 modifiant le règlement de zonage par la résolution 2026-08-150.\",\"excerpt\":\"QUE le conseil municipal adopte les Règlements ci-dessus\\nmentionnés.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement 2026-06 modifiant le règlement de lotissement par la résolution 2026-08-150.\",\"excerpt\":\"QUE le conseil municipal adopte les Règlements ci-dessus\\nmentionnés.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement 2026-07 modifiant le règlement de construction par la résolution 2026-08-150.\",\"excerpt\":\"QUE le conseil municipal adopte les Règlements ci-dessus\\nmentionnés.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement 2026-08 modifiant le règlement de PIIA par la résolution 2026-08-150.\",\"excerpt\":\"QUE le conseil municipal adopte les Règlements ci-dessus\\nmentionnés.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement 2026-09 modifiant le règlement de permis et certificats par la résolution 2026-08-150.\",\"excerpt\":\"QUE le conseil municipal adopte les Règlements ci-dessus\\nmentionnés.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement 2026-10 modifiant le règlement de dérogation mineure par la résolution 2026-08-150.\",\"excerpt\":\"QUE le conseil municipal adopte les Règlements ci-dessus\\nmentionnés.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement 2025-11 sur l'occupation et l'entretien des bâtiments par la résolution 2026-08-151.\",\"excerpt\":\"QUE le conseil municipal adopte le Règlement 2025-11 créant le\\nRèglement sur l’occupation et l’entretien des bâtiments.\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du règlement 2026-14 sur les usages conditionnels par la résolution 2026-08-152.\",\"excerpt\":\"QUE le conseil adopte le Règlement 2026-14 modifiant le\\nrèglement 2008-04 sur les usages conditionnels.\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation PIIA pour l'ajout d'une toiture protégeant une chambre froide au 12, rue Principale par la résolution 2026-08-154.\",\"excerpt\":\"QUE le conseil municipal autorise, sur recommandation du CCU,\\nl’ajout d’une toiture pour protéger la chambre froide qui sera\\ninstallée à l’arrière de la Coopérative située au 12, rue Principale,\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation PIIA pour le remplacement d'un abri par un garage au 24, Allée des Sommets par la résolution 2026-08-155.\",\"excerpt\":\"QUE le conseil municipal autorise, sur recommandation du CCU,\\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\\nSommets, lot 5 662 886,\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Refus d'une demande de dérogation mineure pour une piscine au 135, rue de la Serpentine par la résolution 2026-08-156.\",\"excerpt\":\"QUE le conseil municipal refuse, sur recommandation du CCU, la\\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\\nmarge latérale de 3 mètres prescrite au tableau 1\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"Refus d'une demande de dérogation mineure pour abattage d'arbres hors période de gel chemin de la Tour par la résolution 2026-08-157.\",\"excerpt\":\"QUE le conseil municipal refuse, sur recommandation du CCU, la\\ndemande de dérogation mineure visant à permettre l’abattage\\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\"},{\"act\":\"A14\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation PIIA pour la toiture au 572, 1er Rang par la résolution 2026-08-158.\",\"excerpt\":\"QUE le conseil municipal autorise, sur recommandation du CCU,\\nle remplacement du revêtement de la toiture de la résidence\\nsituée au 572, 1er Rang, lot 5 191 952,\"},{\"act\":\"A15\",\"verdict\":\"soutenu\",\"reason\":\"Avis de motion et dépôt d'un nouveau projet de règlement 2026-15 sur la sécurité incendie.\",\"excerpt\":\"Dans le but de respecter les exigences prévues à l’article 445 du\\nCode municipal du Québec, une copie du nouveau projet de\\nrèglement est présentement déposée.\"},{\"act\":\"A16\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de services professionnels d'ingénierie pour la voirie relève des contrats de services exclus.\",\"excerpt\":\"QUE le conseil accepte la soumission d’EXP pour un montant\\ntotal maximal d’environ 4 500 $ (avant taxes).\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement 2026-04 modifiant le plan d'urbanisme par la résolution 2026-08-150.",
+   "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement 2026-05 modifiant le règlement de zonage par la résolution 2026-08-150.",
+   "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement 2026-06 modifiant le règlement de lotissement par la résolution 2026-08-150.",
+   "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement 2026-07 modifiant le règlement de construction par la résolution 2026-08-150.",
+   "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement 2026-08 modifiant le règlement de PIIA par la résolution 2026-08-150.",
+   "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement 2026-09 modifiant le règlement de permis et certificats par la résolution 2026-08-150.",
+   "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement 2026-10 modifiant le règlement de dérogation mineure par la résolution 2026-08-150.",
+   "excerpt": "QUE le conseil municipal adopte les Règlements ci-dessus\nmentionnés."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement 2025-11 sur l'occupation et l'entretien des bâtiments par la résolution 2026-08-151.",
+   "excerpt": "QUE le conseil municipal adopte le Règlement 2025-11 créant le\nRèglement sur l’occupation et l’entretien des bâtiments."
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Adoption du règlement 2026-14 sur les usages conditionnels par la résolution 2026-08-152.",
+   "excerpt": "QUE le conseil adopte le Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels."
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Autorisation PIIA pour l'ajout d'une toiture protégeant une chambre froide au 12, rue Principale par la résolution 2026-08-154.",
+   "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale,"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Autorisation PIIA pour le remplacement d'un abri par un garage au 24, Allée des Sommets par la résolution 2026-08-155.",
+   "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886,"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Refus d'une demande de dérogation mineure pour une piscine au 135, rue de la Serpentine par la résolution 2026-08-156.",
+   "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à réduire à 2,4 mètres la\nmarge latérale de 3 mètres prescrite au tableau 1"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "Refus d'une demande de dérogation mineure pour abattage d'arbres hors période de gel chemin de la Tour par la résolution 2026-08-157.",
+   "excerpt": "QUE le conseil municipal refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la"
+  },
+  {
+   "act": "A14",
+   "verdict": "soutenu",
+   "reason": "Autorisation PIIA pour la toiture au 572, 1er Rang par la résolution 2026-08-158.",
+   "excerpt": "QUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952,"
+  },
+  {
+   "act": "A15",
+   "verdict": "soutenu",
+   "reason": "Avis de motion et dépôt d'un nouveau projet de règlement 2026-15 sur la sécurité incendie.",
+   "excerpt": "Dans le but de respecter les exigences prévues à l’article 445 du\nCode municipal du Québec, une copie du nouveau projet de\nrèglement est présentement déposée."
+  },
+  {
+   "act": "A16",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de services professionnels d'ingénierie pour la voirie relève des contrats de services exclus.",
+   "excerpt": "QUE le conseil accepte la soumission d’EXP pour un montant\ntotal maximal d’environ 4 500 $ (avant taxes)."
+  }
+ ],
+ "filter": {
+  "acts": 16,
+  "removed": [
+   {
+    "act": "A16",
+    "reason": "L'octroi d'un contrat de services professionnels d'ingénierie pour la voirie relève des contrats de services exclus."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Adoption du règlement 2026-04 modifiant le plan d'urbanisme par la résolution 2026-08-150."
+   },
+   {
+    "act": "A02",
+    "reason": "Adoption du règlement 2026-05 modifiant le règlement de zonage par la résolution 2026-08-150."
+   },
+   {
+    "act": "A03",
+    "reason": "Adoption du règlement 2026-06 modifiant le règlement de lotissement par la résolution 2026-08-150."
+   },
+   {
+    "act": "A04",
+    "reason": "Adoption du règlement 2026-07 modifiant le règlement de construction par la résolution 2026-08-150."
+   },
+   {
+    "act": "A05",
+    "reason": "Adoption du règlement 2026-08 modifiant le règlement de PIIA par la résolution 2026-08-150."
+   },
+   {
+    "act": "A06",
+    "reason": "Adoption du règlement 2026-09 modifiant le règlement de permis et certificats par la résolution 2026-08-150."
+   },
+   {
+    "act": "A07",
+    "reason": "Adoption du règlement 2026-10 modifiant le règlement de dérogation mineure par la résolution 2026-08-150."
+   },
+   {
+    "act": "A08",
+    "reason": "Adoption du règlement 2025-11 sur l'occupation et l'entretien des bâtiments par la résolution 2026-08-151."
+   },
+   {
+    "act": "A09",
+    "reason": "Adoption du règlement 2026-14 sur les usages conditionnels par la résolution 2026-08-152."
+   },
+   {
+    "act": "A10",
+    "reason": "Autorisation PIIA pour l'ajout d'une toiture protégeant une chambre froide au 12, rue Principale par la résolution 2026-08-154."
+   },
+   {
+    "act": "A11",
+    "reason": "Autorisation PIIA pour le remplacement d'un abri par un garage au 24, Allée des Sommets par la résolution 2026-08-155."
+   },
+   {
+    "act": "A12",
+    "reason": "Refus d'une demande de dérogation mineure pour une piscine au 135, rue de la Serpentine par la résolution 2026-08-156."
+   },
+   {
+    "act": "A13",
+    "reason": "Refus d'une demande de dérogation mineure pour abattage d'arbres hors période de gel chemin de la Tour par la résolution 2026-08-157."
+   },
+   {
+    "act": "A14",
+    "reason": "Autorisation PIIA pour la toiture au 572, 1er Rang par la résolution 2026-08-158."
+   },
+   {
+    "act": "A15",
+    "reason": "Avis de motion et dépôt d'un nouveau projet de règlement 2026-15 sur la sécurité incendie."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3722,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 20659,
+   "outputTokens": 1382,
+   "totalTokens": 22041
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3549
+  },
+  "inputSha256": "a3edd91cbbac71179b76d1eeeb22269f33ee86fce00d20781213fff1a6a15201"
+ }
+}

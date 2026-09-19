@@ -1,0 +1,91 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dde58b22ba15c59d0eb3228c87709123e0bb175a8e28a5158f89e617de9987e8",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution d'appui CPTAQ pour l'acquisition et le lotissement d'une superficie agricole, attestée textuellement en page 2.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution d'appui CPTAQ pour la construction d'une résidence en zone agricole, attestée textuellement en page 2.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'assujettissement au droit de préemption pour le lot 5 416 383, adopté par résolution en page 10.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Acte foncier d'assujettissement au droit de préemption pour le lot 5 416 384, adopté par résolution en page 10.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution d'appui CPTAQ pour l'utilisation à des fins autres qu'agricoles du lot 2 935 698, attestée en page 13.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"La location temporaire d'un garage pour les travaux de voirie relève d'un marché ou d'un bail d'entretien et ne constitue pas un acte foncier ou d'urbanisme.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Adoption du règlement d'urbanisme 2026-04 modifiant la tarification des permis et certificats (art. 124 LAU), attestée en page 18.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution d'appui CPTAQ pour l'acquisition et le lotissement d'une superficie agricole, attestée textuellement en page 2."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution d'appui CPTAQ pour la construction d'une résidence en zone agricole, attestée textuellement en page 2."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Acte foncier d'assujettissement au droit de préemption pour le lot 5 416 383, adopté par résolution en page 10."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Acte foncier d'assujettissement au droit de préemption pour le lot 5 416 384, adopté par résolution en page 10."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution d'appui CPTAQ pour l'utilisation à des fins autres qu'agricoles du lot 2 935 698, attestée en page 13."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "La location temporaire d'un garage pour les travaux de voirie relève d'un marché ou d'un bail d'entretien et ne constitue pas un acte foncier ou d'urbanisme."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Adoption du règlement d'urbanisme 2026-04 modifiant la tarification des permis et certificats (art. 124 LAU), attestée en page 18."
+  }
+ ]
+}

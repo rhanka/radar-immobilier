@@ -1,0 +1,268 @@
+{
+ "documentId": "sainte-clotilde-2026-04-20",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "0a6d0945f3380377a44255675f73219b411ba67d3edba411bfa752f60ddf1ead",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Acquisition du lot 6 592 592 pour le stationnement et l’espace vert du futur CPE\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 592 592\",\n        \"page\": 4,\n        \"citation\": \"QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec\",\n        \"anchor\": \"lots 6 592 592\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : la page 4 comporte un saut de ligne entre « J.B. » et « Clermont ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Acquisition du lot 6 199 726 pour agrandir le terrain du garage municipal\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 199 726\",\n        \"page\": 4,\n        \"citation\": \"QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec\",\n        \"anchor\": \"6 199 726 du cadastre du Québec\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : la page 4 comporte un saut de ligne entre « J.B. » et « Clermont ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 533 relatif à l’installation des clapets anti-retour\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"533\",\n        \"page\": 6,\n        \"citation\": \"QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets\\nanti-retour afin de prévenir les refoulements d’égout\",\n        \"anchor\": \"Règlement numéro 533\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : la page 6 comporte un saut de ligne entre « clapets » et « anti-retour ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 471-09 modifiant le zonage\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"471-09\",\n        \"page\": 9,\n        \"citation\": \"10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU\\nZONAGE\",\n        \"anchor\": \"RÈGLEMENT 471-09\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le titre du point 10.2 comporte un saut de ligne avant « ZONAGE ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement 471-09 modifiant le zonage\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"471-09\",\n        \"page\": 9,\n        \"citation\": \"10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU\\nZONAGE\",\n        \"anchor\": \"RÈGLEMENT 471-09\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le titre du point 10.2 comporte un saut de ligne avant « ZONAGE ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 470-04 modifiant le plan d’urbanisme\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"470-04\",\n        \"page\": 9,\n        \"citation\": \"10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN\\nD’URBANISME\",\n        \"anchor\": \"RÈGLEMENT 470-04\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le titre du point 10.3 comporte un saut de ligne entre « PLAN » et « D’URBANISME ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement 470-04 modifiant le plan d’urbanisme\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"470-04\",\n        \"page\": 9,\n        \"citation\": \"10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN\\nD’URBANISME\",\n        \"anchor\": \"RÈGLEMENT 470-04\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le titre du point 10.3 comporte un saut de ligne entre « PLAN » et « D’URBANISME ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 472-04 modifiant le lotissement\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"472-04\",\n        \"page\": 9,\n        \"citation\": \"10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU\\nLOTISSEMENT\",\n        \"anchor\": \"RÈGLEMENT 472-04\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le titre du point 10.4 comporte un saut de ligne avant « LOTISSEMENT ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement 472-04 modifiant le lotissement\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"472-04\",\n        \"page\": 9,\n        \"citation\": \"10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU\\nLOTISSEMENT\",\n        \"anchor\": \"RÈGLEMENT 472-04\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le titre du point 10.4 comporte un saut de ligne avant « LOTISSEMENT ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Adoption de la correction de l’appui CPTAQ 2025-12-286 — ajout d’une partie du lot 6 471 805\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2025-12-286\",\n        \"page\": 10,\n        \"citation\": \"DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\\ndu cadastre du Québec, en plus du lot 6 199 292\",\n        \"anchor\": \"résolution numéro 2025-12-286\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : la page 10 comporte un saut de ligne après « lot 6 471 805 ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Acquisition du lot 6 592 592 pour le stationnement et l’espace vert du futur CPE",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 592 592",
+    "page": 4,
+    "citation": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec",
+    "anchor": "lots 6 592 592"
+   },
+   "reason": "La citation doit être recopiée à l’identique : la page 4 comporte un saut de ligne entre « J.B. » et « Clermont »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Acquisition du lot 6 199 726 pour agrandir le terrain du garage municipal",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 199 726",
+    "page": 4,
+    "citation": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec",
+    "anchor": "6 199 726 du cadastre du Québec"
+   },
+   "reason": "La citation doit être recopiée à l’identique : la page 4 comporte un saut de ligne entre « J.B. » et « Clermont »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du règlement 533 relatif à l’installation des clapets anti-retour",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "533",
+    "page": 6,
+    "citation": "QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets\nanti-retour afin de prévenir les refoulements d’égout",
+    "anchor": "Règlement numéro 533"
+   },
+   "reason": "La citation doit être recopiée à l’identique : la page 6 comporte un saut de ligne entre « clapets » et « anti-retour »."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Avis de motion du règlement 471-09 modifiant le zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "471-09",
+    "page": 9,
+    "citation": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU\nZONAGE",
+    "anchor": "RÈGLEMENT 471-09"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le titre du point 10.2 comporte un saut de ligne avant « ZONAGE »."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Dépôt du projet de règlement 471-09 modifiant le zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "471-09",
+    "page": 9,
+    "citation": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU\nZONAGE",
+    "anchor": "RÈGLEMENT 471-09"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le titre du point 10.2 comporte un saut de ligne avant « ZONAGE »."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Avis de motion du règlement 470-04 modifiant le plan d’urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "470-04",
+    "page": 9,
+    "citation": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN\nD’URBANISME",
+    "anchor": "RÈGLEMENT 470-04"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le titre du point 10.3 comporte un saut de ligne entre « PLAN » et « D’URBANISME »."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Dépôt du projet de règlement 470-04 modifiant le plan d’urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "470-04",
+    "page": 9,
+    "citation": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN\nD’URBANISME",
+    "anchor": "RÈGLEMENT 470-04"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le titre du point 10.3 comporte un saut de ligne entre « PLAN » et « D’URBANISME »."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Avis de motion du règlement 472-04 modifiant le lotissement",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "472-04",
+    "page": 9,
+    "citation": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU\nLOTISSEMENT",
+    "anchor": "RÈGLEMENT 472-04"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le titre du point 10.4 comporte un saut de ligne avant « LOTISSEMENT »."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Dépôt du projet de règlement 472-04 modifiant le lotissement",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "472-04",
+    "page": 9,
+    "citation": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU\nLOTISSEMENT",
+    "anchor": "RÈGLEMENT 472-04"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le titre du point 10.4 comporte un saut de ligne avant « LOTISSEMENT »."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Adoption de la correction de l’appui CPTAQ 2025-12-286 — ajout d’une partie du lot 6 471 805",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2025-12-286",
+    "page": 10,
+    "citation": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292",
+    "anchor": "résolution numéro 2025-12-286"
+   },
+   "reason": "La citation doit être recopiée à l’identique : la page 10 comporte un saut de ligne après « lot 6 471 805 »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 4,
+   "citation": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 4,
+   "citation": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B.\nClermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 6,
+   "citation": "QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets\nanti-retour afin de prévenir les refoulements d’égout"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "avis_motion",
+   "page": 9,
+   "citation": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU\nZONAGE"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "projet_reglement",
+   "page": 9,
+   "citation": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU\nZONAGE"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "avis_motion",
+   "page": 9,
+   "citation": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN\nD’URBANISME"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "projet_reglement",
+   "page": 9,
+   "citation": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN\nD’URBANISME"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "avis_motion",
+   "page": 9,
+   "citation": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU\nLOTISSEMENT"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "projet_reglement",
+   "page": 9,
+   "citation": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU\nLOTISSEMENT"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "adoption",
+   "page": 10,
+   "citation": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805\ndu cadastre du Québec, en plus du lot 6 199 292"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 10
+}

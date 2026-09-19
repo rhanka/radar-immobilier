@@ -1,0 +1,224 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "73819e7992ab11b4dfb12a19aaef98b5aaa825cc4fdc0c1118dfd9e9345f1fe5",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "piia-3-rue-principale"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande d’approbation de PIIA — 3, rue Principale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "piia-9-rue-principale"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande d’approbation de PIIA — 9, rue Principale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "b) Pour le 9, rue Principale (modification enseigne sur poteau)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "ppcmoi-25-rue-des-chutes-approbation"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbation prévue d’une demande de PPCMOI — 25, rue des Chutes",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "ppcmoi-25-rue-des-chutes-premier-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Premier projet de résolution PPCMOI — 25, rue des Chutes",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "achat-partie-lot-6025922"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Modification prévue d’une autorisation de signature d’achat — 1 rue Dollard",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat\nd’une partie du lot 6 025 922 (1 rue Dollard)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "terrain-juteau-abrogation"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Abrogation prévue du choix du proposant — Terrain Juteau",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "b) Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2\n045 370 (Terrain Juteau)"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.2 a) de l'ordre du jour prévoit la demande d'approbation de PIIA pour le 3, rue Principale.\",\"excerpt\":\"8.2. Demande d’approbation de PIIA seulement\\na) Pour le 3, rue Principale (enseigne sur vitrage)\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.2 b) de l'ordre du jour prévoit la demande d'approbation de PIIA pour le 9, rue Principale.\",\"excerpt\":\"b) Pour le 9, rue Principale (modification enseigne sur poteau)\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.3 a) de l'ordre du jour prévoit l'approbation de la demande de PPCMOI pour le 25, rue des Chutes.\",\"excerpt\":\"a)\\n\\nApprobation. Demande d’un PPCMOI pour le 25, rue des Chutes\\n(agrandissement résidentiel)\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.3 b) de l'ordre du jour prévoit l'adoption du premier projet de résolution de PPCMOI pour le 25, rue des Chutes.\",\"excerpt\":\"b)\\n\\nAdoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\\ndes Chutes (agrandissement résidentiel)\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6 a) prévoit la modification de l'autorisation de signature d'acte d'achat pour le lot 6 025 922 (1 rue Dollard).\",\"excerpt\":\"a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat\\nd’une partie du lot 6 025 922 (1 rue Dollard)\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6 b) prévoit l'abrogation du choix du proposant pour le lot 2 045 370 (Terrain Juteau).\",\"excerpt\":\"b) Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2\\n045 370 (Terrain Juteau)\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 8.2 a) de l'ordre du jour prévoit la demande d'approbation de PIIA pour le 3, rue Principale.",
+   "excerpt": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 8.2 b) de l'ordre du jour prévoit la demande d'approbation de PIIA pour le 9, rue Principale.",
+   "excerpt": "b) Pour le 9, rue Principale (modification enseigne sur poteau)"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 8.3 a) de l'ordre du jour prévoit l'approbation de la demande de PPCMOI pour le 25, rue des Chutes.",
+   "excerpt": "a)\n\nApprobation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 8.3 b) de l'ordre du jour prévoit l'adoption du premier projet de résolution de PPCMOI pour le 25, rue des Chutes.",
+   "excerpt": "b)\n\nAdoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le point 6 a) prévoit la modification de l'autorisation de signature d'acte d'achat pour le lot 6 025 922 (1 rue Dollard).",
+   "excerpt": "a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat\nd’une partie du lot 6 025 922 (1 rue Dollard)"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le point 6 b) prévoit l'abrogation du choix du proposant pour le lot 2 045 370 (Terrain Juteau).",
+   "excerpt": "b) Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2\n045 370 (Terrain Juteau)"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 8.2 a) de l'ordre du jour prévoit la demande d'approbation de PIIA pour le 3, rue Principale."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 8.2 b) de l'ordre du jour prévoit la demande d'approbation de PIIA pour le 9, rue Principale."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 8.3 a) de l'ordre du jour prévoit l'approbation de la demande de PPCMOI pour le 25, rue des Chutes."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 8.3 b) de l'ordre du jour prévoit l'adoption du premier projet de résolution de PPCMOI pour le 25, rue des Chutes."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point 6 a) prévoit la modification de l'autorisation de signature d'acte d'achat pour le lot 6 025 922 (1 rue Dollard)."
+   },
+   {
+    "act": "A06",
+    "reason": "Le point 6 b) prévoit l'abrogation du choix du proposant pour le lot 2 045 370 (Terrain Juteau)."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2254,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2666,
+   "outputTokens": 510,
+   "totalTokens": 3176
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2100
+  },
+  "inputSha256": "395869d18406d0b8ebe6c032443e55f9307b1a4842f5a33f5013aab22a378625"
+ }
+}

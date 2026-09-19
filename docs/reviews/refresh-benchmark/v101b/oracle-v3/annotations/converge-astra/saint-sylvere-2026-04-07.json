@@ -1,0 +1,71 @@
+{
+ "documentId": "saint-sylvere-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "8b7b8350fdc54fe2c7ab617f2069ef5c4429b9fb958955266415f48aae00735a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"À la page 6, Gabrielle Gauthier donne explicitement avis de motion pour le règlement 383 modifiant le règlement de zonage 247.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-117, à la page 7, dépose et adopte le premier projet du règlement 383, étape distincte de l’avis de motion selon les règles.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"À la page 7, Yan Dagenais donne avis de motion pour le règlement 384 concernant les projets particuliers de construction, de modification ou d’occupation d’un immeuble.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-119, à la page 8, dépose et adopte le premier projet du règlement 384 sur les PPCMOI, sans constituer son adoption définitive.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-120, adoptée à l’unanimité à la page 8, atteste l’appui municipal à la demande de lotissement 453952 visant un échange de parcelles, et non une autorisation accordée par la CPTAQ.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "À la page 6, Gabrielle Gauthier donne explicitement avis de motion pour le règlement 383 modifiant le règlement de zonage 247."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-117, à la page 7, dépose et adopte le premier projet du règlement 383, étape distincte de l’avis de motion selon les règles."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "À la page 7, Yan Dagenais donne avis de motion pour le règlement 384 concernant les projets particuliers de construction, de modification ou d’occupation d’un immeuble."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-119, à la page 8, dépose et adopte le premier projet du règlement 384 sur les PPCMOI, sans constituer son adoption définitive."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-120, adoptée à l’unanimité à la page 8, atteste l’appui municipal à la demande de lotissement 453952 visant un échange de parcelles, et non une autorisation accordée par la CPTAQ."
+  }
+ ]
+}

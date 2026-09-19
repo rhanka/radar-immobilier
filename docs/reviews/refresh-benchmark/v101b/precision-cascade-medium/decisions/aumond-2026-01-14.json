@@ -1,0 +1,216 @@
+{
+ "documentId": "aumond-2026-01-14",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "1b2590f6dceeb4ea7335d3952637e87fdb9bfabe576f89c4010a3d320541094d",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-01-0001"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-01-0001 — Tarification applicable pour 2026",
+     "stage": "projet",
+     "objet": "2026-01-0001",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+      },
+      {
+       "page": 3,
+       "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-taxe-fonciere"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Adoption du taux de taxe foncière 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de la taxe foncière pour l’année 2026 à\n0.7929$ /100 $ d’évaluation."
+      },
+      {
+       "page": 3,
+       "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de la taxe foncière pour l’année 2026 à\n0.7929$ /100 $ d’évaluation."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-taxe-jeness"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Taxe de secteur du chemin Jeness pour 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de taxe de secteur pour le règlement\nd’emprunt du chemin Jeness à 495.00 $ par propriété."
+      },
+      {
+       "page": 4,
+       "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de taxe de secteur pour le règlement\nd’emprunt du chemin Jeness à 495.00 $ par propriété."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2026-01-0002"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-01-0002 — Rémunération des élus",
+     "stage": "projet",
+     "objet": "2026-01-0002",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "Le projet de règlement 2026-01-0002 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+      },
+      {
+       "page": 7,
+       "excerpt": "Le projet de règlement 2026-01-0002 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-2019-02"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2019-02 — Rémunération des élus",
+     "stage": null,
+     "objet": "2019-02",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "Avis de motion – Règlement 2026-01-0002 modifiant le\nrèglement 2019-02 concernant la rémunération des élus"
+      },
+      {
+       "page": 7,
+       "excerpt": "Avis de motion – Règlement 2026-01-0002 modifiant le\nrèglement 2019-02 concernant la rémunération des élus"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt du projet de règlement 2026-01-0001 concernant la tarification pour 2026 est expressément consigné dans le procès-verbal.\",\"excerpt\":\"Le projet de règlement 2026-01-0001 est déposé et disponible au\\nbureau municipal pour consultation\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte expressément le taux de la taxe foncière pour l'année 2026.\",\"excerpt\":\"Il est résolu par tous les conseillers présents que le conseil\\nmunicipal adopte le taux de la taxe foncière pour l’année 2026 à\\n0.7929$ /100 $ d’évaluation.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte formellement le taux de taxe de secteur pour le règlement d'emprunt du chemin Jeness.\",\"excerpt\":\"Il est résolu par tous les conseillers présents que le conseil\\nmunicipal adopte le taux de taxe de secteur pour le règlement\\nd’emprunt du chemin Jeness à 495.00 $ par propriété.\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Les règlements portant sur la rémunération des élus relèvent de la gouvernance interne et des exclusions du domaine d'urbanisme/aménagement/foncier.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2019-02 sur la rémunération des élus n'est qu'une mention du règlement antérieur modifié, et relève des exclusions hors urbanisme.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le dépôt du projet de règlement 2026-01-0001 concernant la tarification pour 2026 est expressément consigné dans le procès-verbal.",
+   "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte expressément le taux de la taxe foncière pour l'année 2026.",
+   "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de la taxe foncière pour l’année 2026 à\n0.7929$ /100 $ d’évaluation."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte formellement le taux de taxe de secteur pour le règlement d'emprunt du chemin Jeness.",
+   "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de taxe de secteur pour le règlement\nd’emprunt du chemin Jeness à 495.00 $ par propriété."
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Les règlements portant sur la rémunération des élus relèvent de la gouvernance interne et des exclusions du domaine d'urbanisme/aménagement/foncier.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2019-02 sur la rémunération des élus n'est qu'une mention du règlement antérieur modifié, et relève des exclusions hors urbanisme.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [
+   {
+    "act": "A04",
+    "reason": "Les règlements portant sur la rémunération des élus relèvent de la gouvernance interne et des exclusions du domaine d'urbanisme/aménagement/foncier."
+   },
+   {
+    "act": "A05",
+    "reason": "Le règlement 2019-02 sur la rémunération des élus n'est qu'une mention du règlement antérieur modifié, et relève des exclusions hors urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le dépôt du projet de règlement 2026-01-0001 concernant la tarification pour 2026 est expressément consigné dans le procès-verbal."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil municipal adopte expressément le taux de la taxe foncière pour l'année 2026."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil municipal adopte formellement le taux de taxe de secteur pour le règlement d'emprunt du chemin Jeness."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1718,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 5333,
+   "outputTokens": 376,
+   "totalTokens": 5709
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1572
+  },
+  "inputSha256": "d406e07cd1966ec3e8d03dd1d74d021895c5c6c4a0b4f2cac1cc08c9fa9c0711"
+ }
+}

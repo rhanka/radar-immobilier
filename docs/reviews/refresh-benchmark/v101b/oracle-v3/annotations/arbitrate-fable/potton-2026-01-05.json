@@ -1,0 +1,19 @@
+{
+ "documentId": "potton-2026-01-05",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6e7a2bf2057ecd980097c4b8b6abf95615089d95eb87795bc1272c6523568da4",
+ "verificationSha256": "ff2a50347d6a677ab9b5910269fd9ec7bd4631a54155e9bf61f731e8760d17dc",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

@@ -1,0 +1,182 @@
+{
+ "documentId": "saint-zephirin-de-courval-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "630342116328f5c3f3f804ba43007ed419daa63c34bcc864e18497459937e20d",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-cptaq-453592"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Recommandation favorable d’aliénation agricole — CPTAQ 453592",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Et résolu par les membres du ce Conseil de recommander à la Commission de\nprotection du territoire agricole du Québec d’accorder l’autorisation requise pour"
+      },
+      {
+       "page": 4,
+       "excerpt": "Et résolu par les membres du ce Conseil de recommander à la Commission de\nprotection du territoire agricole du Québec d’accorder l’autorisation requise pour\npermettre l’aliénation pour permettre la vente des lots 5 884 262, 5 885 277,\n5 885 261, 5 885 276 totalisant une superficie de 53,6733 en faveur de Ferme Nic\n& Pic inc."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-acquisition-5885286"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acquisition municipale du lot 5885286 — rue des Loisirs",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le\nterrain portant le numéro 5 885 286 du Cadastre du Québec, dans la"
+      },
+      {
+       "page": 5,
+       "excerpt": "D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le\nterrain portant le numéro 5 885 286 du Cadastre du Québec, dans la\ncirconscription foncière de Nicolet-Yamaska (Nicolet 2), d’une superficie de\n841.9mc sans bâtisse, ayant pignon sur rue des Loisirs, Saint-Zéphirin-de-Courval;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-prhlm-ei2317"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Engagement municipal pour la rénovation des logements sociaux — E.I. 2317",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "QUE la Municipalité de Saint-Zéphirin-de-Courval s’engage à assumer une\ncontribution financière municipale équivalant à 10 % des coûts admissibles des\ntravaux,"
+      },
+      {
+       "page": 3,
+       "excerpt": "QUE la Municipalité de Saint-Zéphirin-de-Courval s’engage à assumer une\ncontribution financière municipale équivalant à 10 % des coûts admissibles des\ntravaux, conformément aux conditions du programme PRHLM;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-demande-abrogation-245-1"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’abrogation de l’article 245.1 de la Loi sur l’aménagement et l’urbanisme",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "QUE la municipalité de Saint-Zéphirin-de-Courval demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale"
+      },
+      {
+       "page": 7,
+       "excerpt": "QUE la municipalité de Saint-Zéphirin-de-Courval demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale d’introduire un amendement au projet de loi no 22 abrogeant\nl’article 245.1 de la Loi sur l’aménagement et l’urbanisme afin de respecter le\nconsensus établi entre le ministère et ses partenaires municipaux;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution recommandant à la CPTAQ d'autoriser l'aliénation des lots mentionnés.\",\"excerpt\":\"Et résolu par les membres du ce Conseil de recommander à la Commission de\\nprotection du territoire agricole du Québec d’accorder l’autorisation requise pour\\npermettre l’aliénation\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal résout d'acquérir le lot 5 885 286 sur la rue des Loisirs pour 15 000 $.\",\"excerpt\":\"D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le\\nterrain portant le numéro 5 885 286 du Cadastre du Québec\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une simple entente d'aide financière et d'engagement de contribution pour un programme de rénovation de logements sociaux, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement foncier.\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une prise de position politique/lobbying adressée à l'Assemblée nationale concernant un projet de loi provincial, et non d'un acte réglementaire ou d'urbanisme municipal.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution recommandant à la CPTAQ d'autoriser l'aliénation des lots mentionnés.",
+   "excerpt": "Et résolu par les membres du ce Conseil de recommander à la Commission de\nprotection du territoire agricole du Québec d’accorder l’autorisation requise pour\npermettre l’aliénation"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal résout d'acquérir le lot 5 885 286 sur la rue des Loisirs pour 15 000 $.",
+   "excerpt": "D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le\nterrain portant le numéro 5 885 286 du Cadastre du Québec"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple entente d'aide financière et d'engagement de contribution pour un programme de rénovation de logements sociaux, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement foncier.",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une prise de position politique/lobbying adressée à l'Assemblée nationale concernant un projet de loi provincial, et non d'un acte réglementaire ou d'urbanisme municipal.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Il s'agit d'une simple entente d'aide financière et d'engagement de contribution pour un programme de rénovation de logements sociaux, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement foncier."
+   },
+   {
+    "act": "A04",
+    "reason": "Il s'agit d'une prise de position politique/lobbying adressée à l'Assemblée nationale concernant un projet de loi provincial, et non d'un acte réglementaire ou d'urbanisme municipal."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte une résolution recommandant à la CPTAQ d'autoriser l'aliénation des lots mentionnés."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil municipal résout d'acquérir le lot 5 885 286 sur la rue des Loisirs pour 15 000 $."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1668,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 9507,
+   "outputTokens": 301,
+   "totalTokens": 9808
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1527
+  },
+  "inputSha256": "5c7316737bc7b31529fe93999c72d12eb57ea70f6f01f6559765f210b64acf7c"
+ }
+}

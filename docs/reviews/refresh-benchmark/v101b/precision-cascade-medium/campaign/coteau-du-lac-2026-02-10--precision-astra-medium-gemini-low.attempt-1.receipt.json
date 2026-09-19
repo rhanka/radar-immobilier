@@ -1,0 +1,35 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "72cd8aa070df9f6d149129f86aeda1508f88c60e70be3d8469e8e8ca19a2cc00",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2771,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2667,
+   "outputTokens": 504,
+   "totalTokens": 3171
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2599
+  },
+  "inputSha256": "d516e55e1776aab8f08c2e59c93ec70af1dab1dfdc7f25ec5aee79d06d77b0bc"
+ },
+ "at": "2026-09-19T03:22:11.598Z"
+}

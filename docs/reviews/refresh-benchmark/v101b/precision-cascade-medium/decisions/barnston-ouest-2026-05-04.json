@@ -1,0 +1,466 @@
+{
+ "documentId": "barnston-ouest-2026-05-04",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "f0f2f09f9828e114577e718c2ba59427c5504121da3d6e3536e9bbb7a5ff6524",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-325"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 325-2026 — Plan d’urbanisme",
+     "stage": "projet",
+     "objet": "325-2026",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "Le projet de règlement numéro 325-2026 est présenté par la directrice générale"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-224"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 224 — Plan d’urbanisme",
+     "stage": null,
+     "objet": "224",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "6.2.3. Dépôt et présentation du Règlement numéro 325-2026 modifiant le\nrèglement numéro 224 Plan d’urbanisme"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-326"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 326-2026 — Zonage",
+     "stage": "projet",
+     "objet": "326-2026",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Le projet de règlement numéro 326-2026 est présenté par la directrice générale"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-225"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 225 — Zonage",
+     "stage": null,
+     "objet": "225",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "6.2.5. Dépôt et présentation du Règlement numéro 326-2026 modifiant le\nrèglement numéro 225 de zonage"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-327"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 327-2026 — Lotissement",
+     "stage": "projet",
+     "objet": "327-2026",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Le projet de règlement numéro 327-2026 est présenté par la directrice générale"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-226"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 226 (2012) — Lotissement",
+     "stage": null,
+     "objet": "226 (2012)",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "6.2.7. Dépôt et présentation du Règlement numéro 327-2026 modifiant le\nrèglement numéro 226 (2012) de lotissement"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-328"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 328-2026 — PIIA",
+     "stage": "projet",
+     "objet": "328-2026",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Le projet de règlement numéro 328-2026 est présenté par la directrice générale"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-221"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 221 — PIIA",
+     "stage": null,
+     "objet": "221",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "6.2.9. Dépôt et présentation du Règlement numéro 328-2026 modifiant le\nrèglement numéro 221 sur les plans d’implantation et d’intégration\narchitecturale"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "motion-325"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis de motion — 325-2026",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "motion-326"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis de motion — 326-2026",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "motion-327"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis de motion — 327-2026",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "motion-328"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis de motion — 328-2026",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-verdissement"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Verdissement du Sentier Onès-Cloutier",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la Municipalité accepte la proposition de Plantations Évoluvert, telle que présentée dans le cadre du projet de verdissement municipal."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "signal-carriere"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Intention de relancer un projet de carrière — chemin Stage",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Monsieur Guy Provencher du 711, chemin Stage aimerait relancer son projet\nde carrière sur le chemin Stage."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt et la présentation du projet de règlement 325-2026 sont explicitement consignés au point 6.2.3.\",\"excerpt\":\"Le projet de règlement numéro 325-2026 est présenté par la directrice générale\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 224 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification par le projet de règlement 325-2026.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt et la présentation du projet de règlement 326-2026 sont explicitement attestés au point 6.2.5.\",\"excerpt\":\"Le projet de règlement numéro 326-2026 est présenté par la directrice générale\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 225 est uniquement cité en tant que règlement antérieur modifié par le projet de règlement 326-2026.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt et la présentation du projet de règlement 327-2026 sont explicitement attestés au point 6.2.7.\",\"excerpt\":\"Le projet de règlement numéro 327-2026 est présenté par la directrice générale\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 226 (2012) est simplement le règlement antérieur visé par la modification du projet de règlement 327-2026.\",\"excerpt\":\"\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt et la présentation du projet de règlement 328-2026 sont explicitement consignés au point 6.2.9.\",\"excerpt\":\"Le projet de règlement numéro 328-2026 est présenté par la directrice générale\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 221 est uniquement mentionné comme le règlement faisant l'objet d'une modification par le projet de règlement 328-2026.\",\"excerpt\":\"\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion pour le règlement 325-2026 est donné par la conseillère Cynthia Ferland au point 6.2.4.\",\"excerpt\":\"Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\\nprochaine séance, soit adopté le Règlement numéro 325-2026\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion pour le règlement 326-2026 est donné au point 6.2.6.\",\"excerpt\":\"Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\\nprochaine séance, soit adopté le Règlement numéro 326-2026\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion pour le règlement 327-2026 est consigné au point 6.2.8.\",\"excerpt\":\"Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\\nprochaine séance, soit adopté le Règlement numéro 327-2026\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion pour le règlement 328-2026 est donné au point 6.2.10.\",\"excerpt\":\"Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\\nprochaine séance, soit adopté le Règlement numéro 328-2026\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution 26 05 051 approuvant la proposition d'aménagement/verdissement sur le terrain municipal du Sentier Onès-Cloutier.\",\"excerpt\":\"Que le conseil de la Municipalité accepte la proposition de Plantations Évoluvert, telle que présentée dans le cadre du projet de verdissement municipal.\"},{\"act\":\"A14\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une simple intervention citoyenne lors de la période de questions, ne constituant pas un acte municipal ou une procédure initiée.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le dépôt et la présentation du projet de règlement 325-2026 sont explicitement consignés au point 6.2.3.",
+   "excerpt": "Le projet de règlement numéro 325-2026 est présenté par la directrice générale"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 224 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification par le projet de règlement 325-2026.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le dépôt et la présentation du projet de règlement 326-2026 sont explicitement attestés au point 6.2.5.",
+   "excerpt": "Le projet de règlement numéro 326-2026 est présenté par la directrice générale"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 225 est uniquement cité en tant que règlement antérieur modifié par le projet de règlement 326-2026.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le dépôt et la présentation du projet de règlement 327-2026 sont explicitement attestés au point 6.2.7.",
+   "excerpt": "Le projet de règlement numéro 327-2026 est présenté par la directrice générale"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 226 (2012) est simplement le règlement antérieur visé par la modification du projet de règlement 327-2026.",
+   "excerpt": ""
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le dépôt et la présentation du projet de règlement 328-2026 sont explicitement consignés au point 6.2.9.",
+   "excerpt": "Le projet de règlement numéro 328-2026 est présenté par la directrice générale"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 221 est uniquement mentionné comme le règlement faisant l'objet d'une modification par le projet de règlement 328-2026.",
+   "excerpt": ""
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion pour le règlement 325-2026 est donné par la conseillère Cynthia Ferland au point 6.2.4.",
+   "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 325-2026"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion pour le règlement 326-2026 est donné au point 6.2.6.",
+   "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 326-2026"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion pour le règlement 327-2026 est consigné au point 6.2.8.",
+   "excerpt": "Avis de motion est donné, par la conseillère Cynthia Ferland, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 327-2026"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion pour le règlement 328-2026 est donné au point 6.2.10.",
+   "excerpt": "Avis de motion est donné, par la conseillère Virginie Ashby, que lors d’une\nprochaine séance, soit adopté le Règlement numéro 328-2026"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution 26 05 051 approuvant la proposition d'aménagement/verdissement sur le terrain municipal du Sentier Onès-Cloutier.",
+   "excerpt": "Que le conseil de la Municipalité accepte la proposition de Plantations Évoluvert, telle que présentée dans le cadre du projet de verdissement municipal."
+  },
+  {
+   "act": "A14",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple intervention citoyenne lors de la période de questions, ne constituant pas un acte municipal ou une procédure initiée.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 14,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 224 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification par le projet de règlement 325-2026."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 225 est uniquement cité en tant que règlement antérieur modifié par le projet de règlement 326-2026."
+   },
+   {
+    "act": "A06",
+    "reason": "Le règlement 226 (2012) est simplement le règlement antérieur visé par la modification du projet de règlement 327-2026."
+   },
+   {
+    "act": "A08",
+    "reason": "Le règlement 221 est uniquement mentionné comme le règlement faisant l'objet d'une modification par le projet de règlement 328-2026."
+   },
+   {
+    "act": "A14",
+    "reason": "Il s'agit d'une simple intervention citoyenne lors de la période de questions, ne constituant pas un acte municipal ou une procédure initiée."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le dépôt et la présentation du projet de règlement 325-2026 sont explicitement consignés au point 6.2.3."
+   },
+   {
+    "act": "A03",
+    "reason": "Le dépôt et la présentation du projet de règlement 326-2026 sont explicitement attestés au point 6.2.5."
+   },
+   {
+    "act": "A05",
+    "reason": "Le dépôt et la présentation du projet de règlement 327-2026 sont explicitement attestés au point 6.2.7."
+   },
+   {
+    "act": "A07",
+    "reason": "Le dépôt et la présentation du projet de règlement 328-2026 sont explicitement consignés au point 6.2.9."
+   },
+   {
+    "act": "A09",
+    "reason": "L'avis de motion pour le règlement 325-2026 est donné par la conseillère Cynthia Ferland au point 6.2.4."
+   },
+   {
+    "act": "A10",
+    "reason": "L'avis de motion pour le règlement 326-2026 est donné au point 6.2.6."
+   },
+   {
+    "act": "A11",
+    "reason": "L'avis de motion pour le règlement 327-2026 est consigné au point 6.2.8."
+   },
+   {
+    "act": "A12",
+    "reason": "L'avis de motion pour le règlement 328-2026 est donné au point 6.2.10."
+   },
+   {
+    "act": "A13",
+    "reason": "Le conseil adopte la résolution 26 05 051 approuvant la proposition d'aménagement/verdissement sur le terrain municipal du Sentier Onès-Cloutier."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3938,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10329,
+   "outputTokens": 1007,
+   "totalTokens": 11336
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3782
+  },
+  "inputSha256": "5955b5a29770143257a41934c5474bef1be4d3fc2b20d5cee569d8097921042d"
+ }
+}

@@ -1,0 +1,121 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "315677b1715a23a32329865222ea2827b092bfa8fb9eab7f8a457ecb2e58a488",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Adoption confirmée à la page 5 du règlement de contrôle provisoire 335.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Avis de motion dûment constaté à la page 5 pour le règlement 316-01 modifiant les permis et certificats.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Dépôt du projet de règlement 316-01 explicitement consigné à la page 5.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Avis de motion constaté à la page 6 pour le règlement de zonage 317-01.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Dépôt du projet de règlement 317-01 consigné à la page 6.\"},{\"item\":\"i06\",\"choice\":\"v2\",\"reason\":\"La citation de v2 correspond exactement au titre de la résolution 26-03-9288 à la page 6 sans le numéro de résolution disjoint.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Acceptation du PIIA 2026-02 pour le 102, rue Principale attestée à la page 6.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Dérogation mineure DM-294 accordée pour le 78, rue Sauvé à la page 7.\"},{\"item\":\"i09\",\"choice\":\"absent\",\"reason\":\"L'autorisation d'amarrage dans un parc relève des loisirs et de la gestion contractuelle courante, exclus du périmètre urbanisme et foncier.\"},{\"item\":\"i10\",\"choice\":\"absent\",\"reason\":\"Ce point relève des loisirs et constitue de surcroît un doublon non admissible de l'item i09.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v2"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "absent"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Adoption confirmée à la page 5 du règlement de contrôle provisoire 335."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Avis de motion dûment constaté à la page 5 pour le règlement 316-01 modifiant les permis et certificats."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Dépôt du projet de règlement 316-01 explicitement consigné à la page 5."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Avis de motion constaté à la page 6 pour le règlement de zonage 317-01."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Dépôt du projet de règlement 317-01 consigné à la page 6."
+  },
+  {
+   "item": "i06",
+   "choice": "v2",
+   "reason": "La citation de v2 correspond exactement au titre de la résolution 26-03-9288 à la page 6 sans le numéro de résolution disjoint."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Acceptation du PIIA 2026-02 pour le 102, rue Principale attestée à la page 6."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Dérogation mineure DM-294 accordée pour le 78, rue Sauvé à la page 7."
+  },
+  {
+   "item": "i09",
+   "choice": "absent",
+   "reason": "L'autorisation d'amarrage dans un parc relève des loisirs et de la gestion contractuelle courante, exclus du périmètre urbanisme et foncier."
+  },
+  {
+   "item": "i10",
+   "choice": "absent",
+   "reason": "Ce point relève des loisirs et constitue de surcroît un doublon non admissible de l'item i09."
+  }
+ ]
+}

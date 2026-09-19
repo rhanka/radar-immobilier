@@ -13,7 +13,8 @@
       "documents": 260,
       "tokens": 5635342,
       "t0Utc": "2026-09-17T00:05:00Z",
-      "t1Utc": "2026-09-17T01:33:00Z"
+      "t1Utc": "2026-09-17T01:33:00Z",
+      "apiEquivalentUsd": 9.218584499999997
     },
     {
       "arm": "sonnet46-cloud-off",
@@ -33,7 +34,23 @@
       "documents": 207,
       "tokens": 6348891,
       "t0Utc": "2026-09-16T23:50:00Z",
-      "t1Utc": "2026-09-17T04:15:00Z"
+      "t1Utc": "2026-09-17T04:15:00Z",
+      "apiEquivalentUsd": 125.20533200000007
+    },
+    {
+      "arm": "opus5-off",
+      "provider": "claude",
+      "status": "measured",
+      "method": "controlled-burn",
+      "sourceStatus": "observed",
+      "basePlan": "max-20x",
+      "windowMinutes": 10080,
+      "quotaDeltaPercent": 3,
+      "documents": 20,
+      "tokens": 6059990,
+      "t0Utc": "2026-09-18T00:44:52Z",
+      "t1Utc": "2026-09-18T01:14:45Z",
+      "apiEquivalentUsd": 45.77583
     }
   ]
 }

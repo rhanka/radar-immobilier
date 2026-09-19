@@ -1,0 +1,1146 @@
+{
+ "documentId": "brownsburg-chatham-2026-03-10",
+ "nextId": 30,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Engagement de cession pour des HLM — parties des lots 4 235 205 et 5 641 417",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 235 205",
+    "page": 18,
+    "citation": "modique (HLM) sur son territoire, s’engage à céder une partie des lots 4 235 205 et 5 641 417 du cadastre du Québec, et réitère sa pleine collaboration afin de mener ce projet à terme",
+    "anchor": "lots 4 235 205 et 5 641 417",
+    "spanStart": 2292,
+    "spanEnd": 2475
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Engagement de cession pour des HLM — parties des lots 4 235 205 et 5 641 417",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "4 235 205",
+      "page": 18,
+      "citation": "modique (HLM) sur son territoire, s’engage à céder une partie des lots 4 235 205 et 5 641 417 du cadastre du Québec, et réitère sa pleine collaboration afin de mener ce projet à terme",
+      "anchor": "lots 4 235 205 et 5 641 417",
+      "spanStart": 2292,
+      "spanEnd": 2475
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-066 engage la Ville à céder ces terrains pour du logement social; les numéros retenus sont ceux du dispositif, malgré la mention différente du premier lot dans le préambule."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Acceptation conditionnelle du PIIA 2026-006 — développement sur le lot 4 234 857, prolongement de la rue Lacasse",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-006",
+    "page": 41,
+    "citation": "DEMANDE DE PIIA NUMÉRO 2026-006 RELATIVE À UN PROJET DE DÉVELOPPEMENT IMMOBILIER D’ENVERGURE – LOT 4 234 857 DU CADASTRE DU QUÉBEC",
+    "anchor": "PIIA NUMÉRO 2026-006",
+    "spanStart": 147,
+    "spanEnd": 277
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation conditionnelle du PIIA 2026-006 — développement sur le lot 4 234 857, prolongement de la rue Lacasse",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-006",
+      "page": 41,
+      "citation": "DEMANDE DE PIIA NUMÉRO 2026-006 RELATIVE À UN PROJET DE DÉVELOPPEMENT IMMOBILIER D’ENVERGURE – LOT 4 234 857 DU CADASTRE DU QUÉBEC",
+      "anchor": "PIIA NUMÉRO 2026-006",
+      "spanStart": 147,
+      "spanEnd": 277
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Contrairement à la recommandation de refus du CCU, le conseil accepte le PIIA aux pages 42-43, sous conditions de protection des boisés et de liens piétonniers et cyclables."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00030 accordée — lot projeté 6 721 120, emprise de rue de 13 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00030",
+    "page": 44,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00030, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 120",
+    "anchor": "DM-2026-00030",
+    "spanStart": 1050,
+    "spanEnd": 1235
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00030 accordée — lot projeté 6 721 120, emprise de rue de 13 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00030",
+      "page": 44,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00030, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 120",
+      "anchor": "DM-2026-00030",
+      "spanStart": 1050,
+      "spanEnd": 1235
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte expressément cette demande afin d’autoriser une emprise de rue de 13 mètres plutôt que le minimum de 15 mètres."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00031 accordée — lot projeté 6 721 733, emprise de rue de 13 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00031",
+    "page": 45,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00031, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 733",
+    "anchor": "DM-2026-00031",
+    "spanStart": 1470,
+    "spanEnd": 1655
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00031 accordée — lot projeté 6 721 733, emprise de rue de 13 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00031",
+      "page": 45,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00031, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 733",
+      "anchor": "DM-2026-00031",
+      "spanStart": 1470,
+      "spanEnd": 1655
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte cette demande distincte concernant une emprise de rue de 13 mètres sur le lot projeté 6 721 733."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00032 accordée — lot projeté 6 721 108, profondeur de 27,46 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00032",
+    "page": 46,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00032, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 108",
+    "anchor": "DM-2026-00032",
+    "spanStart": 2265,
+    "spanEnd": 2450
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00032 accordée — lot projeté 6 721 108, profondeur de 27,46 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00032",
+      "page": 46,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00032, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 108",
+      "anchor": "DM-2026-00032",
+      "spanStart": 2265,
+      "spanEnd": 2450
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise une profondeur moyenne de 27,46 mètres au lieu du minimum réglementaire de 28 mètres."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00033 accordée — lot projeté 6 721 109, profondeur de 26,70 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00033",
+    "page": 48,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00033, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 109",
+    "anchor": "DM-2026-00033",
+    "spanStart": 161,
+    "spanEnd": 346
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00033 accordée — lot projeté 6 721 109, profondeur de 26,70 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00033",
+      "page": 48,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00033, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 109",
+      "anchor": "DM-2026-00033",
+      "spanStart": 161,
+      "spanEnd": 346
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte cette demande distincte permettant une profondeur moyenne de 26,70 mètres."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00034 accordée — lot projeté 6 721 110, profondeur de 26,59 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00034",
+    "page": 49,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00034, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 110",
+    "anchor": "DM-2026-00034",
+    "spanStart": 998,
+    "spanEnd": 1183
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00034 accordée — lot projeté 6 721 110, profondeur de 26,59 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00034",
+      "page": 49,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00034, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 110",
+      "anchor": "DM-2026-00034",
+      "spanStart": 998,
+      "spanEnd": 1183
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil autorise la création du lot avec une profondeur moyenne de 26,59 mètres plutôt que 28 mètres."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00035 accordée — lot projeté 6 721 111, profondeur de 27,76 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00035",
+    "page": 50,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00035, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 111",
+    "anchor": "DM-2026-00035",
+    "spanStart": 1765,
+    "spanEnd": 1950
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00035 accordée — lot projeté 6 721 111, profondeur de 27,76 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00035",
+      "page": 50,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00035, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 721 111",
+      "anchor": "DM-2026-00035",
+      "spanStart": 1765,
+      "spanEnd": 1950
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette décision accepte une demande expressément identifiée pour une profondeur moyenne de 27,76 mètres."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00036 accordée — lot projeté 6 686 339, profondeur de 27,41 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00036",
+    "page": 52,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00036, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 339",
+    "anchor": "DM-2026-00036",
+    "spanStart": 70,
+    "spanEnd": 255
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00036 accordée — lot projeté 6 686 339, profondeur de 27,41 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00036",
+      "page": 52,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00036, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 339",
+      "anchor": "DM-2026-00036",
+      "spanStart": 70,
+      "spanEnd": 255
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte la dérogation permettant une profondeur moyenne de 27,41 mètres pour ce lot projeté."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00037 accordée — lot projeté 6 686 340, profondeur de 26,78 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00037",
+    "page": 53,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00037, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 340",
+    "anchor": "DM-2026-00037",
+    "spanStart": 829,
+    "spanEnd": 1014
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00037 accordée — lot projeté 6 686 340, profondeur de 26,78 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00037",
+      "page": 53,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00037, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 340",
+      "anchor": "DM-2026-00037",
+      "spanStart": 829,
+      "spanEnd": 1014
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution accepte cette demande distincte pour une profondeur moyenne de 26,78 mètres."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00038 accordée — lot projeté 6 686 341, profondeur de 27,31 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00038",
+    "page": 54,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00038, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 341",
+    "anchor": "DM-2026-00038",
+    "spanStart": 1645,
+    "spanEnd": 1830
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00038 accordée — lot projeté 6 686 341, profondeur de 27,31 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00038",
+      "page": 54,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00038, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 341",
+      "anchor": "DM-2026-00038",
+      "spanStart": 1645,
+      "spanEnd": 1830
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil autorise une profondeur moyenne de 27,31 mètres au lieu des 28 mètres prescrits."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00039 accordée — lot projeté 6 686 343, profondeur de 27,70 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00039",
+    "page": 55,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00039, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 343",
+    "anchor": "DM-2026-00039",
+    "spanStart": 2264,
+    "spanEnd": 2449
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00039 accordée — lot projeté 6 686 343, profondeur de 27,70 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00039",
+      "page": 55,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00039, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 343",
+      "anchor": "DM-2026-00039",
+      "spanStart": 2264,
+      "spanEnd": 2449
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte expressément cette demande pour une profondeur moyenne de 27,70 mètres."
+    }
+   ]
+  },
+  {
+   "id": "u13",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-00040 accordée — lot projeté 6 686 344, profondeur de 27,50 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-00040",
+    "page": 57,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00040, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 344",
+    "anchor": "DM-2026-00040",
+    "spanStart": 161,
+    "spanEnd": 346
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-00040 accordée — lot projeté 6 686 344, profondeur de 27,50 m",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-00040",
+      "page": 57,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2026-00040, visant des dispositions du Règlement de lotissement numéro 198-2013 pour le lot projeté 6 686 344",
+      "anchor": "DM-2026-00040",
+      "spanStart": 161,
+      "spanEnd": 346
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La décision autorise une profondeur moyenne de 27,50 mètres pour le lot projeté 6 686 344."
+    }
+   ]
+  },
+  {
+   "id": "u14",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2025-00725 accordée — lot projeté 6 703 926, superficie et emplacement d’une enseigne",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2025-00725",
+    "page": 58,
+    "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2025-00725, visant des dispositions du Règlement de zonage numéro 197-2013 pour le lot projeté 6 703 926",
+    "anchor": "DM-2025-00725",
+    "spanStart": 1214,
+    "spanEnd": 1394
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2025-00725 accordée — lot projeté 6 703 926, superficie et emplacement d’une enseigne",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2025-00725",
+      "page": 58,
+      "citation": "QUE le conseil municipal accepte la demande de dérogation mineure numéro DM-2025-00725, visant des dispositions du Règlement de zonage numéro 197-2013 pour le lot projeté 6 703 926",
+      "anchor": "DM-2025-00725",
+      "spanStart": 1214,
+      "spanEnd": 1394
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte une seule demande comportant deux dérogations, soit une enseigne de 10,6 mètres carrés et son installation sur une structure hors toit."
+    }
+   ]
+  },
+  {
+   "id": "u15",
+   "status": "active",
+   "current": {
+    "label": "Acceptation du PIIA 2026-007 — établissement de restauration, lot projeté 6 703 926",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-007",
+    "page": 58,
+    "citation": "DEMANDE DE PIIA NUMÉRO 2026-007 RELATIVE À UNE DEMANDE DE PERMIS DE CONSTRUCTION VISANT LA CONSTRUCTION D’UN ÉTABLISSEMENT DE RESTAURATION (C302",
+    "anchor": "PIIA NUMÉRO 2026-007",
+    "spanStart": 1972,
+    "spanEnd": 2116
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-007 — établissement de restauration, lot projeté 6 703 926",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-007",
+      "page": 58,
+      "citation": "DEMANDE DE PIIA NUMÉRO 2026-007 RELATIVE À UNE DEMANDE DE PERMIS DE CONSTRUCTION VISANT LA CONSTRUCTION D’UN ÉTABLISSEMENT DE RESTAURATION (C302",
+      "anchor": "PIIA NUMÉRO 2026-007",
+      "spanStart": 1972,
+      "spanEnd": 2116
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte cette demande de PIIA et autorise la délivrance du permis de construction à la page 59, indépendamment de la dérogation visant l’enseigne."
+    }
+   ]
+  },
+  {
+   "id": "u16",
+   "status": "active",
+   "current": {
+    "label": "Acceptation du PIIA 2026-008 — remise et abri à bois au 815, route des Outaouais",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-008",
+    "page": 59,
+    "citation": "DEMANDE DE PIIA 2026-008 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA CONSTRUCTION D’UNE REMISE AVEC UN ABRI À BOIS ATTENANT",
+    "anchor": "PIIA 2026-008",
+    "spanStart": 2018,
+    "spanEnd": 2159
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-008 — remise et abri à bois au 815, route des Outaouais",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-008",
+      "page": 59,
+      "citation": "DEMANDE DE PIIA 2026-008 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA CONSTRUCTION D’UNE REMISE AVEC UN ABRI À BOIS ATTENANT",
+      "anchor": "PIIA 2026-008",
+      "spanStart": 2018,
+      "spanEnd": 2159
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La décision de la page 60 accepte ce petit PIIA pour une remise et un abri à bois, lesquels sont expressément inclus dans le rappel."
+    }
+   ]
+  },
+  {
+   "id": "u17",
+   "status": "active",
+   "current": {
+    "label": "Acceptation du PIIA 2026-009 — habitation bifamiliale, lot 4 235 765, rue de l’Église",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-009",
+    "page": 61,
+    "citation": "DEMANDE DE PIIA NUMÉRO 2026-009 RELATIVE À UNE DEMANDE DE PERMIS DE CONSTRUCTION VISANT LA CONSTRUCTION D’UNE HABITATION BIFAMILIALE – LOT 4 235 765",
+    "anchor": "PIIA NUMÉRO 2026-009",
+    "spanStart": 367,
+    "spanEnd": 515
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-009 — habitation bifamiliale, lot 4 235 765, rue de l’Église",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-009",
+      "page": 61,
+      "citation": "DEMANDE DE PIIA NUMÉRO 2026-009 RELATIVE À UNE DEMANDE DE PERMIS DE CONSTRUCTION VISANT LA CONSTRUCTION D’UNE HABITATION BIFAMILIALE – LOT 4 235 765",
+      "anchor": "PIIA NUMÉRO 2026-009",
+      "spanStart": 367,
+      "spanEnd": 515
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte cette demande et autorise le permis de construction de l’habitation bifamiliale à la page 62."
+    }
+   ]
+  },
+  {
+   "id": "u18",
+   "status": "active",
+   "current": {
+    "label": "Acceptation du PIIA 2026-010 — rénovation au 332-332A, rue Saint-Joseph",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-010",
+    "page": 62,
+    "citation": "DEMANDE DE PIIA 2026-010 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA RÉNOVATION DE LA RÉSIDENCE – PROPRIÉTÉ SITUÉE AU 332-332A, RUE SAINT-JOSEPH",
+    "anchor": "PIIA 2026-010",
+    "spanStart": 1327,
+    "spanEnd": 1489
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-010 — rénovation au 332-332A, rue Saint-Joseph",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-010",
+      "page": 62,
+      "citation": "DEMANDE DE PIIA 2026-010 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA RÉNOVATION DE LA RÉSIDENCE – PROPRIÉTÉ SITUÉE AU 332-332A, RUE SAINT-JOSEPH",
+      "anchor": "PIIA 2026-010",
+      "spanStart": 1327,
+      "spanEnd": 1489
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte à la page 63 le PIIA visant le remplacement d’une fenêtre et de deux portes, conformément à l’inclusion des petits PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u19",
+   "status": "active",
+   "current": {
+    "label": "Acceptation du PIIA 2026-011 — bâtiment agricole au 309, route du Canton (lot 4 423 780)",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-011",
+    "page": 63,
+    "citation": "DEMANDE DE PIIA 2026-011 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA CONSTRUCTION D’UN BÂTIMENT AGRICOLE",
+    "anchor": "PIIA 2026-011",
+    "spanStart": 1664,
+    "spanEnd": 1786
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-011 — bâtiment agricole au 309, route du Canton",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-011",
+      "page": 63,
+      "citation": "DEMANDE DE PIIA 2026-011 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA CONSTRUCTION D’UN BÂTIMENT AGRICOLE PROPRIÉTÉ SITUÉE AU 309, ROUTE DU CANTON",
+      "anchor": "PIIA 2026-011",
+      "spanStart": 1664,
+      "spanEnd": 1827
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-011 — bâtiment agricole au 309, route du Canton (lot 4 423 780)",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-011",
+      "page": 63,
+      "citation": "DEMANDE DE PIIA 2026-011 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA CONSTRUCTION D’UN BÂTIMENT AGRICOLE",
+      "anchor": "PIIA 2026-011",
+      "spanStart": 1664,
+      "spanEnd": 1786
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte le PIIA à la page 64 et autorise le certificat pour le bâtiment agricole, les objets non résidentiels étant inclus."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "La citation courante n'est pas recopiée à l'identique : le texte de la page 63 lit « BÂTIMENT AGRICOLE - PROPRIÉTÉ SITUÉE AU 309, ROUTE DU CANTON » (tiret présent), alors que le corrigé omet le tiret ; la citation est ramenée à un extrait exact de la page 63 contenant l'identifiant PIIA 2026-011."
+    }
+   ]
+  },
+  {
+   "id": "u20",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 361-2026 — occupation et entretien des bâtiments",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "361-2026",
+    "page": 64,
+    "citation": "Madame la conseillère Martine Renaud donne avis de motion qu’à une séance subséquente, il sera proposé pour adoption le Règlement numéro 361-2026",
+    "anchor": "Règlement numéro 361-2026",
+    "spanStart": 1991,
+    "spanEnd": 2136
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 361-2026 — occupation et entretien des bâtiments",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "361-2026",
+      "page": 64,
+      "citation": "Madame la conseillère Martine Renaud donne avis de motion qu’à une séance subséquente, il sera proposé pour adoption le Règlement numéro 361-2026",
+      "anchor": "Règlement numéro 361-2026",
+      "spanStart": 1991,
+      "spanEnd": 2136
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion est donné pendant cette séance et constitue une unité distincte du projet de règlement."
+    }
+   ]
+  },
+  {
+   "id": "u21",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet de règlement 361-2026 — occupation et entretien des bâtiments",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "361-2026",
+    "page": 65,
+    "citation": "ADOPTION DU PROJET DE RÈGLEMENT NUMÉRO 361-2026 CONCERNANT L’OCCUPATION ET L’ENTRETIEN DES BÂTIMENTS",
+    "anchor": "RÈGLEMENT NUMÉRO 361-2026",
+    "spanStart": 87,
+    "spanEnd": 187
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet de règlement 361-2026 — occupation et entretien des bâtiments",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "361-2026",
+      "page": 65,
+      "citation": "ADOPTION DU PROJET DE RÈGLEMENT NUMÉRO 361-2026 CONCERNANT L’OCCUPATION ET L’ENTRETIEN DES BÂTIMENTS",
+      "anchor": "RÈGLEMENT NUMÉRO 361-2026",
+      "spanStart": 87,
+      "spanEnd": 187
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 14.20 porte explicitement sur l’adoption du projet; son dépôt au point 14.19 ne multiplie pas l’unité correspondant à cette même étape."
+    }
+   ]
+  },
+  {
+   "id": "u22",
+   "status": "active",
+   "current": {
+    "label": "Acceptation d’une contribution pour parcs de 810 $ — lotissement 2025-00021",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2025-00021",
+    "page": 67,
+    "citation": "CONSIDÉRANT QUE 10 % de 8 100 $ correspond à 810 $ et qu’il s’agit de la contribution assujettie à la demande de permis de lotissement 2025-00021",
+    "anchor": "lotissement 2025-00021",
+    "spanStart": 1895,
+    "spanEnd": 2040
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation d’une contribution pour parcs de 810 $ — lotissement 2025-00021",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2025-00021",
+      "page": 67,
+      "citation": "CONSIDÉRANT QUE 10 % de 8 100 $ correspond à 810 $ et qu’il s’agit de la contribution assujettie à la demande de permis de lotissement 2025-00021",
+      "anchor": "lotissement 2025-00021",
+      "spanStart": 1895,
+      "spanEnd": 2040
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-105 accepte la contrepartie en argent de 810 $ pour cette opération cadastrale, avec exemption du lot demeurant agricole."
+    }
+   ]
+  },
+  {
+   "id": "u23",
+   "status": "active",
+   "current": {
+    "label": "Acceptation d’une contribution pour parcs de 16 950 $ — lotissement 2026-00001",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-00001",
+    "page": 68,
+    "citation": "CONSIDÉRANT QUE 10 % de 169 500 $ correspond à 16 950 $ et qu’il s’agit de la contribution assujettie à la demande de permis de lotissement 2026-00001",
+    "anchor": "lotissement 2026-00001",
+    "spanStart": 2493,
+    "spanEnd": 2643
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation d’une contribution pour parcs de 16 950 $ — lotissement 2026-00001",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-00001",
+      "page": 68,
+      "citation": "CONSIDÉRANT QUE 10 % de 169 500 $ correspond à 16 950 $ et qu’il s’agit de la contribution assujettie à la demande de permis de lotissement 2026-00001",
+      "anchor": "lotissement 2026-00001",
+      "spanStart": 2493,
+      "spanEnd": 2643
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-106 accepte à la page 69 une contribution en argent de 16 950 $ liée à la création du lot 6 717 609."
+    }
+   ]
+  },
+  {
+   "id": "u24",
+   "status": "active",
+   "current": {
+    "label": "Acceptation d’une contribution pour parcs de 21 150 $ — lotissement 2026-00002",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-00002",
+    "page": 70,
+    "citation": "CONSIDÉRANT QUE 10 % de 211 500 $ correspond à 21 150 $ et qu’il s’agit de la contribution assujettie à la demande de permis de lotissement 2026-00002",
+    "anchor": "lotissement 2026-00002",
+    "spanStart": 626,
+    "spanEnd": 776
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation d’une contribution pour parcs de 21 150 $ — lotissement 2026-00002",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-00002",
+      "page": 70,
+      "citation": "CONSIDÉRANT QUE 10 % de 211 500 $ correspond à 21 150 $ et qu’il s’agit de la contribution assujettie à la demande de permis de lotissement 2026-00002",
+      "anchor": "lotissement 2026-00002",
+      "spanStart": 626,
+      "spanEnd": 776
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte une contribution en argent de 21 150 $ pour cette demande unique créant les lots 6 718 011 à 6 718 013."
+    }
+   ]
+  },
+  {
+   "id": "u25",
+   "status": "active",
+   "current": {
+    "label": "Acceptation d’une contribution pour parcs de 123 000 $ — lotissement 2026-00005",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-00005",
+    "page": 71,
+    "citation": "CONSIDÉRANT QUE 10 % de 1 230 000 $ correspond à 123 000 $ et qu’il s’agit de la contribution assujettie à la demande de permis de lotissement 2026-00005",
+    "anchor": "lotissement 2026-00005",
+    "spanStart": 1302,
+    "spanEnd": 1455
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation d’une contribution pour parcs de 123 000 $ — lotissement 2026-00005",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-00005",
+      "page": 71,
+      "citation": "CONSIDÉRANT QUE 10 % de 1 230 000 $ correspond à 123 000 $ et qu’il s’agit de la contribution assujettie à la demande de permis de lotissement 2026-00005",
+      "anchor": "lotissement 2026-00005",
+      "spanStart": 1302,
+      "spanEnd": 1455
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-108 accepte une contribution en argent de 123 000 $ pour le lotissement destiné à des constructions commerciales ou industrielles."
+    }
+   ]
+  },
+  {
+   "id": "u26",
+   "status": "active",
+   "current": {
+    "label": "Acceptation provisoire des travaux du prolongement de la rue de la Septaco",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "RUE DE LA SEPTACO",
+    "page": 73,
+    "citation": "ACCEPTATION PROVISOIRE DES TRAVAUX DE LA RUE DE LA SEPTACO",
+    "anchor": "RUE DE LA SEPTACO",
+    "spanStart": 347,
+    "spanEnd": 405
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation provisoire des travaux du prolongement de la rue de la Septaco",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "RUE DE LA SEPTACO",
+      "page": 73,
+      "citation": "ACCEPTATION PROVISOIRE DES TRAVAUX DE LA RUE DE LA SEPTACO",
+      "anchor": "RUE DE LA SEPTACO",
+      "spanStart": 347,
+      "spanEnd": 405
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution accepte provisoirement les travaux d’un prolongement de rue lié à la construction d’immeubles, sans constater l’acceptation finale ni la reprise effective de la rue."
+    }
+   ]
+  },
+  {
+   "id": "u27",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de signature de l’entente promoteur — domaine Oria, prolongements des rues Lacasse et Saint-Denis",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "DOMAINE ORIA",
+    "page": 74,
+    "citation": "AUTORISER LA SIGNATURE DE L’ENTENTE PROMOTEUR ENTRE LA VILLE DE BROWNSBURGCHATHAM ET LA COMPAGNIE GESTION OR CONCEPT INC CONCERNANT LE DÉVELOPPEMENT DU DOMAINE ORIA",
+    "anchor": "DU DOMAINE ORIA",
+    "spanStart": 1023,
+    "spanEnd": 1187
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de signature de l’entente promoteur — domaine Oria, prolongements des rues Lacasse et Saint-Denis",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "DOMAINE ORIA",
+      "page": 74,
+      "citation": "AUTORISER LA SIGNATURE DE L’ENTENTE PROMOTEUR ENTRE LA VILLE DE BROWNSBURGCHATHAM ET LA COMPAGNIE GESTION OR CONCEPT INC CONCERNANT LE DÉVELOPPEMENT DU DOMAINE ORIA",
+      "anchor": "DU DOMAINE ORIA",
+      "spanStart": 1023,
+      "spanEnd": 1187
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-111 autorise la signature de l’entente encadrant une nouvelle rue publique destinée à desservir de nouveaux lots résidentiels."
+    }
+   ]
+  },
+  {
+   "id": "u28",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de dépôt d’une demande au MELCCFP — développement du Domaine Oria (rue Saint-Denis et prolongement de la rue Lacasse)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Domaine Oria",
+    "page": 75,
+    "citation": "CONSIDÉRANT QUE le projet de développement du Domaine Oria concerne les lots projetés 6 721 120, 6 721 121, 6 721 733 et 6 721 734",
+    "anchor": "Domaine Oria concerne les lots projetés 6 721 120",
+    "spanStart": 894,
+    "spanEnd": 1024
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de dépôt d’une demande au MELCCFP — développement du domaine Oria",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "déclaration de conformité",
+      "page": 75,
+      "citation": "CONSIDÉRANT QUE la Ville autorise la firme BHP Conseils à présenter une demande déclaration de conformité au MELCCFP",
+      "anchor": "déclaration de conformité au MELCCFP",
+      "spanStart": 1297,
+      "spanEnd": 1413
+     }
+    },
+    {
+     "step": "fable-pass2",
+     "unit": {
+      "label": "Autorisation de dépôt d’une demande au MELCCFP — développement du Domaine Oria (rue Saint-Denis et prolongement de la rue Lacasse)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Domaine Oria",
+      "page": 75,
+      "citation": "CONSIDÉRANT QUE le projet de développement du Domaine Oria concerne les lots projetés 6 721 120, 6 721 121, 6 721 733 et 6 721 734",
+      "anchor": "Domaine Oria concerne les lots projetés 6 721 120",
+      "spanStart": 894,
+      "spanEnd": 1024
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-112 autorise le dépôt d’une demande environnementale liée aux rues et infrastructures du domaine Oria, sans constater l’obtention de l’autorisation ministérielle."
+    },
+    {
+     "step": "fable-pass2",
+     "op": "correct",
+     "reason": "Le champ objet doit identifier l’objet foncier lui-même (le projet de développement du Domaine Oria, lots projetés 6 721 120, 6 721 121, 6 721 733 et 6 721 734 nommés page 75) et non l’acte demandé (« déclaration de conformité »); harmonisation avec u27 qui porte sur le même projet à une étape distincte."
+    }
+   ]
+  },
+  {
+   "id": "u29",
+   "status": "active",
+   "current": {
+    "label": "Engagement conditionnel de cession gratuite d’un terrain pour une école secondaire",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "terrain pour école secondaire",
+    "page": 77,
+    "citation": "s’engage à céder, si le besoin se présente, un terrain à titre gratuit pour l’établissement d’une école secondaire sur son territoire",
+    "anchor": "un terrain à titre gratuit",
+    "spanStart": 1118,
+    "spanEnd": 1251
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Engagement conditionnel de cession gratuite d’un terrain pour une école secondaire",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "terrain pour école secondaire",
+      "page": 77,
+      "citation": "s’engage à céder, si le besoin se présente, un terrain à titre gratuit pour l’établissement d’une école secondaire sur son territoire",
+      "anchor": "un terrain à titre gratuit",
+      "spanStart": 1118,
+      "spanEnd": 1251
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-113 contient un engagement foncier explicite de cession gratuite, qui doit rester conditionnel au besoin et ne pas être présenté comme une cession réalisée."
+    }
+   ]
+  }
+ ]
+}

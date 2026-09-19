@@ -1,0 +1,91 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "284ee220fe486f61e7cd108aa9b318d40b04767e6fdc298ec8d61395c1ba5810",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-03-16 (p.19) établit explicitement « 6 714 200 :19 999 $ plus taxes » et « autorise la mise en vente desdits terrains » ; lot cadastral explicite = acte foncier adopté, un nœud groupé pouvant couvrir plusieurs unités nommées.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le texte p.19 fixe « 6 714 201 :19 999 $plus taxes » et autorise la mise en vente ; lot explicitement nommé dans la résolution adoptée 2026-03-16.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le texte p.19 fixe « 6 714 202 22 499 $ plus taxes » et autorise la mise en vente ; lot explicitement nommé, fait distinct de la vente ultérieure du même lot (résolution 2026-03-17).\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-03-17 (p.20) : « QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6 714 202 » à 22 499 $, « conditionnelle à l'engagement de l'acheteur de construire un bâtiment principal … dans un délai maximal de deux (2) ans » ; acte foncier explicite adopté.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"L'entente de collaboration avec le CAD (prêt, cautionnements, local non identifié) n'est pas un objet réglementaire ou foncier explicite au sens de la règle « Unité: objet réglementaire ou foncier explicite » ; relève des ententes de services exclues du rappel.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"P.22 : « Je, Jules Blais, donne avis de motion qu'au cours de la prochaine séance … sera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage numéro 90-01 » ; seul l'avis de motion est constaté, le projet étant reporté au 07-04-2026.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"L'engagement d'installer ligne électrique et aqueduc est une clause de la même résolution 2026-03-16 déjà couverte par les lots 6 714 200/201/202 ; « Desserte des terrains » n'est pas un objet réglementaire ou foncier explicite distinct (doublon même fait non crédité).\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 2026-03-16 (p.19) établit explicitement « 6 714 200 :19 999 $ plus taxes » et « autorise la mise en vente desdits terrains » ; lot cadastral explicite = acte foncier adopté, un nœud groupé pouvant couvrir plusieurs unités nommées."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le texte p.19 fixe « 6 714 201 :19 999 $plus taxes » et autorise la mise en vente ; lot explicitement nommé dans la résolution adoptée 2026-03-16."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le texte p.19 fixe « 6 714 202 22 499 $ plus taxes » et autorise la mise en vente ; lot explicitement nommé, fait distinct de la vente ultérieure du même lot (résolution 2026-03-17)."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Résolution 2026-03-17 (p.20) : « QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6 714 202 » à 22 499 $, « conditionnelle à l'engagement de l'acheteur de construire un bâtiment principal … dans un délai maximal de deux (2) ans » ; acte foncier explicite adopté."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "L'entente de collaboration avec le CAD (prêt, cautionnements, local non identifié) n'est pas un objet réglementaire ou foncier explicite au sens de la règle « Unité: objet réglementaire ou foncier explicite » ; relève des ententes de services exclues du rappel."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "P.22 : « Je, Jules Blais, donne avis de motion qu'au cours de la prochaine séance … sera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage numéro 90-01 » ; seul l'avis de motion est constaté, le projet étant reporté au 07-04-2026."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "L'engagement d'installer ligne électrique et aqueduc est une clause de la même résolution 2026-03-16 déjà couverte par les lots 6 714 200/201/202 ; « Desserte des terrains » n'est pas un objet réglementaire ou foncier explicite distinct (doublon même fait non crédité)."
+  }
+ ]
+}

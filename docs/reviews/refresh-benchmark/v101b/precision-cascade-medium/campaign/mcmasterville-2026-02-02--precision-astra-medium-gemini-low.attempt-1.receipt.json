@@ -1,0 +1,35 @@
+{
+ "documentId": "mcmasterville-2026-02-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c2e9e4ba7af28c9f2be18f363f1559cf18b8c5044e892a67d50fdd1ed0f4cb40",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2221,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3011,
+   "outputTokens": 682,
+   "totalTokens": 3693
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2095
+  },
+  "inputSha256": "90eaf2bae81179ca64d6215fe0313c4e3d4d05f01435d913ebeb7145f30e2e89"
+ },
+ "at": "2026-09-19T03:22:21.791Z"
+}

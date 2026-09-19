@@ -1,0 +1,71 @@
+{
+ "documentId": "saint-damien-2026-06-16",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "7cd332a5b358a642a48227ccfa91165d29c84bf486ec3871f5284bae68093fcd",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 12.2 prévoit l'examen de la demande de dérogation mineure 2026-122 au 73, rue Messier en page 1.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 12.3 prévoit l'examen de la demande de dérogation mineure 2026-133 au 3173, chemin du Ruisseau en page 1.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 12.4 prévoit la demande d'approbation au PIIA 2026-135 au 6710, rue Principale en page 1.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 14.2 en page 2 prévoit l'avis de motion pour le règlement 804-1 avec une citation complète en v1.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 14.2 en page 2 prévoit également la présentation du projet de règlement 804-1 (unité distincte de l'avis de motion selon la règle), avec citation complète en v1.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v2"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 12.2 prévoit l'examen de la demande de dérogation mineure 2026-122 au 73, rue Messier en page 1."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 12.3 prévoit l'examen de la demande de dérogation mineure 2026-133 au 3173, chemin du Ruisseau en page 1."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 12.4 prévoit la demande d'approbation au PIIA 2026-135 au 6710, rue Principale en page 1."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 14.2 en page 2 prévoit l'avis de motion pour le règlement 804-1 avec une citation complète en v1."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 14.2 en page 2 prévoit également la présentation du projet de règlement 804-1 (unité distincte de l'avis de motion selon la règle), avec citation complète en v1."
+  }
+ ]
+}

@@ -1,0 +1,18 @@
+{
+ "documentId": "aumond-2026-01-14",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "18e1213c25285f3b02d5267f997be4940a51c992687d5c48801cddd80b014521",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

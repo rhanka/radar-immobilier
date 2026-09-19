@@ -1,0 +1,266 @@
+{
+ "documentId": "sainte-angele-de-monnoir-2026-01-13",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "6068f0996f75129dc0654ec4c483e3807ef9d93bd7655926ca7618104fe6fced",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-597-25"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 597-25 — Taxes et tarifs 2026",
+     "stage": "adoption",
+     "objet": "597-25",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Sur proposition de M. Patrick Robert, appuyée par M. François\nCharbonneau, il est résolu d’adopter le Règlement numéro 597-25"
+      },
+      {
+       "page": 3,
+       "excerpt": "Sur proposition de M. Patrick Robert, appuyée par M. François\nCharbonneau, il est résolu d’adopter le Règlement numéro 597-25 pour fixer des\ntaxes et des tarifs pour l’exercice financier 2026 et les conditions de leur\nperception."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-599-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 599-26 — Interdiction d’épandage",
+     "stage": "projet",
+     "objet": "599-26",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés\npar Mme Johanne Lacourse, conseillère au poste # 3,"
+      },
+      {
+       "page": 9,
+       "excerpt": "L’objet de ce règlement est d’interdire l’épandage de déjections animales, de\nboues ou de résidus provenant d’une fabrique de pâtes et papiers, les 22, 23 et 24\njuin 2026"
+      },
+      {
+       "page": 8,
+       "excerpt": "Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés\npar Mme Johanne Lacourse, conseillère au poste # 3, qu’elle présentera pour\nadoption, lors d’une séance ultérieure du conseil, le Règlement numéro 599-26"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-382-07"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 382-07 sur les PIIA",
+     "stage": null,
+     "objet": "382-07",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Considérant que le comité de consultation en urbanisme (CCU) ainsi que le\nconseil municipal ont étudié la demande en se référant à la grille d’analyse d’une\ndemande de rénovation en zone de PIIA"
+      },
+      {
+       "page": 11,
+       "excerpt": "Considérant que le comité de consultation en urbanisme (CCU) ainsi que le\nconseil municipal ont étudié la demande en se référant à la grille d’analyse d’une\ndemande de rénovation en zone de PIIA qui reprend chacun des objectifs et critères\ndu règlement 382-07 sur les PIIA et que ceux-ci sont respectés ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-piia-2025-85"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — Permis 2025-85, 152, rue Principale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de"
+      },
+      {
+       "page": 12,
+       "excerpt": "PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation à\nla condition que toutes les autres dispositions du règlement d’urbanisme soient\nrespectées."
+      },
+      {
+       "page": 11,
+       "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de"
+      },
+      {
+       "page": 12,
+       "excerpt": "PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation à\nla condition que toutes les autres dispositions du règlement d’urbanisme soient\nrespectées."
+      },
+      {
+       "page": 11,
+       "excerpt": "Considérant que le comité de consultation en urbanisme (CCU) ainsi que le\nconseil municipal ont étudié la demande en se référant à la grille d’analyse d’une\ndemande de rénovation en zone de PIIA qui reprend chacun des objectifs et critères\ndu règlement 382-07 sur les PIIA et que ceux-ci sont respectés ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-pga-eau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Approbation du Plan de gestion des actifs municipaux en eau",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Que le conseil municipal approuve le document « Plan de gestion des actifs\nmunicipaux en eau » et autorise le dépôt des documents auprès du\nMinistère."
+      },
+      {
+       "page": 11,
+       "excerpt": "Que le conseil municipal approuve le document « Plan de gestion des actifs\nmunicipaux en eau » et autorise le dépôt des documents auprès du\nMinistère."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-habitation-budget"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Office d’habitation Haute-Yamaska-Rouville — Budget initial 2026 approuvé",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Sur proposition de M. Patrick Robert, appuyée par Mme Johanne Lacourse,\nil est résolu d’approuver le budget initial 2026 de l’Office d’habitation de la HauteYamaska-Rouville"
+      },
+      {
+       "page": 11,
+       "excerpt": "Sur proposition de M. Patrick Robert, appuyée par Mme Johanne Lacourse,\nil est résolu d’approuver le budget initial 2026 de l’Office d’habitation de la HauteYamaska-Rouville et de payer le montant de 6 047 $, correspondant à 10 % du\ndéficit."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement numéro 597-25 fixant les taxes et tarifs pour l'exercice financier 2026.\",\"excerpt\":\"il est résolu d’adopter le Règlement numéro 597-25 pour fixer des\\ntaxes et des tarifs pour l’exercice financier 2026 et les conditions de leur\\nperception.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du projet de règlement numéro 599-26 sont constatés au procès-verbal.\",\"excerpt\":\"Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés\\npar Mme Johanne Lacourse, conseillère au poste # 3\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 382-07 n'est qu'une mention contextuelle de conformité réglementaire dans un considérant, il ne fait l'objet d'aucune démarche procédurale propre dans cette séance.\",\"excerpt\":\"grille d’analyse d’une\\ndemande de rénovation en zone de PIIA qui reprend chacun des objectifs et critères\\ndu règlement 382-07 sur les PIIA\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve la demande de PIIA liée au permis 2025-85 pour l'immeuble situé au 152, rue Principale.\",\"excerpt\":\"résolu que le conseil municipal accepte la demande de\\nPIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve expressément le Plan de gestion des actifs municipaux en eau.\",\"excerpt\":\"Que le conseil municipal approuve le document « Plan de gestion des actifs\\nmunicipaux en eau » et autorise le dépôt des documents auprès du\\nMinistère.\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"L'approbation budgétaire d'un organisme d'habitation tiers relève des affaires financières/administratives courantes et des exclusions, sans portée réglementaire d'urbanisme ou foncière directe.\",\"excerpt\":\"il est résolu d’approuver le budget initial 2026 de l’Office d’habitation de la HauteYamaska-Rouville et de payer le montant de 6 047 $, correspondant à 10 % du\\ndéficit.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement numéro 597-25 fixant les taxes et tarifs pour l'exercice financier 2026.",
+   "excerpt": "il est résolu d’adopter le Règlement numéro 597-25 pour fixer des\ntaxes et des tarifs pour l’exercice financier 2026 et les conditions de leur\nperception."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du projet de règlement numéro 599-26 sont constatés au procès-verbal.",
+   "excerpt": "Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés\npar Mme Johanne Lacourse, conseillère au poste # 3"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 382-07 n'est qu'une mention contextuelle de conformité réglementaire dans un considérant, il ne fait l'objet d'aucune démarche procédurale propre dans cette séance.",
+   "excerpt": "grille d’analyse d’une\ndemande de rénovation en zone de PIIA qui reprend chacun des objectifs et critères\ndu règlement 382-07 sur les PIIA"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve la demande de PIIA liée au permis 2025-85 pour l'immeuble situé au 152, rue Principale.",
+   "excerpt": "résolu que le conseil municipal accepte la demande de\nPIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve expressément le Plan de gestion des actifs municipaux en eau.",
+   "excerpt": "Que le conseil municipal approuve le document « Plan de gestion des actifs\nmunicipaux en eau » et autorise le dépôt des documents auprès du\nMinistère."
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "L'approbation budgétaire d'un organisme d'habitation tiers relève des affaires financières/administratives courantes et des exclusions, sans portée réglementaire d'urbanisme ou foncière directe.",
+   "excerpt": "il est résolu d’approuver le budget initial 2026 de l’Office d’habitation de la HauteYamaska-Rouville et de payer le montant de 6 047 $, correspondant à 10 % du\ndéficit."
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 382-07 n'est qu'une mention contextuelle de conformité réglementaire dans un considérant, il ne fait l'objet d'aucune démarche procédurale propre dans cette séance."
+   },
+   {
+    "act": "A06",
+    "reason": "L'approbation budgétaire d'un organisme d'habitation tiers relève des affaires financières/administratives courantes et des exclusions, sans portée réglementaire d'urbanisme ou foncière directe."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le règlement numéro 597-25 fixant les taxes et tarifs pour l'exercice financier 2026."
+   },
+   {
+    "act": "A02",
+    "reason": "L'avis de motion et le dépôt du projet de règlement numéro 599-26 sont constatés au procès-verbal."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil municipal approuve la demande de PIIA liée au permis 2025-85 pour l'immeuble situé au 152, rue Principale."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil approuve expressément le Plan de gestion des actifs municipaux en eau."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 1,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3116,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10515,
+   "outputTokens": 556,
+   "totalTokens": 11071
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2961
+  },
+  "inputSha256": "c7af8edf7dc4d8b798299fe9db659400e3e823be06e69d95c783cc3b9ac4555c"
+ }
+}

@@ -1,0 +1,41 @@
+{
+ "documentId": "saint-zephirin-de-courval-2026-03-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "97f7e0b7e51578bbfebf6ce80068634ffb184b229280037be9abe204a107acd4",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 45-04-2026 à la page 3 porte sur une recommandation favorable relative à une demande d'aliénation agricole à la CPTAQ pour le dossier 453592.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 46-04-2026 adoptée à la page 5 décrète l'acquisition du lot 5 885 286, ce qui constitue un acte foncier explicite.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 45-04-2026 à la page 3 porte sur une recommandation favorable relative à une demande d'aliénation agricole à la CPTAQ pour le dossier 453592."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 46-04-2026 adoptée à la page 5 décrète l'acquisition du lot 5 885 286, ce qui constitue un acte foncier explicite."
+  }
+ ]
+}

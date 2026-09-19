@@ -1,0 +1,124 @@
+{
+ "documentId": "daveluyville-2026-05-04",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "06afa8b814e0d9623dfd8f1e5c5588565305993d4ac6e7a338776e5ffb4bff9f",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Report de l’adoption de la dérogation mineure 2026-DM-002 — 1200, route Principale\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2026-DM-002\",\n        \"page\": 6,\n        \"citation\": \"Sur proposition de monsieur Alain Raymond, il est résolu de reporter\\nl’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à\\nl’adoption définitive du règlement numéro R-2026-154\",\n        \"anchor\": \"dérogation mineure 2026-DM-002\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les retours à la ligne de la résolution de report étaient absents du corrigé.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Refus de la dérogation mineure 2026-DM-003 — 425, 2e Rue, lot 4 441 171\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-DM-003\",\n        \"page\": 8,\n        \"citation\": \"l’unanimité de refuser la demande de dérogation mineure 2026-DM-003,\\ntelle que présentée, et de maintenir le dossier ouvert, sans frais, jusqu’à\",\n        \"anchor\": \"dérogation mineure 2026-DM-003\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique le retour à la ligne après « 2026-DM-003, », tout en conservant le refus constaté.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement R-2026-154 — assouplissement des normes de droits acquis\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-154\",\n        \"page\": 8,\n        \"citation\": \"Avis de motion et\\ndépôt du projet de\\nrèglement numéro\\nR-2026-154\\nmodifiant le\\nRèglement\\nde\\nzonage R-2025137\",\n        \"anchor\": \"règlement numéro\\nR-2026-154\"\n      },\n      \"reason\": \"Le titre du point 2026-05-88 doit être cité à l’identique, avec ses retours à la ligne, et l’ancre doit être une sous-chaîne exacte de cette citation.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement R-2026-154 — assouplissement des normes de droits acquis\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-154\",\n        \"page\": 8,\n        \"citation\": \"Avis de motion et\\ndépôt du projet de\\nrèglement numéro\\nR-2026-154\\nmodifiant le\\nRèglement\\nde\\nzonage R-2025137\",\n        \"anchor\": \"règlement numéro\\nR-2026-154\"\n      },\n      \"reason\": \"La citation et son ancre doivent respecter les retours à la ligne du titre original, le dépôt du projet restant une unité distincte de l’avis de motion.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Report de l’adoption de la dérogation mineure 2026-DM-002 — 1200, route Principale",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2026-DM-002",
+    "page": 6,
+    "citation": "Sur proposition de monsieur Alain Raymond, il est résolu de reporter\nl’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à\nl’adoption définitive du règlement numéro R-2026-154",
+    "anchor": "dérogation mineure 2026-DM-002"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les retours à la ligne de la résolution de report étaient absents du corrigé."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Refus de la dérogation mineure 2026-DM-003 — 425, 2e Rue, lot 4 441 171",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-DM-003",
+    "page": 8,
+    "citation": "l’unanimité de refuser la demande de dérogation mineure 2026-DM-003,\ntelle que présentée, et de maintenir le dossier ouvert, sans frais, jusqu’à",
+    "anchor": "dérogation mineure 2026-DM-003"
+   },
+   "reason": "La citation doit reproduire à l’identique le retour à la ligne après « 2026-DM-003, », tout en conservant le refus constaté."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Avis de motion du règlement R-2026-154 — assouplissement des normes de droits acquis",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "R-2026-154",
+    "page": 8,
+    "citation": "Avis de motion et\ndépôt du projet de\nrèglement numéro\nR-2026-154\nmodifiant le\nRèglement\nde\nzonage R-2025137",
+    "anchor": "règlement numéro\nR-2026-154"
+   },
+   "reason": "Le titre du point 2026-05-88 doit être cité à l’identique, avec ses retours à la ligne, et l’ancre doit être une sous-chaîne exacte de cette citation."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Dépôt du projet de règlement R-2026-154 — assouplissement des normes de droits acquis",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "R-2026-154",
+    "page": 8,
+    "citation": "Avis de motion et\ndépôt du projet de\nrèglement numéro\nR-2026-154\nmodifiant le\nRèglement\nde\nzonage R-2025137",
+    "anchor": "règlement numéro\nR-2026-154"
+   },
+   "reason": "La citation et son ancre doivent respecter les retours à la ligne du titre original, le dépôt du projet restant une unité distincte de l’avis de motion."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 6,
+   "citation": "Sur proposition de monsieur Alain Raymond, il est résolu de reporter\nl’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à\nl’adoption définitive du règlement numéro R-2026-154"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "derogation_mineure",
+   "page": 8,
+   "citation": "l’unanimité de refuser la demande de dérogation mineure 2026-DM-003,\ntelle que présentée, et de maintenir le dossier ouvert, sans frais, jusqu’à"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "avis_motion",
+   "page": 8,
+   "citation": "Avis de motion et\ndépôt du projet de\nrèglement numéro\nR-2026-154\nmodifiant le\nRèglement\nde\nzonage R-2025137"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "projet_reglement",
+   "page": 8,
+   "citation": "Avis de motion et\ndépôt du projet de\nrèglement numéro\nR-2026-154\nmodifiant le\nRèglement\nde\nzonage R-2025137"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

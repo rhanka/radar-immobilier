@@ -1,0 +1,37 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dbb8601a27768bf3efa9e573dfd219a14a6d99a501dc980f410fefeaa4b1a383",
+ "inputSha256": "46cf3a024de78ad30372c0e9425b4c65f19e257ba2c0214083ff67d19ef79014",
+ "responseSha256": "d7dad39ec14ea31cb90a0bfebecf600d1f90b46bfe9143ff53f685319b17ac48",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 24360,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 16707,
+  "outputTokens": 916,
+  "totalTokens": 27253,
+  "thoughtsTokenCount": 9630
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 24134,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:52:37.418Z"
+}

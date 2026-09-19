@@ -1,0 +1,71 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "b5cb850fdaa06bf8a5be64f4659fbc1f75d46dc12e8ddafc69c454bbb6b3a459",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 3.6, page 1, prévoit expressément l’autorisation de démarches préliminaires pour acheter les lots liés à l’église, ce qui constitue un objet foncier explicite.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 5.2, page 1, prévoit l’autorisation de l’état relatif à la vente des immeubles pour défaut de paiement de taxes municipales, sans constater une vente réalisée.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 8.1, page 2, prévoit une résolution d’appui à la CPTAQ pour une fin autre que l’agriculture : l’adoption prévue concerne cet appui municipal, non une autorisation acquise de la CPTAQ.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 10.1, page 2, annonce explicitement l’avis de motion du règlement 169-2019-01 remplaçant le règlement sur les nuisances, à titre d’étape prévue.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition reprend exactement le même objet et la même étape du point 5.2 que l’item i02, alors qu’un doublon du même type et du même fait ne constitue pas une unité distincte.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "absent"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 3.6, page 1, prévoit expressément l’autorisation de démarches préliminaires pour acheter les lots liés à l’église, ce qui constitue un objet foncier explicite."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 5.2, page 1, prévoit l’autorisation de l’état relatif à la vente des immeubles pour défaut de paiement de taxes municipales, sans constater une vente réalisée."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 8.1, page 2, prévoit une résolution d’appui à la CPTAQ pour une fin autre que l’agriculture : l’adoption prévue concerne cet appui municipal, non une autorisation acquise de la CPTAQ."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 10.1, page 2, annonce explicitement l’avis de motion du règlement 169-2019-01 remplaçant le règlement sur les nuisances, à titre d’étape prévue."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "Cette proposition reprend exactement le même objet et la même étape du point 5.2 que l’item i02, alors qu’un doublon du même type et du même fait ne constitue pas une unité distincte."
+  }
+ ]
+}

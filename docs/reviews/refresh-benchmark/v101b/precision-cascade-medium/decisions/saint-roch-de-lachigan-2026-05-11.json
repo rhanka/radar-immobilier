@@ -1,0 +1,255 @@
+{
+ "documentId": "saint-roch-de-lachigan-2026-05-11",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "dbe009871792bfc2b312501b59b60681df53e6e6255f83a7651748fb13a66c8d",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-583-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 583-2026 — Droits sur les mutations immobilières",
+     "stage": "adoption prévue à l'ordre du jour",
+     "objet": "583-2026",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "7.4 Adoption du règlement 583-2026 relatif aux droits sur les mutations immobilières"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-preemption"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente du lot 6 141 751 — Droit de préemption",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-demolition"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Démolition — 16, rue de l'Île-Majeau",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.1 Démolition de l'immeuble situé au 16, rue de l'Île-Majeau"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-derogation-riviere"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 296 rang de la Rivière Nord",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-derogation-beaucage"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 28 rue Beaucage",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-affichage-patrimoine"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Modification d'affichage sur un immeuble cité — 1224 rue Principale",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-travaux-patrimoine"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Travaux sur un immeuble cité — 1484, rue Principale",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le projet d'ordre du jour prévoit l'adoption du règlement 583-2026 à la rubrique 7.4.\",\"excerpt\":\"7.4 Adoption du règlement 583-2026 relatif aux droits sur les mutations immobilières\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.5 de l'ordre du jour prévoit explicitement l'exercice du droit de préemption pour la vente du lot 6 141 751.\",\"excerpt\":\"8.5 Vente du lot lot 6 141 751-exercise du droit de préemption\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 10.1 concerne la démolition de l'immeuble situé au 16, rue de l'Île-Majeau.\",\"excerpt\":\"10.1 Démolition de l'immeuble situé au 16, rue de l'Île-Majeau\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 10.2 inscrit à l'ordre du jour l'autorisation d'une demande de dérogation mineure pour le 296 rang de la Rivière Nord.\",\"excerpt\":\"10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le point 10.3 porte sur l'autorisation d'une demande de dérogation mineure au 28 rue Beaucage.\",\"excerpt\":\"10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le point 10.4 concerne l'autorisation d'une demande de modification d'affichage à un immeuble cité au 1224 rue Principale.\",\"excerpt\":\"10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le point 10.5 concerne l'autorisation d'une demande de travaux sur un immeuble cité situé au 1484, rue Principale.\",\"excerpt\":\"10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le projet d'ordre du jour prévoit l'adoption du règlement 583-2026 à la rubrique 7.4.",
+   "excerpt": "7.4 Adoption du règlement 583-2026 relatif aux droits sur les mutations immobilières"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 8.5 de l'ordre du jour prévoit explicitement l'exercice du droit de préemption pour la vente du lot 6 141 751.",
+   "excerpt": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 10.1 concerne la démolition de l'immeuble situé au 16, rue de l'Île-Majeau.",
+   "excerpt": "10.1 Démolition de l'immeuble situé au 16, rue de l'Île-Majeau"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 10.2 inscrit à l'ordre du jour l'autorisation d'une demande de dérogation mineure pour le 296 rang de la Rivière Nord.",
+   "excerpt": "10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le point 10.3 porte sur l'autorisation d'une demande de dérogation mineure au 28 rue Beaucage.",
+   "excerpt": "10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le point 10.4 concerne l'autorisation d'une demande de modification d'affichage à un immeuble cité au 1224 rue Principale.",
+   "excerpt": "10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le point 10.5 concerne l'autorisation d'une demande de travaux sur un immeuble cité situé au 1484, rue Principale.",
+   "excerpt": "10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation"
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le projet d'ordre du jour prévoit l'adoption du règlement 583-2026 à la rubrique 7.4."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 8.5 de l'ordre du jour prévoit explicitement l'exercice du droit de préemption pour la vente du lot 6 141 751."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 10.1 concerne la démolition de l'immeuble situé au 16, rue de l'Île-Majeau."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 10.2 inscrit à l'ordre du jour l'autorisation d'une demande de dérogation mineure pour le 296 rang de la Rivière Nord."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point 10.3 porte sur l'autorisation d'une demande de dérogation mineure au 28 rue Beaucage."
+   },
+   {
+    "act": "A06",
+    "reason": "Le point 10.4 concerne l'autorisation d'une demande de modification d'affichage à un immeuble cité au 1224 rue Principale."
+   },
+   {
+    "act": "A07",
+    "reason": "Le point 10.5 concerne l'autorisation d'une demande de travaux sur un immeuble cité situé au 1484, rue Principale."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1940,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2540,
+   "outputTokens": 503,
+   "totalTokens": 3043
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1782
+  },
+  "inputSha256": "038623c1d9c3adc40c08e1033ff66a7bde0c7b73a4437ae7c8ac5e438e239663"
+ }
+}

@@ -1,0 +1,91 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab7f365aea8bbf9f79e4bcc5b9eb9134a19b1ef80095576db2136355d052218d",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Acte foncier explicite attesté au point 3.6 de la page 1 concernant l'achat des lots liés à l'église, conforme aux inclusions.\"},{\"item\":\"i02\",\"choice\":\"absent\",\"reason\":\"L'état de vente pour défaut de paiement de taxes relève des finances municipales et ne comporte aucun objet foncier explicite.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution d'appui CPTAQ pour une fin autre que l'agriculture attestée au point 8.1 en page 2, conforme au domaine de l'urbanisme.\"},{\"item\":\"i04\",\"choice\":\"absent\",\"reason\":\"Le règlement sur les nuisances ne relève pas de l'urbanisme et constitue un fait hors gold dont la citation est de surcroît tronquée.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"L'état de vente pour taxes relève des finances municipales sans désignation foncière explicite, hors du périmètre du gold.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Point financier de recouvrement de taxes sans objet foncier explicite, exclu du gold d'urbanisme.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Règlement sur les nuisances hors du périmètre de l'urbanisme, citation tronquée et doublon non admissible.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "absent"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Acte foncier explicite attesté au point 3.6 de la page 1 concernant l'achat des lots liés à l'église, conforme aux inclusions."
+  },
+  {
+   "item": "i02",
+   "choice": "absent",
+   "reason": "L'état de vente pour défaut de paiement de taxes relève des finances municipales et ne comporte aucun objet foncier explicite."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution d'appui CPTAQ pour une fin autre que l'agriculture attestée au point 8.1 en page 2, conforme au domaine de l'urbanisme."
+  },
+  {
+   "item": "i04",
+   "choice": "absent",
+   "reason": "Le règlement sur les nuisances ne relève pas de l'urbanisme et constitue un fait hors gold dont la citation est de surcroît tronquée."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "L'état de vente pour taxes relève des finances municipales sans désignation foncière explicite, hors du périmètre du gold."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Point financier de recouvrement de taxes sans objet foncier explicite, exclu du gold d'urbanisme."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Règlement sur les nuisances hors du périmètre de l'urbanisme, citation tronquée et doublon non admissible."
+  }
+ ]
+}

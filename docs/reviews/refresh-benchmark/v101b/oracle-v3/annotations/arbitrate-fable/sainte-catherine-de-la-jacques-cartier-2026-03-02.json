@@ -1,0 +1,178 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "da997eb99eac78ef15f719aee853f9267939862b5438972042c00fcc82790f1b",
+ "verificationSha256": "a2efd33835e39d6a6b9d59e5c00c8605134221e422f7955815a09effbaf7d3f4",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"L'ordre du jour porte « Demande de dérogation mineure : 3, rue Ernest-Piché - REPORTÉ » (p. 2) et la résolution 089-2026 adopte l'ordre du jour « en reportant toutefois le point 5.1 à une séance ultérieure » : l'objet foncier est explicite et le report est une étape constatée dans ce document, à traiter comme un point prévu (stage inconnu), au même titre qu'un refus reste une unité ; la position C confond absence de décision sur le fond et absence de fait extractible.\"},{\"item\":\"a02\",\"choice\":\"absent\",\"reason\":\"La résolution 124-2026 (section SPORTS, LOISIRS, CULTURE ET VIE COMMUNAUTAIRE) autorise un contrat de location saisonnier « afin de fournir un service de formation et de location de planches à pagaie à l’été 2026 » : il s'agit d'un contrat de service récréatif, exclu du rappel par la règle « Exclusions du rappel: ... marchés de services, loisirs », et non d'un acte foncier (servitude, cession, acquisition) ; la position A est écartée car la seule mention d'un bâtiment et d'un emplacement ne transforme pas une concession de loisirs en objet foncier du profil.\"},{\"item\":\"a03\",\"choice\":\"absent\",\"reason\":\"La résolution 099-2026 n'engage la Ville qu'à « amorcer ... les modifications réglementaires nécessaires pour autoriser l’usage prévu dans la zone concernée » sans nommer ni règlement ni zone : il manque l'« objet réglementaire ou foncier explicite » exigé par la règle d'unité, et aucune étape (avis de motion, projet, adoption) n'est constatée dans ce document, seulement une intention future ; conformément à « Un fait complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur », il ne crée pas d'unité gold, contrairement à la position A.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Report de l’examen de la dérogation mineure — 3, rue Ernest-Piché",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "3, rue Ernest-Piché",
+      "page": 2,
+      "citation": "Demande de dérogation mineure : 3, rue Ernest-Piché - REPORTÉ",
+      "anchor": "3, rue Ernest-Piché",
+      "spanStart": 1146,
+      "spanEnd": 1207
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point relatif au 3, rue Ernest-Piché est marqué « REPORTÉ » à la page 2, et la résolution 089-2026 confirme son report à une séance ultérieure, sans décision sur la dérogation."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le point 5.1 de l'ordre du jour (page 2) porte « Demande de dérogation mineure : 3, rue Ernest-Piché - REPORTÉ » et la résolution 089-2026 confirme le report; un point d'ordre du jour reporté est une unité prévue avec objet foncier explicite, étape inconnue."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'examen du point 5.1 a été reporté lors de l'adoption de l'ordre du jour et aucune décision d'urbanisme n'a été prise dans cette séance."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u10",
+   "verificationItem": "i10",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de location à Yogi Nomade — bâtiment et emplacement au parc du Grand-Héron, été 2026",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "parc du Grand-Héron",
+      "page": 29,
+      "citation": "ET RÉSOLU d’autoriser le directeur du Service sports, loisirs, culture et vie communautaire à signer un contrat de location d’un bâtiment et d’un emplacement dans le parc du Grand-Héron",
+      "anchor": "parc du Grand-Héron",
+      "spanStart": 560,
+      "spanEnd": 745
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 124-2026 autorise à la page 29 la location d’un bâtiment et d’un emplacement à Yogi Nomade, soit un acte foncier explicite même si sa destination est récréative."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "Contrat de location d'un bâtiment au parc du Grand-Héron pour location de planches à pagaie (résolution 124-2026) relève des loisirs et d'un marché de services, exclus du rappel; de plus doublon de i12."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Ce bail saisonnier pour la location de planches à pagaie relève des loisirs et est expressément exclu du périmètre."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u11",
+   "verificationItem": "i11",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Engagement à amorcer les modifications réglementaires (LAU) pour autoriser l’usage parc solaire — projet Innergex, résolution 099-2026",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "modifications réglementaires parc solaire",
+      "page": 9,
+      "citation": "s’engage à amorcer, suivant la procédure prescrite par la Loi sur l’aménagement et l’urbanisme, les modifications réglementaires nécessaires pour autoriser l’usage prévu dans la zone concernée",
+      "anchor": "les modifications réglementaires nécessaires",
+      "spanStart": 606,
+      "spanEnd": 798
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 099-2026 engage expressément la Ville, à la page 9, à amorcer les modifications réglementaires nécessaires à l’usage parc solaire, sans constituer un avis de motion ni une adoption de règlement."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "L'engagement à amorcer « les modifications réglementaires nécessaires pour autoriser l’usage prévu dans la zone concernée » n'identifie ni règlement ni zone : pas d'objet réglementaire explicite, fait complémentaire à signaler hors gold."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Cette résolution d'appui à un tiers contenant un engagement futur ne constitue pas un objet réglementaire ou foncier explicite adopté lors de cette séance."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "L'ordre du jour porte « Demande de dérogation mineure : 3, rue Ernest-Piché - REPORTÉ » (p. 2) et la résolution 089-2026 adopte l'ordre du jour « en reportant toutefois le point 5.1 à une séance ultérieure » : l'objet foncier est explicite et le report est une étape constatée dans ce document, à traiter comme un point prévu (stage inconnu), au même titre qu'un refus reste une unité ; la position C confond absence de décision sur le fond et absence de fait extractible."
+  },
+  {
+   "item": "a02",
+   "choice": "absent",
+   "reason": "La résolution 124-2026 (section SPORTS, LOISIRS, CULTURE ET VIE COMMUNAUTAIRE) autorise un contrat de location saisonnier « afin de fournir un service de formation et de location de planches à pagaie à l’été 2026 » : il s'agit d'un contrat de service récréatif, exclu du rappel par la règle « Exclusions du rappel: ... marchés de services, loisirs », et non d'un acte foncier (servitude, cession, acquisition) ; la position A est écartée car la seule mention d'un bâtiment et d'un emplacement ne transforme pas une concession de loisirs en objet foncier du profil."
+  },
+  {
+   "item": "a03",
+   "choice": "absent",
+   "reason": "La résolution 099-2026 n'engage la Ville qu'à « amorcer ... les modifications réglementaires nécessaires pour autoriser l’usage prévu dans la zone concernée » sans nommer ni règlement ni zone : il manque l'« objet réglementaire ou foncier explicite » exigé par la règle d'unité, et aucune étape (avis de motion, projet, adoption) n'est constatée dans ce document, seulement une intention future ; conformément à « Un fait complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur », il ne crée pas d'unité gold, contrairement à la position A."
+  }
+ ]
+}

@@ -1,0 +1,61 @@
+{
+ "documentId": "daveluyville-2026-05-04",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "06afa8b814e0d9623dfd8f1e5c5588565305993d4ac6e7a338776e5ffb4bff9f",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-86, page 6, reporte explicitement l’adoption de la dérogation 2026-DM-002 jusqu’à l’adoption définitive du règlement R-2026-154; l’étape « inconnu » conserve ce report sans prétendre à une approbation.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution de la page 8 refuse explicitement la dérogation 2026-DM-003 tout en maintenant le dossier ouvert sans frais, conformément à la règle selon laquelle les refus restent des refus.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La page 8 atteste l’avis de motion du règlement R-2026-154 visant l’assouplissement des normes de droits acquis, unité distincte du dépôt du projet.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La page 8 indique que le projet de règlement R-2026-154 est également déposé, conformément à la règle séparant l’avis de motion et le projet actuels.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-86, page 6, reporte explicitement l’adoption de la dérogation 2026-DM-002 jusqu’à l’adoption définitive du règlement R-2026-154; l’étape « inconnu » conserve ce report sans prétendre à une approbation."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution de la page 8 refuse explicitement la dérogation 2026-DM-003 tout en maintenant le dossier ouvert sans frais, conformément à la règle selon laquelle les refus restent des refus."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 8 atteste l’avis de motion du règlement R-2026-154 visant l’assouplissement des normes de droits acquis, unité distincte du dépôt du projet."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 8 indique que le projet de règlement R-2026-154 est également déposé, conformément à la règle séparant l’avis de motion et le projet actuels."
+  }
+ ]
+}

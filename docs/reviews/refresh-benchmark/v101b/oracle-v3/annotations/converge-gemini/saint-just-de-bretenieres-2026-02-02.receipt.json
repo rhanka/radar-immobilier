@@ -1,0 +1,37 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4ed3478f674f30796abf8eaa9483b57afddcd46aeced0b635394e2896f556053",
+ "inputSha256": "53fe0a01c363ef0c8fc9bf3c353e81180b05490f15f10021b083e9ae24819d99",
+ "responseSha256": "15cac3d9147207d61096ef24da2413840b7e8199945d9911efd67d68a68fb172",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 35304,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 8948,
+  "outputTokens": 169,
+  "totalTokens": 22353,
+  "thoughtsTokenCount": 13236
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 35169,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:46:18.009Z"
+}

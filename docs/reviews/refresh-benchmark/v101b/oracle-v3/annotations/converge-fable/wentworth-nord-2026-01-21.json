@@ -1,0 +1,81 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "557b52ba9da86b3f1031f029f78af38c91c213d7117f49d8249dcc742b14e92d",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-01-3809 en page 9 atteste « RÉSOLU À L'UNANIMITÉ ... d'accepter la demande de dérogation mineure 2025-0418 visant à autoriser la création d'une emprise de rue » ; étape derogation_mineure, objet et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Acte foncier explicite (contribution pour fins de parcs liée au permis de lotissement 2025-9029) résolu en page 9 : « RÉSOLU ... de demander que la contribution ... soit acquittée en argent pour un montant de 12 302.60 $ » ; citation du titre 8.4 et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le greffier dépose en page 11 le certificat d'enregistrement référendaire pour le « Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage », règlement distinct explicitement nommé ; le dépôt de certificat ne correspond à aucune étape listée, d'où inconnu.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Règlement distinct explicitement nommé en page 11 : « Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage n°2017-498 afin d'interdire l'usage complémentaire à un usage résidentiel » ; citation, objet et page exacts, étape inconnu pour un dépôt de certificat.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Règlement distinct explicitement nommé en page 11 : « Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage n°2017-498 afin d'interdire l'usage complémentaire à un usage résidentiel » ; un nœud groupé peut couvrir plusieurs unités explicitement nommées, chacune est légitime.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Acte foncier explicite (servitude de conservation réelle et perpétuelle sur les lots 5 589 168, 6 312 664, etc.) dont l'entente de suivi est approuvée et la signature autorisée par la résolution 2026-01-3807 en page 7 ; v1 et v2 sont identiques hors ancre, toutes deux attestées, la version initiale est retenue.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-3809 en page 9 atteste « RÉSOLU À L'UNANIMITÉ ... d'accepter la demande de dérogation mineure 2025-0418 visant à autoriser la création d'une emprise de rue » ; étape derogation_mineure, objet et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Acte foncier explicite (contribution pour fins de parcs liée au permis de lotissement 2025-9029) résolu en page 9 : « RÉSOLU ... de demander que la contribution ... soit acquittée en argent pour un montant de 12 302.60 $ » ; citation du titre 8.4 et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le greffier dépose en page 11 le certificat d'enregistrement référendaire pour le « Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage », règlement distinct explicitement nommé ; le dépôt de certificat ne correspond à aucune étape listée, d'où inconnu."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Règlement distinct explicitement nommé en page 11 : « Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage n°2017-498 afin d'interdire l'usage complémentaire à un usage résidentiel » ; citation, objet et page exacts, étape inconnu pour un dépôt de certificat."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Règlement distinct explicitement nommé en page 11 : « Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage n°2017-498 afin d'interdire l'usage complémentaire à un usage résidentiel » ; un nœud groupé peut couvrir plusieurs unités explicitement nommées, chacune est légitime."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Acte foncier explicite (servitude de conservation réelle et perpétuelle sur les lots 5 589 168, 6 312 664, etc.) dont l'entente de suivi est approuvée et la signature autorisée par la résolution 2026-01-3807 en page 7 ; v1 et v2 sont identiques hors ancre, toutes deux attestées, la version initiale est retenue."
+  }
+ ]
+}

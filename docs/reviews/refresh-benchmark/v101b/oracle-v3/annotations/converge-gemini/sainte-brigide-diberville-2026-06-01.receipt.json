@@ -1,0 +1,37 @@
+{
+ "documentId": "sainte-brigide-diberville-2026-06-01",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab615b0fbb57aa6dba4a51c11a3c25f6858f017c575399590925de3f9be23c82",
+ "inputSha256": "e8ef80486d9eabfb7d8c9dd25fbc40ef3809d9e87fd1dea4a0aefb7fd9d0bae1",
+ "responseSha256": "92206c8442fc57913786c00ce39aaf36e2d8a33c4758f64bb8814512217a053c",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 36987,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2548,
+  "outputTokens": 267,
+  "totalTokens": 15625,
+  "thoughtsTokenCount": 12810
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 36810,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:45:05.135Z"
+}

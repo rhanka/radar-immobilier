@@ -1,0 +1,37 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "b5e36b8255342179d05e430ddadd0cd954799d82ef1a0c671356667e582e30a7",
+ "inputSha256": "10d13b9903833dbeb6223dab38c5bf40c9fc877a8e96a307dfa81d7dbe9522e4",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 69161,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 22851,
+  "outputTokens": 4,
+  "totalTokens": 46173,
+  "thoughtsTokenCount": 23318
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 32768,
+  "httpStatus": 200,
+  "durationMs": 68966,
+  "requestId": null
+ },
+ "at": "2026-09-18T13:56:17.044Z"
+}

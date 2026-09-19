@@ -1,0 +1,13 @@
+{
+ "id": "bedford--brome-missisquoi-2026-06-02",
+ "rc": 0,
+ "latencyMs": 172486,
+ "inputTokens": 2,
+ "outputTokens": 18377,
+ "cacheRead": 0,
+ "cacheCreate": 17098,
+ "costUsd": 0.642997,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 34522
+}

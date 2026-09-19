@@ -1,0 +1,122 @@
+{
+ "documentId": "abercorn-2026-03-30",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "210a58664466100068b884315b5e7ec68928988e58abc2bec796a479185af2e4",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-rues-principales"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Adhésion au réseau Rues Principales",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D’adhérer au réseau Rues Principales au prix de 630 $ et d’autoriser\nmadame la conseillère Annik Alder à participer au colloque qui se tiendra à"
+      },
+      {
+       "page": 3,
+       "excerpt": "D’adhérer au réseau Rues Principales au prix de 630 $ et d’autoriser\nmadame la conseillère Annik Alder à participer au colloque qui se tiendra à\nMontréal le 15 avril prochain et de rembourser les frais de participation à\ncette activité conformément à la réglementation."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-tecq"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Approbation de la programmation de travaux TECQ 2024-2028",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Que la Municipalité approuve le contenu et autorise l’envoi au ministère\ndes Aﬀaires municipales et de l’Habitation de la programmation de travaux"
+      },
+      {
+       "page": 4,
+       "excerpt": "Que la Municipalité s’engage à réaliser les investissements autonomes qui\nlui sont imposés pour l’ensemble des cinq années du programme;"
+      },
+      {
+       "page": 3,
+       "excerpt": "Que la Municipalité approuve le contenu et autorise l’envoi au ministère\ndes Aﬀaires municipales et de l’Habitation de la programmation de travaux\nci-jointe et de tous les autres documents exigés par le Ministère en vue de"
+      },
+      {
+       "page": 4,
+       "excerpt": "Que la Municipalité s’engage à déposer annuellement une mise à jour de\nsa programmation de travaux durant la période du 1er octobre au 15\nfévrier inclusivement;\nQue la Municipalité s’engage à réaliser les investissements autonomes qui\nlui sont imposés pour l’ensemble des cinq années du programme;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une adhésion à un organisme et d'une autorisation de participation à un colloque, ce qui relève de la vie associative et des représentations municipales et non d'un acte réglementaire d'urbanisme.\",\"excerpt\":\"D’adhérer au réseau Rues Principales au prix de 630 $ et d’autoriser madame la conseillère Annik Alder à participer au colloque\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution approuvant la programmation de travaux d'infrastructures dans le cadre du programme TECQ 2024-2028.\",\"excerpt\":\"Que la Municipalité approuve le contenu et autorise l’envoi au ministère des Aﬀaires municipales et de l’Habitation de la programmation de travaux ci-jointe\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une adhésion à un organisme et d'une autorisation de participation à un colloque, ce qui relève de la vie associative et des représentations municipales et non d'un acte réglementaire d'urbanisme.",
+   "excerpt": "D’adhérer au réseau Rues Principales au prix de 630 $ et d’autoriser madame la conseillère Annik Alder à participer au colloque"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution approuvant la programmation de travaux d'infrastructures dans le cadre du programme TECQ 2024-2028.",
+   "excerpt": "Que la Municipalité approuve le contenu et autorise l’envoi au ministère des Aﬀaires municipales et de l’Habitation de la programmation de travaux ci-jointe"
+  }
+ ],
+ "filter": {
+  "acts": 2,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Il s'agit d'une adhésion à un organisme et d'une autorisation de participation à un colloque, ce qui relève de la vie associative et des représentations municipales et non d'un acte réglementaire d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A02",
+    "reason": "Le conseil adopte une résolution approuvant la programmation de travaux d'infrastructures dans le cadre du programme TECQ 2024-2028."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1563,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3362,
+   "outputTokens": 158,
+   "totalTokens": 3520
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1427
+  },
+  "inputSha256": "b43dec45b82c012cd6a75922ec939e7ad2284cdc9f14d5484630fa2e33cb62b0"
+ }
+}

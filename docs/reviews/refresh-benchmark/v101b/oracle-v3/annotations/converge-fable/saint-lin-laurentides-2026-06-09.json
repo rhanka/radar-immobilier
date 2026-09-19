@@ -1,0 +1,211 @@
+{
+ "documentId": "saint-lin-laurentides-2026-06-09",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "078c235b2de7896a0e3c1790e777f3bb2ca17e540bace0933f6c1edb783788a8",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Point 4.2 de l'ordre du jour (page 1) attesté mot pour mot : « Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335 », unité prévue avec objet foncier explicite et étape derogation_mineure.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Point 4.3 (page 1) attesté : « Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335 », citation, objet, étape et page exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Point 4.4 (page 1) attesté : « Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche », étape derogation_mineure et objet explicite.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 4.5 (page 1) attesté : PIIA pour l'agrandissement du bâtiment commercial au lot 6 663 628 / 1510, route 335 ; les petits PIIA sont inclus et il s'agit d'un fait distinct de la dérogation mineure au même lot.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Point 4.6 (page 1) attesté : « PIIA / Ajout d'enseignes pour le commerce Planète Piscine / Lot numéro 6 579 952 / 70, route 335 », fait distinct du point 4.7 (autre enseigne, autre commerce).\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Point 4.7 (page 1) attesté : « PIIA / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot numéro 6 579 952 / 70, route 335 », point d'ordre du jour distinct, donc pas un doublon même type/même fait.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Point 4.8 (page 1) attesté : « Engagement à acquérir le terrain ... situé au 60, rue Lacroix », acte foncier explicite (acquisition de terrain) inclus au rappel, prévu à l'ordre du jour.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Point 4.10 (page 2) « Acceptation finale et offre de cession / Lots numéro 6 553 599, ... » : lot explicitement nommé dans un acte foncier de cession, unité prévue conforme à la règle du nœud groupé couvrant plusieurs unités explicitement nommées.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Lot 5 137 605 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Lot 5 137 606 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Lot 5 429 185 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Lot 5 137 659 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"Lot 5 429 209 explicitement nommé au point 4.10 (page 2, coupé par un saut de ligne « 5 429 / 209 » dans le texte), acte foncier de cession prévu.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"Lot 5 137 708 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"Lot 6 553 600 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"Lot 6 553 597 explicitement nommé au point 4.10 (page 2, « 6 553 600 et 6 553 597 »), acte foncier de cession prévu, citation exacte.\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"Point 4.11 (page 2) attesté : « Acte de vente / Lot numéro 3 570 038 / Rue Panneton », acte foncier explicite prévu à l'ordre du jour.\"},{\"item\":\"i18\",\"choice\":\"v1\",\"reason\":\"Point 4.12 (page 2) attesté : « Acte d'achat / Lot numéro 3 568 198 / 617, rue Lord », acte foncier explicite prévu, distinct du point 4.14 (indemnité de locataire).\"},{\"item\":\"i19\",\"choice\":\"v1\",\"reason\":\"Point 4.13 (page 2) attesté : « Acte de servitude / Installation, utilisation, entretien et réparation d'une conduite d'égout pluvial », servitude = acte foncier explicite inclus au rappel même sans lot cité.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Point 4.2 de l'ordre du jour (page 1) attesté mot pour mot : « Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335 », unité prévue avec objet foncier explicite et étape derogation_mineure."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Point 4.3 (page 1) attesté : « Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335 », citation, objet, étape et page exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Point 4.4 (page 1) attesté : « Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche », étape derogation_mineure et objet explicite."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 4.5 (page 1) attesté : PIIA pour l'agrandissement du bâtiment commercial au lot 6 663 628 / 1510, route 335 ; les petits PIIA sont inclus et il s'agit d'un fait distinct de la dérogation mineure au même lot."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Point 4.6 (page 1) attesté : « PIIA / Ajout d'enseignes pour le commerce Planète Piscine / Lot numéro 6 579 952 / 70, route 335 », fait distinct du point 4.7 (autre enseigne, autre commerce)."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Point 4.7 (page 1) attesté : « PIIA / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot numéro 6 579 952 / 70, route 335 », point d'ordre du jour distinct, donc pas un doublon même type/même fait."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Point 4.8 (page 1) attesté : « Engagement à acquérir le terrain ... situé au 60, rue Lacroix », acte foncier explicite (acquisition de terrain) inclus au rappel, prévu à l'ordre du jour."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Point 4.10 (page 2) « Acceptation finale et offre de cession / Lots numéro 6 553 599, ... » : lot explicitement nommé dans un acte foncier de cession, unité prévue conforme à la règle du nœud groupé couvrant plusieurs unités explicitement nommées."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Lot 5 137 605 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Lot 5 137 606 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Lot 5 429 185 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Lot 5 137 659 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "Lot 5 429 209 explicitement nommé au point 4.10 (page 2, coupé par un saut de ligne « 5 429 / 209 » dans le texte), acte foncier de cession prévu."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Lot 5 137 708 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Lot 6 553 600 explicitement nommé au point 4.10 (page 2), acte foncier de cession prévu, citation exacte."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "Lot 6 553 597 explicitement nommé au point 4.10 (page 2, « 6 553 600 et 6 553 597 »), acte foncier de cession prévu, citation exacte."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "Point 4.11 (page 2) attesté : « Acte de vente / Lot numéro 3 570 038 / Rue Panneton », acte foncier explicite prévu à l'ordre du jour."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "Point 4.12 (page 2) attesté : « Acte d'achat / Lot numéro 3 568 198 / 617, rue Lord », acte foncier explicite prévu, distinct du point 4.14 (indemnité de locataire)."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "Point 4.13 (page 2) attesté : « Acte de servitude / Installation, utilisation, entretien et réparation d'une conduite d'égout pluvial », servitude = acte foncier explicite inclus au rappel même sans lot cité."
+  }
+ ]
+}

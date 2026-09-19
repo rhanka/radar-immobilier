@@ -1,0 +1,71 @@
+{
+ "documentId": "lac-tremblant-nord-2026-05-09",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1536c2b34552ec1fb18c6d610482fa9d18dc11b241440339c42041c15f77a12b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Point 9.2.1 de l'ordre du jour (page 1) cite textuellement la demande de renouvellement du permis COL230051, lot 5 011 332 ; un point d'ordre du jour est une unité « prévue » en urbanisme, étape inconnue faute de procédure nommée.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Point 9.2.2 (page 1) atteste mot pour mot la demande DPCOL250057 pour un garage détaché, lot 6 219 794 ; objet foncier explicite examiné au CCU, unité prévue distincte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Point 9.2.3 (page 1) atteste la demande DPCOL260003 pour une construction neuve, lot 6 219 789 ; citation exacte, unité prévue d'urbanisme.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 9.2.4 (page 1) atteste la demande DPCOL260002 pour un garage détaché, lot 5 011 370 ; citation et objet conformes au texte, unité prévue.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Point 9.2.5 (page 1) atteste la demande DPCOL240004 pour une construction neuve, lot 5 011 310 ; citation exacte (saut de ligne fusionné), unité prévue d'urbanisme au CCU.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Point 9.2.1 de l'ordre du jour (page 1) cite textuellement la demande de renouvellement du permis COL230051, lot 5 011 332 ; un point d'ordre du jour est une unité « prévue » en urbanisme, étape inconnue faute de procédure nommée."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Point 9.2.2 (page 1) atteste mot pour mot la demande DPCOL250057 pour un garage détaché, lot 6 219 794 ; objet foncier explicite examiné au CCU, unité prévue distincte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Point 9.2.3 (page 1) atteste la demande DPCOL260003 pour une construction neuve, lot 6 219 789 ; citation exacte, unité prévue d'urbanisme."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 9.2.4 (page 1) atteste la demande DPCOL260002 pour un garage détaché, lot 5 011 370 ; citation et objet conformes au texte, unité prévue."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Point 9.2.5 (page 1) atteste la demande DPCOL240004 pour une construction neuve, lot 5 011 310 ; citation exacte (saut de ligne fusionné), unité prévue d'urbanisme au CCU."
+  }
+ ]
+}

@@ -1,0 +1,234 @@
+{
+ "documentId": "saint-damien-2026-06-16",
+ "nextId": 6,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Décision prévue sur la dérogation mineure 2026-122 – 73, rue Messier",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-122",
+    "page": 1,
+    "citation": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier",
+    "anchor": "dérogation mineure 2026-122",
+    "spanStart": 1428,
+    "spanEnd": 1489
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Décision prévue sur la dérogation mineure 2026-122 – 73, rue Messier",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-122",
+      "page": 1,
+      "citation": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier",
+      "anchor": "dérogation mineure 2026-122",
+      "spanStart": 1428,
+      "spanEnd": 1489
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 12.2 porte explicitement sur une demande de dérogation mineure ; cet ordre du jour atteste un point prévu, non une décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Décision prévue sur la dérogation mineure 2026-133 – 3173, chemin du Ruisseau",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-133",
+    "page": 1,
+    "citation": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau",
+    "anchor": "dérogation mineure 2026-133",
+    "spanStart": 1490,
+    "spanEnd": 1560
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Décision prévue sur la dérogation mineure 2026-133 – 3173, chemin du Ruisseau",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-133",
+      "page": 1,
+      "citation": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau",
+      "anchor": "dérogation mineure 2026-133",
+      "spanStart": 1490,
+      "spanEnd": 1560
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 12.3 nomme une demande distincte de dérogation mineure, à inclure comme point prévu sans présumer son acceptation."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Approbation prévue au PIIA 2026-135 – 6710, rue Principale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-135",
+    "page": 1,
+    "citation": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale",
+    "anchor": "PIIA 2026-135",
+    "spanStart": 1561,
+    "spanEnd": 1627
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation prévue au PIIA 2026-135 – 6710, rue Principale",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-135",
+      "page": 1,
+      "citation": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale",
+      "anchor": "PIIA 2026-135",
+      "spanStart": 1561,
+      "spanEnd": 1627
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 12.4 prévoit l'examen d'une demande d'approbation au PIIA, objet expressément inclus dans le corrigé."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion prévu – règlement 804-1 modifiant le règlement 804 sur les camions de cuisine cantines temporaires",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "804-1",
+    "page": 2,
+    "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du",
+    "anchor": "règlement 804-1",
+    "spanStart": 255,
+    "spanEnd": 336
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion prévu – règlement 804-1 sur les camions de cuisine cantines temporaires",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "804-1",
+      "page": 2,
+      "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du règlement 804 portant sur les camions de cuisine cantines temporaires",
+      "anchor": "règlement 804-1",
+      "spanStart": 255,
+      "spanEnd": 406
+     }
+    },
+    {
+     "step": "fable-pass2",
+     "unit": {
+      "label": "Avis de motion prévu – règlement 804-1 modifiant le règlement 804 sur les camions de cuisine cantines temporaires",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "804-1",
+      "page": 2,
+      "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du",
+      "anchor": "règlement 804-1",
+      "spanStart": 255,
+      "spanEnd": 336
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 14.2 prévoit un avis de motion pour le règlement 804-1 encadrant les camions de cuisine cantines temporaires ; l'avis de motion constitue une unité distincte du projet."
+    },
+    {
+     "step": "fable-pass2",
+     "op": "correct",
+     "reason": "La citation courante fusionne deux lignes du texte (saut de ligne après « modification du ») et n'est donc pas recopiée à l'identique d'un seul tenant ; la citation corrigée reprend la première ligne du point 14.2 telle qu'elle figure en page 2."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Présentation prévue du projet de règlement 804-1 modifiant le règlement 804 sur les camions de cuisine cantines temporaires",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "804-1",
+    "page": 2,
+    "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du",
+    "anchor": "règlement 804-1",
+    "spanStart": 255,
+    "spanEnd": 336
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Présentation prévue du projet de règlement 804-1 sur les camions de cuisine cantines temporaires",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "804-1",
+      "page": 2,
+      "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du règlement 804 portant sur les camions de cuisine cantines temporaires",
+      "anchor": "règlement 804-1",
+      "spanStart": 255,
+      "spanEnd": 406
+     }
+    },
+    {
+     "step": "fable-pass2",
+     "unit": {
+      "label": "Présentation prévue du projet de règlement 804-1 modifiant le règlement 804 sur les camions de cuisine cantines temporaires",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "804-1",
+      "page": 2,
+      "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du",
+      "anchor": "règlement 804-1",
+      "spanStart": 255,
+      "spanEnd": 336
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 14.2 prévoit aussi la présentation du projet de règlement 804-1, étape à compter séparément de l'avis de motion."
+    },
+    {
+     "step": "fable-pass2",
+     "op": "correct",
+     "reason": "Même motif : la citation courante traverse un saut de ligne du texte source ; elle est remplacée par un extrait d'un seul tenant recopié à l'identique de la page 2, qui atteste la présentation prévue du projet de règlement 804-1 (unité distincte de l'avis de motion selon la règle 2)."
+    }
+   ]
+  }
+ ]
+}

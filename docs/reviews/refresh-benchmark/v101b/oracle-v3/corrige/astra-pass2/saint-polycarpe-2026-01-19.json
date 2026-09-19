@@ -1,0 +1,201 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "nextId": 6,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation prévue de démarches préliminaires — achat des lots liés à l’église",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "lots liés à l’église",
+    "page": 1,
+    "citation": "AUTORISATION - DÉMARCHES PRÉLIMINAIRES CONCERNANT L'ACHAT DES LOTS LIÉS À L’ÉGLISE",
+    "anchor": "L'ACHAT DES LOTS LIÉS À L’ÉGLISE",
+    "spanStart": 613,
+    "spanEnd": 695
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation prévue de démarches préliminaires — achat des lots liés à l’église",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "lots liés à l’église",
+      "page": 1,
+      "citation": "AUTORISATION - DÉMARCHES PRÉLIMINAIRES CONCERNANT L'ACHAT DES LOTS LIÉS À L’ÉGLISE",
+      "anchor": "L'ACHAT DES LOTS LIÉS À L’ÉGLISE",
+      "spanStart": 613,
+      "spanEnd": 695
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 3.6 prévoit des démarches préliminaires concernant un achat foncier explicite, sans constater une acquisition décidée."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "removed",
+   "current": {
+    "label": "Autorisation prévue de l’état relatif à la vente des immeubles pour défaut de paiement de taxes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "vente des immeubles",
+    "page": 1,
+    "citation": "AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES",
+    "anchor": "VENTE DES IMMEUBLES",
+    "spanStart": 1633,
+    "spanEnd": 1730
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation prévue de l’état relatif à la vente des immeubles pour défaut de paiement de taxes",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "vente des immeubles",
+      "page": 1,
+      "citation": "AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES",
+      "anchor": "VENTE DES IMMEUBLES",
+      "spanStart": 1633,
+      "spanEnd": 1730
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 5.2 prévoit une étape relative à des ventes foncières pour défaut de paiement de taxes, mais l’autorisation de l’état ne doit pas être présentée comme une vente réalisée."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "remove",
+     "reason": "Le point 5.2 (section FINANCES) porte sur l'état des immeubles à vendre pour défaut de paiement de taxes, une procédure de recouvrement fiscal sans objet foncier explicite (aucun lot, adresse ni immeuble nommé) ; il relève des comptes et rapports financiers exclus du rappel, non d'un acte foncier ou d'urbanisme."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue d’une résolution d’appui à la CPTAQ — fin autre que l’agriculture",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "autorisation non agricole",
+    "page": 2,
+    "citation": "RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN AUTRE QUE L’AGRICULTURE",
+    "anchor": "RÉSOLUTION D’APPUI POUR LA CPTAQ",
+    "spanStart": 1041,
+    "spanEnd": 1129
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue d’une résolution d’appui à la CPTAQ — fin autre que l’agriculture",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "autorisation non agricole",
+      "page": 2,
+      "citation": "RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN AUTRE QUE L’AGRICULTURE",
+      "anchor": "RÉSOLUTION D’APPUI POUR LA CPTAQ",
+      "spanStart": 1041,
+      "spanEnd": 1129
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 8.1 prévoit une résolution d’appui concernant une utilisation non agricole, objet d’urbanisme à inclure sans présenter l’autorisation de la CPTAQ comme acquise."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion prévu — règlement 169-2019-01 remplaçant le règlement sur les nuisances",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "169-2019-01",
+    "page": 2,
+    "citation": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT LE RÈGLEMENT SUR LES NUISANCES (RMH 450",
+    "anchor": "RÈGLEMENT NO 169-2019-01",
+    "spanStart": 1531,
+    "spanEnd": 1640
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion prévu — règlement 169-2019-01 remplaçant le règlement sur les nuisances",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "169-2019-01",
+      "page": 2,
+      "citation": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT LE RÈGLEMENT SUR LES NUISANCES (RMH 450",
+      "anchor": "RÈGLEMENT NO 169-2019-01",
+      "spanStart": 1531,
+      "spanEnd": 1640
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 10.1 prévoit un avis de motion pour un règlement explicite sur les nuisances; la répétition du libellé « AVIS DE MOTION » ne crée pas une seconde unité."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Autorisation prévue de l’état relatif à la vente des immeubles pour défaut de paiement de taxes municipales",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "vente pour défaut de taxes",
+    "page": 1,
+    "citation": "AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES",
+    "anchor": "VENTE DES IMMEUBLES",
+    "spanStart": 1633,
+    "spanEnd": 1730
+   },
+   "versions": [
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Autorisation prévue de l’état relatif à la vente des immeubles pour défaut de paiement de taxes municipales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "vente pour défaut de taxes",
+      "page": 1,
+      "citation": "AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES",
+      "anchor": "VENTE DES IMMEUBLES",
+      "spanStart": 1633,
+      "spanEnd": 1730
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass2",
+     "op": "add",
+     "reason": "Le point 5.2 prévoit une étape explicite de procédure foncière liée à la vente d’immeubles pour défaut de paiement de taxes, sans constater une vente décidée."
+    }
+   ]
+  }
+ ]
+}

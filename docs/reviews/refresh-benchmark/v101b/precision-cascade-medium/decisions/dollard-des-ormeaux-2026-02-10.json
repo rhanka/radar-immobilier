@@ -1,0 +1,360 @@
+{
+ "documentId": "dollard-des-ormeaux-2026-02-10",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "5c64cb56786637197851bf90d1a70cea855f4982600ee1ac5dba8f43c12e0436",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-r-2026-199-1"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "R-2026-199-1 — Modification du règlement de zonage",
+     "stage": "1er_projet",
+     "objet": "R-2026-199-1",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199"
+      },
+      {
+       "page": 2,
+       "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199"
+      },
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter\ndivers ajustements, clarifications, améliorations et corrections (SD2026-400-2804)"
+      },
+      {
+       "page": 2,
+       "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers\najustements, clarifications, améliorations et corrections (SD2026-400-2805)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-r-2025-199"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "R-2025-199 — Règlement de zonage",
+     "stage": null,
+     "objet": "R-2025-199",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199"
+      },
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter\ndivers ajustements, clarifications, améliorations et corrections (SD2026-400-2804)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-r-2026-084-1"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "R-2026-084-1 — Rétention des eaux de ruissellement",
+     "stage": "projet",
+     "objet": "R-2026-084-1",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts"
+      },
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions\nrelatives à la rétention des eaux de ruissellement (SD2026-200-2822)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-r-2014-084"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "R-2014-084 — Utilisation des égouts",
+     "stage": null,
+     "objet": "R-2014-084",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts"
+      },
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions\nrelatives à la rétention des eaux de ruissellement (SD2026-200-2822)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-r-2026-216"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "R-2026-216 — Ententes pour travaux municipaux",
+     "stage": null,
+     "objet": "R-2026-216",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux"
+      },
+      {
+       "page": 2,
+       "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-50-1"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion et dépôt du premier projet R-2026-199-1 à l’ordre du jour",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199"
+      },
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter\ndivers ajustements, clarifications, améliorations et corrections (SD2026-400-2804)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-50-2"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du premier projet R-2026-199-1 à l’ordre du jour",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199"
+      },
+      {
+       "page": 2,
+       "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers\najustements, clarifications, améliorations et corrections (SD2026-400-2805)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-50-3"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion et dépôt du projet R-2026-084-1 à l’ordre du jour",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts"
+      },
+      {
+       "page": 2,
+       "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions\nrelatives à la rétention des eaux de ruissellement (SD2026-200-2822)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-50-4"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du règlement R-2026-216 à l’ordre du jour",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux"
+      },
+      {
+       "page": 2,
+       "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le premier projet de règlement R-2026-199-1 modifiant le règlement de zonage est inscrit à l'ordre du jour.\",\"excerpt\":\"Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage R-2025-199 n'est cité qu'à titre de référence comme règlement modifié, sans acte propre sur celui-ci.\",\"excerpt\":\"Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du projet de règlement R-2026-084-1 sur la rétention des eaux de ruissellement figurent à l'ordre du jour.\",\"excerpt\":\"Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions relatives à la rétention des eaux de ruissell\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement R-2014-084 n'est mentionné que comme le règlement antérieur modifié.\",\"excerpt\":\"Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement R-2026-216 sur les ententes pour travaux municipaux est inscrite à l'ordre du jour.\",\"excerpt\":\"Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux (SD2026-400-2799)\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du premier projet de règlement R-2026-199-1 sont inscrits au point 50.1.\",\"excerpt\":\"Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du premier projet du règlement R-2026-199-1 figure au point 50.2 de l'ordre du jour.\",\"excerpt\":\"Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du projet R-2026-084-1 figurent au point 50.3 de l'ordre du jour.\",\"excerpt\":\"Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement R-2026-216 figure au point 50.4 de l'ordre du jour.\",\"excerpt\":\"Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux (SD2026-400-2799)\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le premier projet de règlement R-2026-199-1 modifiant le règlement de zonage est inscrit à l'ordre du jour.",
+   "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage R-2025-199 n'est cité qu'à titre de référence comme règlement modifié, sans acte propre sur celui-ci.",
+   "excerpt": "Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du projet de règlement R-2026-084-1 sur la rétention des eaux de ruissellement figurent à l'ordre du jour.",
+   "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions relatives à la rétention des eaux de ruissell"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement R-2014-084 n'est mentionné que comme le règlement antérieur modifié.",
+   "excerpt": "Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement R-2026-216 sur les ententes pour travaux municipaux est inscrite à l'ordre du jour.",
+   "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux (SD2026-400-2799)"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du premier projet de règlement R-2026-199-1 sont inscrits au point 50.1.",
+   "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "L'adoption du premier projet du règlement R-2026-199-1 figure au point 50.2 de l'ordre du jour.",
+   "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du projet R-2026-084-1 figurent au point 50.3 de l'ordre du jour.",
+   "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement R-2026-216 figure au point 50.4 de l'ordre du jour.",
+   "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux (SD2026-400-2799)"
+  }
+ ],
+ "filter": {
+  "acts": 9,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement de zonage R-2025-199 n'est cité qu'à titre de référence comme règlement modifié, sans acte propre sur celui-ci."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement R-2014-084 n'est mentionné que comme le règlement antérieur modifié."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le premier projet de règlement R-2026-199-1 modifiant le règlement de zonage est inscrit à l'ordre du jour."
+   },
+   {
+    "act": "A03",
+    "reason": "L'avis de motion et le dépôt du projet de règlement R-2026-084-1 sur la rétention des eaux de ruissellement figurent à l'ordre du jour."
+   },
+   {
+    "act": "A05",
+    "reason": "L'adoption du règlement R-2026-216 sur les ententes pour travaux municipaux est inscrite à l'ordre du jour."
+   },
+   {
+    "act": "A06",
+    "reason": "L'avis de motion et le dépôt du premier projet de règlement R-2026-199-1 sont inscrits au point 50.1."
+   },
+   {
+    "act": "A07",
+    "reason": "L'adoption du premier projet du règlement R-2026-199-1 figure au point 50.2 de l'ordre du jour."
+   },
+   {
+    "act": "A08",
+    "reason": "L'avis de motion et le dépôt du projet R-2026-084-1 figurent au point 50.3 de l'ordre du jour."
+   },
+   {
+    "act": "A09",
+    "reason": "L'adoption du règlement R-2026-216 figure au point 50.4 de l'ordre du jour."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 2,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2637,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4630,
+   "outputTokens": 834,
+   "totalTokens": 5464
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2513
+  },
+  "inputSha256": "688d4856f1e73c9de46b60ea7860b5069e17548faffc54a24016bf562cadf4eb"
+ }
+}

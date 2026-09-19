@@ -1,0 +1,111 @@
+{
+ "documentId": "stratford-2026-04-20",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b060a30ca906a62ca089de5bcbd2b50be6f30be819ba2a6c011fb5dbd200edc6",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 1 annonce une consultation publique sur le règlement 1257, ce qui atteste cette étape prévue, distincte du deuxième projet.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 1 prévoit explicitement l’adoption du projet du règlement no 1256 relatif à la démolition d’immeubles, conformément à l’étape « projet_reglement ».\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 1 prévoit explicitement l’adoption du deuxième projet du règlement no 1257 créant la zone RU-13, conformément à l’étape « second_projet ».\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point « Bail bureau de poste » figure pour décision à la page 1 et constitue un objet foncier prévu, même non résidentiel, sans étape plus précise attestée.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"absent\",\n      \"reason\": \"La page 1 inscrit l’achat du terrain pour décision, mais n’annonce pas explicitement une adoption, de sorte que l’étape « adoption » proposée n’est pas attestée.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"absent\",\n      \"reason\": \"La vente de la lisière de terrain est prévue pour décision à la page 1, mais le texte ne précise pas l’étape « adoption » attribuée à cette version.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"absent\",\n      \"reason\": \"La servitude au 467 rang Beau-Lac est inscrite pour décision à la page 1, sans mention d’une adoption permettant de confirmer l’étape proposée.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 2 inscrit la demande de dérogation mineure concernant le lot 6 674 217, chemin Thompson, comme point prévu et non comme autorisation acquise.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 2 inscrit la demande de dérogation mineure au 405 rang Elgin, ce qui atteste l’objet et l’étape proposés à titre de décision prévue.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 1 annonce une consultation publique sur le règlement 1257, ce qui atteste cette étape prévue, distincte du deuxième projet."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 1 prévoit explicitement l’adoption du projet du règlement no 1256 relatif à la démolition d’immeubles, conformément à l’étape « projet_reglement »."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 1 prévoit explicitement l’adoption du deuxième projet du règlement no 1257 créant la zone RU-13, conformément à l’étape « second_projet »."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point « Bail bureau de poste » figure pour décision à la page 1 et constitue un objet foncier prévu, même non résidentiel, sans étape plus précise attestée."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "La page 1 inscrit l’achat du terrain pour décision, mais n’annonce pas explicitement une adoption, de sorte que l’étape « adoption » proposée n’est pas attestée."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "La vente de la lisière de terrain est prévue pour décision à la page 1, mais le texte ne précise pas l’étape « adoption » attribuée à cette version."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "La servitude au 467 rang Beau-Lac est inscrite pour décision à la page 1, sans mention d’une adoption permettant de confirmer l’étape proposée."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 2 inscrit la demande de dérogation mineure concernant le lot 6 674 217, chemin Thompson, comme point prévu et non comme autorisation acquise."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La page 2 inscrit la demande de dérogation mineure au 405 rang Elgin, ce qui atteste l’objet et l’étape proposés à titre de décision prévue."
+  }
+ ]
+}

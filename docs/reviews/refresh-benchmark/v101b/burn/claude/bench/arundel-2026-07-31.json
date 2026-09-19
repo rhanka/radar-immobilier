@@ -1,0 +1,13 @@
+{
+ "id": "arundel-2026-07-31",
+ "rc": 0,
+ "latencyMs": 19616,
+ "inputTokens": 2,
+ "outputTokens": 1325,
+ "cacheRead": 0,
+ "cacheCreate": 8545,
+ "costUsd": 0.123925,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 1206
+}

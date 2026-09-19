@@ -1,0 +1,96 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "d1ed7451a47600b6aa5e9f207270fb9f55194381545e6b286e457adff8642bb7",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de location du garage au 366, rue Principale\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"366, rue Principale\",\n        \"page\": 5,\n        \"citation\": \"QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé\\nau 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du\\ncamion de déneigement\",\n        \"anchor\": \"366, rue Principale\"\n      },\n      \"reason\": \"La résolution 104-05-2026 autorise la location d’un immeuble identifié, soit un acte foncier décidé à inclure même s’il est non résidentiel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Consultation publique prévue le 13 juillet 2026 sur le règlement 079-2026 abrogeant la citation patrimoniale de l’église Saint-Paul\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"079-2026\",\n        \"page\": 6,\n        \"citation\": \"consultation publique soit tenue le 13 juillet 2026 à 18 h 30\\nà la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour\\nprésenter et expliquer le projet de règlement numéro 079-2026\",\n        \"anchor\": \"règlement numéro 079-2026\"\n      },\n      \"reason\": \"La résolution 106-05-2026 fixe une consultation publique sur un règlement explicite, sans constater la tenue de cette consultation ni l’adoption du règlement.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"pratiques agroenvironnementales\",\n        \"page\": 6,\n        \"citation\": \"RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES\\nPRATIQUES AGROENVIRONNEMENTALES\",\n        \"anchor\": \"PRATIQUES AGROENVIRONNEMENTALES\"\n      },\n      \"reason\": \"La résolution 107-05-2026 demande la suspension et la révision de ce projet réglementaire touchant l’aménagement du territoire, ce qui constitue une intervention actuelle sur un objet explicite sans adoption du règlement.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt de l’avis spécial d’abrogation du règlement 046-2023 citant l’église Saint-Paul comme immeuble patrimonial\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"046-2023\",\n        \"page\": 8,\n        \"citation\": \"le greffier-trésorier présente et dépose l’avis spécial relatif\\nà l’abrogation du règlement numéro 046-2023 établissant la citation de l’église\\nSaint-Paul à titre d’immeuble patrimonial.\",\n        \"anchor\": \"règlement numéro 046-2023\"\n      },\n      \"reason\": \"Le texte constate le dépôt actuel d’un avis spécial visant l’abrogation d’un règlement patrimonial précis, et non un avis public générique ou un rappel historique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de location du garage au 366, rue Principale",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "366, rue Principale",
+    "page": 5,
+    "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé\nau 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du\ncamion de déneigement",
+    "anchor": "366, rue Principale"
+   },
+   "reason": "La résolution 104-05-2026 autorise la location d’un immeuble identifié, soit un acte foncier décidé à inclure même s’il est non résidentiel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Consultation publique prévue le 13 juillet 2026 sur le règlement 079-2026 abrogeant la citation patrimoniale de l’église Saint-Paul",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "079-2026",
+    "page": 6,
+    "citation": "consultation publique soit tenue le 13 juillet 2026 à 18 h 30\nà la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour\nprésenter et expliquer le projet de règlement numéro 079-2026",
+    "anchor": "règlement numéro 079-2026"
+   },
+   "reason": "La résolution 106-05-2026 fixe une consultation publique sur un règlement explicite, sans constater la tenue de cette consultation ni l’adoption du règlement."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "pratiques agroenvironnementales",
+    "page": 6,
+    "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES\nPRATIQUES AGROENVIRONNEMENTALES",
+    "anchor": "PRATIQUES AGROENVIRONNEMENTALES"
+   },
+   "reason": "La résolution 107-05-2026 demande la suspension et la révision de ce projet réglementaire touchant l’aménagement du territoire, ce qui constitue une intervention actuelle sur un objet explicite sans adoption du règlement."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt de l’avis spécial d’abrogation du règlement 046-2023 citant l’église Saint-Paul comme immeuble patrimonial",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "046-2023",
+    "page": 8,
+    "citation": "le greffier-trésorier présente et dépose l’avis spécial relatif\nà l’abrogation du règlement numéro 046-2023 établissant la citation de l’église\nSaint-Paul à titre d’immeuble patrimonial.",
+    "anchor": "règlement numéro 046-2023"
+   },
+   "reason": "Le texte constate le dépôt actuel d’un avis spécial visant l’abrogation d’un règlement patrimonial précis, et non un avis public générique ou un rappel historique."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

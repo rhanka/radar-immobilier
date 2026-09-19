@@ -1,0 +1,35 @@
+{
+ "documentId": "saint-lin-laurentides-2026-06-09",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "2ac821bad69b8a5b2f465b5c18a52a25c2c78165515c1d3fb996b2e35c5f2045",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3915,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4648,
+   "outputTokens": 1210,
+   "totalTokens": 5858
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3302
+  },
+  "inputSha256": "f390d2e6bf137c614b6a854e67a8477b1c231a05715545c09139a7a2b7ccbb4f"
+ },
+ "at": "2026-09-19T03:22:08.821Z"
+}

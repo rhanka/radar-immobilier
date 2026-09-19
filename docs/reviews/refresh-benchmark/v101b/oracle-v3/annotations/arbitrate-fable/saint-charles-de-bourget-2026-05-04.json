@@ -1,0 +1,19 @@
+{
+ "documentId": "saint-charles-de-bourget-2026-05-04",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "e7e8a29a1debee533e2558886cbf6e9897fe363620f2e4d3ae773b5e9df81f20",
+ "verificationSha256": "cade0d27754fabd521d94b995e4f51dd955c313e19c89defbf90678ec02dd2eb",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

@@ -1,0 +1,50 @@
+{
+ "documentId": "brossard-2026-04-28",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "96109f956cc65df2c54dfaa84531ee7959f88c17353215458b4eb07e22d08a49",
+ "error": "CLAUDE_CLI_FAILED rc=1",
+ "receipt": {
+  "transport": "claude-cli",
+  "rc": 1,
+  "latencyMs": 2129,
+  "isError": true,
+  "numTurns": 1,
+  "sessionId": "787ba3c8-f74f-417f-a51c-d77b24fa13e3",
+  "modelUsage": {},
+  "usage": {
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "input_tokens": 0,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "output_tokens": 0,
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "",
+   "iterations": [],
+   "speed": "standard"
+  },
+  "totalCostUsd": 0,
+  "durationApiMs": 0,
+  "stderrTail": ""
+ },
+ "at": "2026-09-18T14:53:23.623Z"
+}

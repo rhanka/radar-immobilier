@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "ping": "F",
+  "startedAt": "2026-09-14T05:35:17.507Z",
+  "completedAt": "2026-09-14T05:35:19.441Z",
+  "durationMs": 1934,
+  "project": "p1 (loadCodeAssist-derived; value redacted)",
+  "requested": {
+    "model": "gemini-3.8-flash-tiered",
+    "providerEffort": "LOW",
+    "maxOutputTokens": 64
+  },
+  "request": {
+    "method": "POST",
+    "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse",
+    "envelope": {
+      "project": "[REDACTED_LOAD_CODE_ASSIST_PROJECT]",
+      "request": {
+        "contents": [
+          {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Reply with PING_OK only."
+              }
+            ]
+          }
+        ],
+        "generationConfig": {
+          "maxOutputTokens": 64,
+          "thinkingConfig": {
+            "thinkingLevel": "LOW"
+          }
+        }
+      },
+      "model": "gemini-3.8-flash-tiered"
+    },
+    "headers": {
+      "Authorization": "Bearer [REDACTED]",
+      "User-Agent": "antigravity/cli/1.1.10 (aidev_client; os_type=linux; arch=amd64; auth_method=consumer)",
+      "Content-Type": "application/json",
+      "Accept": "text/event-stream",
+      "X-Goog-Api-Client": "gl-node/22.0.0 antigravity/0.1.0",
+      "Client-Metadata": "{\"ideType\":\"ANTIGRAVITY\",\"platform\":\"PLATFORM_UNSPECIFIED\",\"pluginType\":\"ANTIGRAVITY\"}"
+    }
+  },
+  "networkRequestOrdinal": 5,
+  "httpStatus": 200,
+  "message": "PING_OK",
+  "actual": {
+    "output": "PING_OK",
+    "pingExact": true
+  },
+  "networkRequestsSoFar": 5
+}

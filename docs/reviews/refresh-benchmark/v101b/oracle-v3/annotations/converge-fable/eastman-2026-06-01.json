@@ -1,0 +1,351 @@
+{
+ "documentId": "eastman-2026-06-01",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2b37e965112a20a9a323d6b23fe9c9468c0440785feb1a3723a57f1f51c14e16",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 4 atteste « Avis de motion est donné par le conseiller Serge Meunier … le règlement no 2026-07 » ; objet réglementaire explicite, étape avis_motion distincte du projet selon la règle « Avis de motion et projet actuels séparés ».\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 4 atteste la présentation du projet (« Une copie dudit projet de règlement est remise aux membres du conseil ») sous le titre cité ; étape projet_reglement distincte de l'avis de motion.\"},{\"item\":\"i03\",\"choice\":\"absent\",\"reason\":\"Le renouvellement du bail de la friperie ne désigne aucun objet foncier explicite (ni lot ni adresse) et relève de la gestion locative, hors « objet réglementaire ou foncier explicite » du profil.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 5 atteste « D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford » ; adoption d'un règlement territorial, citation et page exactes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 7 atteste « D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots 4 380 408 et 4 380 601 » ; acte foncier explicite adopté par résolution 2026-06-127.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Page 7 atteste la condition 3 « servitude publique et perpétuelle de passage piétonnier … grevant le lot 4 380 408 » ; objet foncier explicite distinct nommé dans la résolution groupée.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Page 7 atteste « Le don des lots 5 235 794 et 4 380 417 par le propriétaire au bénéfice de la Municipalité » ; cession foncière explicite, unité distincte couverte par le nœud groupé.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 7 atteste « Consentir à une servitude de circulation et de stationnement en faveur du fond dominant situé sur le lot 4 380 420 » ; objet foncier explicite distinct de la résolution adoptée.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Page 12, résolution 2026-06-140 : « DE REFUSER la présente demande de dérogation mineure … lot 4 380 003, 70 chemin de la Traverse » ; le refus reste un refus, citation exacte.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Page 12, résolution 2026-06-141 : « DE REFUSER … lots 4 380 313 et 4 380 322, 152 chemin Bellevue, zone V-2 » ; refus de dérogation mineure attesté, page et citation exactes.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Page 13, résolution 2026-06-142 : « D’ACCEPTER la présente demande de dérogation mineure … lot 2 235 834, 6 chemin de la Mésange » ; citation et page exactes.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Page 13, liste des PIIA acceptés : « La construction d’un bâtiment principal sur le lot 6 627 628, chemin Gilbert » ; unité explicitement nommée dans le nœud groupé.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « Le changement de couleur du revêtement extérieur du bâtiment principal sis sur le lot 2 239 886, 42 chemin de Petite-Rivière » parmi les PIIA acceptés.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « La construction d’un bâtiment accessoire sur le lot 2 239 886, 42 chemin de Petite-Rivière » ; fait distinct du changement de couleur sur le même lot, donc pas un doublon.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « La construction d’un bâtiment principal sur le lot 2 236 143, 88 chemin de l’Escalade » parmi les PIIA acceptés.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « La rénovation du bâtiment principal sis sur le lot 2 240 000, 50 chemin de la Feuillade » parmi les PIIA acceptés.\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « La rénovation du bâtiment accessoire sis sur le lot 2 240 000, 50 chemin de la Feuillade » ; fait distinct de la rénovation du bâtiment principal.\"},{\"item\":\"i18\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « La rénovation du bâtiment principal sis sur le lot 2 239 703, 103 chemin du Lac-d’Argent » parmi les PIIA acceptés.\"},{\"item\":\"i19\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « L’agrandissement du bâtiment principal sis sur le lot 2 239 988, 9 rue des Jacinthes » parmi les PIIA acceptés.\"},{\"item\":\"i20\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « La construction d’un bâtiment principal sur le lot 6 597 767, rue de la Butte » parmi les PIIA acceptés.\"},{\"item\":\"i21\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « La construction d’un bâtiment principal sur le lot 6 720 154, chemin des Étangs » parmi les PIIA acceptés.\"},{\"item\":\"i22\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « L’agrandissement du bâtiment principal sis sur le lot 4 380 205, 21 rue Lapointe » parmi les PIIA acceptés.\"},{\"item\":\"i23\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « L’installation d’une enseigne sur le lot 2 235 611, 1167 chemin des Diligences » ; petit PIIA non résidentiel inclus par la règle.\"},{\"item\":\"i24\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « La rénovation du bâtiment principal sis sur le lot 2 237 223, 151 rue Martin » parmi les PIIA acceptés.\"},{\"item\":\"i25\",\"choice\":\"v1\",\"reason\":\"Page 13 atteste « La construction d’un bâtiment principal pour la propriété sise sur le lot 6 291 859, chemin des Diligences » parmi les PIIA acceptés.\"},{\"item\":\"i26\",\"choice\":\"v1\",\"reason\":\"Page 14 atteste « La rénovation du bâtiment principal pour la propriété sise sur le lot 4 380 241, 14 rue Martin » en fin de liste des PIIA acceptés.\"},{\"item\":\"i27\",\"choice\":\"v1\",\"reason\":\"Page 14, sous « ET DE REFUSER » : « La construction d’un bâtiment principal sur le lot 6 627 707, chemin de la Corniche puisque l’étude d’impact visuel… » ; le refus reste un refus.\"},{\"item\":\"i28\",\"choice\":\"v1\",\"reason\":\"Page 14, sous « ET DE REFUSER » : « La construction d’un bâtiment accessoire sur le lot 2 238 228, 93 chemin du Cèdre… » ; refus de PIIA attesté, citation exacte.\"},{\"item\":\"i29\",\"choice\":\"v1\",\"reason\":\"Page 14, sous « ET DE REFUSER » : « L’installation d’une murale sur le bâtiment principal sis sur le lot 4 380 220, 412 rue Principale » ; refus de PIIA attesté.\"},{\"item\":\"i30\",\"choice\":\"absent\",\"reason\":\"La consultation publique n'est qu'un ATTENDU rappelant une étape du même dossier 2026-03 ; « Mentions historiques du même dossier ne multiplient pas le rappel », l'unité est la résolution d'adoption (i31).\"},{\"item\":\"i31\",\"choice\":\"v1\",\"reason\":\"Page 14, résolution 2026-06-144 : « D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments » ; adoption d'un règlement d'urbanisme (LAU 145.41), citation exacte.\"},{\"item\":\"i32\",\"choice\":\"absent\",\"reason\":\"Même rappel d'ATTENDU que i30 et i33 : mention historique de la consultation dans la résolution d'adoption, doublon de même fait non crédité et ne créant pas d'unité en plus de i31.\"},{\"item\":\"i33\",\"choice\":\"absent\",\"reason\":\"Doublon identique de i30 (même type, même fait, même citation) ; un rappel d'étape antérieure dans les attendus ne crée pas d'unité en plus de la résolution d'adoption.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  },
+  {
+   "item": "i22",
+   "unitId": "u22",
+   "current": "v1"
+  },
+  {
+   "item": "i23",
+   "unitId": "u23",
+   "current": "v1"
+  },
+  {
+   "item": "i24",
+   "unitId": "u24",
+   "current": "v1"
+  },
+  {
+   "item": "i25",
+   "unitId": "u25",
+   "current": "v1"
+  },
+  {
+   "item": "i26",
+   "unitId": "u26",
+   "current": "v1"
+  },
+  {
+   "item": "i27",
+   "unitId": "u27",
+   "current": "v1"
+  },
+  {
+   "item": "i28",
+   "unitId": "u28",
+   "current": "v1"
+  },
+  {
+   "item": "i29",
+   "unitId": "u29",
+   "current": "v1"
+  },
+  {
+   "item": "i30",
+   "unitId": "u30",
+   "current": "absent"
+  },
+  {
+   "item": "i31",
+   "unitId": "u31",
+   "current": "v1"
+  },
+  {
+   "item": "i32",
+   "unitId": "u32",
+   "current": "absent"
+  },
+  {
+   "item": "i33",
+   "unitId": "u33",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 4 atteste « Avis de motion est donné par le conseiller Serge Meunier … le règlement no 2026-07 » ; objet réglementaire explicite, étape avis_motion distincte du projet selon la règle « Avis de motion et projet actuels séparés »."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 4 atteste la présentation du projet (« Une copie dudit projet de règlement est remise aux membres du conseil ») sous le titre cité ; étape projet_reglement distincte de l'avis de motion."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "Le renouvellement du bail de la friperie ne désigne aucun objet foncier explicite (ni lot ni adresse) et relève de la gestion locative, hors « objet réglementaire ou foncier explicite » du profil."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 5 atteste « D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford » ; adoption d'un règlement territorial, citation et page exactes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 7 atteste « D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots 4 380 408 et 4 380 601 » ; acte foncier explicite adopté par résolution 2026-06-127."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Page 7 atteste la condition 3 « servitude publique et perpétuelle de passage piétonnier … grevant le lot 4 380 408 » ; objet foncier explicite distinct nommé dans la résolution groupée."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Page 7 atteste « Le don des lots 5 235 794 et 4 380 417 par le propriétaire au bénéfice de la Municipalité » ; cession foncière explicite, unité distincte couverte par le nœud groupé."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 7 atteste « Consentir à une servitude de circulation et de stationnement en faveur du fond dominant situé sur le lot 4 380 420 » ; objet foncier explicite distinct de la résolution adoptée."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Page 12, résolution 2026-06-140 : « DE REFUSER la présente demande de dérogation mineure … lot 4 380 003, 70 chemin de la Traverse » ; le refus reste un refus, citation exacte."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Page 12, résolution 2026-06-141 : « DE REFUSER … lots 4 380 313 et 4 380 322, 152 chemin Bellevue, zone V-2 » ; refus de dérogation mineure attesté, page et citation exactes."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Page 13, résolution 2026-06-142 : « D’ACCEPTER la présente demande de dérogation mineure … lot 2 235 834, 6 chemin de la Mésange » ; citation et page exactes."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Page 13, liste des PIIA acceptés : « La construction d’un bâtiment principal sur le lot 6 627 628, chemin Gilbert » ; unité explicitement nommée dans le nœud groupé."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "Page 13 atteste « Le changement de couleur du revêtement extérieur du bâtiment principal sis sur le lot 2 239 886, 42 chemin de Petite-Rivière » parmi les PIIA acceptés."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Page 13 atteste « La construction d’un bâtiment accessoire sur le lot 2 239 886, 42 chemin de Petite-Rivière » ; fait distinct du changement de couleur sur le même lot, donc pas un doublon."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Page 13 atteste « La construction d’un bâtiment principal sur le lot 2 236 143, 88 chemin de l’Escalade » parmi les PIIA acceptés."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "Page 13 atteste « La rénovation du bâtiment principal sis sur le lot 2 240 000, 50 chemin de la Feuillade » parmi les PIIA acceptés."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "Page 13 atteste « La rénovation du bâtiment accessoire sis sur le lot 2 240 000, 50 chemin de la Feuillade » ; fait distinct de la rénovation du bâtiment principal."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "Page 13 atteste « La rénovation du bâtiment principal sis sur le lot 2 239 703, 103 chemin du Lac-d’Argent » parmi les PIIA acceptés."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "Page 13 atteste « L’agrandissement du bâtiment principal sis sur le lot 2 239 988, 9 rue des Jacinthes » parmi les PIIA acceptés."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "Page 13 atteste « La construction d’un bâtiment principal sur le lot 6 597 767, rue de la Butte » parmi les PIIA acceptés."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "Page 13 atteste « La construction d’un bâtiment principal sur le lot 6 720 154, chemin des Étangs » parmi les PIIA acceptés."
+  },
+  {
+   "item": "i22",
+   "choice": "v1",
+   "reason": "Page 13 atteste « L’agrandissement du bâtiment principal sis sur le lot 4 380 205, 21 rue Lapointe » parmi les PIIA acceptés."
+  },
+  {
+   "item": "i23",
+   "choice": "v1",
+   "reason": "Page 13 atteste « L’installation d’une enseigne sur le lot 2 235 611, 1167 chemin des Diligences » ; petit PIIA non résidentiel inclus par la règle."
+  },
+  {
+   "item": "i24",
+   "choice": "v1",
+   "reason": "Page 13 atteste « La rénovation du bâtiment principal sis sur le lot 2 237 223, 151 rue Martin » parmi les PIIA acceptés."
+  },
+  {
+   "item": "i25",
+   "choice": "v1",
+   "reason": "Page 13 atteste « La construction d’un bâtiment principal pour la propriété sise sur le lot 6 291 859, chemin des Diligences » parmi les PIIA acceptés."
+  },
+  {
+   "item": "i26",
+   "choice": "v1",
+   "reason": "Page 14 atteste « La rénovation du bâtiment principal pour la propriété sise sur le lot 4 380 241, 14 rue Martin » en fin de liste des PIIA acceptés."
+  },
+  {
+   "item": "i27",
+   "choice": "v1",
+   "reason": "Page 14, sous « ET DE REFUSER » : « La construction d’un bâtiment principal sur le lot 6 627 707, chemin de la Corniche puisque l’étude d’impact visuel… » ; le refus reste un refus."
+  },
+  {
+   "item": "i28",
+   "choice": "v1",
+   "reason": "Page 14, sous « ET DE REFUSER » : « La construction d’un bâtiment accessoire sur le lot 2 238 228, 93 chemin du Cèdre… » ; refus de PIIA attesté, citation exacte."
+  },
+  {
+   "item": "i29",
+   "choice": "v1",
+   "reason": "Page 14, sous « ET DE REFUSER » : « L’installation d’une murale sur le bâtiment principal sis sur le lot 4 380 220, 412 rue Principale » ; refus de PIIA attesté."
+  },
+  {
+   "item": "i30",
+   "choice": "absent",
+   "reason": "La consultation publique n'est qu'un ATTENDU rappelant une étape du même dossier 2026-03 ; « Mentions historiques du même dossier ne multiplient pas le rappel », l'unité est la résolution d'adoption (i31)."
+  },
+  {
+   "item": "i31",
+   "choice": "v1",
+   "reason": "Page 14, résolution 2026-06-144 : « D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments » ; adoption d'un règlement d'urbanisme (LAU 145.41), citation exacte."
+  },
+  {
+   "item": "i32",
+   "choice": "absent",
+   "reason": "Même rappel d'ATTENDU que i30 et i33 : mention historique de la consultation dans la résolution d'adoption, doublon de même fait non crédité et ne créant pas d'unité en plus de i31."
+  },
+  {
+   "item": "i33",
+   "choice": "absent",
+   "reason": "Doublon identique de i30 (même type, même fait, même citation) ; un rappel d'étape antérieure dans les attendus ne crée pas d'unité en plus de la résolution d'adoption."
+  }
+ ]
+}

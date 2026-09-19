@@ -1,0 +1,496 @@
+{
+ "documentId": "eastman-2026-06-01",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "013e50a1db84050f8415eaa02349f4c80e23fcb26e07e5e05de41a77f5bd6109",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-07"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-07 — stationnement et voies publiques",
+     "stage": "projet",
+     "objet": "2026-07",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté\npour adoption, lors d’une prochaine séance du conseil municipal, le règlement no"
+      },
+      {
+       "page": 4,
+       "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté\npour adoption, lors d’une prochaine séance du conseil municipal, le règlement no\n2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et\nà la gestion des voies publiques."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-ru-2023-02"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "RU-2023-02 — stationnement et gestion des voies publiques",
+     "stage": null,
+     "objet": "RU-2023-02",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté\npour adoption, lors d’une prochaine séance du conseil municipal, le règlement no"
+      },
+      {
+       "page": 4,
+       "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté\npour adoption, lors d’une prochaine séance du conseil municipal, le règlement no\n2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et\nà la gestion des voies publiques."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2026-04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement 2026-04 — gestion contractuelle",
+     "stage": "adoption",
+     "objet": "2026-04",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’adopter le Règlement no 2026-04 sur la gestion contractuelle dont copie est jointe\naux présentes pour en faire partie intégrante."
+      },
+      {
+       "page": 5,
+       "excerpt": "D’adopter le Règlement no 2026-04 sur la gestion contractuelle dont copie est jointe\naux présentes pour en faire partie intégrante."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2026-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement 2026-05 — annexion d’une partie du Canton d’Orford",
+     "stage": "adoption",
+     "objet": "2026-05",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du\nCanton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante;"
+      },
+      {
+       "page": 5,
+       "excerpt": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du\nCanton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante;\nET DE fixer la date de la tenue de registre au jeudi 18 juin 2026, entre 9h et 19h, à\nl’hôtel de ville situé au 160 chemin George-Bonnallie à Eastman."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-2026-06"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement 2026-06 — réserve financière pour infrastructures",
+     "stage": "adoption",
+     "objet": "2026-06",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’adopter le Règlement no 2026-06 décrétant la création d’une réserve financière à\ndes fins d’infrastructures municipales dont copie est jointe aux présentes pour en"
+      },
+      {
+       "page": 6,
+       "excerpt": "D’adopter le Règlement no 2026-06 décrétant la création d’une réserve financière à\ndes fins d’infrastructures municipales dont copie est jointe aux présentes pour en\nfaire partie intégrante;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-multiplex"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Modification conditionnelle de l’acte de vente pour un projet de multiplexes",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots\n4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions\nsuivantes :"
+      },
+      {
+       "page": 7,
+       "excerpt": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots\n4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions\nsuivantes :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-logements"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Affectation de 250 000 $ à la création de logements",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "D'utiliser la somme de 250 000$ reçue afin d’aider la création de logements pour le\nprojet sur le lot municipal situé au 450 rue Principale (lot 4 380 350) et/ou tout autre"
+      },
+      {
+       "page": 7,
+       "excerpt": "D'utiliser la somme de 250 000$ reçue afin d’aider la création de logements pour le\nprojet sur le lot municipal situé au 450 rue Principale (lot 4 380 350) et/ou tout autre\nprojet de logements futur."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-140"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Refus de dérogation — garage au 70 chemin de la Traverse",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de\nla marge latérale droite dans le but de permettre la construction d’un garage"
+      },
+      {
+       "page": 12,
+       "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de\nla marge latérale droite dans le but de permettre la construction d’un garage\nattenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin\nde la Traverse, zone V-10, PIIA-4 - Corridor visuel d'intérêt supérieur."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-141"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Refus de dérogation — coupe d’arbres au 152 chemin Bellevue",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la\ncoupe d’arbres sur une propriété où le déboisement excède déjà la superficie de"
+      },
+      {
+       "page": 12,
+       "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la\ncoupe d’arbres sur une propriété où le déboisement excède déjà la superficie de\ndéboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et\n4 380 322, 152 chemin Bellevue, zone V-2."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-142"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Acceptation de dérogation — bâtiment accessoire au 6 chemin de la Mésange",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la\nconstruction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot"
+      },
+      {
+       "page": 13,
+       "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la\nconstruction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot\n2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely,\nParker et d’Argent."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-piia-approvals"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbations PIIA — résolution 2026-06-143",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "D’accepter la demande d’approbation au règlement PIIA suivante :"
+      },
+      {
+       "page": 14,
+       "excerpt": "La rénovation du bâtiment principal pour la propriété sise sur le lot 4 380\n241, 14 rue Martin."
+      },
+      {
+       "page": 13,
+       "excerpt": "D’accepter la demande d’approbation au règlement PIIA suivante :\n-\n\nLa construction d’un bâtiment principal sur le lot 6 627 628, chemin\nGilbert;\nLe changement de couleur du revêtement extérieur du bâtiment principal\nsis sur le lot 2 239 886, 42 chemin de Petite-Rivière;\nLa construction d’un bâtiment accessoire sur le lot 2 239 886, 42 chemin\nde Petite-Rivière;\nLa construction d’un bâtiment principal sur le lot 2 236 143, 88 chemin\nde l’Escalade;\nLa rénovation du bâtiment principal sis sur le lot 2 240 000, 50 chemin\nde la Feuillade;\nLa rénovation du bâtiment accessoire sis sur le lot 2 240 000, 50 chemin\nde la Feuillade;\nLa rénovation du bâtiment principal sis sur le lot 2 239 703, 103 chemin\ndu Lac-d’Argent;\nL’agrandissement du bâtiment principal sis sur le lot 2 239 988, 9 rue\ndes Jacinthes;\nLa construction d’un bâtiment principal sur le lot 6 597 767, rue de la\nButte;\nLa construction d’un bâtiment principal sur le lot 6 720 154, chemin des\nÉtangs;\nL’agrandissement du bâtiment principal sis sur le lot 4 380 205, 21 rue\nLapointe;\nL’installation d’une enseigne sur le lot 2 235 611, 1167 chemin des\nDiligences;\nLa rénovation du bâtiment principal sis sur le lot 2 237 223, 151 rue\nMartin;\nLa construction d’un bâtiment principal pour la propriété sise sur le lot 6\n291 859, chemin des Diligences ;"
+      },
+      {
+       "page": 14,
+       "excerpt": "La rénovation du bâtiment principal pour la propriété sise sur le lot 4 380\n241, 14 rue Martin."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "event-piia-refusals"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Refus PIIA — résolution 2026-06-143",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "ET DE REFUSER, les demandes d’approbation au règlement PIIA suivantes :"
+      },
+      {
+       "page": 14,
+       "excerpt": "ET DE REFUSER, les demandes d’approbation au règlement PIIA suivantes :\n-\n\n-\n\n-\n\nLa construction d’un bâtiment principal sur le lot 6 627 707, chemin de la\nCorniche puisque l’étude d’impact visuel mentionne la possibilité que le\nbâtiment soit partiellement visible de certains points stratégiques;\nLa construction d’un bâtiment accessoire sur le lot 2 238 228, 93 chemin\ndu Cèdre puisque l’emplacement et l’orientation visés n’ont pas été\nclairement démontrés;\nL’installation d’une murale sur le bâtiment principal sis sur le lot\n4 380 220, 412 rue Principale puisque la Municipalité souhaite se doter\nd’une politique pour encadrer l’art urbain sur son territoire;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "bylaw-2026-03"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement 2026-03 — occupation et entretien des bâtiments",
+     "stage": "adoption",
+     "objet": "2026-03",
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont\ncopie est jointe aux présentes pour en faire partie intégrante;"
+      },
+      {
+       "page": 14,
+       "excerpt": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont\ncopie est jointe aux présentes pour en faire partie intégrante;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion et la présentation du projet de règlement 2026-07 sont attestés à la page 4.\",\"excerpt\":\"Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté pour adoption, lors d’une prochaine séance du conseil municipal, le règlement no 2026-07\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement RU-2023-02 n'est mentionné que comme le règlement existant amendé par le projet 2026-07, sans acte propre ni étape de procédure.\",\"excerpt\":\"2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et à la gestion des voies publiques.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 2026-04 sur la gestion contractuelle est votée par la résolution 2026-06-124.\",\"excerpt\":\"D’adopter le Règlement no 2026-04 sur la gestion contractuelle dont copie est jointe aux présentes pour en faire partie intégrante.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 2026-05 décrétant l'annexion d'une partie du territoire d'Orford est votée par la résolution 2026-06-125.\",\"excerpt\":\"D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 2026-06 créant une réserve financière pour infrastructures municipales est constatée par la résolution 2026-06-126.\",\"excerpt\":\"D’adopter le Règlement no 2026-06 décrétant la création d’une réserve financière à des fins d’infrastructures municipales dont copie est jointe aux présentes pour en faire partie intégrante\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la modification de l'acte de vente avec conditions d'urbanisme/servitude/cession de lots par la résolution 2026-06-127.\",\"excerpt\":\"D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots 4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions suivantes :\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-06-127 prévoit expressément l'affectation de 250 000 $ reçus pour créer des logements.\",\"excerpt\":\"D'utiliser la somme de 250 000$ reçue afin d’aider la création de logements pour le projet sur le lot municipal situé au 450 rue Principale (lot 4 380 350) et/ou tout autre projet de logements futur.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil refuse la dérogation mineure pour la réduction de marge latérale par la résolution 2026-06-140.\",\"excerpt\":\"DE REFUSER la présente demande de dérogation mineure visant à la réduction de la marge latérale droite dans le but de permettre la construction d’un garage attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le refus de la demande de dérogation mineure pour la coupe d'arbres est consigné par la résolution 2026-06-141.\",\"excerpt\":\"DE REFUSER la présente demande de dérogation mineure visant à autoriser la coupe d’arbres sur une propriété où le déboisement excède déjà la superficie de déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et 4 380 322\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"L'acceptation de la dérogation mineure pour un bâtiment accessoire en cour avant est adoptée par la résolution 2026-06-142.\",\"excerpt\":\"D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot 2 235 834, 6 chemin de la Mésange\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-06-143 accepte les demandes d'approbation PIIA énumérées.\",\"excerpt\":\"D’accepter la demande d’approbation au règlement PIIA suivante :\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-06-143 refuse les demandes d'approbation PIIA énumérées.\",\"excerpt\":\"ET DE REFUSER, les demandes d’approbation au règlement PIIA suivantes :\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement d'urbanisme 2026-03 sur l'occupation et l'entretien des bâtiments est votée par la résolution 2026-06-144.\",\"excerpt\":\"D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont copie est jointe aux présentes pour en faire partie intégrante;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion et la présentation du projet de règlement 2026-07 sont attestés à la page 4.",
+   "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté pour adoption, lors d’une prochaine séance du conseil municipal, le règlement no 2026-07"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement RU-2023-02 n'est mentionné que comme le règlement existant amendé par le projet 2026-07, sans acte propre ni étape de procédure.",
+   "excerpt": "2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et à la gestion des voies publiques."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 2026-04 sur la gestion contractuelle est votée par la résolution 2026-06-124.",
+   "excerpt": "D’adopter le Règlement no 2026-04 sur la gestion contractuelle dont copie est jointe aux présentes pour en faire partie intégrante."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 2026-05 décrétant l'annexion d'une partie du territoire d'Orford est votée par la résolution 2026-06-125.",
+   "excerpt": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du Canton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 2026-06 créant une réserve financière pour infrastructures municipales est constatée par la résolution 2026-06-126.",
+   "excerpt": "D’adopter le Règlement no 2026-06 décrétant la création d’une réserve financière à des fins d’infrastructures municipales dont copie est jointe aux présentes pour en faire partie intégrante"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la modification de l'acte de vente avec conditions d'urbanisme/servitude/cession de lots par la résolution 2026-06-127.",
+   "excerpt": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots 4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions suivantes :"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-06-127 prévoit expressément l'affectation de 250 000 $ reçus pour créer des logements.",
+   "excerpt": "D'utiliser la somme de 250 000$ reçue afin d’aider la création de logements pour le projet sur le lot municipal situé au 450 rue Principale (lot 4 380 350) et/ou tout autre projet de logements futur."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil refuse la dérogation mineure pour la réduction de marge latérale par la résolution 2026-06-140.",
+   "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de la marge latérale droite dans le but de permettre la construction d’un garage attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le refus de la demande de dérogation mineure pour la coupe d'arbres est consigné par la résolution 2026-06-141.",
+   "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la coupe d’arbres sur une propriété où le déboisement excède déjà la superficie de déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et 4 380 322"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "L'acceptation de la dérogation mineure pour un bâtiment accessoire en cour avant est adoptée par la résolution 2026-06-142.",
+   "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot 2 235 834, 6 chemin de la Mésange"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-06-143 accepte les demandes d'approbation PIIA énumérées.",
+   "excerpt": "D’accepter la demande d’approbation au règlement PIIA suivante :"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-06-143 refuse les demandes d'approbation PIIA énumérées.",
+   "excerpt": "ET DE REFUSER, les demandes d’approbation au règlement PIIA suivantes :"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement d'urbanisme 2026-03 sur l'occupation et l'entretien des bâtiments est votée par la résolution 2026-06-144.",
+   "excerpt": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont copie est jointe aux présentes pour en faire partie intégrante;"
+  }
+ ],
+ "filter": {
+  "acts": 13,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement RU-2023-02 n'est mentionné que comme le règlement existant amendé par le projet 2026-07, sans acte propre ni étape de procédure."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Un avis de motion et la présentation du projet de règlement 2026-07 sont attestés à la page 4."
+   },
+   {
+    "act": "A03",
+    "reason": "L'adoption du règlement 2026-04 sur la gestion contractuelle est votée par la résolution 2026-06-124."
+   },
+   {
+    "act": "A04",
+    "reason": "L'adoption du règlement 2026-05 décrétant l'annexion d'une partie du territoire d'Orford est votée par la résolution 2026-06-125."
+   },
+   {
+    "act": "A05",
+    "reason": "L'adoption du règlement 2026-06 créant une réserve financière pour infrastructures municipales est constatée par la résolution 2026-06-126."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil autorise la modification de l'acte de vente avec conditions d'urbanisme/servitude/cession de lots par la résolution 2026-06-127."
+   },
+   {
+    "act": "A07",
+    "reason": "La résolution 2026-06-127 prévoit expressément l'affectation de 250 000 $ reçus pour créer des logements."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil refuse la dérogation mineure pour la réduction de marge latérale par la résolution 2026-06-140."
+   },
+   {
+    "act": "A09",
+    "reason": "Le refus de la demande de dérogation mineure pour la coupe d'arbres est consigné par la résolution 2026-06-141."
+   },
+   {
+    "act": "A10",
+    "reason": "L'acceptation de la dérogation mineure pour un bâtiment accessoire en cour avant est adoptée par la résolution 2026-06-142."
+   },
+   {
+    "act": "A11",
+    "reason": "La résolution 2026-06-143 accepte les demandes d'approbation PIIA énumérées."
+   },
+   {
+    "act": "A12",
+    "reason": "La résolution 2026-06-143 refuse les demandes d'approbation PIIA énumérées."
+   },
+   {
+    "act": "A13",
+    "reason": "L'adoption du règlement d'urbanisme 2026-03 sur l'occupation et l'entretien des bâtiments est votée par la résolution 2026-06-144."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4322,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 15695,
+   "outputTokens": 1295,
+   "totalTokens": 16990
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4088
+  },
+  "inputSha256": "cac40a8f104ce34e290231a0e4549c6ced36ef904d9fcdd45a9973088ad3c5e1"
+ }
+}

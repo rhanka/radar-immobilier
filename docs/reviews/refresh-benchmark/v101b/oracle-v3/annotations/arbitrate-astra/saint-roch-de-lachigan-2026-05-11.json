@@ -1,0 +1,178 @@
+{
+ "documentId": "saint-roch-de-lachigan-2026-05-11",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "29cbae05ed64d89ab15b797a6a429860b02be66efd75d56eef12f530f2d1a9be",
+ "verificationSha256": "c55b279a67e3051fede1b13126ccdaf6682d433edc74c6b2f8fa72aff630d49d",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"Le point 8.5, « Vente du lot lot 6 141 751-exercise du droit de préemption », atteste un acte foncier prévu, mais ne mentionne aucune étape d’adoption. L’inclusion des actes fonciers défendue par A et C est pertinente, mais ne valide pas l’étape « adoption » ajoutée par la seule version proposée.\"},{\"item\":\"a02\",\"choice\":\"absent\",\"reason\":\"Le point 10.4 annonce une « Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation » dans un « PROJET D’ORDRE DU JOUR », sans identifier une étape d’adoption. L’objet urbanistique est bien explicite et prévu, comme le relèvent A et C, mais v1 ne respecte pas l’exigence d’une étape attestée par le texte.\"},{\"item\":\"a03\",\"choice\":\"absent\",\"reason\":\"Le point 10.5, « Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation », atteste une autorisation prévue à l’ordre du jour, non une étape explicitement qualifiée d’adoption. A et C établissent correctement la présence de l’objet urbanistique, mais cela ne suffit pas à retenir v1 avec son étape « adoption » non étayée.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Exercice du droit de préemption prévu — vente du lot 6 141 751",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 141 751",
+      "page": 2,
+      "citation": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption",
+      "anchor": "lot 6 141 751",
+      "spanStart": 436,
+      "spanEnd": 498
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Le point 8.5, page 2, prévoit l'exercice du droit de préemption sur le lot 6 141 751, mais n'atteste pas l'étape « adoption » proposée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Acte foncier explicite (lot 6 141 751, droit de préemption) attesté mot pour mot au point 8.5 de l'ordre du jour, page 2 ; point prévu, inclus au titre des actes fonciers."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Acte foncier prévu à l'ordre du jour concernant l'exercice du droit de préemption sur le lot 6 141 751, textuellement attesté en page 2."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation prévue de modification d'affichage — immeuble cité au 1224 rue Principale",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1224 rue Principale",
+      "page": 2,
+      "citation": "10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation",
+      "anchor": "1224 rue Principale",
+      "spanStart": 1254,
+      "spanEnd": 1348
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Le point 10.4, page 2, prévoit une autorisation de modification d'affichage au 1224 rue Principale, sans attester l'étape « adoption » proposée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 10.4 cité exactement en page 2 (modification d'affichage à un immeuble cité, 1224 rue Principale, autorisation) ; objet urbanistique explicite et point prévu, inclus au rappel."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Autorisation de modification d'affichage sur un immeuble cité prévue à l'ordre du jour pour le 1224 rue Principale, textuellement attestée en page 2."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation prévue de travaux — immeuble cité au 1484, rue Principale",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1484, rue Principale",
+      "page": 2,
+      "citation": "10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation",
+      "anchor": "1484, rue Principale",
+      "spanStart": 1349,
+      "spanEnd": 1431
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Le point 10.5, page 2, prévoit une autorisation de travaux sur l'immeuble cité au 1484, rue Principale, sans attester l'étape « adoption » proposée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 10.5 cité exactement en page 2 (travaux sur un immeuble cité, 1484, rue Principale, autorisation) ; objet urbanistique explicite et point prévu, inclus au rappel."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Autorisation de travaux sur un immeuble cité prévue à l'ordre du jour pour le 1484, rue Principale, textuellement attestée en page 2."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "Le point 8.5, « Vente du lot lot 6 141 751-exercise du droit de préemption », atteste un acte foncier prévu, mais ne mentionne aucune étape d’adoption. L’inclusion des actes fonciers défendue par A et C est pertinente, mais ne valide pas l’étape « adoption » ajoutée par la seule version proposée."
+  },
+  {
+   "item": "a02",
+   "choice": "absent",
+   "reason": "Le point 10.4 annonce une « Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation » dans un « PROJET D’ORDRE DU JOUR », sans identifier une étape d’adoption. L’objet urbanistique est bien explicite et prévu, comme le relèvent A et C, mais v1 ne respecte pas l’exigence d’une étape attestée par le texte."
+  },
+  {
+   "item": "a03",
+   "choice": "absent",
+   "reason": "Le point 10.5, « Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation », atteste une autorisation prévue à l’ordre du jour, non une étape explicitement qualifiée d’adoption. A et C établissent correctement la présence de l’objet urbanistique, mais cela ne suffit pas à retenir v1 avec son étape « adoption » non étayée."
+  }
+ ]
+}

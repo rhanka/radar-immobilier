@@ -1,0 +1,462 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-apr-423-2026",
+   "label": "APR-423-2026 — Limites, usages et normes des zones 115-H et 145-H",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "numero": "APR-423-2026",
+   "stage": "1er_projet",
+   "meetingDate": "2026-03-02",
+   "resolution": "117-2026",
+   "zones_ciblees": [
+    "115-H",
+    "145-H"
+   ],
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "objet": "Déplacer les limites des zones 115-H et 145-H et préciser leurs usages et normes pour le développement Boisé Natura.",
+   "citations": [
+    {
+     "page": 25,
+     "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-115-h",
+   "label": "Zone 115-H",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "code": "115-H",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "secteur": "Boisé Natura",
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "ATTENDU qu’il serait préférable d’inclure la totalité du projet Boisé Natura en\nzone 115-H et d’y prévoir la possibilité de construire des résidences unifamiliales\njumelées;",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-145-h",
+   "label": "Zone 145-H",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "code": "145-H",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "La modification des limites des zones 115-H et 145-H vise à permettre la construction\ndes résidences unifamiliales jumelées dans la phase 3 du développement résidentiel",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-motion-boise-natura",
+   "label": "Boisé Natura — Avis de motion sur les zones 115-H et 145-H",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "kind": "rezonage",
+   "etape": "avis_motion",
+   "etape_date": "2026-03-02",
+   "reglement_number": "1259-2014",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "description": "Avis de motion visant à déplacer les limites des zones 115-H et 145-H et à préciser les usages et normes pour permettre des résidences unifamiliales jumelées dans la phase 3 de Boisé Natura.",
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "Il est, par la présente, donné avis de motion, par monsieur David Milot, conseiller, qu’il\nsera adopté, à une séance ultérieure, un règlement modifiant le Règlement de zonage",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-garbin",
+   "label": "2, rue du Garbin — Dérogation mineure accordée",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "decision": "approuvé",
+   "date": "2026-03-02",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-02",
+   "zone_ref": "53-H",
+   "reglement_number": "1259-2014",
+   "resolution": "111-2026",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "description": "Conversion de l'abri d'auto attenant en garage privé attenant à 1,67 mètre de la limite latérale au lieu des 2 mètres requis; dérogation de 0,33 mètre.",
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri\nd’auto en garage privé attenant pour la propriété sise au 2, rue Garbin.",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-53-h",
+   "label": "Zone 53-H",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "code": "53-H",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "ATTENDU que l’article 7.2.1.2.3 du Règlement de zonage numéro 1259-2014 stipule\ntoutefois que les garages privés attenants doivent respecter la marge latérale",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-catherine",
+   "label": "Lot 6 621 589 — Dérogation pour lotissement accordée",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "decision": "approuvé",
+   "date": "2026-03-02",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-02",
+   "zone_ref": "75-H",
+   "no_lot": "6621589",
+   "reglement_number": "1260-2014",
+   "resolution": "112-2026",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "description": "Lotissement d'un lot d'angle sur l'avenue des Catherine d'une largeur de 27,20 mètres au lieu des 30 mètres requis, soit une dérogation de 2,80 mètres.",
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot\nd’angle 6 621 589 d’une largeur de 27,20 mètres.",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-75-h",
+   "label": "Zone 75-H",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "code": "75-H",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "ATTENDU que l’article 4.1.4 du Règlement de lotissement 1260-2014 prévoit, dans la\nzone 75-H, une largeur de 30 mètres pour les lots d’angle;",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-ernest-piche",
+   "label": "3, rue Ernest-Piché — Dérogation mineure reportée",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "decision": "reporté",
+   "date": "2026-03-02",
+   "etape": "derogation_mineure",
+   "resolution": "089-2026",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de dérogation mineure : 3, rue Ernest-Piché - REPORTÉ",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 3,
+     "excerpt": "ET RÉSOLU d’adopter l’ordre du jour tel qu’il a été présenté en reportant toutefois le\npoint 5.1 à une séance ultérieure.",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-subdivision-manoir",
+   "label": "Site patrimonial Juchereau-Duchesnay — Subdivision approuvée",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "kind": "subdivision",
+   "decision": "approuvé",
+   "date": "2026-03-02",
+   "etape": "inconnu",
+   "no_lot": "6141355",
+   "reglement_number": "1266-2014",
+   "resolution": "113-2026",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "description": "Subdivision d'une parcelle du lot 6 141 355 dans le cadre du réaménagement du pont de la rivière Ontaritzi sur le site patrimonial du manoir seigneurial Juchereau-Duchesnay.",
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que\nprésenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi sur le site",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-castella",
+   "label": "Groupe Castella 2 inc. — Report de la fin des travaux",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "category": "developpement_residentiel",
+   "kind": "report_travaux",
+   "date": "2026-03-02",
+   "resolution": "115-2026",
+   "no_lot": "6621589",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "description": "L'entente de prolongement de l'avenue des Catherine jusqu'à la limite du lot 6 621 589 est amendée pour reporter la fin des travaux du 30 juin au 31 octobre 2026. Le retard du début des travaux est lié aux engagements de nature environnementale.",
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "ET RÉSOLU d’amender l’article 6.7 de l’entente conclue avec Groupe Castella 2 inc.\nafin de repousser la date de fin des travaux au 31 octobre 2026.",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-ste-4",
+   "label": "Le Ste-4 — Garantie financière pour les phases 1A et 1B",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-02",
+   "decision": "approuvé",
+   "resolution": "116-2026",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "description": "Amendement de la résolution 344-2024 concernant le PIIA du projet de multilogements Le Ste-4.",
+   "conditions": [
+    "Dépôt d'une garantie financière de 35 000 $ pour chacune des phases 1A et 1B afin de couvrir l'aménagement du terrain selon le plan de plantation du 29 juin 2024.",
+    "Révision du montant de la garantie par résolution avant l'émission du premier permis de construction de la phase 2."
+   ],
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux\nderniers alinéas par les alinéas suivants :",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-solaire",
+   "label": "Innergex — Appui au parc solaire et modifications réglementaires à amorcer",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "category": "modification_reglementaire",
+   "kind": "parc_solaire",
+   "date": "2026-03-02",
+   "resolution": "099-2026",
+   "etape": "inconnu",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "description": "La Ville appuie la présentation du projet de parc solaire d'Innergex à Hydro-Québec et s'engage à amorcer les modifications réglementaires nécessaires pour autoriser l'usage prévu avant la signature du contrat d'approvisionnement. Aucun code de zone n'est précisé.",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "IL EST ÉGALEMENT RÉSOLU que la Ville de Sainte-Catherine-de-laJacques-Cartier s’engage à amorcer, suivant la procédure prescrite par la Loi sur\nl’aménagement et l’urbanisme,",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-servitude",
+   "label": "Lot 6 164 031 — Servitude de passage pour la Sablière Martel",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "status": "candidate",
+   "category": "foncier",
+   "kind": "servitude",
+   "date": "2026-03-02",
+   "resolution": "102-2026",
+   "no_lot": "6164031",
+   "municipality": "sainte-catherine-de-la-jacques-cartier",
+   "description": "Autorisation de signature du projet d'acte de servitude exclusive et personnelle de passage, droit de premier refus. La servitude issue de l'entente du 19 avril 2007 n'avait pas été enregistrée au registre foncier. Une annotation indique un amendement par la résolution 153-2026 concernant les signataires.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et\npersonnelle de passage, droit de premier refus pour le lot 6 164 031.",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-garbin",
+   "target": "zone-53-h",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "evidence_refs": [
+    "ev-garbin"
+   ],
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri\nd’auto en garage privé attenant pour la propriété sise au 2, rue Garbin.",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-catherine",
+   "target": "zone-75-h",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "evidence_refs": [
+    "ev-catherine-zone",
+    "ev-catherine-decision"
+   ],
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot\nd’angle 6 621 589 d’une largeur de 27,20 mètres.",
+     "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+     "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+     "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-projet",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+   "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+   "modality": "pdf",
+   "page": 25,
+   "excerpt": "ET RÉSOLU que ce conseil adopte le premier projet de règlement numéro APR-4232026 modifiant le Règlement de zonage numéro 1259-2014 visant à déplacer les\nlimites des zones 115-H et 145-H et d’en préciser les usages et les normes."
+  },
+  {
+   "id": "ev-garbin",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+   "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+   "modality": "pdf",
+   "page": 20,
+   "excerpt": "ATTENDU la demande de dérogation mineure et les documents d’appui déposés pour\nla propriété sise au 2, rue du Garbin visant à autoriser la conversion de l’abri d’auto\nattenant en garage privé attenant;\nATTENDU que l’article 7.2.1.2.3 du Règlement de zonage numéro 1259-2014 stipule\ntoutefois que les garages privés attenants doivent respecter la marge latérale\nminimale, qui dans la zone 53-H, est de 2 mètres;"
+  },
+  {
+   "id": "ev-catherine-zone",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+   "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+   "modality": "pdf",
+   "page": 20,
+   "excerpt": "ATTENDU la demande de dérogation mineure et les documents déposés par le\nrequérant pour le lot 6 621 589 situé sur l’avenue des Catherine visant à autoriser le\nlotissement d’un lot d’angle qui aurait une largeur de 27,20 mètres;\nATTENDU que l’article 4.1.4 du Règlement de lotissement 1260-2014 prévoit, dans la\nzone 75-H, une largeur de 30 mètres pour les lots d’angle;"
+  },
+  {
+   "id": "ev-catherine-decision",
+   "source_file": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-catherine-de-la-jacques-cartier/cas/129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c.pdf",
+   "docSha": "129b2565db5419c782c04c804637dfac49a608d58b7547d8f8570ab04d553d3c",
+   "sourceUrl": "https://www.villescjc.com/storage/app/media/seances-du-conseil/2026/20260302-pv-adopte-089-127.pdf",
+   "modality": "pdf",
+   "page": 21,
+   "excerpt": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot\nd’angle 6 621 589 d’une largeur de 27,20 mètres."
+  }
+ ],
+ "input_tokens": 25200,
+ "output_tokens": 6900
+}

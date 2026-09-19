@@ -1,0 +1,234 @@
+{
+ "documentId": "cookshire-eaton-2026-04-07",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure 26-DM-01 accordée — 978, rue Faulkner",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "26-DM-01",
+    "page": 6,
+    "citation": "résolu d’autoriser la dérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue Faulkner (lot 4 487 978",
+    "anchor": "dérogation mineure numéro 26-DM-01",
+    "spanStart": 262,
+    "spanEnd": 376
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure 26-DM-01 accordée — 978, rue Faulkner",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "26-DM-01",
+      "page": 6,
+      "citation": "résolu d’autoriser la dérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue Faulkner (lot 4 487 978",
+      "anchor": "dérogation mineure numéro 26-DM-01",
+      "spanStart": 262,
+      "spanEnd": 376
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-0726 autorise explicitement cette dérogation mineure pour la construction d’une résidence avec un frontage inférieur au minimum réglementaire."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Vente autorisée du lot 4 487 586, rue Eaton — terrain non constructible",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 487 586",
+    "page": 6,
+    "citation": "QUE soit autorisée la vente du terrain situé sur la rue Eaton (lot 4 487 586) à madame Stéphanie Beaudoin au montant de 1 300$ (taxes applicables en sus",
+    "anchor": "lot 4 487 586",
+    "spanStart": 1227,
+    "spanEnd": 1379
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Vente autorisée du lot 4 487 586, rue Eaton — terrain non constructible",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "4 487 586",
+      "page": 6,
+      "citation": "QUE soit autorisée la vente du terrain situé sur la rue Eaton (lot 4 487 586) à madame Stéphanie Beaudoin au montant de 1 300$ (taxes applicables en sus",
+      "anchor": "lot 4 487 586",
+      "spanStart": 1227,
+      "spanEnd": 1379
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-0727 autorise la vente de ce terrain déclaré vacant et non construisible, ce qui constitue un acte foncier décidé."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 400-2026 concernant l’occupation et l’entretien des bâtiments",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "400-2026",
+    "page": 10,
+    "citation": "Règlement numéro 400-2026 concernant l’occupation et l’entretien des bâtiments – Avis de motion et adoption du projet de règlement",
+    "anchor": "Règlement numéro 400-2026",
+    "spanStart": 3,
+    "spanEnd": 133
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 400-2026 concernant l’occupation et l’entretien des bâtiments",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "400-2026",
+      "page": 10,
+      "citation": "Règlement numéro 400-2026 concernant l’occupation et l’entretien des bâtiments – Avis de motion et adoption du projet de règlement",
+      "anchor": "Règlement numéro 400-2026",
+      "spanStart": 3,
+      "spanEnd": 133
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion donné sous la résolution 2026-04-0735 constitue une unité distincte de l’adoption du projet du même règlement."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet de règlement 400-2026 concernant l’occupation et l’entretien des bâtiments",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "400-2026",
+    "page": 10,
+    "citation": "résolu d’adopter le projet de Règlement numéro 400-2026 concernant l’occupation et l’entretien des bâtiments tel que déposé",
+    "anchor": "Règlement numéro 400-2026",
+    "spanStart": 852,
+    "spanEnd": 975
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet de règlement 400-2026 concernant l’occupation et l’entretien des bâtiments",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "400-2026",
+      "page": 10,
+      "citation": "résolu d’adopter le projet de Règlement numéro 400-2026 concernant l’occupation et l’entretien des bâtiments tel que déposé",
+      "anchor": "Règlement numéro 400-2026",
+      "spanStart": 852,
+      "spanEnd": 975
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-0736 adopte le projet de règlement, étape distincte de l’avis de motion et non adoption finale du règlement."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 399-2026 modifiant le règlement sur la démolition d’immeubles",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "399-2026",
+    "page": 10,
+    "citation": "Règlement numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles numéro 316-2023 – Avis de motion et adoption",
+    "anchor": "Règlement numéro 399-2026",
+    "spanStart": 2085,
+    "spanEnd": 2213
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 399-2026 modifiant le règlement sur la démolition d’immeubles",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "399-2026",
+      "page": 10,
+      "citation": "Règlement numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles numéro 316-2023 – Avis de motion et adoption",
+      "anchor": "Règlement numéro 399-2026",
+      "spanStart": 2085,
+      "spanEnd": 2213
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point N.3 identifie le règlement 399-2026 et la résolution 2026-04-0739 constate l’avis de motion, malgré un libellé discordant dans le corps de cet avis."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet de règlement 399-2026 modifiant le règlement sur la démolition d’immeubles",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "399-2026",
+    "page": 11,
+    "citation": "résolu d’adopter le projet de Règlement numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles numéro 316-2023",
+    "anchor": "numéro 399-2026",
+    "spanStart": 747,
+    "spanEnd": 876
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet de règlement 399-2026 modifiant le règlement sur la démolition d’immeubles",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "399-2026",
+      "page": 11,
+      "citation": "résolu d’adopter le projet de Règlement numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles numéro 316-2023",
+      "anchor": "numéro 399-2026",
+      "spanStart": 747,
+      "spanEnd": 876
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-0740 adopte explicitement ce projet de règlement, ce qui constitue une unité distincte de son avis de motion."
+    }
+   ]
+  }
+ ]
+}

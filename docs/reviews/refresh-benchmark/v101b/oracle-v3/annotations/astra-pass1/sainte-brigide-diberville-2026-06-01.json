@@ -1,0 +1,96 @@
+{
+ "documentId": "sainte-brigide-diberville-2026-06-01",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "4486f5b04fcf60b042415abf7110cc6e348f2631cb807943cf087451d61cf4c4",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du règlement 2026-489 sur la gestion quantitative des eaux pluviales\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-489\",\n        \"page\": 1,\n        \"citation\": \"5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption\",\n        \"anchor\": \"Règlement 2026-489\"\n      },\n      \"reason\": \"Le point 5.1 prévoit explicitement l’adoption d’un règlement de gestion des eaux pluviales ; l’ordre du jour atteste une étape prévue, non une décision acquise.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Demande de prolongation prévue à la CPTAQ pour le projet éolien\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"projet éolien\",\n        \"page\": 1,\n        \"citation\": \"6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet\\néolien : demande de prolongation à la CPTAQ\",\n        \"anchor\": \"projet\\néolien\"\n      },\n      \"reason\": \"Le point 6.6 prévoit une démarche foncière auprès de la CPTAQ pour un projet éolien explicite, et non un simple dépôt de correspondance ; cette demande de prolongation relève de l’étape « inconnu ».\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure prévue — lot 4 390 294, Rang de la Rivière Ouest\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"4 390 294\",\n        \"page\": 1,\n        \"citation\": \"11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest\",\n        \"anchor\": \"Lot 4 390 294\"\n      },\n      \"reason\": \"Le point 11.2 porte explicitement sur une dérogation mineure pour le lot désigné ; son examen est prévu sans qu’une acceptation ou un refus soit attesté.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Vente prévue d’immeubles pour défaut de paiement des taxes\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"Vente d’immeubles\",\n        \"page\": 1,\n        \"citation\": \"14.1 Vente d’immeubles pour défaut de paiement des taxes\",\n        \"anchor\": \"Vente d’immeubles\"\n      },\n      \"reason\": \"Le point 14.1 prévoit un acte foncier explicite de vente d’immeubles, inclus même sans identifiant cadastral ; le libellé conserve son caractère prévu.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption prévue du règlement 2026-489 sur la gestion quantitative des eaux pluviales",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-489",
+    "page": 1,
+    "citation": "5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption",
+    "anchor": "Règlement 2026-489"
+   },
+   "reason": "Le point 5.1 prévoit explicitement l’adoption d’un règlement de gestion des eaux pluviales ; l’ordre du jour atteste une étape prévue, non une décision acquise."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Demande de prolongation prévue à la CPTAQ pour le projet éolien",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "projet éolien",
+    "page": 1,
+    "citation": "6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet\néolien : demande de prolongation à la CPTAQ",
+    "anchor": "projet\néolien"
+   },
+   "reason": "Le point 6.6 prévoit une démarche foncière auprès de la CPTAQ pour un projet éolien explicite, et non un simple dépôt de correspondance ; cette demande de prolongation relève de l’étape « inconnu »."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dérogation mineure prévue — lot 4 390 294, Rang de la Rivière Ouest",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "4 390 294",
+    "page": 1,
+    "citation": "11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest",
+    "anchor": "Lot 4 390 294"
+   },
+   "reason": "Le point 11.2 porte explicitement sur une dérogation mineure pour le lot désigné ; son examen est prévu sans qu’une acceptation ou un refus soit attesté."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Vente prévue d’immeubles pour défaut de paiement des taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Vente d’immeubles",
+    "page": 1,
+    "citation": "14.1 Vente d’immeubles pour défaut de paiement des taxes",
+    "anchor": "Vente d’immeubles"
+   },
+   "reason": "Le point 14.1 prévoit un acte foncier explicite de vente d’immeubles, inclus même sans identifiant cadastral ; le libellé conserve son caractère prévu."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

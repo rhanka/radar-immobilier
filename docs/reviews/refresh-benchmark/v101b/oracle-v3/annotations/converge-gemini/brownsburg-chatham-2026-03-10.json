@@ -1,0 +1,311 @@
+{
+ "documentId": "brownsburg-chatham-2026-03-10",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "74d11969a462e6c5249baa54eed2ad32210241b1b1ec2b5ac6d3225521ce65b0",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 26-03-066 à la page 18 confirme l'engagement de cession d'une partie des lots pour des HLM.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 26-03-086 à la page 41 autorise conditionnellement le PIIA 2026-006 sur le lot 4 234 857.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00030 est accordée par la résolution 26-03-087 à la page 44.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00031 est accordée par la résolution 26-03-088 à la page 45.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00032 est accordée par la résolution 26-03-089 à la page 46.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00033 est accordée par la résolution 26-03-090 à la page 48.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00034 est accordée par la résolution 26-03-091 à la page 49.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00035 est accordée par la résolution 26-03-092 à la page 50.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00036 est accordée par la résolution 26-03-093 à la page 52.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00037 est accordée par la résolution 26-03-094 à la page 53.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00038 est accordée par la résolution 26-03-095 à la page 54.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00039 est accordée par la résolution 26-03-096 à la page 55.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2026-00040 est accordée par la résolution 26-03-097 à la page 57.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure DM-2025-00725 est accordée par la résolution 26-03-098 à la page 58.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"Le PIIA 2026-007 est accepté par la résolution 26-03-099 à la page 58.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"Le PIIA 2026-008 est accepté par la résolution 26-03-100 à la page 59.\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"Le PIIA 2026-009 est accepté par la résolution 26-03-101 à la page 61.\"},{\"item\":\"i18\",\"choice\":\"v1\",\"reason\":\"Le PIIA 2026-010 est accepté par la résolution 26-03-102 à la page 62.\"},{\"item\":\"i19\",\"choice\":\"v1\",\"reason\":\"Le PIIA 2026-011 est accepté par la résolution 26-03-103 à la page 63, dont la citation reproduit textuellement le titre de la demande.\"},{\"item\":\"i20\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement 361-2026 est donné à la page 64 par la conseillère Martine Renaud.\"},{\"item\":\"i21\",\"choice\":\"v1\",\"reason\":\"Le projet de règlement 361-2026 est adopté par la résolution 26-03-104 à la page 65.\"},{\"item\":\"i22\",\"choice\":\"v1\",\"reason\":\"La contribution pour parcs liée au lotissement 2025-00021 est acceptée par la résolution 26-03-105 à la page 67.\"},{\"item\":\"i23\",\"choice\":\"v1\",\"reason\":\"La contribution pour parcs liée au lotissement 2026-00001 est acceptée par la résolution 26-03-106 à la page 68.\"},{\"item\":\"i24\",\"choice\":\"v1\",\"reason\":\"La contribution pour parcs liée au lotissement 2026-00002 est acceptée par la résolution 26-03-107 à la page 70.\"},{\"item\":\"i25\",\"choice\":\"v1\",\"reason\":\"La contribution pour parcs liée au lotissement 2026-00005 est acceptée par la résolution 26-03-108 à la page 71.\"},{\"item\":\"i26\",\"choice\":\"v1\",\"reason\":\"L'acceptation provisoire des travaux du prolongement de la rue de la Septaco est adoptée par la résolution 26-03-110 à la page 73.\"},{\"item\":\"i27\",\"choice\":\"v1\",\"reason\":\"L'autorisation de signer l'entente de développement du domaine Oria est accordée par la résolution 26-03-111 à la page 74.\"},{\"item\":\"i28\",\"choice\":\"v2\",\"reason\":\"La version v2 identifie correctement le projet « Domaine Oria » comme objet et cite fidèlement les considérants de la résolution 26-03-112 à la page 75.\"},{\"item\":\"i29\",\"choice\":\"v1\",\"reason\":\"L'engagement de cession à titre gratuit d'un terrain pour une école secondaire est attesté à la page 77 dans la résolution 26-03-113.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v2"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  },
+  {
+   "item": "i22",
+   "unitId": "u22",
+   "current": "v1"
+  },
+  {
+   "item": "i23",
+   "unitId": "u23",
+   "current": "v1"
+  },
+  {
+   "item": "i24",
+   "unitId": "u24",
+   "current": "v1"
+  },
+  {
+   "item": "i25",
+   "unitId": "u25",
+   "current": "v1"
+  },
+  {
+   "item": "i26",
+   "unitId": "u26",
+   "current": "v1"
+  },
+  {
+   "item": "i27",
+   "unitId": "u27",
+   "current": "v1"
+  },
+  {
+   "item": "i28",
+   "unitId": "u28",
+   "current": "v2"
+  },
+  {
+   "item": "i29",
+   "unitId": "u29",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 26-03-066 à la page 18 confirme l'engagement de cession d'une partie des lots pour des HLM."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 26-03-086 à la page 41 autorise conditionnellement le PIIA 2026-006 sur le lot 4 234 857."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00030 est accordée par la résolution 26-03-087 à la page 44."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00031 est accordée par la résolution 26-03-088 à la page 45."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00032 est accordée par la résolution 26-03-089 à la page 46."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00033 est accordée par la résolution 26-03-090 à la page 48."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00034 est accordée par la résolution 26-03-091 à la page 49."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00035 est accordée par la résolution 26-03-092 à la page 50."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00036 est accordée par la résolution 26-03-093 à la page 52."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00037 est accordée par la résolution 26-03-094 à la page 53."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00038 est accordée par la résolution 26-03-095 à la page 54."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00039 est accordée par la résolution 26-03-096 à la page 55."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2026-00040 est accordée par la résolution 26-03-097 à la page 57."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "La dérogation mineure DM-2025-00725 est accordée par la résolution 26-03-098 à la page 58."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Le PIIA 2026-007 est accepté par la résolution 26-03-099 à la page 58."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "Le PIIA 2026-008 est accepté par la résolution 26-03-100 à la page 59."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "Le PIIA 2026-009 est accepté par la résolution 26-03-101 à la page 61."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "Le PIIA 2026-010 est accepté par la résolution 26-03-102 à la page 62."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "Le PIIA 2026-011 est accepté par la résolution 26-03-103 à la page 63, dont la citation reproduit textuellement le titre de la demande."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement 361-2026 est donné à la page 64 par la conseillère Martine Renaud."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "Le projet de règlement 361-2026 est adopté par la résolution 26-03-104 à la page 65."
+  },
+  {
+   "item": "i22",
+   "choice": "v1",
+   "reason": "La contribution pour parcs liée au lotissement 2025-00021 est acceptée par la résolution 26-03-105 à la page 67."
+  },
+  {
+   "item": "i23",
+   "choice": "v1",
+   "reason": "La contribution pour parcs liée au lotissement 2026-00001 est acceptée par la résolution 26-03-106 à la page 68."
+  },
+  {
+   "item": "i24",
+   "choice": "v1",
+   "reason": "La contribution pour parcs liée au lotissement 2026-00002 est acceptée par la résolution 26-03-107 à la page 70."
+  },
+  {
+   "item": "i25",
+   "choice": "v1",
+   "reason": "La contribution pour parcs liée au lotissement 2026-00005 est acceptée par la résolution 26-03-108 à la page 71."
+  },
+  {
+   "item": "i26",
+   "choice": "v1",
+   "reason": "L'acceptation provisoire des travaux du prolongement de la rue de la Septaco est adoptée par la résolution 26-03-110 à la page 73."
+  },
+  {
+   "item": "i27",
+   "choice": "v1",
+   "reason": "L'autorisation de signer l'entente de développement du domaine Oria est accordée par la résolution 26-03-111 à la page 74."
+  },
+  {
+   "item": "i28",
+   "choice": "v2",
+   "reason": "La version v2 identifie correctement le projet « Domaine Oria » comme objet et cite fidèlement les considérants de la résolution 26-03-112 à la page 75."
+  },
+  {
+   "item": "i29",
+   "choice": "v1",
+   "reason": "L'engagement de cession à titre gratuit d'un terrain pour une école secondaire est attesté à la page 77 dans la résolution 26-03-113."
+  }
+ ]
+}

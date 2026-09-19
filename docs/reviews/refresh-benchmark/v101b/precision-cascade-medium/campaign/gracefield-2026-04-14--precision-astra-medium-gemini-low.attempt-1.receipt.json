@@ -1,0 +1,35 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "a619f6738b627f03ce2034e9e47deb258ceec9d1ada1dba308f59348b391dbc3",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1925,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 19490,
+   "outputTokens": 484,
+   "totalTokens": 19974
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1769
+  },
+  "inputSha256": "1d57bc587d5e642a96eb80d2d93eb98a2781fca8a542be4d03cd36b1d7b27522"
+ },
+ "at": "2026-09-19T03:23:01.184Z"
+}

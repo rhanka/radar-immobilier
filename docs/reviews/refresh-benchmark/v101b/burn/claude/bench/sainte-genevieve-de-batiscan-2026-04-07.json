@@ -1,0 +1,13 @@
+{
+ "id": "sainte-genevieve-de-batiscan-2026-04-07",
+ "rc": 0,
+ "latencyMs": 489871,
+ "inputTokens": 6,
+ "outputTokens": 71682,
+ "cacheRead": 27583,
+ "cacheCreate": 91648,
+ "costUsd": 2.7427645000000003,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 16301
+}

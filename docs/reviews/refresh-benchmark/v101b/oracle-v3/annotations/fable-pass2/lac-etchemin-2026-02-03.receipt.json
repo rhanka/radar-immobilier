@@ -1,0 +1,75 @@
+{
+ "documentId": "lac-etchemin-2026-02-03",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "d35ebfd9a268081ce8cb8d54fd89837c3d38338f1e6f32a84ad088f635486153",
+ "inputSha256": "38e31c71a921ff19a1c81410f1f70c5c737dc8c4d434d84ddd486d5d3262f916",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "rc": 0,
+ "latencyMs": 21365,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "479c3db8-e6a1-4299-8f39-ae6620ab8882",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 1624,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 20629,
+   "webSearchRequests": 0,
+   "costUSD": 0.4944732500000001,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 1614,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 20629,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 1624,
+  "output_tokens_details": {
+   "thinking_tokens": 1614
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 20629,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1624,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 20629,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 20629
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.4944732500000001,
+ "durationApiMs": 19466,
+ "stderrTail": "",
+ "at": "2026-09-18T17:52:22.564Z"
+}

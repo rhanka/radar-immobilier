@@ -1,0 +1,112 @@
+{
+ "documentId": "sainte-christine-2026-04-07",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "fedd9ed773ed03f8863afd1dcfdc783517b044e9166b177985e72b3952574e3a",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-cadastre-route116"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Autorisation de signature pour la modification cadastrale de la route 116",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\nnom de la municipalité,"
+      },
+      {
+       "page": 9,
+       "excerpt": "Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\nnom de la municipalité, tous les documents cadastraux requis dans le\ncadre de l’opération cadastrale liée au projet de modification du\ncadastre concernant la route 116, conditionnellement à l’obtention de\ntous les permis d’urbanisme requis."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-abrogation-245-1"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’abrogation de l’article 245.1 de la Loi sur l’aménagement et l’urbanisme",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "Que la Municipalité de Sainte-Christine demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi"
+      },
+      {
+       "page": 13,
+       "excerpt": "Que la Municipalité de Sainte-Christine demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi\nno 22 abrogeant l’article 245.1 de la Loi sur l’aménagement et\nl’urbanisme afin de respecter le consensus établi entre le ministère et\nses partenaires municipaux;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 071-04-2026 autorise explicitement la signature des documents cadastraux pour l'opération cadastrale sur la route 116.\",\"excerpt\":\"Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\\nnom de la municipalité, tous les documents cadastraux requis\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 074-04-2026 demande formellement un amendement au projet de loi 22 pour abroger l'article 245.1 de la Loi sur l'aménagement et l'urbanisme.\",\"excerpt\":\"Que la Municipalité de Sainte-Christine demande aux membres de la\\nCommission parlementaire de l’aménagement du territoire de\\nl’Assemblée nationale d’introduire un amendement au projet de loi\\nno 22\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La résolution 071-04-2026 autorise explicitement la signature des documents cadastraux pour l'opération cadastrale sur la route 116.",
+   "excerpt": "Que le conseil municipal autorise la directrice générale et greffièretrésorière ainsi que le maire ou le maire suppléant à signer, pour et au\nnom de la municipalité, tous les documents cadastraux requis"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La résolution 074-04-2026 demande formellement un amendement au projet de loi 22 pour abroger l'article 245.1 de la Loi sur l'aménagement et l'urbanisme.",
+   "excerpt": "Que la Municipalité de Sainte-Christine demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi\nno 22"
+  }
+ ],
+ "filter": {
+  "acts": 2,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La résolution 071-04-2026 autorise explicitement la signature des documents cadastraux pour l'opération cadastrale sur la route 116."
+   },
+   {
+    "act": "A02",
+    "reason": "La résolution 074-04-2026 demande formellement un amendement au projet de loi 22 pour abroger l'article 245.1 de la Loi sur l'aménagement et l'urbanisme."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1651,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 12774,
+   "outputTokens": 199,
+   "totalTokens": 12973
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1494
+  },
+  "inputSha256": "cef8ed3d916c290ebd2c162d247358d07fac5afc347bf4118c2cec05a46aa5a5"
+ }
+}

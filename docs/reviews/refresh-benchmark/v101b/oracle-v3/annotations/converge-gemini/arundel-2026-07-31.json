@@ -1,0 +1,51 @@
+{
+ "documentId": "arundel-2026-07-31",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "12d93e61bac9f641799398316817d7dcf9cd535d65f53ab01a2d9a52fce57c36",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-08-123 à la page 3 confirme l'adoption du règlement 312-2026 (SCAOPI).\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-08-132 à la page 6 autorise le PIIA pour la construction d'un abri d'auto au 165 Chemin de la Rouge.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-08-133 à la page 7 autorise le PIIA pour la rénovation du garage au 117 Rue du Village.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-08-123 à la page 3 confirme l'adoption du règlement 312-2026 (SCAOPI)."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-08-132 à la page 6 autorise le PIIA pour la construction d'un abri d'auto au 165 Chemin de la Rouge."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-08-133 à la page 7 autorise le PIIA pour la rénovation du garage au 117 Rue du Village."
+  }
+ ]
+}

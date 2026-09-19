@@ -1,0 +1,196 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "nextId": 6,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Acquisition conditionnelle du terrain au matricule 6100-38-1522 après démolition complète",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6100-38-1522",
+    "page": 7,
+    "citation": "à procéder à l’acquisition du lot qui porte le matricule 6100-38-1522 appartenant à monsieur William Pilon et madame Mahélie Campagna",
+    "anchor": "matricule 6100-38-1522",
+    "spanStart": 1689,
+    "spanEnd": 1822
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acquisition conditionnelle du terrain au matricule 6100-38-1522 après démolition complète",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6100-38-1522",
+      "page": 7,
+      "citation": "à procéder à l’acquisition du lot qui porte le matricule 6100-38-1522 appartenant à monsieur William Pilon et madame Mahélie Campagna",
+      "anchor": "matricule 6100-38-1522",
+      "spanStart": 1689,
+      "spanEnd": 1822
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le terrain identifié page 7 fait l’objet d’une disposition actuelle de la résolution 2026-03-70, page 8, prévoyant son acquisition après démolition complète des bâtiments : l’unité porte sur cette disposition foncière, non sur le crédit de taxes ou le rappel historique."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Autorisation d’enchérir et d’acquérir à la vente pour taxes du 16 juin 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "vente pour taxes municipales",
+    "page": 8,
+    "citation": "lors de la vente pour défaut de paiement de taxes du 16 juin 2026, à enchérir, pour et au nom de la Municipalité, jusqu’à un montant maximal",
+    "anchor": "vente pour défaut de paiement de taxes",
+    "spanStart": 1714,
+    "spanEnd": 1854
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir à la vente pour taxes du 16 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "vente pour taxes municipales",
+      "page": 8,
+      "citation": "lors de la vente pour défaut de paiement de taxes du 16 juin 2026, à enchérir, pour et au nom de la Municipalité, jusqu’à un montant maximal",
+      "anchor": "vente pour défaut de paiement de taxes",
+      "spanStart": 1714,
+      "spanEnd": 1854
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-71 autorise expressément les enchères et l’acquisition d’immeubles au nom de la Municipalité, ce qui constitue une autorisation foncière sans attester qu’un immeuble a déjà été acquis."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Modification du signataire de l’acquisition de terrains du rang Haut de la Rivière — résolution 2025-08-304",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2025-08-304",
+    "page": 12,
+    "citation": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la modification du changement de nom du maire, par monsieur Michel Deraspe dans la résolution 2025-08-304",
+    "anchor": "résolution 2025-08-304",
+    "spanStart": 122,
+    "spanEnd": 289
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Modification du signataire de l’acquisition de terrains du rang Haut de la Rivière — résolution 2025-08-304",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2025-08-304",
+      "page": 12,
+      "citation": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la modification du changement de nom du maire, par monsieur Michel Deraspe dans la résolution 2025-08-304",
+      "anchor": "résolution 2025-08-304",
+      "spanStart": 122,
+      "spanEnd": 289
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-75 modifie actuellement le signataire des documents permettant l’acquisition décrite page 11 ; cette étape foncière distincte n’est ni une nouvelle adoption de l’acquisition antérieure ni une simple nomination."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Second projet du règlement 268-2025 — triplex rue Georges, zone H-06",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "268-2025",
+    "page": 15,
+    "citation": "19. ADOPTION DU DEUXIÈME (2IÈME) PROJET DE RÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE ZONAGE 160-2017 POUR LA CONSTRUCTION D’UN TRIPLEX SUR LA RUE GEORGES",
+    "anchor": "RÈGLEMENT 268-2025",
+    "spanStart": 1829,
+    "spanEnd": 1985
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Second projet du règlement 268-2025 — triplex rue Georges, zone H-06",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "268-2025",
+      "page": 15,
+      "citation": "19. ADOPTION DU DEUXIÈME (2IÈME) PROJET DE RÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE ZONAGE 160-2017 POUR LA CONSTRUCTION D’UN TRIPLEX SUR LA RUE GEORGES",
+      "anchor": "RÈGLEMENT 268-2025",
+      "spanStart": 1829,
+      "spanEnd": 1985
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 19 et la résolution 2026-03-80 constatent l’adoption du deuxième projet modifiant le zonage, tandis que l’avis de motion du 9 décembre 2025 demeure un rappel historique sans unité supplémentaire."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Appel d’offres autorisé pour la vente du 620, rang Haut de la Rivière — résidence sous huit mois",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "620, rang Haut de la Rivière",
+    "page": 17,
+    "citation": "d’autoriser la parution de l’annonce de la vente du terrain appartenant à la Municipalité, soit celui du 620, rang Haut de la Rivière dans le journal Le Courrier Sud",
+    "anchor": "620, rang Haut de la Rivière",
+    "spanStart": 50,
+    "spanEnd": 215
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appel d’offres autorisé pour la vente du 620, rang Haut de la Rivière — résidence sous huit mois",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "620, rang Haut de la Rivière",
+      "page": 17,
+      "citation": "d’autoriser la parution de l’annonce de la vente du terrain appartenant à la Municipalité, soit celui du 620, rang Haut de la Rivière dans le journal Le Courrier Sud",
+      "anchor": "620, rang Haut de la Rivière",
+      "spanStart": 50,
+      "spanEnd": 215
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-81 autorise la mise en publicité de la vente et impose la construction d’une résidence dans les huit mois, sans constater une vente conclue avec un acquéreur."
+    }
+   ]
+  }
+ ]
+}

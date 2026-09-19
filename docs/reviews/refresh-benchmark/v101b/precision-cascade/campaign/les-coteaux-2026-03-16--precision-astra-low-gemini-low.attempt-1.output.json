@@ -1,0 +1,285 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-335",
+   "label": "Règlement 335 — Contrôle provisoire de la capacité du système d’égout",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "status": "candidate",
+   "numero": "335",
+   "title": "Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible de créer des besoins excédant la capacité du système d’égout",
+   "municipality": "les-coteaux",
+   "date": "2026-03-16",
+   "stage": "adoption",
+   "resolution": "26-03-9287",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\nde créer des besoins excédant la capacité du système d’égout numéro 335.",
+     "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+     "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-335"
+   ]
+  },
+  {
+   "id": "constraint-egout",
+   "label": "Contrôle provisoire des travaux augmentant les besoins en égout",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "status": "candidate",
+   "constraintType": "autre",
+   "municipality": "les-coteaux",
+   "meetingDate": "2026-03-16",
+   "resolution": "26-03-9287",
+   "loi": "Règlement 335; article 29 de la Loi sur les compétences municipales",
+   "description": "Adoption d’un contrôle provisoire prohibant les travaux susceptibles de créer des besoins excédant la capacité du système d’égout. Les débits réservés à la station d’épuration sont dépassés depuis 2023. L’entrée en vigueur n’est pas indiquée.",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\nde créer des besoins excédant la capacité du système d’égout numéro 335.",
+     "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+     "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-335"
+   ]
+  },
+  {
+   "id": "bylaw-316-01",
+   "label": "Projet 316-01 — Correctifs au règlement de permis et certificats",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "status": "candidate",
+   "numero": "316-01",
+   "title": "Règlement modifiant le Règlement de permis et certificats numéro 316 afin d’y apporter des correctifs suite à son remplacement",
+   "municipality": "les-coteaux",
+   "meetingDate": "2026-03-16",
+   "stage": "projet",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\nsuite à son remplacement.",
+     "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+     "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-316"
+   ]
+  },
+  {
+   "id": "bylaw-317-01",
+   "label": "Projet 317-01 — Correctifs au règlement de zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "status": "candidate",
+   "numero": "317-01",
+   "title": "Règlement modifiant le Règlement de zonage numéro 317 afin d’y apporter des correctifs suite à son remplacement",
+   "municipality": "les-coteaux",
+   "meetingDate": "2026-03-16",
+   "stage": "projet",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\nremplacement.",
+     "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+     "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-317"
+   ]
+  },
+  {
+   "id": "event-9288",
+   "label": "PIIA — Résolution 26-03-9288, identification contradictoire",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "status": "needs_review",
+   "date": "2026-03-16",
+   "municipality": "les-coteaux",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-16",
+   "decision": "approuvé",
+   "resolution": "26-03-9288",
+   "description": "Le titre vise le PIIA 2026-01 au 65, route 338, lot 2 085 614, mais le dispositif accepte le PIIA 2026-02 au 102, rue Principale pour remplacer quatre fenêtres à l’étage par des fenêtres à guillotine. Identification du dossier et du lot à vérifier.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "DEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614",
+     "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+     "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 6,
+     "excerpt": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres à l’étage du bâtiment",
+     "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+     "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-piia"
+   ]
+  },
+  {
+   "id": "event-9289",
+   "label": "PIIA 2026-02 — 102, rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "status": "candidate",
+   "date": "2026-03-16",
+   "municipality": "les-coteaux",
+   "kind": "piia",
+   "dossier": "2026-02",
+   "no_lot": "1686919",
+   "etape": "piia",
+   "etape_date": "2026-03-16",
+   "decision": "approuvé",
+   "resolution": "26-03-9289",
+   "description": "Acceptation du remplacement de quatre fenêtres à l’étage du bâtiment principal par des fenêtres à guillotine, tel que présenté.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres à l’étage du bâtiment",
+     "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+     "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-piia"
+   ]
+  },
+  {
+   "id": "event-dm294",
+   "label": "DM-294 — Régularisation du garage au 78, rue Sauvé",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "status": "candidate",
+   "date": "2026-03-16",
+   "municipality": "les-coteaux",
+   "kind": "derogation",
+   "dossier": "DM-294",
+   "no_lot": "1688067",
+   "reglement_number": "317",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-16",
+   "decision": "approuvé",
+   "resolution": "26-03-9290",
+   "description": "Régularisation de l’implantation du garage privé isolé partiellement en cour avant plutôt qu’entièrement en cour latérale ou arrière, en dérogation au point 9 du tableau de l’article 6.1 du règlement de zonage 317.",
+   "motif": "Travaux réalisés conformément au permis délivré; respect des objectifs du plan d’urbanisme; absence d’atteinte aux droits des voisins; préjudice sérieux en cas de refus.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour",
+     "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+     "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+     "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-dm294"
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-335",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+   "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\nde créer des besoins excédant la capacité du système d’égout numéro 335."
+  },
+  {
+   "id": "ev-316",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+   "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\nsuite à son remplacement."
+  },
+  {
+   "id": "ev-317",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+   "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\nremplacement."
+  },
+  {
+   "id": "ev-piia",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+   "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres à l’étage du bâtiment\nprincipal par des fenêtres à guillotine, tel que présenté."
+  },
+  {
+   "id": "ev-dm294",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+   "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour\navant plutôt qu’entièrement en cour latérale ou arrière tel que prévu au point 9 du tableau de\nl’article 6.1 du règlement de zonage 317 telle que présentée."
+  },
+  {
+   "id": "ev-dm293",
+   "source_file": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "rawRef": "raw/proces-verbaux-les-coteaux/cas/029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681.pdf",
+   "docSha": "029008b09784e0d76a5c71bfee833b5f6aac1414774088b05b9bf859569ba681",
+   "sourceUrl": "https://les-coteaux.qc.ca/wp-content/uploads/2026/04/pv_so_20260316.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "CONSIDÉRANT QUE par la résolution numéro 25-10-9187, le conseil a approuvé la demande\nde dérogation mineure DM-293 ;"
+  }
+ ],
+ "input_tokens": 15300,
+ "output_tokens": 5300
+}

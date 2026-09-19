@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "status": "receipt_failed_after_response",
+  "requested": {
+    "model": "gemini-3.8-flash-low",
+    "effort": "low",
+    "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse",
+    "maxOutputTokens": 64
+  },
+  "account": {
+    "pseudonym": "acct-59dca62565"
+  },
+  "alignment": {
+    "envelope": {
+      "beforeFields": ["model", "project", "request", "requestId", "userAgent"],
+      "afterFields": ["model", "project", "request"],
+      "removedFields": ["requestId", "userAgent"]
+    },
+    "project": {
+      "before": "loadCodeAssist-derived value (redacted)",
+      "after": "default-cli-project",
+      "changed": true
+    },
+    "request": {
+      "beforeFields": ["contents", "generationConfig", "systemInstruction"],
+      "afterFields": ["contents", "generationConfig"],
+      "removedEmptySystemInstruction": true
+    },
+    "model": {
+      "before": "gemini-3.8-flash-low",
+      "after": "gemini-3.8-flash-low",
+      "changed": false
+    },
+    "headersAdded": ["Client-Metadata", "X-Goog-Api-Client"],
+    "headerValues": {
+      "X-Goog-Api-Client": "gl-node/22.0.0 antigravity/0.1.0",
+      "Client-Metadata": {
+        "ideType": "ANTIGRAVITY",
+        "platform": "PLATFORM_UNSPECIFIED",
+        "pluginType": "ANTIGRAVITY"
+      }
+    },
+    "sources": {
+      "cliLog": "/home/antoinefa/.gemini/antigravity-cli/log/cli-20260913_214126.log",
+      "priorDiagnostic": "/home/antoinefa/src/radar-immobilier/.lanes/conductor/.remote/DEBUG_429_CLOUDCODE.md"
+    }
+  },
+  "wire": {
+    "requestDispatched": true,
+    "responseConsumed": true,
+    "httpStatus": null,
+    "providerError": null,
+    "durationMs": null
+  },
+  "localReceiptError": {
+    "code": "ENOENT",
+    "message": "ENOENT: no such file or directory, open 'file:///workspace/node_modules/@sentropic/llm-mesh/package.json'"
+  }
+}

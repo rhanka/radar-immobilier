@@ -1,0 +1,91 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4379fc60f9b0423ee4f1fcbe4e45632ff075e83f84ece97381a698efdc225824",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Acte foncier explicite attesté p. 7-8 : la résolution 2026-03-70 résout « QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain lorsque les bâtiments ... seront entièrement démoli », citation exacte p. 7 sur le matricule 6100-38-1522.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-03-71 p. 8 autorisant à enchérir et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » le 16 juin 2026 : acte foncier inclus par la règle, citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-03-75 ne fait que changer le nom du maire signataire dans la résolution historique 2025-08-304 : simple nomination exclue du rappel et mention historique du même dossier qui ne multiplie pas le rappel, sans objet foncier explicite (l’objet est un numéro de résolution).\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 19 p. 15-16 : adoption du deuxième projet de règlement 268-2025 modifiant la grille des usages de la zone H-06 du règlement de zonage 160-2017 (triplex rue Georges), étape second_projet et citation exactes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-03-81 p. 17 : « d’autoriser la parution de l’annonce de la vente du terrain ... 620, rang Haut de la Rivière » avec vente conditionnelle à la construction d’une résidence dans les huit mois — acte foncier explicite, citation et page exactes.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Doublon même type/même fait de i02 (résolution 2026-03-71, autorisation d’enchérir et d’acquérir à la vente pour taxes du 16 juin 2026) : non crédité selon la règle.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Doublon strict de i06 et du même fait que i02 (résolution 2026-03-71 p. 8) : « Doublon même type/même fait non crédité ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Acte foncier explicite attesté p. 7-8 : la résolution 2026-03-70 résout « QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain lorsque les bâtiments ... seront entièrement démoli », citation exacte p. 7 sur le matricule 6100-38-1522."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 2026-03-71 p. 8 autorisant à enchérir et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » le 16 juin 2026 : acte foncier inclus par la règle, citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "La résolution 2026-03-75 ne fait que changer le nom du maire signataire dans la résolution historique 2025-08-304 : simple nomination exclue du rappel et mention historique du même dossier qui ne multiplie pas le rappel, sans objet foncier explicite (l’objet est un numéro de résolution)."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 19 p. 15-16 : adoption du deuxième projet de règlement 268-2025 modifiant la grille des usages de la zone H-06 du règlement de zonage 160-2017 (triplex rue Georges), étape second_projet et citation exactes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution 2026-03-81 p. 17 : « d’autoriser la parution de l’annonce de la vente du terrain ... 620, rang Haut de la Rivière » avec vente conditionnelle à la construction d’une résidence dans les huit mois — acte foncier explicite, citation et page exactes."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Doublon même type/même fait de i02 (résolution 2026-03-71, autorisation d’enchérir et d’acquérir à la vente pour taxes du 16 juin 2026) : non crédité selon la règle."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Doublon strict de i06 et du même fait que i02 (résolution 2026-03-71 p. 8) : « Doublon même type/même fait non crédité »."
+  }
+ ]
+}

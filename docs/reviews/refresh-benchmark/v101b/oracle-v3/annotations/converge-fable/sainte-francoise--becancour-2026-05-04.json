@@ -1,0 +1,81 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "3a6ae6809f0da4a89c45b1e2bc32faf27033a275dbb2da9d785a50ccdb404e82",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le titre du point 9.2 (page 7) et l'ordre du jour attestent « ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03 » ; objet réglementaire d'urbanisme explicite, étape second_projet conforme à la séquence (avis de motion 13 avril, consultation 27 avril), citation et page exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 62-05-2026 (page 8) atteste que « le règlement portant le numéro 56-2026 relatif à l’aménagement des entrées privées et à la fermeture des fossés de chemins soit adopté tel que rédigé » ; objet réglementaire explicite d'aménagement foncier, non un simple entretien de voirie, étape adoption exacte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 8, point 9.5 : « Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance ultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme #2010-01 » ; avis de motion actuel, unité distincte du projet selon la règle.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 8, point 9.5 : « Un projet dudit est déposé séance tenante » pour le règlement #58-2026 modifiant le plan d'urbanisme ; la règle impose « Avis de motion et projet actuels séparés », étape projet_reglement exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 8, point 9.6 : « Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance ultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de construction #2010-05 » ; citation, objet et étape avis_motion exacts.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Page 8, point 9.6 : le règlement #59-2026 « vise à : Permettre les pieux dans l’agrandissement des bâtiments. Un projet dudit est déposé séance tenante » ; dépôt de projet actuel distinct de l'avis de motion, étape projet_reglement exacte.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le titre du point 9.2 (page 7) et l'ordre du jour attestent « ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03 » ; objet réglementaire d'urbanisme explicite, étape second_projet conforme à la séquence (avis de motion 13 avril, consultation 27 avril), citation et page exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 62-05-2026 (page 8) atteste que « le règlement portant le numéro 56-2026 relatif à l’aménagement des entrées privées et à la fermeture des fossés de chemins soit adopté tel que rédigé » ; objet réglementaire explicite d'aménagement foncier, non un simple entretien de voirie, étape adoption exacte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 8, point 9.5 : « Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance ultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme #2010-01 » ; avis de motion actuel, unité distincte du projet selon la règle."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 8, point 9.5 : « Un projet dudit est déposé séance tenante » pour le règlement #58-2026 modifiant le plan d'urbanisme ; la règle impose « Avis de motion et projet actuels séparés », étape projet_reglement exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 8, point 9.6 : « Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance ultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de construction #2010-05 » ; citation, objet et étape avis_motion exacts."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Page 8, point 9.6 : le règlement #59-2026 « vise à : Permettre les pieux dans l’agrandissement des bâtiments. Un projet dudit est déposé séance tenante » ; dépôt de projet actuel distinct de l'avis de motion, étape projet_reglement exacte."
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+ "documentId": "chesterville-2026-03-02",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "d9a409dbefad179459f5751fa87c97623f8a3da0e1c2fe816646735999b3793a",
+ "verificationSha256": "8543394943159912a112db0f7ed74eeb4b61833353f454340d259c97a33a4db6",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

@@ -1,0 +1,178 @@
+{
+ "documentId": "saint-constant-2026-01-20",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c9abe0b998cac2c8ce004058fae5d3cd8ca1ca0e3a951038694e7d56f1c1a0ed",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "ppcmoi-premier-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du premier projet — PPCMOI 2025-00114 — 42, montée Saint-Régis",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\ndemande d’autorisation de PPCMOI numéro 2025-00114,"
+      },
+      {
+       "page": 1,
+       "excerpt": "AVIS est donné par la soussignée, que lors d'une séance ordinaire tenue le mardi,\n20 janvier 2026,"
+      },
+      {
+       "page": 5,
+       "excerpt": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\ndemande d’autorisation de PPCMOI numéro 2025-00114, concernant le lot 2 869 628 du\ncadastre du Québec, soit le 42, montée Saint-Régis, selon la condition suivante :"
+      },
+      {
+       "page": 1,
+       "excerpt": "AVIS est donné par la soussignée, que lors d'une séance ordinaire tenue le mardi,\n20 janvier 2026, le Conseil municipal de la Ville de Saint-Constant a adopté le projet de\nrésolution numéro 037-01-26 intitulé « Adoption du premier projet de résolution –\nDemande de PPCMOI numéro 2025-00114 – Projet de construction, de modification\nou d’occupation d’un immeuble (PPCMOI) – 42, montée Saint-Régis » visant à\nrégulariser des éléments dérogatoires de l’habitation unifamiliale jumelée existante au 42,\nmontée Saint-Régis (lot 2 869 625 du cadastre du Québec)."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "consultation"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation publique annoncée — 3 mars 2026",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Ce projet de résolution conformément à la Loi, fera l'objet d'une assemblée publique de\nconsultation qui sera tenue par le Conseil municipal le 3 mars 2026 à 18h00,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-1528"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 1528-17",
+     "stage": null,
+     "objet": "1528-17",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Ce projet de résolution concerne une propriété située dans la zone H-532 du règlement\nde zonage numéro 1528-17,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-1536"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1536-17 relatif aux PPCMOI",
+     "stage": null,
+     "objet": "1536-17",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "CONSIDÉRANT que la Ville de Saint-Constant a adopté le règlement numéro 1536-17 relatif\naux projets particuliers de construction, de modification ou d’occupation d’un immeuble;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "```json\n{\n  \"decisions\": [\n    {\n      \"act\": \"A01\",\n      \"verdict\": \"soutenu\",\n      \"reason\": \"Le conseil municipal adopte le premier projet de résolution concernant la demande de PPCMOI 2025-00114 pour le 42, montée Saint-Régis.\",\n      \"excerpt\": \"D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\\ndemande d’autorisation de PPCMOI numéro 2025-00114\"\n    },\n    {\n      \"act\": \"A02\",\n      \"verdict\": \"soutenu\",\n      \"reason\": \"L'avis public annonce la tenue d'une assemblée publique de consultation le 3 mars 2026.\",\n      \"excerpt\": \"fera l'objet d'une assemblée publique de\\nconsultation qui sera tenue par le Conseil municipal le 3 mars 2026 à 18h00\"\n    },\n    {\n      \"act\": \"A03\",\n      \"verdict\": \"non_soutenu\",\n      \"reason\": \"Le règlement de zonage 1528-17 est simplement mentionné comme norme de référence faisant l'objet de dérogations, sans faire l'objet d'un acte réglementaire dans cette séance.\",\n      \"excerpt\": \"Ce projet de résolution a pour objet d’accorder la demande d’autorisation de PPCMOI et\\nd’autoriser les dérogations suivantes au règlement de zonage numéro 1528-17 de la Ville\\nde Saint-Constant\"\n    },\n    {\n      \"act\": \"A04\",\n      \"verdict\": \"non_soutenu\",\n      \"reason\": \"Le règlement 1536-17 est cité dans les considérants comme base habilitante du PPCMOI et ne fait l'objet d'aucun acte ou processus d'adoption dans la séance.\",\n      \"excerpt\": \"CONSIDÉRANT que la Ville de Saint-Constant a adopté le règlement numéro 1536-17 relatif\\naux projets particuliers de construction, de modification ou d’occupation d’un immeuble;\"\n    }\n  ]\n}\n```",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte le premier projet de résolution concernant la demande de PPCMOI 2025-00114 pour le 42, montée Saint-Régis.",
+   "excerpt": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\ndemande d’autorisation de PPCMOI numéro 2025-00114"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'avis public annonce la tenue d'une assemblée publique de consultation le 3 mars 2026.",
+   "excerpt": "fera l'objet d'une assemblée publique de\nconsultation qui sera tenue par le Conseil municipal le 3 mars 2026 à 18h00"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage 1528-17 est simplement mentionné comme norme de référence faisant l'objet de dérogations, sans faire l'objet d'un acte réglementaire dans cette séance.",
+   "excerpt": "Ce projet de résolution a pour objet d’accorder la demande d’autorisation de PPCMOI et\nd’autoriser les dérogations suivantes au règlement de zonage numéro 1528-17 de la Ville\nde Saint-Constant"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1536-17 est cité dans les considérants comme base habilitante du PPCMOI et ne fait l'objet d'aucun acte ou processus d'adoption dans la séance.",
+   "excerpt": "CONSIDÉRANT que la Ville de Saint-Constant a adopté le règlement numéro 1536-17 relatif\naux projets particuliers de construction, de modification ou d’occupation d’un immeuble;"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement de zonage 1528-17 est simplement mentionné comme norme de référence faisant l'objet de dérogations, sans faire l'objet d'un acte réglementaire dans cette séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 1536-17 est cité dans les considérants comme base habilitante du PPCMOI et ne fait l'objet d'aucun acte ou processus d'adoption dans la séance."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal adopte le premier projet de résolution concernant la demande de PPCMOI 2025-00114 pour le 42, montée Saint-Régis."
+   },
+   {
+    "act": "A02",
+    "reason": "L'avis public annonce la tenue d'une assemblée publique de consultation le 3 mars 2026."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1750,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4809,
+   "outputTokens": 465,
+   "totalTokens": 5274
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1607
+  },
+  "inputSha256": "0713ce68165254251c93f7eb278f8c7a742bca5997ccfcba7b54994d486b54a4"
+ }
+}

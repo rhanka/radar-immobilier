@@ -1,0 +1,1272 @@
+{
+ "couples": 161,
+ "positives": 32,
+ "negatives": 117,
+ "open": 12,
+ "gated": {
+  "positive": 26,
+  "negative": 12,
+  "open": 3
+ },
+ "curve": [
+  {
+   "threshold": 0,
+   "positives": 32,
+   "negatives": 117,
+   "open": 12
+  },
+  {
+   "threshold": 0.05,
+   "positives": 32,
+   "negatives": 117,
+   "open": 11
+  },
+  {
+   "threshold": 0.1,
+   "positives": 32,
+   "negatives": 110,
+   "open": 7
+  },
+  {
+   "threshold": 0.15,
+   "positives": 32,
+   "negatives": 85,
+   "open": 3
+  },
+  {
+   "threshold": 0.2,
+   "positives": 32,
+   "negatives": 55,
+   "open": 3
+  },
+  {
+   "threshold": 0.25,
+   "positives": 32,
+   "negatives": 42,
+   "open": 3
+  },
+  {
+   "threshold": 0.3,
+   "positives": 24,
+   "negatives": 21,
+   "open": 3
+  },
+  {
+   "threshold": 0.35,
+   "positives": 17,
+   "negatives": 11,
+   "open": 2
+  },
+  {
+   "threshold": 0.4,
+   "positives": 17,
+   "negatives": 7,
+   "open": 2
+  },
+  {
+   "threshold": 0.45,
+   "positives": 11,
+   "negatives": 1,
+   "open": 2
+  },
+  {
+   "threshold": 0.5,
+   "positives": 9,
+   "negatives": 0,
+   "open": 1
+  },
+  {
+   "threshold": 0.55,
+   "positives": 6,
+   "negatives": 0,
+   "open": 1
+  },
+  {
+   "threshold": 0.6,
+   "positives": 6,
+   "negatives": 0,
+   "open": 1
+  },
+  {
+   "threshold": 0.65,
+   "positives": 6,
+   "negatives": 0,
+   "open": 0
+  },
+  {
+   "threshold": 0.7,
+   "positives": 5,
+   "negatives": 0,
+   "open": 0
+  },
+  {
+   "threshold": 0.75,
+   "positives": 4,
+   "negatives": 0,
+   "open": 0
+  },
+  {
+   "threshold": 0.8,
+   "positives": 3,
+   "negatives": 0,
+   "open": 0
+  },
+  {
+   "threshold": 0.85,
+   "positives": 3,
+   "negatives": 0,
+   "open": 0
+  },
+  {
+   "threshold": 0.9,
+   "positives": 3,
+   "negatives": 0,
+   "open": 0
+  },
+  {
+   "threshold": 0.95,
+   "positives": 2,
+   "negatives": 0,
+   "open": 0
+  },
+  {
+   "threshold": 1,
+   "positives": 1,
+   "negatives": 0,
+   "open": 0
+  }
+ ],
+ "retained": 0.5,
+ "rule": "lowest threshold with no negative couple at or above it",
+ "measure": "ROUGE-L F1 on normalised word tokens",
+ "normalisation": "NFKC, diacritics removed, lower case, split on non-alphanumerics",
+ "couplesDetail": [
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.4444444444444445,
+   "human": "L36",
+   "candidate": "lac-des-seize-iles-2026-09-agenda#u01:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.41975308641975306,
+   "human": "L37",
+   "candidate": "lac-des-seize-iles-2026-09-agenda#u02:v1"
+  },
+  {
+   "label": "positive",
+   "gate": false,
+   "score": 0.2898550724637681,
+   "human": "L54",
+   "candidate": "lac-des-seize-iles-2026-09-agenda#u03:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.6593406593406593,
+   "human": "L55",
+   "candidate": "lac-des-seize-iles-2026-09-agenda#u04:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.3142857142857143,
+   "human": "B04",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u01:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.26865671641791045,
+   "human": "B05",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u02:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.26865671641791045,
+   "human": "B06",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u03:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.2647058823529412,
+   "human": "B07",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u04:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.2608695652173913,
+   "human": "B08",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u05:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.3188405797101449,
+   "human": "B09",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u06:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.28169014084507044,
+   "human": "B10",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u07:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.9523809523809523,
+   "human": "B11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u08:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.41975308641975306,
+   "human": "B14",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u09:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.3283582089552239,
+   "human": "BC2010-11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u10:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.34285714285714286,
+   "human": "BC2014-11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u11:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.2608695652173913,
+   "human": "BC2023-02",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u12:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.4897959183673469,
+   "human": "B154",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u13:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.41758241758241754,
+   "human": "B155",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u14:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.7070707070707071,
+   "human": "B157",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u16:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.30303030303030304,
+   "human": "B158",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u17:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2647058823529412,
+   "human": "B04",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2647058823529412,
+   "human": "B04",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2647058823529412,
+   "human": "B04",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2647058823529412,
+   "human": "B04",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u05:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.3142857142857143,
+   "human": "B04",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u06:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.17391304347826086,
+   "human": "B04",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1518987341772152,
+   "human": "B04",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1842105263157895,
+   "human": "B04",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.17391304347826086,
+   "human": "B05",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.26865671641791045,
+   "human": "B05",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.26865671641791045,
+   "human": "B05",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.26865671641791045,
+   "human": "B05",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u05:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.3188405797101449,
+   "human": "B05",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u06:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.29411764705882354,
+   "human": "B05",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.15384615384615385,
+   "human": "B05",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.21333333333333335,
+   "human": "B05",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.17391304347826086,
+   "human": "B06",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.17910447761194032,
+   "human": "B06",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.26865671641791045,
+   "human": "B06",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.26865671641791045,
+   "human": "B06",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u05:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.3188405797101449,
+   "human": "B06",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u06:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.29411764705882354,
+   "human": "B06",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.23076923076923075,
+   "human": "B06",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.24000000000000002,
+   "human": "B06",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.17142857142857146,
+   "human": "B07",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1764705882352941,
+   "human": "B07",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2058823529411765,
+   "human": "B07",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2647058823529412,
+   "human": "B07",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u05:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.3142857142857143,
+   "human": "B07",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u06:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2898550724637681,
+   "human": "B07",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.40506329113924056,
+   "human": "B07",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.23684210526315788,
+   "human": "B07",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1971830985915493,
+   "human": "B08",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1739130434782609,
+   "human": "B08",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2028985507246377,
+   "human": "B08",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1739130434782609,
+   "human": "B08",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.30985915492957744,
+   "human": "B08",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u06:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2857142857142857,
+   "human": "B08",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.4,
+   "human": "B08",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.3116883116883117,
+   "human": "B08",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.20289855072463767,
+   "human": "B09",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.17910447761194032,
+   "human": "B09",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.208955223880597,
+   "human": "B09",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.17910447761194032,
+   "human": "B09",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.17910447761194032,
+   "human": "B09",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u05:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.29411764705882354,
+   "human": "B09",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.4102564102564103,
+   "human": "B09",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.37333333333333335,
+   "human": "B09",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.19444444444444445,
+   "human": "B10",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.14285714285714285,
+   "human": "B10",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1714285714285714,
+   "human": "B10",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.14285714285714285,
+   "human": "B10",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.14285714285714285,
+   "human": "B10",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u05:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.16666666666666666,
+   "human": "B10",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u06:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.3703703703703703,
+   "human": "B10",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.358974358974359,
+   "human": "B10",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.12121212121212123,
+   "human": "B11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1290322580645161,
+   "human": "B11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1290322580645161,
+   "human": "B11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1290322580645161,
+   "human": "B11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1290322580645161,
+   "human": "B11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u05:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.24242424242424246,
+   "human": "B11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u06:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.12500000000000003,
+   "human": "B11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.46153846153846156,
+   "human": "B11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.16,
+   "human": "B14",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.136986301369863,
+   "human": "B14",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.136986301369863,
+   "human": "B14",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.136986301369863,
+   "human": "B14",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.136986301369863,
+   "human": "B14",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u05:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.16,
+   "human": "B14",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u06:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.13513513513513514,
+   "human": "B14",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2857142857142857,
+   "human": "B14",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.35294117647058826,
+   "human": "BC2010-11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u11:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.27692307692307694,
+   "human": "BC2010-11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u12:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.17391304347826086,
+   "human": "BC2014-11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u10:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.26865671641791045,
+   "human": "BC2014-11",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u12:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.08450704225352113,
+   "human": "BC2023-02",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u10:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1111111111111111,
+   "human": "BC2023-02",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u11:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.19354838709677422,
+   "human": "B154",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u14:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.20408163265306123,
+   "human": "B154",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u17:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.18749999999999997,
+   "human": "B155",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u13:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.14583333333333334,
+   "human": "B155",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u17:v1"
+  },
+  {
+   "label": "open",
+   "gate": true,
+   "score": 0.3440860215053763,
+   "human": "B156",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u15:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.3440860215053763,
+   "human": "B156",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u16:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.16161616161616163,
+   "human": "B158",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u13:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1276595744680851,
+   "human": "B158",
+   "candidate": "saint-etienne-de-bolton-2026-08-04#u14:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.2666666666666667,
+   "human": "V71",
+   "candidate": "valcourt-2026-06-01-agenda#u01:v1"
+  },
+  {
+   "label": "positive",
+   "gate": false,
+   "score": 0.4117647058823529,
+   "human": "V72",
+   "candidate": "valcourt-2026-06-01-agenda#u02:v1"
+  },
+  {
+   "label": "positive",
+   "gate": false,
+   "score": 0.5084745762711864,
+   "human": "V73",
+   "candidate": "valcourt-2026-06-01-agenda#u03:v1"
+  },
+  {
+   "label": "positive",
+   "gate": false,
+   "score": 0.45714285714285713,
+   "human": "V74",
+   "candidate": "valcourt-2026-06-01-agenda#u04:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.9032258064516129,
+   "human": "V75",
+   "candidate": "valcourt-2026-06-01-agenda#u05:v1"
+  },
+  {
+   "label": "positive",
+   "gate": false,
+   "score": 0.34782608695652173,
+   "human": "V132",
+   "candidate": "valcourt-2026-06-01-agenda#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": true,
+   "score": 0.42424242424242425,
+   "human": "V71",
+   "candidate": "valcourt-2026-06-01-agenda#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.44776119402985076,
+   "human": "V71",
+   "candidate": "valcourt-2026-06-01-agenda#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.19999999999999998,
+   "human": "V71",
+   "candidate": "valcourt-2026-06-01-agenda#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.22580645161290322,
+   "human": "V72",
+   "candidate": "valcourt-2026-06-01-agenda#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.4347826086956522,
+   "human": "V72",
+   "candidate": "valcourt-2026-06-01-agenda#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.25806451612903225,
+   "human": "V72",
+   "candidate": "valcourt-2026-06-01-agenda#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.23076923076923075,
+   "human": "V73",
+   "candidate": "valcourt-2026-06-01-agenda#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.27586206896551724,
+   "human": "V73",
+   "candidate": "valcourt-2026-06-01-agenda#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.3076923076923077,
+   "human": "V73",
+   "candidate": "valcourt-2026-06-01-agenda#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.34285714285714286,
+   "human": "V74",
+   "candidate": "valcourt-2026-06-01-agenda#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.3414634146341463,
+   "human": "V74",
+   "candidate": "valcourt-2026-06-01-agenda#u02:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.2857142857142857,
+   "human": "V74",
+   "candidate": "valcourt-2026-06-01-agenda#u03:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.54,
+   "human": "S739M",
+   "candidate": "saint-barthelemy-2026-09-08#u02:v1"
+  },
+  {
+   "label": "positive",
+   "gate": false,
+   "score": 0.4086021505376344,
+   "human": "S194",
+   "candidate": "saint-barthelemy-2026-09-08#u04:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.34782608695652173,
+   "human": "S196",
+   "candidate": "saint-barthelemy-2026-09-08#u07:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.5499999999999999,
+   "human": "S197",
+   "candidate": "saint-barthelemy-2026-09-08#u08:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 0.787878787878788,
+   "human": "S203",
+   "candidate": "saint-barthelemy-2026-09-08#u09:v1"
+  },
+  {
+   "label": "open",
+   "gate": true,
+   "score": 0.49411764705882355,
+   "human": "S738",
+   "candidate": "saint-barthelemy-2026-09-08#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.09090909090909091,
+   "human": "S738",
+   "candidate": "saint-barthelemy-2026-09-08#u04:v1"
+  },
+  {
+   "label": "open",
+   "gate": false,
+   "score": 0.09090909090909091,
+   "human": "S738",
+   "candidate": "saint-barthelemy-2026-09-08#u05:v1"
+  },
+  {
+   "label": "open",
+   "gate": false,
+   "score": 0.09090909090909091,
+   "human": "S738",
+   "candidate": "saint-barthelemy-2026-09-08#u05:v2"
+  },
+  {
+   "label": "open",
+   "gate": false,
+   "score": 0.07058823529411766,
+   "human": "S738",
+   "candidate": "saint-barthelemy-2026-09-08#u06:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.07058823529411766,
+   "human": "S738",
+   "candidate": "saint-barthelemy-2026-09-08#u07:v1"
+  },
+  {
+   "label": "open",
+   "gate": false,
+   "score": 0.07058823529411766,
+   "human": "S738",
+   "candidate": "saint-barthelemy-2026-09-08#u07:v2"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.07317073170731708,
+   "human": "S738",
+   "candidate": "saint-barthelemy-2026-09-08#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.09302325581395349,
+   "human": "S738",
+   "candidate": "saint-barthelemy-2026-09-08#u09:v1"
+  },
+  {
+   "label": "open",
+   "gate": true,
+   "score": 0.6185567010309277,
+   "human": "S739P",
+   "candidate": "saint-barthelemy-2026-09-08#u03:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.24444444444444446,
+   "human": "S194",
+   "candidate": "saint-barthelemy-2026-09-08#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.13793103448275862,
+   "human": "S194",
+   "candidate": "saint-barthelemy-2026-09-08#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.13186813186813187,
+   "human": "S194",
+   "candidate": "saint-barthelemy-2026-09-08#u09:v1"
+  },
+  {
+   "label": "open",
+   "gate": false,
+   "score": 0.048780487804878044,
+   "human": "S195",
+   "candidate": "saint-barthelemy-2026-09-08#u01:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.1411764705882353,
+   "human": "S195",
+   "candidate": "saint-barthelemy-2026-09-08#u04:v1"
+  },
+  {
+   "label": "open",
+   "gate": false,
+   "score": 0.1411764705882353,
+   "human": "S195",
+   "candidate": "saint-barthelemy-2026-09-08#u05:v1"
+  },
+  {
+   "label": "open",
+   "gate": false,
+   "score": 0.1411764705882353,
+   "human": "S195",
+   "candidate": "saint-barthelemy-2026-09-08#u05:v2"
+  },
+  {
+   "label": "open",
+   "gate": false,
+   "score": 0.14634146341463414,
+   "human": "S195",
+   "candidate": "saint-barthelemy-2026-09-08#u06:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.14634146341463414,
+   "human": "S195",
+   "candidate": "saint-barthelemy-2026-09-08#u07:v1"
+  },
+  {
+   "label": "open",
+   "gate": false,
+   "score": 0.14634146341463414,
+   "human": "S195",
+   "candidate": "saint-barthelemy-2026-09-08#u07:v2"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.0759493670886076,
+   "human": "S195",
+   "candidate": "saint-barthelemy-2026-09-08#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.16867469879518074,
+   "human": "S195",
+   "candidate": "saint-barthelemy-2026-09-08#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.16842105263157894,
+   "human": "S196",
+   "candidate": "saint-barthelemy-2026-09-08#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.15730337078651685,
+   "human": "S196",
+   "candidate": "saint-barthelemy-2026-09-08#u08:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.15053763440860213,
+   "human": "S196",
+   "candidate": "saint-barthelemy-2026-09-08#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.09302325581395349,
+   "human": "S197",
+   "candidate": "saint-barthelemy-2026-09-08#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.14457831325301204,
+   "human": "S197",
+   "candidate": "saint-barthelemy-2026-09-08#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.11904761904761904,
+   "human": "S197",
+   "candidate": "saint-barthelemy-2026-09-08#u09:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.11764705882352941,
+   "human": "S203",
+   "candidate": "saint-barthelemy-2026-09-08#u04:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.15384615384615385,
+   "human": "S203",
+   "candidate": "saint-barthelemy-2026-09-08#u07:v1"
+  },
+  {
+   "label": "negative",
+   "gate": false,
+   "score": 0.12903225806451613,
+   "human": "S203",
+   "candidate": "saint-barthelemy-2026-09-08#u08:v1"
+  },
+  {
+   "label": "positive",
+   "gate": true,
+   "score": 1,
+   "human": "W001",
+   "candidate": "waterloo-2026-08-18#u03:v1"
+  }
+ ]
+}

@@ -1,0 +1,790 @@
+{
+ "documentId": "carignan-2026-03-04",
+ "nextId": 21,
+ "units": [
+  {
+   "id": "u01",
+   "status": "removed",
+   "current": {
+    "label": "Demande de retrait du projet gouvernemental sur les contributions exigées pour un permis ou certificat",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "contributions aux services municipaux",
+    "page": 11,
+    "citation": "de retirer le Projet de Règlement concernant certaines contributions à des services municipaux exigées pour la délivrance d'un permis ou d'un certificat",
+    "anchor": "Règlement concernant certaines contributions",
+    "spanStart": 1420,
+    "spanEnd": 1572
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de retrait du projet gouvernemental sur les contributions exigées pour un permis ou certificat",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "contributions aux services municipaux",
+      "page": 11,
+      "citation": "de retirer le Projet de Règlement concernant certaines contributions à des services municipaux exigées pour la délivrance d'un permis ou d'un certificat",
+      "anchor": "Règlement concernant certaines contributions",
+      "spanStart": 1420,
+      "spanEnd": 1572
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-91 demande le retrait d'un projet réglementaire explicite relatif aux contributions de développement, sans constater son retrait effectif ni son adoption."
+    },
+    {
+     "step": "gemini-pass2",
+     "op": "remove",
+     "reason": "La résolution 5.3 constitue une prise de position politique demandant au gouvernement du Québec de retirer un projet de règlement provincial ; elle ne constitue pas un objet réglementaire ou foncier municipal ni une étape de procédure d'urbanisme de la Ville (fait hors gold devant être exclu du dénominateur)."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de l'acte de vente définitif — lots 2 597 876, 2 598 251 et 2 599 459",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2 597 876, 2 598 251 et 2 599 459",
+    "page": 14,
+    "citation": "D'AUTORISER le maire ou en son absence, la mairesse suppléante, et la greffière à signer pour et au nom de la Ville, l'acte de vente définitif des lots 2 597 876, 2 598 251 et 2 599 459",
+    "anchor": "lots 2 597 876, 2 598 251 et 2 599 459",
+    "spanStart": 398,
+    "spanEnd": 583
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de l'acte de vente définitif — lots 2 597 876, 2 598 251 et 2 599 459",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2 597 876, 2 598 251 et 2 599 459",
+      "page": 14,
+      "citation": "D'AUTORISER le maire ou en son absence, la mairesse suppléante, et la greffière à signer pour et au nom de la Ville, l'acte de vente définitif des lots 2 597 876, 2 598 251 et 2 599 459",
+      "anchor": "lots 2 597 876, 2 598 251 et 2 599 459",
+      "spanStart": 398,
+      "spanEnd": 583
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-93 autorise un acte de vente définitif portant sur ces trois lots; le dispositif désigne le lot 2 598 251, contrairement à l'intitulé."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de l'acte de vente définitif — lot 6 504 999",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 504 999",
+    "page": 14,
+    "citation": "D'AUTORISER le maire ou en son absence, la mairesse suppléante, et la greffière à signer pour et au nom de la Ville, l'acte de vente définitif du lot 6 504 999",
+    "anchor": "lot 6 504 999",
+    "spanStart": 1343,
+    "spanEnd": 1502
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de l'acte de vente définitif — lot 6 504 999",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 504 999",
+      "page": 14,
+      "citation": "D'AUTORISER le maire ou en son absence, la mairesse suppléante, et la greffière à signer pour et au nom de la Ville, l'acte de vente définitif du lot 6 504 999",
+      "anchor": "lot 6 504 999",
+      "spanStart": 1343,
+      "spanEnd": 1502
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-94 autorise actuellement la signature de l'acte de vente définitif, tandis que l'adjudication de décembre 2024 constitue seulement un rappel historique."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Approbation de la dérogation mineure 2026-007 — remise en cour avant au 1621, rue des Roses",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-007",
+    "page": 20,
+    "citation": "D'APPROUVER la demande de de dérogation mineure 2026-007 dans le but d'autoriser l'implantation d'une remise en cour avant de la résidence située du 1621, rue des Roses, sur le lot 2 600 386",
+    "anchor": "dérogation mineure 2026-007",
+    "spanStart": 910,
+    "spanEnd": 1100
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation de la dérogation mineure 2026-007 — remise en cour avant au 1621, rue des Roses",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-007",
+      "page": 20,
+      "citation": "D'APPROUVER la demande de de dérogation mineure 2026-007 dans le but d'autoriser l'implantation d'une remise en cour avant de la résidence située du 1621, rue des Roses, sur le lot 2 600 386",
+      "anchor": "dérogation mineure 2026-007",
+      "spanStart": 910,
+      "spanEnd": 1100
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-100 approuve explicitement cette demande de dérogation mineure pour l'implantation d'une remise en cour avant."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle de la dérogation mineure 2026-013 — conteneurs au 150, rue de l'Aigle",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-013",
+    "page": 21,
+    "citation": "D'APPROUVER la demande de dérogation mineure 2026-013 concernant l'installation de conteneurs semi-enfouis en cour avant de la propriété située au 150, rue de l'Aigle, sur le lot 6 630 145",
+    "anchor": "dérogation mineure 2026-013",
+    "spanStart": 0,
+    "spanEnd": 188
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle de la dérogation mineure 2026-013 — conteneurs au 150, rue de l'Aigle",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-013",
+      "page": 21,
+      "citation": "D'APPROUVER la demande de dérogation mineure 2026-013 concernant l'installation de conteneurs semi-enfouis en cour avant de la propriété située au 150, rue de l'Aigle, sur le lot 6 630 145",
+      "anchor": "dérogation mineure 2026-013",
+      "spanStart": 0,
+      "spanEnd": 188
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-101 approuve la demande sous condition de réaliser l'aménagement paysager prévu pour camoufler les conteneurs."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Approbation de la dérogation mineure 2025-113 — emprise au sol de 24 % au 2157, rue des Roses",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2025-113",
+    "page": 22,
+    "citation": "D'APPROUVER la demande de dérogation mineure 2025-113 dans le but de permettre un coefficient d'emprise au sol de 24",
+    "anchor": "dérogation mineure 2025-113",
+    "spanStart": 0,
+    "spanEnd": 116
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation de la dérogation mineure 2025-113 — emprise au sol de 24 % au 2157, rue des Roses",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2025-113",
+      "page": 22,
+      "citation": "D'APPROUVER la demande de dérogation mineure 2025-113 dans le but de permettre un coefficient d'emprise au sol de 24",
+      "anchor": "dérogation mineure 2025-113",
+      "spanStart": 0,
+      "spanEnd": 116
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-102 approuve un coefficient d'emprise au sol de 24 % plutôt que 20 %, sans supprimer les autres normes applicables rappelées dans les considérants."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA 2025-015 — agrandissement au 2157, rue des Roses",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-015",
+    "page": 22,
+    "citation": "D'APPROUVER la demande de PIIA 2025-015 concernant l'agrandissement de la résidence unifamiliale isolée située au 2157, rue des Roses, sur le lot 2 600 450",
+    "anchor": "demande de PIIA 2025-015",
+    "spanStart": 823,
+    "spanEnd": 978
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA 2025-015 — agrandissement au 2157, rue des Roses",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2025-015",
+      "page": 22,
+      "citation": "D'APPROUVER la demande de PIIA 2025-015 concernant l'agrandissement de la résidence unifamiliale isolée située au 2157, rue des Roses, sur le lot 2 600 450",
+      "anchor": "demande de PIIA 2025-015",
+      "spanStart": 823,
+      "spanEnd": 978
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-103 approuve cette demande de PIIA sous condition de replanter un arbre en cour avant à un emplacement compatible avec les fils électriques."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2025-121 — rénovations au 2167, rue des Roses",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-121",
+    "page": 22,
+    "citation": "D'APPROUVER la demande de PIIA 2025-121 concernant les rénovations de la résidence unifamiliale isolée située au 2167, rue des Roses, sur le lot 2 600 445",
+    "anchor": "demande de PIIA 2025-121",
+    "spanStart": 1793,
+    "spanEnd": 1947
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2025-121 — rénovations au 2167, rue des Roses",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2025-121",
+      "page": 22,
+      "citation": "D'APPROUVER la demande de PIIA 2025-121 concernant les rénovations de la résidence unifamiliale isolée située au 2167, rue des Roses, sur le lot 2 600 445",
+      "anchor": "demande de PIIA 2025-121",
+      "spanStart": 1793,
+      "spanEnd": 1947
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-104 approuve explicitement cette demande de PIIA, les petits travaux de rénovation étant inclus dans le corrigé."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2025-125 — revêtements extérieurs au 4400, chemin Bellerive",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-125",
+    "page": 23,
+    "citation": "D'APPROUVER la demande de PIIA 2025-125 concernant le remplacement de certains revêtements extérieurs de la résidence située au 4400, chemin Bellerive, sur le lot 5 357 275",
+    "anchor": "demande de PIIA 2025-125",
+    "spanStart": 570,
+    "spanEnd": 742
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2025-125 — revêtements extérieurs au 4400, chemin Bellerive",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2025-125",
+      "page": 23,
+      "citation": "D'APPROUVER la demande de PIIA 2025-125 concernant le remplacement de certains revêtements extérieurs de la résidence située au 4400, chemin Bellerive, sur le lot 5 357 275",
+      "anchor": "demande de PIIA 2025-125",
+      "spanStart": 570,
+      "spanEnd": 742
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-105 approuve une demande de PIIA distincte portant sur le remplacement de certains revêtements extérieurs."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2025-126 — revêtement extérieur au 1463, rue Marie-Gendron",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-126",
+    "page": 23,
+    "citation": "D'APPROUVER la demande de PIIA 2025-126 concernant le remplacement du revêtement léger extérieur de la résidence située au 1463, rue Marie-Gendron, sur le lot 2 601 260",
+    "anchor": "demande de PIIA 2025-126",
+    "spanStart": 1303,
+    "spanEnd": 1471
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2025-126 — revêtement extérieur au 1463, rue Marie-Gendron",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2025-126",
+      "page": 23,
+      "citation": "D'APPROUVER la demande de PIIA 2025-126 concernant le remplacement du revêtement léger extérieur de la résidence située au 1463, rue Marie-Gendron, sur le lot 2 601 260",
+      "anchor": "demande de PIIA 2025-126",
+      "spanStart": 1303,
+      "spanEnd": 1471
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-106 approuve explicitement cette demande de PIIA relative au revêtement léger extérieur."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2025-128 — bâtiment patrimonial au 3968, chemin Sainte-Thérèse",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-128",
+    "page": 24,
+    "citation": "D'APPROUVER la demande de PIIA 2025-128 concernant le remplacement du revêtement extérieur sur un bâtiment patrimonial située au 3968, chemin Sainte-Thérèse, sur le lot 2 344 856",
+    "anchor": "demande de PIIA 2025-128",
+    "spanStart": 136,
+    "spanEnd": 314
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2025-128 — bâtiment patrimonial au 3968, chemin Sainte-Thérèse",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2025-128",
+      "page": 24,
+      "citation": "D'APPROUVER la demande de PIIA 2025-128 concernant le remplacement du revêtement extérieur sur un bâtiment patrimonial située au 3968, chemin Sainte-Thérèse, sur le lot 2 344 856",
+      "anchor": "demande de PIIA 2025-128",
+      "spanStart": 136,
+      "spanEnd": 314
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-107 approuve cette demande de PIIA concernant le remplacement du revêtement extérieur d'un bâtiment patrimonial."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "Refus du PIIA 2026-001 — revêtement et fenêtres au 4639, rue de l'Île-Sainte-Marie",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-001",
+    "page": 24,
+    "citation": "DE REFUSER la demande de PIIA 2026-001 consistant au remplacement du revêtement en clin par un revêtement d'acrylique ainsi que le remplacement de deux fenêtres",
+    "anchor": "demande de PIIA 2026-001",
+    "spanStart": 1259,
+    "spanEnd": 1419
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus du PIIA 2026-001 — revêtement et fenêtres au 4639, rue de l'Île-Sainte-Marie",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-001",
+      "page": 24,
+      "citation": "DE REFUSER la demande de PIIA 2026-001 consistant au remplacement du revêtement en clin par un revêtement d'acrylique ainsi que le remplacement de deux fenêtres",
+      "anchor": "demande de PIIA 2026-001",
+      "spanStart": 1259,
+      "spanEnd": 1419
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-108 refuse explicitement cette demande de PIIA, et les refus doivent être inclus sans être transformés en approbations."
+    }
+   ]
+  },
+  {
+   "id": "u13",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-002 — résidence avec studio au 2014-2016, rue Étienne-Provost",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-002",
+    "page": 25,
+    "citation": "D'APPROUVER la demande de PIIA 2026-002 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio",
+    "anchor": "demande de PIIA 2026-002",
+    "spanStart": 244,
+    "spanEnd": 415
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-002 — résidence avec studio au 2014-2016, rue Étienne-Provost",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-002",
+      "page": 25,
+      "citation": "D'APPROUVER la demande de PIIA 2026-002 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio",
+      "anchor": "demande de PIIA 2026-002",
+      "spanStart": 244,
+      "spanEnd": 415
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-109 approuve cette construction avec studio, la variation des modèles étant seulement suggérée pour les projets futurs."
+    }
+   ]
+  },
+  {
+   "id": "u14",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-004 — résidence avec studio au 2018-2020, rue Étienne-Provost",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-004",
+    "page": 25,
+    "citation": "D'APPROUVER la demande de PIIA 2026-004 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio",
+    "anchor": "demande de PIIA 2026-004",
+    "spanStart": 1384,
+    "spanEnd": 1555
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-004 — résidence avec studio au 2018-2020, rue Étienne-Provost",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-004",
+      "page": 25,
+      "citation": "D'APPROUVER la demande de PIIA 2026-004 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio",
+      "anchor": "demande de PIIA 2026-004",
+      "spanStart": 1384,
+      "spanEnd": 1555
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-110 approuve une demande de PIIA distinctement numérotée pour une résidence avec studio sur le lot 6 710 901."
+    }
+   ]
+  },
+  {
+   "id": "u15",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-005 — résidence avec studio au 2011-2013, rue Liliane Ouest",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-005",
+    "page": 26,
+    "citation": "D'APPROUVER la demande de PIIA 2026-005 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio",
+    "anchor": "demande de PIIA 2026-005",
+    "spanStart": 489,
+    "spanEnd": 660
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-005 — résidence avec studio au 2011-2013, rue Liliane Ouest",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-005",
+      "page": 26,
+      "citation": "D'APPROUVER la demande de PIIA 2026-005 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio",
+      "anchor": "demande de PIIA 2026-005",
+      "spanStart": 489,
+      "spanEnd": 660
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-111 approuve cette demande de PIIA pour une résidence avec studio sur le lot 6 710 902."
+    }
+   ]
+  },
+  {
+   "id": "u16",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-006 — résidence avec studio au 2015-2017, rue Liliane Ouest",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-006",
+    "page": 26,
+    "citation": "D'APPROUVER la demande de PIIA 2026-006 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio",
+    "anchor": "demande de PIIA 2026-006",
+    "spanStart": 1622,
+    "spanEnd": 1793
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-006 — résidence avec studio au 2015-2017, rue Liliane Ouest",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-006",
+      "page": 26,
+      "citation": "D'APPROUVER la demande de PIIA 2026-006 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio",
+      "anchor": "demande de PIIA 2026-006",
+      "spanStart": 1622,
+      "spanEnd": 1793
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-112 approuve cette demande de PIIA distincte pour une résidence avec studio sur le lot 6 710 903."
+    }
+   ]
+  },
+  {
+   "id": "u17",
+   "status": "active",
+   "current": {
+    "label": "Autorisation du protocole d'utilisation des immeubles — Centre de services scolaire des Patriotes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "utilisation des immeubles",
+    "page": 29,
+    "citation": "à signer pour et au nom de la Ville de Carignan, le protocole d'entente d'utilisation des immeubles et de l'équipement à des fins sportives, récréatives, culturelles et communautaires",
+    "anchor": "protocole d'entente d'utilisation des immeubles",
+    "spanStart": 1355,
+    "spanEnd": 1538
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation du protocole d'utilisation des immeubles — Centre de services scolaire des Patriotes",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "utilisation des immeubles",
+      "page": 29,
+      "citation": "à signer pour et au nom de la Ville de Carignan, le protocole d'entente d'utilisation des immeubles et de l'équipement à des fins sportives, récréatives, culturelles et communautaires",
+      "anchor": "protocole d'entente d'utilisation des immeubles",
+      "spanStart": 1355,
+      "spanEnd": 1538
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-115 autorise une convention d'utilisation d'immeubles, acte d'usage foncier relevant de l'étape « inconnu » plutôt qu'une simple activité de loisirs."
+    }
+   ]
+  },
+  {
+   "id": "u18",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 483-41-U — sécurité des piscines et usages des zones IDI-489 et IDI-490",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "483-41-U",
+    "page": 33,
+    "citation": "D'ADOPTER, pour valoir à toutes fins que de droit, le Règlement numéro 483-41-U modifiant le règlement de zonage numéro 483U",
+    "anchor": "numéro 483-41-U",
+    "spanStart": 1546,
+    "spanEnd": 1670
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 483-41-U — sécurité des piscines et usages des zones IDI-489 et IDI-490",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "483-41-U",
+      "page": 33,
+      "citation": "D'ADOPTER, pour valoir à toutes fins que de droit, le Règlement numéro 483-41-U modifiant le règlement de zonage numéro 483U",
+      "anchor": "Règlement numéro 483-41-U",
+      "spanStart": 1546,
+      "spanEnd": 1670
+     }
+    },
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Adoption du règlement 483-41-U — sécurité des piscines et usages des zones IDI-489 et IDI-490",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "483-41-U",
+      "page": 33,
+      "citation": "D'ADOPTER, pour valoir à toutes fins que de droit, le Règlement numéro 483-41-U modifiant le règlement de zonage numéro 483U",
+      "anchor": "numéro 483-41-U",
+      "spanStart": 1546,
+      "spanEnd": 1670
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-123 adopte le règlement de zonage modificatif, tandis que l'avis de motion et les projets de janvier et février ne sont que des rappels historiques."
+    },
+    {
+     "step": "astra-pass2",
+     "op": "correct",
+     "reason": "Le retour à la ligne après « Règlement » doit être conservé et l'ancre ajustée pour rester une sous-chaîne exacte de la citation."
+    }
+   ]
+  },
+  {
+   "id": "u19",
+   "status": "active",
+   "current": {
+    "label": "Acceptation de l'offre de GemDev et autorisation de vente — lots 2 597 589 et 6 508 688",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2 597 589 et 6 508 688",
+    "page": 34,
+    "citation": "D'AUTORISER le maire ou en son absence, la mairesse suppléante, et la greffière à signer pour et au nom de la Ville, l'offre d'achat et l'acte de vente des lots 2 597 589 et 6 508 688",
+    "anchor": "lots 2 597 589 et 6 508 688",
+    "spanStart": 826,
+    "spanEnd": 1009
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation de l'offre de GemDev et autorisation de vente — lots 2 597 589 et 6 508 688",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2 597 589 et 6 508 688",
+      "page": 34,
+      "citation": "D'AUTORISER le maire ou en son absence, la mairesse suppléante, et la greffière à signer pour et au nom de la Ville, l'offre d'achat et l'acte de vente des lots 2 597 589 et 6 508 688",
+      "anchor": "lots 2 597 589 et 6 508 688",
+      "spanStart": 826,
+      "spanEnd": 1009
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-124 accepte l'offre de GemDev et autorise l'acte de vente portant sur les deux lots, ce qui constitue une transaction foncière décidée."
+    }
+   ]
+  },
+  {
+   "id": "u20",
+   "status": "active",
+   "current": {
+    "label": "Avis favorable sous réserves — Planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Planification des besoins d'espace 2026",
+    "page": 6,
+    "citation": "QUE le Conseil municipal donne un avis favorable au projet de Planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes, sous réserves des clarifications demandées",
+    "anchor": "Planification des besoins d'espace 2026",
+    "spanStart": 1013,
+    "spanEnd": 1203
+   },
+   "versions": [
+    {
+     "step": "astra-pass3",
+     "unit": {
+      "label": "Avis favorable sous réserves — Planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Planification des besoins d'espace 2026",
+      "page": 6,
+      "citation": "QUE le Conseil municipal donne un avis favorable au projet de Planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes, sous réserves des clarifications demandées",
+      "anchor": "Planification des besoins d'espace 2026",
+      "spanStart": 1013,
+      "spanEnd": 1203
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass3",
+     "op": "add",
+     "reason": "La résolution constate un avis favorable sous réserves dans le processus de planification des acquisitions et cessions d'immeubles scolaires décrit aux pages 5 et 6, sans autoriser encore une cession."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,198 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "2758dce52bb9de64def6149d76c2319c6eebe48ae7373411358de763ef3d9642",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 645 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"645\",\n        \"page\": 5,\n        \"citation\": \"PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\\nunanimement que le règlement portant le numéro 645 suivant soit\\nadopté :\",\n        \"anchor\": \"règlement portant le numéro 645\"\n      },\n      \"reason\": \"Le règlement 645 est adopté à cette séance; l’avis de motion et le dépôt du projet du 20 avril 2026 sont seulement des rappels historiques.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"règlement sur les pratiques agroenvironnementales\",\n        \"page\": 12,\n        \"citation\": \"RÉSOLUTION 2026-05-175\\nRévision nécessaire du projet de règlement sur les pratiques\\nagroenvironnementales\",\n        \"anchor\": \"règlement sur les pratiques\\nagroenvironnementales\"\n      },\n      \"reason\": \"La résolution demande la suspension et la révision d’un projet réglementaire explicitement nommé touchant l’aménagement du territoire, sans constituer son adoption ni son dépôt par la municipalité.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Modification autorisée de la convention de concession de la halte routière pour l’agrandissement du bâtiment\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"halte routière\",\n        \"page\": 19,\n        \"citation\": \"modification à la convention de la concession de la halte routière en\\najoutant une clause pour l’agrandissement du bâtiment.\",\n        \"anchor\": \"concession de la halte routière\"\n      },\n      \"reason\": \"La résolution autorise la modification d’une convention de concession pour permettre l’agrandissement d’un bâtiment devant demeurer déplaçable, ce qui constitue un acte foncier conventionnel même non résidentiel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"2026-009\",\n        \"page\": 19,\n        \"citation\": \"d’autoriser par projet de\\nrésolution la demande numéro 2026-009 de M. Mario Bédard aux fins\\nd’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425.\",\n        \"anchor\": \"demande numéro 2026-009\"\n      },\n      \"reason\": \"La résolution actuelle autorise le PPCMOI après le processus de consultation et d’approbation; le projet de résolution 2026-03-93 est seulement rappelé et ne crée pas d’unité supplémentaire.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-010 — reconstruction de la maison au 318, chemin de L’Anse-de-Roche\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-010\",\n        \"page\": 20,\n        \"citation\": \"d’autoriser la demande de PIIA numéro\\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\\nzone 40-REC.\",\n        \"anchor\": \"PIIA numéro\\n2026-010\"\n      },\n      \"reason\": \"La résolution 2026-05-187 autorise explicitement cette demande de PIIA, qui constitue une unité distincte.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-008 — maison au 99, chemin du Fjord\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-008\",\n        \"page\": 20,\n        \"citation\": \"d’autoriser la demande de PIIA\\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC.\",\n        \"anchor\": \"numéro 2026-008\"\n      },\n      \"reason\": \"La résolution 2026-05-188 autorise la demande de PIIA de Jennifer Hovington, distincte des autres demandes traitées.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-007 — verrière trois saisons au 322 chemin de L’Anse de Roche\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-007\",\n        \"page\": 21,\n        \"citation\": \"d’autoriser la demande de PIIA\\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche\",\n        \"anchor\": \"numéro 2026-007\"\n      },\n      \"reason\": \"La résolution 2026-05-189 autorise l’ajout de panneaux de verre au patio dans le cadre d’un PIIA, et les petits PIIA sont inclus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-006 — agrandissement du patio au 295 chemin de L’Anse de Roche\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-006\",\n        \"page\": 21,\n        \"citation\": \"d’autoriser la demande de PIIA numéro\\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\\ndu patio à la place de la terrasse actuelle\",\n        \"anchor\": \"PIIA numéro\\n2026-006\"\n      },\n      \"reason\": \"La résolution 2026-05-190 autorise cette demande de PIIA pour l’agrandissement d’un patio, laquelle doit être comptée séparément.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure 20226-009 accordée — lot 4 700 841, marge arrière réduite à deux mètres\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"20226-009\",\n        \"page\": 22,\n        \"citation\": \"d’autoriser la demande de dérogation\\nmineure numéro 20226-009 soumise par la Société des frais funéraires de\\nSacré-Cœur inc.\",\n        \"anchor\": \"mineure numéro 20226-009\"\n      },\n      \"reason\": \"La résolution 2026-05-191 accorde la dérogation réduisant la marge arrière de huit à deux mètres, et le numéro « 20226-009 » est conservé tel qu’écrit.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure 2026-011 accordée — lot 4 701 026, marge arrière de 6,25 mètres\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-011\",\n        \"page\": 22,\n        \"citation\": \"d’autoriser la demande de\\ndérogation mineure numéro 2026-011 soumise par monsieur Yannick\\nHovington, aux fins de réduire la marge de recul arrière de huit mètres à\\n6,25 mètres\",\n        \"anchor\": \"dérogation mineure numéro 2026-011\"\n      },\n      \"reason\": \"La résolution 2026-05-192 accorde la dérogation de Yannick Hovington; la mention d’un éventuel refus dans les considérants ne constitue pas la décision.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 645 sur l’occupation et l’entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "645",
+    "page": 5,
+    "citation": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté :",
+    "anchor": "règlement portant le numéro 645"
+   },
+   "reason": "Le règlement 645 est adopté à cette séance; l’avis de motion et le dépôt du projet du 20 avril 2026 sont seulement des rappels historiques."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "règlement sur les pratiques agroenvironnementales",
+    "page": 12,
+    "citation": "RÉSOLUTION 2026-05-175\nRévision nécessaire du projet de règlement sur les pratiques\nagroenvironnementales",
+    "anchor": "règlement sur les pratiques\nagroenvironnementales"
+   },
+   "reason": "La résolution demande la suspension et la révision d’un projet réglementaire explicitement nommé touchant l’aménagement du territoire, sans constituer son adoption ni son dépôt par la municipalité."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Modification autorisée de la convention de concession de la halte routière pour l’agrandissement du bâtiment",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "halte routière",
+    "page": 19,
+    "citation": "modification à la convention de la concession de la halte routière en\najoutant une clause pour l’agrandissement du bâtiment.",
+    "anchor": "concession de la halte routière"
+   },
+   "reason": "La résolution autorise la modification d’une convention de concession pour permettre l’agrandissement d’un bâtiment devant demeurer déplaçable, ce qui constitue un acte foncier conventionnel même non résidentiel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "2026-009",
+    "page": 19,
+    "citation": "d’autoriser par projet de\nrésolution la demande numéro 2026-009 de M. Mario Bédard aux fins\nd’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425.",
+    "anchor": "demande numéro 2026-009"
+   },
+   "reason": "La résolution actuelle autorise le PPCMOI après le processus de consultation et d’approbation; le projet de résolution 2026-03-93 est seulement rappelé et ne crée pas d’unité supplémentaire."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-010 — reconstruction de la maison au 318, chemin de L’Anse-de-Roche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-010",
+    "page": 20,
+    "citation": "d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\nzone 40-REC.",
+    "anchor": "PIIA numéro\n2026-010"
+   },
+   "reason": "La résolution 2026-05-187 autorise explicitement cette demande de PIIA, qui constitue une unité distincte."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-008 — maison au 99, chemin du Fjord",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-008",
+    "page": 20,
+    "citation": "d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC.",
+    "anchor": "numéro 2026-008"
+   },
+   "reason": "La résolution 2026-05-188 autorise la demande de PIIA de Jennifer Hovington, distincte des autres demandes traitées."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-007 — verrière trois saisons au 322 chemin de L’Anse de Roche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-007",
+    "page": 21,
+    "citation": "d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche",
+    "anchor": "numéro 2026-007"
+   },
+   "reason": "La résolution 2026-05-189 autorise l’ajout de panneaux de verre au patio dans le cadre d’un PIIA, et les petits PIIA sont inclus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-006 — agrandissement du patio au 295 chemin de L’Anse de Roche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-006",
+    "page": 21,
+    "citation": "d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\ndu patio à la place de la terrasse actuelle",
+    "anchor": "PIIA numéro\n2026-006"
+   },
+   "reason": "La résolution 2026-05-190 autorise cette demande de PIIA pour l’agrandissement d’un patio, laquelle doit être comptée séparément."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dérogation mineure 20226-009 accordée — lot 4 700 841, marge arrière réduite à deux mètres",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "20226-009",
+    "page": 22,
+    "citation": "d’autoriser la demande de dérogation\nmineure numéro 20226-009 soumise par la Société des frais funéraires de\nSacré-Cœur inc.",
+    "anchor": "mineure numéro 20226-009"
+   },
+   "reason": "La résolution 2026-05-191 accorde la dérogation réduisant la marge arrière de huit à deux mètres, et le numéro « 20226-009 » est conservé tel qu’écrit."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dérogation mineure 2026-011 accordée — lot 4 701 026, marge arrière de 6,25 mètres",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-011",
+    "page": 22,
+    "citation": "d’autoriser la demande de\ndérogation mineure numéro 2026-011 soumise par monsieur Yannick\nHovington, aux fins de réduire la marge de recul arrière de huit mètres à\n6,25 mètres",
+    "anchor": "dérogation mineure numéro 2026-011"
+   },
+   "reason": "La résolution 2026-05-192 accorde la dérogation de Yannick Hovington; la mention d’un éventuel refus dans les considérants ne constitue pas la décision."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  },
+  {
+   "op": "add",
+   "id": "u09"
+  },
+  {
+   "op": "add",
+   "id": "u10"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 10
+}

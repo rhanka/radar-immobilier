@@ -1,0 +1,140 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "638f58c73d3253faa109d65d15cdb3049a3d7c044a5978af7e7b940173cebbd3",
+ "verificationSha256": "2af9e9662f35369cf3b44e56cc843ac7fa1c8af4d0ea96e28680fb301a3dbd2d",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-04-062 concerne un simple prêt d’usage d’un local municipal à un organisme communautaire, ce qui constitue une entente administrative courante et non un acte foncier ou un objet d'urbanisme au sens des règles du corrigé.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"La version v1 reproduit fidèlement le titre et le numéro de la résolution 2026-04-064 identifiant la demande d'autorisation à la CPTAQ pour les lots visés, tandis que v2 tronque le début de l'intitulé pour débuter au milieu d'une phrase (« Québec – Lots... »).\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Signature autorisée de l’entente de prêt d’un local au 30, rue Principale",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "30, rue Principale",
+      "page": 14,
+      "citation": "Considérant la demande formulée pour le prêt de locaux situés à l’étage de la Clinique Santé, sise au 30, rue Principale, propriété de la Ville de Gracefield",
+      "anchor": "30, rue Principale",
+      "spanStart": 1332,
+      "spanEnd": 1489
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-062, page 14, accepte le prêt d’un local au 30, rue Principale et autorise la signature des documents correspondants, ce qui constitue un acte foncier non résidentiel inclus."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La résolution 2026-04-062 (section Administration, p. 14) accorde un prêt gratuit d'un local municipal à un organisme communautaire selon des modalités à convenir : ce n'est ni un objet réglementaire ni un acte foncier (aucune vente, acquisition, servitude ou zonage), donc fait complémentaire hors gold selon les exclusions du corrigé."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le prêt d'un local à un organisme communautaire est une entente administrative qui ne constitue ni un dossier d'urbanisme ni un acte foncier."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Appui à la demande d’aliénation à la CPTAQ — lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "5 410 305",
+      "page": 22,
+      "citation": "2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du Québec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+      "anchor": "Lots 5 410 305",
+      "spanStart": 996,
+      "spanEnd": 1164
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Appui à la demande d’aliénation à la CPTAQ — lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "5 410 305",
+      "page": 22,
+      "citation": "Québec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311 du cadastre du Québec dans la circonscription foncière de Gatineau",
+      "anchor": "Lots 5 410 305",
+      "spanStart": 1106,
+      "spanEnd": 1231
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "L’intitulé cité figure à la page 22 avec les quatre lots, et la résolution poursuivie page 23 confirme l’appui municipal à la demande sans constituer une autorisation accordée par la CPTAQ."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v2",
+     "reason": "Le conseil « appuie et recommande ladite demande d'autorisation » à la CPTAQ pour les lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311 (p. 22-23) ; la citation de v2 reproduit exactement l'intitulé « Québec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311 du cadastre du Québec dans la circonscription foncière de Gatineau », alors que v1 tronque/altère le segment du titre entre « (aliénation temporaire) » et « Commission »."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "La recommandation à la CPTAQ pour aliénation en zone agricole est attestée à la résolution 2026-04-064 en page 22, avec la citation complète du titre."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La résolution 2026-04-062 concerne un simple prêt d’usage d’un local municipal à un organisme communautaire, ce qui constitue une entente administrative courante et non un acte foncier ou un objet d'urbanisme au sens des règles du corrigé."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "La version v1 reproduit fidèlement le titre et le numéro de la résolution 2026-04-064 identifiant la demande d'autorisation à la CPTAQ pour les lots visés, tandis que v2 tronque le début de l'intitulé pour débuter au milieu d'une phrase (« Québec – Lots... »)."
+  }
+ ]
+}

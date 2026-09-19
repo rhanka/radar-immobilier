@@ -1,0 +1,141 @@
+{
+ "documentId": "bedford--brome-missisquoi-2026-06-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c5de592a09dbe44822aeba1edf7c9686111f53eb53c102fec513198bc10e74d6",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement numéro 765-26 est attesté à la page 4, résolution 26-06-170.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le dépôt et la présentation du projet de règlement numéro 765-26 sont expressément constatés à la page 4, résolution 26-06-170, distincts de l'avis de motion selon la règle.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La demande de PIIA pour le remplacement de toiture au 152, rue de la Rivière est accordée à la page 9, résolution 26-06-177.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La demande de PIIA pour le nouveau quatre logements sur le lot 5 603 254 (rue Leclair) est accordée à la page 9, résolution 26-06-178.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour l'implantation du stationnement au 125, rue Alcée-Rocheleau est accordée à la page 9, résolution 26-06-179.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour la réduction de marge au 137, rue Alcée-Rocheleau est accordée à la page 9, résolution 26-06-179.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure relative à la marge avant au 180, rue du Parc est accordée à la page 10, résolution 26-06-180.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Le refus de l'aménagement sous PIIA pour le développement des Cerfs est attesté à la page 10, résolution 26-06-181, conformément à la règle imposant de maintenir les refus.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"L'autorisation d'occupation du domaine public au parc Dr. Adrien Tougas pour une terrasse commerciale est adoptée à la page 11, résolution 26-06-182.\"},{\"item\":\"i10\",\"choice\":\"v2\",\"reason\":\"L'acte foncier autorisant la signature de l'addenda au bail pour le local du 52, rue du Pont est attesté à la page 11, résolution 26-06-183, et v2 corrige le saut de ligne erroné dans l'objet.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du projet de règlement numéro 702-26-9 est dûment consigné à la page 15, résolution 26-06-190.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet de règlement numéro 702-26-9 est adoptée à la page 15, résolution 26-06-191, distincte de l'avis de motion.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v2"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement numéro 765-26 est attesté à la page 4, résolution 26-06-170."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le dépôt et la présentation du projet de règlement numéro 765-26 sont expressément constatés à la page 4, résolution 26-06-170, distincts de l'avis de motion selon la règle."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La demande de PIIA pour le remplacement de toiture au 152, rue de la Rivière est accordée à la page 9, résolution 26-06-177."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La demande de PIIA pour le nouveau quatre logements sur le lot 5 603 254 (rue Leclair) est accordée à la page 9, résolution 26-06-178."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour l'implantation du stationnement au 125, rue Alcée-Rocheleau est accordée à la page 9, résolution 26-06-179."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour la réduction de marge au 137, rue Alcée-Rocheleau est accordée à la page 9, résolution 26-06-179."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La dérogation mineure relative à la marge avant au 180, rue du Parc est accordée à la page 10, résolution 26-06-180."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Le refus de l'aménagement sous PIIA pour le développement des Cerfs est attesté à la page 10, résolution 26-06-181, conformément à la règle imposant de maintenir les refus."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "L'autorisation d'occupation du domaine public au parc Dr. Adrien Tougas pour une terrasse commerciale est adoptée à la page 11, résolution 26-06-182."
+  },
+  {
+   "item": "i10",
+   "choice": "v2",
+   "reason": "L'acte foncier autorisant la signature de l'addenda au bail pour le local du 52, rue du Pont est attesté à la page 11, résolution 26-06-183, et v2 corrige le saut de ligne erroné dans l'objet."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "L'avis de motion du projet de règlement numéro 702-26-9 est dûment consigné à la page 15, résolution 26-06-190."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet de règlement numéro 702-26-9 est adoptée à la page 15, résolution 26-06-191, distincte de l'avis de motion."
+  }
+ ]
+}

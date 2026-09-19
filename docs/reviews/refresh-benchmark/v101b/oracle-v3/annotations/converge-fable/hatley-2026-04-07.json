@@ -1,0 +1,81 @@
+{
+ "documentId": "hatley-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "7698c4adcecc5ce44ef0cfa7e380f71b90c092e21d3515c64adfddca992c1a16",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-054 (page 11) accepte la recommandation du CCU autorisant l'agrandissement au 141 rue Main sous le PIIA-1 2025-03-0004 ; citation, étape piia, objet et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-055 (page 11) retient explicitement « la grange de la Rubicon Farm, située au 38, rue Main » à la liste révisée de l'inventaire du patrimoine immobilier, objet explicite nommé sous la rubrique urbanisme ; citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-055 (page 11) retient explicitement « l'église Saint-James, située au 100, rue Main » ; un nœud groupé peut couvrir plusieurs unités explicitement nommées, chaque bâtiment est un objet distinct.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-055 (page 11) retient explicitement « le St. James Hall (centre communautaire), situé au 100, rue Main », objet distinct de l'église malgré la même adresse ; citation et page exactes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-055 (page 11) retient explicitement « le gazebo, situé au 100, rue Main » comme bâtiment maintenu à la liste révisée ; fait distinct des autres bâtiments, citation et page exactes.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-058 (page 13) appuie la demande CPTAQ pour l'utilisation non agricole d'une partie du lot 2 935 698 (agrandissement du LET), acte foncier explicite inclus même non résidentiel ; citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-054 (page 11) accepte la recommandation du CCU autorisant l'agrandissement au 141 rue Main sous le PIIA-1 2025-03-0004 ; citation, étape piia, objet et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-055 (page 11) retient explicitement « la grange de la Rubicon Farm, située au 38, rue Main » à la liste révisée de l'inventaire du patrimoine immobilier, objet explicite nommé sous la rubrique urbanisme ; citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-055 (page 11) retient explicitement « l'église Saint-James, située au 100, rue Main » ; un nœud groupé peut couvrir plusieurs unités explicitement nommées, chaque bâtiment est un objet distinct."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-055 (page 11) retient explicitement « le St. James Hall (centre communautaire), situé au 100, rue Main », objet distinct de l'église malgré la même adresse ; citation et page exactes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-055 (page 11) retient explicitement « le gazebo, situé au 100, rue Main » comme bâtiment maintenu à la liste révisée ; fait distinct des autres bâtiments, citation et page exactes."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-058 (page 13) appuie la demande CPTAQ pour l'utilisation non agricole d'une partie du lot 2 935 698 (agrandissement du LET), acte foncier explicite inclus même non résidentiel ; citation et page exactes."
+  }
+ ]
+}

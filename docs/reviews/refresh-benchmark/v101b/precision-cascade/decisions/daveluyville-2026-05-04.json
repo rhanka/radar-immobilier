@@ -1,0 +1,367 @@
+{
+ "documentId": "daveluyville-2026-05-04",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "bb97c7b38fa4a141cb1b9ac735b902a8293c53919be9e12e4d65eab0346bc226",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-154"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "R-2026-154 — Assouplissement des normes de droits acquis",
+     "stage": "1er_projet",
+     "objet": "R-2026-154",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "CONSIDÉRANT QUE l’adoption de la demande de dérogation mineure\n2026-DM-002 est conditionnelle à l’entrée en vigueur du règlement\nnuméro R-2026-154 modifiant le règlement de zonage numéro"
+      },
+      {
+       "page": 8,
+       "excerpt": "Le projet de règlement est également déposé, le tout, conformément aux\nexigences de l’article 356 de la Loi sur les cités et villes (RLRQ, chap. C 19)"
+      },
+      {
+       "page": 6,
+       "excerpt": "CONSIDÉRANT QUE l’adoption de la demande de dérogation mineure\n2026-DM-002 est conditionnelle à l’entrée en vigueur du règlement\nnuméro R-2026-154 modifiant le règlement de zonage numéro\nR-2025-137 afin d’assouplir les normes applicables aux droits acquis;\nCONSIDÉRANT QUE l’avis de motion et le dépôt dudit premier projet de\nrèglement ont été donnés et effectués lors de la présente séance, au\npoint 10.5 de l’ordre du jour;\nRÉSOLUTION\nSur proposition de monsieur Alain Raymond, il est résolu de reporter\nl’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à\nl’adoption définitive du règlement numéro R-2026-154."
+      },
+      {
+       "page": 8,
+       "excerpt": "Le projet de règlement est également déposé, le tout, conformément aux\nexigences de l’article 356 de la Loi sur les cités et villes (RLRQ, chap. C 19)\net est disponible sur le site Internet de la Ville de Daveluyville à\nwww.ville.daveluyville.qc.ca."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-137"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "R-2025-137 — Règlement de zonage",
+     "stage": null,
+     "objet": "R-2025-137",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Avis est donné par monsieur Sébastien Bilodeau, qu’un conseiller\nprésentera ou fera présenter pour adoption, à une séance subséquente,\nun règlement modifiant le Règlement de zonage R-2025-137"
+      },
+      {
+       "page": 8,
+       "excerpt": "Avis est donné par monsieur Sébastien Bilodeau, qu’un conseiller\nprésentera ou fera présenter pour adoption, à une séance subséquente,\nun règlement modifiant le Règlement de zonage R-2025-137 afin\nd’assouplir les normes des droits acquis."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "dm002"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "2026-DM-002 — Dérogation mineure reportée, 1200, route Principale",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "Sur proposition de monsieur Alain Raymond, il est résolu de reporter\nl’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à\nl’adoption définitive du règlement numéro R-2026-154."
+      },
+      {
+       "page": 6,
+       "excerpt": "CONSIDÉRANT QUE l’adoption de la demande de dérogation mineure\n2026-DM-002 est conditionnelle à l’entrée en vigueur du règlement\nnuméro R-2026-154 modifiant le règlement de zonage numéro\nR-2025-137 afin d’assouplir les normes applicables aux droits acquis;\nCONSIDÉRANT QUE l’avis de motion et le dépôt dudit premier projet de\nrèglement ont été donnés et effectués lors de la présente séance, au\npoint 10.5 de l’ordre du jour;\nRÉSOLUTION\nSur proposition de monsieur Alain Raymond, il est résolu de reporter\nl’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à\nl’adoption définitive du règlement numéro R-2026-154."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "dm003"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "2026-DM-003 — Dérogation mineure refusée, 425, 2e Rue",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Sur proposition de madame Carole-Anne Provencher, il est résolu à\nl’unanimité de refuser la demande de dérogation mineure 2026-DM-003,\ntelle que présentée, et de maintenir le dossier ouvert, sans frai"
+      },
+      {
+       "page": 8,
+       "excerpt": "Sur proposition de madame Carole-Anne Provencher, il est résolu à\nl’unanimité de refuser la demande de dérogation mineure 2026-DM-003,\ntelle que présentée, et de maintenir le dossier ouvert, sans frais, jusqu’à\nce que les modifications recommandées par le CCU aient été apportées et\nacceptées, et ce, afin d’assurer la conformité du projet à la réglementation\nen vigueur."
+      },
+      {
+       "page": 6,
+       "excerpt": "CONSIDÉRANT la demande de dérogation mineure 2026-DM-003\nconcernant le lot 4 441 171, en la Ville de Daveluyville;\nCONSIDÉRANT QUE la demande vise à autoriser l’implantation d’un\nbâtiment à usage commercial dans la zone R-07, conformément au\nrèglement de zonage 2025-137, lequel permet les usages commerciaux\nde vente au détail et de services professionnels;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "motion-154"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "R-2026-154 — Avis de motion",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Avis est donné par monsieur Sébastien Bilodeau, qu’un conseiller\nprésentera ou fera présenter pour adoption, à une séance subséquente,\nun règlement modifiant le Règlement de zonage R-2025-137"
+      },
+      {
+       "page": 8,
+       "excerpt": "Avis est donné par monsieur Sébastien Bilodeau, qu’un conseiller\nprésentera ou fera présenter pour adoption, à une séance subséquente,\nun règlement modifiant le Règlement de zonage R-2025-137 afin\nd’assouplir les normes des droits acquis."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "projet-154"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "R-2026-154 — Dépôt du premier projet",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Le projet de règlement est également déposé, le tout, conformément aux\nexigences de l’article 356 de la Loi sur les cités et villes (RLRQ, chap. C 19)"
+      },
+      {
+       "page": 8,
+       "excerpt": "Le projet de règlement est également déposé, le tout, conformément aux\nexigences de l’article 356 de la Loi sur les cités et villes (RLRQ, chap. C 19)\net est disponible sur le site Internet de la Ville de Daveluyville à\nwww.ville.daveluyville.qc.ca."
+      },
+      {
+       "page": 6,
+       "excerpt": "CONSIDÉRANT QUE l’adoption de la demande de dérogation mineure\n2026-DM-002 est conditionnelle à l’entrée en vigueur du règlement\nnuméro R-2026-154 modifiant le règlement de zonage numéro\nR-2025-137 afin d’assouplir les normes applicables aux droits acquis;\nCONSIDÉRANT QUE l’avis de motion et le dépôt dudit premier projet de\nrèglement ont été donnés et effectués lors de la présente séance, au\npoint 10.5 de l’ordre du jour;\nRÉSOLUTION\nSur proposition de monsieur Alain Raymond, il est résolu de reporter\nl’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à\nl’adoption définitive du règlement numéro R-2026-154."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-litige"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Litige de zonage 5803-23 — Mandat de remise en conformité",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "Sur proposition de monsieur Sébastien Bilodeau, il est résolu à\nl'unanimité de mandater la firme DHC Avocats afin d'effectuer les\ndémarches légales permettant la remise en conformité des lieux des lot"
+      },
+      {
+       "page": 6,
+       "excerpt": "Sur proposition de monsieur Sébastien Bilodeau, il est résolu à\nl'unanimité de mandater la firme DHC Avocats afin d'effectuer les\ndémarches légales permettant la remise en conformité des lieux des lots\n4 441 919 et 4 441 920 du cadastre du Québec que la directrice générale\nsoit autorisée à signer tout document nécessaire à la mise en œuvre de la\nprésente résolution et d’autoriser la trésorière à émettre les déboursés en\nconséquence."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-permis"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avril 2026 — 11 permis délivrés, valeur de 236 000 $",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "L’assistante greffière dépose la liste des permis délivrés et le maire en fait\nun bref résumé. Pour le mois d’avril 2026, 11 permis ont été délivrés,\ntotalisant 236 000 $."
+      },
+      {
+       "page": 6,
+       "excerpt": "L’assistante greffière dépose la liste des permis délivrés et le maire en fait\nun bref résumé. Pour le mois d’avril 2026, 11 permis ont été délivrés,\ntotalisant 236 000 $."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-infrastructures"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mise à jour du plan d’intervention des infrastructures",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "D’OCTROYER à la FQM le mandat de mise à jour du plan d’intervention en\nrenouvellement des conduites d’eau potable, d’égouts et des chaussées\nde la Ville de Daveluyville,"
+      },
+      {
+       "page": 4,
+       "excerpt": "D’OCTROYER à la FQM le mandat de mise à jour du plan d’intervention en\nrenouvellement des conduites d’eau potable, d’égouts et des chaussées\nde la Ville de Daveluyville, conformément à l’offre de services datée du 14\navril 2026;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt du projet de règlement R-2026-154 modifiant le règlement de zonage R-2025-137 est explicitement consigné au procès-verbal.\",\"excerpt\":\"Avis de motion et dépôt du projet de règlement numéro R-2026-154 modifiant le Règlement de zonage R-2025137 afin d’assouplir les normes de droits acquis.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement R-2025-137 n'est que la réglementation de base citée en référence sans étape propre lors de cette séance.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal résout de reporter l'adoption de la demande de dérogation mineure 2026-DM-002.\",\"excerpt\":\"il est résolu de reporter l’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à l’adoption définitive du règlement numéro R-2026-154.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal résout formellement de refuser la demande de dérogation mineure 2026-DM-003.\",\"excerpt\":\"il est résolu à l’unanimité de refuser la demande de dérogation mineure 2026-DM-003, telle que présentée\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion pour le règlement modifiant le zonage est donné lors de la séance.\",\"excerpt\":\"Avis est donné par monsieur Sébastien Bilodeau, qu’un conseiller présentera ou fera présenter pour adoption, à une séance subséquente, un règlement modifiant le Règlement de zonage R-2025-137\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt du projet de règlement R-2026-154 est consigné au point 2026-05-88.\",\"excerpt\":\"Le projet de règlement est également déposé, le tout, conformément aux exigences de l’article 356 de la Loi sur les cités et villes\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Résolution donnant mandat à une firme d'avocats pour des démarches légales de remise en conformité de lots au regard du zonage.\",\"excerpt\":\"mandater la firme DHC Avocats afin d'effectuer les démarches légales permettant la remise en conformité des lieux des lots 4 441 919 et 4 441 920\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple dépôt et rapport mensuel de permis délivrés, sans décision d'urbanisme ou acte de procédure.\",\"excerpt\":\"\"},{\"act\":\"A09\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de services pour la mise à jour d'un plan d'intervention en infrastructures relève des contrats de services et non d'un acte d'urbanisme soutenu.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le dépôt du projet de règlement R-2026-154 modifiant le règlement de zonage R-2025-137 est explicitement consigné au procès-verbal.",
+   "excerpt": "Avis de motion et dépôt du projet de règlement numéro R-2026-154 modifiant le Règlement de zonage R-2025137 afin d’assouplir les normes de droits acquis."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement R-2025-137 n'est que la réglementation de base citée en référence sans étape propre lors de cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal résout de reporter l'adoption de la demande de dérogation mineure 2026-DM-002.",
+   "excerpt": "il est résolu de reporter l’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à l’adoption définitive du règlement numéro R-2026-154."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal résout formellement de refuser la demande de dérogation mineure 2026-DM-003.",
+   "excerpt": "il est résolu à l’unanimité de refuser la demande de dérogation mineure 2026-DM-003, telle que présentée"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion pour le règlement modifiant le zonage est donné lors de la séance.",
+   "excerpt": "Avis est donné par monsieur Sébastien Bilodeau, qu’un conseiller présentera ou fera présenter pour adoption, à une séance subséquente, un règlement modifiant le Règlement de zonage R-2025-137"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le dépôt du projet de règlement R-2026-154 est consigné au point 2026-05-88.",
+   "excerpt": "Le projet de règlement est également déposé, le tout, conformément aux exigences de l’article 356 de la Loi sur les cités et villes"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Résolution donnant mandat à une firme d'avocats pour des démarches légales de remise en conformité de lots au regard du zonage.",
+   "excerpt": "mandater la firme DHC Avocats afin d'effectuer les démarches légales permettant la remise en conformité des lieux des lots 4 441 919 et 4 441 920"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple dépôt et rapport mensuel de permis délivrés, sans décision d'urbanisme ou acte de procédure.",
+   "excerpt": ""
+  },
+  {
+   "act": "A09",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de services pour la mise à jour d'un plan d'intervention en infrastructures relève des contrats de services et non d'un acte d'urbanisme soutenu.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 9,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement R-2025-137 n'est que la réglementation de base citée en référence sans étape propre lors de cette séance."
+   },
+   {
+    "act": "A08",
+    "reason": "Il s'agit d'un simple dépôt et rapport mensuel de permis délivrés, sans décision d'urbanisme ou acte de procédure."
+   },
+   {
+    "act": "A09",
+    "reason": "L'octroi d'un contrat de services pour la mise à jour d'un plan d'intervention en infrastructures relève des contrats de services et non d'un acte d'urbanisme soutenu."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le dépôt du projet de règlement R-2026-154 modifiant le règlement de zonage R-2025-137 est explicitement consigné au procès-verbal."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil municipal résout de reporter l'adoption de la demande de dérogation mineure 2026-DM-002."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil municipal résout formellement de refuser la demande de dérogation mineure 2026-DM-003."
+   },
+   {
+    "act": "A05",
+    "reason": "Un avis de motion pour le règlement modifiant le zonage est donné lors de la séance."
+   },
+   {
+    "act": "A06",
+    "reason": "Le dépôt du projet de règlement R-2026-154 est consigné au point 2026-05-88."
+   },
+   {
+    "act": "A07",
+    "reason": "Résolution donnant mandat à une firme d'avocats pour des démarches légales de remise en conformité de lots au regard du zonage."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3492,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 12616,
+   "outputTokens": 710,
+   "totalTokens": 13326
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2377
+  },
+  "inputSha256": "431a4f55afd5e2521255d79467ee930bc0fbdaf54fd2ea8ffd459b929958aa27"
+ }
+}

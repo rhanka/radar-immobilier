@@ -1,0 +1,13 @@
+{
+ "id": "roxton-2026-04-07",
+ "rc": 0,
+ "latencyMs": 14956,
+ "inputTokens": 2,
+ "outputTokens": 992,
+ "cacheRead": 0,
+ "cacheCreate": 15123,
+ "costUsd": 0.186963,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 188
+}

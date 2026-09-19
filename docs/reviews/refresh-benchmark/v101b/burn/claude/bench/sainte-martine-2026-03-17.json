@@ -1,0 +1,13 @@
+{
+ "id": "sainte-martine-2026-03-17",
+ "rc": 0,
+ "latencyMs": 529444,
+ "inputTokens": 6,
+ "outputTokens": 80859,
+ "cacheRead": 27324,
+ "cacheCreate": 91389,
+ "costUsd": 2.969806,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 35803
+}

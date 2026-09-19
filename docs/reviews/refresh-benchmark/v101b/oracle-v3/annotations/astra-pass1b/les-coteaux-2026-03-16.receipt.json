@@ -1,0 +1,37 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "b69f45c06615daf99d252af159341cf0c9d0fcacbc773c8f93bdb628b6c90ea9",
+ "inputSha256": "8fc69427c14e3ca96a3046102c739ba278629975abb4290a4b1ae97ef6009b7e",
+ "responseSha256": "ca6be1b8db016d85d47a6291818ed3ad1d39dc56b7b0001e5d62955c87903b1e",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 95152,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 12390,
+  "outputTokens": 3046,
+  "totalTokens": 15436
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 95145,
+  "requestId": null
+ },
+ "at": "2026-09-18T13:01:33.809Z",
+ "relabeledFrom": "astra-pass2"
+}

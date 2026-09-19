@@ -1,0 +1,258 @@
+{
+ "documentId": "lislet-2026-04-07",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "e83fb5819ef84050c06ef837e80f5d5666cf973f855da2a9eadf0f7590c97b19",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-342-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 342-2026 relatif aux droits de mutations immobilières — projet à l’ordre du jour",
+     "stage": "projet",
+     "objet": "342-2026",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "24. Avis de motion pour l’adoption ultérieure du règlement 342-2026 relatif aux droits de mutations\nimmobilières"
+      },
+      {
+       "page": 1,
+       "excerpt": "25. Dépôt du projet de règlement 342-2026 relatif aux droits de mutations immobilières"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-derogation-418"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure — 418, chemin des Pionniers Est",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-piia-81"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA — 81, chemin des Pionniers Est",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "31. Demande de PIIA pour le 81, chemin des Pionniers Est"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-piia-272"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA — 272, chemin des Pionniers Est",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "32. Demande de PIIA pour le 272, chemin des Pionniers Est"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-conteneur"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Entreposage temporaire d’un conteneur — 2, rue Chanoine-Martel",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "33. Entérinement de la décision concernant la demande d’entreposage temporaire d’un conteneur au\n2, rue Chanoine-Martel"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-cptaq-sabliere"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande à la CPTAQ — renouvellement du permis d’exploitation d’une sablière",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-patrimoine"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Inventaire partiel du patrimoine bâti — adoption prévue à l’ordre du jour",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "36. Adoption de l’inventaire du patrimoine bâti partiel – Municipalité de L’Islet"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit l'avis de motion et le dépôt du projet de règlement 342-2026 sur les droits de mutations immobilières.\",\"excerpt\":\"25. Dépôt du projet de règlement 342-2026 relatif aux droits de mutations immobilières\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 30 de l'ordre du jour concerne explicitement une demande de dérogation mineure pour cette adresse.\",\"excerpt\":\"30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 31 de l'ordre du jour porte sur une demande de PIIA à cette adresse.\",\"excerpt\":\"31. Demande de PIIA pour le 81, chemin des Pionniers Est\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 32 de l'ordre du jour porte sur une demande de PIIA au 272, chemin des Pionniers Est.\",\"excerpt\":\"32. Demande de PIIA pour le 272, chemin des Pionniers Est\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le point 33 concerne l'entérinement d'une décision relative à l'entreposage temporaire d'un conteneur à cette adresse.\",\"excerpt\":\"33. Entérinement de la décision concernant la demande d’entreposage temporaire d’un conteneur au\\n2, rue Chanoine-Martel\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le point 34 de l'ordre du jour vise une demande d'autorisation à la CPTAQ pour le renouvellement du permis d'exploitation de sablière.\",\"excerpt\":\"34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\\nsablière (Michel Gamache & Frères)\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le point 36 de l'ordre du jour prévoit l'adoption de l'inventaire partiel du patrimoine bâti.\",\"excerpt\":\"36. Adoption de l’inventaire du patrimoine bâti partiel – Municipalité de L’Islet\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit l'avis de motion et le dépôt du projet de règlement 342-2026 sur les droits de mutations immobilières.",
+   "excerpt": "25. Dépôt du projet de règlement 342-2026 relatif aux droits de mutations immobilières"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 30 de l'ordre du jour concerne explicitement une demande de dérogation mineure pour cette adresse.",
+   "excerpt": "30. Demande de dérogation mineure pour le 418, chemin des Pionniers Est"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 31 de l'ordre du jour porte sur une demande de PIIA à cette adresse.",
+   "excerpt": "31. Demande de PIIA pour le 81, chemin des Pionniers Est"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 32 de l'ordre du jour porte sur une demande de PIIA au 272, chemin des Pionniers Est.",
+   "excerpt": "32. Demande de PIIA pour le 272, chemin des Pionniers Est"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le point 33 concerne l'entérinement d'une décision relative à l'entreposage temporaire d'un conteneur à cette adresse.",
+   "excerpt": "33. Entérinement de la décision concernant la demande d’entreposage temporaire d’un conteneur au\n2, rue Chanoine-Martel"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le point 34 de l'ordre du jour vise une demande d'autorisation à la CPTAQ pour le renouvellement du permis d'exploitation de sablière.",
+   "excerpt": "34. Demande d’autorisation à la CPTAQ pour le renouvellement de permis d’exploitation d’une\nsablière (Michel Gamache & Frères)"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le point 36 de l'ordre du jour prévoit l'adoption de l'inventaire partiel du patrimoine bâti.",
+   "excerpt": "36. Adoption de l’inventaire du patrimoine bâti partiel – Municipalité de L’Islet"
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "L'ordre du jour prévoit l'avis de motion et le dépôt du projet de règlement 342-2026 sur les droits de mutations immobilières."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 30 de l'ordre du jour concerne explicitement une demande de dérogation mineure pour cette adresse."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 31 de l'ordre du jour porte sur une demande de PIIA à cette adresse."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 32 de l'ordre du jour porte sur une demande de PIIA au 272, chemin des Pionniers Est."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point 33 concerne l'entérinement d'une décision relative à l'entreposage temporaire d'un conteneur à cette adresse."
+   },
+   {
+    "act": "A06",
+    "reason": "Le point 34 de l'ordre du jour vise une demande d'autorisation à la CPTAQ pour le renouvellement du permis d'exploitation de sablière."
+   },
+   {
+    "act": "A07",
+    "reason": "Le point 36 de l'ordre du jour prévoit l'adoption de l'inventaire partiel du patrimoine bâti."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2062,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2699,
+   "outputTokens": 508,
+   "totalTokens": 3207
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1900
+  },
+  "inputSha256": "18e55c228678bb26e45a7e92c2a4fdad098e2dbf704b8e14ae6e1eaa4048e75f"
+ }
+}

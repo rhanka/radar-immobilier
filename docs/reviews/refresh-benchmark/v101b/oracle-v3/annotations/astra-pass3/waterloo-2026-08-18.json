@@ -1,0 +1,388 @@
+{
+ "documentId": "waterloo-2026-08-18",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "b77427cfb49b8a86baf404098dbeb0941f95bb02f69826c603ec1e14494bfea4",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Dépôt du certificat de résultat d'approbation référendaire — règlement 26-956-2\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"26-956-2\",\n        \"page\": 2,\n        \"citation\": \"Dépôt du certificat de résultat - Processus d'approbation par les\\npersonnes habiles à voter - Règlement 26-956-2\",\n        \"anchor\": \"Règlement 26-956-2\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : le titre comporte un retour à la ligne après « les ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Dépôt du procès-verbal de consultation publique — règlement 26-957-1\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"26-957-1\",\n        \"page\": 2,\n        \"citation\": \"Le procès-verbal de l'assemblée publique de consultation sur le\\nprojet de règlement de lotissement 26-957-1, qui s'est tenue le 3 août\\n2026, est déposé\",\n        \"anchor\": \"règlement de lotissement 26-957-1\"\n      },\n      \"reason\": \"La règle de transcription à l'identique exige de conserver les retours à la ligne du paragraphe attestant le dépôt.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 26-956-2 — zonage et encadrement des projets intégrés\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"26-956-2\",\n        \"page\": 3,\n        \"citation\": \"Que le conseil municipal adopte le Règlement 26-956-2 modifiant\\nle règlement de zonage afin de modifier l'encadrement des projets\\nintégrés tel que soumis\",\n        \"anchor\": \"Règlement 26-956-2\"\n      },\n      \"reason\": \"La citation actuelle remplace les retours à la ligne par des espaces, contrairement à l'exigence d'un extrait recopié à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 26-957-1 — lotissement et sites patrimoniaux\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"26-957-1\",\n        \"page\": 3,\n        \"citation\": \"Que le conseil municipal adopte le Règlement 26-957-1 sur le\\nlotissement en lien avec certains sites patrimoniaux tel que soumis\",\n        \"anchor\": \"Règlement 26-957-1\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne entre « le » et « lotissement » pour reproduire exactement le texte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Autorisation de vente pour taxes — immeubles de la liste annexée, 2026\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"vente pour taxes\",\n        \"page\": 6,\n        \"citation\": \"Que la Ville de Waterloo autorise la greffière à effectuer et\\nsigner individuellement toute démarche et à signer tout\\ndocument dans le but de mener à terme la vente pour taxes\",\n        \"anchor\": \"vente pour taxes\"\n      },\n      \"reason\": \"L'autorisation est correctement identifiée, mais sa citation doit reproduire les retours à la ligne du dispositif de la résolution.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Prêt à usage gratuit d'un espace au 417, rue de la Cour — Télévision communautaire\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"417, rue de la Cour\",\n        \"page\": 8,\n        \"citation\": \"à titre gratuit,\\npour une durée d'un an, d'un espace de rangement clôturé situé au\\nrez-de-chaussée du garage détaché municipal du 417, rue de la\\nCour\",\n        \"anchor\": \"417, rue de la\\nCour\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne, et l'ancre doit être une sous-chaîne exacte de cette citation, y compris dans l'adresse.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Autorisation d'une servitude réelle et perpétuelle à Hydro-Québec — rue Nadeau\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"rue Nadeau\",\n        \"page\": 9,\n        \"citation\": \"d'une servitude réelle et\\nperpétuelle en faveur d'Hydro-Québec de la manière prévue\\nau document joint à la présente résolution pour permettre le\\nprolongement du réseau électrique sur la rue Nadeau\",\n        \"anchor\": \"la rue Nadeau\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique, avec les retours à la ligne présents dans la clause autorisant la servitude.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Accord de principe conditionnel — tour Bell sur les lots 4 161 789 ou 6 098 789\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"4 161 789 ou 6 098 789\",\n        \"page\": 9,\n        \"citation\": \"Le conseil donne son accord de principe à l'implantation d'une\\ntour de télécommunications d'une hauteur maximale de 40\\nmètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre\\ndu Québec\",\n        \"anchor\": \"lots 4 161 789 ou 6 098 789\"\n      },\n      \"reason\": \"La citation actuelle aplatit les lignes du dispositif et doit être remplacée par l'extrait exact de la page 9.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — implantation latérale et arrière, 80, rue Yves-Malouin\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"CCU 2026-107\",\n        \"page\": 11,\n        \"citation\": \"Dérogation mineure, implantation latérale et arrière, 80, rue\\nYves-Malouin (CCU 2026-107)\",\n        \"anchor\": \"CCU 2026-107\"\n      },\n      \"reason\": \"Le titre cité comporte un retour à la ligne après « rue », qui doit être conservé conformément à la règle de transcription exacte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u11\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — implantation latérale et arrière, 82, rue Yves-Malouin\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"CCU 2026-108\",\n        \"page\": 11,\n        \"citation\": \"Dérogation mineure, implantation latérale et arrière, 82, rue\\nYves-Malouin (CCU 2026-108)\",\n        \"anchor\": \"CCU 2026-108\"\n      },\n      \"reason\": \"La citation doit reproduire exactement le titre de la demande, notamment le retour à la ligne entre « rue » et « Yves-Malouin ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u12\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée sous condition — implantation au 153, rue du Manège\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"153, rue du Manège\",\n        \"page\": 12,\n        \"citation\": \"Que le Conseil, sur recommandation du CCU approuve la dérogation\\nmineure pour le 153, rue du Manège, telle que demandée\",\n        \"anchor\": \"153, rue du Manège\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne entre « dérogation » et « mineure » pour être identique au document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u13\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — implantation au 155, rue du Manège\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"155, rue du Manège\",\n        \"page\": 13,\n        \"citation\": \"Que le Conseil, sur recommandation du CCU approuve la dérogation\\nmineure pour le 155, rue du Manège, telle que demandée\",\n        \"anchor\": \"155, rue du Manège\"\n      },\n      \"reason\": \"L'extrait doit être recopié à l'identique, avec le retour à la ligne qui sépare « dérogation » de « mineure ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u14\",\n      \"unit\": {\n        \"label\": \"PIIA approuvé — ajout de lettrage au 4906, rue Foster\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"4906, rue Foster\",\n        \"page\": 13,\n        \"citation\": \"Que le conseil approuve l'ajout de lettrage en façade, tel que\\nprésenté, pour le 4906, rue Foster\",\n        \"anchor\": \"4906, rue Foster\"\n      },\n      \"reason\": \"La citation actuelle omet le retour à la ligne avant « présenté », alors que la règle exige une transcription à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u16\",\n      \"unit\": {\n        \"label\": \"PIIA approuvé sous condition — construction neuve au 80-82, rue Yves-Malouin\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"80-82, rue Yves-Malouin\",\n        \"page\": 14,\n        \"citation\": \"Que le conseil municipal approuve la demande PIIA pour une\\nconstruction neuve au 80-82, rue Yves-Malouin, tel que\\ndemandé\",\n        \"anchor\": \"80-82, rue Yves-Malouin\"\n      },\n      \"reason\": \"La citation doit conserver les deux retours à la ligne du passage approuvant la demande PIIA.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u17\",\n      \"unit\": {\n        \"label\": \"PIIA approuvé — construction neuve aux 153 et 155, rue du Manège\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"153 et 155, rue du Manège\",\n        \"page\": 14,\n        \"citation\": \"Que le conseil approuve le projet de construction résidentielle neuve\\nau 153 et 155, rue du Manège, tel que présenté\",\n        \"anchor\": \"153 et 155, rue du Manège\"\n      },\n      \"reason\": \"La citation doit reproduire le retour à la ligne après « neuve » conformément à l'exigence de copie exacte.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Dépôt du certificat de résultat d'approbation référendaire — règlement 26-956-2",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "26-956-2",
+    "page": 2,
+    "citation": "Dépôt du certificat de résultat - Processus d'approbation par les\npersonnes habiles à voter - Règlement 26-956-2",
+    "anchor": "Règlement 26-956-2"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le titre comporte un retour à la ligne après « les »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Dépôt du procès-verbal de consultation publique — règlement 26-957-1",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "26-957-1",
+    "page": 2,
+    "citation": "Le procès-verbal de l'assemblée publique de consultation sur le\nprojet de règlement de lotissement 26-957-1, qui s'est tenue le 3 août\n2026, est déposé",
+    "anchor": "règlement de lotissement 26-957-1"
+   },
+   "reason": "La règle de transcription à l'identique exige de conserver les retours à la ligne du paragraphe attestant le dépôt."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du règlement 26-956-2 — zonage et encadrement des projets intégrés",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-956-2",
+    "page": 3,
+    "citation": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant\nle règlement de zonage afin de modifier l'encadrement des projets\nintégrés tel que soumis",
+    "anchor": "Règlement 26-956-2"
+   },
+   "reason": "La citation actuelle remplace les retours à la ligne par des espaces, contrairement à l'exigence d'un extrait recopié à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Adoption du règlement 26-957-1 — lotissement et sites patrimoniaux",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-957-1",
+    "page": 3,
+    "citation": "Que le conseil municipal adopte le Règlement 26-957-1 sur le\nlotissement en lien avec certains sites patrimoniaux tel que soumis",
+    "anchor": "Règlement 26-957-1"
+   },
+   "reason": "La citation doit conserver le retour à la ligne entre « le » et « lotissement » pour reproduire exactement le texte."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Autorisation de vente pour taxes — immeubles de la liste annexée, 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "vente pour taxes",
+    "page": 6,
+    "citation": "Que la Ville de Waterloo autorise la greffière à effectuer et\nsigner individuellement toute démarche et à signer tout\ndocument dans le but de mener à terme la vente pour taxes",
+    "anchor": "vente pour taxes"
+   },
+   "reason": "L'autorisation est correctement identifiée, mais sa citation doit reproduire les retours à la ligne du dispositif de la résolution."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Prêt à usage gratuit d'un espace au 417, rue de la Cour — Télévision communautaire",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "417, rue de la Cour",
+    "page": 8,
+    "citation": "à titre gratuit,\npour une durée d'un an, d'un espace de rangement clôturé situé au\nrez-de-chaussée du garage détaché municipal du 417, rue de la\nCour",
+    "anchor": "417, rue de la\nCour"
+   },
+   "reason": "La citation doit conserver les retours à la ligne, et l'ancre doit être une sous-chaîne exacte de cette citation, y compris dans l'adresse."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Autorisation d'une servitude réelle et perpétuelle à Hydro-Québec — rue Nadeau",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "rue Nadeau",
+    "page": 9,
+    "citation": "d'une servitude réelle et\nperpétuelle en faveur d'Hydro-Québec de la manière prévue\nau document joint à la présente résolution pour permettre le\nprolongement du réseau électrique sur la rue Nadeau",
+    "anchor": "la rue Nadeau"
+   },
+   "reason": "La citation doit être recopiée à l'identique, avec les retours à la ligne présents dans la clause autorisant la servitude."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Accord de principe conditionnel — tour Bell sur les lots 4 161 789 ou 6 098 789",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "4 161 789 ou 6 098 789",
+    "page": 9,
+    "citation": "Le conseil donne son accord de principe à l'implantation d'une\ntour de télécommunications d'une hauteur maximale de 40\nmètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre\ndu Québec",
+    "anchor": "lots 4 161 789 ou 6 098 789"
+   },
+   "reason": "La citation actuelle aplatit les lignes du dispositif et doit être remplacée par l'extrait exact de la page 9."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Dérogation mineure accordée — implantation latérale et arrière, 80, rue Yves-Malouin",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "CCU 2026-107",
+    "page": 11,
+    "citation": "Dérogation mineure, implantation latérale et arrière, 80, rue\nYves-Malouin (CCU 2026-107)",
+    "anchor": "CCU 2026-107"
+   },
+   "reason": "Le titre cité comporte un retour à la ligne après « rue », qui doit être conservé conformément à la règle de transcription exacte."
+  },
+  {
+   "op": "correct",
+   "id": "u11",
+   "unit": {
+    "label": "Dérogation mineure accordée — implantation latérale et arrière, 82, rue Yves-Malouin",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "CCU 2026-108",
+    "page": 11,
+    "citation": "Dérogation mineure, implantation latérale et arrière, 82, rue\nYves-Malouin (CCU 2026-108)",
+    "anchor": "CCU 2026-108"
+   },
+   "reason": "La citation doit reproduire exactement le titre de la demande, notamment le retour à la ligne entre « rue » et « Yves-Malouin »."
+  },
+  {
+   "op": "correct",
+   "id": "u12",
+   "unit": {
+    "label": "Dérogation mineure accordée sous condition — implantation au 153, rue du Manège",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "153, rue du Manège",
+    "page": 12,
+    "citation": "Que le Conseil, sur recommandation du CCU approuve la dérogation\nmineure pour le 153, rue du Manège, telle que demandée",
+    "anchor": "153, rue du Manège"
+   },
+   "reason": "La citation doit conserver le retour à la ligne entre « dérogation » et « mineure » pour être identique au document."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "Dérogation mineure accordée — implantation au 155, rue du Manège",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "155, rue du Manège",
+    "page": 13,
+    "citation": "Que le Conseil, sur recommandation du CCU approuve la dérogation\nmineure pour le 155, rue du Manège, telle que demandée",
+    "anchor": "155, rue du Manège"
+   },
+   "reason": "L'extrait doit être recopié à l'identique, avec le retour à la ligne qui sépare « dérogation » de « mineure »."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "PIIA approuvé — ajout de lettrage au 4906, rue Foster",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "4906, rue Foster",
+    "page": 13,
+    "citation": "Que le conseil approuve l'ajout de lettrage en façade, tel que\nprésenté, pour le 4906, rue Foster",
+    "anchor": "4906, rue Foster"
+   },
+   "reason": "La citation actuelle omet le retour à la ligne avant « présenté », alors que la règle exige une transcription à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u16",
+   "unit": {
+    "label": "PIIA approuvé sous condition — construction neuve au 80-82, rue Yves-Malouin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "80-82, rue Yves-Malouin",
+    "page": 14,
+    "citation": "Que le conseil municipal approuve la demande PIIA pour une\nconstruction neuve au 80-82, rue Yves-Malouin, tel que\ndemandé",
+    "anchor": "80-82, rue Yves-Malouin"
+   },
+   "reason": "La citation doit conserver les deux retours à la ligne du passage approuvant la demande PIIA."
+  },
+  {
+   "op": "correct",
+   "id": "u17",
+   "unit": {
+    "label": "PIIA approuvé — construction neuve aux 153 et 155, rue du Manège",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "153 et 155, rue du Manège",
+    "page": 14,
+    "citation": "Que le conseil approuve le projet de construction résidentielle neuve\nau 153 et 155, rue du Manège, tel que présenté",
+    "anchor": "153 et 155, rue du Manège"
+   },
+   "reason": "La citation doit reproduire le retour à la ligne après « neuve » conformément à l'exigence de copie exacte."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "Dépôt du certificat de résultat - Processus d'approbation par les\npersonnes habiles à voter - Règlement 26-956-2"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "Le procès-verbal de l'assemblée publique de consultation sur le\nprojet de règlement de lotissement 26-957-1, qui s'est tenue le 3 août\n2026, est déposé"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 3,
+   "citation": "Que le conseil municipal adopte le Règlement 26-956-2 modifiant\nle règlement de zonage afin de modifier l'encadrement des projets\nintégrés tel que soumis"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 3,
+   "citation": "Que le conseil municipal adopte le Règlement 26-957-1 sur le\nlotissement en lien avec certains sites patrimoniaux tel que soumis"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "adoption",
+   "page": 6,
+   "citation": "Que la Ville de Waterloo autorise la greffière à effectuer et\nsigner individuellement toute démarche et à signer tout\ndocument dans le but de mener à terme la vente pour taxes"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "inconnu",
+   "page": 8,
+   "citation": "à titre gratuit,\npour une durée d'un an, d'un espace de rangement clôturé situé au\nrez-de-chaussée du garage détaché municipal du 417, rue de la\nCour"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "adoption",
+   "page": 9,
+   "citation": "d'une servitude réelle et\nperpétuelle en faveur d'Hydro-Québec de la manière prévue\nau document joint à la présente résolution pour permettre le\nprolongement du réseau électrique sur la rue Nadeau"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "inconnu",
+   "page": 9,
+   "citation": "Le conseil donne son accord de principe à l'implantation d'une\ntour de télécommunications d'une hauteur maximale de 40\nmètres, au fonds des lots 4 161 789 ou 6 098 789 du cadastre\ndu Québec"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "derogation_mineure",
+   "page": 11,
+   "citation": "Dérogation mineure, implantation latérale et arrière, 80, rue\nYves-Malouin (CCU 2026-107)"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u11",
+   "stage": "derogation_mineure",
+   "page": 11,
+   "citation": "Dérogation mineure, implantation latérale et arrière, 82, rue\nYves-Malouin (CCU 2026-108)"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u12",
+   "stage": "derogation_mineure",
+   "page": 12,
+   "citation": "Que le Conseil, sur recommandation du CCU approuve la dérogation\nmineure pour le 153, rue du Manège, telle que demandée"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "derogation_mineure",
+   "page": 13,
+   "citation": "Que le Conseil, sur recommandation du CCU approuve la dérogation\nmineure pour le 155, rue du Manège, telle que demandée"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 12,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "piia",
+   "page": 13,
+   "citation": "Que le conseil approuve l'ajout de lettrage en façade, tel que\nprésenté, pour le 4906, rue Foster"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 13,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u16",
+   "stage": "piia",
+   "page": 14,
+   "citation": "Que le conseil municipal approuve la demande PIIA pour une\nconstruction neuve au 80-82, rue Yves-Malouin, tel que\ndemandé"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 14,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u17",
+   "stage": "piia",
+   "page": 14,
+   "citation": "Que le conseil approuve le projet de construction résidentielle neuve\nau 153 et 155, rue du Manège, tel que présenté"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 16
+}

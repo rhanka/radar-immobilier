@@ -1,0 +1,61 @@
+{
+ "documentId": "potton-2026-01-05",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6e7a2bf2057ecd980097c4b8b6abf95615089d95eb87795bc1272c6523568da4",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 14, la résolution accepte la dérogation pour le lot 5 553 677, chemin de la Mine, permettant un recul avant de 6 m plutôt que 15 m, soit un empiétement de 9 m.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 15, la résolution accepte la construction d’une habitation unifamiliale sur le lot 5 753 149, chemin du Mont-Bear, conformément aux plans examinés dans le cadre du PIIA-5 décrit à la page 14.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 19 atteste l’avis de motion donné par Cynthia Sherrer pour le règlement 2001-291-BR concernant l’extension ou la modification des cimetières dérogatoires protégés par droits acquis.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La citation de la page 45 confirme l’adoption du premier projet 2001-291-BR détaillé aux pages 43 et 44, étape distincte de l’avis de motion selon les règles.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "À la page 14, la résolution accepte la dérogation pour le lot 5 553 677, chemin de la Mine, permettant un recul avant de 6 m plutôt que 15 m, soit un empiétement de 9 m."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "À la page 15, la résolution accepte la construction d’une habitation unifamiliale sur le lot 5 753 149, chemin du Mont-Bear, conformément aux plans examinés dans le cadre du PIIA-5 décrit à la page 14."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 19 atteste l’avis de motion donné par Cynthia Sherrer pour le règlement 2001-291-BR concernant l’extension ou la modification des cimetières dérogatoires protégés par droits acquis."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La citation de la page 45 confirme l’adoption du premier projet 2001-291-BR détaillé aux pages 43 et 44, étape distincte de l’avis de motion selon les règles."
+  }
+ ]
+}

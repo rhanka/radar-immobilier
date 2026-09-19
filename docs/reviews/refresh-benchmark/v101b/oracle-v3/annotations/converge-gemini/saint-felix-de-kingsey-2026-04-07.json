@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-felix-de-kingsey-2026-04-07",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "3af0de69954f704c23483e712159a82d4849c7f5137fb1ff3937ee8794f66a3a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le règlement 638 relatif à l'occupation et à l'entretien des bâtiments est formellement adopté par la résolution 70-04-2026 à la page 8.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure visant le lot 5 740 483 au 1130 rue Provencher est acceptée par la résolution 71-04-2026 à la page 8.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le premier projet de résolution PPCMOI pour le lot 5 739 222 est adopté par la résolution 72-04-2026 à la page 8.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le règlement 638 relatif à l'occupation et à l'entretien des bâtiments est formellement adopté par la résolution 70-04-2026 à la page 8."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La dérogation mineure visant le lot 5 740 483 au 1130 rue Provencher est acceptée par la résolution 71-04-2026 à la page 8."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le premier projet de résolution PPCMOI pour le lot 5 739 222 est adopté par la résolution 72-04-2026 à la page 8."
+  }
+ ]
+}

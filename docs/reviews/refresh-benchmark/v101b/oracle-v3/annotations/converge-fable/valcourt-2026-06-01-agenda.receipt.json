@@ -1,0 +1,77 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "160b21de89153b366ad378f120d15d0ad2c2b085c05343a3c47205fcb0259737",
+ "inputSha256": "48526ef7e97f7b49a1bbad674720df550329a664c9f81aa52ff89b4490032a9c",
+ "responseSha256": "f5d8475fb4c310b006b4da91440c469d1f42753b2dd51d269e2ad331f3f90580",
+ "rc": 0,
+ "latencyMs": 34457,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "6e1639c0-474d-4ffe-abb6-cb9ef15b8746",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 2947,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 6068,
+   "webSearchRequests": 0,
+   "costUSD": 0.26901474999999997,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 2042,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 6068,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 2947,
+  "output_tokens_details": {
+   "thinking_tokens": 2042
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 6068,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 2947,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 6068,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 6068
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.26901474999999997,
+ "durationApiMs": 32440,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:41:12.785Z"
+}

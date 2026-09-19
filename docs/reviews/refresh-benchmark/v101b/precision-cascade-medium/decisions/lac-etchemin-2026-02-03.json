@@ -1,0 +1,266 @@
+{
+ "documentId": "lac-etchemin-2026-02-03",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "90cf352fad21a1a6a8515d51851456dca42791133445e45b577a85a2851522b5",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "derogation-2026-175"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-175 — garage attenant",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par\nle Conseil de la Municipalité de Lac-Etchemin."
+      },
+      {
+       "page": 10,
+       "excerpt": "QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par\nle Conseil de la Municipalité de Lac-Etchemin."
+      },
+      {
+       "page": 9,
+       "excerpt": "Demande de dérogation mineure no. 2026-175 - M. Jérémy Blouin, sur le lot\nnuméro 3 601 426, situé au 304, avenue du Ruisseau, zone 03-H, à Lac-Etchemin"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "ppcmoi-2026-157"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI 2026-157 — vente de trailer et remorque",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil\nmunicipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un"
+      },
+      {
+       "page": 10,
+       "excerpt": "Adoption d’un projet de résolution relatif à une demande d’autorisation d’un projet\nparticulier de construction, de modification ou d’occupation d’un immeuble"
+      },
+      {
+       "page": 10,
+       "excerpt": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil\nmunicipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un\nusage « vente de trailer et remorque» sis sur le lot numéro 4 341 331, zone 58A/ILOT, situé au 1646, route 277, et ce, pour les raisons suivantes :"
+      },
+      {
+       "page": 10,
+       "excerpt": "Adoption d’un projet de résolution relatif à une demande d’autorisation d’un projet\nparticulier de construction, de modification ou d’occupation d’un immeuble\n(PPCMOI) concernant l’ajout de l’usage de commerce et services lié à\nl’automobile pour le lot numéro 4 341 331, zone 58-A/ILOT, situé au 1646, route\n277"
+      },
+      {
+       "page": 10,
+       "excerpt": "Considérant que ledit dossier est admissible au processus d’étude dans le cadre d’une\ndemande de PPCMOI en vertu de l’article 2.1 (Objet d’une demande) du règlement\nnuméro 121-2012 relatif aux projets particuliers de construction, de modification ou\nd’occupation d’un immeuble;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-66-2006"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 66-2006 — dérogations mineures",
+     "stage": null,
+     "objet": "66-2006",
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "Considérant que ledit dossier est admissible au processus d'étude dans le cadre d'une\ndemande de dérogation mineure en vertu de l'article 3.1"
+      },
+      {
+       "page": 9,
+       "excerpt": "Considérant que ledit dossier est admissible au processus d'étude dans le cadre d'une\ndemande de dérogation mineure en vertu de l'article 3.1 (Dispositions pouvant faire\nl'objet d'une dérogation mineure) du règlement numéro 66-2006 sur les dérogations\nmineures aux règlements de zonage et de lotissement;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-121-2012"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 121-2012 — PPCMOI",
+     "stage": null,
+     "objet": "121-2012",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Considérant que ledit dossier est admissible au processus d’étude dans le cadre d’une\ndemande de PPCMOI en vertu de l’article 2.1"
+      },
+      {
+       "page": 10,
+       "excerpt": "Considérant que ledit dossier est admissible au processus d’étude dans le cadre d’une\ndemande de PPCMOI en vertu de l’article 2.1 (Objet d’une demande) du règlement\nnuméro 121-2012 relatif aux projets particuliers de construction, de modification ou\nd’occupation d’un immeuble;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-62-2006"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 62-2006",
+     "stage": null,
+     "objet": "62-2006",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Considérant que ledit règlement permet d’autoriser, sous certaines conditions, un\nusage non autorisé dans une zone et de la rendre conforme au sens du règlement de\nzonage numéro 62-2006;"
+      },
+      {
+       "page": 10,
+       "excerpt": "Considérant que ledit règlement permet d’autoriser, sous certaines conditions, un\nusage non autorisé dans une zone et de la rendre conforme au sens du règlement de\nzonage numéro 62-2006;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-248-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 248-2026 — réfection des réseaux et de la rue Gagnon",
+     "stage": "adoption",
+     "objet": "248-2026",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE le conseil confirme par la présente résolution, l'adoption du règlement numéro\n248-2026 intitulé : Règlement ayant pour objet des travaux pour la réfection des"
+      },
+      {
+       "page": 6,
+       "excerpt": "QUE le conseil confirme par la présente résolution, l'adoption du règlement numéro\n248-2026 intitulé : Règlement ayant pour objet des travaux pour la réfection des\nconduites d'aqueduc et d'égout ainsi que l’infrastructure de la rue Gagnon dans le\ncadre du « Programme FIMEAU » et décrétant un emprunt à long terme n'excédant\npas un montant de 2 248 908 $ amorti sur une période de vingt (20) ans tel que rédigé\net déposé par le directeur général et greffier-trésorier."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La dérogation mineure no 2026-175 est approuvée par le conseil municipal.\",\"excerpt\":\"QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par le Conseil de la Municipalité de Lac-Etchemin.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de résolution autorisant la demande de PPCMOI 2026-157 est adopté par le conseil.\",\"excerpt\":\"QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil municipal de la Municipalité de Lac-Etchemin\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 66-2006 n'est mentionné qu'à titre de référence habilitante pour la demande de dérogation mineure, sans faire l'objet d'un acte réglementaire dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 121-2012 est seulement cité comme cadre normatif habilitant la demande de PPCMOI, aucun acte procédural ne porte sur ce règlement.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 62-2006 est une simple mention de référence contextuelle dans les considérants du PPCMOI.\",\"excerpt\":\"\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte formellement le règlement d'emprunt et de travaux 248-2026.\",\"excerpt\":\"QUE le conseil confirme par la présente résolution, l'adoption du règlement numéro 248-2026 intitulé : Règlement ayant pour objet des travaux pour la réfection des conduites d'aqueduc et d'égout ainsi que l’infrastructure de la rue Gagnon\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La dérogation mineure no 2026-175 est approuvée par le conseil municipal.",
+   "excerpt": "QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par le Conseil de la Municipalité de Lac-Etchemin."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le projet de résolution autorisant la demande de PPCMOI 2026-157 est adopté par le conseil.",
+   "excerpt": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil municipal de la Municipalité de Lac-Etchemin"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 66-2006 n'est mentionné qu'à titre de référence habilitante pour la demande de dérogation mineure, sans faire l'objet d'un acte réglementaire dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 121-2012 est seulement cité comme cadre normatif habilitant la demande de PPCMOI, aucun acte procédural ne porte sur ce règlement.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 62-2006 est une simple mention de référence contextuelle dans les considérants du PPCMOI.",
+   "excerpt": ""
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte formellement le règlement d'emprunt et de travaux 248-2026.",
+   "excerpt": "QUE le conseil confirme par la présente résolution, l'adoption du règlement numéro 248-2026 intitulé : Règlement ayant pour objet des travaux pour la réfection des conduites d'aqueduc et d'égout ainsi que l’infrastructure de la rue Gagnon"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 66-2006 n'est mentionné qu'à titre de référence habilitante pour la demande de dérogation mineure, sans faire l'objet d'un acte réglementaire dans cette séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 121-2012 est seulement cité comme cadre normatif habilitant la demande de PPCMOI, aucun acte procédural ne porte sur ce règlement."
+   },
+   {
+    "act": "A05",
+    "reason": "Le règlement 62-2006 est une simple mention de référence contextuelle dans les considérants du PPCMOI."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La dérogation mineure no 2026-175 est approuvée par le conseil municipal."
+   },
+   {
+    "act": "A02",
+    "reason": "Le projet de résolution autorisant la demande de PPCMOI 2026-157 est adopté par le conseil."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil adopte formellement le règlement d'emprunt et de travaux 248-2026."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2095,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 14416,
+   "outputTokens": 394,
+   "totalTokens": 14810
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1935
+  },
+  "inputSha256": "50261596085c6b05481a97744815d2c20cd2ecbdfe7262aacfc4bc1d6be39f97"
+ }
+}

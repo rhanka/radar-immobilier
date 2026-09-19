@@ -1,0 +1,271 @@
+{
+ "documentId": "beloeil-2026-03-23",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c2d735769759743298d7dd16de8395a4b4fa202353daa334488a06b35c10463b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'assemblée publique de consultation tenue sur le règlement 1667-126-2026 est attestée à la page 2 (résolution 2026-03-115).\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'adoption du second projet du règlement 1667-126-2026 est constatée à la page 3 (résolution 2026-03-116).\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'assemblée publique de consultation tenue sur le règlement 1667-127-2026 est attestée à la page 3 (résolution 2026-03-117).\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'adoption du second projet du règlement 1667-127-2026 est constatée à la page 4 (résolution 2026-03-118).\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'assemblée publique de consultation tenue sur le règlement 1667-128-2026 est attestée à la page 4 (résolution 2026-03-119).\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'adoption du second projet du règlement 1667-128-2026 est constatée à la page 5 (résolution 2026-03-120).\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"L'autorisation de la dérogation mineure DM-2026-9017 au 636, rue Salomon est adoptée à la page 5 (résolution 2026-03-121).\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'autorisation de la dérogation mineure DM-2026-9021 au 1500, rue Louis-Marchand est adoptée à la page 6 (résolution 2026-03-122).\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"L'autorisation de la dérogation mineure DM-2026-9022 au 850, rue Laurier est adoptée à la page 7 (résolution 2026-03-123).\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"L'autorisation de l'usage conditionnel UC-2026-9008 au 209, rue Gagnon est adoptée à la page 7 (résolution 2026-03-124).\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"L'autorisation de l'usage conditionnel UC-2026-9020 au 850, rue Le Moyne est adoptée à la page 8 (résolution 2026-03-125).\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA-2026-9002 au 1005, rue Richelieu est adoptée à la page 11 (résolution 2026-03-133).\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA-2026-9003 aux 201-217, rue Saint-Jean-Baptiste est adoptée à la page 11 (résolution 2026-03-134).\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA-2026-9004 aux 229-245, rue Saint-Jean-Baptiste est adoptée à la page 12 (résolution 2026-03-135).\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA-2026-9009 au 481, rue de l'Industrie est adoptée à la page 12 (résolution 2026-03-136).\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA-2026-9024 pour le lot 6 580 334 sur la rue Serge-Pepin est adoptée à la page 13 (résolution 2026-03-137).\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA-2026-9025 aux 850 et 866, rue Laurier et 225, rue Hubert est adoptée à la page 13 (résolution 2026-03-138).\"},{\"item\":\"i18\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA-2026-9026 au 1182, rue Omer-Adam est adoptée à la page 14 (résolution 2026-03-139).\"},{\"item\":\"i19\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA-2026-9028 pour le lot 4 553 167 sur la rue Serge-Pepin est adoptée à la page 14 (résolution 2026-03-140).\"},{\"item\":\"i20\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA-2026-9030 au 888, boulevard Yvon-L'Heureux Nord est adoptée à la page 15 (résolution 2026-03-141).\"},{\"item\":\"i21\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA-2026-9033 au 650, rue Serge-Pepin est adoptée à la page 15 (résolution 2026-03-142).\"},{\"item\":\"i22\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement 1667-129-2026 est donné à la page 16 (point 35).\"},{\"item\":\"i23\",\"choice\":\"v1\",\"reason\":\"L'adoption du projet de règlement 1667-129-2026 est constatée à la page 16 (résolution 2026-03-143).\"},{\"item\":\"i24\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet de résolution pour le PPCMOI-2026-9027 est constatée à la page 16 (résolution 2026-03-144).\"},{\"item\":\"i25\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet de résolution pour le PPCMOI 2025-9133 est constatée à la page 18 (résolution 2026-03-145).\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  },
+  {
+   "item": "i22",
+   "unitId": "u22",
+   "current": "v1"
+  },
+  {
+   "item": "i23",
+   "unitId": "u23",
+   "current": "v1"
+  },
+  {
+   "item": "i24",
+   "unitId": "u24",
+   "current": "v1"
+  },
+  {
+   "item": "i25",
+   "unitId": "u25",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'assemblée publique de consultation tenue sur le règlement 1667-126-2026 est attestée à la page 2 (résolution 2026-03-115)."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'adoption du second projet du règlement 1667-126-2026 est constatée à la page 3 (résolution 2026-03-116)."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'assemblée publique de consultation tenue sur le règlement 1667-127-2026 est attestée à la page 3 (résolution 2026-03-117)."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'adoption du second projet du règlement 1667-127-2026 est constatée à la page 4 (résolution 2026-03-118)."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'assemblée publique de consultation tenue sur le règlement 1667-128-2026 est attestée à la page 4 (résolution 2026-03-119)."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'adoption du second projet du règlement 1667-128-2026 est constatée à la page 5 (résolution 2026-03-120)."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L'autorisation de la dérogation mineure DM-2026-9017 au 636, rue Salomon est adoptée à la page 5 (résolution 2026-03-121)."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'autorisation de la dérogation mineure DM-2026-9021 au 1500, rue Louis-Marchand est adoptée à la page 6 (résolution 2026-03-122)."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "L'autorisation de la dérogation mineure DM-2026-9022 au 850, rue Laurier est adoptée à la page 7 (résolution 2026-03-123)."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "L'autorisation de l'usage conditionnel UC-2026-9008 au 209, rue Gagnon est adoptée à la page 7 (résolution 2026-03-124)."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "L'autorisation de l'usage conditionnel UC-2026-9020 au 850, rue Le Moyne est adoptée à la page 8 (résolution 2026-03-125)."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA-2026-9002 au 1005, rue Richelieu est adoptée à la page 11 (résolution 2026-03-133)."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA-2026-9003 aux 201-217, rue Saint-Jean-Baptiste est adoptée à la page 11 (résolution 2026-03-134)."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA-2026-9004 aux 229-245, rue Saint-Jean-Baptiste est adoptée à la page 12 (résolution 2026-03-135)."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA-2026-9009 au 481, rue de l'Industrie est adoptée à la page 12 (résolution 2026-03-136)."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA-2026-9024 pour le lot 6 580 334 sur la rue Serge-Pepin est adoptée à la page 13 (résolution 2026-03-137)."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA-2026-9025 aux 850 et 866, rue Laurier et 225, rue Hubert est adoptée à la page 13 (résolution 2026-03-138)."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA-2026-9026 au 1182, rue Omer-Adam est adoptée à la page 14 (résolution 2026-03-139)."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA-2026-9028 pour le lot 4 553 167 sur la rue Serge-Pepin est adoptée à la page 14 (résolution 2026-03-140)."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA-2026-9030 au 888, boulevard Yvon-L'Heureux Nord est adoptée à la page 15 (résolution 2026-03-141)."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA-2026-9033 au 650, rue Serge-Pepin est adoptée à la page 15 (résolution 2026-03-142)."
+  },
+  {
+   "item": "i22",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement 1667-129-2026 est donné à la page 16 (point 35)."
+  },
+  {
+   "item": "i23",
+   "choice": "v1",
+   "reason": "L'adoption du projet de règlement 1667-129-2026 est constatée à la page 16 (résolution 2026-03-143)."
+  },
+  {
+   "item": "i24",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet de résolution pour le PPCMOI-2026-9027 est constatée à la page 16 (résolution 2026-03-144)."
+  },
+  {
+   "item": "i25",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet de résolution pour le PPCMOI 2025-9133 est constatée à la page 18 (résolution 2026-03-145)."
+  }
+ ]
+}

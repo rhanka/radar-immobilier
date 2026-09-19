@@ -1,0 +1,13 @@
+{
+ "id": "saint-charles-de-bourget-2026-05-04",
+ "rc": 0,
+ "latencyMs": 139888,
+ "inputTokens": 2,
+ "outputTokens": 15191,
+ "cacheRead": 0,
+ "cacheCreate": 3956,
+ "costUsd": 0.42135599999999995,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 27252
+}

@@ -1,0 +1,51 @@
+{
+ "documentId": "acton-vale-2026-03-16",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "651db8ff1fc50b87182675ec2f9ff7652f82181a774981355061c593e80a89d8",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 18.1, page 2, prévoit l’adoption de la résolution finale PPCMOI-001-2026 au 1050, rue Dubois ; le libellé respecte le caractère prévu de ce point d’ordre du jour.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 18.2, page 2, prévoit une résolution relative à une demande à la CPTAQ pour Ferme Guilmette Inc., sans préciser son issue, ce qui justifie l’étape inconnu.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 18.3, page 2, prévoit une résolution relative à une demande à la CPTAQ pour Daniel Laroche, sans préciser son issue, ce qui justifie l’étape inconnu.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 18.1, page 2, prévoit l’adoption de la résolution finale PPCMOI-001-2026 au 1050, rue Dubois ; le libellé respecte le caractère prévu de ce point d’ordre du jour."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 18.2, page 2, prévoit une résolution relative à une demande à la CPTAQ pour Ferme Guilmette Inc., sans préciser son issue, ce qui justifie l’étape inconnu."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 18.3, page 2, prévoit une résolution relative à une demande à la CPTAQ pour Daniel Laroche, sans préciser son issue, ce qui justifie l’étape inconnu."
+  }
+ ]
+}

@@ -1,0 +1,164 @@
+{
+ "documentId": "la-peche-2026-06-01",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "6403c834cf5039832425639cf950740d1a33dad5f8eb24368507cbabe019e1f0",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — 30, chemin Albert-Labelle\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"30, chemin Albert-Labelle\",\n        \"page\": 7,\n        \"citation\": \"Demande de dérogation mineure au règlement de zonage numéro 113-2025\\n– 30, chemin Albert-Labelle\",\n        \"anchor\": \"30, chemin Albert-Labelle\"\n      },\n      \"reason\": \"La résolution poursuivie à la page 8 accorde cette demande pour un bâtiment accessoire détaché; les deux dispositions visées appartiennent à la même demande.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — 14, chemin Guertin\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"14, chemin Guertin\",\n        \"page\": 8,\n        \"citation\": \"accorde la demande d’une dérogation mineure au\\nRèglement de zonage 113-2025 pour la propriété sise au 14, chemin Guertin,\",\n        \"anchor\": \"14, chemin Guertin\"\n      },\n      \"reason\": \"Le conseil accorde une demande distincte réduisant la marge latérale sur rue pour permettre la construction d’un bâtiment accessoire détaché.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Usage conditionnel accordé sous conditions — 75, chemin du Lac-Chip\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"usage_conditionnel\",\n        \"objet\": \"75, chemin du Lac-Chip\",\n        \"page\": 9,\n        \"citation\": \"Règlement relatif aux usages conditionnels 145.31-2025 pour la propriété sise au\\n75, chemin du Lac-Chip, connue comme étant le lot 3 390 978 du cadastre du\\nQuébec;\",\n        \"anchor\": \"75, chemin du Lac-Chip\"\n      },\n      \"reason\": \"La résolution accorde sous conditions l’usage d’hébergement touristique de type établissement de résidence principale, ce qui constitue une décision finale d’usage conditionnel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Usage conditionnel accordé sous conditions — 5, chemin Vaillant\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"usage_conditionnel\",\n        \"objet\": \"5, chemin Vaillant\",\n        \"page\": 10,\n        \"citation\": \"Règlement relatif aux usages conditionnels 145.31-2025 pour la propriété sise au\\n5, chemin Vaillant, connue comme étant le lot 3 390 175 du cadastre du Québec;\",\n        \"anchor\": \"5, chemin Vaillant\"\n      },\n      \"reason\": \"Le conseil accorde sous conditions une deuxième demande d’usage conditionnel pour un établissement de résidence principale, distincte de celle du chemin du Lac-Chip.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Servitude de tolérance d’empiètement autorisée — 741, chemin Riverside\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"741, chemin Riverside\",\n        \"page\": 11,\n        \"citation\": \"autorise une servitude de tolérance\\nd’empiètement au bénéfice du propriétaire du lot 3 391 753, du cadastre du\\nQuébec connu comme étant le 741, chemin Riverside\",\n        \"anchor\": \"741, chemin Riverside\"\n      },\n      \"reason\": \"Le conseil autorise expressément la servitude et la signature de l’acte notarié, soit un acte foncier inclus même pour une propriété non résidentielle.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 26-866 — bon fonctionnement des installations septiques\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"26-866\",\n        \"page\": 14,\n        \"citation\": \"Adoption du règlement numéro 26-866 relatif au bon fonctionnement des\\ninstallations septiques\",\n        \"anchor\": \"règlement numéro 26-866\"\n      },\n      \"reason\": \"Le point 9a traite de l’adoption du règlement encadrant la conformité des installations septiques; l’avis de motion et le dépôt du projet du 4 mai sont seulement des rappels historiques.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 26-867 — aide à la mise aux normes des installations septiques\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"26-867\",\n        \"page\": 14,\n        \"citation\": \"Adoption du règlement numéro 26-867 relatif à la création d’un programme\\nd’aide financière pour la mise aux normes des installations septiques\",\n        \"anchor\": \"règlement numéro 26-867\"\n      },\n      \"reason\": \"Le point 9b adopte un objet réglementaire distinct visant la construction ou la réfection des installations septiques; sa reproduction à l’annexe 002 ne crée pas une autre unité.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement d’emprunt 26-868 — financement de la mise aux normes des installations septiques\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"26-868\",\n        \"page\": 15,\n        \"citation\": \"Adoption du règlement numéro 26-868 autorisant une dépense de\\n5 737 912 $ et un emprunt de 5 737 912 $\",\n        \"anchor\": \"règlement numéro 26-868\"\n      },\n      \"reason\": \"Le point 9c adopte un règlement distinct finançant explicitement la mise aux normes des installations septiques, sans nouvelle unité pour les étapes antérieures du 4 mai ni pour l’annexe 003.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dérogation mineure accordée — 30, chemin Albert-Labelle",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "30, chemin Albert-Labelle",
+    "page": 7,
+    "citation": "Demande de dérogation mineure au règlement de zonage numéro 113-2025\n– 30, chemin Albert-Labelle",
+    "anchor": "30, chemin Albert-Labelle"
+   },
+   "reason": "La résolution poursuivie à la page 8 accorde cette demande pour un bâtiment accessoire détaché; les deux dispositions visées appartiennent à la même demande."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dérogation mineure accordée — 14, chemin Guertin",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "14, chemin Guertin",
+    "page": 8,
+    "citation": "accorde la demande d’une dérogation mineure au\nRèglement de zonage 113-2025 pour la propriété sise au 14, chemin Guertin,",
+    "anchor": "14, chemin Guertin"
+   },
+   "reason": "Le conseil accorde une demande distincte réduisant la marge latérale sur rue pour permettre la construction d’un bâtiment accessoire détaché."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Usage conditionnel accordé sous conditions — 75, chemin du Lac-Chip",
+    "stage": "adoption",
+    "procedure": "usage_conditionnel",
+    "objet": "75, chemin du Lac-Chip",
+    "page": 9,
+    "citation": "Règlement relatif aux usages conditionnels 145.31-2025 pour la propriété sise au\n75, chemin du Lac-Chip, connue comme étant le lot 3 390 978 du cadastre du\nQuébec;",
+    "anchor": "75, chemin du Lac-Chip"
+   },
+   "reason": "La résolution accorde sous conditions l’usage d’hébergement touristique de type établissement de résidence principale, ce qui constitue une décision finale d’usage conditionnel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Usage conditionnel accordé sous conditions — 5, chemin Vaillant",
+    "stage": "adoption",
+    "procedure": "usage_conditionnel",
+    "objet": "5, chemin Vaillant",
+    "page": 10,
+    "citation": "Règlement relatif aux usages conditionnels 145.31-2025 pour la propriété sise au\n5, chemin Vaillant, connue comme étant le lot 3 390 175 du cadastre du Québec;",
+    "anchor": "5, chemin Vaillant"
+   },
+   "reason": "Le conseil accorde sous conditions une deuxième demande d’usage conditionnel pour un établissement de résidence principale, distincte de celle du chemin du Lac-Chip."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Servitude de tolérance d’empiètement autorisée — 741, chemin Riverside",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "741, chemin Riverside",
+    "page": 11,
+    "citation": "autorise une servitude de tolérance\nd’empiètement au bénéfice du propriétaire du lot 3 391 753, du cadastre du\nQuébec connu comme étant le 741, chemin Riverside",
+    "anchor": "741, chemin Riverside"
+   },
+   "reason": "Le conseil autorise expressément la servitude et la signature de l’acte notarié, soit un acte foncier inclus même pour une propriété non résidentielle."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 26-866 — bon fonctionnement des installations septiques",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-866",
+    "page": 14,
+    "citation": "Adoption du règlement numéro 26-866 relatif au bon fonctionnement des\ninstallations septiques",
+    "anchor": "règlement numéro 26-866"
+   },
+   "reason": "Le point 9a traite de l’adoption du règlement encadrant la conformité des installations septiques; l’avis de motion et le dépôt du projet du 4 mai sont seulement des rappels historiques."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 26-867 — aide à la mise aux normes des installations septiques",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-867",
+    "page": 14,
+    "citation": "Adoption du règlement numéro 26-867 relatif à la création d’un programme\nd’aide financière pour la mise aux normes des installations septiques",
+    "anchor": "règlement numéro 26-867"
+   },
+   "reason": "Le point 9b adopte un objet réglementaire distinct visant la construction ou la réfection des installations septiques; sa reproduction à l’annexe 002 ne crée pas une autre unité."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement d’emprunt 26-868 — financement de la mise aux normes des installations septiques",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-868",
+    "page": 15,
+    "citation": "Adoption du règlement numéro 26-868 autorisant une dépense de\n5 737 912 $ et un emprunt de 5 737 912 $",
+    "anchor": "règlement numéro 26-868"
+   },
+   "reason": "Le point 9c adopte un règlement distinct finançant explicitement la mise aux normes des installations septiques, sans nouvelle unité pour les étapes antérieures du 4 mai ni pour l’annexe 003."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 8
+}

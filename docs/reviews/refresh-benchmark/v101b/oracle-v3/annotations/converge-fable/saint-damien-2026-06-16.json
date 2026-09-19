@@ -1,0 +1,71 @@
+{
+ "documentId": "saint-damien-2026-06-16",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "7cd332a5b358a642a48227ccfa91165d29c84bf486ec3871f5284bae68093fcd",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 12.2 « Demande de dérogation mineure 2026-122 - 73, rue Messier » figure en page 1 ; un point d'ordre du jour est une unité prévue, citation, objet et étape exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 12.3 « Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau » figure en page 1 ; unité prévue distincte, citation et objet exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 12.4 « Demande d’approbation au PIIA 2026-135 – 6710, rue Principale » figure en page 1 ; les petits PIIA sont inclus et l'ordre du jour n'atteste qu'un point prévu.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 14.2 en page 2 atteste un avis de motion prévu sur l'objet réglementaire explicite 804-1 (usage temporaire de camions de cuisine, non couvert par les exclusions) ; la citation v1 reprend le texte complet en joignant le saut de ligne, alors que v2 la tronque.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Règle « Avis de motion et projet actuels séparés » : le même point 14.2 « Avis de motion et présentation – projet de règlement 804-1 » atteste aussi la présentation prévue du projet, unité distincte de l'avis de motion, avec citation complète et page 2 exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v2"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 12.2 « Demande de dérogation mineure 2026-122 - 73, rue Messier » figure en page 1 ; un point d'ordre du jour est une unité prévue, citation, objet et étape exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 12.3 « Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau » figure en page 1 ; unité prévue distincte, citation et objet exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 12.4 « Demande d’approbation au PIIA 2026-135 – 6710, rue Principale » figure en page 1 ; les petits PIIA sont inclus et l'ordre du jour n'atteste qu'un point prévu."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 14.2 en page 2 atteste un avis de motion prévu sur l'objet réglementaire explicite 804-1 (usage temporaire de camions de cuisine, non couvert par les exclusions) ; la citation v1 reprend le texte complet en joignant le saut de ligne, alors que v2 la tronque."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Règle « Avis de motion et projet actuels séparés » : le même point 14.2 « Avis de motion et présentation – projet de règlement 804-1 » atteste aussi la présentation prévue du projet, unité distincte de l'avis de motion, avec citation complète et page 2 exactes."
+  }
+ ]
+}

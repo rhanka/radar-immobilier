@@ -1,0 +1,214 @@
+{
+ "documentId": "lac-tremblant-nord-2026-05-09",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "37cc28a92482c9c2a2f96bb8cb9077383d37d15cab1b408c74ec291294918b41",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "demande-COL230051"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Renouvellement du permis COL230051 — construction neuve",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "9.2.1 Demande de renouvellement du permis COL230051 pour une construction neuve, matricule 1624-72-9382,\nlot 5 011 332 du cadastre du Québec;"
+      },
+      {
+       "page": 1,
+       "excerpt": "9.2.1 Demande de renouvellement du permis COL230051 pour une construction neuve, matricule 1624-72-9382,\nlot 5 011 332 du cadastre du Québec;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "demande-DPCOL250057"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande DPCOL250057 — garage détaché",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "9.2.2 Demande DPCOL250057, demande de permis pour la construction d’un garage détaché, matricule 1427-691052-0-010-0001, lot 6 219 794 du cadastre du Québec;"
+      },
+      {
+       "page": 1,
+       "excerpt": "9.2.2 Demande DPCOL250057, demande de permis pour la construction d’un garage détaché, matricule 1427-691052-0-010-0001, lot 6 219 794 du cadastre du Québec;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "demande-DPCOL260003"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande DPCOL260003 — construction neuve",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "9.2.3 Demande DPCOL260003, demande de permis pour une construction neuve, matricule 1427-69-1052-0-0050001, lot 6 219 789 du cadastre du Québec;"
+      },
+      {
+       "page": 1,
+       "excerpt": "9.2.3 Demande DPCOL260003, demande de permis pour une construction neuve, matricule 1427-69-1052-0-0050001, lot 6 219 789 du cadastre du Québec;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "demande-DPCOL260002"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande DPCOL260002 — garage détaché",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "9.2.4 Demande DPCOL260002, demande de permis pour la construction d’un garage détaché, matricule 1720-695649, lot 5 011 370 du cadastre du Québec;"
+      },
+      {
+       "page": 1,
+       "excerpt": "9.2.4 Demande DPCOL260002, demande de permis pour la construction d’un garage détaché, matricule 1720-695649, lot 5 011 370 du cadastre du Québec;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "demande-DPCOL240004"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande DPCOL240004 — construction neuve",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "9.2.5 Demande DPCOL240004, demande de permis pour une construction neuve, matricule 1621-54-9153, lot\n5 011 310 du cadastre du Québec;"
+      },
+      {
+       "page": 1,
+       "excerpt": "9.2.5 Demande DPCOL240004, demande de permis pour une construction neuve, matricule 1621-54-9153, lot\n5 011 310 du cadastre du Québec;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 9.2.1 de l'ordre du jour mentionne expressément la demande de renouvellement du permis COL230051 pour une construction neuve.\",\"excerpt\":\"9.2.1 Demande de renouvellement du permis COL230051 pour une construction neuve, matricule 1624-72-9382,\\nlot 5 011 332 du cadastre du Québec;\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 9.2.2 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL250057 pour un garage détaché.\",\"excerpt\":\"9.2.2 Demande DPCOL250057, demande de permis pour la construction d’un garage détaché, matricule 1427-691052-0-010-0001, lot 6 219 794 du cadastre du Québec;\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 9.2.3 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL260003 pour une construction neuve.\",\"excerpt\":\"9.2.3 Demande DPCOL260003, demande de permis pour une construction neuve, matricule 1427-69-1052-0-0050001, lot 6 219 789 du cadastre du Québec;\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 9.2.4 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL260002 pour un garage détaché.\",\"excerpt\":\"9.2.4 Demande DPCOL260002, demande de permis pour la construction d’un garage détaché, matricule 1720-695649, lot 5 011 370 du cadastre du Québec;\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le point 9.2.5 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL240004 pour une construction neuve.\",\"excerpt\":\"9.2.5 Demande DPCOL240004, demande de permis pour une construction neuve, matricule 1621-54-9153, lot\\n5 011 310 du cadastre du Québec;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 9.2.1 de l'ordre du jour mentionne expressément la demande de renouvellement du permis COL230051 pour une construction neuve.",
+   "excerpt": "9.2.1 Demande de renouvellement du permis COL230051 pour une construction neuve, matricule 1624-72-9382,\nlot 5 011 332 du cadastre du Québec;"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 9.2.2 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL250057 pour un garage détaché.",
+   "excerpt": "9.2.2 Demande DPCOL250057, demande de permis pour la construction d’un garage détaché, matricule 1427-691052-0-010-0001, lot 6 219 794 du cadastre du Québec;"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 9.2.3 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL260003 pour une construction neuve.",
+   "excerpt": "9.2.3 Demande DPCOL260003, demande de permis pour une construction neuve, matricule 1427-69-1052-0-0050001, lot 6 219 789 du cadastre du Québec;"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 9.2.4 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL260002 pour un garage détaché.",
+   "excerpt": "9.2.4 Demande DPCOL260002, demande de permis pour la construction d’un garage détaché, matricule 1720-695649, lot 5 011 370 du cadastre du Québec;"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le point 9.2.5 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL240004 pour une construction neuve.",
+   "excerpt": "9.2.5 Demande DPCOL240004, demande de permis pour une construction neuve, matricule 1621-54-9153, lot\n5 011 310 du cadastre du Québec;"
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 9.2.1 de l'ordre du jour mentionne expressément la demande de renouvellement du permis COL230051 pour une construction neuve."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 9.2.2 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL250057 pour un garage détaché."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 9.2.3 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL260003 pour une construction neuve."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 9.2.4 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL260002 pour un garage détaché."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point 9.2.5 de l'ordre du jour prévoit le traitement de la demande de permis DPCOL240004 pour une construction neuve."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2099,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3435,
+   "outputTokens": 574,
+   "totalTokens": 4009
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1966
+  },
+  "inputSha256": "67ad3bfa47e23f04e6cc2407b299b2dcd4f2996f337c5a2430de0b1c86da5da0"
+ }
+}

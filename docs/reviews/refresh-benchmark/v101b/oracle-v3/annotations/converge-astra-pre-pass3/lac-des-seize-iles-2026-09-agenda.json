@@ -1,0 +1,61 @@
+{
+ "documentId": "lac-des-seize-iles-2026-09-agenda",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "0ded76906f0c25cb52cdce093c80a979c7821bdb5745041887419e5b2c5b5c6e",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 3.6, page 1, prévoit explicitement l’avis de motion du règlement 2026-08 sur l’occupation du domaine public municipal, sans attester une décision acquise.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 3.7, page 1, prévoit le dépôt du projet de règlement 2026-08, unité distincte de l’avis de motion conformément aux règles.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 5.4, page 1, inscrit la dérogation mineure DDM2026-058 au 252, chemin du Village à l’ordre du jour, ce qui atteste un examen prévu et non une autorisation acquise.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 5.5, page 1, prévoit l’adoption du règlement 2026-102-01 modifiant le règlement de lotissement concernant le calcul de la contribution pour fins de parcs, de terrains de jeux ou d’espaces naturels.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v2"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 3.6, page 1, prévoit explicitement l’avis de motion du règlement 2026-08 sur l’occupation du domaine public municipal, sans attester une décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 3.7, page 1, prévoit le dépôt du projet de règlement 2026-08, unité distincte de l’avis de motion conformément aux règles."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 5.4, page 1, inscrit la dérogation mineure DDM2026-058 au 252, chemin du Village à l’ordre du jour, ce qui atteste un examen prévu et non une autorisation acquise."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 5.5, page 1, prévoit l’adoption du règlement 2026-102-01 modifiant le règlement de lotissement concernant le calcul de la contribution pour fins de parcs, de terrains de jeux ou d’espaces naturels."
+  }
+ ]
+}

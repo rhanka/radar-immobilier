@@ -1,0 +1,281 @@
+{
+ "nodes": [
+  {
+   "id": "derogation-2025-0157",
+   "label": "Dérogation mineure 2025-0157 — abri d’auto et garage",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "status": "candidate",
+   "date": "2026-04-13",
+   "kind": "derogation",
+   "dossier": "2025-0157",
+   "decision": "approuvé",
+   "resolution": "2026-04-049",
+   "reglement_number": "02-2023",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-04-13",
+   "description": "Au 5580 rue Principale, autorisation d’un abri d’auto en cour avant rattaché au garage détaché et de l’agrandissement du garage détaché en cour arrière. Superficie demandée de 178,43 m² contre un maximum autorisé de 170,58 m².",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil autorise la demande de dérogation mineure numéro 2025-0157 afin\nd’autoriser l’implantation d’un abri d’auto en cours avant rattaché au garage détaché et",
+     "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+     "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-1"
+   ]
+  },
+  {
+   "id": "derogation-2026-0003",
+   "label": "Dérogation mineure 2026-0003 — conteneur refusé",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "status": "candidate",
+   "date": "2026-04-13",
+   "kind": "derogation",
+   "dossier": "2026-0003",
+   "decision": "refusé",
+   "resolution": "2026-04-050",
+   "reglement_number": "02-2023",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-04-13",
+   "description": "Refus de l’implantation d’un conteneur au 3791-3791A rang Sainte-Rose.",
+   "motif": "Non-conformité aux articles 7.3.2 et 6.1.3 du règlement de zonage, prohibant l’utilisation d’un conteneur à une autre fin que celle pour laquelle il a été conçu.",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "Que le conseil municipal refuse la demande de dérogation mineure numéro 2026-0003.",
+     "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+     "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-2"
+   ]
+  },
+  {
+   "id": "derogation-2026-0002",
+   "label": "Dérogation mineure 2026-0002 — largeur du lot 6 658 131",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "status": "candidate",
+   "date": "2026-04-13",
+   "kind": "derogation",
+   "dossier": "2026-0002",
+   "decision": "approuvé",
+   "resolution": "04-2026- 051",
+   "no_lot": "6658131",
+   "reglement_number": "03-2023",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-04-13",
+   "description": "Autorisation de la forme du lot avec une largeur sur la ligne avant sur la rue Maria de 30 mètres, contre 50 mètres exigés pour un lot riverain non desservi à l’intérieur du corridor riverain.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2026-0002\nafin d’autoriser la forme du lot tel que présentée, avec une largeur sur la ligne avant sur",
+     "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+     "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-3"
+   ]
+  },
+  {
+   "id": "derogation-2026-0005",
+   "label": "Dérogation mineure — clôture au 3741 rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "status": "needs_review",
+   "date": "2026-04-13",
+   "kind": "derogation",
+   "dossier": "2026-0005",
+   "decision": "approuvé",
+   "resolution": "2026-04-052",
+   "reglement_number": "02-2023",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-04-13",
+   "description": "Autorisation d’une clôture de 1,52 mètre en cour avant secondaire au lieu de 1,2 mètre. Discordance du numéro de dossier : le titre et les attendus indiquent 2026-0005, mais le dispositif indique 2025-0005.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2025-0005 afin de\npermettre la construction de la clôture d’une hauteur de 1,52 mètre en cours avant\nsecondaire.",
+     "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+     "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-4"
+   ]
+  },
+  {
+   "id": "bylaw-03-2026",
+   "label": "Règlement 03-2026 — modification du zonage U-41",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "status": "needs_review",
+   "numero": "03-2026",
+   "title": "Règlement modifiant le règlement de zonage 02-2023",
+   "objet": "Modifier le nombre de logements, le nombre d’étages et la hauteur permise pour une habitation multifamiliale dans la zone U-41. Le titre du point annonce un second projet, tandis que le dispositif mentionne l’adoption du règlement.",
+   "stage": "2e_projet",
+   "meetingDate": "2026-04-13",
+   "resolution": "2026-04-053",
+   "zone_cible": "U-41",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de\nzonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes",
+     "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+     "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 7,
+     "excerpt": "Que le conseil municipal de Notre-Dame-de-Lourdes adopte le règlement numéro 032026 modifiant le règlement de zonage 02-2023.",
+     "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+     "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-5"
+   ]
+  },
+  {
+   "id": "zone-u-41",
+   "label": "Zone U-41",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "status": "candidate",
+   "code": "U-41",
+   "bylaw": "02-2023",
+   "description": "Zone visée par une modification des normes relatives aux habitations multifamiliales.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "ATTENDU QUE le présent règlement vise à modifier le nombre de logements, le nombre\nd’étages et la hauteur permise pour une habitation multifamiliale dans la zone U-41 ;",
+     "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+     "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-5"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "bylaw-03-2026",
+   "target": "zone-u-41",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "evidence_refs": [
+    "ev-5"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "ATTENDU QUE le présent règlement vise à modifier le nombre de logements, le nombre\nd’étages et la hauteur permise pour une habitation multifamiliale dans la zone U-41 ;",
+     "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+     "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+     "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-1",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+   "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Que le conseil autorise la demande de dérogation mineure numéro 2025-0157 afin\nd’autoriser l’implantation d’un abri d’auto en cours avant rattaché au garage détaché et\nl’agrandissement du garage détaché en cours arrière."
+  },
+  {
+   "id": "ev-2",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+   "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "Que le conseil municipal refuse la demande de dérogation mineure numéro 2026-0003."
+  },
+  {
+   "id": "ev-3",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+   "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2026-0002\nafin d’autoriser la forme du lot tel que présentée, avec une largeur sur la ligne avant sur\nla rue Maria de 30 mètres."
+  },
+  {
+   "id": "ev-4",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+   "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2025-0005 afin de\npermettre la construction de la clôture d’une hauteur de 1,52 mètre en cours avant\nsecondaire."
+  },
+  {
+   "id": "ev-5",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+   "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de\nzonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes\nATTENDU QUE le règlement de zonage numéro 02-2023 est entré en vigueur le 13 avril\n2023 ;\nATTENDU QUE le Conseil municipal peut modifier son règlement de zonage numéro 022023 en vertu de la Loi sur l’aménagement et l’urbanisme (RLRQ, c. A-19.1) ;\nATTENDU QU’un avis de motion a été dûment donné lors de la séance ordinaire du\nconseil municipal tenue le 9 mars 2026, qu’un projet de règlement a été déposé lors de\ncette même séance ;\nATTENDU QUE le présent règlement vise à modifier le nombre de logements, le nombre\nd’étages et la hauteur permise pour une habitation multifamiliale dans la zone U-41 ;"
+  },
+  {
+   "id": "ev-6",
+   "source_file": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "rawRef": "raw/proces-verbaux-notre-dame-de-lourdes--joliette/cas/25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840.pdf",
+   "docSha": "25a2090deac2af0742b7766f3d74797e50482847c609cf2032bb1be893c78840",
+   "sourceUrl": "https://www.notredamedelourdes.ca/fichiersUpload/fichiers/20260526105916-pv-du-13-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "D’autoriser le directeur général et greffier-trésorier ou, en son absence, la directrice des\nfinances et greffière-trésorière adjointe, lors de la vente pour défaut de paiement de\ntaxes du 11 juin 2026, à enchérir, pour et au nom de la Municipalité, jusqu’à un montant\nmaximal équivalent au montant des taxes, en capital, intérêts, pénalité et frais, plus un\nmontant suffisant pour satisfaire à toute créance prioritaire ou hypothécaire d’un rang\nantérieur ou égal à celui des taxes municipales, et à acquérir, au nom de la Municipalité,\ntout immeuble de son territoire mis en vente."
+  }
+ ],
+ "input_tokens": 13300,
+ "output_tokens": 5600
+}

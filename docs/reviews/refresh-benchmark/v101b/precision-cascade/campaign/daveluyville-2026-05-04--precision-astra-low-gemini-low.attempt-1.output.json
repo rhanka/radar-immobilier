@@ -1,0 +1,500 @@
+{
+ "nodes": [
+  {
+   "id": "source",
+   "label": "Procès-verbal du conseil municipal de Daveluyville du 4 mai 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+   "date": "2026-05-04",
+   "municipality": "daveluyville",
+   "url": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil municipal qui s’est\ntenue le lundi 4 mai 2026 à 20h à la salle communautaire située au\n3, 9e Avenue à Daveluyville.",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-source"
+   ]
+  },
+  {
+   "id": "bylaw-154",
+   "label": "R-2026-154 — Assouplissement des normes de droits acquis",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "numero": "R-2026-154",
+   "title": "Règlement modifiant le Règlement de zonage R-2025-137 afin d’assouplir les normes de droits acquis",
+   "stage": "1er_projet",
+   "meetingDate": "2026-05-04",
+   "municipality": "daveluyville",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "CONSIDÉRANT QUE l’adoption de la demande de dérogation mineure\n2026-DM-002 est conditionnelle à l’entrée en vigueur du règlement\nnuméro R-2026-154 modifiant le règlement de zonage numéro",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 8,
+     "excerpt": "Le projet de règlement est également déposé, le tout, conformément aux\nexigences de l’article 356 de la Loi sur les cités et villes (RLRQ, chap. C 19)",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-dm002",
+    "ev-projet"
+   ]
+  },
+  {
+   "id": "dm002",
+   "label": "2026-DM-002 — Dérogation mineure reportée, 1200, route Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "date": "2026-05-04",
+   "meetingDate": "2026-05-04",
+   "municipality": "daveluyville",
+   "kind": "derogation",
+   "dossier": "2026-DM-002",
+   "decision": "reporté",
+   "resolution": "2026-05-86",
+   "no_lot": "4441659",
+   "reglement_number": "R-2026-154",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-05-04",
+   "description": "Report de l’adoption de la demande au 1200, route Principale jusqu’à l’adoption définitive de R-2026-154. Le préambule indique que la demande est conditionnelle à l’entrée en vigueur de ce règlement.",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Sur proposition de monsieur Alain Raymond, il est résolu de reporter\nl’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à\nl’adoption définitive du règlement numéro R-2026-154.",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-dm002"
+   ]
+  },
+  {
+   "id": "dm003",
+   "label": "2026-DM-003 — Dérogation mineure refusée, 425, 2e Rue",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "date": "2026-05-04",
+   "meetingDate": "2026-05-04",
+   "municipality": "daveluyville",
+   "kind": "derogation",
+   "dossier": "2026-DM-003",
+   "decision": "refusé",
+   "resolution": "2026-05-87",
+   "zone_ref": "R-07",
+   "no_lot": "4441171",
+   "reglement_number": "2025-137",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-05-04",
+   "description": "Refus de l’implantation d’un bâtiment commercial à 1,56 mètre de la ligne avant et 1,5 mètre de la ligne arrière, au lieu des marges réglementaires de 6 mètres. Le dossier demeure ouvert, sans frais, jusqu’à ce que les modifications recommandées par le CCU soient apportées et acceptées.",
+   "motif": "Possibilité de modifier l’implantation pour respecter la réglementation sans réduire la superficie; absence de préjudice sérieux; risques pour les propriétés voisines et la sécurité liés aux marges de recul.",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Sur proposition de madame Carole-Anne Provencher, il est résolu à\nl’unanimité de refuser la demande de dérogation mineure 2026-DM-003,\ntelle que présentée, et de maintenir le dossier ouvert, sans frai",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-dm003",
+    "ev-zone"
+   ]
+  },
+  {
+   "id": "zone-r07",
+   "label": "Zone R-07",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "code": "R-07",
+   "municipality": "daveluyville",
+   "usages_autorises": [
+    "vente au détail",
+    "services professionnels"
+   ],
+   "bylaw": "2025-137",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "CONSIDÉRANT QUE la demande vise à autoriser l’implantation d’un\nbâtiment à usage commercial dans la zone R-07, conformément au\nrèglement de zonage 2025-137,",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zone"
+   ]
+  },
+  {
+   "id": "motion-154",
+   "label": "R-2026-154 — Avis de motion",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "date": "2026-05-04",
+   "municipality": "daveluyville",
+   "resolution": "2026-05-88",
+   "reglement_number": "R-2026-154",
+   "etape": "avis_motion",
+   "etape_date": "2026-05-04",
+   "description": "Avis de motion d’un règlement modifiant R-2025-137 afin d’assouplir les normes des droits acquis.",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Avis est donné par monsieur Sébastien Bilodeau, qu’un conseiller\nprésentera ou fera présenter pour adoption, à une séance subséquente,\nun règlement modifiant le Règlement de zonage R-2025-137",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-motion"
+   ]
+  },
+  {
+   "id": "projet-154",
+   "label": "R-2026-154 — Dépôt du premier projet",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "date": "2026-05-04",
+   "municipality": "daveluyville",
+   "resolution": "2026-05-88",
+   "reglement_number": "R-2026-154",
+   "etape": "projet_reglement",
+   "etape_date": "2026-05-04",
+   "description": "Dépôt du premier projet de règlement assouplissant les normes des droits acquis; projet disponible sur le site Internet de la Ville.",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Le projet de règlement est également déposé, le tout, conformément aux\nexigences de l’article 356 de la Loi sur les cités et villes (RLRQ, chap. C 19)",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-projet",
+    "ev-dm002"
+   ]
+  },
+  {
+   "id": "signal-litige",
+   "label": "Litige de zonage 5803-23 — Mandat de remise en conformité",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "category": "litige_zonage",
+   "date": "2026-05-04",
+   "municipality": "daveluyville",
+   "resolution": "2026-05-85",
+   "scope": "local",
+   "description": "Mandat à DHC Avocats pour les démarches légales permettant la remise en conformité des lots 4441919 et 4441920. Les travaux requis par l’entente de règlement hors cours du 30 juin 2025 n’ont pas été effectués. Dossier de litige 5803-23; dossier judiciaire 415-17-001804-248.",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Sur proposition de monsieur Sébastien Bilodeau, il est résolu à\nl'unanimité de mandater la firme DHC Avocats afin d'effectuer les\ndémarches légales permettant la remise en conformité des lieux des lot",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-litige"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source",
+   "target": "bylaw-154",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "evidence_refs": [
+    "ev-dm002"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "CONSIDÉRANT QUE l’adoption de la demande de dérogation mineure\n2026-DM-002 est conditionnelle à l’entrée en vigueur du règlement\nnuméro R-2026-154 modifiant le règlement de zonage numéro",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "dm002",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "evidence_refs": [
+    "ev-dm002"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Sur proposition de monsieur Alain Raymond, il est résolu de reporter\nl’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à\nl’adoption définitive du règlement numéro R-2026-154.",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "dm003",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "evidence_refs": [
+    "ev-dm003"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Sur proposition de madame Carole-Anne Provencher, il est résolu à\nl’unanimité de refuser la demande de dérogation mineure 2026-DM-003,",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "dm003",
+   "target": "zone-r07",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "evidence_refs": [
+    "ev-zone"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "CONSIDÉRANT QUE la demande vise à autoriser l’implantation d’un\nbâtiment à usage commercial dans la zone R-07, conformément au\nrèglement de zonage 2025-137,",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "motion-154",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "evidence_refs": [
+    "ev-motion"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Avis est donné par monsieur Sébastien Bilodeau, qu’un conseiller\nprésentera ou fera présenter pour adoption, à une séance subséquente,",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "projet-154",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "evidence_refs": [
+    "ev-projet"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Le projet de règlement est également déposé, le tout, conformément aux\nexigences de l’article 356 de la Loi sur les cités et villes (RLRQ, chap. C 19)",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "signal-litige",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "evidence_refs": [
+    "ev-litige"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Sur proposition de monsieur Sébastien Bilodeau, il est résolu à\nl'unanimité de mandater la firme DHC Avocats afin d'effectuer les\ndémarches légales permettant la remise en conformité des lieux des lot",
+     "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+     "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+     "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-source",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+   "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil municipal qui s’est\ntenue le lundi 4 mai 2026 à 20h à la salle communautaire située au\n3, 9e Avenue à Daveluyville."
+  },
+  {
+   "id": "ev-dm002",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+   "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "CONSIDÉRANT QUE l’adoption de la demande de dérogation mineure\n2026-DM-002 est conditionnelle à l’entrée en vigueur du règlement\nnuméro R-2026-154 modifiant le règlement de zonage numéro\nR-2025-137 afin d’assouplir les normes applicables aux droits acquis;\nCONSIDÉRANT QUE l’avis de motion et le dépôt dudit premier projet de\nrèglement ont été donnés et effectués lors de la présente séance, au\npoint 10.5 de l’ordre du jour;\nRÉSOLUTION\nSur proposition de monsieur Alain Raymond, il est résolu de reporter\nl’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à\nl’adoption définitive du règlement numéro R-2026-154."
+  },
+  {
+   "id": "ev-zone",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+   "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "CONSIDÉRANT la demande de dérogation mineure 2026-DM-003\nconcernant le lot 4 441 171, en la Ville de Daveluyville;\nCONSIDÉRANT QUE la demande vise à autoriser l’implantation d’un\nbâtiment à usage commercial dans la zone R-07, conformément au\nrèglement de zonage 2025-137, lequel permet les usages commerciaux\nde vente au détail et de services professionnels;"
+  },
+  {
+   "id": "ev-dm003",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+   "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "Sur proposition de madame Carole-Anne Provencher, il est résolu à\nl’unanimité de refuser la demande de dérogation mineure 2026-DM-003,\ntelle que présentée, et de maintenir le dossier ouvert, sans frais, jusqu’à\nce que les modifications recommandées par le CCU aient été apportées et\nacceptées, et ce, afin d’assurer la conformité du projet à la réglementation\nen vigueur."
+  },
+  {
+   "id": "ev-motion",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+   "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "Avis est donné par monsieur Sébastien Bilodeau, qu’un conseiller\nprésentera ou fera présenter pour adoption, à une séance subséquente,\nun règlement modifiant le Règlement de zonage R-2025-137 afin\nd’assouplir les normes des droits acquis."
+  },
+  {
+   "id": "ev-projet",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+   "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "Le projet de règlement est également déposé, le tout, conformément aux\nexigences de l’article 356 de la Loi sur les cités et villes (RLRQ, chap. C 19)\net est disponible sur le site Internet de la Ville de Daveluyville à\nwww.ville.daveluyville.qc.ca."
+  },
+  {
+   "id": "ev-litige",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+   "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "Sur proposition de monsieur Sébastien Bilodeau, il est résolu à\nl'unanimité de mandater la firme DHC Avocats afin d'effectuer les\ndémarches légales permettant la remise en conformité des lieux des lots\n4 441 919 et 4 441 920 du cadastre du Québec que la directrice générale\nsoit autorisée à signer tout document nécessaire à la mise en œuvre de la\nprésente résolution et d’autoriser la trésorière à émettre les déboursés en\nconséquence."
+  },
+  {
+   "id": "ev-permis",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+   "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "L’assistante greffière dépose la liste des permis délivrés et le maire en fait\nun bref résumé. Pour le mois d’avril 2026, 11 permis ont été délivrés,\ntotalisant 236 000 $."
+  },
+  {
+   "id": "ev-infrastructures",
+   "source_file": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "rawRef": "raw/proces-verbaux-daveluyville/cas/0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7.pdf",
+   "docSha": "0337858e2af84020f51ca7c2b6b718a1c3eda98419f972bdc7dffecbbe9fe3e7",
+   "sourceUrl": "https://www.ville.daveluyville.qc.ca/medias/doc/pv/01-301_pv_2026-05-04.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "D’OCTROYER à la FQM le mandat de mise à jour du plan d’intervention en\nrenouvellement des conduites d’eau potable, d’égouts et des chaussées\nde la Ville de Daveluyville, conformément à l’offre de services datée du 14\navril 2026;"
+  }
+ ],
+ "input_tokens": 13500,
+ "output_tokens": 7800
+}

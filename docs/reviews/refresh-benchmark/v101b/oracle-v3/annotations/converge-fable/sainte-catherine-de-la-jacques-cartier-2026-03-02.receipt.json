@@ -1,0 +1,77 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "da997eb99eac78ef15f719aee853f9267939862b5438972042c00fcc82790f1b",
+ "inputSha256": "5087f1c5bf55f375f9cf2511382f611c95a33c15b6dad12a4a328b0639175273",
+ "responseSha256": "d7f903d933823d3398eee900ee2b39d32de484c4d279c7e731e65e435047e8a2",
+ "rc": 0,
+ "latencyMs": 59948,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "b143e01b-3393-4090-a542-314cfe202002",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 4921,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 47784,
+   "webSearchRequests": 0,
+   "costUSD": 1.20203475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 3486,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 47784,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 4921,
+  "output_tokens_details": {
+   "thinking_tokens": 3486
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 47784,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 4921,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 47784,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 47784
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 1.20203475,
+ "durationApiMs": 58049,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:38:01.227Z"
+}

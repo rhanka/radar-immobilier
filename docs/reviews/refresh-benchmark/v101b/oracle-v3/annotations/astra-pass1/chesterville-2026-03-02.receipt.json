@@ -1,0 +1,36 @@
+{
+ "documentId": "chesterville-2026-03-02",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "198b17e5073daba1661e08c99a7e5444950e9f2969efe22925972527213d5806",
+ "inputSha256": "fda651cd7115dd72162a90dfa648e3bf452257fb498181b3b680d6f1e9b20065",
+ "responseSha256": "9b8a254f6eda5dd7fef79f2f73d49249971cc19298f492fb1c21e8f3bd5e8f5d",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 32142,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2304,
+  "outputTokens": 991,
+  "totalTokens": 3295
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 32139,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:09:38.844Z"
+}

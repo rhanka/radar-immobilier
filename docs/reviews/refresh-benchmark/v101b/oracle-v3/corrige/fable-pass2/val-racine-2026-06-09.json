@@ -1,0 +1,234 @@
+{
+ "documentId": "val-racine-2026-06-09",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Vente des remises au plus offrant — prévue",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Vente des remises",
+    "page": 1,
+    "citation": "Vente des remises au plus offrant",
+    "anchor": "Vente des remises",
+    "spanStart": 1093,
+    "spanEnd": 1126
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Vente des remises au plus offrant — prévue",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Vente des remises",
+      "page": 1,
+      "citation": "Vente des remises au plus offrant",
+      "anchor": "Vente des remises",
+      "spanStart": 1093,
+      "spanEnd": 1126
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 6.2 prévoit une vente de bâtiments, soit un acte foncier explicite à retenir comme prévu et non comme déjà décidé."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure DM-2026-001 — 204, chemin de la Forêt-Enchantée — prévue",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-001",
+    "page": 1,
+    "citation": "DM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354",
+    "anchor": "DM-2026-001 – Demande",
+    "spanStart": 1137,
+    "spanEnd": 1217
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure DM-2026-001 — 204, chemin de la Forêt-Enchantée — prévue",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-001",
+      "page": 1,
+      "citation": "DM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354",
+      "anchor": "DM-2026-001 – Demande",
+      "spanStart": 1137,
+      "spanEnd": 1217
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 6.3 porte sur une demande de dérogation mineure explicitement identifiée; l’ordre du jour atteste son examen prévu, sans en établir l’issue."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "PIIA — 2996, chemin St-Léon, arbres — prévu",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2996, chemin St-Léon",
+    "page": 1,
+    "citation": "PIIA - Demande du 2996, chemin St-Léon (Arbres",
+    "anchor": "2996, chemin St-Léon",
+    "spanStart": 1228,
+    "spanEnd": 1275
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA — 2996, chemin St-Léon, arbres — prévu",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2996, chemin St-Léon",
+      "page": 1,
+      "citation": "PIIA - Demande du 2996, chemin St-Léon (Arbres",
+      "anchor": "2996, chemin St-Léon",
+      "spanStart": 1228,
+      "spanEnd": 1275
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 6.4 prévoit le traitement d’une demande de PIIA distincte, incluse même lorsqu’elle concerne seulement des arbres."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "PIIA — 2984, chemin St-Léon, arbres — prévu",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2984, chemin St-Léon",
+    "page": 1,
+    "citation": "PIIA - Demande du 2984, chemin St-Léon (Arbres",
+    "anchor": "2984, chemin St-Léon",
+    "spanStart": 1287,
+    "spanEnd": 1334
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA — 2984, chemin St-Léon, arbres — prévu",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2984, chemin St-Léon",
+      "page": 1,
+      "citation": "PIIA - Demande du 2984, chemin St-Léon (Arbres",
+      "anchor": "2984, chemin St-Léon",
+      "spanStart": 1287,
+      "spanEnd": 1334
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 6.5 prévoit une autre demande de PIIA explicitement localisée, qui constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement no 332 sur les installations septiques — prévu",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "332",
+    "page": 1,
+    "citation": "Projet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement tertiaire avec désinfestation par rayonnement ultraviolet",
+    "anchor": "Règlement no 332",
+    "spanStart": 1662,
+    "spanEnd": 1823
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement no 332 sur les installations septiques — prévu",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "332",
+      "page": 1,
+      "citation": "Projet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement tertiaire avec désinfestation par rayonnement ultraviolet",
+      "anchor": "Règlement no 332",
+      "spanStart": 1662,
+      "spanEnd": 1823
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’indication « A et D » associée au projet no 332 prévoit un avis de motion, que les règles imposent de distinguer du dépôt du projet."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement no 332 sur les installations septiques — prévu",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "332",
+    "page": 1,
+    "citation": "Projet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement tertiaire avec désinfestation par rayonnement ultraviolet",
+    "anchor": "Règlement no 332",
+    "spanStart": 1662,
+    "spanEnd": 1823
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement no 332 sur les installations septiques — prévu",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "332",
+      "page": 1,
+      "citation": "Projet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement tertiaire avec désinfestation par rayonnement ultraviolet",
+      "anchor": "Règlement no 332",
+      "spanStart": 1662,
+      "spanEnd": 1823
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.1 prévoit le dépôt d’un projet réglementaire explicite concernant les installations septiques; cette étape constitue une unité distincte de l’avis de motion."
+    }
+   ]
+  }
+ ]
+}

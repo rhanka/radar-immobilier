@@ -1,0 +1,61 @@
+{
+ "documentId": "lac-des-seize-iles-2026-09-agenda",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "0ded76906f0c25cb52cdce093c80a979c7821bdb5745041887419e5b2c5b5c6e",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 3.6 « Avis de motion – Projet de règlement numéro 2026-08 régissant l’occupation du domaine public municipal » figure page 1 ; un point d'ordre du jour est une unité prévue et l'avis de motion est distinct du projet.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 3.7 « Dépôt du projet de règlement numéro 2026-08 régissant l’occupation du domaine public municipal » figure page 1 ; le projet est une unité distincte de l'avis de motion selon les règles.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 5.4 « Dérogation mineure – 252, chemin du Village (DDM2026-058) » figure page 1 ; citation, étape et objet exacts, et l'ancre v1 cible directement l'identifiant DDM2026-058.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 5.5 « Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102… » figure page 1 ; l'ordre du jour atteste une adoption prévue, non acquise, conformément au label.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v2"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 3.6 « Avis de motion – Projet de règlement numéro 2026-08 régissant l’occupation du domaine public municipal » figure page 1 ; un point d'ordre du jour est une unité prévue et l'avis de motion est distinct du projet."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 3.7 « Dépôt du projet de règlement numéro 2026-08 régissant l’occupation du domaine public municipal » figure page 1 ; le projet est une unité distincte de l'avis de motion selon les règles."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 5.4 « Dérogation mineure – 252, chemin du Village (DDM2026-058) » figure page 1 ; citation, étape et objet exacts, et l'ancre v1 cible directement l'identifiant DDM2026-058."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 5.5 « Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102… » figure page 1 ; l'ordre du jour atteste une adoption prévue, non acquise, conformément au label."
+  }
+ ]
+}

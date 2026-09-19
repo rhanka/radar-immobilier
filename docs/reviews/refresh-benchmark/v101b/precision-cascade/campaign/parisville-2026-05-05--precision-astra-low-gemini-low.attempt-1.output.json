@@ -1,0 +1,299 @@
+{
+ "nodes": [
+  {
+   "id": "source-2026-05-05",
+   "label": "Procès-verbal du conseil de Parisville du 5 mai 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "status": "candidate",
+   "date": "2026-05-05",
+   "municipality": "parisville",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "url": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil de Parisville tenue à la salle du\nconseil, le mardi 5 mai 2026 à compter de 19 h 30.",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-source"
+   ]
+  },
+  {
+   "id": "bylaw-432-2026",
+   "label": "Règlement 432-2026 modifiant le règlement de zonage 308-2011",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "status": "candidate",
+   "numero": "432-2026",
+   "municipality": "parisville",
+   "date": "2026-05-05",
+   "meetingDate": "2026-05-05",
+   "stage": "adoption",
+   "resolution": "73-05-26",
+   "objet": "Modifier la terminologie liée à l’occupation et à l’entretien des bâtiments, ajuster les revêtements extérieurs, permettre les conteneurs comme structure de bâtiment principal, agrandissement ou bâtiment accessoire, et abroger l’annexe 3 sur les éléments susceptibles d’approbation référendaire.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011.",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zonage"
+   ]
+  },
+  {
+   "id": "bylaw-433-2026",
+   "label": "Règlement 433-2026 modifiant le règlement de lotissement 311-2011",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "status": "candidate",
+   "numero": "433-2026",
+   "municipality": "parisville",
+   "date": "2026-05-05",
+   "meetingDate": "2026-05-05",
+   "stage": "adoption",
+   "resolution": "74-05-26",
+   "objet": "Modifier le règlement de lotissement afin de permettre le remembrement d’un terrain.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011.",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-lotissement"
+   ]
+  },
+  {
+   "id": "signal-conduites",
+   "label": "Prêt temporaire pour la réfection des conduites de la route Principale",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "status": "candidate",
+   "category": "infrastructure",
+   "kind": "financement_reseau_eau",
+   "municipality": "parisville",
+   "date": "2026-05-05",
+   "resolution": "72-05-26",
+   "scope": "local",
+   "amount_cad": 6500000,
+   "description": "Autorisation de contracter un prêt temporaire de 6 500 000 $ auprès de Desjardins pour couvrir les dépenses de réfection des conduites de la route Principale, dans l’attente des subventions et de la part du MTMD.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "D’autoriser le directeur général et le maire à signer les documents\nnécessaires auprès du Centre financier aux entreprises de Desjardins afin\nde contracter un prêt temporaire de 6 500 000.00 $",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-conduites"
+   ]
+  },
+  {
+   "id": "signal-eau",
+   "label": "Signature de l’entente modifiée de fourniture d’eau potable",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "status": "candidate",
+   "category": "infrastructure",
+   "kind": "entente_eau_potable",
+   "municipality": "parisville",
+   "date": "2026-05-05",
+   "resolution": "78-05-26",
+   "description": "Autorisation de signer l’entente modifiée avec Deschaillons-sur-Saint-Laurent concernant la fourniture et la distribution d’eau potable. La date limite convenue pour la signature est le 1er juin 2026.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "D’autoriser la signature de l’entente modifiée entre la municipalité de\nParisville et la municipalité de Deschaillons-sur-Saint-Laurent concernant la",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-eau"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-2026-05-05",
+   "target": "bylaw-432-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011.",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-05-05",
+   "target": "bylaw-433-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "evidence_refs": [
+    "ev-lotissement"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011.",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-05-05",
+   "target": "signal-conduites",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "evidence_refs": [
+    "ev-conduites"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "D’autoriser le directeur général et le maire à signer les documents\nnécessaires auprès du Centre financier aux entreprises de Desjardins afin\nde contracter un prêt temporaire de 6 500 000.00 $",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-05-05",
+   "target": "signal-eau",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "evidence_refs": [
+    "ev-eau"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "D’autoriser la signature de l’entente modifiée entre la municipalité de\nParisville et la municipalité de Deschaillons-sur-Saint-Laurent concernant la",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-source",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil de Parisville tenue à la salle du\nconseil, le mardi 5 mai 2026 à compter de 19 h 30."
+  },
+  {
+   "id": "ev-zonage",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+  },
+  {
+   "id": "ev-lotissement",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+  },
+  {
+   "id": "ev-premier-projet",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "CONSIDÉRANT QUE le premier projet de règlement # 431-2026 modifiant\nle règlement de zonage a été adopté le 10 mars 2026;"
+  },
+  {
+   "id": "ev-conduites",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "D’autoriser le directeur général et le maire à signer les documents\nnécessaires auprès du Centre financier aux entreprises de Desjardins afin\nde contracter un prêt temporaire de 6 500 000.00 $ afin de couvrir les\ndépenses liées au projet de réfection des conduites de la route Principale."
+  },
+  {
+   "id": "ev-eau",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "D’autoriser la signature de l’entente modifiée entre la municipalité de\nParisville et la municipalité de Deschaillons-sur-Saint-Laurent concernant la\nfourniture et la distribution d’eau potable."
+  }
+ ],
+ "input_tokens": 10900,
+ "output_tokens": 4900
+}

@@ -1,0 +1,75 @@
+{
+ "documentId": "brownsburg-chatham-2026-03-10",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "85df3c220fd3f2dc07da54d47ff9f6f9533d5ffd52a2b3f3c2d6d496ce6090d4",
+ "inputSha256": "7b8716fb727adedbb499072ca316c9bc84d3587b08ed8f8308f2f26af62a236e",
+ "responseSha256": "437e07aff0067a6fc990ad17ec2a8cd4f906e884c7970d1189d9c67c0584e0b1",
+ "rc": 0,
+ "latencyMs": 183826,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "8757a123-9974-4190-b84e-c742b45e244f",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 16293,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 92358,
+   "webSearchRequests": 0,
+   "costUSD": 2.66250325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 15934,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 92358,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 16293,
+  "output_tokens_details": {
+   "thinking_tokens": 15934
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 92358,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 16293,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 92358,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 92358
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 2.66250325,
+ "durationApiMs": 181926,
+ "stderrTail": "",
+ "at": "2026-09-18T17:56:06.396Z"
+}

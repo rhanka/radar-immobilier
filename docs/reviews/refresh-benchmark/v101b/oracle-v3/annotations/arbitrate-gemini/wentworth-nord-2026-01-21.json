@@ -1,0 +1,88 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "557b52ba9da86b3f1031f029f78af38c91c213d7117f49d8249dcc742b14e92d",
+ "verificationSha256": "7f543aa70c7156b197fdcc3091ed8e8b4abd43122713ae7bb898ba58544166a3",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-01-3807 à la page 7 vise expressément l'entente fixant les modalités de suivi d'une servitude de conservation sur des lots précis; l'ancre de v1 (« SUIVI DE LA SERVITUDE DE CONSERVATION ») reflète fidèlement l'acte actuellement autorisé sans le confondre avec l'approbation antérieure de la servitude elle-même.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Entente de suivi de la servitude de conservation avec Éco-corridors laurentiens — terres des sentiers des Orphelins (lots 5 589 168 et autres)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "servitude de conservation sentiers Orphelins",
+      "page": 7,
+      "citation": "7.2 ENTENTE AVEC ÉCO-CORRIDORS LAURENTIENS POUR LE SUIVI DE LA SERVITUDE DE CONSERVATION DES TERRES DES SENTIERS DES ORPHELINS",
+      "anchor": "SUIVI DE LA SERVITUDE DE CONSERVATION",
+      "spanStart": 246,
+      "spanEnd": 372
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Entente de suivi de la servitude de conservation avec Éco-corridors laurentiens — terres des sentiers des Orphelins (lots 5 589 168 et autres)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "servitude de conservation sentiers Orphelins",
+      "page": 7,
+      "citation": "7.2 ENTENTE AVEC ÉCO-CORRIDORS LAURENTIENS POUR LE SUIVI DE LA SERVITUDE DE CONSERVATION DES TERRES DES SENTIERS DES ORPHELINS",
+      "anchor": "SERVITUDE DE CONSERVATION DES TERRES",
+      "spanStart": 246,
+      "spanEnd": 372
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-01-3807, page 7, autorise la signature de l’entente relative au suivi de la servitude de conservation des lots énumérés, un engagement foncier actuel distinct des approbations historiques rappelées."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Acte foncier explicite (servitude de conservation réelle et perpétuelle sur les lots 5 589 168, 6 312 664, etc.) dont l'entente de suivi est approuvée et la signature autorisée par la résolution 2026-01-3807 en page 7 ; v1 et v2 sont identiques hors ancre, toutes deux attestées, la version initiale est retenue."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v2",
+     "reason": "La résolution 2026-01-3807 à la page 7 approuve l'entente relative à la servitude de conservation, et l'ancre de la v2 cible précisément l'acte foncier en cause."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-3807 à la page 7 vise expressément l'entente fixant les modalités de suivi d'une servitude de conservation sur des lots précis; l'ancre de v1 (« SUIVI DE LA SERVITUDE DE CONSERVATION ») reflète fidèlement l'acte actuellement autorisé sans le confondre avec l'approbation antérieure de la servitude elle-même."
+  }
+ ]
+}

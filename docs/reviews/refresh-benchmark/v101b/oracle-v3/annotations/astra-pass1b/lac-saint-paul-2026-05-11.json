@@ -1,0 +1,125 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "0264906bcb79ef6b3633818a8b7e410484a90675ec2524a70f836e9143602dca",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Autorisation de location du garage au 366, rue Principale\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"366, rue Principale\",\n        \"page\": 5,\n        \"citation\": \"QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé\\nau 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du\\ncamion de déneigement\",\n        \"anchor\": \"366, rue Principale\"\n      },\n      \"reason\": \"L’autorisation de location est attestée, mais la citation doit conserver les sauts de ligne de la page 5 pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Consultation publique prévue le 13 juillet 2026 sur le règlement 079-2026 abrogeant la citation patrimoniale de l’église Saint-Paul\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"079-2026\",\n        \"page\": 6,\n        \"citation\": \"consultation publique soit tenue le 13 juillet 2026 à 18 h 30\\nà la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour\\nprésenter et expliquer le projet de règlement numéro 079-2026\",\n        \"anchor\": \"règlement numéro 079-2026\"\n      },\n      \"reason\": \"La consultation prévue est correctement décrite, mais la citation doit reproduire les sauts de ligne présents dans la résolution de la page 6.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"pratiques agroenvironnementales\",\n        \"page\": 6,\n        \"citation\": \"RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES\\nPRATIQUES AGROENVIRONNEMENTALES\",\n        \"anchor\": \"PRATIQUES AGROENVIRONNEMENTALES\"\n      },\n      \"reason\": \"La citation du titre doit conserver le saut de ligne après « LES » pour respecter l’exigence de transcription à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Dépôt de l’avis spécial d’abrogation du règlement 046-2023 citant l’église Saint-Paul comme immeuble patrimonial\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"046-2023\",\n        \"page\": 8,\n        \"citation\": \"le greffier-trésorier présente et dépose l’avis spécial relatif\\nà l’abrogation du règlement numéro 046-2023 établissant la citation de l’église\\nSaint-Paul à titre d’immeuble patrimonial\",\n        \"anchor\": \"règlement numéro 046-2023\"\n      },\n      \"reason\": \"Le dépôt de l’avis spécial est attesté, mais la citation courante remplace les sauts de ligne de la page 8 par des espaces et doit être rendue identique au texte.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Autorisation de location du garage au 366, rue Principale",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "366, rue Principale",
+    "page": 5,
+    "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé\nau 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du\ncamion de déneigement",
+    "anchor": "366, rue Principale"
+   },
+   "reason": "L’autorisation de location est attestée, mais la citation doit conserver les sauts de ligne de la page 5 pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Consultation publique prévue le 13 juillet 2026 sur le règlement 079-2026 abrogeant la citation patrimoniale de l’église Saint-Paul",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "079-2026",
+    "page": 6,
+    "citation": "consultation publique soit tenue le 13 juillet 2026 à 18 h 30\nà la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour\nprésenter et expliquer le projet de règlement numéro 079-2026",
+    "anchor": "règlement numéro 079-2026"
+   },
+   "reason": "La consultation prévue est correctement décrite, mais la citation doit reproduire les sauts de ligne présents dans la résolution de la page 6."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "pratiques agroenvironnementales",
+    "page": 6,
+    "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES\nPRATIQUES AGROENVIRONNEMENTALES",
+    "anchor": "PRATIQUES AGROENVIRONNEMENTALES"
+   },
+   "reason": "La citation du titre doit conserver le saut de ligne après « LES » pour respecter l’exigence de transcription à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Dépôt de l’avis spécial d’abrogation du règlement 046-2023 citant l’église Saint-Paul comme immeuble patrimonial",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "046-2023",
+    "page": 8,
+    "citation": "le greffier-trésorier présente et dépose l’avis spécial relatif\nà l’abrogation du règlement numéro 046-2023 établissant la citation de l’église\nSaint-Paul à titre d’immeuble patrimonial",
+    "anchor": "règlement numéro 046-2023"
+   },
+   "reason": "Le dépôt de l’avis spécial est attesté, mais la citation courante remplace les sauts de ligne de la page 8 par des espaces et doit être rendue identique au texte."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 5,
+   "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé\nau 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du\ncamion de déneigement"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 6,
+   "citation": "consultation publique soit tenue le 13 juillet 2026 à 18 h 30\nà la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour\nprésenter et expliquer le projet de règlement numéro 079-2026"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 6,
+   "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES\nPRATIQUES AGROENVIRONNEMENTALES"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "inconnu",
+   "page": 8,
+   "citation": "le greffier-trésorier présente et dépose l’avis spécial relatif\nà l’abrogation du règlement numéro 046-2023 établissant la citation de l’église\nSaint-Paul à titre d’immeuble patrimonial"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4,
+ "relabeledFrom": "astra-pass2"
+}

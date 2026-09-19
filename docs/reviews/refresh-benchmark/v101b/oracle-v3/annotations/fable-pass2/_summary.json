@@ -1,0 +1,15 @@
+{
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "done": 45,
+ "skipped": 55,
+ "notReady": 0,
+ "failed": 0,
+ "noCall": 0,
+ "stopped": null,
+ "at": "2026-09-18T17:59:14.149Z"
+}

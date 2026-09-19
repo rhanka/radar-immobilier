@@ -1,0 +1,81 @@
+{
+ "documentId": "warden-2026-04-08",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c8a31d25a47bb2fca7dc9c87cb1fdeca738889ce0bacd1e88c4a63c8e391eaa4",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le texte de la page 4 atteste « Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance ultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184 » (modification du règlement de zonage 2017-127, TIAM) ; étape avis_motion distincte du projet selon la règle « Avis de motion et projet actuels séparés ».\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-047 (page 4) porte « il est résolu à l'unanimité des membres présents d'adopter le projet de règlement numéro 2026-184, tel que déposé » ; étape projet_reglement, unité distincte de l'avis de motion.\"},{\"item\":\"i03\",\"choice\":\"v2\",\"reason\":\"La résolution 2026-04-051 (page 6) accepte un bail commercial pour l'espace de bureau au 1-5383, rue Foster, à Waterloo (relocalisation temporaire des bureaux municipaux) — acte foncier non résidentiel inclus par la règle « petits PIIA et actes fonciers, même non résidentiels » ; l'étape « adoption » de v1 est réservée aux règlements, donc « inconnu » est l'étape exacte.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-04-062 en page 12 : le conseil « adopte le règlement numéro 2026-180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la délégation de certains mandats au comité consultatif d'urbanisme » » ; l'avis de motion du 11 mars 2026 n'est qu'un rappel historique et ne crée pas d'unité supplémentaire.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'en-tête « 10.3. ADOPTION DU RÈGLEMENT NUMÉRO 2026-181 RELATIF À LA DÉMOLITION D'IMMEUBLES » figure en page 12 et la résolution 2026-04-063 adopte ce règlement ; étape adoption, objet réglementaire d'urbanisme explicite.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-04-064 en page 13 : le conseil « adopte le règlement numéro 2026-182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments » » ; étape adoption, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v2"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le texte de la page 4 atteste « Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance ultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184 » (modification du règlement de zonage 2017-127, TIAM) ; étape avis_motion distincte du projet selon la règle « Avis de motion et projet actuels séparés »."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-047 (page 4) porte « il est résolu à l'unanimité des membres présents d'adopter le projet de règlement numéro 2026-184, tel que déposé » ; étape projet_reglement, unité distincte de l'avis de motion."
+  },
+  {
+   "item": "i03",
+   "choice": "v2",
+   "reason": "La résolution 2026-04-051 (page 6) accepte un bail commercial pour l'espace de bureau au 1-5383, rue Foster, à Waterloo (relocalisation temporaire des bureaux municipaux) — acte foncier non résidentiel inclus par la règle « petits PIIA et actes fonciers, même non résidentiels » ; l'étape « adoption » de v1 est réservée aux règlements, donc « inconnu » est l'étape exacte."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Résolution 2026-04-062 en page 12 : le conseil « adopte le règlement numéro 2026-180 intitulé « Règlement relatif à la gestion des immeubles patrimoniaux et à la délégation de certains mandats au comité consultatif d'urbanisme » » ; l'avis de motion du 11 mars 2026 n'est qu'un rappel historique et ne crée pas d'unité supplémentaire."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'en-tête « 10.3. ADOPTION DU RÈGLEMENT NUMÉRO 2026-181 RELATIF À LA DÉMOLITION D'IMMEUBLES » figure en page 12 et la résolution 2026-04-063 adopte ce règlement ; étape adoption, objet réglementaire d'urbanisme explicite."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Résolution 2026-04-064 en page 13 : le conseil « adopte le règlement numéro 2026-182 intitulé « Règlement relatif à l'occupation et à l'entretien des bâtiments » » ; étape adoption, citation et page exactes."
+  }
+ ]
+}

@@ -1,0 +1,81 @@
+{
+ "documentId": "bolton-est-2026-01-12",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "f971f04a3adffc7cd458fc798258875999b81d9567226b126177a8929ad29eff",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 7.3, page 1, prévoit une dérogation mineure pour le lot 6 116 054 au 4 Impasse des Châtelains, conformément à la règle des points d’ordre du jour comme unités prévues.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 7.4, page 1, prévoit une demande de PIIA pour le lot 4 860 343 au 5 rue Castel, sans attester de décision acquise.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 7.5, page 1, prévoit une demande de PIIA pour le lot 4 860 346 au 7 rue Castel, ce qui atteste l’objet, l’étape et la citation proposés.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 7.6, page 1, prévoit une demande de PIIA pour le lot 4 860 502 au 19 rue Horse Shoe, conformément à la règle des points d’ordre du jour comme unités prévues.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 7.7, page 1, prévoit une demande de PIIA pour le lot 6 465 655 au 74 rue de Lac-Spring, sans attester de décision acquise.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 7.8, page 1, prévoit explicitement une demande de PIIA pour le lot 6 668 264-P, ce qui confirme l’unité proposée comme examen prévu.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 7.3, page 1, prévoit une dérogation mineure pour le lot 6 116 054 au 4 Impasse des Châtelains, conformément à la règle des points d’ordre du jour comme unités prévues."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 7.4, page 1, prévoit une demande de PIIA pour le lot 4 860 343 au 5 rue Castel, sans attester de décision acquise."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 7.5, page 1, prévoit une demande de PIIA pour le lot 4 860 346 au 7 rue Castel, ce qui atteste l’objet, l’étape et la citation proposés."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 7.6, page 1, prévoit une demande de PIIA pour le lot 4 860 502 au 19 rue Horse Shoe, conformément à la règle des points d’ordre du jour comme unités prévues."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 7.7, page 1, prévoit une demande de PIIA pour le lot 6 465 655 au 74 rue de Lac-Spring, sans attester de décision acquise."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 7.8, page 1, prévoit explicitement une demande de PIIA pour le lot 6 668 264-P, ce qui confirme l’unité proposée comme examen prévu."
+  }
+ ]
+}

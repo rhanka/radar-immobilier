@@ -1,0 +1,111 @@
+{
+ "documentId": "contrecoeur-2026-04-14",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "f0baf2f9afc3a69c641ca6cc86c1cff2346c391e6151dc571335006642175964",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v2\",\"reason\":\"L'avis de motion pour le Règlement U-102 est explicitement donné au texte de la page 4 avec la formule exacte citée.\"},{\"item\":\"i02\",\"choice\":\"v2\",\"reason\":\"La présentation et le dépôt du projet de règlement U-102 sont constatés à la page 4, distincts de l'avis de motion conformément aux règles.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'adoption du second projet de règlement U-100-1 est adoptée par la résolution 2026-04-057 à la page 5.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement U-101 de contrôle intérimaire est adoptée par la résolution 2026-04-058 à la page 5.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'approbation de la demande de PIIA 2026-009 est adoptée par la résolution 2026-04-071 à la page 13.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA 2026-012 est adoptée par la résolution 2026-04-072 à la page 14.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"L'approbation de la dérogation mineure 2026-011 est adoptée par la résolution 2026-04-073 à la page 14.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'approbation de la dérogation mineure 2026-020 est adoptée par la résolution 2026-04-074 à la page 15.\"},{\"item\":\"i09\",\"choice\":\"absent\",\"reason\":\"Une autorisation de signature d'un protocole d'entente pour des infrastructures de génie civil n'est ni un objet réglementaire d'urbanisme ni un acte foncier.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v2"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v2"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v2",
+   "reason": "L'avis de motion pour le Règlement U-102 est explicitement donné au texte de la page 4 avec la formule exacte citée."
+  },
+  {
+   "item": "i02",
+   "choice": "v2",
+   "reason": "La présentation et le dépôt du projet de règlement U-102 sont constatés à la page 4, distincts de l'avis de motion conformément aux règles."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'adoption du second projet de règlement U-100-1 est adoptée par la résolution 2026-04-057 à la page 5."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'adoption du règlement U-101 de contrôle intérimaire est adoptée par la résolution 2026-04-058 à la page 5."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'approbation de la demande de PIIA 2026-009 est adoptée par la résolution 2026-04-071 à la page 13."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA 2026-012 est adoptée par la résolution 2026-04-072 à la page 14."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L'approbation de la dérogation mineure 2026-011 est adoptée par la résolution 2026-04-073 à la page 14."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'approbation de la dérogation mineure 2026-020 est adoptée par la résolution 2026-04-074 à la page 15."
+  },
+  {
+   "item": "i09",
+   "choice": "absent",
+   "reason": "Une autorisation de signature d'un protocole d'entente pour des infrastructures de génie civil n'est ni un objet réglementaire d'urbanisme ni un acte foncier."
+  }
+ ]
+}

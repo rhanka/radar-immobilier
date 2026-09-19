@@ -1,0 +1,13 @@
+{
+ "id": "parisville-2026-05-05",
+ "rc": 0,
+ "latencyMs": 25178,
+ "inputTokens": 2,
+ "outputTokens": 1917,
+ "cacheRead": 0,
+ "cacheCreate": 11139,
+ "costUsd": 0.166678,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 3471
+}

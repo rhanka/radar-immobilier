@@ -1,0 +1,35 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "49ecb9f65d5c60f55923c503dd3f26075c96cce7c8c8f3c1c6529748468b4ba3",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3604,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 11858,
+   "outputTokens": 1016,
+   "totalTokens": 12874
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3460
+  },
+  "inputSha256": "7f8a69f57c99f3a9150c0020cb798ce619438000166071c74dff16a32ed38be1"
+ },
+ "at": "2026-09-19T03:22:38.504Z"
+}

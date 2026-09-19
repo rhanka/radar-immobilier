@@ -1,0 +1,361 @@
+{
+ "documentId": "cowansville-2026-05-05",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6b2f0f42478cda0df13e9a0ef53603935fecd69407b87058a8c18a85e4cf5120",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 250-05-2026 autorise à la page 8 la mainlevée et la renonciation au droit de préemption de l’acte 28 261 535, constituant un acte foncier explicite.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"À la page 10, Alain Daigle donne expressément avis de motion du règlement 1571-08-2026 relatif aux PIIA.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La page 11 atteste l’adoption du projet de règlement 1571-08-2026, étape distincte de son avis de motion.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 257-05-2026, à la page 11, atteste l’avis de motion du règlement de zonage 1841-53-2026 concernant notamment les zones Rc-23, Cbb-1 et Ib-1.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La résolution 258-05-2026 adopte explicitement le premier projet de règlement de zonage 1841-53-2026 à la page 12.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"À la page 12, la résolution 259-05-2026 présente l’avis de motion du règlement de lotissement 1842-06-2026.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La page 13 atteste l’adoption du projet de règlement de lotissement 1842-06-2026, distincte de l’avis de motion.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"La page 14 approuve la dérogation mineure 2026-006 au 518 rue Principale avec des conditions précisées aux pages 14 et 15.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"La page 15 approuve expressément la dérogation mineure 2026-034 au 111 rue du Muscadet, lot 4 445 225.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"La page 16 approuve sous conditions le PIIA 2026-003 au 518 rue Principale pour l’affichage et les aménagements du service au volant.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"La résolution 265-05-2026 approuve à la page 16 le PIIA 2025-087 au 1529 rue du Sud pour de l’affichage et des travaux de peinture.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"La page 17 refuse explicitement le PIIA 2026-029 pour un garage au 295 rue d’Ontario, conformément à la règle voulant que les refus restent des refus.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"La page 17 approuve explicitement le PIIA 2026-043 avec le PIIA 2026-047, les deux demandes nommées pouvant constituer des unités distinctes.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"Le PIIA 2026-047 est expressément approuvé à la page 17 dans la résolution groupée concernant les deux demandes du 1600 rue du Sud.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"La page 18 approuve sous trois conditions le PIIA 2026-040 relatif à l’enseigne du 101 rue Albert, local 1002.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"La page 18 approuve le PIIA 2026-013 pour une réfection majeure et un agrandissement de la résidence au 454 rue Principale.\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"La décision citée à la page 18 approuve le PIIA 2026-042 pour le retrait de la marquise au 419 rue de la Rivière.\"},{\"item\":\"i18\",\"choice\":\"v1\",\"reason\":\"La page 19 approuve le PIIA 2026-039 concernant les modifications du projet résidentiel Le Nordik aux 141 à 153 rue du Nord.\"},{\"item\":\"i19\",\"choice\":\"v1\",\"reason\":\"La page 19 approuve le PIIA 2026-041 pour l’installation d’une enseigne au 111 rue William, petit PIIA inclus dans le rappel.\"},{\"item\":\"i20\",\"choice\":\"v1\",\"reason\":\"La page 20 approuve sous conditions le PIIA 2026-044 pour un bâtiment accessoire au 191 rue Pauline-Julien, notamment avec un toit à deux pentes uniquement.\"},{\"item\":\"i21\",\"choice\":\"v1\",\"reason\":\"La page 20 approuve le PIIA 2026-045 pour un bâtiment accessoire sans appentis au 192 rue Albert-Millaire, sous condition d’un seul matériau de revêtement.\"},{\"item\":\"i22\",\"choice\":\"v1\",\"reason\":\"La page 21 approuve sous conditions le PIIA 2026-046 pour transformer une partie de la terrasse du 82 rue Pine en véranda quatre saisons.\"},{\"item\":\"i23\",\"choice\":\"v1\",\"reason\":\"La page 21 approuve sous conditions le PIIA 2026-051 pour des enclos à bacs sur les rues Pauline-Julien et Albert-Millaire.\"},{\"item\":\"i24\",\"choice\":\"v1\",\"reason\":\"La page 22 refuse explicitement le PIIA 2026-035 visant un immeuble de neuf logements sur le lot 3 356 557 à l’angle des rues Bernard et du Nord.\"},{\"item\":\"i25\",\"choice\":\"v1\",\"reason\":\"La page 22 refuse la modification du PIIA 2025-120 concernant les deux immeubles de la rue Paul-Hébert, malgré la formule générale relative à la durée d’autorisation.\"},{\"item\":\"i26\",\"choice\":\"v1\",\"reason\":\"La page 23 approuve la modification du PIIA 2025-117 au 1447 rue du Sud concernant les dimensions et l’implantation de l’immeuble.\"},{\"item\":\"i27\",\"choice\":\"v1\",\"reason\":\"La résolution 280-05-2026 approuve à la page 23 le rendu architectural du dossier CDEMO 2025-116, sans constituer une nouvelle autorisation de démolition.\"},{\"item\":\"i28\",\"choice\":\"v1\",\"reason\":\"La page 25 exige une contribution de 14 500 $ avant la délivrance du permis de lotissement pour le lot projeté 6 725 842.\"},{\"item\":\"i29\",\"choice\":\"v1\",\"reason\":\"La page 25 autorise la signature de l’acte de rétrocession du lot 4 621 525 à la Ville, acte foncier actuel distinct des rappels historiques.\"},{\"item\":\"i30\",\"choice\":\"v1\",\"reason\":\"La page 27 entérine l’avenant 1 et autorise sa signature avec Village Scolaire inc. pour les infrastructures du développement domiciliaire modifié.\"},{\"item\":\"i31\",\"choice\":\"v1\",\"reason\":\"La page 31 autorise une dépense comprenant explicitement l’acquisition de servitudes de passage derrière les propriétés de la rue Jules-Monast, acte foncier inclus malgré son contexte de drainage.\"},{\"item\":\"i32\",\"choice\":\"absent\",\"reason\":\"La résolution 298-05-2026 concerne seulement un bail saisonnier d’exploitation de cantine dans un équipement de loisirs, relevant de la gestion des loisirs exclue du rappel.\"},{\"item\":\"i33\",\"choice\":\"absent\",\"reason\":\"La résolution 299-05-2026 concerne le renouvellement d’un bail d’exploitation de cantine et l’accès aux installations sanitaires d’un parc, relevant de la gestion des loisirs exclue du rappel.\"},{\"item\":\"i34\",\"choice\":\"v1\",\"reason\":\"La page 42 adopte explicitement le second projet de PPCMOI 2026-032 au 245 rue Principale pour quatre logements touristiques au total et la régularisation du stationnement, sans adoption définitive du PPCMOI.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  },
+  {
+   "item": "i22",
+   "unitId": "u22",
+   "current": "v1"
+  },
+  {
+   "item": "i23",
+   "unitId": "u23",
+   "current": "v1"
+  },
+  {
+   "item": "i24",
+   "unitId": "u24",
+   "current": "v1"
+  },
+  {
+   "item": "i25",
+   "unitId": "u25",
+   "current": "v1"
+  },
+  {
+   "item": "i26",
+   "unitId": "u26",
+   "current": "v1"
+  },
+  {
+   "item": "i27",
+   "unitId": "u27",
+   "current": "v1"
+  },
+  {
+   "item": "i28",
+   "unitId": "u28",
+   "current": "v1"
+  },
+  {
+   "item": "i29",
+   "unitId": "u29",
+   "current": "v1"
+  },
+  {
+   "item": "i30",
+   "unitId": "u30",
+   "current": "v1"
+  },
+  {
+   "item": "i31",
+   "unitId": "u31",
+   "current": "v1"
+  },
+  {
+   "item": "i32",
+   "unitId": "u32",
+   "current": "v1"
+  },
+  {
+   "item": "i33",
+   "unitId": "u33",
+   "current": "v1"
+  },
+  {
+   "item": "i34",
+   "unitId": "u34",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 250-05-2026 autorise à la page 8 la mainlevée et la renonciation au droit de préemption de l’acte 28 261 535, constituant un acte foncier explicite."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "À la page 10, Alain Daigle donne expressément avis de motion du règlement 1571-08-2026 relatif aux PIIA."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 11 atteste l’adoption du projet de règlement 1571-08-2026, étape distincte de son avis de motion."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 257-05-2026, à la page 11, atteste l’avis de motion du règlement de zonage 1841-53-2026 concernant notamment les zones Rc-23, Cbb-1 et Ib-1."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 258-05-2026 adopte explicitement le premier projet de règlement de zonage 1841-53-2026 à la page 12."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "À la page 12, la résolution 259-05-2026 présente l’avis de motion du règlement de lotissement 1842-06-2026."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La page 13 atteste l’adoption du projet de règlement de lotissement 1842-06-2026, distincte de l’avis de motion."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 14 approuve la dérogation mineure 2026-006 au 518 rue Principale avec des conditions précisées aux pages 14 et 15."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La page 15 approuve expressément la dérogation mineure 2026-034 au 111 rue du Muscadet, lot 4 445 225."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La page 16 approuve sous conditions le PIIA 2026-003 au 518 rue Principale pour l’affichage et les aménagements du service au volant."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "La résolution 265-05-2026 approuve à la page 16 le PIIA 2025-087 au 1529 rue du Sud pour de l’affichage et des travaux de peinture."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "La page 17 refuse explicitement le PIIA 2026-029 pour un garage au 295 rue d’Ontario, conformément à la règle voulant que les refus restent des refus."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "La page 17 approuve explicitement le PIIA 2026-043 avec le PIIA 2026-047, les deux demandes nommées pouvant constituer des unités distinctes."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Le PIIA 2026-047 est expressément approuvé à la page 17 dans la résolution groupée concernant les deux demandes du 1600 rue du Sud."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "La page 18 approuve sous trois conditions le PIIA 2026-040 relatif à l’enseigne du 101 rue Albert, local 1002."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "La page 18 approuve le PIIA 2026-013 pour une réfection majeure et un agrandissement de la résidence au 454 rue Principale."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "La décision citée à la page 18 approuve le PIIA 2026-042 pour le retrait de la marquise au 419 rue de la Rivière."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "La page 19 approuve le PIIA 2026-039 concernant les modifications du projet résidentiel Le Nordik aux 141 à 153 rue du Nord."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "La page 19 approuve le PIIA 2026-041 pour l’installation d’une enseigne au 111 rue William, petit PIIA inclus dans le rappel."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "La page 20 approuve sous conditions le PIIA 2026-044 pour un bâtiment accessoire au 191 rue Pauline-Julien, notamment avec un toit à deux pentes uniquement."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "La page 20 approuve le PIIA 2026-045 pour un bâtiment accessoire sans appentis au 192 rue Albert-Millaire, sous condition d’un seul matériau de revêtement."
+  },
+  {
+   "item": "i22",
+   "choice": "v1",
+   "reason": "La page 21 approuve sous conditions le PIIA 2026-046 pour transformer une partie de la terrasse du 82 rue Pine en véranda quatre saisons."
+  },
+  {
+   "item": "i23",
+   "choice": "v1",
+   "reason": "La page 21 approuve sous conditions le PIIA 2026-051 pour des enclos à bacs sur les rues Pauline-Julien et Albert-Millaire."
+  },
+  {
+   "item": "i24",
+   "choice": "v1",
+   "reason": "La page 22 refuse explicitement le PIIA 2026-035 visant un immeuble de neuf logements sur le lot 3 356 557 à l’angle des rues Bernard et du Nord."
+  },
+  {
+   "item": "i25",
+   "choice": "v1",
+   "reason": "La page 22 refuse la modification du PIIA 2025-120 concernant les deux immeubles de la rue Paul-Hébert, malgré la formule générale relative à la durée d’autorisation."
+  },
+  {
+   "item": "i26",
+   "choice": "v1",
+   "reason": "La page 23 approuve la modification du PIIA 2025-117 au 1447 rue du Sud concernant les dimensions et l’implantation de l’immeuble."
+  },
+  {
+   "item": "i27",
+   "choice": "v1",
+   "reason": "La résolution 280-05-2026 approuve à la page 23 le rendu architectural du dossier CDEMO 2025-116, sans constituer une nouvelle autorisation de démolition."
+  },
+  {
+   "item": "i28",
+   "choice": "v1",
+   "reason": "La page 25 exige une contribution de 14 500 $ avant la délivrance du permis de lotissement pour le lot projeté 6 725 842."
+  },
+  {
+   "item": "i29",
+   "choice": "v1",
+   "reason": "La page 25 autorise la signature de l’acte de rétrocession du lot 4 621 525 à la Ville, acte foncier actuel distinct des rappels historiques."
+  },
+  {
+   "item": "i30",
+   "choice": "v1",
+   "reason": "La page 27 entérine l’avenant 1 et autorise sa signature avec Village Scolaire inc. pour les infrastructures du développement domiciliaire modifié."
+  },
+  {
+   "item": "i31",
+   "choice": "v1",
+   "reason": "La page 31 autorise une dépense comprenant explicitement l’acquisition de servitudes de passage derrière les propriétés de la rue Jules-Monast, acte foncier inclus malgré son contexte de drainage."
+  },
+  {
+   "item": "i32",
+   "choice": "absent",
+   "reason": "La résolution 298-05-2026 concerne seulement un bail saisonnier d’exploitation de cantine dans un équipement de loisirs, relevant de la gestion des loisirs exclue du rappel."
+  },
+  {
+   "item": "i33",
+   "choice": "absent",
+   "reason": "La résolution 299-05-2026 concerne le renouvellement d’un bail d’exploitation de cantine et l’accès aux installations sanitaires d’un parc, relevant de la gestion des loisirs exclue du rappel."
+  },
+  {
+   "item": "i34",
+   "choice": "v1",
+   "reason": "La page 42 adopte explicitement le second projet de PPCMOI 2026-032 au 245 rue Principale pour quatre logements touristiques au total et la régularisation du stationnement, sans adoption définitive du PPCMOI."
+  }
+ ]
+}

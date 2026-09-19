@@ -1,0 +1,38 @@
+{
+ "documentId": "stoneham-et-tewkesbury-2026-06-08",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fb01cb7d80ff17759f3653fc7e8c1f3a5ef0c6b1da2235b2a3180d8ffe5873d5",
+ "verificationSha256": "bc645c72aac292ef5f26fbcf912650767d1d7735b5ba5d5d99fd759e709edfd0",
+ "inputSha256": "b953912a991f9aa3cca21650e296ad1f4138b9ffbdbc852bd09202cea744e3cf",
+ "responseSha256": "aaf41b7fc6e9c5a1abc2fd27fc825a177a1fee50560d9afef1d13b116c23b621",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 94689,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 10683,
+  "outputTokens": 354,
+  "totalTokens": 45046,
+  "thoughtsTokenCount": 34009
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 94509,
+  "requestId": null
+ },
+ "at": "2026-09-18T22:48:50.390Z"
+}

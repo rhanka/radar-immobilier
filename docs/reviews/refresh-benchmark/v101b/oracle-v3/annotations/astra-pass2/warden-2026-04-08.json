@@ -1,0 +1,172 @@
+{
+ "documentId": "warden-2026-04-08",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "c8a31d25a47bb2fca7dc9c87cb1fdeca738889ce0bacd1e88c4a63c8e391eaa4",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 2026-184 intégrant les dispositions relatives aux TIAM\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"2026-184\",\n        \"page\": 4,\n        \"citation\": \"Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance\\nultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184\",\n        \"anchor\": \"Règlement numéro 2026-184\"\n      },\n      \"reason\": \"L'unité est valide, mais la citation doit conserver le saut de ligne après « séance » pour être recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Dépôt et adoption du projet de règlement 2026-184 relatif aux TIAM\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"2026-184\",\n        \"page\": 4,\n        \"citation\": \"il est résolu à l'unanimité des membres présents d'adopter le projet de\\nrèglement numéro 2026-184, tel que déposé\",\n        \"anchor\": \"règlement numéro 2026-184\"\n      },\n      \"reason\": \"La citation doit être reproduite à l'identique, notamment avec le saut de ligne entre « projet de » et « règlement numéro 2026-184 ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Acceptation du bail commercial pour la location d'un espace de bureau au 1-5383, rue Foster, à Waterloo (relocalisation temporaire des bureaux municipaux)\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"1-5383, rue Foster\",\n        \"page\": 6,\n        \"citation\": \"accepte le bail commercial à intervenir entre\\nGroupe RSE inc. et la Municipalité de Warden pour la location d'un espace de\\nbureau situé au 1-5383, rue Foster, à Waterloo\",\n        \"anchor\": \"1-5383, rue Foster\"\n      },\n      \"reason\": \"La citation de l'acceptation du bail doit conserver les sauts de ligne après « entre » et « espace de », conformément à l'exigence de reproduction à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-180 sur les immeubles patrimoniaux et les mandats du CCU\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-180\",\n        \"page\": 12,\n        \"citation\": \"10.2. ADOPTION DU RÈGLEMENT 2026-180 RELATIF À LA GESTION DES\\nIMMEUBLES PATRIMONIAUX ET À LA DÉLÉGATION DE CERTAINS\\nMANDATS AU COMITÉ CONSULTATIF D'URBANISME\",\n        \"anchor\": \"RÈGLEMENT 2026-180\"\n      },\n      \"reason\": \"L'adoption est correctement identifiée, mais sa citation doit reprendre les deux sauts de ligne du titre de la résolution pour être identique au document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-181 relatif à la démolition d'immeubles\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-181\",\n        \"page\": 12,\n        \"citation\": \"10.3. ADOPTION DU RÈGLEMENT NUMÉRO 2026-181 RELATIF À LA\\nDÉMOLITION D'IMMEUBLES\",\n        \"anchor\": \"RÈGLEMENT NUMÉRO 2026-181\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne avant « DÉMOLITION D'IMMEUBLES » pour respecter la règle de copie à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-182 relatif à l'occupation et à l'entretien des bâtiments\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-182\",\n        \"page\": 13,\n        \"citation\": \"10.4. ADOPTION DU RÈGLEMENT 2026-182 RELATIF À L'OCCUPATION ET À\\nL'ENTRETIEN DES BÂTIMENTS\",\n        \"anchor\": \"RÈGLEMENT 2026-182\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne avant « L'ENTRETIEN DES BÂTIMENTS » pour être recopiée à l'identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Avis de motion du règlement 2026-184 intégrant les dispositions relatives aux TIAM",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2026-184",
+    "page": 4,
+    "citation": "Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance\nultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184",
+    "anchor": "Règlement numéro 2026-184"
+   },
+   "reason": "L'unité est valide, mais la citation doit conserver le saut de ligne après « séance » pour être recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Dépôt et adoption du projet de règlement 2026-184 relatif aux TIAM",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2026-184",
+    "page": 4,
+    "citation": "il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé",
+    "anchor": "règlement numéro 2026-184"
+   },
+   "reason": "La citation doit être reproduite à l'identique, notamment avec le saut de ligne entre « projet de » et « règlement numéro 2026-184 »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Acceptation du bail commercial pour la location d'un espace de bureau au 1-5383, rue Foster, à Waterloo (relocalisation temporaire des bureaux municipaux)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "1-5383, rue Foster",
+    "page": 6,
+    "citation": "accepte le bail commercial à intervenir entre\nGroupe RSE inc. et la Municipalité de Warden pour la location d'un espace de\nbureau situé au 1-5383, rue Foster, à Waterloo",
+    "anchor": "1-5383, rue Foster"
+   },
+   "reason": "La citation de l'acceptation du bail doit conserver les sauts de ligne après « entre » et « espace de », conformément à l'exigence de reproduction à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Adoption du règlement 2026-180 sur les immeubles patrimoniaux et les mandats du CCU",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-180",
+    "page": 12,
+    "citation": "10.2. ADOPTION DU RÈGLEMENT 2026-180 RELATIF À LA GESTION DES\nIMMEUBLES PATRIMONIAUX ET À LA DÉLÉGATION DE CERTAINS\nMANDATS AU COMITÉ CONSULTATIF D'URBANISME",
+    "anchor": "RÈGLEMENT 2026-180"
+   },
+   "reason": "L'adoption est correctement identifiée, mais sa citation doit reprendre les deux sauts de ligne du titre de la résolution pour être identique au document."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Adoption du règlement 2026-181 relatif à la démolition d'immeubles",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-181",
+    "page": 12,
+    "citation": "10.3. ADOPTION DU RÈGLEMENT NUMÉRO 2026-181 RELATIF À LA\nDÉMOLITION D'IMMEUBLES",
+    "anchor": "RÈGLEMENT NUMÉRO 2026-181"
+   },
+   "reason": "La citation doit conserver le saut de ligne avant « DÉMOLITION D'IMMEUBLES » pour respecter la règle de copie à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Adoption du règlement 2026-182 relatif à l'occupation et à l'entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-182",
+    "page": 13,
+    "citation": "10.4. ADOPTION DU RÈGLEMENT 2026-182 RELATIF À L'OCCUPATION ET À\nL'ENTRETIEN DES BÂTIMENTS",
+    "anchor": "RÈGLEMENT 2026-182"
+   },
+   "reason": "La citation doit conserver le saut de ligne avant « L'ENTRETIEN DES BÂTIMENTS » pour être recopiée à l'identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "avis_motion",
+   "page": 4,
+   "citation": "Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance\nultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "projet_reglement",
+   "page": 4,
+   "citation": "il est résolu à l'unanimité des membres présents d'adopter le projet de\nrèglement numéro 2026-184, tel que déposé"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 6,
+   "citation": "accepte le bail commercial à intervenir entre\nGroupe RSE inc. et la Municipalité de Warden pour la location d'un espace de\nbureau situé au 1-5383, rue Foster, à Waterloo"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 12,
+   "citation": "10.2. ADOPTION DU RÈGLEMENT 2026-180 RELATIF À LA GESTION DES\nIMMEUBLES PATRIMONIAUX ET À LA DÉLÉGATION DE CERTAINS\nMANDATS AU COMITÉ CONSULTATIF D'URBANISME"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "adoption",
+   "page": 12,
+   "citation": "10.3. ADOPTION DU RÈGLEMENT NUMÉRO 2026-181 RELATIF À LA\nDÉMOLITION D'IMMEUBLES"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "adoption",
+   "page": 13,
+   "citation": "10.4. ADOPTION DU RÈGLEMENT 2026-182 RELATIF À L'OCCUPATION ET À\nL'ENTRETIEN DES BÂTIMENTS"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

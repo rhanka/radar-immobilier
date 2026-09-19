@@ -1,0 +1,35 @@
+{
+ "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c5bd6c3691bded48bc52c4d09099be3d12ef9154b14042d27db2935aa5088121",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 5095,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 13169,
+   "outputTokens": 1694,
+   "totalTokens": 14863
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4931
+  },
+  "inputSha256": "470fc3c0a5ea7955f7a99735b9a7b6d97d19c52b7b9a6c25f2315d907eccee8d"
+ },
+ "at": "2026-09-19T03:22:32.009Z"
+}

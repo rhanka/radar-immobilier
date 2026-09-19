@@ -1,0 +1,1551 @@
+{
+  "schemaVersion": 1,
+  "campaign": "v101b",
+  "measuredAt": "2026-09-17T11:32:52.018Z",
+  "networkRequests": 0,
+  "policy": "latest terminal receipt; strict current parser then offline fence/BOM/envelope/trailing-comma tolerance; v9 profile and provenance validation",
+  "totals": {
+    "jsonRefusals": 125,
+    "validAfterTolerance": 5,
+    "acceptedAfterProfileAndProvenance": 2
+  },
+  "byArm": {
+    "gemini-low": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "gemini-medium": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "gemini-high": {
+      "jsonRefusals": 44,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "luna-low": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "luna-medium": {
+      "jsonRefusals": 2,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "luna-high": {
+      "jsonRefusals": 1,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "luna-xhigh": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "gpt41": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "sonnet46-cloud-off": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "sonnet46-cloud-low": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "sonnet46-cloud-high": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "sonnet5-off": {
+      "jsonRefusals": 13,
+      "validAfterTolerance": 1,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "sonnet5-low": {
+      "jsonRefusals": 2,
+      "validAfterTolerance": 1,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "sonnet5-high": {
+      "jsonRefusals": 13,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "opus5-off": {
+      "jsonRefusals": 24,
+      "validAfterTolerance": 1,
+      "acceptedAfterProfileAndProvenance": 1
+    },
+    "opus5-low": {
+      "jsonRefusals": 2,
+      "validAfterTolerance": 2,
+      "acceptedAfterProfileAndProvenance": 1
+    },
+    "opus5-high": {
+      "jsonRefusals": 24,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "opus5-cli-off": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "sol-low": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "sol-medium": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "sol-high": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "sol-xhigh": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "astra-low": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "astra-medium": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "astra-high": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "astra-xhigh": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    },
+    "mistral-small4": {
+      "jsonRefusals": 0,
+      "validAfterTolerance": 0,
+      "acceptedAfterProfileAndProvenance": 0
+    }
+  },
+  "rows": [
+    {
+      "arm": "gemini-high",
+      "documentId": "saint-lin-laurentides-2026-06-09",
+      "rawSha256": "5deb20a11ce71b6ff4bc3b5b775b5125b61f89a11ba14c1894805743c951ccfd",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 2532 (line 61 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "amherst-2026-06-08",
+      "rawSha256": "b69082616287e677ea5dd9f31a46487dff788cbf9f921ffade70daa4954aecec",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 3218 (line 83 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "ayers-cliff-2026-03-02",
+      "rawSha256": "b2ba5c6d2e81115f6c5bb86b1282efacfb1b7c29dbdb8322a8d6d632a12a872f",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 9050 (line 228 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "saint-charles-de-bourget-2026-05-04",
+      "rawSha256": "502a97121f81811150300cad874b6e395db5421941b8d2511a08e11a641d6e1f",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 4842 (line 110 column 4)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "coteau-du-lac-2026-02-10",
+      "rawSha256": "83ebf7a61f99c7324ea368e7da27955b1b2d7db00d17ec2e94aaaf159df64aa4",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 18802 (line 444 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "saint-damien-2026-06-16",
+      "rawSha256": "54cc76afb56f8a795645e5b346357fd210a45180fa15c7f0171159943f486b9c",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Unexpected token 'P', \"[PDF PAGE 2\"... is not valid JSON"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "lac-tremblant-nord-2026-05-09",
+      "rawSha256": "78b48c03d3b1e84b6d3710a4a3cf60c45e219b721dfd0ea213cf1bc7a94681b6",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 22755 (line 602 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "pincourt-2026-01-20",
+      "rawSha256": "e05167c74ea53053ff63fbd138b6e10fc13144c9100beef69742aa07814b3a95",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 19575 (line 455 column 4)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "mcmasterville-2026-02-02",
+      "rawSha256": "4082652de01cb499a2ab4fe3324cd3ef2f3c9694406eeeab33c54773242288ba",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 4683 (line 108 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "chesterville-2026-03-02",
+      "rawSha256": "969521a71bc3e82d8ac7b37544dff61cb67d317c851a4735c627cadee02c25c8",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 2637 (line 69 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "lac-du-cerf-2026-04-11",
+      "rawSha256": "1fcc31ec38fa8c385114ff77ed31bfe0a73409ec07b688aa81168c41c5c54451",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 2848 (line 65 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "acton-vale-2026-03-16",
+      "rawSha256": "e35a6366bd3ebb1c10bb8d447ae163258e8270f6f8c5d1504914af7db0f38c8c",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 19588 (line 495 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "les-coteaux-2026-03-16",
+      "rawSha256": "dd8e7da3ff2b215ebb4c13defa3b1722a18e31d206a33926e959b347a53c5af2",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 21125 (line 506 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "saint-bernard-de-michaudville-2026-04-01",
+      "rawSha256": "d16f0dac108700702db56d506035b560463e2bffd2e8dbcb0632644af217e2d4",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 2227 (line 47 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "tadoussac-2026-01-13",
+      "rawSha256": "1c87f6a398849b5247dce7de0902ab86c6c67a2d159bdf7f52a240e18924ef09",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 5185 (line 139 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "barnston-ouest-2026-05-04",
+      "rawSha256": "7bcc00d415947c347d550c0883c77cc190119183c9eb5420ab04cde432800d33",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 2798 (line 65 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "bedford--brome-missisquoi-2026-06-02",
+      "rawSha256": "9380533f96475cab2f9e0c4deeed7b9ed384426e0539bfeb20f922d87fab00eb",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 4819 (line 120 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+      "rawSha256": "315d368ab41bb785816fa1c78c153a2bdfe9dd17836f92635b0f994967c1fb5a",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 27127 (line 642 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "wentworth-nord-2026-01-21",
+      "rawSha256": "62ca17598776daeee330a85c0de129ab5eabebb300cca9ff8efa4fbf6b99aaf4",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 13719 (line 319 column 8)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "eastman-2026-06-01",
+      "rawSha256": "1c8d760946f00e0dfcd71b86f0259e18c9bc8d73a7b8fd14d7c9556ffa6c3676",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 28573 (line 602 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "stoneham-et-tewkesbury-2026-06-08",
+      "rawSha256": "441d47fadbb5273f46f96d2e9a420ac5671263b918cb9f03fca31ed2e52f2a11",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 20933 (line 534 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "cookshire-eaton-2026-04-07",
+      "rawSha256": "b35e6e5e8fb864978993ff80a1e4a9201f6b3ea61ca65c20a816b6a24f01fa56",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 2313 (line 51 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "mont-saint-hilaire-2026-04-13",
+      "rawSha256": "bc00aabaead7fb2e45e1c25efb0421442ba2ca48bcecdf0fcee62bf0108b6eac",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 18968 (line 417 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "cowansville-2026-05-05",
+      "rawSha256": "15e187c1ab8b3066ed7c25e9aeb41a418bf93620d17981694a2c2626e899796a",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 40002 (line 887 column 4)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "brossard-2026-04-28",
+      "rawSha256": "91d17f84e283809915f37adacb22f74c00018cbf6901f2984e70b483aadafbc1",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 22343 (line 553 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "contrecoeur-2026-04-14",
+      "rawSha256": "22a25c8f0d8d045ac2e4957d489911cf694a3f055e101d0b45ebc042ee76094f",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 21025 (line 527 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "frontenac-2026-03-10",
+      "rawSha256": "deffa22adc5915e279178f74f72d5b21aa71129337cb8fbfb32b189d969a27b6",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 31082 (line 792 column 4)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "hatley-2026-04-07",
+      "rawSha256": "aa006daeca21b21e516ecfb7c15d36ff08469e652743c39454eee3da9f4c4953",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 1762 (line 45 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "beloeil-2026-03-23",
+      "rawSha256": "8e0cb855aa6c54754b8b07d59e624ad60b72a4906f4716d74d3afda1e28a9331",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 21815 (line 477 column 4)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "la-peche-2026-06-01",
+      "rawSha256": "d991fea3db9f358bb03042ac536131afca46553c1485d4fb8dba80275a855b88",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 10734 (line 221 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "sainte-sophie-2026-06-02",
+      "rawSha256": "262a53dab1872b6512d47ac7167a5b7eb8b6e405b6832f104d047d47ca7d7f7c",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 31806 (line 788 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "sainte-martine-2026-03-17",
+      "rawSha256": "ca275d3ad637fb534b01853c127ded59c7997617b1f26c1ee820f8c5f64ba070",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 10350 (line 234 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "rosemere-2026-04-13",
+      "rawSha256": "a136bb712d1a1bfa9d487b217e82fe8a0736149b9e1ef281b81a1270bf90f632",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 9790 (line 215 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "berthier-sur-mer-2026-03-24",
+      "rawSha256": "389c78749d48b5f0887bba7f60427c840f216cbb04cd9477e3d6d57662dd2bc9",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 20608 (line 497 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "sacre-coeur-2026-05-11",
+      "rawSha256": "eeadc2b03637764fc24350ab862f3bde2fda706a4002af43db78bc2efaac05f9",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 23570 (line 549 column 8)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "notre-dame-du-rosaire-2026-03-02",
+      "rawSha256": "46a4e4d53797c4b7a722a949c3ee070ed7be0694ced8982511cf275b84e0287b",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 16432 (line 353 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "sainte-croix-2026-05-05",
+      "rawSha256": "512de5a93508cec5be163ba25b2e86c0c598b03426490fbaf56251af7ca3fd54",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 27088 (line 596 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "brownsburg-chatham-2026-03-10",
+      "rawSha256": "2b868d6c2ab50ac0451718daf7dec6c1b5930b28699f5d22641f716369d7379e",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 39116 (line 915 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "sainte-thecle-2026-03-09",
+      "rawSha256": "aa9e267ba51dda0e0acaeff73d850fb06741060ac314060cd5cdaec9eb185ea8",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 28313 (line 669 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "carignan-2026-03-04",
+      "rawSha256": "827021350fe65eccc9ff2d4efc89c83632dddcc795d1d733c1bdc2771c8cf82b",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 21360 (line 477 column 42)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "lac-brome-2026-04-07",
+      "rawSha256": "cf0a89324e3483fb99ca06459a46e5958cd39da89c6fdd1ed74c5960fcfd8468",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 4884 (line 107 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "boisbriand-2026-05-05",
+      "rawSha256": "1d771c4cba1c8238e53006285255cbc59d38fc2a4bf388dc3f18c3cec62d14e7",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 17941 (line 429 column 8)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "saint-etienne-de-bolton-2026-08-04",
+      "rawSha256": "336d8d22f1325a0bb4902a4c10a00126c62d5fad909665c0ed2989b7be77de5d",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 29530 (line 691 column 6)"
+    },
+    {
+      "arm": "gemini-high",
+      "documentId": "waterloo-2026-08-18",
+      "rawSha256": "97e34049abc6feee6b01069707ba985eccee40f4143538468b8b72f45ad5a3c4",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 43959 (line 936 column 6)"
+    },
+    {
+      "arm": "luna-medium",
+      "documentId": "les-coteaux-2026-03-16",
+      "rawSha256": "6c692e9ae8dd0356b261e0acfd98c8e9df3e42a5a7dba4766c32befee8f4fdfd",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 17442 (line 1 column 17443)"
+    },
+    {
+      "arm": "luna-medium",
+      "documentId": "frontenac-2026-03-10",
+      "rawSha256": "aa88fe9d09f5464d8088cadd81ea399973afbeddf4b8f3bdaa54bda4346d3676",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 9257 (line 1 column 9258)"
+    },
+    {
+      "arm": "luna-high",
+      "documentId": "saint-bernard-de-michaudville-2026-04-01",
+      "rawSha256": "d5a83451db34032d44a8b2d3e43f7d3e66c806b0b9c05a71f92b7b9995c0c51a",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 3467 (line 1 column 3468)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "saint-sylvere-2026-04-07",
+      "rawSha256": "121e4902926326a6df5d07469b6277b73bf058ba9502b07d5253eb780b347dbc",
+      "strictValid": false,
+      "tolerantValid": true,
+      "acceptedAfterValidation": false,
+      "method": "tolerant-envelope-fence-bom-trailing-comma",
+      "validation": {
+        "accepted": false,
+        "contractViolation": null,
+        "extractionViolations": 0,
+        "profileViolations": 6,
+        "provenanceViolations": 0
+      }
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "wentworth-nord-2026-01-21",
+      "rawSha256": "4d80b9b6845b1b92865cbed6e7fe440f63f5348ef6b245f8703d0382027cf4b2",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 33189 (line 300 column 1121)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "stoneham-et-tewkesbury-2026-06-08",
+      "rawSha256": "6e44c495094978be30f10de68ea40114a9da1064f52da9bda417c57ab621bd35",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 43070 (line 860 column 6)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "mont-saint-hilaire-2026-04-13",
+      "rawSha256": "933089a2d90004d16f7772544a22cbe28f2735843776053dfe07c40827cb10b8",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 17269 (line 299 column 386)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "frontenac-2026-03-10",
+      "rawSha256": "6a800534b6fbd28c9cf1afd1227e977e63fd72f4b8a79cfe8a1870d1857ca931",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 29876 (line 561 column 6)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "beloeil-2026-03-23",
+      "rawSha256": "0e68504be6b11afc283d94aaaf605a2cf310217430914c55cc5e5a2e0d87fe85",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 19403 (line 442 column 4)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "sainte-sophie-2026-06-02",
+      "rawSha256": "a0e5f2dcaac107db1968b705e44f369e7b31e5ec08bad8567867b3ea86fbf6bb",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 30479 (line 469 column 390)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "sainte-martine-2026-03-17",
+      "rawSha256": "e7d65c5e338e296e8693add62b0947dcb980a70ebb4323027d73946506913bbf",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 21519 (line 317 column 414)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+      "rawSha256": "02d22c83c4868346695222f27e3a3f2f99eec94ad6c0040377147f51ae4abf7b",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 37858 (line 822 column 6)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "brownsburg-chatham-2026-03-10",
+      "rawSha256": "f0ed8c4b5b442602df8bfa3ac718605939453679ccbf843a4302ee11874282eb",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 41373 (line 451 column 658)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "lac-brome-2026-04-07",
+      "rawSha256": "e1beceb7725b34042078b5d6450eb8c8656e44dd31353fbbe0e8aa752bb757d0",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 37228 (line 319 column 801)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "saint-etienne-de-bolton-2026-08-04",
+      "rawSha256": "508adc484326aa98fc61be60941c53e2f96efc97eb22586fb163445ff21e87f1",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 33760 (line 388 column 651)"
+    },
+    {
+      "arm": "sonnet5-off",
+      "documentId": "waterloo-2026-08-18",
+      "rawSha256": "478782b9fe37bba7391fde1a22190b829fac1275a1a502c69813de946f5d6bfd",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 34102 (line 360 column 615)"
+    },
+    {
+      "arm": "sonnet5-low",
+      "documentId": "waterville-2026-04-07",
+      "rawSha256": "90fdb1da590160643ca98db22d4cdb87358276225c1110a43aa6cca8179ccb7b",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected double-quoted property name in JSON at position 4830 (line 121 column 7)"
+    },
+    {
+      "arm": "sonnet5-low",
+      "documentId": "saint-sylvere-2026-04-07",
+      "rawSha256": "040eac210e7e73cabc0e6b7b6c9314626f63ed0e6290aff0ac7e2cecb10807c4",
+      "strictValid": false,
+      "tolerantValid": true,
+      "acceptedAfterValidation": false,
+      "method": "tolerant-envelope-fence-bom-trailing-comma",
+      "validation": {
+        "accepted": false,
+        "contractViolation": null,
+        "extractionViolations": 0,
+        "profileViolations": 1,
+        "provenanceViolations": 0
+      }
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "saint-sylvere-2026-04-07",
+      "rawSha256": "064431c466dfed1029904fe84af19c7a5385d2e4626230a519ec46fb01a80f4d",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "no JSON object/array envelope"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "barnston-ouest-2026-05-04",
+      "rawSha256": "eaccce7007eebbf4c212597c14dbaf23a872dedff583fa24ca5775327c2ff59d",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 32375 (line 701 column 8)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "stoneham-et-tewkesbury-2026-06-08",
+      "rawSha256": "1edf371a2706c8289cf7628dd03f5f367afa69db6ccd229ba2f2496a466804b2",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 39668 (line 746 column 637)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "mont-saint-hilaire-2026-04-13",
+      "rawSha256": "facedb465a9b8ba23e0d6a7eb30dc547fa4c99a6756a2946ac40c6f42a699a9f",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 5903 (line 120 column 6)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "cowansville-2026-05-05",
+      "rawSha256": "43a92c901b1a958d65f2f59a54ecc5f9b3ebd653ba60c36d3b2f0f7fc473f75e",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 3695 (line 75 column 6)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "contrecoeur-2026-04-14",
+      "rawSha256": "bde6db9fc33b4e51a3e0c4a60f977700b3ad5f511a410117e592d12f48467f3d",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 29275 (line 325 column 603)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "frontenac-2026-03-10",
+      "rawSha256": "059be4af454ded4f50b08c74fed90625a7be87e7cfaaabb11507f3431d338a20",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 41186 (line 339 column 688)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "beloeil-2026-03-23",
+      "rawSha256": "412012c4f21859280c6190ce7c095736c618b6287ec1e035a27d0063d8b2bf3c",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 11098 (line 219 column 6)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "sainte-sophie-2026-06-02",
+      "rawSha256": "9ce11b2b767b883bc5ce4463e057591044440ddd3e8896882f6df2343d51ed73",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 15028 (line 230 column 6)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "sainte-martine-2026-03-17",
+      "rawSha256": "44ca8497edd4989d9d6926dd55a8c09a6d177566a404e2ba19932084a9e43710",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 31358 (line 321 column 567)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+      "rawSha256": "0e491704e014ab98a516fd0b032d858bdfa7b5017d89593d0fc34663a2b697f5",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 23247 (line 461 column 6)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "brownsburg-chatham-2026-03-10",
+      "rawSha256": "f8bb495fddd557f7b9e82dcc82b8ae809e68e314983ce2f95763d0efae3ed443",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 25351 (line 481 column 6)"
+    },
+    {
+      "arm": "sonnet5-high",
+      "documentId": "waterloo-2026-08-18",
+      "rawSha256": "fdd92558fccc21bfb7888eb5d6a483ff51caadee7a7882a3934cc70c9bf2fdb7",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 19426 (line 416 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "saint-sylvere-2026-04-07",
+      "rawSha256": "1871ceab21cb0d5f345369551c98077943a96315d50ab63cd8d4cdc458ab4364",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "no JSON object/array envelope"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "wentworth-nord-2026-01-21",
+      "rawSha256": "5913d9463390244a3d8c1ffefc5b5e3d890a705afe789e8e48157ad9ad03a059",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 55004 (line 1166 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "sainte-clotilde-2026-04-20",
+      "rawSha256": "8b972a8faa03adc2aa8c3a8c827a39852103219a37a6911781226b45890e17e1",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 58091 (line 1283 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "stoneham-et-tewkesbury-2026-06-08",
+      "rawSha256": "5c148c1b8e4f17696523bf4883ddb87046adfb3a37d7dabb15842ef8c26a13fd",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 61258 (line 1354 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "mont-saint-hilaire-2026-04-13",
+      "rawSha256": "58c49b003173e767d0e82aca400ac9aaceec6f95203ad7266414123fb75e09bf",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 55898 (line 1275 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "cowansville-2026-05-05",
+      "rawSha256": "dea96dbdb2c697bbcc63cfc4dae14c5503a86318013a2317318cf5441a54ec1d",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 54416 (line 1278 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "frontenac-2026-03-10",
+      "rawSha256": "d32793c4d54a4ffd2bbe0dafca4c5fb3c42174f15db4e782f1fec62b5e5d63d3",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 55507 (line 1296 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "beloeil-2026-03-23",
+      "rawSha256": "9dc617ea7ebe29a0293866f951d0f9f4e9a4558535954bf0e2633a4c7af1c082",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 55467 (line 1258 column 34)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "sainte-sophie-2026-06-02",
+      "rawSha256": "f519d3ffae1365c5dd74f33f39d35c13951a32a9f68c41325a23e7e90f55bef3",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 54772 (line 1200 column 55)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "sainte-barbe-2026-05-05",
+      "rawSha256": "e03557b23fc537736b2f2b73bc0737cc9dbbe32342431462a83b7b8acddc6209",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 53308 (line 1257 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "sainte-martine-2026-03-17",
+      "rawSha256": "8a3eeb62ec775742d02d94fbd1bb2c4ddcf542a08e319d9eb1bb7ea9bb1f43f0",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 46560 (line 1064 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "rosemere-2026-04-13",
+      "rawSha256": "558cbd7667b99e424d93e890ac361ad8008ef995bd8bbbd6823b2296d10f7516",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 61848 (line 1387 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "berthier-sur-mer-2026-03-24",
+      "rawSha256": "5c67dfc38ae195cf25335158052bcd2b2031af6e73228f2e4a95d904ee8ad41a",
+      "strictValid": false,
+      "tolerantValid": true,
+      "acceptedAfterValidation": true,
+      "method": "tolerant-envelope-fence-bom-trailing-comma",
+      "validation": {
+        "accepted": true,
+        "contractViolation": null,
+        "extractionViolations": 0,
+        "profileViolations": 0,
+        "provenanceViolations": 0
+      }
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+      "rawSha256": "0fb13a074d432268e095a7e16a2c4d443a2308d644939e2fde90f4a7ba1dbee3",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 52232 (line 1161 column 41)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "sainte-croix-2026-05-05",
+      "rawSha256": "7400e112248ab5ccb447be10c78c7c96d579d5c7616f393d3225db893d665f24",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 60918 (line 1352 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+      "rawSha256": "be3a0c86fd67562b114f6e24fadceae2315c51cefa99147311809a50c6e7fc90",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 58886 (line 1281 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "stanstead-est-2026-04-13",
+      "rawSha256": "d1eae94427341fc57eef64621d0a297603fb1ee785b4fd0e58c64eecb29fde80",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 57544 (line 1291 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "brownsburg-chatham-2026-03-10",
+      "rawSha256": "0c0ca23c8e9e907ac7cadafb2114a1ea317aa0c24dbaaa25914b62f13b7e8897",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 56120 (line 1277 column 8)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "sainte-thecle-2026-03-09",
+      "rawSha256": "71bba2cc1eeb9c78d0f9e253e0f78fc2985191625411994e74e1fa8683d16e4a",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 60572 (line 1337 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "carignan-2026-03-04",
+      "rawSha256": "3ea56a19d87cb66ab03023f16fbec9df1054ee91f083cdc4ebf0a951cee96b5e",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 59011 (line 1419 column 33)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "lac-brome-2026-04-07",
+      "rawSha256": "97382cce9252e08f6c7f34f22a2389ba58ff6833a9fae7eb76937fae5ec7ccfd",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 63724 (line 1486 column 60)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "boisbriand-2026-05-05",
+      "rawSha256": "a1e2bb0abb2f700fd92746c01b4a1a393161f3e452460fdf1a481eb37b36433f",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 61791 (line 1480 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "saint-etienne-de-bolton-2026-08-04",
+      "rawSha256": "8196304cc46cb004db4b05f8db4b017be2cd6fa626eab424b0042e82c5bb76d2",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 60135 (line 1472 column 6)"
+    },
+    {
+      "arm": "opus5-off",
+      "documentId": "waterloo-2026-08-18",
+      "rawSha256": "c9d87f6cb6728f279409520c1106fff220d1702a5bb22fade0f8023022893c90",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 48807 (line 1274 column 6)"
+    },
+    {
+      "arm": "opus5-low",
+      "documentId": "saint-sylvere-2026-04-07",
+      "rawSha256": "a79104c1d866884e843ba66f7905d8202db42c4e8810ef9306c1fbf723895ce5",
+      "strictValid": false,
+      "tolerantValid": true,
+      "acceptedAfterValidation": false,
+      "method": "tolerant-envelope-fence-bom-trailing-comma",
+      "validation": {
+        "accepted": false,
+        "contractViolation": null,
+        "extractionViolations": 0,
+        "profileViolations": 1,
+        "provenanceViolations": 0
+      }
+    },
+    {
+      "arm": "opus5-low",
+      "documentId": "berthier-sur-mer-2026-03-24",
+      "rawSha256": "900de7b0df21564ba70d8cbd8c3f8b8f64a71eba19b50b287f328f5b4efd3ca4",
+      "strictValid": false,
+      "tolerantValid": true,
+      "acceptedAfterValidation": true,
+      "method": "tolerant-envelope-fence-bom-trailing-comma",
+      "validation": {
+        "accepted": true,
+        "contractViolation": null,
+        "extractionViolations": 0,
+        "profileViolations": 0,
+        "provenanceViolations": 0
+      }
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "lorraine-2026-01-13",
+      "rawSha256": "00cb599d8267b3a8a26ee54447b7baf323ccd10ac3ad1d66b5c3f0c2f6bb1f49",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 59384 (line 1284 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "saint-sylvere-2026-04-07",
+      "rawSha256": "1f9685b52146b7a22d039cf1a04fc26ae9f4f3c491353f0f8b9e785b7eaf7f84",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Unexpected token 'E', \"[END OF PDF]\" is not valid JSON"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "sainte-clotilde-2026-04-20",
+      "rawSha256": "01db86e7a9173ce4dad7a76806aefef5721b9695bacc643ccd233014ef5c6411",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 58572 (line 1307 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "warden-2026-04-08",
+      "rawSha256": "99467766e15c2e67f79a99c68d5a5add13176538fc10a0e3425906317fe2fcac",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 57519 (line 1270 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "stoneham-et-tewkesbury-2026-06-08",
+      "rawSha256": "4c93c8e13b4673b6b82b64b8c7dc6508a35f9742b80be46351ebaddfcd0be409",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 55575 (line 1350 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "mont-saint-hilaire-2026-04-13",
+      "rawSha256": "af2f063c094d50cc7b1d4cb1fad5d2d04bc2f83bc6f3fec740ad72d9670e5160",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 63932 (line 1488 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "cowansville-2026-05-05",
+      "rawSha256": "b101a2a627047f2436bef16f29b9d3742b85acd54aad57038604a0554abf730f",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 43005 (line 969 column 10)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "contrecoeur-2026-04-14",
+      "rawSha256": "308cfdf3f592a557b2c5e391d761afcc1a04a32c5b49e75092c87a6e14a6a1be",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 51563 (line 1213 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "frontenac-2026-03-10",
+      "rawSha256": "3d583371bff8c79d68030dc5350e9e072b12c12f46bd1d938b34b754b3fc0890",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 61553 (line 1425 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "beloeil-2026-03-23",
+      "rawSha256": "eac161cbd9183def82a6f32cae2a0fab9535210ef28c922fc37be65fe0321534",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 53681 (line 1279 column 32)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "sainte-sophie-2026-06-02",
+      "rawSha256": "140c767aa3e2fb2cef57c639b247a98615b3cb1f70dd29cfd9b6ec3d9fe52aa6",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 50061 (line 1197 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "sainte-martine-2026-03-17",
+      "rawSha256": "4a755b4808162c68a2a7b1f76a2ad2da956235db4f25df5a28d9c5ad82c4aa59",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 47481 (line 1182 column 8)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "rosemere-2026-04-13",
+      "rawSha256": "9b20ad305e536b047c526ff3c005628db7c3d8e4416a6628fcd147a4aab5a509",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 61861 (line 1429 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "berthier-sur-mer-2026-03-24",
+      "rawSha256": "5a5a057836868b14b318ba410219136549e43914629c0622921020dc9de6a428",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "no JSON object/array envelope"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+      "rawSha256": "23f9550df5d62fae7058c5a17e4039189c760e276e370843f09b3dfa9051453b",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 56265 (line 1262 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "sainte-croix-2026-05-05",
+      "rawSha256": "208d1103a607696776c1f8f129122683d3cec6994412ec16794ae46a709324f1",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 58485 (line 1237 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+      "rawSha256": "65c8a947046a8de4c343448cab4c539d89215fad184575d4285b10d68c15f845",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 61172 (line 1317 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "stanstead-est-2026-04-13",
+      "rawSha256": "eab02a68a77f06fa8818554b0cbcc67ccb75cc6e7f6ca2a84882bb118b6a4465",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 60914 (line 1355 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "brownsburg-chatham-2026-03-10",
+      "rawSha256": "e78bd7874912b56af9b3cb064b765907c3b4c9498057e7256bdaf60191cb231c",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 51492 (line 1251 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "carignan-2026-03-04",
+      "rawSha256": "bcdfea2375b99bfb4a103542cd153073c6e0f628289ba49dffe1c4319ec21d73",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 60977 (line 1494 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "lac-brome-2026-04-07",
+      "rawSha256": "35c4cc46b464e7e6929f70ae0c7f734522c8d9f26034c64fc3687956dbc6d942",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 62329 (line 1448 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "boisbriand-2026-05-05",
+      "rawSha256": "4d60a0e056961c8a80bca87f395d5e8775bb22a2a558590b9a3184126e2fc7cb",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 60929 (line 1412 column 6)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "saint-etienne-de-bolton-2026-08-04",
+      "rawSha256": "3088f232ad98b8a8be8d29ffab630704889f21c60ee55068d5643fe0b7fae9f8",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or '}' after property value in JSON at position 58403 (line 1414 column 33)"
+    },
+    {
+      "arm": "opus5-high",
+      "documentId": "waterloo-2026-08-18",
+      "rawSha256": "29cfd190b520a7660d8e0aa160fd8d23e6528deaf9f8494a718245bf084872d9",
+      "strictValid": false,
+      "tolerantValid": false,
+      "acceptedAfterValidation": false,
+      "method": null,
+      "validation": null,
+      "error": "Expected ',' or ']' after array element in JSON at position 55515 (line 1171 column 6)"
+    }
+  ]
+}

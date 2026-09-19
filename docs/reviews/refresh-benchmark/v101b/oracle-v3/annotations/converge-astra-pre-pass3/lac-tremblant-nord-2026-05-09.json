@@ -1,0 +1,71 @@
+{
+ "documentId": "lac-tremblant-nord-2026-05-09",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "1536c2b34552ec1fb18c6d610482fa9d18dc11b241440339c42041c15f77a12b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 9.2.1, page 1, prévoit la demande de renouvellement du permis COL230051 pour une construction neuve sur le lot 5 011 332, sans attester de décision acquise.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 9.2.2, page 1, prévoit l’examen de la demande DPCOL250057 pour un garage détaché sur le lot 6 219 794, conformément à la règle des unités prévues à l’ordre du jour.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 9.2.3, page 1, mentionne la demande DPCOL260003 pour une construction neuve sur le lot 6 219 789 comme point prévu, sans préciser de procédure justifiant une étape autre qu’inconnu.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 9.2.4, page 1, prévoit la demande DPCOL260002 pour la construction d’un garage détaché sur le lot 5 011 370, sans en constater l’approbation.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 9.2.5, page 1, prévoit la demande DPCOL240004 pour une construction neuve sur le lot 5 011 310, ce qui atteste une unité d’urbanisme prévue et non une décision acquise.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 9.2.1, page 1, prévoit la demande de renouvellement du permis COL230051 pour une construction neuve sur le lot 5 011 332, sans attester de décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 9.2.2, page 1, prévoit l’examen de la demande DPCOL250057 pour un garage détaché sur le lot 6 219 794, conformément à la règle des unités prévues à l’ordre du jour."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 9.2.3, page 1, mentionne la demande DPCOL260003 pour une construction neuve sur le lot 6 219 789 comme point prévu, sans préciser de procédure justifiant une étape autre qu’inconnu."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 9.2.4, page 1, prévoit la demande DPCOL260002 pour la construction d’un garage détaché sur le lot 5 011 370, sans en constater l’approbation."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 9.2.5, page 1, prévoit la demande DPCOL240004 pour une construction neuve sur le lot 5 011 310, ce qui atteste une unité d’urbanisme prévue et non une décision acquise."
+  }
+ ]
+}

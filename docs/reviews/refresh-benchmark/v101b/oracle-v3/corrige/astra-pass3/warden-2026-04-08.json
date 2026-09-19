@@ -1,0 +1,253 @@
+{
+ "documentId": "warden-2026-04-08",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 2026-184 intégrant les dispositions relatives aux TIAM",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2026-184",
+    "page": 4,
+    "citation": "Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance ultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184",
+    "anchor": "Règlement numéro 2026-184",
+    "spanStart": 1342,
+    "spanEnd": 1490
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 2026-184 intégrant les dispositions relatives aux TIAM",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "2026-184",
+      "page": 4,
+      "citation": "Avis de motion est donné par monsieur Martin Labrecque, qu'à une séance ultérieure du conseil sera soumis pour adoption le Règlement numéro 2026-184",
+      "anchor": "Règlement numéro 2026-184",
+      "spanStart": 1342,
+      "spanEnd": 1490
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L'avis de motion est donné dans cette séance pour un règlement modifiant la réglementation d'urbanisme et constitue une unité distincte du projet."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dépôt et adoption du projet de règlement 2026-184 relatif aux TIAM",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2026-184",
+    "page": 4,
+    "citation": "il est résolu à l'unanimité des membres présents d'adopter le projet de règlement numéro 2026-184, tel que déposé",
+    "anchor": "règlement numéro 2026-184",
+    "spanStart": 1847,
+    "spanEnd": 1960
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt et adoption du projet de règlement 2026-184 relatif aux TIAM",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "2026-184",
+      "page": 4,
+      "citation": "il est résolu à l'unanimité des membres présents d'adopter le projet de règlement numéro 2026-184, tel que déposé",
+      "anchor": "règlement numéro 2026-184",
+      "spanStart": 1847,
+      "spanEnd": 1960
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le projet est déposé puis adopté pendant la séance, ce qui constitue une unité de projet de règlement et non une adoption finale du règlement."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Acceptation du bail commercial pour la location d'un espace de bureau au 1-5383, rue Foster, à Waterloo (relocalisation temporaire des bureaux municipaux)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "1-5383, rue Foster",
+    "page": 6,
+    "citation": "accepte le bail commercial à intervenir entre Groupe RSE inc. et la Municipalité de Warden pour la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo",
+    "anchor": "1-5383, rue Foster",
+    "spanStart": 630,
+    "spanEnd": 799
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation du bail commercial au 1-5383, rue Foster, à Waterloo",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1-5383, rue Foster",
+      "page": 6,
+      "citation": "accepte le bail commercial à intervenir entre Groupe RSE inc. et la Municipalité de Warden pour la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo",
+      "anchor": "1-5383, rue Foster",
+      "spanStart": 630,
+      "spanEnd": 799
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Acceptation du bail commercial pour la location d'un espace de bureau au 1-5383, rue Foster, à Waterloo (relocalisation temporaire des bureaux municipaux)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1-5383, rue Foster",
+      "page": 6,
+      "citation": "accepte le bail commercial à intervenir entre Groupe RSE inc. et la Municipalité de Warden pour la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo",
+      "anchor": "1-5383, rue Foster",
+      "spanStart": 630,
+      "spanEnd": 799
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte le bail d'un local explicitement identifié et autorise sa signature, soit un acte immobilier décidé à inclure même non résidentiel."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "Un bail (location d'un immeuble) n'est pas un acte foncier décidé au sens de « adoption » (vente, acquisition, cession, servitude autorisée) ; il relève de l'étape « inconnu », comme l'exemple « convention de prêt à usage d'un immeuble » du vocabulaire d'étape."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 2026-180 sur les immeubles patrimoniaux et les mandats du CCU",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-180",
+    "page": 12,
+    "citation": "10.2. ADOPTION DU RÈGLEMENT 2026-180 RELATIF À LA GESTION DES IMMEUBLES PATRIMONIAUX ET À LA DÉLÉGATION DE CERTAINS MANDATS AU COMITÉ CONSULTATIF D'URBANISME",
+    "anchor": "RÈGLEMENT 2026-180",
+    "spanStart": 699,
+    "spanEnd": 856
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 2026-180 sur les immeubles patrimoniaux et les mandats du CCU",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-180",
+      "page": 12,
+      "citation": "10.2. ADOPTION DU RÈGLEMENT 2026-180 RELATIF À LA GESTION DES IMMEUBLES PATRIMONIAUX ET À LA DÉLÉGATION DE CERTAINS MANDATS AU COMITÉ CONSULTATIF D'URBANISME",
+      "anchor": "RÈGLEMENT 2026-180",
+      "spanStart": 699,
+      "spanEnd": 856
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution adopte ce règlement relatif aux immeubles patrimoniaux; l'avis de motion et le projet du 11 mars ne sont que des rappels historiques."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 2026-181 relatif à la démolition d'immeubles",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-181",
+    "page": 12,
+    "citation": "10.3. ADOPTION DU RÈGLEMENT NUMÉRO 2026-181 RELATIF À LA DÉMOLITION D'IMMEUBLES",
+    "anchor": "RÈGLEMENT NUMÉRO 2026-181",
+    "spanStart": 1649,
+    "spanEnd": 1728
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 2026-181 relatif à la démolition d'immeubles",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-181",
+      "page": 12,
+      "citation": "10.3. ADOPTION DU RÈGLEMENT NUMÉRO 2026-181 RELATIF À LA DÉMOLITION D'IMMEUBLES",
+      "anchor": "RÈGLEMENT NUMÉRO 2026-181",
+      "spanStart": 1649,
+      "spanEnd": 1728
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 10.3 et sa résolution poursuivie en page 13 constatent l'adoption du règlement de démolition, sans créer d'unités pour les étapes antérieures rappelées."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 2026-182 relatif à l'occupation et à l'entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-182",
+    "page": 13,
+    "citation": "10.4. ADOPTION DU RÈGLEMENT 2026-182 RELATIF À L'OCCUPATION ET À L'ENTRETIEN DES BÂTIMENTS",
+    "anchor": "RÈGLEMENT 2026-182",
+    "spanStart": 296,
+    "spanEnd": 386
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 2026-182 relatif à l'occupation et à l'entretien des bâtiments",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-182",
+      "page": 13,
+      "citation": "10.4. ADOPTION DU RÈGLEMENT 2026-182 RELATIF À L'OCCUPATION ET À L'ENTRETIEN DES BÂTIMENTS",
+      "anchor": "RÈGLEMENT 2026-182",
+      "spanStart": 296,
+      "spanEnd": 386
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil adopte ce règlement encadrant l'occupation et l'entretien des bâtiments; les mentions du précédent avis de motion et du projet sont historiques."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "a127dadc311871e9673d4bfe3ebb72bd262de636086a07c23a9c5047e62d6954",
+ "inputSha256": "1967b6cf9f3038622da79fd16ce18d46350465752b7619063a8dba55b70908d0",
+ "responseSha256": "7cbfb6ba55fb30a496268ec769d58818366d21b0542dcd892684f640330cefdc",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 96670,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 8548,
+  "outputTokens": 3155,
+  "totalTokens": 11703
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 96664,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:14:22.242Z"
+}

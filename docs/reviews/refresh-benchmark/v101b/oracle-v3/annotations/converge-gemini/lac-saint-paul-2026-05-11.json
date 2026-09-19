@@ -1,0 +1,101 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "bb96389f138a3f206d64d8dcac29fb7d776e86c78fec7fe79bbdedb91bbe60bc",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"La location temporaire d'un garage pour l'entreposage d'un camion de déneigement relève de l'entretien de voirie sans développement explicite, exclu du rappel.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 106-05-2026 ordonne la tenue d'une consultation publique le 13 juillet 2026 pour le projet de règlement 079-2026 abrogeant la citation patrimoniale, attestée en page 6.\"},{\"item\":\"i03\",\"choice\":\"absent\",\"reason\":\"Cette demande politique adressée au gouvernement provincial concernant un règlement ministériel ne constitue pas un objet réglementaire ou foncier municipal correspondant au profil.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le dépôt de l'avis spécial relatif à l'abrogation du règlement patrimonial 046-2023 est explicitement acté par le greffier-trésorier en page 8.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"La location d'un garage pour le camion de déneigement est une mesure de voirie exclue du rappel et constitue un doublon non crédité.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Une prise de position municipale sollicitant la suspension d'un règlement provincial n'est pas un acte réglementaire ou foncier municipal admissible.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Ce point concerne l'entreposage de voirie sans développement explicite, exclu du rappel et redondant avec d'autres items.\"},{\"item\":\"i08\",\"choice\":\"absent\",\"reason\":\"Cette résolution concernant un projet de règlement du gouvernement du Québec ne constitue pas un objet réglementaire municipal et fait doublon.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "absent"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La location temporaire d'un garage pour l'entreposage d'un camion de déneigement relève de l'entretien de voirie sans développement explicite, exclu du rappel."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 106-05-2026 ordonne la tenue d'une consultation publique le 13 juillet 2026 pour le projet de règlement 079-2026 abrogeant la citation patrimoniale, attestée en page 6."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "Cette demande politique adressée au gouvernement provincial concernant un règlement ministériel ne constitue pas un objet réglementaire ou foncier municipal correspondant au profil."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le dépôt de l'avis spécial relatif à l'abrogation du règlement patrimonial 046-2023 est explicitement acté par le greffier-trésorier en page 8."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "La location d'un garage pour le camion de déneigement est une mesure de voirie exclue du rappel et constitue un doublon non crédité."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Une prise de position municipale sollicitant la suspension d'un règlement provincial n'est pas un acte réglementaire ou foncier municipal admissible."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Ce point concerne l'entreposage de voirie sans développement explicite, exclu du rappel et redondant avec d'autres items."
+  },
+  {
+   "item": "i08",
+   "choice": "absent",
+   "reason": "Cette résolution concernant un projet de règlement du gouvernement du Québec ne constitue pas un objet réglementaire municipal et fait doublon."
+  }
+ ]
+}

@@ -1,0 +1,71 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "ebd732269f54a2374886a8f50998368d7ebd795fc371fc083f3141955dbffda9",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 26-02-037 ordonne à la page 6 la vente aux enchères des immeubles figurant au rapport de la trésorière et est adoptée à la page 7, constituant un acte foncier inclus.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 10 atteste l'approbation finale du PPCMOI-2025-07, dont l'objet décrit à la page 9 est la fusion des lots 6 465 474 et 6 465 475.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 11 atteste l'approbation finale du PPCMOI-2025-08, visant la fusion des lots 6 465 476 et 6 465 477 décrite à la page 10.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 12 atteste l'approbation finale du PPCMOI-2025-09, visant la fusion des lots 6 465 470, 6 465 471 et 6 460 234 décrite à la page 11.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 13 confirme l'appui municipal à la demande auprès de la CPTAQ pour une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot 5 891 123, sans constater une autorisation de la CPTAQ, ce qui convient à l'étape « inconnu ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 26-02-037 ordonne à la page 6 la vente aux enchères des immeubles figurant au rapport de la trésorière et est adoptée à la page 7, constituant un acte foncier inclus."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 10 atteste l'approbation finale du PPCMOI-2025-07, dont l'objet décrit à la page 9 est la fusion des lots 6 465 474 et 6 465 475."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 11 atteste l'approbation finale du PPCMOI-2025-08, visant la fusion des lots 6 465 476 et 6 465 477 décrite à la page 10."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 12 atteste l'approbation finale du PPCMOI-2025-09, visant la fusion des lots 6 465 470, 6 465 471 et 6 460 234 décrite à la page 11."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 13 confirme l'appui municipal à la demande auprès de la CPTAQ pour une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot 5 891 123, sans constater une autorisation de la CPTAQ, ce qui convient à l'étape « inconnu »."
+  }
+ ]
+}

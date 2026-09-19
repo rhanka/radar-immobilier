@@ -1,0 +1,317 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "eba5c05922cdf6f6d98ecd55663440de864f36207d59fd38b51282e1fe5afd54",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-04 modifiant le plan d’urbanisme\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-04\",\n        \"page\": 10,\n        \"citation\": \"2026-04 modifiant le Règlement de plan d’urbanisme\\n2014-04 ;\",\n        \"anchor\": \"2026-04 modifiant le Règlement\"\n      },\n      \"reason\": \"La résolution 2026-08-150 adopte les règlements énumérés, dont le 2026-04 ; les avis de motion et projets antérieurs ne créent pas d’unités supplémentaires.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-05 modifiant le zonage\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-05\",\n        \"page\": 10,\n        \"citation\": \"2026-05 modifiant le Règlement de zonage 2014-05 ;\",\n        \"anchor\": \"2026-05 modifiant le Règlement\"\n      },\n      \"reason\": \"La résolution 2026-08-150 adopte notamment le règlement 2026-05, qui constitue une unité distincte parmi les règlements explicitement nommés.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-06 modifiant le lotissement\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-06\",\n        \"page\": 10,\n        \"citation\": \"2026-06 modifiant le règlement de lotissement 2014-06 ;\",\n        \"anchor\": \"2026-06 modifiant le règlement\"\n      },\n      \"reason\": \"La résolution 2026-08-150 adopte notamment le règlement 2026-06 ; chaque règlement explicitement nommé donne une unité.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-07 modifiant la construction\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-07\",\n        \"page\": 10,\n        \"citation\": \"2026-07 modifiant le règlement de construction 2014-08;\",\n        \"anchor\": \"2026-07 modifiant le règlement\"\n      },\n      \"reason\": \"Le règlement 2026-07 fait partie des règlements adoptés par la résolution 2026-08-150 et doit être compté séparément.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-08 modifiant le PIIA\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-08\",\n        \"page\": 10,\n        \"citation\": \"2026-08 modifiant le règlement de PIIA 2014-09 ;\",\n        \"anchor\": \"2026-08 modifiant le règlement\"\n      },\n      \"reason\": \"La résolution 2026-08-150 adopte le règlement modificatif 2026-08, objet réglementaire distinct d’une demande individuelle de PIIA.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-09 modifiant les permis et certificats\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-09\",\n        \"page\": 10,\n        \"citation\": \"2026-09 modifiant le règlement de permis et certificats\\n2014-10 ;\",\n        \"anchor\": \"2026-09 modifiant le règlement\"\n      },\n      \"reason\": \"Le règlement 2026-09 est explicitement compris dans l’adoption collective de la résolution 2026-08-150.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-10 modifiant les dérogations mineures\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-10\",\n        \"page\": 10,\n        \"citation\": \"2026-10 modifiant le règlement de dérogation mineure\\n2008-06 ;\",\n        \"anchor\": \"2026-10 modifiant le règlement\"\n      },\n      \"reason\": \"La résolution 2026-08-150 adopte notamment le règlement 2026-10 ; cette adoption réglementaire constitue une unité distincte.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2025-11 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2025-11\",\n        \"page\": 10,\n        \"citation\": \"QUE le conseil municipal adopte le Règlement 2025-11 créant le\\nRèglement sur l’occupation et l’entretien des bâtiments.\",\n        \"anchor\": \"Règlement 2025-11\"\n      },\n      \"reason\": \"La résolution 2026-08-151 adopte ce règlement sur les bâtiments ; l’avis de motion et le projet de novembre 2025 sont seulement rappelés.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-14 modifiant le règlement sur les usages conditionnels\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-14\",\n        \"page\": 11,\n        \"citation\": \"QUE le conseil adopte le Règlement 2026-14 modifiant le\\nrèglement 2008-04 sur les usages conditionnels.\",\n        \"anchor\": \"Règlement 2026-14\"\n      },\n      \"reason\": \"La résolution 2026-08-152 adopte un règlement modificatif, et non une autorisation individuelle d’usage conditionnel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de non-modification du règlement 2010-11 — concordance au schéma\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2010-11\",\n        \"page\": 11,\n        \"citation\": \"Règlement 2010-11 sur les ententes relatives à des\\ntravaux municipaux ;\",\n        \"anchor\": \"Règlement 2010-11\"\n      },\n      \"reason\": \"La résolution 2026-08-153 vise la non-modification de ce règlement pour tenir compte du schéma et la transmission de l’avis correspondant, étape classée « inconnu ».\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de non-modification du règlement 2014-11 — concordance au schéma\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2014-11\",\n        \"page\": 11,\n        \"citation\": \"Règlement 2014-11 sur les conditions d’émission de\\npermis de construire ;\",\n        \"anchor\": \"Règlement 2014-11\"\n      },\n      \"reason\": \"Le règlement 2014-11 est explicitement nommé parmi les règlements visés par l’avis de non-modification de la résolution 2026-08-153 et constitue une unité distincte.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de non-modification du règlement 2023-02 — concordance au schéma\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2023-02\",\n        \"page\": 11,\n        \"citation\": \"Règlement 2023-02 relatif à la démolition d’immeubles ;\",\n        \"anchor\": \"Règlement 2023-02\"\n      },\n      \"reason\": \"La résolution 2026-08-153 comprend le règlement 2023-02 dans l’avis de non-modification ; chaque objet réglementaire nommé doit être distingué.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — toiture de la chambre froide au 12, rue Principale\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"12, rue Principale\",\n        \"page\": 12,\n        \"citation\": \"QUE le conseil municipal autorise, sur recommandation du CCU,\\nl’ajout d’une toiture pour protéger la chambre froide qui sera\\ninstallée à l’arrière de la Coopérative située au 12, rue Principale,\",\n        \"anchor\": \"12, rue Principale\"\n      },\n      \"reason\": \"La résolution 2026-08-154 autorise l’ajout de la toiture après étude des critères du PIIA ; le permis antérieur pour la chambre froide ne constitue pas une nouvelle unité.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — remplacement de l’abri automobile par un garage au 24, Allée des Sommets\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"24, Allée des Sommets\",\n        \"page\": 12,\n        \"citation\": \"QUE le conseil municipal autorise, sur recommandation du CCU,\\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\\nSommets, lot 5 662 886,\",\n        \"anchor\": \"24, Allée des\\nSommets\"\n      },\n      \"reason\": \"La résolution 2026-08-155 autorise le garage remplaçant l’abri automobile après examen des critères du PIIA, ce qui constitue une demande distincte.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Refus de dérogation mineure — piscine à 2,4 mètres de la limite latérale au 135, rue de la Serpentine\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"135, rue de la Serpentine\",\n        \"page\": 2,\n        \"citation\": \"j. Refus de la demande de dérogation mineure de\\nréduire la distance entre une piscine creusée et la\\nlimite latérale à 2,4 mètres au lieu de 3 mètres au\\n135, rue de la Serpentine.\",\n        \"anchor\": \"135, rue de la Serpentine\"\n      },\n      \"reason\": \"Le refus annoncé à l’ordre du jour est confirmé par la résolution 2026-08-156 à la page 13 ; une demande refusée reste une unité, sans doubler l’ordre du jour et la décision.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Refus de dérogation mineure — abattage hors période de gel sur le lot 5 191 546, chemin de la Tour\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"5 191 546\",\n        \"page\": 14,\n        \"citation\": \"refuse, sur recommandation du CCU, la\\ndemande de dérogation mineure visant à permettre l’abattage\\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\\npériode de gel.\",\n        \"anchor\": \"lot 5 191 546\"\n      },\n      \"reason\": \"La résolution 2026-08-157 refuse expressément l’abattage hors période de gel ; le refus doit être conservé sans contredire la contrainte environnementale.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — remplacement du revêtement de toiture au 572, 1er Rang\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"572, 1er Rang\",\n        \"page\": 14,\n        \"citation\": \"QUE le conseil municipal autorise, sur recommandation du CCU,\\nle remplacement du revêtement de la toiture de la résidence\\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle\",\n        \"anchor\": \"572, 1er Rang\"\n      },\n      \"reason\": \"La résolution 2026-08-158 autorise le remplacement du revêtement par de la tôle gris foncé après étude des critères du PIIA ; les petits PIIA sont inclus.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 2026-04 modifiant le plan d’urbanisme",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-04",
+    "page": 10,
+    "citation": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04 ;",
+    "anchor": "2026-04 modifiant le Règlement"
+   },
+   "reason": "La résolution 2026-08-150 adopte les règlements énumérés, dont le 2026-04 ; les avis de motion et projets antérieurs ne créent pas d’unités supplémentaires."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 2026-05 modifiant le zonage",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-05",
+    "page": 10,
+    "citation": "2026-05 modifiant le Règlement de zonage 2014-05 ;",
+    "anchor": "2026-05 modifiant le Règlement"
+   },
+   "reason": "La résolution 2026-08-150 adopte notamment le règlement 2026-05, qui constitue une unité distincte parmi les règlements explicitement nommés."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 2026-06 modifiant le lotissement",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-06",
+    "page": 10,
+    "citation": "2026-06 modifiant le règlement de lotissement 2014-06 ;",
+    "anchor": "2026-06 modifiant le règlement"
+   },
+   "reason": "La résolution 2026-08-150 adopte notamment le règlement 2026-06 ; chaque règlement explicitement nommé donne une unité."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 2026-07 modifiant la construction",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-07",
+    "page": 10,
+    "citation": "2026-07 modifiant le règlement de construction 2014-08;",
+    "anchor": "2026-07 modifiant le règlement"
+   },
+   "reason": "Le règlement 2026-07 fait partie des règlements adoptés par la résolution 2026-08-150 et doit être compté séparément."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 2026-08 modifiant le PIIA",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-08",
+    "page": 10,
+    "citation": "2026-08 modifiant le règlement de PIIA 2014-09 ;",
+    "anchor": "2026-08 modifiant le règlement"
+   },
+   "reason": "La résolution 2026-08-150 adopte le règlement modificatif 2026-08, objet réglementaire distinct d’une demande individuelle de PIIA."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 2026-09 modifiant les permis et certificats",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-09",
+    "page": 10,
+    "citation": "2026-09 modifiant le règlement de permis et certificats\n2014-10 ;",
+    "anchor": "2026-09 modifiant le règlement"
+   },
+   "reason": "Le règlement 2026-09 est explicitement compris dans l’adoption collective de la résolution 2026-08-150."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 2026-10 modifiant les dérogations mineures",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-10",
+    "page": 10,
+    "citation": "2026-10 modifiant le règlement de dérogation mineure\n2008-06 ;",
+    "anchor": "2026-10 modifiant le règlement"
+   },
+   "reason": "La résolution 2026-08-150 adopte notamment le règlement 2026-10 ; cette adoption réglementaire constitue une unité distincte."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 2025-11 sur l’occupation et l’entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2025-11",
+    "page": 10,
+    "citation": "QUE le conseil municipal adopte le Règlement 2025-11 créant le\nRèglement sur l’occupation et l’entretien des bâtiments.",
+    "anchor": "Règlement 2025-11"
+   },
+   "reason": "La résolution 2026-08-151 adopte ce règlement sur les bâtiments ; l’avis de motion et le projet de novembre 2025 sont seulement rappelés."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 2026-14 modifiant le règlement sur les usages conditionnels",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-14",
+    "page": 11,
+    "citation": "QUE le conseil adopte le Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels.",
+    "anchor": "Règlement 2026-14"
+   },
+   "reason": "La résolution 2026-08-152 adopte un règlement modificatif, et non une autorisation individuelle d’usage conditionnel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de non-modification du règlement 2010-11 — concordance au schéma",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2010-11",
+    "page": 11,
+    "citation": "Règlement 2010-11 sur les ententes relatives à des\ntravaux municipaux ;",
+    "anchor": "Règlement 2010-11"
+   },
+   "reason": "La résolution 2026-08-153 vise la non-modification de ce règlement pour tenir compte du schéma et la transmission de l’avis correspondant, étape classée « inconnu »."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de non-modification du règlement 2014-11 — concordance au schéma",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2014-11",
+    "page": 11,
+    "citation": "Règlement 2014-11 sur les conditions d’émission de\npermis de construire ;",
+    "anchor": "Règlement 2014-11"
+   },
+   "reason": "Le règlement 2014-11 est explicitement nommé parmi les règlements visés par l’avis de non-modification de la résolution 2026-08-153 et constitue une unité distincte."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de non-modification du règlement 2023-02 — concordance au schéma",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2023-02",
+    "page": 11,
+    "citation": "Règlement 2023-02 relatif à la démolition d’immeubles ;",
+    "anchor": "Règlement 2023-02"
+   },
+   "reason": "La résolution 2026-08-153 comprend le règlement 2023-02 dans l’avis de non-modification ; chaque objet réglementaire nommé doit être distingué."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "PIIA accordé — toiture de la chambre froide au 12, rue Principale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "12, rue Principale",
+    "page": 12,
+    "citation": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale,",
+    "anchor": "12, rue Principale"
+   },
+   "reason": "La résolution 2026-08-154 autorise l’ajout de la toiture après étude des critères du PIIA ; le permis antérieur pour la chambre froide ne constitue pas une nouvelle unité."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "PIIA accordé — remplacement de l’abri automobile par un garage au 24, Allée des Sommets",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "24, Allée des Sommets",
+    "page": 12,
+    "citation": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886,",
+    "anchor": "24, Allée des\nSommets"
+   },
+   "reason": "La résolution 2026-08-155 autorise le garage remplaçant l’abri automobile après examen des critères du PIIA, ce qui constitue une demande distincte."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Refus de dérogation mineure — piscine à 2,4 mètres de la limite latérale au 135, rue de la Serpentine",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "135, rue de la Serpentine",
+    "page": 2,
+    "citation": "j. Refus de la demande de dérogation mineure de\nréduire la distance entre une piscine creusée et la\nlimite latérale à 2,4 mètres au lieu de 3 mètres au\n135, rue de la Serpentine.",
+    "anchor": "135, rue de la Serpentine"
+   },
+   "reason": "Le refus annoncé à l’ordre du jour est confirmé par la résolution 2026-08-156 à la page 13 ; une demande refusée reste une unité, sans doubler l’ordre du jour et la décision."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Refus de dérogation mineure — abattage hors période de gel sur le lot 5 191 546, chemin de la Tour",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "5 191 546",
+    "page": 14,
+    "citation": "refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel.",
+    "anchor": "lot 5 191 546"
+   },
+   "reason": "La résolution 2026-08-157 refuse expressément l’abattage hors période de gel ; le refus doit être conservé sans contredire la contrainte environnementale."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "PIIA accordé — remplacement du revêtement de toiture au 572, 1er Rang",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "572, 1er Rang",
+    "page": 14,
+    "citation": "QUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle",
+    "anchor": "572, 1er Rang"
+   },
+   "reason": "La résolution 2026-08-158 autorise le remplacement du revêtement par de la tôle gris foncé après étude des critères du PIIA ; les petits PIIA sont inclus."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  },
+  {
+   "op": "add",
+   "id": "u09"
+  },
+  {
+   "op": "add",
+   "id": "u10"
+  },
+  {
+   "op": "add",
+   "id": "u11"
+  },
+  {
+   "op": "add",
+   "id": "u12"
+  },
+  {
+   "op": "add",
+   "id": "u13"
+  },
+  {
+   "op": "add",
+   "id": "u14"
+  },
+  {
+   "op": "add",
+   "id": "u15"
+  },
+  {
+   "op": "add",
+   "id": "u16"
+  },
+  {
+   "op": "add",
+   "id": "u17"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 17
+}

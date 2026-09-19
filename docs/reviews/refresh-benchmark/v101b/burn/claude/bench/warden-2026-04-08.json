@@ -1,0 +1,13 @@
+{
+ "id": "warden-2026-04-08",
+ "rc": 0,
+ "latencyMs": 259120,
+ "inputTokens": 2,
+ "outputTokens": 29637,
+ "cacheRead": 0,
+ "cacheCreate": 15947,
+ "costUsd": 0.9116420000000001,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 58722
+}

@@ -1,0 +1,74 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01e174afa3871e892056b2ac16eff8c2088afe711ebcf965b22813672952c4c2",
+ "verificationSha256": "45a7ee7790ab17671049346278842ffbb0bef385bce236e320e0061864d2696e",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"La rés. 2026-03-070 (p.16) vise un objet réglementaire explicite que le texte qualifie lui-même de « règlement d’urbanisme #389-2021 » et constate une décision du conseil qui « entame les procédures de modification du règlement 389-2021 » ; aucun avis de motion, projet ou adoption n’étant constaté, le stage « inconnu » est le seul exact. L’exclusion invoquée par A (loisirs, « entretiens de voirie sans développement explicite ») vise des travaux ou activités, non une modification de règlement d’urbanisme nommée comme telle par le document, donc « absent » est écarté.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Engagement des procédures de modification du règlement 389-2021 — circulation des motoneiges",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "389-2021",
+      "page": 16,
+      "citation": "que le conseil de la municipalité de Sainte-Thècle entame les procédures de modification du règlement 389-2021 afin de donner accès aux motoneigistes à un poste d’essence dans la municipalité",
+      "anchor": "règlement 389-2021",
+      "spanStart": 1642,
+      "spanEnd": 1833
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-070, page 16, engage explicitement les procédures de modification du règlement d’urbanisme 389-2021, sans constater un avis de motion ni une adoption."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Rés. 2026-03-070 p.16 atteste que le conseil « entame les procédures de modification du règlement 389-2021 » ; objet réglementaire explicite, aucune étape formelle (avis de motion) constatée, donc stage inconnu correct."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La circulation des motoneiges sur les chemins municipaux relève des loisirs et de la voirie sans développement explicite, exclu par les règles du corrigé, et l'engagement de procédures ne constitue pas une étape réglementaire formelle."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "La rés. 2026-03-070 (p.16) vise un objet réglementaire explicite que le texte qualifie lui-même de « règlement d’urbanisme #389-2021 » et constate une décision du conseil qui « entame les procédures de modification du règlement 389-2021 » ; aucun avis de motion, projet ou adoption n’étant constaté, le stage « inconnu » est le seul exact. L’exclusion invoquée par A (loisirs, « entretiens de voirie sans développement explicite ») vise des travaux ou activités, non une modification de règlement d’urbanisme nommée comme telle par le document, donc « absent » est écarté."
+  }
+ ]
+}

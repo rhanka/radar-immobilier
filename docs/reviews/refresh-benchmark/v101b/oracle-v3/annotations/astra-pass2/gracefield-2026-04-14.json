@@ -1,0 +1,100 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "d42504f55f765b6adf02bc18d624f90fcb9aa62de212a7312a35139df76a27fa",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Signature autorisée de l’entente de prêt d’un local au 30, rue Principale\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"30, rue Principale\",\n        \"page\": 14,\n        \"citation\": \"Considérant la demande formulée pour le prêt de locaux situés à l’étage\\nde la Clinique Santé, sise au 30, rue Principale, propriété de la Ville de\\nGracefield\",\n        \"anchor\": \"30, rue Principale\"\n      },\n      \"reason\": \"L’unité est valide, mais la citation doit reproduire à l’identique l’extrait de la page 14, y compris ses sauts de ligne.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 263-2026 relatif à l’occupation et à l’entretien des bâtiments patrimoniaux\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"263-2026\",\n        \"page\": 15,\n        \"citation\": \"2026-04-063 Adoption du règlement numéro 263-2026 relatif à\\nl’occupation et l’entretien des bâtiments patrimoniaux\",\n        \"anchor\": \"règlement numéro 263-2026\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le titre de la résolution comporte un saut de ligne après « relatif à ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Appui à la demande d’aliénation à la CPTAQ — lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"5 410 305\",\n        \"page\": 22,\n        \"citation\": \"2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du\\nQuébec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410\\n311\",\n        \"anchor\": \"Lots 5 410 305\"\n      },\n      \"reason\": \"L’appui à cette demande unique est correctement identifié, mais sa citation doit conserver les sauts de ligne du texte de la page 22.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Signature autorisée de l’entente de prêt d’un local au 30, rue Principale",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "30, rue Principale",
+    "page": 14,
+    "citation": "Considérant la demande formulée pour le prêt de locaux situés à l’étage\nde la Clinique Santé, sise au 30, rue Principale, propriété de la Ville de\nGracefield",
+    "anchor": "30, rue Principale"
+   },
+   "reason": "L’unité est valide, mais la citation doit reproduire à l’identique l’extrait de la page 14, y compris ses sauts de ligne."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Adoption du règlement 263-2026 relatif à l’occupation et à l’entretien des bâtiments patrimoniaux",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "263-2026",
+    "page": 15,
+    "citation": "2026-04-063 Adoption du règlement numéro 263-2026 relatif à\nl’occupation et l’entretien des bâtiments patrimoniaux",
+    "anchor": "règlement numéro 263-2026"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le titre de la résolution comporte un saut de ligne après « relatif à »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Appui à la demande d’aliénation à la CPTAQ — lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5 410 305",
+    "page": 22,
+    "citation": "2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du\nQuébec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410\n311",
+    "anchor": "Lots 5 410 305"
+   },
+   "reason": "L’appui à cette demande unique est correctement identifié, mais sa citation doit conserver les sauts de ligne du texte de la page 22."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 14,
+   "citation": "Considérant la demande formulée pour le prêt de locaux situés à l’étage\nde la Clinique Santé, sise au 30, rue Principale, propriété de la Ville de\nGracefield"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 15,
+   "citation": "2026-04-063 Adoption du règlement numéro 263-2026 relatif à\nl’occupation et l’entretien des bâtiments patrimoniaux"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 22,
+   "citation": "2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du\nQuébec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410\n311"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

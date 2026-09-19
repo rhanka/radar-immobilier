@@ -1,0 +1,332 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-369",
+   "label": "369 — Deuxième projet modifiant la grille des usages",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "status": "candidate",
+   "numero": "369",
+   "title": "Modification de la grille des usages du règlement de zonage numéro 265",
+   "stage": "2e_projet",
+   "municipality": "berthier-sur-mer",
+   "meetingDate": "2026-03-24",
+   "resolution": "2026-067",
+   "zones_ciblees": [
+    "Rb.23",
+    "Rb.24",
+    "Rb.25",
+    "Rd.5"
+   ],
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "evidence_refs": [
+    "ev-369",
+    "ev-zones",
+    "ev-rd5"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté.",
+     "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+     "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-rb23",
+   "label": "Rb.23",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "status": "candidate",
+   "code": "Rb.23",
+   "municipality": "berthier-sur-mer",
+   "description": "Grille visée par le projet 369 afin de la rendre autonome et indépendante des grilles Rb.24 et Rb.25.",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "evidence_refs": [
+    "ev-zones"
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "grille des usages permis, à laquelle réfère l'articl\nnuméro 265, est modifiée afin d'individ\nstinctes les grilles Rb.23, Rb.24 et Rb.25,",
+     "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+     "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-rb24",
+   "label": "Rb.24",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "status": "candidate",
+   "code": "Rb.24",
+   "municipality": "berthier-sur-mer",
+   "description": "Grille visée par l'individualisation proposée des grilles Rb.23, Rb.24 et Rb.25.",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "evidence_refs": [
+    "ev-zones"
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "grille des usages permis, à laquelle réfère l'articl\nnuméro 265, est modifiée afin d'individ\nstinctes les grilles Rb.23, Rb.24 et Rb.25,",
+     "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+     "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-rb25",
+   "label": "Rb.25",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "status": "candidate",
+   "code": "Rb.25",
+   "municipality": "berthier-sur-mer",
+   "description": "Grille visée par l'individualisation proposée des grilles Rb.23, Rb.24 et Rb.25.",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "evidence_refs": [
+    "ev-zones"
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "grille des usages permis, à laquelle réfère l'articl\nnuméro 265, est modifiée afin d'individ\nstinctes les grilles Rb.23, Rb.24 et Rb.25,",
+     "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+     "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-rd5",
+   "label": "Rd.5 — Nouvelle zone proposée",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "status": "candidate",
+   "code": "Rd.5",
+   "municipality": "berthier-sur-mer",
+   "description": "Nouvelle zone proposée dans le périmètre d'urbanisation; le projet prévoit l'inclusion des lots 6 553 420 et 6 553 421.",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "evidence_refs": [
+    "ev-rd5",
+    "ev-lots"
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "CONSIDÉRANT QUE la zone Rb 23, ainsique la création d'une nouvelle zone Rd.5,",
+     "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+     "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 10,
+     "excerpt": "lure les lots 6 553 420 et 6 553 421 dans la zone Rd.5, le\ntout tel qu'illustré au plan de zonage et aux grilles des usages\nfaisant partie intégrante du présent règlement.",
+     "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+     "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-372",
+   "label": "372 — Premier projet sur la démolition d'immeubles",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "status": "candidate",
+   "numero": "372",
+   "title": "Modification du règlement numéro 360 relatif à la démolition d'immeubles",
+   "objet": "Modification du champ d'application et de l'annexe du règlement de démolition, notamment pour retirer des bâtiments accessoires.",
+   "stage": "1er_projet",
+   "meetingDate": "2026-03-24",
+   "resolution": "2026-068",
+   "municipality": "berthier-sur-mer",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "evidence_refs": [
+    "ev-372"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté.",
+     "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+     "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-373",
+   "label": "373 — Premier projet sur la salubrité, l'occupation et l'entretien",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "status": "candidate",
+   "numero": "373",
+   "title": "Règlement relatif à la salubrité, à l'occupation et à l'entretien des bâtiments et logements",
+   "stage": "1er_projet",
+   "meetingDate": "2026-03-24",
+   "resolution": "2026-069",
+   "municipality": "berthier-sur-mer",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "evidence_refs": [
+    "ev-373"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté.",
+     "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+     "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-bail",
+   "label": "Bail municipal — La Marée Gourmande",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "status": "candidate",
+   "category": "bail_foncier",
+   "date": "2026-03-24",
+   "meetingDate": "2026-03-24",
+   "resolution": "2026-063",
+   "municipality": "berthier-sur-mer",
+   "scope": "local",
+   "amount_cad": 3200,
+   "description": "Conclusion autorisée d'un bail du terrain municipal avec le nouveau propriétaire du bâtiment de La Marée Gourmande : cinq ans, 3 200 $ par année, ajustement annuel selon l'IPC et maintien de l'usage de crémerie.",
+   "outcome": "autorisé",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "evidence_refs": [
+    "ev-bail"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\nGourmande,",
+     "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+     "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+     "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-369",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "QUE le deuxième projet de règlement numéro 369 modifiant la grille des usages\n\ndu règlement de zonage numéro 265 soit adopté."
+  },
+  {
+   "id": "ev-zones",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+   "modality": "pdf",
+   "page": 11,
+   "excerpt": "grille des usages permis, à laquelle réfère l'articl\nnuméro 265, est modifiée afin d'individ\nstinctes les grilles Rb.23, Rb.24 et Rb.25,"
+  },
+  {
+   "id": "ev-rd5",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "CONSIDÉRANT QUE la zone Rb 23, ainsique la création d'une nouvelle zone Rd.5,"
+  },
+  {
+   "id": "ev-lots",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "lure les lots 6 553 420 et 6 553 421 dans la zone Rd.5, le\ntout tel qu'illustré au plan de zonage et aux grilles des usages\nfaisant partie intégrante du présent règlement."
+  },
+  {
+   "id": "ev-372",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "QUE le premier projet de règlement numéro 372 ayant pour objet de modifier le\n\nrèglement numéro 360 relatif à la démolition d'immeubles soit adopté."
+  },
+  {
+   "id": "ev-360",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "ATTENDU que la municipalité de Berthier-sur-Mer a adopté en date du 2\ndécembre 2024|e règlement numéro 360 mpdifiant le règlement numéro 354\nrelatif à la démolition d'immeubles;"
+  },
+  {
+   "id": "ev-373",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "QUE la municipalité adopte le premier projet de Règlement numéro373 relatif à\nla salubrité, à I'occupation et à I'entretien des bâtiments et logements soit adopté."
+  },
+  {
+   "id": "ev-bail",
+   "source_file": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "rawRef": "raw/proces-verbaux-berthier-sur-mer/cas/10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904.pdf",
+   "docSha": "10c7a06ab9d0a72d615969820a186b63b5870cf618781839f82250950935e904",
+   "sourceUrl": "https://berthiersurmer.ca/wp-content/uploads/2026/04/PV_2026-03-24_extra-reglements_signe.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain\navec le nouveau propriétaire du bâtiment exploité sous le nom La Marée\nGourmande, pour une durée de cinq (5) ans au montant de 3 200,00 $ par\nannée, incluant un ajustement annuel bdsé sur l'indice des prix à la\nconsommation (lPC);\n\nQUE l'usage de crémerie soit maintenu conformément aux conditions\nconvenues ;"
+  }
+ ],
+ "input_tokens": 22400,
+ "output_tokens": 7050
+}

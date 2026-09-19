@@ -1,0 +1,79 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "e9ffba7a5607859ac6b71357792f0a07c1963efe4a6cdff4626f2ea61cf97634",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Signature autorisée de l’entente de prêt d’un local au 30, rue Principale\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"30, rue Principale\",\n        \"page\": 14,\n        \"citation\": \"Considérant la demande formulée pour le prêt de locaux situés à l’étage\\nde la Clinique Santé, sise au 30, rue Principale, propriété de la Ville de\\nGracefield ;\",\n        \"anchor\": \"30, rue Principale\"\n      },\n      \"reason\": \"La résolution 2026-04-062 accepte le prêt d’un local au Repère Familial et autorise la signature des documents, ce qui constitue une convention de prêt immobilier à classer au stade « inconnu ».\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 263-2026 relatif à l’occupation et à l’entretien des bâtiments patrimoniaux\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"263-2026\",\n        \"page\": 15,\n        \"citation\": \"2026-04-063 Adoption du règlement numéro 263-2026 relatif à\\nl’occupation et l’entretien des bâtiments patrimoniaux\",\n        \"anchor\": \"règlement numéro 263-2026\"\n      },\n      \"reason\": \"Le conseil adopte ce règlement d’urbanisme dans la présente séance ; l’avis de motion, le projet et la consultation antérieurs ne sont que des rappels historiques.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Appui à la demande d’aliénation à la CPTAQ — lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"5 410 305\",\n        \"page\": 22,\n        \"citation\": \"2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du\\nQuébec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410\\n311\",\n        \"anchor\": \"Lots 5 410 305\"\n      },\n      \"reason\": \"La résolution 2026-04-064 appuie et recommande cette demande foncière unique portant sur plusieurs lots, sans constituer elle-même une autorisation d’aliénation de la CPTAQ.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Signature autorisée de l’entente de prêt d’un local au 30, rue Principale",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "30, rue Principale",
+    "page": 14,
+    "citation": "Considérant la demande formulée pour le prêt de locaux situés à l’étage\nde la Clinique Santé, sise au 30, rue Principale, propriété de la Ville de\nGracefield ;",
+    "anchor": "30, rue Principale"
+   },
+   "reason": "La résolution 2026-04-062 accepte le prêt d’un local au Repère Familial et autorise la signature des documents, ce qui constitue une convention de prêt immobilier à classer au stade « inconnu »."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 263-2026 relatif à l’occupation et à l’entretien des bâtiments patrimoniaux",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "263-2026",
+    "page": 15,
+    "citation": "2026-04-063 Adoption du règlement numéro 263-2026 relatif à\nl’occupation et l’entretien des bâtiments patrimoniaux",
+    "anchor": "règlement numéro 263-2026"
+   },
+   "reason": "Le conseil adopte ce règlement d’urbanisme dans la présente séance ; l’avis de motion, le projet et la consultation antérieurs ne sont que des rappels historiques."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Appui à la demande d’aliénation à la CPTAQ — lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5 410 305",
+    "page": 22,
+    "citation": "2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du\nQuébec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410\n311",
+    "anchor": "Lots 5 410 305"
+   },
+   "reason": "La résolution 2026-04-064 appuie et recommande cette demande foncière unique portant sur plusieurs lots, sans constituer elle-même une autorisation d’aliénation de la CPTAQ."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

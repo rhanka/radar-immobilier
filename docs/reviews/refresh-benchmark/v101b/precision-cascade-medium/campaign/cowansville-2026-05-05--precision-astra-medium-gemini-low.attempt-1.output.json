@@ -1,0 +1,1152 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-1571-08-2026",
+   "label": "Projet de règlement 1571-08-2026 — PIIA",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "numero": "1571-08-2026",
+   "municipality": "cowansville",
+   "meetingDate": "2026-05-05",
+   "stage": "projet",
+   "resolution": "256-05-2026",
+   "objet": "Actualiser les demandes et travaux assujettis ou exclus du PIIA et modifier les objectifs et critères de l’annexe XV, Les Hauteurs de Sweetsburg.",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "D’adopter le projet de règlement numéro 1571-08-2026 modifiant le règlement\nnuméro 1571 relatif aux plans d’implantation et d’intégration architecturale",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1841-53-2026",
+   "label": "Premier projet de règlement 1841-53-2026 — Zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "numero": "1841-53-2026",
+   "municipality": "cowansville",
+   "meetingDate": "2026-05-05",
+   "stage": "1er_projet",
+   "resolution": "258-05-2026",
+   "zones_ciblees": [
+    "Rc-23",
+    "Cga-1",
+    "Cbb-1",
+    "Ib-1"
+   ],
+   "objet": "Permettre les habitations de 26 logements et quatre étages dans Rc-23, agrandir cette zone à même Cga-1, assouplir les marges latérales et l’aire d’agrément, exclure le chenil dans Cbb-1 et l’autoriser une seule fois dans Ib-1.",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-258",
+   "label": "Adoption du premier projet de rezonage 1841-53-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "rezonage",
+   "decision": "approuvé",
+   "etape": "projet_reglement",
+   "etape_date": "2026-05-05",
+   "reglement_number": "1841-53-2026",
+   "no_lot": "6512063",
+   "resolution": "258-05-2026",
+   "description": "Adoption du premier projet; agrandissement projeté de Rc-23 pour intégrer le terrain municipal, autorisation projetée d’immeubles de 26 logements et quatre étages et modification des exceptions de chenil. Consultation publique prévue le 20 mai 2026, avec possibilité de changement.",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-rc23",
+   "label": "Rc-23 — rue James",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "code": "Rc-23",
+   "municipality": "cowansville",
+   "secteur": "rue James",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-cga1",
+   "label": "Cga-1",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "code": "Cga-1",
+   "municipality": "cowansville",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-cbb1",
+   "label": "Cbb-1 — rue de la Rivière",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "code": "Cbb-1",
+   "municipality": "cowansville",
+   "secteur": "rue de la Rivière",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-ib1",
+   "label": "Ib-1 — chemin Brosseau",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "code": "Ib-1",
+   "municipality": "cowansville",
+   "secteur": "chemin Brosseau",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1842-06-2026",
+   "label": "Projet de règlement 1842-06-2026 — Lotissement et cessions pour parcs",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "numero": "1842-06-2026",
+   "municipality": "cowansville",
+   "meetingDate": "2026-05-05",
+   "stage": "projet",
+   "resolution": "260-05-2026",
+   "objet": "Préciser les cessions pour parcs, actualiser les exemptions, introduire des règles de rénovation cadastrale et clarifier les dispositions pour les projets intégrés.",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’adopter le projet de règlement numéro 1842-06-2026 modifiant le règlement\nde lotissement numéro 1842 afin de préciser les dispositions relatives aux",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1899-04-2026",
+   "label": "Projet 1899-04-2026 — Gestion des eaux",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "numero": "1899-04-2026",
+   "municipality": "cowansville",
+   "meetingDate": "2026-05-05",
+   "stage": "projet",
+   "resolution": "251-05-2026",
+   "objet": "Modifier les obligations du requérant relatives à l’entretien, au nettoyage et au bon fonctionnement des raccordements d’aqueduc et d’égout.",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "Madame la conseillère Renée Fortin dépose le projet de Règlement numéro\n1899-04-2026 modifiant le règlement numéro 1899 concernant la gestion des\neaux, tel qu’amendé.",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1934-02-2026",
+   "label": "Projet 1934-02-2026 — Tarification des réseaux",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "numero": "1934-02-2026",
+   "municipality": "cowansville",
+   "meetingDate": "2026-05-05",
+   "stage": "projet",
+   "resolution": "252-05-2026",
+   "objet": "Modifier la tarification rattachée aux travaux relatifs aux réseaux d’égouts et d’aqueduc.",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "Monsieur le conseiller Stéphane Lussier dépose le projet de Règlement\nnuméro 1934-02-2026 modifiant le règlement numéro 1934 décrétant la",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1866-01-2026",
+   "label": "Règlement 1866-01-2026 — Droits de mutation",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "numero": "1866-01-2026",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "stage": "adoption",
+   "resolution": "253-05-2026",
+   "objet": "Modifier les modalités de paiement et de recouvrement des droits de mutation.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "D’adopter le règlement numéro 1866-01-2026 modifiant le règlement 1866\ndécrétant l'imposition d'un droit supplétif et établissant un taux de droit de",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1931-01-2026",
+   "label": "Règlement 1931-01-2026 — Matières résiduelles",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "numero": "1931-01-2026",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "stage": "adoption",
+   "resolution": "254-05-2026",
+   "objet": "Clarifier les définitions liées aux ICI et les responsabilités de la Ville; modifier l’article 44.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "D’adopter le règlement numéro 1931-01-2026 modifiant le règlement numéro\n1931 concernant la gestion des matières résiduelles.",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-262",
+   "label": "Dérogation 2026-006 — 518 rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-006",
+   "resolution": "262-05-2026",
+   "decision": "approuvé",
+   "zone_ref": "Cbc-2",
+   "no_lot": "3355762",
+   "description": "Enseigne directionnelle à 0,5 m de l’emprise plutôt que 1,5 m et enseigne menu rétroéclairée en aluminium et acrylique translucide.",
+   "conditions": [
+    "Éteindre l’éclairage du panneau menu hors des heures d’ouverture.",
+    "Réserver des cases pour les clients en attente au service à l’auto aux périodes de pointe.",
+    "Faire valider préalablement l’installation finale du poteau directionnel à partir d’un prototype grandeur réelle.",
+    "Période d’essai d’un an pour les aménagements du service au volant; possibilité d’exiger un nouveau plan."
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D'approuver la demande de dérogation mineure 2026-006 relative à la\npropriété sise au 518 rue Principale, lot 3 355 762 du cadastre du Québec, afin\nde permettre :",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-263",
+   "label": "Dérogation 2026-034 — 111 rue du Muscadet",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-034",
+   "resolution": "263-05-2026",
+   "decision": "approuvé",
+   "no_lot": "4445225",
+   "description": "Autoriser 82,6 m² de bâtiments accessoires au lieu du maximum de 78,91 m².",
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "D'approuver la demande de dérogation mineure 2026-034 relative à la\npropriété sise au 111 rue du Muscadet, lot 4 445 225 du cadastre du Québec,",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-264",
+   "label": "PIIA 2026-003 — 518 rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-003",
+   "resolution": "264-05-2026",
+   "decision": "approuvé",
+   "no_lot": "3355762",
+   "description": "Installation d’affichage et travaux connexes pour aménager un service au volant.",
+   "conditions": [
+    "Éteindre le panneau menu hors des heures d’ouverture.",
+    "Réserver des cases d’attente au service à l’auto.",
+    "Validation préalable du poteau directionnel au moyen d’un prototype grandeur réelle.",
+    "Période d’essai d’un an des aménagements; nouveau plan exigible en cas de problèmes."
+   ],
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "D’approuver la demande de PIIA 2026-003 relative à la propriété sise au 518\nrue Principale, lot 3 355 762 du cadastre du Québec, de manière à permettre",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-265",
+   "label": "PIIA 2025-087 — 1529 rue du Sud",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2025-087",
+   "resolution": "265-05-2026",
+   "decision": "approuvé",
+   "no_lot": "3798733",
+   "description": "Affichage et peinture pour le nouvel occupant Coffre aux Trésors.",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "D’approuver la demande de PIIA 2025-087 relative à la propriété sise au 1529\nrue du Sud, lot 3 798 733 du cadastre du Québec, de manière à permettre",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-266",
+   "label": "Refus PIIA 2026-029 — 295 rue d’Ontario",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-029",
+   "resolution": "266-05-2026",
+   "decision": "refusé",
+   "description": "Construction d’un garage de 24 par 28 pieds avec rangement sur les lots 6407699 et 6407703.",
+   "motif": "Insuffisance de données sur les aménagements existants et proposés pour apprécier l’intégration du bâtiment.",
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "De refuser la demande de PIIA 2026-029 relative à la propriété sise au 295 rue\nd’Ontario, lots 6 407 699 et 6 407 703 du cadastre du Québec, de manière à",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-267",
+   "label": "PIIA 2026-043 et 2026-047 — 1600 rue du Sud",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-043 et 2026-047",
+   "resolution": "267-05-2026",
+   "decision": "approuvé",
+   "no_lot": "3798742",
+   "description": "Agrandissement pour un comptoir de restauration avec service au volant et remplacement d’une fenêtre par une porte dans la verrière pour un comptoir de glaces.",
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec, de\nmanière à permettre :",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-268",
+   "label": "PIIA 2026-040 — 101 rue Albert",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-040",
+   "resolution": "268-05-2026",
+   "decision": "approuvé",
+   "no_lot": "3357701",
+   "description": "Nouvelle enseigne sur support existant, local 1002.",
+   "conditions": [
+    "Conserver uniquement l’image et le nom Traiteur Les 6 B.",
+    "Supprimer Chaud, Froid, le numéro de téléphone et le courriel.",
+    "Utiliser un panneau en acrylique et non en composite d’aluminium."
+   ],
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "D’approuver la demande de PIIA 2026-040 relative à la propriété sise au 101\nrue Albert, lot 3 357 701 du cadastre du Québec, de manière à permettre",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-269",
+   "label": "PIIA 2026-013 — 454 rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-013",
+   "resolution": "269-05-2026",
+   "decision": "approuvé",
+   "no_lot": "3356478",
+   "description": "Réfection majeure de la résidence avec agrandissement.",
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "D’approuver la demande de PIIA 2026-013 relative à la propriété sise au 454\nrue Principale, lot 3 356 478 du cadastre du Québec, de manière à permettre",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-270",
+   "label": "PIIA 2026-042 — 419 rue de la Rivière",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-042",
+   "resolution": "270-05-2026",
+   "decision": "approuvé",
+   "description": "Retrait de la marquise à l’entrée du restaurant LA Table 419, lots 3799479 et 5759231.",
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "D’approuver la demande de PIIA 2026-042 relative à la propriété sise au 419\nrue de la Rivière, lots 3 799 479 et 5 759 231 du cadastre du Québec, de",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-271",
+   "label": "PIIA 2026-039 — Projet Le Nordik",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-039",
+   "resolution": "271-05-2026",
+   "decision": "approuvé",
+   "description": "Modifications au projet résidentiel Le Nordik, 141 à 153 rue du Nord, après adoption du PPCMOI 2025-115; lots 6677103 à 6677110, 6692067 et 6388104.",
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "D’approuver la demande de PIIA 2026-039 relative aux propriétés sises aux\n141 à 153 rue du Nord, lots 6 677 103 à 6 677 110, 6 692 067 et 6 388 104 du",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-272",
+   "label": "PIIA 2026-041 — 111 rue William",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-041",
+   "resolution": "272-05-2026",
+   "decision": "approuvé",
+   "no_lot": "3356907",
+   "description": "Installation d’une enseigne au-dessus de l’entrée principale.",
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "D’approuver la demande de PIIA 2026-041 relative à la propriété sise au 111\nrue William, lot 3 356 907 du cadastre du Québec, de manière à permettre",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-273",
+   "label": "PIIA 2026-044 — 191 rue Pauline-Julien",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-044",
+   "resolution": "273-05-2026",
+   "decision": "approuvé",
+   "no_lot": "6592066",
+   "description": "Installation d’un bâtiment accessoire.",
+   "conditions": [
+    "Toit à deux pentes uniquement.",
+    "Aucun pignon au-dessus de la porte.",
+    "Soffite et solin Minerai de fer, ou noirs si le cabanon voisin adjacent est noir.",
+    "Clin blanc pur assorti au bâtiment principal."
+   ],
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "D’approuver la demande de PIIA 2026-044 relative à la propriété sise au 191\nrue Pauline-Julien, lot 6 592 066 du cadastre du Québec, de manière à",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-274",
+   "label": "PIIA 2026-045 — 192 rue Albert-Millaire",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-045",
+   "resolution": "274-05-2026",
+   "decision": "approuvé",
+   "no_lot": "6592073",
+   "description": "Bâtiment accessoire de 10 par 12 pieds sans appentis.",
+   "conditions": [
+    "Un seul matériau de revêtement extérieur : fibrociment ou, idéalement, acier."
+   ],
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "D’approuver la demande de PIIA 2026-045 relative à la propriété sise au 192\nrue Albert-Millaire, lot 6 592 073 du cadastre du Québec, de manière à",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-275",
+   "label": "PIIA 2026-046 — 82 rue Pine",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-046",
+   "resolution": "275-05-2026",
+   "decision": "approuvé",
+   "no_lot": "5236370",
+   "description": "Agrandissement par conversion d’une partie de terrasse en véranda quatre saisons.",
+   "conditions": [
+    "Si le revêtement identique est indisponible, utiliser le vinyle vertical ROYAL Amande grillée proposé.",
+    "Regrouper les trois fenêtres pour créer une baie vitrée sur le mur arrière.",
+    "Solin et soffite noirs.",
+    "Fenêtres de 60 pouces plutôt que 48 pouces.",
+    "Ouvertures idéalement noires."
+   ],
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "D’approuver la demande de PIIA 2026-046 relative à la propriété sise au 82\nrue Pine, lot 5 236 370 du cadastre du Québec, de manière à permettre",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-276",
+   "label": "PIIA 2026-051 — Quartier des Comédiens",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-051",
+   "resolution": "276-05-2026",
+   "decision": "approuvé",
+   "description": "Enclos pour bacs de matières résiduelles des maisons de ville sans garage intégré, rues Pauline-Julien et Albert-Millaire.",
+   "conditions": [
+    "Revêtement identique aux entrées contiguës.",
+    "Dimensions de 86 par 30 par 48 pouces; trois bacs maximum.",
+    "Rangement en cour avant réservé aux unités centrales sans garage.",
+    "Unités de coin et unités avec garage : rangement en cour latérale ou arrière exclusivement."
+   ],
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "D’approuver la demande de PIIA 2026-051 relative aux propriétés situées sur\nles rues Pauline-Julien et Albert-Millaire, afin de permettre l’installation",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-277",
+   "label": "Refus PIIA 2026-035 — Rue Bernard",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-035",
+   "resolution": "277-05-2026",
+   "decision": "refusé",
+   "no_lot": "3356557",
+   "description": "Immeuble multifamilial de 9 logements et 3 étages avec dalle sur sol, à l’angle des rues Bernard et du Nord.",
+   "motif": "Composition architecturale et qualité des façades insuffisantes; façade secondaire peu dynamique; matériaux nombreux et couleurs foncées défavorables à l’intégration.",
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "De refuser la demande de PIIA 2026-035 relative à la future propriété sise à\nl’angle des rues Bernard et du Nord, lot 3 356 557 du cadastre du Québec, de",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-278",
+   "label": "Refus de modification PIIA 2025-120 — Rue Paul-Hébert",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2025-120",
+   "resolution": "278-05-2026",
+   "decision": "refusé",
+   "description": "Modification de l’implantation de deux habitations multifamiliales de 4 logements avec garages intérieurs, 403 et 407 rue Paul-Hébert, lots 6691576 et 6691577.",
+   "motif": "Manque d’intégration et de cohérence avec le contexte et documentation insuffisante.",
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "De refuser la demande de PIIA 2025-120 relative aux futures propriétés sises\nsur la rue Paul-Hébert, lots 6 691 576 et 6 691 577 du cadastre du Québec, de",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-279",
+   "label": "Modification PIIA 2025-117 — 1447 rue du Sud",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-05-05",
+   "dossier": "2025-117",
+   "resolution": "279-05-2026",
+   "decision": "approuvé",
+   "no_lot": "3798608",
+   "description": "Modification de la version 2 d’une habitation multifamiliale de 6 logements avec bâtiment accessoire : immeuble légèrement agrandi et tourné pour être parallèle à la limite nord.",
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "D’approuver la demande de PIIA 2025-117 relative à la future propriété sise\nau 1447 rue du Sud, lot 3 798 608 du cadastre du Québec, de manière à",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-280",
+   "label": "Rendu architectural CDEMO 2025-116 — Rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "etape": "inconnu",
+   "etape_date": "2026-05-05",
+   "dossier": "2025-116",
+   "resolution": "280-05-2026",
+   "decision": "approuvé",
+   "demandeur_corporate": "Gestion Lussard Inc.",
+   "description": "Approbation du rendu architectural du remplacement au 1037, 1039 et 1041 rue Principale, lots 3356100, 3356101 et 3356102 : deux triplex et un duplex.",
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "D'approuver la demande d’approbation du rendu architectural relative à la\npropriété sise au 1037, 1039 et 1041 rue Principale, lots 3 356 100, 3 356 101",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-282",
+   "label": "Contribution pour parcs — Lot projeté 6725842",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "category": "lotissement",
+   "resolution": "282-05-2026",
+   "no_lot": "6725842",
+   "reglement_number": "1842",
+   "amount_cad": 14500,
+   "description": "Contribution en argent exigée avant délivrance du permis de lotissement, boulevard Pierre-Laporte. Terrain destiné à un usage résidentiel unifamilial isolé; contribution de 10 % de sa valeur marchande.",
+   "citations": [
+    {
+     "page": 25,
+     "excerpt": "D'exiger une contribution pour fins de parcs, terrains de jeux et espaces\nnaturels de 14 500 $ en argent, préalablement à l'autorisation de délivrance du",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-250",
+   "label": "Mainlevée et renonciation au droit de préemption — Rue du Sud",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "category": "foncier",
+   "resolution": "250-05-2026",
+   "no_lot": "6579086",
+   "description": "Autorisation de signer une mainlevée totale d’hypothèque et de renoncer au droit de préemption de l’acte 28 261 535 pour permettre le financement d’une construction commencée rue du Sud. Le titre et les considérants divergent sur le nom de la société.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "D’autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l’acte\nnotarié à intervenir afin d'accorder une mainlevée totale de l'hypothèque et afin",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-283",
+   "label": "Rétrocession d’un terrain — Rue des Pivoines",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "category": "foncier",
+   "resolution": "283-05-2026",
+   "no_lot": "4621525",
+   "description": "Signature autorisée de la rétrocession du terrain à la Ville; remboursement limité à 90 % du prix de vente reçu.",
+   "citations": [
+    {
+     "page": 25,
+     "excerpt": "D’autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l’acte\nde rétrocession (acte de vente) à intervenir entre les propriétaires du lot",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-285",
+   "label": "Avenant d’infrastructures — Village Scolaire inc.",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "category": "developpement_residentiel",
+   "resolution": "285-05-2026",
+   "description": "Accord de principe au projet modifié VillageÉcole et entérinement de l’avenant 1 du protocole d’infrastructures souterraines à céder à la Ville, rue du Nord. Lots 6476186, 6476187, 6176188, 6625575, 6625576 et 6625577.",
+   "citations": [
+    {
+     "page": 27,
+     "excerpt": "De donner un accord de principe au projet modifié de développement VillageÉcole, illustré au plan de lotissement préparé par M. Kevin Migué, arpenteurgéomètre,",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-291",
+   "label": "Servitudes et fossé — Arrière-lot Jules-Monast",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "category": "infrastructure",
+   "resolution": "291-05-2026",
+   "amount_cad": 94000,
+   "description": "Dépense maximale, taxes nettes, pour acquisition de servitudes, services professionnels et fossé de drainage derrière les propriétés de la rue Jules-Monast, afin de régulariser les empiètements de la rue Albert.",
+   "citations": [
+    {
+     "page": 31,
+     "excerpt": "D’autoriser une dépense maximale de 94 000 $ taxes nettes pour :",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-315",
+   "label": "Second projet PPCMOI 2026-032 — 245 rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "status": "candidate",
+   "municipality": "cowansville",
+   "date": "2026-05-05",
+   "kind": "ppcmoi",
+   "etape": "second_projet",
+   "etape_date": "2026-05-05",
+   "dossier": "2026-032",
+   "resolution": "315-05-2026",
+   "decision": "approuvé",
+   "zone_ref": "CaP-1",
+   "no_lot": "3357427",
+   "reglement_number": "1881",
+   "description": "Adoption du second projet pour ajouter une unité d’hébergement de courte durée, portant le total à quatre unités, et régulariser le stationnement : 11 cases au lieu de 13 et diverses anomalies d’implantation et d’aménagement paysager.",
+   "conditions": [
+    "Le requérant doit être propriétaire-occupant; sinon l’autorisation est annulée et l’usage doit cesser.",
+    "Maximum de quatre unités de location à court terme : 103, 104, 01 et 204.",
+    "L’agrandissement accueillant l’unité 204 doit faire l’objet d’une révision et d’une approbation PIIA."
+   ],
+   "citations": [
+    {
+     "page": 42,
+     "excerpt": "D’adopter le second projet de PPCMOI numéro 2026-032, afin d’autoriser, sur\nl’immeuble situé au 245, rue Principale (lot 3 357 427 du cadastre du Québec)",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-258",
+   "target": "zone-rc23",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-258",
+   "target": "zone-cga1",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-258",
+   "target": "zone-cbb1",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-258",
+   "target": "zone-ib1",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+     "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+     "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+     "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-zonage",
+   "source_file": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "rawRef": "raw/proces-verbaux-cowansville/cas/0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d.pdf",
+   "docSha": "0046957e795a2d62228c2c6dcc93b89fc02dbf3a31e11aed1901dbfb8c2c184d",
+   "sourceUrl": "https://www.cowansville.ca/storage/app/media/vie-municipale/democratie/proces-verbaux/2026/pv_seance_2026-05-05.pdf",
+   "modality": "pdf",
+   "page": 12,
+   "excerpt": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26\nlogements et de quatre étages dans la zone Rc-23 (rue James), d’agrandir\ncette zone à même la zone Cga-1, d’y prévoir des assouplissements relatifs\naux marges latérales et à l’aire d’agrément, ainsi que d’exclure l’usage de\nchenil dans la zone Cbb-1 (rue de la Rivière) et de l’autoriser une seule fois\ndans la zone Ib-1 (chemin Brosseau)."
+  }
+ ],
+ "input_tokens": 27800,
+ "output_tokens": 10900
+}

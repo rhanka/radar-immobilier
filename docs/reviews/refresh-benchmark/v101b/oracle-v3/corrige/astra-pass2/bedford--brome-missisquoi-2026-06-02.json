@@ -1,0 +1,481 @@
+{
+ "documentId": "bedford--brome-missisquoi-2026-06-02",
+ "nextId": 13,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion – Règlement 765-26 sur l’occupation du domaine public",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "765-26",
+    "page": 4,
+    "citation": "Avis de motion et dépôt du projet de règlement numéro 765-26 relativement à l’occupation du domaine public",
+    "anchor": "règlement numéro 765-26",
+    "spanStart": 556,
+    "spanEnd": 662
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion – Règlement 765-26 sur l’occupation du domaine public",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "765-26",
+      "page": 4,
+      "citation": "Avis de motion et dépôt du projet de règlement numéro 765-26 relativement à l’occupation du domaine public",
+      "anchor": "règlement numéro 765-26",
+      "spanStart": 556,
+      "spanEnd": 662
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-170 constate un avis de motion actuel, qui constitue une unité distincte du dépôt du projet."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement 765-26 sur l’occupation du domaine public",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "765-26",
+    "page": 4,
+    "citation": "Je dépose et présente le projet de règlement numéro 765-26 relativement à l’occupation du domaine public",
+    "anchor": "règlement numéro 765-26",
+    "spanStart": 914,
+    "spanEnd": 1018
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement 765-26 sur l’occupation du domaine public",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "765-26",
+      "page": 4,
+      "citation": "Je dépose et présente le projet de règlement numéro 765-26 relativement à l’occupation du domaine public",
+      "anchor": "règlement numéro 765-26",
+      "spanStart": 914,
+      "spanEnd": 1018
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le projet est expressément déposé et présenté pendant la séance; cette étape doit être distinguée de l’avis de motion, sans inférer une adoption finale."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "PIIA accordé – 152, Rivière – Remplacement de toiture",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "152, Rivière",
+    "page": 9,
+    "citation": "PIIA – 152, Rivière – Remplacement de toiture",
+    "anchor": "PIIA – 152, Rivière",
+    "spanStart": 15,
+    "spanEnd": 60
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accordé – 152, Rivière – Remplacement de toiture",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "152, Rivière",
+      "page": 9,
+      "citation": "PIIA – 152, Rivière – Remplacement de toiture",
+      "anchor": "PIIA – 152, Rivière",
+      "spanStart": 15,
+      "spanEnd": 60
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-177 accorde la demande de PIIA pour le remplacement de toiture; les petits PIIA sont inclus."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "PIIA accordé – Lot 5 603 254, rue Leclair – Nouveau quatre logements, proposition révisée",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "5 603 254",
+    "page": 9,
+    "citation": "PIIA – Lot 5 603 254 Rue Leclair – Nouveau 4 Plex",
+    "anchor": "Lot 5 603 254",
+    "spanStart": 519,
+    "spanEnd": 568
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accordé – Lot 5 603 254, rue Leclair – Nouveau quatre logements, proposition révisée",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "5 603 254",
+      "page": 9,
+      "citation": "PIIA – Lot 5 603 254 Rue Leclair – Nouveau 4 Plex",
+      "anchor": "Lot 5 603 254",
+      "spanStart": 519,
+      "spanEnd": 568
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-178 accorde la nouvelle proposition de PIIA; le refus initial rappelé dans un considérant ne crée pas d’unité supplémentaire."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée – 125, rue Alcée-Rocheleau – Marge droite de stationnement",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "125, rue Alcée-Rocheleau",
+    "page": 9,
+    "citation": "Considérant la demande soumise afin de permettre l’implantation d’un stationnement à moins de 60 centimètres de la limite droite pour le 125, rue Alcée-Rocheleau",
+    "anchor": "125, rue Alcée-Rocheleau",
+    "spanStart": 1624,
+    "spanEnd": 1785
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée – 125, rue Alcée-Rocheleau – Marge droite de stationnement",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "125, rue Alcée-Rocheleau",
+      "page": 9,
+      "citation": "Considérant la demande soumise afin de permettre l’implantation d’un stationnement à moins de 60 centimètres de la limite droite pour le 125, rue Alcée-Rocheleau",
+      "anchor": "125, rue Alcée-Rocheleau",
+      "spanStart": 1624,
+      "spanEnd": 1785
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-179 accorde notamment la demande explicitement localisée au 125, contrairement au 155 annoncé dans l’ordre du jour; chaque demande nommée constitue une unité."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée – 137, rue Alcée-Rocheleau – Marge gauche de stationnement",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "137, rue Alcée-Rocheleau",
+    "page": 9,
+    "citation": "Dérogation mineure – 125 et 137, rue Alcée-Rocheleau – Réduction de marge de stationnement",
+    "anchor": "137, rue Alcée-Rocheleau",
+    "spanStart": 1365,
+    "spanEnd": 1455
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée – 137, rue Alcée-Rocheleau – Marge gauche de stationnement",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "137, rue Alcée-Rocheleau",
+      "page": 9,
+      "citation": "Dérogation mineure – 125 et 137, rue Alcée-Rocheleau – Réduction de marge de stationnement",
+      "anchor": "137, rue Alcée-Rocheleau",
+      "spanStart": 1365,
+      "spanEnd": 1455
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-179 accorde également la demande visant la limite gauche du terrain du 137, objet explicitement nommé distinct de la demande visant le 125."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée – 180, rue du Parc – Marge avant de 5.68 mètres",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "180, rue du Parc",
+    "page": 10,
+    "citation": "Dérogation mineure – 180, rue du Parc – Implantation dérogatoire",
+    "anchor": "180, rue du Parc",
+    "spanStart": 24,
+    "spanEnd": 88
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée – 180, rue du Parc – Marge avant de 5.68 mètres",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "180, rue du Parc",
+      "page": 10,
+      "citation": "Dérogation mineure – 180, rue du Parc – Implantation dérogatoire",
+      "anchor": "180, rue du Parc",
+      "spanStart": 24,
+      "spanEnd": 88
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-180 accepte expressément la dérogation permettant une construction à 5.68 mètres de la ligne avant, malgré les réserves du CCU."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "PIIA – Refus préliminaire du développement des Cerfs",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "développement des Cerfs",
+    "page": 10,
+    "citation": "Que ce conseil refuse l’aménagement du développement des Cerfs tel que présenté, compte tenu de l’emplacement des fins de parcs",
+    "anchor": "développement des Cerfs",
+    "spanStart": 1879,
+    "spanEnd": 2006
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA – Refus préliminaire du développement des Cerfs",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "développement des Cerfs",
+      "page": 10,
+      "citation": "Que ce conseil refuse l’aménagement du développement des Cerfs tel que présenté, compte tenu de l’emplacement des fins de parcs",
+      "anchor": "développement des Cerfs",
+      "spanStart": 1879,
+      "spanEnd": 2006
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-181 refuse l’aménagement présenté dans une demande assujettie au règlement sur les PIIA; cette décision préliminaire doit rester un refus."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Autorisation d’occupation du domaine public – Parc Dr. Adrien Tougas – Terrasse saisonnière",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Parc Dr. Adrien Tougas",
+    "page": 11,
+    "citation": "Autorisation d’occupation du domaine public – Parc Dr. Adrien Tougas",
+    "anchor": "Parc Dr. Adrien Tougas",
+    "spanStart": 15,
+    "spanEnd": 83
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation d’occupation du domaine public – Parc Dr. Adrien Tougas – Terrasse saisonnière",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Parc Dr. Adrien Tougas",
+      "page": 11,
+      "citation": "Autorisation d’occupation du domaine public – Parc Dr. Adrien Tougas",
+      "anchor": "Parc Dr. Adrien Tougas",
+      "spanStart": 15,
+      "spanEnd": 83
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-182 autorise une terrasse sur une portion du parc municipal, avec retrait avant le 19 octobre 2026 pour l’hiver; l’occupation du domaine public est incluse."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de signature de l’addenda au bail – Bibliothèque, 52, rue du Pont, local #105",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "52, rue du Pont",
+    "page": 11,
+    "citation": "Autorisation de signature de l’addenda au bail de location pour la bibliothèque Considérant que la Ville de Bedford loue le local #105 de l’immeuble situé au 52, rue du Pont à Bedford",
+    "anchor": "52, rue du Pont",
+    "spanStart": 1015,
+    "spanEnd": 1198
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de signature de l’addenda au bail – Bibliothèque, 52, rue du Pont, local #105",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "52, rue\ndu Pont",
+      "page": 11,
+      "citation": "Autorisation de signature de l’addenda au bail de location pour la bibliothèque Considérant que la Ville de Bedford loue le local #105 de l’immeuble situé au 52, rue du Pont à Bedford",
+      "anchor": "52, rue du Pont",
+      "spanStart": 1015,
+      "spanEnd": 1198
+     }
+    },
+    {
+     "step": "gemini-pass1",
+     "unit": {
+      "label": "Autorisation de signature de l’addenda au bail – Bibliothèque, 52, rue du Pont, local #105",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "52, rue du Pont",
+      "page": 11,
+      "citation": "Autorisation de signature de l’addenda au bail de location pour la bibliothèque Considérant que la Ville de Bedford loue le local #105 de l’immeuble situé au 52, rue du Pont à Bedford",
+      "anchor": "52, rue du Pont",
+      "spanStart": 1015,
+      "spanEnd": 1198
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-183 autorise la signature d’un addenda à un bail immobilier explicite, acte foncier non résidentiel dont l’étape contractuelle relève d’« inconnu »."
+    },
+    {
+     "step": "gemini-pass1",
+     "op": "correct",
+     "reason": "Correction du saut de ligne accidentel dans le champ objet pour normaliser l'adresse en « 52, rue du Pont »."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion – Règlement 702-26-9 modifiant les permis et certificats, amendes pour abattage d’arbre",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "702-26-9",
+    "page": 15,
+    "citation": "Avis de motion du projet de règlement numéro 702-26-9 modifiant le règlement numéro 702-11, tel qu’amendé, intitulé Règlement sur l’émission des permis et certificats",
+    "anchor": "règlement numéro 702-26-9",
+    "spanStart": 304,
+    "spanEnd": 470
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion – Règlement 702-26-9 modifiant les permis et certificats, amendes pour abattage d’arbre",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "702-26-9",
+      "page": 15,
+      "citation": "Avis de motion du projet de règlement numéro 702-26-9 modifiant le règlement numéro 702-11, tel qu’amendé, intitulé Règlement sur l’émission des permis et certificats",
+      "anchor": "règlement numéro 702-26-9",
+      "spanStart": 304,
+      "spanEnd": 470
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-190 constate l’avis de motion actuel du règlement modificatif; son annonce dans l’ordre du jour ne constitue pas une autre unité."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de règlement 702-26-9 – Permis et certificats, amendes pour abattage d’arbre",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "702-26-9",
+    "page": 15,
+    "citation": "Que le conseil municipal adopte le premier projet de règlement numéro 702-26-9",
+    "anchor": "règlement numéro 702-26-9",
+    "spanStart": 1697,
+    "spanEnd": 1775
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 702-26-9 – Permis et certificats, amendes pour abattage d’arbre",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "702-26-9",
+      "page": 15,
+      "citation": "Que le conseil municipal adopte le premier projet de règlement numéro 702-26-9",
+      "anchor": "règlement numéro 702-26-9",
+      "spanStart": 1697,
+      "spanEnd": 1775
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-06-191 adopte le premier projet, étape distincte de l’avis de motion et non une adoption finale du règlement."
+    }
+   ]
+  }
+ ]
+}

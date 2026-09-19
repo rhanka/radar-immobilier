@@ -1,0 +1,959 @@
+{
+ "documentId": "beloeil-2026-03-23",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "92c08af899c4b29430ce5373c4ca8d431b3b232606889687b4ccd867f8f27534",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-126"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "1667-126-2026 — Service de génie dans I-906",
+     "stage": "2e_projet",
+     "objet": "1667-126-2026",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D'adopter le second projet du Règlement 1667-126-2026 modifiant le Règlement de zonage 166700-2011"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "consultation-126"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation publique — 1667-126-2026",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1262026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "second-126"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Second projet adopté — 1667-126-2026",
+     "stage": "second_projet",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D'adopter le second projet du Règlement 1667-126-2026 modifiant le Règlement de zonage 166700-2011"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-127"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "1667-127-2026 — Actualisation environnementale du zonage",
+     "stage": "2e_projet",
+     "objet": "1667-127-2026",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "D'adopter le second projet du Règlement 1667-127-2026 modifiant le Règlement de zonage 166700-2011"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "consultation-127"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation publique — 1667-127-2026",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1272026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "second-127"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Second projet adopté — 1667-127-2026",
+     "stage": "second_projet",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "D'adopter le second projet du Règlement 1667-127-2026 modifiant le Règlement de zonage 166700-2011"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-128"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "1667-128-2026 — Usages C-5 dans C-523",
+     "stage": "2e_projet",
+     "objet": "1667-128-2026",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D'adopter le second projet du Règlement 1667-128-2026 modifiant le Règlement de zonage 1667-00-2011"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "consultation-128"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation publique — 1667-128-2026",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1282026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "second-128"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Second projet adopté — 1667-128-2026",
+     "stage": "second_projet",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D'adopter le second projet du Règlement 1667-128-2026 modifiant le Règlement de zonage 1667-00-2011"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "dm-9017"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-9017 — 636, rue Salomon",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’autoriser la dérogation mineure numéro DM-2026-9017 telle que demandée pour le\n636, rue Salomon,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "dm-9021"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-9021 — 1500, rue Louis-Marchand",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’autoriser la dérogation mineure numéro DM-2026-9021 telle que demandée pour le\n1500, rue Louis-Marchand,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "dm-9022"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-9022 — 850, rue Laurier",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "D’autoriser la dérogation mineure numéro DM-2026-9022 telle que demandée pour le\n850, rue Laurier,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "uc-9008"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "UC-2026-9008 — 209, rue Gagnon",
+     "stage": "usage_conditionnel",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9008 pour le 209, rue Gagnon, aux\nconditions prévues à la recommandation 2026/02/40"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "uc-9020"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "UC-2026-9020 — 850, rue Le Moyne",
+     "stage": "usage_conditionnel",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9020 pour le 850, rue Le Moyne,\naux conditions prévues à la recommandation 2026/02/41"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "piia-9002"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2026-9002 — 1005, rue Richelieu",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/30 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9002"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A16",
+   "nodeIds": [
+    "piia-9003"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2026-9003 — Enseignes, 201-217, rue Saint-Jean-Baptiste",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/31 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9003"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A17",
+   "nodeIds": [
+    "piia-9004"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2026-9004 — Enseignes, 229-245, rue Saint-Jean-Baptiste",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/32 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9004"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A18",
+   "nodeIds": [
+    "piia-9009"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2026-9009 — Poulet Rouge, 481, rue de l’Industrie",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/33 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9009"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A19",
+   "nodeIds": [
+    "piia-9024"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2026-9024 — Lotissement, rue Serge-Pepin",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/34 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9024"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A20",
+   "nodeIds": [
+    "piia-9025"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2026-9025 — Lotissement, rues Laurier et Hubert",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/35 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9025"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A21",
+   "nodeIds": [
+    "piia-9026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2026-9026 — 1182, rue Omer-Adam",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/36 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A22",
+   "nodeIds": [
+    "piia-9028",
+    "signal-218"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2026-9028 — Projet intégré mixte, rue Serge-Pepin",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028"
+      }
+     ]
+    },
+    {
+     "type": "Signal",
+     "label": "Projet mixte de 218 logements — rue Serge-Pepin",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A23",
+   "nodeIds": [
+    "piia-9030"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2026-9030 — Liquidation Marie",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/38 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9030"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A24",
+   "nodeIds": [
+    "piia-9033"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2026-9033 — Pitou Minou et Compagnons",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D’approuver le plan d’implantation et d’intégration architecturale PIIA-2026-9033 et d’autoriser\nla délivrance du certificat d’autorisation"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A25",
+   "nodeIds": [
+    "bylaw-129"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "1667-129-2026 — Dimensions minimales des terrains dans C-733",
+     "stage": "projet",
+     "objet": "1667-129-2026",
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D’adopter le projet de Règlement 1667-129-2026 modifiant le Règlement de zonage 1667-002011"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A26",
+   "nodeIds": [
+    "motion-129"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — 1667-129-2026",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "Madame la conseillère Alexandra Picard-Dubé donne un avis de motion qu'un règlement ayant\npour objet de modifier les normes relatives aux dimensions minimales de terrain"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A27",
+   "nodeIds": [
+    "projet-129"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Projet adopté — 1667-129-2026",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D’adopter le projet de Règlement 1667-129-2026 modifiant le Règlement de zonage 1667-002011"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A28",
+   "nodeIds": [
+    "ppcmoi-9027"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI-2026-9027 — Premier projet, rue Serge-Pepin",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "1. D'accorder, conformément au Règlement 1643‐00‐2010 relatif aux projets particuliers de\nconstruction, de modification ou d'occupation d'un immeuble (PPCMOI),"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A29",
+   "nodeIds": [
+    "ppcmoi-9133"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI 2025-9133 — Premier projet, 409-415, boulevard Sir-Wilfrid-Laurier",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "1. D'accorder, conformément au Règlement 1643‐00‐2010 relatif aux projets particuliers de\nconstruction, de modification ou d'occupation d'un immeuble (PPCMOI),"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A30",
+   "nodeIds": [
+    "signal-eau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Réhabilitation de conduites d’eau potable",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "D’octroyer le contrat pour les travaux de réhabilitation de conduites d’eau potable par chemisage,\nRues des Colibris, des Cigognes, des Faisans et des Merles"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du second projet du règlement 1667-126-2026 à la résolution 2026-03-116.\",\"excerpt\":\"D'adopter le second projet du Règlement 1667-126-2026 modifiant le Règlement de zonage 166700-2011\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Tenue d'une assemblée publique de consultation sur le projet de règlement 1667-126-2026 au point 7.\",\"excerpt\":\"Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1262026 modifiant le Règlement de zonage 1667-00-2011\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du second projet du règlement 1667-126-2026.\",\"excerpt\":\"D'adopter le second projet du Règlement 1667-126-2026 modifiant le Règlement de zonage 166700-2011\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du second projet du règlement 1667-127-2026 à la résolution 2026-03-118.\",\"excerpt\":\"D'adopter le second projet du Règlement 1667-127-2026 modifiant le Règlement de zonage 166700-2011\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Tenue d'une assemblée publique de consultation sur le projet de règlement 1667-127-2026 au point 9.\",\"excerpt\":\"Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1272026 modifiant le Règlement de zonage 1667-00-2011\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du second projet du règlement 1667-127-2026.\",\"excerpt\":\"D'adopter le second projet du Règlement 1667-127-2026 modifiant le Règlement de zonage 166700-2011\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du second projet du règlement 1667-128-2026 à la résolution 2026-03-120.\",\"excerpt\":\"D'adopter le second projet du Règlement 1667-128-2026 modifiant le Règlement de zonage 1667-00-2011\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Tenue de l'assemblée publique de consultation sur le projet de règlement 1667-128-2026 au point 11.\",\"excerpt\":\"Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1282026 modifiant le Règlement de zonage 1667-00-2011\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du second projet du règlement 1667-128-2026.\",\"excerpt\":\"D'adopter le second projet du Règlement 1667-128-2026 modifiant le Règlement de zonage 1667-00-2011\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation de la dérogation mineure DM-2026-9017 à la résolution 2026-03-121.\",\"excerpt\":\"D’autoriser la dérogation mineure numéro DM-2026-9017 telle que demandée pour le\\n636, rue Salomon\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation de la dérogation mineure DM-2026-9021 à la résolution 2026-03-122.\",\"excerpt\":\"D’autoriser la dérogation mineure numéro DM-2026-9021 telle que demandée pour le\\n1500, rue Louis-Marchand\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation de la dérogation mineure DM-2026-9022 à la résolution 2026-03-123.\",\"excerpt\":\"D’autoriser la dérogation mineure numéro DM-2026-9022 telle que demandée pour le\\n850, rue Laurier\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation de l'usage conditionnel UC-2026-9008 à la résolution 2026-03-124.\",\"excerpt\":\"D’autoriser la demande d’usage conditionnel numéro UC-2026-9008 pour le 209, rue Gagnon\"},{\"act\":\"A14\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation de l'usage conditionnel UC-2026-9020 à la résolution 2026-03-125.\",\"excerpt\":\"D’autoriser la demande d’usage conditionnel numéro UC-2026-9020 pour le 850, rue Le Moyne\"},{\"act\":\"A15\",\"verdict\":\"soutenu\",\"reason\":\"Approbation du plan d'implantation et d'intégration architecturale PIIA-2026-9002 à la résolution 2026-03-133.\",\"excerpt\":\"D’approuver, aux conditions prévues à la recommandation 2026/02/30 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9002\"},{\"act\":\"A16\",\"verdict\":\"soutenu\",\"reason\":\"Approbation du PIIA-2026-9003 à la résolution 2026-03-134.\",\"excerpt\":\"D’approuver, aux conditions prévues à la recommandation 2026/02/31 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9003\"},{\"act\":\"A17\",\"verdict\":\"soutenu\",\"reason\":\"Approbation du PIIA-2026-9004 à la résolution 2026-03-135.\",\"excerpt\":\"D’approuver, aux conditions prévues à la recommandation 2026/02/32 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9004\"},{\"act\":\"A18\",\"verdict\":\"soutenu\",\"reason\":\"Approbation du PIIA-2026-9009 à la résolution 2026-03-136.\",\"excerpt\":\"D’approuver, aux conditions prévues à la recommandation 2026/02/33 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9009\"},{\"act\":\"A19\",\"verdict\":\"soutenu\",\"reason\":\"Approbation du PIIA-2026-9024 à la résolution 2026-03-137.\",\"excerpt\":\"D’approuver, aux conditions prévues à la recommandation 2026/02/34 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9024\"},{\"act\":\"A20\",\"verdict\":\"soutenu\",\"reason\":\"Approbation du PIIA-2026-9025 à la résolution 2026-03-138.\",\"excerpt\":\"D’approuver, aux conditions prévues à la recommandation 2026/02/35 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9025\"},{\"act\":\"A21\",\"verdict\":\"soutenu\",\"reason\":\"Approbation du PIIA-2026-9026 à la résolution 2026-03-139.\",\"excerpt\":\"D’approuver, aux conditions prévues à la recommandation 2026/02/36 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9026\"},{\"act\":\"A22\",\"verdict\":\"soutenu\",\"reason\":\"Approbation du PIIA-2026-9028 pour un projet intégré mixte de 218 logements à la résolution 2026-03-140.\",\"excerpt\":\"D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028\"},{\"act\":\"A23\",\"verdict\":\"soutenu\",\"reason\":\"Approbation du PIIA-2026-9030 à la résolution 2026-03-141.\",\"excerpt\":\"D’approuver, aux conditions prévues à la recommandation 2026/02/38 du comité consultatif\\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9030\"},{\"act\":\"A24\",\"verdict\":\"soutenu\",\"reason\":\"Approbation du PIIA-2026-9033 à la résolution 2026-03-142.\",\"excerpt\":\"D’approuver le plan d’implantation et d’intégration architecturale PIIA-2026-9033 et d’autoriser\\nla délivrance du certificat d’autorisation\"},{\"act\":\"A25\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du premier projet de règlement 1667-129-2026 à la résolution 2026-03-143.\",\"excerpt\":\"D’adopter le projet de Règlement 1667-129-2026 modifiant le Règlement de zonage 1667-002011\"},{\"act\":\"A26\",\"verdict\":\"soutenu\",\"reason\":\"Don d'un avis de motion pour le projet de règlement 1667-129-2026 au point 35.\",\"excerpt\":\"Madame la conseillère Alexandra Picard-Dubé donne un avis de motion qu'un règlement ayant\\npour objet de modifier les normes relatives aux dimensions minimales de terrain\"},{\"act\":\"A27\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du projet de règlement 1667-129-2026.\",\"excerpt\":\"D’adopter le projet de Règlement 1667-129-2026 modifiant le Règlement de zonage 1667-002011\"},{\"act\":\"A28\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du premier projet de résolution PPCMOI-2026-9027 à la résolution 2026-03-144.\",\"excerpt\":\"1. D'accorder, conformément au Règlement 1643‐00‐2010 relatif aux projets particuliers de\\nconstruction, de modification ou d'occupation d'un immeuble (PPCMOI),\"},{\"act\":\"A29\",\"verdict\":\"soutenu\",\"reason\":\"Adoption du premier projet de résolution PPCMOI 2025-9133 à la résolution 2026-03-145.\",\"excerpt\":\"1. D'accorder, conformément au Règlement 1643‐00‐2010 relatif aux projets particuliers de\\nconstruction, de modification ou d'occupation d'un immeuble (PPCMOI),\"},{\"act\":\"A30\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple octroi de contrat pour des travaux d'entretien/réhabilitation d'infrastructures existantes, ce qui relève des exclusions.\",\"excerpt\":\"D’octroyer le contrat pour les travaux de réhabilitation de conduites d’eau potable par chemisage\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Adoption du second projet du règlement 1667-126-2026 à la résolution 2026-03-116.",
+   "excerpt": "D'adopter le second projet du Règlement 1667-126-2026 modifiant le Règlement de zonage 166700-2011"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Tenue d'une assemblée publique de consultation sur le projet de règlement 1667-126-2026 au point 7.",
+   "excerpt": "Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1262026 modifiant le Règlement de zonage 1667-00-2011"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Adoption du second projet du règlement 1667-126-2026.",
+   "excerpt": "D'adopter le second projet du Règlement 1667-126-2026 modifiant le Règlement de zonage 166700-2011"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Adoption du second projet du règlement 1667-127-2026 à la résolution 2026-03-118.",
+   "excerpt": "D'adopter le second projet du Règlement 1667-127-2026 modifiant le Règlement de zonage 166700-2011"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Tenue d'une assemblée publique de consultation sur le projet de règlement 1667-127-2026 au point 9.",
+   "excerpt": "Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1272026 modifiant le Règlement de zonage 1667-00-2011"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Adoption du second projet du règlement 1667-127-2026.",
+   "excerpt": "D'adopter le second projet du Règlement 1667-127-2026 modifiant le Règlement de zonage 166700-2011"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Adoption du second projet du règlement 1667-128-2026 à la résolution 2026-03-120.",
+   "excerpt": "D'adopter le second projet du Règlement 1667-128-2026 modifiant le Règlement de zonage 1667-00-2011"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Tenue de l'assemblée publique de consultation sur le projet de règlement 1667-128-2026 au point 11.",
+   "excerpt": "Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1282026 modifiant le Règlement de zonage 1667-00-2011"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Adoption du second projet du règlement 1667-128-2026.",
+   "excerpt": "D'adopter le second projet du Règlement 1667-128-2026 modifiant le Règlement de zonage 1667-00-2011"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Autorisation de la dérogation mineure DM-2026-9017 à la résolution 2026-03-121.",
+   "excerpt": "D’autoriser la dérogation mineure numéro DM-2026-9017 telle que demandée pour le\n636, rue Salomon"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Autorisation de la dérogation mineure DM-2026-9021 à la résolution 2026-03-122.",
+   "excerpt": "D’autoriser la dérogation mineure numéro DM-2026-9021 telle que demandée pour le\n1500, rue Louis-Marchand"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Autorisation de la dérogation mineure DM-2026-9022 à la résolution 2026-03-123.",
+   "excerpt": "D’autoriser la dérogation mineure numéro DM-2026-9022 telle que demandée pour le\n850, rue Laurier"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "Autorisation de l'usage conditionnel UC-2026-9008 à la résolution 2026-03-124.",
+   "excerpt": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9008 pour le 209, rue Gagnon"
+  },
+  {
+   "act": "A14",
+   "verdict": "soutenu",
+   "reason": "Autorisation de l'usage conditionnel UC-2026-9020 à la résolution 2026-03-125.",
+   "excerpt": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9020 pour le 850, rue Le Moyne"
+  },
+  {
+   "act": "A15",
+   "verdict": "soutenu",
+   "reason": "Approbation du plan d'implantation et d'intégration architecturale PIIA-2026-9002 à la résolution 2026-03-133.",
+   "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/30 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9002"
+  },
+  {
+   "act": "A16",
+   "verdict": "soutenu",
+   "reason": "Approbation du PIIA-2026-9003 à la résolution 2026-03-134.",
+   "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/31 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9003"
+  },
+  {
+   "act": "A17",
+   "verdict": "soutenu",
+   "reason": "Approbation du PIIA-2026-9004 à la résolution 2026-03-135.",
+   "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/32 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9004"
+  },
+  {
+   "act": "A18",
+   "verdict": "soutenu",
+   "reason": "Approbation du PIIA-2026-9009 à la résolution 2026-03-136.",
+   "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/33 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9009"
+  },
+  {
+   "act": "A19",
+   "verdict": "soutenu",
+   "reason": "Approbation du PIIA-2026-9024 à la résolution 2026-03-137.",
+   "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/34 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9024"
+  },
+  {
+   "act": "A20",
+   "verdict": "soutenu",
+   "reason": "Approbation du PIIA-2026-9025 à la résolution 2026-03-138.",
+   "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/35 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9025"
+  },
+  {
+   "act": "A21",
+   "verdict": "soutenu",
+   "reason": "Approbation du PIIA-2026-9026 à la résolution 2026-03-139.",
+   "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/36 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9026"
+  },
+  {
+   "act": "A22",
+   "verdict": "soutenu",
+   "reason": "Approbation du PIIA-2026-9028 pour un projet intégré mixte de 218 logements à la résolution 2026-03-140.",
+   "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028"
+  },
+  {
+   "act": "A23",
+   "verdict": "soutenu",
+   "reason": "Approbation du PIIA-2026-9030 à la résolution 2026-03-141.",
+   "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/38 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9030"
+  },
+  {
+   "act": "A24",
+   "verdict": "soutenu",
+   "reason": "Approbation du PIIA-2026-9033 à la résolution 2026-03-142.",
+   "excerpt": "D’approuver le plan d’implantation et d’intégration architecturale PIIA-2026-9033 et d’autoriser\nla délivrance du certificat d’autorisation"
+  },
+  {
+   "act": "A25",
+   "verdict": "soutenu",
+   "reason": "Adoption du premier projet de règlement 1667-129-2026 à la résolution 2026-03-143.",
+   "excerpt": "D’adopter le projet de Règlement 1667-129-2026 modifiant le Règlement de zonage 1667-002011"
+  },
+  {
+   "act": "A26",
+   "verdict": "soutenu",
+   "reason": "Don d'un avis de motion pour le projet de règlement 1667-129-2026 au point 35.",
+   "excerpt": "Madame la conseillère Alexandra Picard-Dubé donne un avis de motion qu'un règlement ayant\npour objet de modifier les normes relatives aux dimensions minimales de terrain"
+  },
+  {
+   "act": "A27",
+   "verdict": "soutenu",
+   "reason": "Adoption du projet de règlement 1667-129-2026.",
+   "excerpt": "D’adopter le projet de Règlement 1667-129-2026 modifiant le Règlement de zonage 1667-002011"
+  },
+  {
+   "act": "A28",
+   "verdict": "soutenu",
+   "reason": "Adoption du premier projet de résolution PPCMOI-2026-9027 à la résolution 2026-03-144.",
+   "excerpt": "1. D'accorder, conformément au Règlement 1643‐00‐2010 relatif aux projets particuliers de\nconstruction, de modification ou d'occupation d'un immeuble (PPCMOI),"
+  },
+  {
+   "act": "A29",
+   "verdict": "soutenu",
+   "reason": "Adoption du premier projet de résolution PPCMOI 2025-9133 à la résolution 2026-03-145.",
+   "excerpt": "1. D'accorder, conformément au Règlement 1643‐00‐2010 relatif aux projets particuliers de\nconstruction, de modification ou d'occupation d'un immeuble (PPCMOI),"
+  },
+  {
+   "act": "A30",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple octroi de contrat pour des travaux d'entretien/réhabilitation d'infrastructures existantes, ce qui relève des exclusions.",
+   "excerpt": "D’octroyer le contrat pour les travaux de réhabilitation de conduites d’eau potable par chemisage"
+  }
+ ],
+ "filter": {
+  "acts": 30,
+  "removed": [
+   {
+    "act": "A30",
+    "reason": "Il s'agit d'un simple octroi de contrat pour des travaux d'entretien/réhabilitation d'infrastructures existantes, ce qui relève des exclusions."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Adoption du second projet du règlement 1667-126-2026 à la résolution 2026-03-116."
+   },
+   {
+    "act": "A02",
+    "reason": "Tenue d'une assemblée publique de consultation sur le projet de règlement 1667-126-2026 au point 7."
+   },
+   {
+    "act": "A03",
+    "reason": "Adoption du second projet du règlement 1667-126-2026."
+   },
+   {
+    "act": "A04",
+    "reason": "Adoption du second projet du règlement 1667-127-2026 à la résolution 2026-03-118."
+   },
+   {
+    "act": "A05",
+    "reason": "Tenue d'une assemblée publique de consultation sur le projet de règlement 1667-127-2026 au point 9."
+   },
+   {
+    "act": "A06",
+    "reason": "Adoption du second projet du règlement 1667-127-2026."
+   },
+   {
+    "act": "A07",
+    "reason": "Adoption du second projet du règlement 1667-128-2026 à la résolution 2026-03-120."
+   },
+   {
+    "act": "A08",
+    "reason": "Tenue de l'assemblée publique de consultation sur le projet de règlement 1667-128-2026 au point 11."
+   },
+   {
+    "act": "A09",
+    "reason": "Adoption du second projet du règlement 1667-128-2026."
+   },
+   {
+    "act": "A10",
+    "reason": "Autorisation de la dérogation mineure DM-2026-9017 à la résolution 2026-03-121."
+   },
+   {
+    "act": "A11",
+    "reason": "Autorisation de la dérogation mineure DM-2026-9021 à la résolution 2026-03-122."
+   },
+   {
+    "act": "A12",
+    "reason": "Autorisation de la dérogation mineure DM-2026-9022 à la résolution 2026-03-123."
+   },
+   {
+    "act": "A13",
+    "reason": "Autorisation de l'usage conditionnel UC-2026-9008 à la résolution 2026-03-124."
+   },
+   {
+    "act": "A14",
+    "reason": "Autorisation de l'usage conditionnel UC-2026-9020 à la résolution 2026-03-125."
+   },
+   {
+    "act": "A15",
+    "reason": "Approbation du plan d'implantation et d'intégration architecturale PIIA-2026-9002 à la résolution 2026-03-133."
+   },
+   {
+    "act": "A16",
+    "reason": "Approbation du PIIA-2026-9003 à la résolution 2026-03-134."
+   },
+   {
+    "act": "A17",
+    "reason": "Approbation du PIIA-2026-9004 à la résolution 2026-03-135."
+   },
+   {
+    "act": "A18",
+    "reason": "Approbation du PIIA-2026-9009 à la résolution 2026-03-136."
+   },
+   {
+    "act": "A19",
+    "reason": "Approbation du PIIA-2026-9024 à la résolution 2026-03-137."
+   },
+   {
+    "act": "A20",
+    "reason": "Approbation du PIIA-2026-9025 à la résolution 2026-03-138."
+   },
+   {
+    "act": "A21",
+    "reason": "Approbation du PIIA-2026-9026 à la résolution 2026-03-139."
+   },
+   {
+    "act": "A22",
+    "reason": "Approbation du PIIA-2026-9028 pour un projet intégré mixte de 218 logements à la résolution 2026-03-140."
+   },
+   {
+    "act": "A23",
+    "reason": "Approbation du PIIA-2026-9030 à la résolution 2026-03-141."
+   },
+   {
+    "act": "A24",
+    "reason": "Approbation du PIIA-2026-9033 à la résolution 2026-03-142."
+   },
+   {
+    "act": "A25",
+    "reason": "Adoption du premier projet de règlement 1667-129-2026 à la résolution 2026-03-143."
+   },
+   {
+    "act": "A26",
+    "reason": "Don d'un avis de motion pour le projet de règlement 1667-129-2026 au point 35."
+   },
+   {
+    "act": "A27",
+    "reason": "Adoption du projet de règlement 1667-129-2026."
+   },
+   {
+    "act": "A28",
+    "reason": "Adoption du premier projet de résolution PPCMOI-2026-9027 à la résolution 2026-03-144."
+   },
+   {
+    "act": "A29",
+    "reason": "Adoption du premier projet de résolution PPCMOI 2025-9133 à la résolution 2026-03-145."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 6773,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 26011,
+   "outputTokens": 2896,
+   "totalTokens": 28907
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 6625
+  },
+  "inputSha256": "9561c2f5faf0cf47052d8a9178402ff97685271336a384117cd63dc60de69f70"
+ }
+}

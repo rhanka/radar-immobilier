@@ -1,0 +1,91 @@
+{
+ "documentId": "sainte-croix-2026-05-05",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "99b86b2c262f1b2a6ed341d6b6085222101383467151687495d2b29b3300191c",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 117-2026 (p. 8) atteste l'acte foncier explicite « DE TRANSMETTRE une lettre d'intention … pour une partie du lot 6 191 770 », citation, objet et page exacts, étape inconnu adéquate pour une lettre d'intention.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 118-2026 (p. 9) : « QUE le règlement #760-2026 … soit adopté », adoption d'un règlement d'urbanisme (plan d'urbanisme), citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 119-2026 (p. 9) : « QUE le règlement #761-2026 … zone 14-I et la création de la zone 21-H », soit adopté », adoption de règlement de zonage attestée, citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Résolution 120-2026 (p. 10) : « D'APPROUVER le plan d'aménagement … concernant le développement du lot 3 592 103 », acte de lotissement/développement explicite sur un lot cadastral, décision adoptée à l'unanimité.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution 121-2026 (p. 14) : « QUE la Municipalité de Sainte-Croix recommande à la Commission d'approuver la Demande », recommandation CPTAQ en zone agricole pour le projet éolien, objet et page exacts.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Fait distinct dans la même résolution 121-2026 (p. 14) : « confirme son engagement à l'octroi des droits fonciers sur les terres du domaine municipal », acte foncier propre, non un doublon de la recommandation CPTAQ.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Résolution 126-2026 (p. 17) : « D'APPROUVER au promoteur les plans et devis préliminaires … développement du lot 3 592 103 », étape distincte du plan de lotissement (6.4) avec développement explicite, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 117-2026 (p. 8) atteste l'acte foncier explicite « DE TRANSMETTRE une lettre d'intention … pour une partie du lot 6 191 770 », citation, objet et page exacts, étape inconnu adéquate pour une lettre d'intention."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 118-2026 (p. 9) : « QUE le règlement #760-2026 … soit adopté », adoption d'un règlement d'urbanisme (plan d'urbanisme), citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 119-2026 (p. 9) : « QUE le règlement #761-2026 … zone 14-I et la création de la zone 21-H », soit adopté », adoption de règlement de zonage attestée, citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Résolution 120-2026 (p. 10) : « D'APPROUVER le plan d'aménagement … concernant le développement du lot 3 592 103 », acte de lotissement/développement explicite sur un lot cadastral, décision adoptée à l'unanimité."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution 121-2026 (p. 14) : « QUE la Municipalité de Sainte-Croix recommande à la Commission d'approuver la Demande », recommandation CPTAQ en zone agricole pour le projet éolien, objet et page exacts."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Fait distinct dans la même résolution 121-2026 (p. 14) : « confirme son engagement à l'octroi des droits fonciers sur les terres du domaine municipal », acte foncier propre, non un doublon de la recommandation CPTAQ."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Résolution 126-2026 (p. 17) : « D'APPROUVER au promoteur les plans et devis préliminaires … développement du lot 3 592 103 », étape distincte du plan de lotissement (6.4) avec développement explicite, citation et page exactes."
+  }
+ ]
+}

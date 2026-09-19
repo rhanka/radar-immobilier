@@ -1,0 +1,294 @@
+{
+ "nodes": [
+  {
+   "id": "event-2026-01-17",
+   "label": "Dérogation mineure acceptée — lot 5553677, chemin de la Mine",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "status": "candidate",
+   "municipality": "potton",
+   "date": "2026-01-19",
+   "meetingDate": "2026-01-19",
+   "decision": "approuvé",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-01-19",
+   "resolution": "2026 01 17",
+   "no_lot": "5553677",
+   "zone_ref": "RU-6",
+   "reglement_number": "2001-291",
+   "description": "Autorisation d’implanter une habitation à 6 m de la ligne de lot avant plutôt qu’à 15 m, soit un empiétement de 9 m. Terrain situé chemin de la Mine.",
+   "motif": "Espace constructible limité par un talus présentant des pentes de 30 % et plus; implantation concordante avec l’alignement des résidences voisines.",
+   "evidence_refs": [
+    "ev-derogation"
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment\nprincipal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant",
+     "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+     "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-ru-6",
+   "label": "Zone RU-6",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "status": "candidate",
+   "municipality": "potton",
+   "code": "RU-6",
+   "bylaw": "2001-291",
+   "evidence_refs": [
+    "ev-derogation"
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment\nprincipal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant",
+     "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+     "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-pentes-mine",
+   "label": "Interdiction de construction dans le secteur de pentes de 30 % et plus",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "status": "candidate",
+   "municipality": "potton",
+   "constraintType": "autre",
+   "meetingDate": "2026-01-19",
+   "resolution": "2026 01 17",
+   "description": "Le terrain visé par la demande concernant le lot 5553677 comporte un talus présentant des pentes de 30 % et plus, secteur où la construction est interdite. Cette contrainte limite l’espace disponible pour une résidence conforme.",
+   "evidence_refs": [
+    "ev-pentes"
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "CONSIDÉRANT QUE\nl’espace disponible sur ce terrain afin d’implanter une résidence de\ndimensions conformes est très limité par la présence d’un talus",
+     "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+     "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-2026-01-18",
+   "label": "PIIA — construction résidentielle acceptée, chemin du Mont-Bear",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "status": "needs_review",
+   "municipality": "potton",
+   "date": "2026-01-19",
+   "meetingDate": "2026-01-19",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-01-19",
+   "resolution": "2026 01 18",
+   "dossier": "CCU251209-5.1",
+   "no_lot": "5753149",
+   "description": "Construction d’une habitation unifamiliale sur le lot 5753149, chemin du Mont-Bear, acceptée conformément aux plans mentionnés. Le considérant d’assujettissement au PIIA-5 mentionne toutefois le lot 5553677, contrairement au titre, à la description du projet et à la décision.",
+   "conditions": [
+    "Respect du plan projet d’implantation et de lotissement signé et scellé le 6 juillet 2025, minute 14 330.",
+    "Respect des plans finaux de construction de Yamaska Design inc. datés du 12 décembre 2025.",
+    "Respect du plan de déboisement reçu le 5 décembre 2025."
+   ],
+   "evidence_refs": [
+    "ev-piia"
+   ],
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5\nle tout conformément aux plans mentionnés précédemment.\n\n753 149,",
+     "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+     "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2001-291-br",
+   "label": "Premier projet 2001-291-BR — extension des cimetières dérogatoires",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "status": "candidate",
+   "municipality": "potton",
+   "numero": "2001-291-BR",
+   "stage": "1er_projet",
+   "meetingDate": "2026-01-19",
+   "resolution": "2026 01 26",
+   "title": "Modification du règlement de zonage 2001-291 concernant l’extension des cimetières protégés par droits acquis",
+   "objet": "Modifier l’article 20 afin de permettre l’agrandissement d’un cimetière au-delà des limites du terrain d’origine et jusqu’à 50 % de la superficie utilisée au moment où l’usage est devenu dérogatoire.",
+   "evidence_refs": [
+    "ev-amendment"
+   ],
+   "citations": [
+    {
+     "page": 44,
+     "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\nBR qui décrète ce qui suit :",
+     "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+     "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-zonage-avis",
+   "label": "Avis de motion — règlement 2001-291-BR",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "status": "candidate",
+   "municipality": "potton",
+   "date": "2026-01-19",
+   "etape": "avis_motion",
+   "etape_date": "2026-01-19",
+   "reglement_number": "2001-291-BR",
+   "description": "Avis de motion concernant les conditions d’extension ou de modification d’un cimetière dérogatoire protégé par droits acquis.",
+   "evidence_refs": [
+    "ev-avis"
+   ],
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "Le Conseiller Cynthia Sherrer donne avis de motion qu’un projet de règlement portant le\nnuméro 2001 -291-BR sera présenté pour adoption.",
+     "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+     "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-zonage-premier-projet",
+   "label": "Adoption du premier projet 2001-291-BR",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "status": "candidate",
+   "municipality": "potton",
+   "date": "2026-01-19",
+   "decision": "approuvé",
+   "etape": "projet_reglement",
+   "etape_date": "2026-01-19",
+   "resolution": "2026 01 26",
+   "reglement_number": "2001-291-BR",
+   "description": "Adoption du premier projet modifiant les droits acquis applicables aux cimetières. Une assemblée publique de consultation est annoncée pour les prochaines semaines, sans date précisée.",
+   "evidence_refs": [
+    "ev-amendment"
+   ],
+   "citations": [
+    {
+     "page": 44,
+     "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\nBR qui décrète ce qui suit :",
+     "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+     "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-2026-01-17",
+   "target": "zone-ru-6",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "evidence_refs": [
+    "ev-derogation"
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment\nprincipal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant",
+     "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+     "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+     "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-derogation",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+   "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+   "modality": "pdf",
+   "page": 14,
+   "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment\nprincipal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les\narticles 22 et 113 du règlement de zonage numéro 2001\n-291 et ses amendements stipule nt\nqu’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à\nune distance d’au moins 15 m de la ligne de lot avant en zone municipale RU\n-6, ce qui\nconstitue un empi étement de 9 mètres aux dispositions minimales ap plicables.\nLE TOUT pour le lot 5 553 677, ch. de la Mine.\nAdoptée ."
+  },
+  {
+   "id": "ev-pentes",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+   "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+   "modality": "pdf",
+   "page": 14,
+   "excerpt": "CONSIDÉRANT QUE\nl’espace disponible sur ce terrain afin d’implanter une résidence de\ndimensions conformes est très limité par la présence d’un talus présentant des pentes de\n30% et plus, soit un secteur où la construction est interdite;"
+  },
+  {
+   "id": "ev-piia",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+   "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+   "modality": "pdf",
+   "page": 15,
+   "excerpt": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5\nle tout conformément aux plans mentionnés précédemment.\n\n753 149,\n\nLE TOUT pour le lot 5 753 149, chemin du Mont -Bear."
+  },
+  {
+   "id": "ev-avis",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+   "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+   "modality": "pdf",
+   "page": 19,
+   "excerpt": "Le Conseiller Cynthia Sherrer donne avis de motion qu’un projet de règlement portant le\nnuméro 2001 -291-BR sera présenté pour adoption.\nLe règlement a pour objet de prévoir spécifiquement les conditions où un cimetière\ndérogatoire protégé par droits acquis pourra être étendu ou modifié."
+  },
+  {
+   "id": "ev-amendment",
+   "source_file": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "rawRef": "raw/proces-verbaux-potton/cas/141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35.pdf",
+   "docSha": "141c96147f46e461b5f35583b634f753bc14b19a0b7d83f374bb8f3580ef9e35",
+   "sourceUrl": "https://potton.ca/download/445/2026/30187/proces-verbal-seance-ordinaire-du-19-janvier-2026.pdf",
+   "modality": "pdf",
+   "page": 44,
+   "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\nBR qui décrète ce qui suit :\nArticle 1 .\n\n-291-\n\nLe préambule fait partie intégrante du présent règlement.\n\nArticle 2.\nL’article 20 « Extension de l’usage dérogatoire d’une construction ou d’un\nterrain » du règlement de zonage 2001 -291 et ses amendements se lisant comme suit\n:"
+  }
+ ],
+ "input_tokens": 28500,
+ "output_tokens": 4900
+}

@@ -1,0 +1,478 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "node_type": "Source",
+      "label": "Ordre du jour - 10 février 2026 - Ville de Dollard-des-Ormeaux",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "attached",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "date": "2026-02-10",
+      "municipality": "dollard-des-ormeaux",
+      "url": "https://ville.ddo.qc.ca/wp-content/uploads/2026/02/2026-02-10_Ordinaire_Ordre_du_jour.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "rawRef": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "SÉANCE DU CONSEIL MUNICIPAL\n12001, boulevard De Salaberry\nDollard-des-Ormeaux\nSÉANCE ORDINAIRE DU 10 FÉVRIER 2026"
+        }
+      ]
+    },
+    {
+      "id": "bylaw_r_2026_199_1",
+      "node_type": "Bylaw",
+      "label": "Règlement R-2026-199-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "candidate",
+      "numero": "R-2026-199-1",
+      "title": "Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements, clarifications, améliorations et corrections",
+      "municipality": "dollard-des-ormeaux",
+      "meetingDate": "2026-02-10",
+      "stage": "1er_projet",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter"
+        }
+      ]
+    },
+    {
+      "id": "bylaw_r_2025_199",
+      "node_type": "Bylaw",
+      "label": "Règlement R-2025-199",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "candidate",
+      "numero": "R-2025-199",
+      "title": "Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux",
+      "municipality": "dollard-des-ormeaux",
+      "meetingDate": "2026-02-10",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter"
+        }
+      ]
+    },
+    {
+      "id": "bylaw_r_2026_084_1",
+      "node_type": "Bylaw",
+      "label": "Règlement R-2026-084-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "candidate",
+      "numero": "R-2026-084-1",
+      "title": "Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions relatives à la rétention des eaux de ruissellement",
+      "municipality": "dollard-des-ormeaux",
+      "meetingDate": "2026-02-10",
+      "stage": "projet",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions"
+        }
+      ]
+    },
+    {
+      "id": "bylaw_r_2014_084",
+      "node_type": "Bylaw",
+      "label": "Règlement R-2014-084",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "candidate",
+      "numero": "R-2014-084",
+      "title": "Règlement R-2014-084 sur l’utilisation des égouts",
+      "municipality": "dollard-des-ormeaux",
+      "meetingDate": "2026-02-10",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions"
+        }
+      ]
+    },
+    {
+      "id": "bylaw_r_2026_216",
+      "node_type": "Bylaw",
+      "label": "Règlement R-2026-216",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "candidate",
+      "numero": "R-2026-216",
+      "title": "Règlement R-2026-216 sur les ententes pour travaux municipaux",
+      "municipality": "dollard-des-ormeaux",
+      "meetingDate": "2026-02-10",
+      "stage": "adoption",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux\n(SD2026-400-2799)"
+        }
+      ]
+    },
+    {
+      "id": "event_50_1",
+      "node_type": "DesignationEvent",
+      "label": "Avis de motion et dépôt R-2026-199-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "candidate",
+      "date": "2026-02-10",
+      "meetingDate": "2026-02-10",
+      "kind": "rezonage",
+      "dossier": "SD2026-400-2804",
+      "municipality": "dollard-des-ormeaux",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "etape": "avis_motion",
+      "etape_date": "2026-02-10",
+      "reglement_number": "R-2026-199-1",
+      "description": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements, clarifications, améliorations et corrections (SD2026-400-2804)",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter"
+        }
+      ]
+    },
+    {
+      "id": "event_50_2",
+      "node_type": "DesignationEvent",
+      "label": "Adoption du premier projet R-2026-199-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "candidate",
+      "date": "2026-02-10",
+      "meetingDate": "2026-02-10",
+      "kind": "rezonage",
+      "dossier": "SD2026-400-2805",
+      "municipality": "dollard-des-ormeaux",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "etape": "projet_reglement",
+      "etape_date": "2026-02-10",
+      "reglement_number": "R-2026-199-1",
+      "description": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements, clarifications, améliorations et corrections (SD2026-400-2805)",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers"
+        }
+      ]
+    },
+    {
+      "id": "event_50_3",
+      "node_type": "DesignationEvent",
+      "label": "Avis de motion et dépôt R-2026-084-1",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "candidate",
+      "date": "2026-02-10",
+      "meetingDate": "2026-02-10",
+      "kind": "rezonage",
+      "dossier": "SD2026-200-2822",
+      "municipality": "dollard-des-ormeaux",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "etape": "avis_motion",
+      "etape_date": "2026-02-10",
+      "reglement_number": "R-2026-084-1",
+      "description": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions relatives à la rétention des eaux de ruissellement (SD2026-200-2822)",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions"
+        }
+      ]
+    },
+    {
+      "id": "event_50_4",
+      "node_type": "DesignationEvent",
+      "label": "Adoption R-2026-216",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "candidate",
+      "date": "2026-02-10",
+      "meetingDate": "2026-02-10",
+      "kind": "rezonage",
+      "dossier": "SD2026-400-2799",
+      "municipality": "dollard-des-ormeaux",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "etape": "adoption",
+      "etape_date": "2026-02-10",
+      "reglement_number": "R-2026-216",
+      "description": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux (SD2026-400-2799)",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux\n(SD2026-400-2799)"
+        }
+      ]
+    },
+    {
+      "id": "signal_50_1_2",
+      "node_type": "Signal",
+      "label": "Signal R-2026-199-1 - Modification au zonage R-2025-199",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "status": "candidate",
+      "category": "urbanisme",
+      "kind": "modification_reglement_zonage",
+      "date": "2026-02-10",
+      "meetingDate": "2026-02-10",
+      "scope": "local",
+      "municipality": "dollard-des-ormeaux",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "etape": "projet_reglement",
+      "etape_date": "2026-02-10",
+      "reglement_number": "R-2026-199-1",
+      "description": "Modification au Règlement de zonage R-2025-199 par le premier projet de Règlement R-2026-199-1 pour divers ajustements, clarifications, améliorations et corrections",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw_r_2026_199_1",
+      "target": "bylaw_r_2025_199",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_1"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter"
+        }
+      ]
+    },
+    {
+      "source": "bylaw_r_2026_084_1",
+      "target": "bylaw_r_2014_084",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_2"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions"
+        }
+      ]
+    },
+    {
+      "source": "event_50_1",
+      "target": "event_50_2",
+      "relation": "lifecycle_predecessor",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_1"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter"
+        }
+      ]
+    },
+    {
+      "source": "event_50_2",
+      "target": "signal_50_1_2",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_1"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers"
+        }
+      ]
+    },
+    {
+      "source": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "bylaw_r_2026_199_1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_1"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter"
+        }
+      ]
+    },
+    {
+      "source": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "bylaw_r_2025_199",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_1"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter"
+        }
+      ]
+    },
+    {
+      "source": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "bylaw_r_2026_084_1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_2"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions"
+        }
+      ]
+    },
+    {
+      "source": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "bylaw_r_2014_084",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_2"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions"
+        }
+      ]
+    },
+    {
+      "source": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "bylaw_r_2026_216",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_3"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux\n(SD2026-400-2799)"
+        }
+      ]
+    },
+    {
+      "source": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "event_50_1",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_1"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter"
+        }
+      ]
+    },
+    {
+      "source": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "event_50_2",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_1"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers"
+        }
+      ]
+    },
+    {
+      "source": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "event_50_3",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_2"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions"
+        }
+      ]
+    },
+    {
+      "source": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "event_50_4",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_3"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux\n(SD2026-400-2799)"
+        }
+      ]
+    },
+    {
+      "source": "source_1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "target": "signal_50_1_2",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "evidence_refs": ["ev_1"],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_1",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "rawRef": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "sourceUrl": "https://ville.ddo.qc.ca/wp-content/uploads/2026/02/2026-02-10_Ordinaire_Ordre_du_jour.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers ajustements, clarifications, améliorations et corrections (SD2026-400-2804)\n50.2\nAdoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers\najustements, clarifications, améliorations et corrections (SD2026-400-2805)"
+    },
+    {
+      "id": "ev_2",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "rawRef": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "sourceUrl": "https://ville.ddo.qc.ca/wp-content/uploads/2026/02/2026-02-10_Ordinaire_Ordre_du_jour.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts afin de préciser les dispositions\nrelatives à la rétention des eaux de ruissellement (SD2026-200-2822)"
+    },
+    {
+      "id": "ev_3",
+      "source_file": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "rawRef": "raw/proces-verbaux-dollard-des-ormeaux/cas/1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea.pdf",
+      "docSha": "1b5738c40ec38fe32b9daf6b905fdd623252ee78f42b1ccb849c7926e9d8c7ea",
+      "sourceUrl": "https://ville.ddo.qc.ca/wp-content/uploads/2026/02/2026-02-10_Ordinaire_Ordre_du_jour.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux\n(SD2026-400-2799)"
+    }
+  ],
+  "input_tokens": 1250,
+  "output_tokens": 850
+}
+```

@@ -1,0 +1,81 @@
+{
+ "documentId": "val-racine-2026-06-09",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "76a286c0a70e28c654c1f4ea52589753cf8d14c57882e2bc1d85989f44c23d37",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"La vente de remises constitue une disposition de biens meubles/surplus municipaux et non un acte foncier ou réglementaire explicite.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Demande de dérogation mineure DM-2026-001 prévue à l'ordre du jour (point 6.3, page 1).\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Demande de PIIA pour le 2996, chemin St-Léon prévue à l'ordre du jour (point 6.4, page 1).\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Demande de PIIA pour le 2984, chemin St-Léon prévue à l'ordre du jour (point 6.5, page 1).\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Avis de motion prévu pour le projet de règlement no 332, identifié par la lettre 'A' au point 9.1 (page 1).\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Dépôt du projet de règlement no 332 prévu à l'ordre du jour, identifié par la lettre 'D' au point 9.1 (page 1).\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La vente de remises constitue une disposition de biens meubles/surplus municipaux et non un acte foncier ou réglementaire explicite."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Demande de dérogation mineure DM-2026-001 prévue à l'ordre du jour (point 6.3, page 1)."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Demande de PIIA pour le 2996, chemin St-Léon prévue à l'ordre du jour (point 6.4, page 1)."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Demande de PIIA pour le 2984, chemin St-Léon prévue à l'ordre du jour (point 6.5, page 1)."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Avis de motion prévu pour le projet de règlement no 332, identifié par la lettre 'A' au point 9.1 (page 1)."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Dépôt du projet de règlement no 332 prévu à l'ordre du jour, identifié par la lettre 'D' au point 9.1 (page 1)."
+  }
+ ]
+}

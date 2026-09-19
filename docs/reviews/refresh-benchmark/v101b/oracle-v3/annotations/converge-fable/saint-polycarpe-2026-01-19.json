@@ -1,0 +1,91 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab7f365aea8bbf9f79e4bcc5b9eb9134a19b1ef80095576db2136355d052218d",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Point 3.6 de l'ordre du jour (page 1) atteste un acte foncier explicite prévu (achat des lots liés à l'église) ; citation, page et étape inconnu conformes à la règle « Inclusions: urbanisme, petits PIIA et actes fonciers ».\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Point 5.2 (page 1) atteste un acte foncier prévu (vente des immeubles pour défaut de taxes) avec citation exacte ; unité retenue comme représentation unique de ce fait, les points d'ordre du jour étant « prévus ».\"},{\"item\":\"i03\",\"choice\":\"absent\",\"reason\":\"L'étape « adoption » est inexacte pour une résolution d'appui CPTAQ qui n'est pas l'adoption d'un règlement (l'étape attendue serait inconnu, comme pour les autres autorisations par résolution).\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 10.1 (page 2) atteste un avis de motion prévu pour le règlement no 169-2019-01, objet réglementaire explicite ; citation, étape avis_motion et page exactes.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"Doublon du même fait que i02 (point 5.2, même citation) — « Doublon même type/même fait non crédité ».\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Doublon du même fait que i02 (point 5.2, même citation, même objet) — « Doublon même type/même fait non crédité ».\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Doublon identique de i04 (même avis de motion du règlement no 169-2019-01, même citation, même page) — « Doublon même type/même fait non crédité ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "absent"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Point 3.6 de l'ordre du jour (page 1) atteste un acte foncier explicite prévu (achat des lots liés à l'église) ; citation, page et étape inconnu conformes à la règle « Inclusions: urbanisme, petits PIIA et actes fonciers »."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Point 5.2 (page 1) atteste un acte foncier prévu (vente des immeubles pour défaut de taxes) avec citation exacte ; unité retenue comme représentation unique de ce fait, les points d'ordre du jour étant « prévus »."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "L'étape « adoption » est inexacte pour une résolution d'appui CPTAQ qui n'est pas l'adoption d'un règlement (l'étape attendue serait inconnu, comme pour les autres autorisations par résolution)."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 10.1 (page 2) atteste un avis de motion prévu pour le règlement no 169-2019-01, objet réglementaire explicite ; citation, étape avis_motion et page exactes."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "Doublon du même fait que i02 (point 5.2, même citation) — « Doublon même type/même fait non crédité »."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Doublon du même fait que i02 (point 5.2, même citation, même objet) — « Doublon même type/même fait non crédité »."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Doublon identique de i04 (même avis de motion du règlement no 169-2019-01, même citation, même page) — « Doublon même type/même fait non crédité »."
+  }
+ ]
+}

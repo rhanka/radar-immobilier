@@ -1,0 +1,88 @@
+{
+ "documentId": "brownsburg-chatham-2026-03-10",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "74d11969a462e6c5249baa54eed2ad32210241b1b1ec2b5ac6d3225521ce65b0",
+ "verificationSha256": "7c920dc7ebebdc312c826a5d1dcf69a00cf064eda57dd36ad4e0a7f47e113031",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v2\",\"reason\":\"La résolution 26-03-103, commencée page 63, établit page 64 que le « conseil municipal accepte la demande » de construction d’un bâtiment agricole au « 309, route du Canton (lot 4 423 780 du cadastre du Québec) », ce qui confirme l’unité PIIA et exclut « absent ». V2 fournit un extrait exact du titre et précise un lot explicitement confirmé, tandis que la citation de v1 omet le tiret entre « AGRICOLE » et « PROPRIÉTÉ », contrairement à l’affirmation de reproduction textuelle de l’annotateur A.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u19",
+   "verificationItem": "i19",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-011 — bâtiment agricole au 309, route du Canton",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-011",
+      "page": 63,
+      "citation": "DEMANDE DE PIIA 2026-011 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA CONSTRUCTION D’UN BÂTIMENT AGRICOLE PROPRIÉTÉ SITUÉE AU 309, ROUTE DU CANTON",
+      "anchor": "PIIA 2026-011",
+      "spanStart": 1664,
+      "spanEnd": 1827
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-011 — bâtiment agricole au 309, route du Canton (lot 4 423 780)",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-011",
+      "page": 63,
+      "citation": "DEMANDE DE PIIA 2026-011 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA CONSTRUCTION D’UN BÂTIMENT AGRICOLE",
+      "anchor": "PIIA 2026-011",
+      "spanStart": 1664,
+      "spanEnd": 1786
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v2",
+     "reason": "La citation de v2 reproduit exactement le début du titre page 63, qui identifie le 309, route du Canton et le lot 4 423 780, et l’acceptation du PIIA figure page 64."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v2",
+     "reason": "Résolution 26-03-103 p.63-64 : PIIA 2026-011 accepté pour le bâtiment agricole au 309, route du Canton (lot 4 423 780); la citation de v2 est un extrait exact de l’en-tête et le label précise le lot, alors que la citation de v1 omet le tiret séparant « AGRICOLE » et « PROPRIÉTÉ »."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Le PIIA 2026-011 est accepté par la résolution 26-03-103 à la page 63, dont la citation reproduit textuellement le titre de la demande."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v2",
+   "reason": "La résolution 26-03-103, commencée page 63, établit page 64 que le « conseil municipal accepte la demande » de construction d’un bâtiment agricole au « 309, route du Canton (lot 4 423 780 du cadastre du Québec) », ce qui confirme l’unité PIIA et exclut « absent ». V2 fournit un extrait exact du titre et précise un lot explicitement confirmé, tandis que la citation de v1 omet le tiret entre « AGRICOLE » et « PROPRIÉTÉ », contrairement à l’affirmation de reproduction textuelle de l’annotateur A."
+  }
+ ]
+}

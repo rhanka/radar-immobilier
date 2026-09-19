@@ -1,0 +1,13 @@
+{
+ "id": "abercorn-2026-03-30",
+ "rc": 0,
+ "latencyMs": 135043,
+ "inputTokens": 2,
+ "outputTokens": 14569,
+ "cacheRead": 0,
+ "cacheCreate": 5828,
+ "costUsd": 0.42610400000000004,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 26890
+}

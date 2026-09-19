@@ -1,0 +1,19 @@
+{
+ "documentId": "cowansville-2026-05-05",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6b2f0f42478cda0df13e9a0ef53603935fecd69407b87058a8c18a85e4cf5120",
+ "verificationSha256": "020454157e7042ad965ec5270e75c6d438773c8587c6cbf44f3a830173c847a2",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

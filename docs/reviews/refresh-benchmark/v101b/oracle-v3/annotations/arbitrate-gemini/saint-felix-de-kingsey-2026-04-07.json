@@ -1,0 +1,19 @@
+{
+ "documentId": "saint-felix-de-kingsey-2026-04-07",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "3af0de69954f704c23483e712159a82d4849c7f5137fb1ff3937ee8794f66a3a",
+ "verificationSha256": "6c1a273064e8edcf67dad7e5b1c5971d421af9e331bd83a02361ecde08a46537",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

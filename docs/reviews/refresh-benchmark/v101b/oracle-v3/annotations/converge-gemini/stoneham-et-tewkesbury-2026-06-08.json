@@ -1,0 +1,171 @@
+{
+ "documentId": "stoneham-et-tewkesbury-2026-06-08",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fb01cb7d80ff17759f3653fc7e8c1f3a5ef0c6b1da2235b2a3180d8ffe5873d5",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"La vidange des fosses septiques relève de l'hygiène du milieu et non de l'urbanisme, constituant un fait complémentaire hors gold.\"},{\"item\":\"i02\",\"choice\":\"absent\",\"reason\":\"Le projet de règlement sur la vidange des fosses septiques relève de l'hygiène du milieu et non de l'urbanisme (hors gold).\"},{\"item\":\"i03\",\"choice\":\"absent\",\"reason\":\"L'entente de partage de stationnement est une entente administrative contractuelle hors urbanisme et l'étape indiquée est inexacte.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'acquisition à titre gratuit d'une partie du lot 6 564 346 est un acte foncier explicite adopté par résolution à la page 23.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"L'autorisation générale de servitudes jugées nécessaires est une clause accessoire indéterminée sans objet foncier explicite.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour la piscine au 2135, route de Tewkesbury est attestée à la page 38 avec des métadonnées exactes.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour la marge latérale au 53, chemin Plamondon est attestée à la page 40 avec des métadonnées exactes.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"La demande de PIIA au 2757, boulevard Talbot est attestée à la page 42 avec des métadonnées exactes.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"La demande de PIIA au 98, 1re Avenue est attestée à la page 44 et un refus recommandé constitue bien une unité valide.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"La demande de PIIA au 105, chemin de la Tourterelle est attestée à la page 46 avec des métadonnées exactes.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"La demande de PIIA au 144, chemin du Sommet est attestée à la page 48 avec des métadonnées exactes.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"La demande de PIIA pour l'enseigne au 2523, boulevard Talbot est attestée à la page 50 avec des métadonnées exactes.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement de zonage numéro 26-1105 est formellement constatée à la page 52.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement numéro 26-1106 modifiant le règlement sur les PIIA est formellement constatée à la page 54.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"Le refus du premier projet de résolution PPCMOI au 102, 1re Avenue est attesté à la page 56 conformément à la règle sur les refus.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La vidange des fosses septiques relève de l'hygiène du milieu et non de l'urbanisme, constituant un fait complémentaire hors gold."
+  },
+  {
+   "item": "i02",
+   "choice": "absent",
+   "reason": "Le projet de règlement sur la vidange des fosses septiques relève de l'hygiène du milieu et non de l'urbanisme (hors gold)."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "L'entente de partage de stationnement est une entente administrative contractuelle hors urbanisme et l'étape indiquée est inexacte."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'acquisition à titre gratuit d'une partie du lot 6 564 346 est un acte foncier explicite adopté par résolution à la page 23."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "L'autorisation générale de servitudes jugées nécessaires est une clause accessoire indéterminée sans objet foncier explicite."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour la piscine au 2135, route de Tewkesbury est attestée à la page 38 avec des métadonnées exactes."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour la marge latérale au 53, chemin Plamondon est attestée à la page 40 avec des métadonnées exactes."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La demande de PIIA au 2757, boulevard Talbot est attestée à la page 42 avec des métadonnées exactes."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La demande de PIIA au 98, 1re Avenue est attestée à la page 44 et un refus recommandé constitue bien une unité valide."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La demande de PIIA au 105, chemin de la Tourterelle est attestée à la page 46 avec des métadonnées exactes."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "La demande de PIIA au 144, chemin du Sommet est attestée à la page 48 avec des métadonnées exactes."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "La demande de PIIA pour l'enseigne au 2523, boulevard Talbot est attestée à la page 50 avec des métadonnées exactes."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "L'adoption du règlement de zonage numéro 26-1105 est formellement constatée à la page 52."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "L'adoption du règlement numéro 26-1106 modifiant le règlement sur les PIIA est formellement constatée à la page 54."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Le refus du premier projet de résolution PPCMOI au 102, 1re Avenue est attesté à la page 56 conformément à la règle sur les refus."
+  }
+ ]
+}

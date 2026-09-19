@@ -1,0 +1,88 @@
+{
+ "documentId": "berthier-sur-mer-2026-03-24",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c45f9d1b48e4e12cc888b85c591319f6edbda635bff8a8a1342f47fc48ea7f1b",
+ "verificationSha256": "e52616176de24ac1ffa2e16f556b962b8fef2731c1f98e0196f4b40868ace755",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v2\",\"reason\":\"La résolution 2026-063 (pages 3-4) autorise la conclusion d'un bail de terrain municipal avec maintien de l'usage de crémerie, ce qui constitue un acte foncier par simple résolution et non l'adoption d'un règlement d'urbanisme, justifiant l'étape « inconnu ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation du bail du terrain de La Marée Gourmande pour cinq ans",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "La Marée Gourmande",
+      "page": 4,
+      "citation": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain avec le nouveau propriétaire du bâtiment exploité sous le nom La Marée Gourmande, pour une durée de cinq (5) ans",
+      "anchor": "La Marée Gourmande",
+      "spanStart": 132,
+      "spanEnd": 325
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Autorisation du bail de location du terrain municipal de La Marée Gourmande pour cinq ans (maintien de l'usage de crémerie)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "La Marée Gourmande",
+      "page": 4,
+      "citation": "QUE le conseil municipal autorise la conclusion d'un bail de location du terrain avec le nouveau propriétaire du bâtiment exploité sous le nom La Marée Gourmande, pour une durée de cinq (5) ans",
+      "anchor": "La Marée Gourmande",
+      "spanStart": 132,
+      "spanEnd": 325
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v2",
+     "reason": "La résolution 2026-063, page 4, autorise un bail foncier de cinq ans avec maintien de l’usage de crémerie, sans constituer une adoption de règlement, ce qui justifie l’étape « inconnu »."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v2",
+     "reason": "La résolution 2026-063 (page 4) autorise un bail de location du terrain municipal, acte foncier inclus au corrigé, mais ce n'est pas l'adoption d'un règlement : l'étape « inconnu » est la seule conforme, et le maintien de l'usage de crémerie est attesté par « QUE l'usage de crémerie soit maintenu »."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "La résolution 2026-063 adoptée en page 4 autorise la conclusion d'un bail de terrain municipal pour cinq ans, constituant un acte foncier dûment adopté par le conseil."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v2",
+   "reason": "La résolution 2026-063 (pages 3-4) autorise la conclusion d'un bail de terrain municipal avec maintien de l'usage de crémerie, ce qui constitue un acte foncier par simple résolution et non l'adoption d'un règlement d'urbanisme, justifiant l'étape « inconnu »."
+  }
+ ]
+}

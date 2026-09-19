@@ -1,0 +1,36 @@
+{
+ "documentId": "grenville-sur-la-rouge-2026-04-14",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "68fb1e48f376c508176e4378bf19c6993825b225c0585f2478274b9ab0aabaaf",
+ "inputSha256": "7009fbde43a952eb4e4cd50db6d9ee12b7e6bec086094459ea24cfeefde55b82",
+ "responseSha256": "c514c10d6cdd28d4e1d6d7e27e7e29e509bb83075338101e08a18672d4977c1a",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 112805,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 3262,
+  "outputTokens": 3673,
+  "totalTokens": 6935
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 112800,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:06:23.430Z"
+}

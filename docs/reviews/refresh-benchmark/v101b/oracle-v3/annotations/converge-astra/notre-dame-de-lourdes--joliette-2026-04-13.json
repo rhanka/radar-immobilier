@@ -1,0 +1,91 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01d555b9144977e58926b82bb8440d1531b599d66161fc3fb838739681afff4f",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-049, page 4, autorise explicitement la dérogation mineure 2025-0157 pour le 5580 rue Principale, conformément à la citation.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-050, page 5, refuse explicitement la dérogation mineure 2026-0003 au 3791-3791A rang Sainte-Rose, et la version conserve bien ce refus.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 04-2026-051, page 6, autorise la dérogation mineure 2026-0002 concernant le lot 6 658 131, avec une largeur avant sur la rue Maria de 30 mètres.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La rubrique 8.4 et ses attendus, page 6, identifient la demande 2026-0005 au 3741 rue Principale et la résolution autorise la clôture de 1,52 mètre, malgré la discordance du numéro 2025-0005 dans le dispositif.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La rubrique 10.1, page 7, désigne explicitement l’adoption du second projet de règlement 03-2026, dont les attendus précisent la modification du zonage dans la zone U-41.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-055, adoptée page 8, autorise expressément à enchérir et à acquérir des immeubles lors de la vente pour taxes du 11 juin 2026, ce qui constitue un acte foncier inclus.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cet item reprend exactement l’objet et l’étape de l’item i06 dans la même résolution, alors que la règle exclut le crédit d’un doublon de même type décrivant le même fait.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-049, page 4, autorise explicitement la dérogation mineure 2025-0157 pour le 5580 rue Principale, conformément à la citation."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-050, page 5, refuse explicitement la dérogation mineure 2026-0003 au 3791-3791A rang Sainte-Rose, et la version conserve bien ce refus."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 04-2026-051, page 6, autorise la dérogation mineure 2026-0002 concernant le lot 6 658 131, avec une largeur avant sur la rue Maria de 30 mètres."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La rubrique 8.4 et ses attendus, page 6, identifient la demande 2026-0005 au 3741 rue Principale et la résolution autorise la clôture de 1,52 mètre, malgré la discordance du numéro 2025-0005 dans le dispositif."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La rubrique 10.1, page 7, désigne explicitement l’adoption du second projet de règlement 03-2026, dont les attendus précisent la modification du zonage dans la zone U-41."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-055, adoptée page 8, autorise expressément à enchérir et à acquérir des immeubles lors de la vente pour taxes du 11 juin 2026, ce qui constitue un acte foncier inclus."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Cet item reprend exactement l’objet et l’étape de l’item i06 dans la même résolution, alors que la règle exclut le crédit d’un doublon de même type décrivant le même fait."
+  }
+ ]
+}

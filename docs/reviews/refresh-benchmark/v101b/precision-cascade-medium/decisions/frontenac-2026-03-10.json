@@ -1,0 +1,465 @@
+{
+ "documentId": "frontenac-2026-03-10",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "3a70fa13a7c89ad6ab39050e55bf1a82a06287f3e2ecc7d188a412d9cb445785",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-503-2026-report"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report du premier projet sur l’occupation et l’entretien des bâtiments",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\nl’occupation et à l’entretien des bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-504-2026-report"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l’adoption du règlement sur la démolition",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Adoption reportée du règlement no 504-2026 modifiant le règlement\nrelatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-506-2026-report"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l’avis de motion et de la présentation — construction",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Avis de motion et présentation reportée du règlement no. 506-2026\nafin de faire la concordance du règlement de construction no 287-96\nenvers le schéma d’aménagement de la MRC du Granit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-507-2026-report"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l’avis de motion et de la présentation — lotissement",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Avis de motion et présentation reportée du règlement no 507-2026\nafin de faire la concordance du règlement de lotissement no 244-90\nenvers le schéma d’aménagement de la MRC du Granit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-508-2026-report"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l’avis de motion et de la présentation — permis et certificats",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Avis de motion et présentation reportée du règlement no 508-2026\nafin de faire la concordance du règlement sur les permis et certificats\nno 242-90 envers le schéma d’aménagement de la MRC du Granit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-5092026-report"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report du projet de remplacement du plan d’urbanisme",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\n241-90"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-510-2026-report"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l’avis de motion et de la présentation — zonage",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Avis de motion et présentation reportée du règlement no 510-2026\nafin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-cptaq-453132"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Attestation de conformité municipale — Groupe Exca inc.",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "Que le conseil municipal de la Municipalité de Frontenac atteste que la\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\nest conforme à la réglementation municipale applicable,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-vente-taxes-4972283"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de vente pour défaut de paiement de taxes — lot 4972283",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "Qu’en vertu de l’article 1023 du Code Municipal du Québec, le conseil\nde la Municipalité de Frontenac demande à la MRC du Granit de vendre\npour défaut de paiement des taxes, les immeubles suivants :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "signal-piste-route204"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Octroi du contrat de piste multifonctionnelle — route 204",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "Que la municipalité accepte la soumission déposée par Excavation Bolduc Inc. pour l'ajout d'une piste multifonctionnelle sur la route 204 (secteur\nvillage),"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "signal-retrait-surveillance-puits"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Retrait municipal de la gestion de la surveillance des puits — contournement ferroviaire",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 28,
+       "excerpt": "Que la Municipalité de Frontenac confirme son retrait de l’intérêt d’agir\nà titre de responsable de la mise en œuvre et de la gestion du plan de surveillance des puits d’eau potable"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-site-archeologique-subvention"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Accord de subvention pour l’aménagement du site archéologique",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 26,
+       "excerpt": "Que la Municipalité de Frontenac approuve le projet d’accord de subvention avec ministère du Patrimoine canadien dans le cadre du programme\nFonds du Canada pour les espaces culturels"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-pavillon-archeologique"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acquisition des composantes du pavillon d’accueil archéologique",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 36,
+       "excerpt": "Que la soumission de Clyvanor Ltée pour la fourniture de fermes de toit,\nmurs préfabriqués et autres composantes du pavillon d’accueil du site archéologique Cliche-Rancourt-Mamsalhabika"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "signal-marais-megantic"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Appui au portrait préliminaire du marais du lac Mégantic",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 30,
+       "excerpt": "Que le conseil municipal appuie officiellement le projet de portrait préliminaire et ciblé du marais du lac Mégantic tel que présenté par le RAPPEL\net l’APLM ;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le procès-verbal consigne explicitement le report de l'adoption du premier projet du règlement no 503-2026.\",\"excerpt\":\"Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\\nl’occupation et à l’entretien des bâtiments\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le document indique le report de l'adoption du règlement no 504-2026 relatif à la démolition d'immeubles.\",\"excerpt\":\"Adoption reportée du règlement no 504-2026 modifiant le règlement\\nrelatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le document rapporte le report de l'avis de motion et de la présentation du règlement de construction no 506-2026.\",\"excerpt\":\"Avis de motion et présentation reportée du règlement no. 506-2026\\nafin de faire la concordance du règlement de construction no 287-96\\nenvers le schéma d’aménagement de la MRC du Granit\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le document rapporte le report de l'avis de motion et de la présentation du règlement de lotissement no 507-2026.\",\"excerpt\":\"Avis de motion et présentation reportée du règlement no 507-2026\\nafin de faire la concordance du règlement de lotissement no 244-90\\nenvers le schéma d’aménagement de la MRC du Granit\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le document fait état du report de l'avis de motion et de la présentation du règlement sur les permis et certificats no 508-2026.\",\"excerpt\":\"Avis de motion et présentation reportée du règlement no 508-2026\\nafin de faire la concordance du règlement sur les permis et certificats\\nno 242-90 envers le schéma d’aménagement de la MRC du Granit\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le document rapporte le report de l'avis de motion et de la présentation du règlement no 509-2026 remplaçant le plan d'urbanisme.\",\"excerpt\":\"Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\\n241-90\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le document consigne le report de l'avis de motion et de la présentation du règlement de zonage no 510-2026.\",\"excerpt\":\"Avis de motion et présentation reportée du règlement no 510-2026\\nafin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-087 atteste la conformité à la réglementation municipale pour un dossier CPTAQ.\",\"excerpt\":\"Que le conseil municipal de la Municipalité de Frontenac atteste que la\\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\\nest conforme à la réglementation municipale applicable,\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-080 ordonne la vente pour défaut de paiement de taxes d'un immeuble désigné.\",\"excerpt\":\"Qu’en vertu de l’article 1023 du Code Municipal du Québec, le conseil\\nde la Municipalité de Frontenac demande à la MRC du Granit de vendre\\npour défaut de paiement des taxes, les immeubles suivants :\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-089 octroie le contrat pour l'aménagement d'une piste multifonctionnelle.\",\"excerpt\":\"Que la municipalité accepte la soumission déposée par Excavation Bolduc Inc. pour l'ajout d'une piste multifonctionnelle sur la route 204 (secteur\\nvillage),\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-095 confirme le retrait de la municipalité de la gestion de la surveillance des puits dans le dossier du contournement ferroviaire.\",\"excerpt\":\"Que la Municipalité de Frontenac confirme son retrait de l’intérêt d’agir\\nà titre de responsable de la mise en œuvre et de la gestion du plan de surveillance des puits d’eau potable\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-092 approuve le projet d'accord de subvention pour l'aménagement du site archéologique.\",\"excerpt\":\"Que la Municipalité de Frontenac approuve le projet d’accord de subvention avec ministère du Patrimoine canadien dans le cadre du programme\\nFonds du Canada pour les espaces culturels\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-111 approuve la soumission pour la fourniture des composantes du pavillon d'accueil du site archéologique.\",\"excerpt\":\"Que la soumission de Clyvanor Ltée pour la fourniture de fermes de toit,\\nmurs préfabriqués et autres composantes du pavillon d’accueil du site archéologique Cliche-Rancourt-Mamsalhabika\"},{\"act\":\"A14\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-100 accorde un appui officiel et une contribution financière au projet de portrait préliminaire du marais du lac Mégantic.\",\"excerpt\":\"Que le conseil municipal appuie officiellement le projet de portrait préliminaire et ciblé du marais du lac Mégantic tel que présenté par le RAPPEL\\net l’APLM ;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le procès-verbal consigne explicitement le report de l'adoption du premier projet du règlement no 503-2026.",
+   "excerpt": "Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\nl’occupation et à l’entretien des bâtiments"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le document indique le report de l'adoption du règlement no 504-2026 relatif à la démolition d'immeubles.",
+   "excerpt": "Adoption reportée du règlement no 504-2026 modifiant le règlement\nrelatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le document rapporte le report de l'avis de motion et de la présentation du règlement de construction no 506-2026.",
+   "excerpt": "Avis de motion et présentation reportée du règlement no. 506-2026\nafin de faire la concordance du règlement de construction no 287-96\nenvers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le document rapporte le report de l'avis de motion et de la présentation du règlement de lotissement no 507-2026.",
+   "excerpt": "Avis de motion et présentation reportée du règlement no 507-2026\nafin de faire la concordance du règlement de lotissement no 244-90\nenvers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le document fait état du report de l'avis de motion et de la présentation du règlement sur les permis et certificats no 508-2026.",
+   "excerpt": "Avis de motion et présentation reportée du règlement no 508-2026\nafin de faire la concordance du règlement sur les permis et certificats\nno 242-90 envers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le document rapporte le report de l'avis de motion et de la présentation du règlement no 509-2026 remplaçant le plan d'urbanisme.",
+   "excerpt": "Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\n241-90"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le document consigne le report de l'avis de motion et de la présentation du règlement de zonage no 510-2026.",
+   "excerpt": "Avis de motion et présentation reportée du règlement no 510-2026\nafin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-087 atteste la conformité à la réglementation municipale pour un dossier CPTAQ.",
+   "excerpt": "Que le conseil municipal de la Municipalité de Frontenac atteste que la\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\nest conforme à la réglementation municipale applicable,"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-080 ordonne la vente pour défaut de paiement de taxes d'un immeuble désigné.",
+   "excerpt": "Qu’en vertu de l’article 1023 du Code Municipal du Québec, le conseil\nde la Municipalité de Frontenac demande à la MRC du Granit de vendre\npour défaut de paiement des taxes, les immeubles suivants :"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-089 octroie le contrat pour l'aménagement d'une piste multifonctionnelle.",
+   "excerpt": "Que la municipalité accepte la soumission déposée par Excavation Bolduc Inc. pour l'ajout d'une piste multifonctionnelle sur la route 204 (secteur\nvillage),"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-095 confirme le retrait de la municipalité de la gestion de la surveillance des puits dans le dossier du contournement ferroviaire.",
+   "excerpt": "Que la Municipalité de Frontenac confirme son retrait de l’intérêt d’agir\nà titre de responsable de la mise en œuvre et de la gestion du plan de surveillance des puits d’eau potable"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-092 approuve le projet d'accord de subvention pour l'aménagement du site archéologique.",
+   "excerpt": "Que la Municipalité de Frontenac approuve le projet d’accord de subvention avec ministère du Patrimoine canadien dans le cadre du programme\nFonds du Canada pour les espaces culturels"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-111 approuve la soumission pour la fourniture des composantes du pavillon d'accueil du site archéologique.",
+   "excerpt": "Que la soumission de Clyvanor Ltée pour la fourniture de fermes de toit,\nmurs préfabriqués et autres composantes du pavillon d’accueil du site archéologique Cliche-Rancourt-Mamsalhabika"
+  },
+  {
+   "act": "A14",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-100 accorde un appui officiel et une contribution financière au projet de portrait préliminaire du marais du lac Mégantic.",
+   "excerpt": "Que le conseil municipal appuie officiellement le projet de portrait préliminaire et ciblé du marais du lac Mégantic tel que présenté par le RAPPEL\net l’APLM ;"
+  }
+ ],
+ "filter": {
+  "acts": 14,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le procès-verbal consigne explicitement le report de l'adoption du premier projet du règlement no 503-2026."
+   },
+   {
+    "act": "A02",
+    "reason": "Le document indique le report de l'adoption du règlement no 504-2026 relatif à la démolition d'immeubles."
+   },
+   {
+    "act": "A03",
+    "reason": "Le document rapporte le report de l'avis de motion et de la présentation du règlement de construction no 506-2026."
+   },
+   {
+    "act": "A04",
+    "reason": "Le document rapporte le report de l'avis de motion et de la présentation du règlement de lotissement no 507-2026."
+   },
+   {
+    "act": "A05",
+    "reason": "Le document fait état du report de l'avis de motion et de la présentation du règlement sur les permis et certificats no 508-2026."
+   },
+   {
+    "act": "A06",
+    "reason": "Le document rapporte le report de l'avis de motion et de la présentation du règlement no 509-2026 remplaçant le plan d'urbanisme."
+   },
+   {
+    "act": "A07",
+    "reason": "Le document consigne le report de l'avis de motion et de la présentation du règlement de zonage no 510-2026."
+   },
+   {
+    "act": "A08",
+    "reason": "La résolution 2026-087 atteste la conformité à la réglementation municipale pour un dossier CPTAQ."
+   },
+   {
+    "act": "A09",
+    "reason": "La résolution 2026-080 ordonne la vente pour défaut de paiement de taxes d'un immeuble désigné."
+   },
+   {
+    "act": "A10",
+    "reason": "La résolution 2026-089 octroie le contrat pour l'aménagement d'une piste multifonctionnelle."
+   },
+   {
+    "act": "A11",
+    "reason": "La résolution 2026-095 confirme le retrait de la municipalité de la gestion de la surveillance des puits dans le dossier du contournement ferroviaire."
+   },
+   {
+    "act": "A12",
+    "reason": "La résolution 2026-092 approuve le projet d'accord de subvention pour l'aménagement du site archéologique."
+   },
+   {
+    "act": "A13",
+    "reason": "La résolution 2026-111 approuve la soumission pour la fourniture des composantes du pavillon d'accueil du site archéologique."
+   },
+   {
+    "act": "A14",
+    "reason": "La résolution 2026-100 accorde un appui officiel et une contribution financière au projet de portrait préliminaire du marais du lac Mégantic."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3873,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 23030,
+   "outputTokens": 1340,
+   "totalTokens": 24370
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3725
+  },
+  "inputSha256": "bacbea632689d3feebe55756bffd6ab1d21bf11ac30e8ed06fe8cc18c38b26b1"
+ }
+}

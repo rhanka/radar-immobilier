@@ -1,0 +1,378 @@
+{
+ "documentId": "ogden-2026-03-09",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "3f903a5dd162c18b56ff309e5f526df3488a2d787299ed69255deb7e73c8cbd9",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-derogations-905-descente-2"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de deux dérogations mineures au 905 Descente 2",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Demande de deux (2) dérogations mineures au 905 Descente 2"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-piia-2050-marlington"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA — nouveau bâtiment au 2050 chemin Marlington",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-piia-3695-stanstead"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA — nouveau bâtiment au 3695 chemin Stanstead",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-conformite-urbanisme"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Dépôt prévu des certificats de conformité de la MRC",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-2025-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage no. 2025-05",
+     "stage": null,
+     "objet": "2025-05",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-enregistrement-2025-05"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Certificat relatif à la procédure d’enregistrement — zonage 2025-05",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-2026-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement no. 2026.05 — occupation et entretien des bâtiments",
+     "stage": null,
+     "objet": "2026.05",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+      },
+      {
+       "page": 2,
+       "excerpt": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-2026-05-avis"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis de motion prévu — règlement 2026.05",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-2026-05-projet"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Adoption prévue du projet de règlement 2026.05",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "bylaw-2026-03"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement no. 2026.03 — modification du règlement sur le CCU",
+     "stage": null,
+     "objet": "2026.03",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au​\n​comité consultatif d’urbanisme et ses amendements"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "bylaw-2020-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement no. 2020.05 — comité consultatif d’urbanisme",
+     "stage": null,
+     "objet": "2020.05",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au​\n​comité consultatif d’urbanisme et ses amendements"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.3 de l'ordre du jour prévoit la demande de dérogations mineures au 905 Descente 2.\",\"excerpt\":\"Demande de deux (2) dérogations mineures au 905 Descente 2\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.4 de l'ordre du jour porte sur la demande de PIIA au 2050 chemin Marlington.\",\"excerpt\":\"Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.5 de l'ordre du jour prévoit la demande de PIIA au 3695 chemin Stanstead.\",\"excerpt\":\"Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.6 de l'ordre du jour prévoit le dépôt des certificats de conformité de la MRC.\",\"excerpt\":\"Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement de zonage no. 2025-05 est explicitement mentionné au point 6.7 de l'ordre du jour.\",\"excerpt\":\"Règlement de zonage no. 2025-05\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.7 prévoit le dépôt du certificat relatif à la procédure d'enregistrement pour le règlement 2025-05.\",\"excerpt\":\"Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des personnes habiles à voter sur le Règlement de zonage no. 2025-05\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement no. 2026.05 est mentionné aux points 13.3 et 13.4 de l'ordre du jour.\",\"excerpt\":\"Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le point 13.3 porte explicitement sur l'avis de motion pour le règlement 2026.05.\",\"excerpt\":\"Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le point 13.4 porte explicitement sur l'adoption du projet de règlement no. 2026.05.\",\"excerpt\":\"Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le point 13.1 porte sur l'adoption du règlement no. 2026.03 modifiant le règlement sur le CCU.\",\"excerpt\":\"Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au comité consultatif d’urbanisme\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement no. 2020.05 est cité au point 13.1 comme règlement modifié.\",\"excerpt\":\"Règlement no. 2020.05 relatif au comité consultatif d’urbanisme\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 6.3 de l'ordre du jour prévoit la demande de dérogations mineures au 905 Descente 2.",
+   "excerpt": "Demande de deux (2) dérogations mineures au 905 Descente 2"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 6.4 de l'ordre du jour porte sur la demande de PIIA au 2050 chemin Marlington.",
+   "excerpt": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 6.5 de l'ordre du jour prévoit la demande de PIIA au 3695 chemin Stanstead.",
+   "excerpt": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 6.6 de l'ordre du jour prévoit le dépôt des certificats de conformité de la MRC.",
+   "excerpt": "Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le règlement de zonage no. 2025-05 est explicitement mentionné au point 6.7 de l'ordre du jour.",
+   "excerpt": "Règlement de zonage no. 2025-05"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le point 6.7 prévoit le dépôt du certificat relatif à la procédure d'enregistrement pour le règlement 2025-05.",
+   "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le règlement no. 2026.05 est mentionné aux points 13.3 et 13.4 de l'ordre du jour.",
+   "excerpt": "Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le point 13.3 porte explicitement sur l'avis de motion pour le règlement 2026.05.",
+   "excerpt": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le point 13.4 porte explicitement sur l'adoption du projet de règlement no. 2026.05.",
+   "excerpt": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le point 13.1 porte sur l'adoption du règlement no. 2026.03 modifiant le règlement sur le CCU.",
+   "excerpt": "Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au comité consultatif d’urbanisme"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le règlement no. 2020.05 est cité au point 13.1 comme règlement modifié.",
+   "excerpt": "Règlement no. 2020.05 relatif au comité consultatif d’urbanisme"
+  }
+ ],
+ "filter": {
+  "acts": 11,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 6.3 de l'ordre du jour prévoit la demande de dérogations mineures au 905 Descente 2."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 6.4 de l'ordre du jour porte sur la demande de PIIA au 2050 chemin Marlington."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 6.5 de l'ordre du jour prévoit la demande de PIIA au 3695 chemin Stanstead."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 6.6 de l'ordre du jour prévoit le dépôt des certificats de conformité de la MRC."
+   },
+   {
+    "act": "A05",
+    "reason": "Le règlement de zonage no. 2025-05 est explicitement mentionné au point 6.7 de l'ordre du jour."
+   },
+   {
+    "act": "A06",
+    "reason": "Le point 6.7 prévoit le dépôt du certificat relatif à la procédure d'enregistrement pour le règlement 2025-05."
+   },
+   {
+    "act": "A07",
+    "reason": "Le règlement no. 2026.05 est mentionné aux points 13.3 et 13.4 de l'ordre du jour."
+   },
+   {
+    "act": "A08",
+    "reason": "Le point 13.3 porte explicitement sur l'avis de motion pour le règlement 2026.05."
+   },
+   {
+    "act": "A09",
+    "reason": "Le point 13.4 porte explicitement sur l'adoption du projet de règlement no. 2026.05."
+   },
+   {
+    "act": "A10",
+    "reason": "Le point 13.1 porte sur l'adoption du règlement no. 2026.03 modifiant le règlement sur le CCU."
+   },
+   {
+    "act": "A11",
+    "reason": "Le règlement no. 2020.05 est cité au point 13.1 comme règlement modifié."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2485,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3622,
+   "outputTokens": 762,
+   "totalTokens": 4384
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2352
+  },
+  "inputSha256": "ff5991927e527c9011397bdd3ecaba94f9efd66b197fa1dd4624fa7177d7e116"
+ }
+}

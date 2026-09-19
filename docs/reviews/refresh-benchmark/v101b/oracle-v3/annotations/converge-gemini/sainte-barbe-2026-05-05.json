@@ -1,0 +1,91 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4d1e737f5b87940afc4fdaaca53ee2d9a01a0336db2efe620f0fe663b9779ab9",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"Un simple échange en période de questions sans décision formelle du conseil ne constitue pas une étape procédurale d'urbanisme au sens des règles.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-13 fixe formellement la tenue et la date du scrutin référendaire pour le PPCMOI 2025-001 à la page 14.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-16 atteste l'adoption du second projet de règlement 2003-05-63 à la page 15.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-18 approuve le PIIA 2026-0055 à la page 18, et la version v1 fournit la citation intégrale de la décision.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-19 approuve le PIIA 2026-0056 à la page 19, et la version v1 fournit la citation intégrale de la décision.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-20 approuve la dérogation mineure 2026-0057 à la page 20, et la version v1 fournit la citation intégrale de la décision.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-21 autorise la cession d'une servitude au 163 avenue des Cèdres, ce qui correspond à un acte foncier inclus par les règles.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v2"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v2"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "Un simple échange en période de questions sans décision formelle du conseil ne constitue pas une étape procédurale d'urbanisme au sens des règles."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-13 fixe formellement la tenue et la date du scrutin référendaire pour le PPCMOI 2025-001 à la page 14."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-16 atteste l'adoption du second projet de règlement 2003-05-63 à la page 15."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-18 approuve le PIIA 2026-0055 à la page 18, et la version v1 fournit la citation intégrale de la décision."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-19 approuve le PIIA 2026-0056 à la page 19, et la version v1 fournit la citation intégrale de la décision."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-20 approuve la dérogation mineure 2026-0057 à la page 20, et la version v1 fournit la citation intégrale de la décision."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-21 autorise la cession d'une servitude au 163 avenue des Cèdres, ce qui correspond à un acte foncier inclus par les règles."
+  }
+ ]
+}

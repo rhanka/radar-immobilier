@@ -1,0 +1,19 @@
+{
+ "documentId": "lyster-2026-02-02",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "092e8dfeb56a8da806cc0d2322c3112274a690fd04d48f8c24b20e75560b1bfe",
+ "verificationSha256": "04efa7d3ccecd6bcd00e2e5d55316e871880ef67f6c34cc6946fb1b95d1a0ddf",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

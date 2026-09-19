@@ -1,0 +1,13 @@
+{
+ "id": "notre-dame-du-rosaire-2026-03-02",
+ "rc": 0,
+ "latencyMs": 305887,
+ "inputTokens": 2,
+ "outputTokens": 45360,
+ "cacheRead": 0,
+ "cacheCreate": 23793,
+ "costUsd": 1.3893609999999998,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 70668
+}

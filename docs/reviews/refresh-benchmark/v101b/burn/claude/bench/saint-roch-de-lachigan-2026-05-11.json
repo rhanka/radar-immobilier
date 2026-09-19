@@ -1,0 +1,13 @@
+{
+ "id": "saint-roch-de-lachigan-2026-05-11",
+ "rc": 0,
+ "latencyMs": 297987,
+ "inputTokens": 2,
+ "outputTokens": 12452,
+ "cacheRead": 0,
+ "cacheCreate": 3947,
+ "costUsd": 0.35306499999999996,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 20670
+}

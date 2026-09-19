@@ -1,0 +1,130 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "65a820678700bb1058c82112a314aefa981bad8f7ea1c9f8f1c67b9cb88ed569",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation conditionnelle du PIIA — aire de stationnement en pente, lot 6 474 528\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 474 528\",\n        \"page\": 43,\n        \"citation\": \"Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38.\\nDe FAIRE parvenir la présente résolution à Mme Genevieve Lacroix.\\nADOPTÉE À L'UNANIMITÉ\",\n        \"anchor\": \"lot numéro 6 474 528\"\n      },\n      \"reason\": \"La résolution 2026-03-59 approuve le PIIA de l'aire de stationnement en pente d'au plus 18,7 %, conditionnellement à un aménagement de gestion des eaux pluviales, sans assujettir les bâtiments au PIIA.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation conditionnelle du PIIA — rénovation au 2197-2199, chemin du Parc\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2197-2199, chemin du Parc\",\n        \"page\": 45,\n        \"citation\": \"Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 –\\nZone C3.\\nDe FAIRE parvenir la présente résolution à M. Eric Graveson.\\nADOPTÉE À L'UNANIMITÉ\",\n        \"anchor\": \"2197-2199, chemin du Parc\"\n      },\n      \"reason\": \"La résolution 2026-03-60 approuve les travaux de rénovation sous réserve du dépôt d'un plan d'aménagement paysager avant la délivrance du permis ou du certificat.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Contribution pour parcs exigée en argent — lot 6 521 680\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 521 680\",\n        \"page\": 46,\n        \"citation\": \"6 521 680\\n\\n0 m2\\n\\nChemin des\\nNénuphars\\n6 449 130\\n\\nMontant à\\npayer au fonds\\nde parcs, de\\nterrains de\\njeux et\\nd'espaces\\nnaturels (10 %)\\nContribution\\nexigée en argent.\",\n        \"anchor\": \"6 521 680\\n\\n0 m2\"\n      },\n      \"reason\": \"La résolution 2026-03-61 exige une contribution pour parcs en argent et nomme explicitement le lot 6 521 680, à distinguer de l'autre objet foncier visé.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Contribution pour parcs exigée en argent — lot 6 449 130\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 449 130\",\n        \"page\": 46,\n        \"citation\": \"Chemin des\\nNénuphars\\n6 449 130\\n\\nMontant à\\npayer au fonds\\nde parcs, de\\nterrains de\\njeux et\\nd'espaces\\nnaturels (10 %)\\nContribution\\nexigée en argent.\",\n        \"anchor\": \"Nénuphars\\n6 449 130\"\n      },\n      \"reason\": \"La résolution 2026-03-61 nomme également le lot 6 449 130 parmi les terrains soumis à la contribution, ce qui justifie une unité distincte pour cet objet explicite.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Demande de modification du RCI 16-21 — intégration du lot 3 787 898 au secteur de consolidation\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"16-21\",\n        \"page\": 47,\n        \"citation\": \"De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle\\nintérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur\",\n        \"anchor\": \"intérimaire numéro 16-21\"\n      },\n      \"reason\": \"La résolution 2026-03-62 demande à la MRC une modification du RCI 16-21, sans constater l'adoption de cette modification ni autoriser immédiatement le prolongement de rue.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Demande de modification du schéma d'aménagement 16-23 — intégration du lot 3 787 898\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"16-23\",\n        \"page\": 46,\n        \"citation\": \"schéma d'aménagement de la MRC de Memphrémagog\\n(Règlement numéro 16-23)\",\n        \"anchor\": \"Règlement numéro 16-23\"\n      },\n      \"reason\": \"La demande formulée page 47 vise aussi le schéma d'aménagement identifié ici comme règlement 16-23, qui constitue un second objet réglementaire distinct du RCI 16-21.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA — aire de stationnement en pente, lot 6 474 528",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 474 528",
+    "page": 43,
+    "citation": "Pour le lot numéro 6 474 528 adjacent à la rue de la Bourrasque, zone R38.\nDe FAIRE parvenir la présente résolution à Mme Genevieve Lacroix.\nADOPTÉE À L'UNANIMITÉ",
+    "anchor": "lot numéro 6 474 528"
+   },
+   "reason": "La résolution 2026-03-59 approuve le PIIA de l'aire de stationnement en pente d'au plus 18,7 %, conditionnellement à un aménagement de gestion des eaux pluviales, sans assujettir les bâtiments au PIIA."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA — rénovation au 2197-2199, chemin du Parc",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2197-2199, chemin du Parc",
+    "page": 45,
+    "citation": "Pour la propriété située au 2197-2199, chemin du Parc – Lot numéro 3 786 675 –\nZone C3.\nDe FAIRE parvenir la présente résolution à M. Eric Graveson.\nADOPTÉE À L'UNANIMITÉ",
+    "anchor": "2197-2199, chemin du Parc"
+   },
+   "reason": "La résolution 2026-03-60 approuve les travaux de rénovation sous réserve du dépôt d'un plan d'aménagement paysager avant la délivrance du permis ou du certificat."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Contribution pour parcs exigée en argent — lot 6 521 680",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 521 680",
+    "page": 46,
+    "citation": "6 521 680\n\n0 m2\n\nChemin des\nNénuphars\n6 449 130\n\nMontant à\npayer au fonds\nde parcs, de\nterrains de\njeux et\nd'espaces\nnaturels (10 %)\nContribution\nexigée en argent.",
+    "anchor": "6 521 680\n\n0 m2"
+   },
+   "reason": "La résolution 2026-03-61 exige une contribution pour parcs en argent et nomme explicitement le lot 6 521 680, à distinguer de l'autre objet foncier visé."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Contribution pour parcs exigée en argent — lot 6 449 130",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 449 130",
+    "page": 46,
+    "citation": "Chemin des\nNénuphars\n6 449 130\n\nMontant à\npayer au fonds\nde parcs, de\nterrains de\njeux et\nd'espaces\nnaturels (10 %)\nContribution\nexigée en argent.",
+    "anchor": "Nénuphars\n6 449 130"
+   },
+   "reason": "La résolution 2026-03-61 nomme également le lot 6 449 130 parmi les terrains soumis à la contribution, ce qui justifie une unité distincte pour cet objet explicite."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Demande de modification du RCI 16-21 — intégration du lot 3 787 898 au secteur de consolidation",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "16-21",
+    "page": 47,
+    "citation": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle\nintérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur",
+    "anchor": "intérimaire numéro 16-21"
+   },
+   "reason": "La résolution 2026-03-62 demande à la MRC une modification du RCI 16-21, sans constater l'adoption de cette modification ni autoriser immédiatement le prolongement de rue."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Demande de modification du schéma d'aménagement 16-23 — intégration du lot 3 787 898",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "16-23",
+    "page": 46,
+    "citation": "schéma d'aménagement de la MRC de Memphrémagog\n(Règlement numéro 16-23)",
+    "anchor": "Règlement numéro 16-23"
+   },
+   "reason": "La demande formulée page 47 vise aussi le schéma d'aménagement identifié ici comme règlement 16-23, qui constitue un second objet réglementaire distinct du RCI 16-21."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

@@ -1,0 +1,124 @@
+{
+ "nodes": [
+  {
+   "id": "event-cptaq-453592",
+   "label": "Recommandation municipale d’aliénation agricole — CPTAQ 453592",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "status": "candidate",
+   "municipality": "saint-zephirin-de-courval",
+   "docSha": "2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69",
+   "date": "2026-04-13",
+   "meetingDate": "2026-04-13",
+   "kind": "cptaq",
+   "dossier": "453592",
+   "resolution": "45-04-2026",
+   "decision": "Recommandation favorable à la CPTAQ",
+   "etape": "inconnu",
+   "superficie_m2": 536733,
+   "description": "Le conseil recommande à la CPTAQ d’autoriser l’aliénation des lots 5 884 262, 5 885 277, 5 885 261 et 5 885 276, totalisant 53,6733 hectares, en faveur de Ferme Nic & Pic inc. La décision de la CPTAQ n’est pas rapportée.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Et résolu par les membres du ce Conseil de recommander à la Commission de\nprotection du territoire agricole du Québec d’accorder l’autorisation requise pour",
+     "source_file": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+     "rawRef": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+     "docSha": "2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69",
+     "sourceUrl": "https://www.saint-zephirin.ca/upload/seances-du-conseil/04-26pv.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-cptaq"
+   ]
+  },
+  {
+   "id": "signal-acquisition-5885286",
+   "label": "Acquisition municipale du lot 5 885 286",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "status": "candidate",
+   "municipality": "saint-zephirin-de-courval",
+   "docSha": "2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69",
+   "date": "2026-04-13",
+   "category": "acquisition_fonciere",
+   "resolution": "46-04-2026",
+   "scope": "local",
+   "no_lot": "5885286",
+   "amount_cad": 15000,
+   "description": "Acquisition autorisée auprès de Ferme Maquille inc. d’un terrain sans bâtisse de 841,9 m² sur la rue des Loisirs, pour 15 000 $ plus taxes applicables. Un mandat notarial et la signature de l’acte de vente sont autorisés.",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le\nterrain portant le numéro 5 885 286 du Cadastre du Québec, dans la",
+     "source_file": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+     "rawRef": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+     "docSha": "2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69",
+     "sourceUrl": "https://www.saint-zephirin.ca/upload/seances-du-conseil/04-26pv.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-acquisition"
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-cptaq",
+   "source_file": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "rawRef": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "docSha": "2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69",
+   "sourceUrl": "https://www.saint-zephirin.ca/upload/seances-du-conseil/04-26pv.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Et résolu par les membres du ce Conseil de recommander à la Commission de\nprotection du territoire agricole du Québec d’accorder l’autorisation requise pour\npermettre l’aliénation pour permettre la vente des lots 5 884 262, 5 885 277,\n5 885 261, 5 885 276 totalisant une superficie de 53,6733 en faveur de Ferme Nic\n& Pic inc."
+  },
+  {
+   "id": "ev-acquisition",
+   "source_file": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "rawRef": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "docSha": "2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69",
+   "sourceUrl": "https://www.saint-zephirin.ca/upload/seances-du-conseil/04-26pv.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le\nterrain portant le numéro 5 885 286 du Cadastre du Québec, dans la\ncirconscription foncière de Nicolet-Yamaska (Nicolet 2), d’une superficie de\n841.9mc sans bâtisse, ayant pignon sur rue des Loisirs, Saint-Zéphirin-de-Courval;"
+  },
+  {
+   "id": "ev-prhlm",
+   "source_file": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "rawRef": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "docSha": "2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69",
+   "sourceUrl": "https://www.saint-zephirin.ca/upload/seances-du-conseil/04-26pv.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "QUE la Municipalité de Saint-Zéphirin-de-Courval s’engage à assumer une\ncontribution financière municipale équivalant à 10 % des coûts admissibles des\ntravaux, conformément aux conditions du programme PRHLM;"
+  },
+  {
+   "id": "ev-budget",
+   "source_file": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "rawRef": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "docSha": "2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69",
+   "sourceUrl": "https://www.saint-zephirin.ca/upload/seances-du-conseil/04-26pv.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "D’adopter les prévisions budgétaires révisées pour l’exercice financier 2026 de\nl’Office d’Habitation Nicolet-Yamaska. Le budget de l’OH de Saint-Zéphirin s’élève\n64 860 $. Ce budget est déficitaire de 5 387 $, la part de la municipalité\nreprésentant 10% du déficit s’élève à 539 $."
+  },
+  {
+   "id": "ev-lau",
+   "source_file": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "rawRef": "raw/proces-verbaux-saint-zephirin-de-courval/cas/2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69.pdf",
+   "docSha": "2e0b187ed24723f4e706d382de7ee2c4d23e53fd9a334a13c73d2498045a1c69",
+   "sourceUrl": "https://www.saint-zephirin.ca/upload/seances-du-conseil/04-26pv.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "QUE la municipalité de Saint-Zéphirin-de-Courval demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale d’introduire un amendement au projet de loi no 22 abrogeant\nl’article 245.1 de la Loi sur l’aménagement et l’urbanisme afin de respecter le\nconsensus établi entre le ministère et ses partenaires municipaux;"
+  }
+ ],
+ "input_tokens": 12500,
+ "output_tokens": 3900
+}

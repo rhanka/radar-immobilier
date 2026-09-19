@@ -1,0 +1,320 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "09de2d3418b5c853532414afcc7fba349c83ecd33e1bd82d6fd4584c23940aab",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-26-R-285"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "26-R-285 — Interdiction d'épandage à des dates prédéterminées",
+     "stage": "adoption",
+     "objet": "26-R-285",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "En conséquence, il est proposé par Joël Caisse, appuyé par Charles Fraser-Guay et\nrésolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé :"
+      },
+      {
+       "page": 3,
+       "excerpt": "En conséquence, il est proposé par Joël Caisse, appuyé par Charles Fraser-Guay et\nrésolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé :\n« Règlement interdisant l'épandage de déjections animales ou de boues à des dates\n\nprédéterminées entre le 31 mai et le 1er octobre 2026 »."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-ppcmoi-2025-07"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI-2025-07 — Approbation finale du projet de lotissement",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :"
+      },
+      {
+       "page": 9,
+       "excerpt": "que la demande consiste à fusionner les lots numéro\n6 465 474 et 6 465 475 pour n'en faire qu'un seul\nlot;"
+      },
+      {
+       "page": 10,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :\nArticle 1.\nAutoriser deux (2) bâtiments principaux résidentiels. Le nombre de bâtiments\nprincipaux sera de deux (2) au lieu d'un (1) seul (article 11.1 du Règlement\nd'urbanisme numéro 14-R-186)."
+      },
+      {
+       "page": 9,
+       "excerpt": "que la demande consiste à fusionner les lots numéro\n6 465 474 et 6 465 475 pour n'en faire qu'un seul\nlot;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-ppcmoi-2025-08"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI-2025-08 — Approbation finale du projet de lotissement",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :"
+      },
+      {
+       "page": 10,
+       "excerpt": "que la demande consiste à fusionner les lots\nnuméro 6 465 476 et 6 465 477 pour n'en faire\nqu'un seul lot;"
+      },
+      {
+       "page": 11,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :\nArticle 1.\nAutoriser deux (2) bâtiments principaux résidentiels. Le nombre de bâtiments\nprincipaux sera de deux (2) au lieu d'un (1) seul (article 11.1 du Règlement\nd'urbanisme numéro 14-R-186)."
+      },
+      {
+       "page": 10,
+       "excerpt": "que la demande consiste à fusionner les lots\nnuméro 6 465 476 et 6 465 477 pour n'en faire\nqu'un seul lot;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-ppcmoi-2025-09"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI-2025-09 — Approbation finale du projet de lotissement",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :"
+      },
+      {
+       "page": 11,
+       "excerpt": "que la demande consiste à fusionner les lots numéro\n6 465 470, 6 465 471 et 6 460 234 pour n'en faire\nqu'un seul lot;"
+      },
+      {
+       "page": 12,
+       "excerpt": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :\nArticle 1.\nAutoriser trois (3) bâtiments principaux résidentiels. Le nombre de bâtiments\nprincipaux sera de trois (3) au lieu d'un (1) seul (article 11.1 du Règlement\nd'urbanisme numéro 14-R-186)."
+      },
+      {
+       "page": 11,
+       "excerpt": "que la demande consiste à fusionner les lots numéro\n6 465 470, 6 465 471 et 6 460 234 pour n'en faire\nqu'un seul lot;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-cptaq-5891123"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui municipal à la demande CPTAQ — 2860, chemin des Patriotes",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "En conséquence, il est proposé par Lise Ferland, appuyé par Michel Beaudoin et\nrésolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour"
+      },
+      {
+       "page": 12,
+       "excerpt": "que la superficie totale faisant l'objet de la demande\nest de 809,2 mètres carrés;"
+      },
+      {
+       "page": 13,
+       "excerpt": "En conséquence, il est proposé par Lise Ferland, appuyé par Michel Beaudoin et\nrésolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\nnuméro 5 891 123 du cadastre du Québec."
+      },
+      {
+       "page": 12,
+       "excerpt": "que la superficie totale faisant l'objet de la demande\nest de 809,2 mètres carrés;"
+      },
+      {
+       "page": 13,
+       "excerpt": "que l'immeuble est situé dans la zone 529, sur le\nchemin des Patriotes et de maisons construites de\npart et d'autre;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-vente-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente d'immeubles pour défaut de paiement de taxes — 15 avril 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\npublique, dans la salle du conseil de l'hôtel de ville située au 200, boulevard Richelieu,"
+      },
+      {
+       "page": 6,
+       "excerpt": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\npublique, dans la salle du conseil de l'hôtel de ville située au 200, boulevard Richelieu,\nle 15 avril 2026 à 10h00, les immeubles apparaissant au rapport de la trésorière\nprésentement soumis sur lesquels des arrérages de taxes sont dus;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-savane"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Réfection du rang de la Savane — Plans et devis",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "En conséquence, il est proposé par Charles Fraser-Guay, appuyé par Joël Caisse et\nrésolu que le conseil municipal accepte l'offre de services de la firme Pluritec portant"
+      },
+      {
+       "page": 8,
+       "excerpt": "En conséquence, il est proposé par Charles Fraser-Guay, appuyé par Joël Caisse et\nrésolu que le conseil municipal accepte l'offre de services de la firme Pluritec portant\nle numéro ODS39767 et datée du 27 janvier 2026, au montant de 65 895,00$, taxes\nen sus, pour la réalisation de plans et devis dans le cadre de la réfection du rang de\nla Savane, et par le fait même, autorise le paiement de cette dépense à même le\nsurplus non affecté, poste budgétaire numéro 59-110-00-000."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte le règlement numéro 26-R-285.\",\"excerpt\":\"résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé :\\n« Règlement interdisant l'épandage de déjections animales ou de boues à des dates\\n\\nprédéterminées entre le 31 mai et le 1er octobre 2026 ».\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la demande PPCMOI-2025-07 dérogeant au règlement d'urbanisme.\",\"excerpt\":\"Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la demande PPCMOI-2025-08 dérogeant au règlement d'urbanisme.\",\"excerpt\":\"Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la demande PPCMOI-2025-09 dérogeant au règlement d'urbanisme.\",\"excerpt\":\"Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal résout d'appuyer la demande auprès de la CPTAQ pour une habitation unifamiliale.\",\"excerpt\":\"résolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour\\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\\nnuméro 5 891 123\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"La vente d'immeubles pour taxes est une mesure de perception/recouvrement fiscal, exclue des actes d'urbanisme et d'aménagement foncier.\",\"excerpt\":\"ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\\npublique, dans la salle du conseil de l'hôtel de ville située au 200, boulevard Richelieu,\\nle 15 avril 2026 à 10h00, les immeubles\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de services professionnels pour des plans et devis d'ingénierie routière relève des contrats et de l'entretien de voirie, exclus des actes d'urbanisme.\",\"excerpt\":\"résolu que le conseil municipal accepte l'offre de services de la firme Pluritec portant\\nle numéro ODS39767 et datée du 27 janvier 2026, au montant de 65 895,00$, taxes\\nen sus, pour la réalisation de plans et devis\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte le règlement numéro 26-R-285.",
+   "excerpt": "résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé :\n« Règlement interdisant l'épandage de déjections animales ou de boues à des dates\n\nprédéterminées entre le 31 mai et le 1er octobre 2026 »."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la demande PPCMOI-2025-07 dérogeant au règlement d'urbanisme.",
+   "excerpt": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la demande PPCMOI-2025-08 dérogeant au règlement d'urbanisme.",
+   "excerpt": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la demande PPCMOI-2025-09 dérogeant au règlement d'urbanisme.",
+   "excerpt": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal résout d'appuyer la demande auprès de la CPTAQ pour une habitation unifamiliale.",
+   "excerpt": "résolu que le conseil municipal appuie la présente demande auprès de la CPTAQ pour\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\nnuméro 5 891 123"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "La vente d'immeubles pour taxes est une mesure de perception/recouvrement fiscal, exclue des actes d'urbanisme et d'aménagement foncier.",
+   "excerpt": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\npublique, dans la salle du conseil de l'hôtel de ville située au 200, boulevard Richelieu,\nle 15 avril 2026 à 10h00, les immeubles"
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de services professionnels pour des plans et devis d'ingénierie routière relève des contrats et de l'entretien de voirie, exclus des actes d'urbanisme.",
+   "excerpt": "résolu que le conseil municipal accepte l'offre de services de la firme Pluritec portant\nle numéro ODS39767 et datée du 27 janvier 2026, au montant de 65 895,00$, taxes\nen sus, pour la réalisation de plans et devis"
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [
+   {
+    "act": "A06",
+    "reason": "La vente d'immeubles pour taxes est une mesure de perception/recouvrement fiscal, exclue des actes d'urbanisme et d'aménagement foncier."
+   },
+   {
+    "act": "A07",
+    "reason": "L'octroi d'un contrat de services professionnels pour des plans et devis d'ingénierie routière relève des contrats et de l'entretien de voirie, exclus des actes d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal adopte le règlement numéro 26-R-285."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil approuve la demande PPCMOI-2025-07 dérogeant au règlement d'urbanisme."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil approuve la demande PPCMOI-2025-08 dérogeant au règlement d'urbanisme."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil approuve la demande PPCMOI-2025-09 dérogeant au règlement d'urbanisme."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil municipal résout d'appuyer la demande auprès de la CPTAQ pour une habitation unifamiliale."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2997,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 13591,
+   "outputTokens": 717,
+   "totalTokens": 14308
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2806
+  },
+  "inputSha256": "3806d31ac544ac38f28784f7ef4a44910c2ceb38b8460654ffdd75c6e648b30f"
+ }
+}

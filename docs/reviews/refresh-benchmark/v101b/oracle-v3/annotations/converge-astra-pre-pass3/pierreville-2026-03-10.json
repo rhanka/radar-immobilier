@@ -1,0 +1,81 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "ff3ca719885081f1943d80506640ab35d8ec6cbbc709142dfe1e54a9824cc67d",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le matricule et la citation figurent page 7, et la résolution 2026-03-70 poursuivie page 8 confirme actuellement l’acquisition du terrain sous condition de démolition complète des bâtiments.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-71, page 8, adopte expressément l’autorisation d’enchérir et d’acquérir au nom de la Municipalité lors de la vente pour taxes du 16 juin 2026.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-75, page 12, modifie effectivement le signataire de la résolution d’acquisition des terrains du rang Haut de la Rivière, constituant une intervention actuelle dans cet acte foncier.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 19, page 15, annonce explicitement l’adoption du deuxième projet du règlement 268-2025, dont le dispositif page 16 permet les habitations trifamiliales isolées dans la zone H-06.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-81, page 17, autorise l’annonce de vente du terrain du 620, rang Haut de la Rivière et impose la construction d’une résidence dans les huit mois suivant cette résolution.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition reprend la même autorisation foncière de la résolution 2026-03-71 déjà couverte par i02, alors qu’un doublon du même fait ne constitue pas une unité gold distincte.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le matricule et la citation figurent page 7, et la résolution 2026-03-70 poursuivie page 8 confirme actuellement l’acquisition du terrain sous condition de démolition complète des bâtiments."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-71, page 8, adopte expressément l’autorisation d’enchérir et d’acquérir au nom de la Municipalité lors de la vente pour taxes du 16 juin 2026."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-75, page 12, modifie effectivement le signataire de la résolution d’acquisition des terrains du rang Haut de la Rivière, constituant une intervention actuelle dans cet acte foncier."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 19, page 15, annonce explicitement l’adoption du deuxième projet du règlement 268-2025, dont le dispositif page 16 permet les habitations trifamiliales isolées dans la zone H-06."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-81, page 17, autorise l’annonce de vente du terrain du 620, rang Haut de la Rivière et impose la construction d’une résidence dans les huit mois suivant cette résolution."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Cette proposition reprend la même autorisation foncière de la résolution 2026-03-71 déjà couverte par i02, alors qu’un doublon du même fait ne constitue pas une unité gold distincte."
+  }
+ ]
+}

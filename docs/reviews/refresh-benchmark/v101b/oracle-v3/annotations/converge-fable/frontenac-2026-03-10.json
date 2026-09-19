@@ -1,0 +1,121 @@
+{
+ "documentId": "frontenac-2026-03-10",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4123b4b6aa6edb3493ae47527db68392cd5733de0363aa4ec717521c25f429d1",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Acte foncier explicite (cadastre 4 972 283) attesté p.19 par la résolution 2026-080 adoptée demandant la vente pour défaut de paiement des taxes; citation, objet et page exacts, inclusion « actes fonciers » de la règle.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-087 p.23 atteste la conformité à la réglementation d'urbanisme de la demande CPTAQ 453132 de Groupe Exca inc.; citation exacte, objet réglementaire explicite, étape inconnu appropriée.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-094 p.27 accepte une entente de conservation des milieux humides sur les terrains du propriétaire pour 25 ans, acte foncier non résidentiel inclus par la règle; citation exacte.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le texte p.37 atteste « Adoption reportée du 1er projet du règlement no. 503-2026 relatif à l’occupation et à l’entretien des bâtiments »; le report est l'étape constatée (inconnu), sans contredire le fait qu'aucune adoption n'a eu lieu.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Citation complète et exacte p.37 « Adoption reportée du règlement no 504-2026 ... bâtiments assujettis » pour un règlement de démolition; v1 identifie l'objet plus précisément que la version tronquée v2, même fait donc une seule version retenue.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Texte p.37 atteste le report de l'avis de motion et de la présentation du règlement 506-2026 (concordance du règlement de construction 287-96); étape inconnu correcte puisque l'avis de motion n'a pas été donné.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Texte p.37 atteste le report de l'avis de motion et de la présentation du règlement 507-2026 (concordance du règlement de lotissement 244-90); citation, objet et page exacts.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Texte p.37 atteste le report de l'avis de motion et de la présentation du règlement 508-2026 (concordance des permis et certificats 242-90); citation, objet et page exacts.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Le texte p.37 écrit « règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro 241-90 »; l'objet reprend la forme attestée par le document et la citation est exacte.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Citation complète et exacte p.37 du report de l'avis de motion et présentation du règlement 510-2026 (concordance du zonage 243-90 envers le schéma de la MRC); v2 décrit le même fait tronqué, doublon non crédité.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Acte foncier explicite (cadastre 4 972 283) attesté p.19 par la résolution 2026-080 adoptée demandant la vente pour défaut de paiement des taxes; citation, objet et page exacts, inclusion « actes fonciers » de la règle."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 2026-087 p.23 atteste la conformité à la réglementation d'urbanisme de la demande CPTAQ 453132 de Groupe Exca inc.; citation exacte, objet réglementaire explicite, étape inconnu appropriée."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 2026-094 p.27 accepte une entente de conservation des milieux humides sur les terrains du propriétaire pour 25 ans, acte foncier non résidentiel inclus par la règle; citation exacte."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le texte p.37 atteste « Adoption reportée du 1er projet du règlement no. 503-2026 relatif à l’occupation et à l’entretien des bâtiments »; le report est l'étape constatée (inconnu), sans contredire le fait qu'aucune adoption n'a eu lieu."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Citation complète et exacte p.37 « Adoption reportée du règlement no 504-2026 ... bâtiments assujettis » pour un règlement de démolition; v1 identifie l'objet plus précisément que la version tronquée v2, même fait donc une seule version retenue."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Texte p.37 atteste le report de l'avis de motion et de la présentation du règlement 506-2026 (concordance du règlement de construction 287-96); étape inconnu correcte puisque l'avis de motion n'a pas été donné."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Texte p.37 atteste le report de l'avis de motion et de la présentation du règlement 507-2026 (concordance du règlement de lotissement 244-90); citation, objet et page exacts."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Texte p.37 atteste le report de l'avis de motion et de la présentation du règlement 508-2026 (concordance des permis et certificats 242-90); citation, objet et page exacts."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Le texte p.37 écrit « règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro 241-90 »; l'objet reprend la forme attestée par le document et la citation est exacte."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Citation complète et exacte p.37 du report de l'avis de motion et présentation du règlement 510-2026 (concordance du zonage 243-90 envers le schéma de la MRC); v2 décrit le même fait tronqué, doublon non crédité."
+  }
+ ]
+}

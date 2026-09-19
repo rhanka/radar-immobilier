@@ -1,0 +1,101 @@
+{
+ "documentId": "la-peche-2026-06-01",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1bf30d4e86757ad7bd1cc2edc48b5f7efb22e8cdb823706f4efae97ba9488853",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour le 30, chemin Albert-Labelle est adoptée à la page 7 et la citation est textuelle.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour le 14, chemin Guertin est accordée à la page 8 et la citation est exacte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'usage conditionnel pour le 75, chemin du Lac-Chip est accordé sous conditions à la page 9 avec citation conforme.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'usage conditionnel pour le 5, chemin Vaillant est accordé sous conditions à la page 10 avec citation conforme.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'autorisation de servitude de tolérance d'empiètement pour le 741, chemin Riverside est un acte foncier adopté à la page 11.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement 26-866 est explicitement résolue à la page 14 avec une citation textuelle.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement 26-867 créant un programme d'aide financière est résolue à la page 14 avec citation conforme.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement d'emprunt 26-868 est résolue à la page 15 avec une citation exacte.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour le 30, chemin Albert-Labelle est adoptée à la page 7 et la citation est textuelle."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour le 14, chemin Guertin est accordée à la page 8 et la citation est exacte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'usage conditionnel pour le 75, chemin du Lac-Chip est accordé sous conditions à la page 9 avec citation conforme."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'usage conditionnel pour le 5, chemin Vaillant est accordé sous conditions à la page 10 avec citation conforme."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'autorisation de servitude de tolérance d'empiètement pour le 741, chemin Riverside est un acte foncier adopté à la page 11."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'adoption du règlement 26-866 est explicitement résolue à la page 14 avec une citation textuelle."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L'adoption du règlement 26-867 créant un programme d'aide financière est résolue à la page 14 avec citation conforme."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'adoption du règlement d'emprunt 26-868 est résolue à la page 15 avec une citation exacte."
+  }
+ ]
+}
